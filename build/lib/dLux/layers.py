@@ -2,7 +2,7 @@ from .base import Layer
 import jax.numpy as np
 from jax.numpy import ndarray
 from equinox import static_field
-from jaxinterp2d import interp2d
+from .jaxinterp2d import interp2d
 from poppy.zernike import zernike_basis
 
 
