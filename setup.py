@@ -1,6 +1,7 @@
 import setuptools
 import os
 import codecs
+import re
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -17,7 +18,6 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-
 # DEPENDENCIES
 # 1. What are the required dependencies?
 with open('requirements.txt') as f:
@@ -28,7 +28,6 @@ tests_require = ['pytest', 'pytest-cov', 'pytest-remotedata']
 
 setuptools.setup(
     name="dLux",
-    
     version=find_version("src", "__init__.py"),
     description="A fully differentiable optical simulator build in Jax",
     long_description=long_description,
@@ -36,15 +35,18 @@ setuptools.setup(
     
     author="Louis Desdoigts",
     author_email="Louis.Desdoigts@sydney.edu.au",
-    
     url="https://github.com/LouisDesdoigts/dLux",
+    
     project_urls={
-        "Bug Tracker": "https://github.com/LouisDesdoigts/DeLux/issues",
+        "Bug Tracker": "https://github.com/LouisDesdoigts/DLux/issues",
     },
     
     
     package_dir={"dLux": "src"},
-    packages=setuptools.find_packages(where="src"),
+    # packages=setuptools.find_packages(where="src"),
+    packages=["dLux"],
+    
+    install_requires=install_requires,
     
     classifiers=[
         "Programming Language :: Python :: 3",

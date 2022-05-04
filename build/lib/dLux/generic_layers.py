@@ -1,4 +1,7 @@
-from base import *
+from .base import Layer
+import jax.numpy as np
+from jax.numpy import ndarray
+from equinox import static_field
 from jaxinterp2d import interp2d
     
 ######################################################
@@ -39,7 +42,7 @@ class MultiplyArray(Layer):
     """
     Multiplies the input wavefront by an array
     """
-    array: jax.numpy.ndarray
+    array: ndarray
     def __init__(self, size, array):
         self.size_in = size
         self.size_out = size
@@ -67,7 +70,7 @@ class AddArray(Layer):
     """
     Adds an array of values to the input wavefront
     """
-    array: jax.numpy.ndarray
+    array: ndarray
     def __init__(self, size, array):
         self.size_in = size
         self.size_out = size
@@ -92,7 +95,7 @@ class MultiplyScalar(Layer):
         return wavefront_out, pixelscale
     
 class Interpolator(Layer):
-    pixelscale_out: float = equinox.static_field()
+    pixelscale_out: float = static_field()
     
     def __init__(self, size_in, size_out, pixelscale_out):
         self.size_in = size_in
