@@ -1,0 +1,7 @@
+jax
+equinox
+numpy
+matplotlib
+tqdm
+jaxinterp2d
+poppy
