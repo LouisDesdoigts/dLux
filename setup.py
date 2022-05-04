@@ -3,8 +3,10 @@ import os
 import codecs
 import re
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+# with open("README.md", "r", encoding="utf-8") as fh:
+#     long_description = fh.read()
+
+long_description = "Taking derivatives through Light"
     
 here = os.path.abspath(os.path.dirname(__file__))
 def read(*parts):
@@ -31,7 +33,7 @@ setuptools.setup(
     version=find_version("src", "__init__.py"),
     description="A fully differentiable optical simulator build in Jax",
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    # long_description_content_type="text/markdown",
     
     author="Louis Desdoigts",
     author_email="Louis.Desdoigts@sydney.edu.au",
