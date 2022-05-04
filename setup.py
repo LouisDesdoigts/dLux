@@ -23,7 +23,7 @@ def find_version(*file_paths):
 with open('requirements.txt') as f:
     install_requires = f.read().splitlines()
 # 2. What dependencies required to run the unit tests? (i.e. `pytest --remote-data`)
-tests_require = ['pytest', 'pytest-cov', 'pytest-remotedata']
+# tests_require = ['pytest', 'pytest-cov', 'pytest-remotedata']
 
 
 setuptools.setup(
@@ -38,12 +38,10 @@ setuptools.setup(
     url="https://github.com/LouisDesdoigts/dLux",
     
     project_urls={
-        "Bug Tracker": "https://github.com/LouisDesdoigts/DLux/issues",
+        "Bug Tracker": "https://github.com/LouisDesdoigts/dLux/issues",
     },
     
-    
     package_dir={"dLux": "src"},
-    # packages=setuptools.find_packages(where="src"),
     packages=["dLux"],
     
     install_requires=install_requires,
