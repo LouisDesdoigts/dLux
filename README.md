@@ -1,5 +1,6 @@
 # dLux
 [![PyPI version](https://badge.fury.io/py/dLux.svg)](https://badge.fury.io/py/dLux)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ∂Lux: Taking derivatives through Light - 'Optical systems as a Neural Network'
 
