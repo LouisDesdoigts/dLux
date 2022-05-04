@@ -79,12 +79,6 @@ class OpticalSystem(Module):
             shape: (2,)
             The (x, y) angular offset of the source object from the optical 
             axis in radians
-            
-        Intermediate
-        ------------
-        pixelscale: float
-            Units: meters/pixel
-            the pixelscae of each array between each layer operation
         
         Returns
         -------
@@ -124,7 +118,7 @@ class OpticalSystem(Module):
         ------------
         pixelscale: float
             Units: meters/pixel
-            the pixelscae of each array between each layer operation
+            The pixelscae of each array between each layer operation
         
         Returns
         -------
@@ -286,7 +280,6 @@ class Scene(Module):
         
         # Vmap operation over each image
         detector_vmap = vmap(self._apply_detector_layers, in_axes=0)
-        # detector_vmap = pmap(self._apply_detector_layers, in_axes=0)
         images = detector_vmap(psf_images)
         
         return images
