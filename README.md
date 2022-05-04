@@ -1,4 +1,6 @@
 # dLux
+[![PyPI version](https://badge.fury.io/py/dLux.svg)](https://badge.fury.io/py/dLux)
+
 
 dLux: Taking derivatives through Light
 
