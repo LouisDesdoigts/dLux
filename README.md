@@ -1,6 +1,6 @@
 # dLux
 [![PyPI version](https://badge.fury.io/py/dLux.svg)](https://badge.fury.io/py/dLux)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 
 dLux: Taking derivatives through Light
