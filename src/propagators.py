@@ -1,4 +1,7 @@
-from base import *
+from .base import Layer
+import jax.numpy as np
+from jax.numpy import ndarray
+from equinox import static_field
 
 class FresnelProp(Layer):
     """
@@ -14,9 +17,9 @@ class FresnelProp(Layer):
     -> Do something clever with MFTs in the final TF with the offset term to 
     get propper off axis behaviour?
     """
-    focal_length: float = equinox.static_field()
-    XX: jax.numpy.ndarray = equinox.static_field()
-    YY: jax.numpy.ndarray = equinox.static_field()
+    focal_length: float = static_field
+    XX: ndarray = static_field
+    YY: ndarray = static_field
     z: float
     
     def __init__(self, size, focal_length, z):
@@ -97,9 +100,9 @@ class MFT(Layer):
     """
     Matches poppy but assumes square
     """
-    focal_length: float = equinox.static_field()
-    pixelscale_out: float = equinox.static_field()
-    oversample: int = equinox.static_field()
+    focal_length: float = static_field()
+    pixelscale_out: float = static_field()
+    oversample: int = static_field()
     
     def __init__(self, size_in, size_out, oversample, focal_length, pixelscale_out):
         self.size_in = size_in
@@ -145,7 +148,7 @@ class MFT(Layer):
         return wavefront_out, self.pixelscale_out
 
 class FFT(Layer):
-    focal_length: float = equinox.static_field()
+    focal_length: float = static_field()
     
     def __init__(self, size, focal_length):
         self.size_in = size
@@ -165,7 +168,7 @@ class FFT(Layer):
         return wavefront_out, pixelscale_out
     
 class IFFT(Layer):
-    focal_length: float = equinox.static_field()
+    focal_length: float = static_field()
     
     def __init__(self, size, focal_length):
         self.size_in = size

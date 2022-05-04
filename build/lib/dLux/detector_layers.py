@@ -1,7 +1,8 @@
-from base import *
+from .base import Layer
+from jax.numpy import ndarray
 
 class ApplyPixelResponse(Layer):
-    pixel_response: jax.numpy.ndarray
+    pixel_response: ndarray
     
     def __init__(self, size, pixel_response):
         self.size_in = size

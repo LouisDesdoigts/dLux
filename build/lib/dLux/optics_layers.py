@@ -1,4 +1,8 @@
-from base import *
+from .base import Layer
+import jax.numpy as np
+from jax.numpy import ndarray
+from equinox import static_field
+from poppy.zernike import zernike_basis
 
 class CreateWavefront(Layer):
     """
@@ -10,7 +14,7 @@ class CreateWavefront(Layer):
         Always propagate on axis and and shift with the offset term in MFT?
     To Do: Test this properly
     """
-    pixelscale: float = equinox.static_field()
+    pixelscale: float = static_field
     optic_size: float
     
     def __init__(self, size, optic_size):
@@ -25,8 +29,6 @@ class CreateWavefront(Layer):
         self.size_out = size
         self.optic_size = optic_size
         self.pixelscale = optic_size/size
-        
-        # self.name = 'Create Wavefront'
     
     def __call__(self, dummy_wavefront, wavel, offset, dummy_pixelscale):
         """
@@ -76,7 +78,7 @@ class AddPhase(Layer):
     """
     Adds an array of values to the input wavefront
     """
-    array: jax.numpy.ndarray
+    array: ndarray
     def __init__(self, size, array):
         self.size_in = size
         self.size_out = size
@@ -93,7 +95,7 @@ class ApplyOPD(Layer):
     """
     Adds an array of phase values to the input wavefront calculated from the OPD
     """
-    array: jax.numpy.ndarray
+    array: ndarray
     def __init__(self, size, array):
         self.size_in = size
         self.size_out = size
@@ -116,21 +118,20 @@ class ApplyZernike(Layer):
     
     Currently relies on poppy to import zernikes
     """
-    nterms: int = equinox.static_field()
-    basis: jax.numpy.ndarray = equinox.static_field()
-    coefficients: jax.numpy.ndarray
+    nterms: int = static_field
+    basis: ndarray = static_field
+    coefficients: ndarray
     
     def __init__(self, size, nterms, coefficients):
         self.size_in = size
         self.size_out = size
         self.nterms = nterms
         self.coefficients = coefficients
+        
         # Load basis
         self.basis = np.array(np.nan_to_num(
-            poppy.zernike.zernike_basis(nterms=nterms+3, npix=size)[3:])).T
+            zernike_basis(nterms=nterms+3, npix=size)[3:])).T
         print("Note Zernike Ignores Piston Tip Tilt")
-        
-        # self.name = 'Apply Zernike'
         
     def __call__(self, complex_array, wavel, dummy_offset, pixelscale):
         amplitude = np.abs(complex_array)
@@ -148,8 +149,8 @@ class ApplyZernike(Layer):
         return np.dot(self.basis, self.coefficients)
     
 class ThinLens(Layer):
-    pixelscale: float = equinox.static_field()
-    r_coords: jax.numpy.ndarray = equinox.static_field()
+    pixelscale: float = static_field
+    r_coords: ndarray = static_field
     f: float
     
     def __init__(self, size, f, aperture):
