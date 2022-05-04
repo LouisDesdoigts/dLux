@@ -1,6 +1,0 @@
-jax
-equinox
-numpy
-matplotlib
-tqdm
-poppy
