@@ -7,5 +7,6 @@ dLux.egg-info/requires.txt
 dLux.egg-info/top_level.txt
 src/__init__.py
 src/base.py
+src/jaxinterp2d.py
 src/layers.py
 src/propagators.py

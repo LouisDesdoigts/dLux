@@ -164,7 +164,7 @@ class FFT(Layer):
         wavefront_out = norm * np.fft.fftshift( np.fft.ifft2(wavefront) )
         
         # Calculate pixel scale
-        pixelscale_out = wavel * focal_length / (pixelscale * self.size_in)
+        pixelscale_out = wavel * self.focal_length / (pixelscale * self.size_in)
         return wavefront_out, pixelscale_out
     
 class IFFT(Layer):

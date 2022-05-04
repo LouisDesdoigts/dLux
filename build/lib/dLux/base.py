@@ -1,10 +1,7 @@
-# import jax
 import jax.numpy as np
 from jax.numpy import ndarray
 from equinox import static_field
 from jax import vmap
-# from jax import pmap
-# import poppy # Used for Zernike
 from equinox import Module
 from equinox import static_field
 
