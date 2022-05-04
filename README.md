@@ -24,4 +24,4 @@ We are currently building examples and documentation! For now - see a [simple ex
 
 ## History
 
-∂Lux is a full from-scratch rewrite of the ideas [morphine](https://github.com/benjaminpope/morphine) which is a fork of the popular optical simulation package '[poppy](https://github.com/mperrin/poppy)' using the autodiff library [Google Jax](https://github.com/google/jax) to do _derivatives_. 
+∂Lux is a full from-scratch rewrite of the ideas [morphine](https://github.com/benjaminpope/morphine), which is a fork of the popular optical simulation package '[poppy](https://github.com/mperrin/poppy)' using the autodiff library [Google Jax](https://github.com/google/jax) to do _derivatives_. We have built it from the ground up in [equinox](https://github.com/patrick-kidger/equinox), a powerful object-oriented library in Jax, to best take advantage of new features and permit easy development and integration with neural networks.
