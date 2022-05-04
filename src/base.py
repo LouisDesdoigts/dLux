@@ -5,20 +5,35 @@ from jax import vmap
 from equinox import Module
 from equinox import static_field
 
-"""
-This script stores all classes which are defined by equinox.Module()
-"""
-
-
-########################
-### Layer Base Class ###
-########################
+__all__ = ['Layer', 'OpticalSystem', 'Scene']
 
 class Layer(Module):
-    """
-    Base Layer class
-    Can optionally pass in 'function' in order to facilitate parameterised planes
-    Can optionally pass in 'static' to automatically freeze in the parameters
+    """ Base Layer class, Equinox Modle
+    
+    Only supports square arrays (n, n).
+    
+    Each child class can either be some optical or array operation, transform
+    or neural network like operation. Thier __call__() function must be 
+    differentiable in order for things to work and follow this formatting:
+    
+        def __call__(self, wavelength, wavefront, pixelscale, offset):
+            # Do things
+            return wavefront, pixelscale
+    
+    wavefront must be input as an array with shape (size_in, size_in) and it 
+    must be returned with shape (size_out, size_out).
+    
+    The parameters size_in, size_out must be set in the __init__() class of
+    children classes.
+    
+    Parameters
+    ----------
+    size_in: int, equinox.static_field
+        defines the linear size of the input wavefront to the __call__()
+        function
+    size_out: int, equinox.static_field
+        defines the linear size of the output wavefront to the __call__()
+        function
     """
     size_in: int = static_field()
     size_out: int = static_field()
@@ -26,75 +41,129 @@ class Layer(Module):
     def __init__(self, size_in, size_out):
         self.size_in = size_in
         self.size_out = size_out
-
-
-###################################
-### Optical System Base Classes ###
-###################################
     
 class OpticalSystem(Module):
-    """
-    Base class defining some optical system
+    """ OpticalSystem class, Equinox Modle
     
-    Dev: Automatically stores intermediate wavefronts for examination
+    A class to store the list of layer objects that specifically define an 
+    optical system. 
     
-    layers must be a list of Layer objects
-    Each layer object can either be some optical operation, 
-    transform, or NN type layer
+    Parameters
+    ----------
+    layers: list, 
+        A list of Layer objects 
+    
+    Notes:
+     - layers could theoretically also be a dictionary if needed for optax
+     - test if everything still works if this is set as static
     """
-    layers: list # Can this be set to a static field?    
+    layers: list
+    
     def __init__(self, layers):
         self.layers = layers
 
-    def __call__(self, wavel, offset):
+    def __call__(self, wavelength, offset):
+        """ Propagation Function
+        
+        This function propagates the wavefront by iterating though the layers
+        list and calling the __call__() function 
+        
+        Parameters
+        ----------
+        wavelength: float
+            Units: meters
+            Wavelength of light being propagated through the opitcal
+            system
+        offset: jax.numpy.ndarray
+            Units: radians
+            shape: (2,)
+            The (x, y) angular offset of the source object from the optical 
+            axis in radians
+            
+        Intermediate
+        ------------
+        pixelscale: float
+            Units: meters/pixel
+            the pixelscae of each array between each layer operation
+        
+        Returns
+        -------
+        wavefront: jax.numpy.ndarray
+            The output wavefront after being 'propaged' through all the layer
+            objects
         """
-        offset is now passed through all layers so that the shift can be 
-        done in layers other than the intitial (which people might want?)
-        """
-        # Inialise value and objects to store data
-        x, pixelscale = None, None
+        
+        # Inialise values
+        wavefront, pixelscale = None, None
         
         # Inialise values and iterate 
         for i in range(len(self.layers)):
-            x, pixelscale = self.layers[i](x, wavel, offset, pixelscale)
-        return x
+            wavefront, pixelscale = self.layers[i](wavefront, wavelength, offset, pixelscale)
+        return wavefront
     
-class DevOpticalSystem(Module):
-    """
-    Base class defining some optical system
-    
-    Dev: Automatically stores intermediate wavefronts for examination
-    
-    layers must be a list of Layer objects
-    Each layer object can either be some optical operation, 
-    transform, or NN type layer
-    """
-    layers: list # Can this be set to a static field?    
-    def __init__(self, layers):
-        self.layers = layers
+    def debug_prop(self, wavel, offset):
+        """ Debugging/Heler Propagation Function
         
-    def __call__(self, wavel, offset):
+        Helper function that is identical to the __call__() function except it
+        stores the intermediary wavefront and pixelscale values and returns 
+        them. 
+        
+        Parameters
+        ----------
+        wavel: float
+            Units: meters
+            Wavelength of light being propagated through the opitcal
+            system
+        offset: jax.numpy.ndarray
+            Units: radians
+            shape: (2,)
+            The (x, y) angular offset of the source object from the optical 
+            axis in radians
+            
+        Intermediate
+        ------------
+        pixelscale: float
+            Units: meters/pixel
+            the pixelscae of each array between each layer operation
+        
+        Returns
+        -------
+        wavefront: jax.numpy.ndarray
+            The output wavefront after being 'propaged' through all the layer
+            objects
+        intermed_wavefronts: list
+            a list storing the state of the wavefront between each layer 
+            operation.
+            This can be used to check that your wavefront is being transformed
+            properly between each layer and that Layers are working as expected
+        intermed_pixelscales: list
+            a list storing the pixelscale of the wavefront between each layer 
+            operation. 
+            This can be used to check for inconsistencies and look for layers
+            where interpolation is needed
+        """
         
         # Inialise value and objects to store data
         functions, intermed_wavefronts, intermed_pixelscales = [], [], []
-        x, pixelscale = None, None
+        wavefront, pixelscale = None, None
         
         # Inialise values and iterate 
         for i in range(len(self.layers)):
-            x, pixelscale = self.layers[i](x, wavel, offset, pixelscale)
+            wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
+            
             # Store Values in list
-            intermed_wavefronts.append(x)
+            intermed_wavefronts.append(wavefront)
             intermed_pixelscales.append(pixelscale)
             
-        return x, intermed_wavefronts, intermed_pixelscales
+        return wavefront, intermed_wavefronts, intermed_pixelscales
 
-
-########################
-### Scene Base Class ###
-########################
+    
 
 class Scene(Module):
-    """
+    """ Scene class, Equinox Modle
+    
+    DOCSTRING NOT COMPLETE
+    
     A Class to store and apply properties external to the optical system
     Ie: stellar positions and specturms
     
@@ -102,21 +171,19 @@ class Scene(Module):
     wavels: (Nwavels) array
     weights: (Nwavel)/(Nwavels, Nstars) array
     
-    Take in layers in order to re-intialise the model every call?
     
-    If the scaling array is created at initialisation, then do we lose the
-    the ability to keep them normalised?
+    Notes:
+     - Take in layers in order to re-intialise the model every call?
     
-    General image output shape: (Nimages, Nstars, Nwavels, Npix, Npix)
     
-    Currently doesnt allow temporal variation in specturm becuase im lazy
-    Currently doesnt allow temporal variation in flux becuase im lazy
+    General images output shape: (Nimages, Nstars, Nwavels, Npix, Npix)
+    
+     - Currently doesnt allow temporal variation in specturm becuase im lazy
+     - Currently doesnt allow temporal variation in flux becuase im lazy
     
     ToDo: Add getter methods for acessing weights and fluxes attributes that
     use np.squeeze to remove empy axes
     
-    QUESTION: Should dithered positions be a static field to allow grads to 
-    prop through to the undelying position and shifts
     """
     optical_system: Module # Not static becuase we want to take grads through this?
     detector_layers: list
@@ -191,17 +258,14 @@ class Scene(Module):
         
         # First over wavels
         wavel_vmap = vmap(self.optical_system, in_axes=(0, None))
-        # wavel_vmap = pmap(self.optical_system, in_axes=(0, None))
         
         # Then over the positions for each image
         # Mapping over the stars in a single image first (zeroth axis)
         position_vmap = vmap(wavel_vmap, in_axes=(None, 0))
-        # position_vmap = pmap(wavel_vmap, in_axes=(None, 0))
         
         # Then map over each image
         # Mapping over each image (first axis)
         image_vmap = vmap(position_vmap, in_axes=(None, 1))
-        # image_vmap = pmap(position_vmap, in_axes=(None, 1))
 
         # Generate PSFs
         dithered_positions = self._dither_positions()
