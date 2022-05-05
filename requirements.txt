@@ -1,6 +1,14 @@
+# Required Modules
 jax
+jaxlib
 equinox
+optax
+
+# Helper Modules
 numpy
 matplotlib
 tqdm
-poppy
+jupyter
+jupyterlab
+
+
