@@ -8,8 +8,8 @@ from .zernike import zernike_basis
 __all__ = [
     
     # Optics Layers
-    'CreateWavefront', 'Wavefront2PSF', 'NormaliseWavefront', 
-    'AddPhase', 'ApplyOPD', 'ApplyZernike', 'ThinLens', 
+    'CreateWavefront', 'CircularAperture', 'Wavefront2PSF', 
+    'NormaliseWavefront', 'AddPhase', 'ApplyOPD', 'ApplyZernike', 'ThinLens', 
     
     # Instrument Layers
    'ApplyPixelResponse',
@@ -104,6 +104,35 @@ class CreateWavefront(Layer):
         tiltphasor = np.exp(-2.0j * np.pi * (U*xangle + V*yangle) / wavel)
         wavefront = tiltphasor * np.ones([npix, npix]) * np.exp(1j * np.zeros([npix, npix]))
         return wavefront, self.pixelscale
+    
+class CircularAperture(Layer):
+    """
+    Multiplies the input wavefront by a pre calculated circular binary mask
+    that fills the size of the array
+    __call__() is a mirror of MultiplyArray(Layer)
+    """
+    array: ndarray = static_field()
+    def __init__(self, size):
+        self.size_in = size
+        self.size_out = size
+        self.array = self._create_aperture(size)
+    
+    def __call__(self, wavefront, dummy_wavel, dummy_offset, pixelscale):
+        """
+        
+        """
+        wavefront_out = np.multiply(wavefront, self.array)
+        return wavefront_out, pixelscale
+    
+    def _create_aperture(self, npix):
+        """
+        
+        """
+        xs = np.arange(-npix//2, npix//2)
+        XX, YY = np.meshgrid(xs, xs)
+        RR = np.hypot(XX, YY)
+        aperture = RR < npix//2
+        return aperture
     
 class Wavefront2PSF(Layer):
     """ 
