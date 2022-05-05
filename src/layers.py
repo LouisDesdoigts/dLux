@@ -3,7 +3,7 @@ import jax.numpy as np
 from jax.numpy import ndarray
 from equinox import static_field
 from .jaxinterp2d import interp2d
-from poppy.zernike import zernike_basis
+from .zernike import zernike_basis
 
 __all__ = [
     
@@ -19,6 +19,7 @@ __all__ = [
    'MultiplyScalar', 'Interpolator', 'InvertXY', 'InvertX', 'InvertY'
 
 ]
+
 
 
 
@@ -49,6 +50,11 @@ size_out: int, equinox.static_field
     defines the linear size of the output wavefront to the __call__()
     function
 """
+
+
+
+
+
 
 
 ###################################################
@@ -150,16 +156,21 @@ class ApplyZernike(Layer):
     basis: ndarray = static_field()
     coefficients: ndarray
     
-    def __init__(self, size, nterms, coefficients):
+    def __init__(self, size, nterms, coefficients, defocus=True):
         self.size_in = size
         self.size_out = size
         self.nterms = nterms
         self.coefficients = coefficients
         
         # Load basis
-        self.basis = np.array(np.nan_to_num(
-            zernike_basis(nterms=nterms+3, npix=size)[3:])).T
-        print("Note Zernike Ignores Piston Tip Tilt")
+        if defocus:
+            self.basis = np.array(np.nan_to_num(
+                zernike_basis(nterms=nterms+3, npix=size)[3:])).T
+            print("Ignoring Piston Tip Tilt")
+        else:
+            self.basis = np.array(np.nan_to_num(
+                zernike_basis(nterms=nterms+4, npix=size)[4:])).T
+            print("Ignoring Piston Tip Tilt Defocus")
         
     def __call__(self, complex_array, wavel, dummy_offset, pixelscale):
         amplitude = np.abs(complex_array)
