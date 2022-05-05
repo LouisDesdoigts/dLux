@@ -5,42 +5,90 @@ from equinox import static_field
 from .jaxinterp2d import interp2d
 from poppy.zernike import zernike_basis
 
+__all__ = [
+    
+    # Optics Layers
+    'CreateWavefront', 'Wavefront2PSF', 'NormaliseWavefront', 
+    'AddPhase', 'ApplyOPD', 'ApplyZernike', 'ThinLens', 
+    
+    # Instrument Layers
+   'ApplyPixelResponse',
+    
+    # Generic Layers
+   'Pad', 'Crop', 'MultiplyArray', 'AddScalar', 'AddArray', 
+   'MultiplyScalar', 'Interpolator', 'InvertXY', 'InvertX', 'InvertY'
+
+]
+
+
+
+
+
+
+
+""" All Classes in this script inherit from the Layer() base classand must
+define 2 static parameters, size_in and size_out.
+
+Each child class can either be some optical or array operation, transform
+or neural network like operation. Thier __call__() function must be 
+differentiable in order for things to work and follow this formatting:
+
+    def __call__(self, wavelength, wavefront, pixelscale, offset):
+        # Do things
+        return wavefront, pixelscale
+
+wavefront must be input as an array with shape (size_in, size_in) and it 
+must be returned with shape (size_out, size_out).
+
+Parameters
+----------
+size_in: int, equinox.static_field
+    defines the linear size of the input wavefront to the __call__()
+    function
+size_out: int, equinox.static_field
+    defines the linear size of the output wavefront to the __call__()
+    function
+"""
+
+
+###################################################
+############## Optical Layers #####################
+###################################################
 
 class CreateWavefront(Layer):
-    """
+    """ 
     Initialises an input wavefront
-    x and y should be in radians (measured from the optical axis)
-        How to pass in aperture to this robustly? As a property of the osys?
-        What if we want to optimise the aperture size? 
-        Shuould this exist outside of the system?
-        Always propagate on axis and and shift with the offset term in MFT?
-    To Do: Test this properly
-    """
-    pixelscale: float = static_field
-    optic_size: float
-    
-    def __init__(self, size, optic_size):
-        """
-        size: Size of the array
+
+    Parameters
+    ----------
+    pixelscale: float, equinox.static_field
+        Units: meters/pixel
+        The pixelscae of each array between each layer operation
+        Its value is automatically calculated from the input values
         
-        array_size: This physical size of the input wavefront (m)
-            This value is used to determine the pixelscale and coordinate
-            arrays that are tracked throughout propagation for fresnel
-        """
+    wavefront_size: float
+        Units: meters
+        Width of the array representing the wavefront in physical units
+        
+    """
+    pixelscale: float = static_field()
+    wavefront_size: float
+    
+    def __init__(self, size, wavefront_size):
         self.size_in = size
         self.size_out = size
-        self.optic_size = optic_size
-        self.pixelscale = optic_size/size
+        self.wavefront_size = wavefront_size
+        self.pixelscale = wavefront_size/size
     
     def __call__(self, dummy_wavefront, wavel, offset, dummy_pixelscale):
         """
         offset: (offset_x, offset_y) - measured in radians deviation from the optical axis
-        
         pixelscale input is always None - take definition from class property
+        
         """
         
-        npix = self.size_in
         xangle, yangle = offset
+        npix = self.size_in
         V, U = np.indices([npix, npix], dtype=float)
         V -= (npix - 1) / 2.0
         V *= self.pixelscale
@@ -52,7 +100,7 @@ class CreateWavefront(Layer):
         return wavefront, self.pixelscale
     
 class Wavefront2PSF(Layer):
-    """
+    """ 
     Returns the modulus squared of the input wavefront
     """
     def __init__(self, size):
@@ -64,7 +112,7 @@ class Wavefront2PSF(Layer):
         return psf, pixelscale
     
 class NormaliseWavefront(Layer):
-    """
+    """ 
     Normalises the input wavefront
     """
     def __init__(self, size):
@@ -76,52 +124,30 @@ class NormaliseWavefront(Layer):
         norm_wavefront = wavefront/norm_factor
         return norm_wavefront, pixelscale
     
-class AddPhase(Layer):
-    """
-    Adds an array of values to the input wavefront
-    """
-    array: ndarray
-    def __init__(self, size, array):
-        self.size_in = size
-        self.size_out = size
-        self.array = array
-    
-    def __call__(self, complex_array, dummy_wavel, dummy_offset, pixelscale):
-        
-        amplitude = np.abs(complex_array)
-        phase = np.angle(complex_array) + self.array
-        wavefront_out = amplitude * np.exp(1j*phase)
-        return wavefront_out, pixelscale
-    
-class ApplyOPD(Layer):
-    """
-    Adds an array of phase values to the input wavefront calculated from the OPD
-    """
-    array: ndarray
-    def __init__(self, size, array):
-        self.size_in = size
-        self.size_out = size
-        self.array = array
-    
-    def __call__(self, complex_array, wavel, dummy_offset, pixelscale):
-        amplitude = np.abs(complex_array)
-        phase = np.angle(complex_array)
-        phase_in = self._opd_to_phase(self.array, wavel)
-        phase_out = phase + phase_in
-        wavefront_out = amplitude * np.exp(1j*phase_out)
-        return wavefront_out, pixelscale
-    
-    def _opd_to_phase(self, opd, wavel):
-        return 2*np.pi*opd/wavel
-    
 class ApplyZernike(Layer):
     """
     Adds an array of phase values to the input wavefront calculated from the OPD
     
     Currently relies on poppy to import zernikes
+    To Do: 
+     - Check units output from poppy basis 
+     - Check order of terms output by poppy
+     
+    Parameters
+    ----------
+    nterms: int, equinox.static_field
+        The number of zernike terms to apply, ignoring the first two radial
+        terms: Piston, Tip, Tilt
+        
+    basis: jax.numpy.ndarray, equinox.static_field
+        Arrays holding the pre-calculated zernike basis terms
+        
+    coefficients: jax.numpy.ndarray
+        Array of shape (nterns) of coefficients to be applied to each 
+        Zernike term
     """
-    nterms: int = static_field
-    basis: ndarray = static_field
+    nterms: int = static_field()
+    basis: ndarray = static_field()
     coefficients: ndarray
     
     def __init__(self, size, nterms, coefficients):
@@ -151,8 +177,25 @@ class ApplyZernike(Layer):
         return np.dot(self.basis, self.coefficients)
     
 class ThinLens(Layer):
-    pixelscale: float = static_field
-    r_coords: ndarray = static_field
+    """
+    Applies the thin-lens formula
+    To Do:
+    Check if the center of r_coords is on the corner or center of a pixel
+    
+    Parameters
+    ----------
+    pixelscale: float equinox.static_field
+        Units: meters/pixel
+        The pixelscae of each array between each layer operation
+        Its value is automatically calculated from the input values
+    r_coords: jax.numpy.ndarray equinox.static_field
+        Pre-calcualted array defining the physical radial distance from the
+        array center
+    f: float equinox.static_field
+        Units: meters
+    """
+    pixelscale: float = static_field()
+    r_coords: ndarray = static_field()
     f: float
     
     def __init__(self, size, f, aperture):
@@ -179,8 +222,74 @@ class ThinLens(Layer):
         wavefront_out = wavefront * np.exp(-0.5j * k * self.r_coords**2 * 1/self.f)
         return wavefront_out, pixelscale
     
-class PadToWavel(Layer):
+class AddPhase(Layer):
+    """ 
+    
+    Takes in an array of phase values and adds them to the phase term of the 
+    input wavefront. ie wavelength independent
+    
+    This would represent a geometric phase optic like the TinyTol Pupil
+    
+    Parameters
+    ----------
+    array: jax.numpy.ndarray, equinox.static_field
+        Units: radians
+        Array of phase values to be applied to the input wavefront
     """
+    array: ndarray
+    def __init__(self, size, array):
+        self.size_in = size
+        self.size_out = size
+        self.array = array
+    
+    def __call__(self, complex_array, dummy_wavel, dummy_offset, pixelscale):
+        """
+        
+        """
+        amplitude = np.abs(complex_array)
+        phase = np.angle(complex_array) + self.array
+        wavefront_out = amplitude * np.exp(1j*phase)
+        return wavefront_out, pixelscale
+    
+class ApplyOPD(Layer):
+    """ 
+    
+    Takes in an array representing the Optical Path Difference (OPD) and 
+    applies the corresponding phase difference to the input wavefront. 
+
+    This would represent an etched reflective optic, or phase plate
+    
+    Parameters
+    ----------
+    array: jax.numpy.ndarray, equinox.static_field
+        Units: radians
+        Array of OPD values to be applied to the input wavefront
+    """
+    array: ndarray
+    def __init__(self, size, array):
+        self.size_in = size
+        self.size_out = size
+        self.array = array
+    
+    def __call__(self, complex_array, wavel, dummy_offset, pixelscale):
+        """
+        
+        """
+        amplitude = np.abs(complex_array)
+        phase = np.angle(complex_array)
+        phase_in = self._opd_to_phase(self.array, wavel)
+        phase_out = phase + phase_in
+        wavefront_out = amplitude * np.exp(1j*phase_out)
+        return wavefront_out, pixelscale
+    
+    def _opd_to_phase(self, opd, wavel):
+        return 2*np.pi*opd/wavel
+    
+    
+    
+    
+class PadToWavel(Layer):
+    """ 
     To Do
     Implement this as an aleternative to interpolate
      -> How to do this with static array sizes since size out depends on wavel?
@@ -189,6 +298,50 @@ class PadToWavel(Layer):
     Possibly pre-calculate array sizes and store than in osys object?
     """
     pass
+
+
+
+
+
+
+
+
+
+
+
+
+######################################################
+############## Instrumental Layers ###################
+######################################################
+    
+    
+class ApplyPixelResponse(Layer):
+    pixel_response: ndarray
+    
+    def __init__(self, size, pixel_response):
+        self.size_in = size
+        self.size_out = size
+        self.pixel_response = pixel_response
+        
+    def __call__(self, image):
+        image *= self.pixel_response
+        return image
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
 ######################################################
 ############## Generic Array Ops #####################
@@ -371,15 +524,3 @@ class InvertY(Layer):
     def __call__(self, array, dummy_wavel, dummy_offset, dummy_pixelscale):
         return array[::-1]
     
-    
-class ApplyPixelResponse(Layer):
-    pixel_response: ndarray
-    
-    def __init__(self, size, pixel_response):
-        self.size_in = size
-        self.size_out = size
-        self.pixel_response = pixel_response
-        
-    def __call__(self, image):
-        image *= self.pixel_response
-        return image
