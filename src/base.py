@@ -191,9 +191,7 @@ class Scene(Module):
     Nstars: int = static_field()
     Nwavels: int = static_field()
     Nims: int = static_field()
-    
-    # dithered_positions: jax.numpy.ndarray = equinox.static_field() # Trying out Q
-    
+        
     def __init__(self, optical_system, wavels, positions, fluxes, 
                        weights=None, detector_layers=[], dithers=np.zeros([1, 2])):
                  
@@ -209,12 +207,6 @@ class Scene(Module):
         self.Nwavels = len(wavels)
         self.Nims = len(dithers)
         
-        # Function to do an outer sum becuase Jax hasnt ported the functionality
-        # Turns out I might actually be learning something!
-        # outer = vmap(vmap(lambda a, b: a + b, in_axes=(0, None)), in_axes=(None, 0))
-        # self.dithered_positions = outer(dithers, positions) 
-        # Output shape: (Nstars, Ndithers, 2)
-        
         # Format weights
         if weights is None:
             # Each star has the same uniform spectrum
@@ -226,10 +218,12 @@ class Scene(Module):
             # Each star has a different non-uniform spectrum
             self.weights = np.expand_dims(weights, axis=(-2, -1, 0))
             
-    def _update_positions(self):
-        self.positions += 1e2
-            
     def _dither_positions(self):
+        # Function to do an outer sum becuase Jax hasnt ported the functionality
+        # Turns out I might actually be learning something!
+        # outer = vmap(vmap(lambda a, b: a + b, in_axes=(0, None)), in_axes=(None, 0))
+        # self.dithered_positions = outer(dithers, positions) 
+        # Output shape: (Nstars, Ndithers, 2)
         outer = vmap(vmap(lambda a, b: a + b, in_axes=(0, None)), in_axes=(None, 0))
         dithered_positions = outer(self.dithers, self.positions) 
         return dithered_positions
@@ -265,7 +259,6 @@ class Scene(Module):
         dithered_positions = self._dither_positions()
         psfs = image_vmap(self.wavels, dithered_positions)
         
-
         # Normalise Weights, and format weights/fluxes
         weights_norm = np.expand_dims(self.weights.sum(2), axis=2) # Normliase along wavels
         weights_in = self.weights / weights_norm  # Expand dimension back out
