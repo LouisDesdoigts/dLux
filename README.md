@@ -16,11 +16,14 @@ The easiest way to install is from PyPI: just use
 
 To install from source: clone this git repo, enter the directory, and run
 
-`python setup.py install`
+`pip install .`
+
+## Documentation 
+We are currently building examples and [documentation!](https://louisdesdoigts.github.io/dLux/)!
 
 ## Use
 
-We are currently building examples and documentation! For now - see a [simple example](https://colab.research.google.com/drive/1Dz5NdRhtbGOzPl7jlIn5JvwNEQfaOq9Y?usp=sharing) in Google colab showing deployment onto GPU.
+For now - see a [simple example](https://colab.research.google.com/drive/1Dz5NdRhtbGOzPl7jlIn5JvwNEQfaOq9Y?usp=sharing) in Google colab showing deployment onto GPU. We are currently working on building out demonstration notebooks to show how to use the package.
 
 ## History
 
