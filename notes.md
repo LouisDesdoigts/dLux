@@ -1,4 +1,5 @@
 ### Notes:
+- All units are internally treated as SI unless explicitiy stated otherwise (which would be very rare)
 - Currently we only work with even sized arrays
 - We need to figure out the centering convetion for psfs (ie central pixel or corner of pixel)
 - Offset is now passed through ALL layers so that CreateWavefront does not have the be the first layer, ie you could use the offest term in the MFT
