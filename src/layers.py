@@ -8,7 +8,7 @@ from .zernike import zernike_basis
 __all__ = [
     
     # Optics Layers
-    'CreateWavefront', 'CircularAperture', 'Wavefront2PSF', 
+    'CreateWavefront', 'TiltedWavefront', 'CircularAperture', 'Wavefront2PSF', 
     'NormaliseWavefront', 'AddPhase', 'ApplyOPD', 'ApplyZernike', 'ThinLens', 
     
     # Instrument Layers
