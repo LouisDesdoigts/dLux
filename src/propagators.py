@@ -106,7 +106,7 @@ class MFT(Layer):
     
     def __init__(self, size_in, size_out, oversample, focal_length, pixelscale_out):
         self.size_in = size_in
-        self.size_outx = size_out
+        self.size_out = size_out
         self.oversample = oversample
         self.focal_length = focal_length
         self.pixelscale_out = pixelscale_out
