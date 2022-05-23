@@ -63,7 +63,7 @@ size_out: int, equinox.static_field
 
 class CreateWavefront(Layer):
     """ 
-    Initialises an input wavefront
+    Initialises an on-axis input wavefront
 
     Parameters
     ----------
@@ -86,22 +86,55 @@ class CreateWavefront(Layer):
         self.wavefront_size = wavefront_size
         self.pixelscale = wavefront_size/size
     
+    def __call__(self, dummy_wavefront, wavel, dummy_offset, dummy_pixelscale):
+        """
+        pixelscale input is always None - take definition from class property
+        
+        """
+        npix = self.size_in
+        wavefront = np.ones([npix, npix]) * np.exp(1j * np.zeros([npix, npix]))
+        return wavefront, self.pixelscale
+    
+class TiltedWavefront(Layer):
+    """ 
+    Initialises an input wavefront
+
+    Parameters
+    ----------
+    pixelscale: float, equinox.static_field
+        Units: meters/pixel
+        The pixelscae of each array between each layer operation
+        Its value is automatically calculated from the input values
+        
+    wavefront_size: float
+        Units: meters
+        Width of the array representing the wavefront in physical units
+        
+    """
+    pixelscale: float = static_field()
+    wavefront_size: float
+    _XX: ndarray
+    _YY: ndarray
+    
+    def __init__(self, size, wavefront_size, shift=0.):
+        self.size_in = size
+        self.size_out = size
+        self.wavefront_size = wavefront_size
+        self.pixelscale = wavefront_size/size
+    
+        c = self.size_in//2
+        xs = np.arange(-c, c) + shift # Shift what is the optical axis
+        self._XX, self._YY = self.pixelscale * np.array(np.meshgrid(xs, xs))
+    
     def __call__(self, dummy_wavefront, wavel, offset, dummy_pixelscale):
         """
         offset: (offset_x, offset_y) - measured in radians deviation from the optical axis
         pixelscale input is always None - take definition from class property
         
         """
-        
         xangle, yangle = offset
         npix = self.size_in
-        V, U = np.indices([npix, npix], dtype=float)
-        V -= (npix - 1) / 2.0
-        V *= self.pixelscale
-        U -= (npix - 1) / 2.0
-        U *= self.pixelscale
-
-        tiltphasor = np.exp(-2.0j * np.pi * (U*xangle + V*yangle) / wavel)
+        tiltphasor = np.exp(-2.0j * np.pi * (self._YY*xangle + self._XX*yangle) / wavel)
         wavefront = tiltphasor * np.ones([npix, npix]) * np.exp(1j * np.zeros([npix, npix]))
         return wavefront, self.pixelscale
     
@@ -159,8 +192,76 @@ class NormaliseWavefront(Layer):
         norm_wavefront = wavefront/norm_factor
         return norm_wavefront, pixelscale
     
+    
 class ApplyZernike(Layer):
     """
+    NEW DOCTRING:
+        TO DO
+        
+    OLD DOCSTRING:
+    Adds an array of phase values to the input wavefront calculated from the OPD
+     
+    Parameters
+    ----------
+    nterms: int, equinox.static_field
+        The number of zernike terms to apply, ignoring the first two radial
+        terms: Piston, Tip, Tilt
+        
+    basis: jax.numpy.ndarray, equinox.static_field
+        Arrays holding the pre-calculated zernike basis terms
+        
+    coefficients: jax.numpy.ndarray
+        Array of shape (nterns) of coefficients to be applied to each 
+        Zernike term
+    """
+    basis: ndarray = static_field()
+    coefficients: ndarray
+    names: list = static_field()
+    
+    def __init__(self, size, coefficients, indexes=None):
+        self.size_in = size
+        self.size_out = size
+        self.coefficients = np.array(coefficients)
+        
+        # Load basis
+        indexes = np.arange(len(coefficients)) if indexes is None else indexes
+        
+        if np.max(indexes) >= 22:
+            raise ValueError("Zernike indexes above 22 not supported")
+            
+        full_basis = np.array(np.nan_to_num(
+                zernike_basis(nterms=np.max(indexes)+1, npix=size)))
+        
+        self.basis = np.array([full_basis[indx] for indx in indexes])
+        
+        # Names - Helper
+        all_names = ['Piston', 'Tilt X', 'Tilt Y',
+                     'Focus', 'Astigmatism 45', 'Astigmatism 0',
+                     'Coma Y', 'Coma X',
+                     'Trefoil Y', 'Trefoil X',
+                     'Spherical', '2nd Astig 0', '2nd Astig 45',
+                     'Tetrafoil 0', 'Tetrafoil 22.5',
+                     '2nd coma X', '2nd coma Y', '3rd Astig X', '3rd Astig Y',
+                     'Pentafoil X', 'Pentafoil Y', '5th order spherical']
+        self.names = [all_names[indx] for indx in indexes]
+        
+    def __call__(self, complex_array, wavel, dummy_offset, pixelscale):
+        amplitude = np.abs(complex_array)
+        phase = np.angle(complex_array)
+        zernike_opd = np.dot(self.basis.T, self.coefficients)
+        zernike_phase = self._opd_to_phase(zernike_opd, wavel)
+        phase_out = phase + zernike_phase
+        wavefront_out = amplitude * np.exp(1j*phase_out)
+        return wavefront_out, pixelscale
+    
+    def _opd_to_phase(self, opd, wavel):
+        return 2*np.pi*opd/wavel
+    
+    def get_total_opd(self):
+        return np.dot(self.basis.T, self.coefficients)
+    
+class ApplyZernikeOld(Layer):
+    """ Old function, will be deleted eventually
     Adds an array of phase values to the input wavefront calculated from the OPD
     
     Currently relies on poppy to import zernikes

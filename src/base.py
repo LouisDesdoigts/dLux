@@ -152,7 +152,7 @@ class OpticalSystem(Module):
         return wavefront, intermed_wavefronts, intermed_pixelscales
 
     
-
+    
 class Scene(Module):
     """ Scene class, Equinox Modle
     
@@ -179,38 +179,44 @@ class Scene(Module):
     use np.squeeze to remove empy axes
     
     """
-    optical_system: Module # Not static becuase we want to take grads through this?
+    layers: list
     detector_layers: list
-    wavels: ndarray = static_field()
+    wavels: ndarray # Might need to be static
     positions: ndarray
     fluxes: ndarray
     weights: ndarray
     dithers: ndarray
     
-    # Determined from inputs
-    Nstars: int = static_field()
-    Nwavels: int = static_field()
-    Nims: int = static_field()
+    # # Determined from inputs
+    # Nstars: int = static_field()
+    # Nwavels: int = static_field()
+    # Nims: int = static_field()
         
-    def __init__(self, optical_system, wavels, positions, fluxes, 
-                       weights=None, detector_layers=[], dithers=np.zeros([1, 2])):
-                 
-        self.optical_system = optical_system
-        self.detector_layers = detector_layers
-        self.wavels = wavels
-        self.positions = positions
-        self.fluxes = fluxes
-        self.dithers = dithers
+    def __init__(self, layers, wavels=None, positions=None, fluxes=None, 
+                       weights=None, dithers=None, detector_layers=None):
+        # Required Inputs
+        self.layers = layers
+        self.wavels = np.array(wavels)
         
-        # Determined from inputs
-        self.Nstars = len(positions)
-        self.Nwavels = len(wavels)
-        self.Nims = len(dithers)
+        # Set to default values
+        self.positions = np.zeros(2) if positions is None else np.array(positions)
+        self.fluxes = np.ones(1) if fluxes is None else np.array(fluxes)
+        self.dithers = np.zeros([1, 2]) if dithers is None else dithers
+        self.detector_layers = [] if detector_layers is None else detector_layers
+        
+        # # Determined from inputs
+        # self.Nstars = len(positions)
+        # self.Nwavels = len(wavels)
+        # self.Nims = len(dithers)
+        
+        # To do - pass in positions for multiple images, ignoring dither (ie multi image)
         
         # Format weights
-        if weights is None:
+        if wavels is None:
+            self.weights = np.ones([1, 1, 1, 1, 1])
+        elif weights is None:
             # Each star has the same uniform spectrum
-            self.weights = np.ones([1, 1, self.Nwavels, 1, 1])
+            self.weights = np.ones([1, 1, len(wavels), 1, 1])
         elif len(weights.shape) == 1:
             # Each star has the same non-uniform spectrum
             self.weights = np.expand_dims(weights, axis=(-1, 0, 1, 3))
@@ -218,48 +224,65 @@ class Scene(Module):
             # Each star has a different non-uniform spectrum
             self.weights = np.expand_dims(weights, axis=(-2, -1, 0))
             
+        # To Do - add asset conditions to ensure that everything is formatted correctly (make sure inputs arent garbage)
+            
+            
     def _dither_positions(self):
-        # Function to do an outer sum becuase Jax hasnt ported the functionality
+        # Function to do an outer sum becuase it is more flexible than
+        # Formatting array shapes and using +
         # Turns out I might actually be learning something!
-        # outer = vmap(vmap(lambda a, b: a + b, in_axes=(0, None)), in_axes=(None, 0))
-        # self.dithered_positions = outer(dithers, positions) 
         # Output shape: (Nstars, Ndithers, 2)
         outer = vmap(vmap(lambda a, b: a + b, in_axes=(0, None)), in_axes=(None, 0))
         dithered_positions = outer(self.dithers, self.positions) 
         return dithered_positions
         
+    def debug_prop(self, wavel, offset=np.zeros(2)):
         
-    def _apply_detector_layers(self, image):
-        for i in range(len(self.detector_layers)):
-            image = self.detector_layers[i](image)
-        return image
+        # Inialise value and objects to store data
+        functions, intermed_wavefronts, intermed_pixelscales = [], [], []
+        wavefront, pixelscale = None, None
+        
+        # Inialise values and iterate 
+        for i in range(len(self.layers)):
+            wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
             
-        
+            # Store Values in list
+            intermed_wavefronts.append(wavefront)
+            intermed_pixelscales.append(pixelscale)
+            
+        return wavefront, intermed_wavefronts, intermed_pixelscales
+            
+    """################################"""
+    ### DIFFERENTIABLE FUNCTIONS BELOW ###
+    """################################"""
+    
     def __call__(self):
         """
-        shift parameter is optional so that Scene can be called independently
-        of MultiImageScene
         """
         # Maps the wavelength and position calcualtions across multiple dimesions
         # We want to vmap in three dims
         # Optical system inputs: (wavel, position)
         
-        # First over wavels
-        wavel_vmap = vmap(self.optical_system, in_axes=(0, None))
+        # Mapping over wavelengths
+        propagate_single = vmap(self.propagate_mono, in_axes=(0, None))
         
         # Then over the positions for each image
-        # Mapping over the stars in a single image first (zeroth axis)
-        position_vmap = vmap(wavel_vmap, in_axes=(None, 0))
+        # Mapping over the stars in a single image first (zeroth axis of positions)
+        propagate_multi = vmap(propagate_single, in_axes=(None, 0))
         
-        # Then map over each image
-        # Mapping over each image (first axis)
-        image_vmap = vmap(position_vmap, in_axes=(None, 1))
+        # Mapping over each image (first axis of positions)
+        propagator = vmap(propagate_multi, in_axes=(None, 1))
 
         # Generate PSFs
         dithered_positions = self._dither_positions()
-        psfs = image_vmap(self.wavels, dithered_positions)
+        # dithered_positions = self.positions() + self.dithers.T # Outer sum operation
+        # dithered_positions = self.positions + np.expand_dims(self.dithers, axis=(1))
+        psfs = propagator(self.wavels, dithered_positions)
         
         # Normalise Weights, and format weights/fluxes
+        # Psfs output shape: (Nims, Nstars, Nwavels, npix, npix)
+        # We want weights shape: (1, 1, Nwavels, 1, 1)
+        # We want fluxes shape: (1, Nstars, 1, 1, 1)
         weights_norm = np.expand_dims(self.weights.sum(2), axis=2) # Normliase along wavels
         weights_in = self.weights / weights_norm  # Expand dimension back out
         fluxes_in = np.expand_dims(self.fluxes, axis=(0, -1, -2, -3)) # Expand to correct dims
@@ -268,11 +291,50 @@ class Scene(Module):
         psfs *= weights_in
         psfs *= fluxes_in
         
-        # Sum into images
-        psf_images = psfs.sum([1, 2])
+        # Sum into images and remove empty dims for single image props
+        psf_images = np.squeeze(psfs.sum([1, 2]))
         
         # Vmap operation over each image
         detector_vmap = vmap(self._apply_detector_layers, in_axes=0)
         images = detector_vmap(psf_images)
         
         return images
+    
+    
+    def propagate_mono(self, wavel, offset=np.zeros(2)):
+        """
+        Must have wavelength and offset as input parameters in order to vmap over
+        could be kwargs theoretically
+        """
+        
+        # Inialise values
+        wavefront, pixelscale = None, None
+        
+        # Inialise values and iterate 
+        for i in range(len(self.layers)):
+            wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
+        return wavefront
+    
+    def _apply_detector_layers(self, image):
+        for i in range(len(self.detector_layers)):
+            image = self.detector_layers[i](image)
+        return image
+        
+    
+    def propagate_single(self, wavels, offset=np.zeros(2), weights=1.):
+        """
+        Only propagates a single star, allowing wavelength input
+        sums output to single array
+        
+        Wavels must be an array and the same shape as weights if provided
+        """
+        
+        # Mapping over wavelengths
+        prop_wf_map = vmap(self.propagate_mono, in_axes=(0, None))
+        
+        # Apply spectral weighting
+        psfs = weights * prop_wf_map(wavels, offset)/len(wavels)
+        
+        # Sum into single psf
+        psf = psfs.sum(0)
+        return psf
