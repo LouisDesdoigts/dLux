@@ -61,40 +61,7 @@ class OpticalSystem(Module):
     
     def __init__(self, layers):
         self.layers = layers
-
-    def __call__(self, wavelength, offset):
-        """ Propagation Function
         
-        This function propagates the wavefront by iterating though the layers
-        list and calling the __call__() function 
-        
-        Parameters
-        ----------
-        wavelength: float
-            Units: meters
-            Wavelength of light being propagated through the opitcal
-            system
-        offset: jax.numpy.ndarray
-            Units: radians
-            shape: (2,)
-            The (x, y) angular offset of the source object from the optical 
-            axis in radians
-        
-        Returns
-        -------
-        wavefront: jax.numpy.ndarray
-            The output wavefront after being 'propaged' through all the layer
-            objects
-        """
-        
-        # Inialise values
-        wavefront, pixelscale = None, None
-        
-        # Inialise values and iterate 
-        for i in range(len(self.layers)):
-            wavefront, pixelscale = self.layers[i](wavefront, wavelength, offset, pixelscale)
-        return wavefront
-    
     def debug_prop(self, wavel, offset):
         """ Debugging/Heler Propagation Function
         
@@ -150,6 +117,77 @@ class OpticalSystem(Module):
             intermed_pixelscales.append(pixelscale)
             
         return wavefront, intermed_wavefronts, intermed_pixelscales
+    
+            
+    """################################"""
+    ### DIFFERENTIABLE FUNCTIONS BELOW ###
+    """################################"""
+    
+
+    def __call__(self, wavelength, offset):
+        """ Propagation Function
+        
+        This function propagates the wavefront by iterating though the layers
+        list and calling the __call__() function 
+        
+        Parameters
+        ----------
+        wavelength: float
+            Units: meters
+            Wavelength of light being propagated through the opitcal
+            system
+        offset: jax.numpy.ndarray
+            Units: radians
+            shape: (2,)
+            The (x, y) angular offset of the source object from the optical 
+            axis in radians
+        
+        Returns
+        -------
+        wavefront: jax.numpy.ndarray
+            The output wavefront after being 'propaged' through all the layer
+            objects
+        """
+        
+        # Inialise values
+        wavefront, pixelscale = None, None
+        
+        # Inialise values and iterate 
+        for i in range(len(self.layers)):
+            wavefront, pixelscale = self.layers[i](wavefront, wavelength, offset, pixelscale)
+        return wavefront
+    
+    def propagate_mono(self, wavel, offset=np.zeros(2)):
+        """
+        Must have wavelength and offset as input parameters in order to vmap over
+        could be kwargs theoretically
+        """
+        
+        # Inialise values
+        wavefront, pixelscale = None, None
+        
+        # Inialise values and iterate 
+        for i in range(len(self.layers)):
+            wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
+        return wavefront
+        
+    def propagate_single(self, wavels, offset=np.zeros(2), weights=1.):
+        """
+        Only propagates a single star, allowing wavelength input
+        sums output to single array
+        
+        Wavels must be an array and the same shape as weights if provided
+        """
+        
+        # Mapping over wavelengths
+        prop_wf_map = vmap(self.propagate_mono, in_axes=(0, None))
+        
+        # Apply spectral weighting
+        psfs = weights * prop_wf_map(wavels, offset)/len(wavels)
+        
+        # Sum into single psf
+        psf = psfs.sum(0)
+        return psf
 
     
     
@@ -314,13 +352,7 @@ class Scene(Module):
         for i in range(len(self.layers)):
             wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
         return wavefront
-    
-    def _apply_detector_layers(self, image):
-        for i in range(len(self.detector_layers)):
-            image = self.detector_layers[i](image)
-        return image
         
-    
     def propagate_single(self, wavels, offset=np.zeros(2), weights=1.):
         """
         Only propagates a single star, allowing wavelength input
@@ -338,3 +370,8 @@ class Scene(Module):
         # Sum into single psf
         psf = psfs.sum(0)
         return psf
+    
+    def _apply_detector_layers(self, image):
+        for i in range(len(self.detector_layers)):
+            image = self.detector_layers[i](image)
+        return image
