@@ -167,6 +167,7 @@ class CircularAperture(Layer):
         aperture = RR < npix//2
         return aperture
     
+    
 class Wavefront2PSF(Layer):
     """ 
     Returns the modulus squared of the input wavefront
