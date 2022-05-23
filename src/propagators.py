@@ -100,13 +100,13 @@ class MFT(Layer):
     """
     Matches poppy but assumes square
     """
-    focal_length: float = static_field()
-    pixelscale_out: float = static_field()
+    focal_length: float
+    pixelscale_out: float
     oversample: int = static_field()
     
     def __init__(self, size_in, size_out, oversample, focal_length, pixelscale_out):
         self.size_in = size_in
-        self.size_out = size_out
+        self.size_outx = size_out
         self.oversample = oversample
         self.focal_length = focal_length
         self.pixelscale_out = pixelscale_out
@@ -127,14 +127,13 @@ class MFT(Layer):
         det_size = self.pixelscale_out * npix # detector size
         wavel_scale = det_size * aperture / self.focal_length
         nlamD = wavel_scale / wavel
-        
+
         # Calulate Arrays
         dX = 1.0 / float(npup)
         dU = nlamD / float(npix)
         
-        offset = 0 # Keeping this here for potential later use
-        Xs = (np.arange(npup, dtype=float) - float(npup) / 2.0 + offset) * dX
-        Us = (np.arange(npix, dtype=float) - float(npix) / 2.0 + offset) * dU
+        Xs = (np.arange(npup, dtype=float) - float(npup) / 2.0) * dX
+        Us = (np.arange(npix, dtype=float) - float(npix) / 2.0) * dU
         XU = np.outer(Xs, Us)
         expXU = np.exp(-2.0 * np.pi * 1j * XU)
 
@@ -146,7 +145,67 @@ class MFT(Layer):
         t2 = np.dot(t1, expXU)
         wavefront_out = norm_coeff * t2
         return wavefront_out, self.pixelscale_out
+    
+class OffsetMFT(Layer):
+    """
+    Matches poppy but assumes square
+    """
+    focal_length: float
+    pixelscale_out: float
+    oversample: int = static_field()
+    
+    def __init__(self, size_in, size_out, oversample, focal_length, pixelscale_out):
+        self.size_in = size_in
+        self.size_out = size_out
+        self.oversample = oversample
+        self.focal_length = focal_length
+        self.pixelscale_out = pixelscale_out
+        
+    def __call__(self, wavefront, wavel, offset, pixelscale):
+        """
+        Should we add offset here too?
+        I have removed it but we have the code needed in the old notebooks
+        
+        Potentially use different parameters based on what inputs are given?
+        
+        Add shift parameter?
+        """
+        # Calculate NlamD (radius from optical axis measured in fringes)
+        npup, npix = self.size_in, self.size_out
+        wf_size_in = pixelscale * npup # Wavefront size
+        aperture = wf_size_in / self.oversample # Aperture size
+        det_size = self.pixelscale_out * npix # detector size
+        wavel_scale =  aperture * npix * self.pixelscale_out / self.focal_length
+        # wavel_scale =  aperture * npix * pixel_rad
+        nlamD = wavel_scale / wavel
+        
+        # Calulate Arrays
+        dX = 1.0 / float(npup)
+        dU = nlamD / float(npix)
+        
+        # offsetX, offsetY = offset * self.focal_length / self.pixelscale_out
+        offsetX, offsetY = offset
+        dY = 1.0 / float(npup)
+        dV = nlamD / float(npix)
+        
+        Xs = (np.arange(npup, dtype=float) - float(npup) / 2.0 + offsetX) * dX
+        Ys = (np.arange(npup, dtype=float) - float(npup) / 2.0 + offsetY) * dY
+        Us = (np.arange(npix, dtype=float) - float(npix) / 2.0 + offsetX) * dU
+        Vs = (np.arange(npix, dtype=float) - float(npix) / 2.0 + offsetY) * dV
+        
+        XU = np.outer(Xs, Us)
+        YV = np.outer(Ys, Vs)
 
+        expYV = np.exp(-2.0 * np.pi * 1j * YV).T
+        expXU = np.exp(-2.0 * np.pi * 1j * XU)
+        t1 = np.dot(expYV, wavefront)
+        t2 = np.dot(t1, expXU)
+
+        norm_coeff = np.sqrt((nlamD**2) / (npup**2 * npix**2))         
+        wavefront_out = norm_coeff * t2
+        return wavefront_out, self.pixelscale_out
+    
+    
 class FFT(Layer):
     focal_length: float = static_field()
     
