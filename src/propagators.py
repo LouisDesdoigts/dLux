@@ -1,127 +1,37 @@
-from .base import Layer
 import jax.numpy as np
-from jax.numpy import ndarray
-from equinox import static_field
+import equinox as eqx
 
-class FresnelProp(Layer):
-    """
-    Layer for Fresnel propagation
-    
-    Note this algorithm is completely not intensity conservative and will
-    give different answers for each wavelength too
-    
-    Note this probably gives wrong answers for tilted input wavefronts becuase
-    I believe its based on the paraxial wave equation and tilted wavefronts
-    are not paraxial
-    
-    -> Do something clever with MFTs in the final TF with the offset term to 
-    get propper off axis behaviour?
-    """
-    focal_length: float = static_field
-    XX: ndarray = static_field
-    YY: ndarray = static_field
-    z: float
-    
-    def __init__(self, size, focal_length, z):
-        """
-        Initialisation
-        pixelscale must be in m/pixel, ie aperture/npix
-        
-        Aperture pixelscale is the pixelscale at the ORIGINAL lens -> for multiple
-        non-conjuagte lens systems is it slightly more complex (EFL, EFZ?)
-        
-        Do we need 'effective focal length' and 'effective final distance' in order to 
-        track pixelscales correctly? Ie in an RC telescope after M2 the EFL is changed
-        and the effective propagated distance is different too
-          -> What about free space propagation?
-        """
-        self.size_in = size
-        self.size_out = size
-        self.focal_length = focal_length
-        self.z = z
-
-        # Check if this matches PSF centering
-        xs = np.arange(0, size) - size//2 
-        self.XX, self.YY = np.meshgrid(xs, xs)
-        
-    def _get_pixelscale(self, focal_length, pixelscale, z, wavel):
-        """
-        We calcualte these values outside of the function to help keep track of 
-        wavefronts passing through multiple non-conjugate planes.
-        
-        Assumes a linear scaliing between initial and final pixel scale along
-        z axis
-        """
-        # Calculate pixel scale
-        pixelscale_conj = wavel * focal_length / (pixelscale * self.size_in)
-        pixelscale_out = (pixelscale_conj - pixelscale) * (z / focal_length) + pixelscale
-        return pixelscale_out
-        
-    def __call__(self, wavefront, wavel, dummy_offset, pixelscale):
-        """
-        Propagates Fresnel
-        """
-        
-        z_prop = self.z
-        
-        # Wave number
-        k = 2*np.pi / wavel
-        
-        # Coordinates & Pixelscale
-        x_coords = self.XX * pixelscale
-        y_coords = self.YY * pixelscale
-        pixelscale_out = self._get_pixelscale(self.focal_length, pixelscale, self.z, wavel)
-        
-        # Units: pixels * m / pixel = m 'simulation size'
-        s = self.size_in * pixelscale 
-            
-        # First Phase Operation
-        rho1 = np.exp(1.0j * k * (x_coords ** 2 + y_coords ** 2) / (2 * z_prop))
-        wavefront *= rho1
-        
-        # Assume z > 0 for now
-        wavefront = np.fft.ifftshift(wavefront)
-        wavefront = np.fft.fft2(wavefront)
-        wavefront = np.fft.fftshift(wavefront)
-        wavefront *= pixelscale ** 2
-        
-        # Second Phase Operation
-        rho2 = np.exp(1.0j * k * z_prop) / (1.0j * wavel * z_prop) * np.exp(1.0j * k * 
-                                (x_coords ** 2 + y_coords ** 2) / (2 * z_prop))
-        wavefront *= rho2
-        
-        pixelscale_out_popppy = wavel * self.z / s
-        # print(pixelscale_out)
-        # print(pixelscale)
-        
-        return wavefront, pixelscale_out_popppy
-    
-class MFT(Layer):
+class MFT(eqx.Module):
     """
     Matches poppy but assumes square
     """
-    focal_length: float
+    npix_out:       int
+    focal_length:   float
     pixelscale_out: float
     
-    def __init__(self, size_in, size_out, focal_length, pixelscale_out):
-        self.size_in = size_in
-        self.size_out = size_out
-        self.focal_length = focal_length
-        self.pixelscale_out = pixelscale_out
+    def __init__(self, npix_out, focal_length, pixelscale_out):
+        self.npix_out =       int(npix_out)
+        self.focal_length =   float(focal_length)
+        self.pixelscale_out = float(pixelscale_out)
         
-    def __call__(self, wavefront, wavel, dummy_offset, pixelscale):
+    def __call__(self, params_dict):
         """
-        Should we add offset here too?
-        I have removed it but we have the code needed in the old notebooks
         
-        Potentially use different parameters based on what inputs are given?
-        
-        Add shift parameter?
         """
-        # Calculate NlamD parameter
-        npup, npix = self.size_in, self.size_out
-        wf_size_in = pixelscale * npup # Wavefront size, 'd'
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+        pixelscale = WF.pixelscale
+
+
+        # Calculate NlamD parameter (Do on Wavefront class??)
+        npup = wavefront.shape[0] 
+        npix = self.npix_out
+        
+        wf_size_in = pixelscale * npup # Wavefront size 'd'        
         det_size = self.pixelscale_out * npix # detector size
+        
         wavel_scale = det_size * wf_size_in / self.focal_length
         nlamD = wavel_scale / wavel
 
@@ -141,32 +51,42 @@ class MFT(Layer):
         t1 = np.dot(expXU.T, wavefront)
         t2 = np.dot(t1, expXU)
         wavefront_out = norm_coeff * t2
-        return wavefront_out, self.pixelscale_out
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
+        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, "Focal")
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-class OffsetMFT(Layer):
+class OffsetMFT(eqx.Module):
     """
     Matches poppy but assumes square
     """
-    focal_length: float
+    npix_out:       int
+    focal_length:   float
     pixelscale_out: float
     
-    def __init__(self, size_in, size_out, focal_length, pixelscale_out):
-        self.size_in = size_in
-        self.size_out = size_out
-        self.focal_length = focal_length
-        self.pixelscale_out = pixelscale_out
+    def __init__(self, npix_out, focal_length, pixelscale_out):
+        self.npix_out =       int(npix_out)
+        self.focal_length =   float(focal_length)
+        self.pixelscale_out = float(pixelscale_out)
         
-    def __call__(self, wavefront, wavel, offset, pixelscale):
+    def __call__(self, params_dict):
         """
-        Should we add offset here too?
-        I have removed it but we have the code needed in the old notebooks
         
-        Potentially use different parameters based on what inputs are given?
-        
-        Add shift parameter?
         """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+        offset = WF.offset
+        pixelscale = WF.pixelscale
+        
+        
         # Calculate NlamD (radius from optical axis measured in fringes)
-        npup, npix = self.size_in, self.size_out
+        npup = wavefront.shape[0] 
+        npix = self.npix_out
         wf_size_in = pixelscale * npup # Wavefront size, 'd'
         det_size = self.pixelscale_out * npix # detector size
         wavel_scale =  wf_size_in * npix * self.pixelscale_out / self.focal_length
@@ -177,8 +97,7 @@ class OffsetMFT(Layer):
         dX = 1.0 / float(npup)
         dU = nlamD / float(npix)
         
-        # offsetX, offsetY = offset * self.focal_length / self.pixelscale_out
-        offsetX, offsetY = offset
+        offsetX, offsetY = offset * self.focal_length / self.pixelscale_out
         dY = 1.0 / float(npup)
         dV = nlamD / float(npix)
         
@@ -197,45 +116,146 @@ class OffsetMFT(Layer):
 
         norm_coeff = np.sqrt((nlamD**2) / (npup**2 * npix**2))         
         wavefront_out = norm_coeff * t2
-        return wavefront_out, self.pixelscale_out
-    
-    
-class FFT(Layer):
-    focal_length: float = static_field()
-    
-    def __init__(self, size, focal_length):
-        self.size_in = size
-        self.size_out = size
-        self.focal_length = focal_length
         
-    def __call__(self, wavefront, wavel, dummy_offset, pixelscale):
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
+        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, "Focal")
+        params_dict["Wavefront"] = WF
+        return params_dict
+    
+class FFT(eqx.Module):
+    """
+    
+    """
+    focal_length: float
+    
+    def __init__(self, focal_length):
+        self.focal_length = float(focal_length)
+        
+    def __call__(self, params_dict):
         """
         Performs normalisation matching poppy
         """
-        # Calculate Wavefront
-        norm = wavefront.shape[0]
-        wavefront_out = norm * np.fft.fftshift( np.fft.ifft2(wavefront) )
-        
-        # Calculate pixel scale
-        pixelscale_out = wavel * self.focal_length / (pixelscale * self.size_in)
-        return wavefront_out, pixelscale_out
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+        pixelscale = WF.pixelscale
+
+        # Calculate Wavefront & Pixelscale
+        npix_in = wavefront.shape[0]
+        norm = npix_in
+        wavefront_out = norm * np.fft.fftshift(np.fft.ifft2(wavefront))
+        pixelscale_out = wavel * self.focal_length / (pixelscale * npix_in)
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, pixelscale_out)
+        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, "Focal")
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-class IFFT(Layer):
-    focal_length: float = static_field()
+class IFFT(eqx.Module):
+    """
     
-    def __init__(self, size, focal_length):
-        self.size_in = size
-        self.size_out = size
-        self.focal_length = focal_length
+    """
+    focal_length: float
+    
+    def __init__(self, focal_length):
+        self.focal_length = float(focal_length)
         
-    def __call__(self, wavefront, wavel, dummy_offset, pixelscale):
+    def __call__(self, params_dict):
         """
         Performs normalisation matching poppy
         """
-        # Calculate Wavefront
-        norm = 1./wavefront.shape[0]
-        wavefront_out = norm * np.fft.fft2( np.fft.ifftshift(wavefront) )
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+        pixelscale = WF.pixelscale
+
+        # Calculate Wavefront & Pixelscale
+        npix_in = wavefront.shape[0]
+        norm = 1./npix_in
+        wavefront_out = norm * np.fft.fft2(np.fft.ifftshift(wavefront))
+        pixelscale_out = wavel * self.focal_length / (pixelscale * npix_in)
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, pixelscale_out)
+        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, "Pupil")
+        params_dict["Wavefront"] = WF
+        return params_dict
+    
+class FresnelProp(eqx.Module):
+    """
+    Layer for Fresnel propagation
+    
+    Note this algorithm is completely not intensity conservative and will
+    give different answers for each wavelength too
+    
+    Note this probably gives wrong answers for tilted input wavefronts becuase
+    I believe its based on the paraxial wave equation and tilted wavefronts
+    are not paraxial
+    
+    -> Do something clever with MFTs in the final TF with the offset term to 
+    get propper off axis behaviour?
+    """
+    prop_dist:    float
+    
+    def __init__(self, focal_length, prop_dist):
+        """
+        Initialisation
+        pixelscale must be in m/pixel, ie aperture/npix
         
-        # Calculate pixel scale
-        pixelscale_out = 2 * wavel * focal_length / (pixelscale * self.size_in)
-        return wavefront_out, pixelscale_out
+        Aperture pixelscale is the pixelscale at the ORIGINAL lens -> for multiple
+        non-conjuagte lens systems is it slightly more complex (EFL, EFZ?)
+        
+        Do we need 'effective focal length' and 'effective final distance' in order to 
+        track pixelscales correctly? Ie in an RC telescope after M2 the EFL is changed
+        and the effective propagated distance is different too
+          -> What about free space propagation?
+        """
+        self.prop_dist = prop_dist
+
+    def __call__(self, params_dict):
+        """
+        Propagates Fresnel
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+        pixelscale = WF.pixelscale
+
+        # Calc Pixelscale
+        npix_in = wavefront.shape[0]
+        z_prop = self.prop_dist
+        pixelscale_out = wavel * z_prop / (npix_in * pixelscale)
+        
+        # Wave number & Coordinates
+        k = 2*np.pi / wavel
+        x_coords, y_coords = WF.get_xycoords()
+
+        # First Phase Operation
+        rho1 = np.exp(1.0j * k * (x_coords ** 2 + y_coords ** 2) / (2 * z_prop))
+        wavefront = rho1 * wavefront
+        
+        # Assume z > 0 for now
+        wavefront = np.fft.ifftshift(wavefront)
+        wavefront = np.fft.fft2(wavefront)
+        wavefront = np.fft.fftshift(wavefront)
+        wavefront *= pixelscale ** 2
+        
+        # Second Phase Operation
+        rho2 = np.exp(1.0j * k * z_prop) / (1.0j * wavel * z_prop) * np.exp(1.0j * k * 
+                                (x_coords ** 2 + y_coords ** 2) / (2 * z_prop))
+        wavefront_out = rho2 * wavefront
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, pixelscale_out)
+        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, None)
+        params_dict["Wavefront"] = WF
+        return params_dict
