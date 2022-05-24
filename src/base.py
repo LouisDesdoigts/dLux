@@ -3,9 +3,8 @@ from jax.numpy import ndarray
 from equinox import static_field
 from jax import vmap
 from equinox import Module
-from equinox import static_field
 
-__all__ = ['Layer', 'OpticalSystem', 'Scene']
+__all__ = ['Layer', 'OpticalSystem']
 
 class Layer(Module):
     """ Base Layer class, Equinox Modle
@@ -41,158 +40,38 @@ class Layer(Module):
     def __init__(self, size_in, size_out):
         self.size_in = size_in
         self.size_out = size_out
+        
+class Wavefront(Module):
+    """
+    Class to store the optical information and paramaters
+    """
+    wavefront: ndarray
+    wavel: float
+    offset: ndarray
+    pixelscale: float
+    # planetype: str
+    
+    def __init__(self, wavel, offset, pixelscale, npix):
+        self.wavel = wavel
+        self.offset = offset
+        self.pixelscale = pixelscale
+        self.wavefront = np.ones([npix, npix], dtype=complex)
+        # self.planetype = "Pupil"
+        
+    def wf2psf(self):
+        return np.abs(self.wavefront)**2
+    
+    def get_XXYY(self, shift=0.):
+        npix = self.wavefront.shape[0]
+        xs = np.arange(-npix//2, npix//2) + shift
+        YY, XX = np.meshgrid(xs, xs)
+        return np.array([XX, YY])
+    
+    def get_xycoords(self, shift=0.):
+        return self.pixelscale * self.get_XXYY(shift=shift)
     
 class OpticalSystem(Module):
-    """ OpticalSystem class, Equinox Modle
-    
-    A class to store the list of layer objects that specifically define an 
-    optical system. 
-    
-    Parameters
-    ----------
-    layers: list, 
-        A list of Layer objects 
-    
-    Notes:
-     - layers could theoretically also be a dictionary if needed for optax
-     - test if everything still works if this is set as static
-    """
-    layers: list
-    
-    def __init__(self, layers):
-        self.layers = layers
-        
-    def debug_prop(self, wavel, offset):
-        """ Debugging/Heler Propagation Function
-        
-        Helper function that is identical to the __call__() function except it
-        stores the intermediary wavefront and pixelscale values and returns 
-        them. 
-        
-        Parameters
-        ----------
-        wavel: float
-            Units: meters
-            Wavelength of light being propagated through the opitcal
-            system
-        offset: jax.numpy.ndarray
-            Units: radians
-            shape: (2,)
-            The (x, y) angular offset of the source object from the optical 
-            axis in radians
-            
-        Intermediate
-        ------------
-        pixelscale: float
-            Units: meters/pixel
-            The pixelscae of each array between each layer operation
-        
-        Returns
-        -------
-        wavefront: jax.numpy.ndarray
-            The output wavefront after being 'propaged' through all the layer
-            objects
-        intermed_wavefronts: list
-            a list storing the state of the wavefront between each layer 
-            operation.
-            This can be used to check that your wavefront is being transformed
-            properly between each layer and that Layers are working as expected
-        intermed_pixelscales: list
-            a list storing the pixelscale of the wavefront between each layer 
-            operation. 
-            This can be used to check for inconsistencies and look for layers
-            where interpolation is needed
-        """
-        
-        # Inialise value and objects to store data
-        functions, intermed_wavefronts, intermed_pixelscales = [], [], []
-        wavefront, pixelscale = None, None
-        
-        # Inialise values and iterate 
-        for i in range(len(self.layers)):
-            wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
-            
-            # Store Values in list
-            intermed_wavefronts.append(wavefront)
-            intermed_pixelscales.append(pixelscale)
-            
-        return wavefront, intermed_wavefronts, intermed_pixelscales
-    
-            
-    """################################"""
-    ### DIFFERENTIABLE FUNCTIONS BELOW ###
-    """################################"""
-    
-
-    def __call__(self, wavelength, offset):
-        """ Propagation Function
-        
-        This function propagates the wavefront by iterating though the layers
-        list and calling the __call__() function 
-        
-        Parameters
-        ----------
-        wavelength: float
-            Units: meters
-            Wavelength of light being propagated through the opitcal
-            system
-        offset: jax.numpy.ndarray
-            Units: radians
-            shape: (2,)
-            The (x, y) angular offset of the source object from the optical 
-            axis in radians
-        
-        Returns
-        -------
-        wavefront: jax.numpy.ndarray
-            The output wavefront after being 'propaged' through all the layer
-            objects
-        """
-        
-        # Inialise values
-        wavefront, pixelscale = None, None
-        
-        # Inialise values and iterate 
-        for i in range(len(self.layers)):
-            wavefront, pixelscale = self.layers[i](wavefront, wavelength, offset, pixelscale)
-        return wavefront
-    
-    def propagate_mono(self, wavel, offset=np.zeros(2)):
-        """
-        Must have wavelength and offset as input parameters in order to vmap over
-        could be kwargs theoretically
-        """
-        
-        # Inialise values
-        wavefront, pixelscale = None, None
-        
-        # Inialise values and iterate 
-        for i in range(len(self.layers)):
-            wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
-        return wavefront
-        
-    def propagate_single(self, wavels, offset=np.zeros(2), weights=1.):
-        """
-        Only propagates a single star, allowing wavelength input
-        sums output to single array
-        
-        Wavels must be an array and the same shape as weights if provided
-        """
-        
-        # Mapping over wavelengths
-        prop_wf_map = vmap(self.propagate_mono, in_axes=(0, None))
-        
-        # Apply spectral weighting
-        psfs = weights * prop_wf_map(wavels, offset)/len(wavels)
-        
-        # Sum into single psf
-        psf = psfs.sum(0)
-        return psf
-
-    
-    
-class Scene(Module):
-    """ Scene class, Equinox Modle
+    """ Optical System class, Equinox Modle
     
     DOCSTRING NOT COMPLETE
     
@@ -274,21 +153,22 @@ class Scene(Module):
         dithered_positions = outer(self.dithers, self.positions) 
         return dithered_positions
         
-    def debug_prop(self, wavel, offset=np.zeros(2)):
+    # Debug Prop is not broken from the Wavefront class, it will be fixed later
+#     def debug_prop(self, wavel, offset=np.zeros(2)):
         
-        # Inialise value and objects to store data
-        functions, intermed_wavefronts, intermed_pixelscales = [], [], []
-        wavefront, pixelscale = None, None
+#         # Inialise value and objects to store data
+#         functions, intermed_wavefronts, intermed_pixelscales = [], [], []
+#         wavefront, pixelscale = None, None
         
-        # Inialise values and iterate 
-        for i in range(len(self.layers)):
-            wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
+#         # Inialise values and iterate 
+#         for i in range(len(self.layers)):
+#             wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
             
-            # Store Values in list
-            intermed_wavefronts.append(wavefront)
-            intermed_pixelscales.append(pixelscale)
+#             # Store Values in list
+#             intermed_wavefronts.append(wavefront)
+#             intermed_pixelscales.append(pixelscale)
             
-        return wavefront, intermed_wavefronts, intermed_pixelscales
+#         return wavefront, intermed_wavefronts, intermed_pixelscales
             
     """################################"""
     ### DIFFERENTIABLE FUNCTIONS BELOW ###
@@ -339,19 +219,31 @@ class Scene(Module):
         return images
     
     
-    def propagate_mono(self, wavel, offset=np.zeros(2)):
-        """
-        Must have wavelength and offset as input parameters in order to vmap over
-        could be kwargs theoretically
-        """
+#     def propagate_mono(self, wavel, offset=np.zeros(2)):
+#         """
+#         Must have wavelength and offset as input parameters in order to vmap over
+#         could be kwargs theoretically
+#         """
         
-        # Inialise values
-        wavefront, pixelscale = None, None
+#         # Inialise values
+#         wavefront, pixelscale = None, None
         
-        # Inialise values and iterate 
-        for i in range(len(self.layers)):
-            wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
-        return wavefront
+#         # Inialise values and iterate 
+#         for i in range(len(self.layers)):
+#             wavefront, pixelscale = self.layers[i](wavefront, wavel, offset, pixelscale)
+#         return wavefront
+
+
+    def propagate_mono(self, wavel, offset=np.zeros(2)):        
+        # Initialise wavefront object - Layer 0 MUST be CreateWavefront
+        params_dict = {"Wavefront": layers[0](wavel, offset)}
+        
+        # Iterate over the rest of the layers
+        for i in range(1, len(self.layers)):
+            params_dict = self.layers[i](params_dict)
+        return params_dict["Wavefront"].wf2psf()
+
+
         
     def propagate_single(self, wavels, offset=np.zeros(2), weights=1.):
         """
