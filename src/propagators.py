@@ -102,12 +102,10 @@ class MFT(Layer):
     """
     focal_length: float
     pixelscale_out: float
-    oversample: int = static_field()
     
-    def __init__(self, size_in, size_out, oversample, focal_length, pixelscale_out):
+    def __init__(self, size_in, size_out, focal_length, pixelscale_out):
         self.size_in = size_in
         self.size_out = size_out
-        self.oversample = oversample
         self.focal_length = focal_length
         self.pixelscale_out = pixelscale_out
         
@@ -122,10 +120,9 @@ class MFT(Layer):
         """
         # Calculate NlamD parameter
         npup, npix = self.size_in, self.size_out
-        wf_size_in = pixelscale * npup # Wavefront size
-        aperture = wf_size_in / self.oversample # Aperture size
+        wf_size_in = pixelscale * npup # Wavefront size, 'd'
         det_size = self.pixelscale_out * npix # detector size
-        wavel_scale = det_size * aperture / self.focal_length
+        wavel_scale = det_size * wf_size_in / self.focal_length
         nlamD = wavel_scale / wavel
 
         # Calulate Arrays
@@ -152,12 +149,10 @@ class OffsetMFT(Layer):
     """
     focal_length: float
     pixelscale_out: float
-    oversample: int = static_field()
     
-    def __init__(self, size_in, size_out, oversample, focal_length, pixelscale_out):
+    def __init__(self, size_in, size_out, focal_length, pixelscale_out):
         self.size_in = size_in
         self.size_out = size_out
-        self.oversample = oversample
         self.focal_length = focal_length
         self.pixelscale_out = pixelscale_out
         
@@ -172,11 +167,10 @@ class OffsetMFT(Layer):
         """
         # Calculate NlamD (radius from optical axis measured in fringes)
         npup, npix = self.size_in, self.size_out
-        wf_size_in = pixelscale * npup # Wavefront size
-        aperture = wf_size_in / self.oversample # Aperture size
+        wf_size_in = pixelscale * npup # Wavefront size, 'd'
         det_size = self.pixelscale_out * npix # detector size
-        wavel_scale =  aperture * npix * self.pixelscale_out / self.focal_length
-        # wavel_scale =  aperture * npix * pixel_rad
+        wavel_scale =  wf_size_in * npix * self.pixelscale_out / self.focal_length
+        # wavel_scale =  wf_size_in * npix * pixel_rad
         nlamD = wavel_scale / wavel
         
         # Calulate Arrays
