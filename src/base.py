@@ -1,76 +1,46 @@
 import jax.numpy as np
-from jax.numpy import ndarray
-from equinox import static_field
 from jax import vmap
-from equinox import Module
+import equinox as eqx
 
-__all__ = ['Layer', 'OpticalSystem']
-
-class Layer(Module):
-    """ Base Layer class, Equinox Modle
-    
-    Only supports square arrays (n, n).
-    
-    Each child class can either be some optical or array operation, transform
-    or neural network like operation. Thier __call__() function must be 
-    differentiable in order for things to work and follow this formatting:
-    
-        def __call__(self, wavelength, wavefront, pixelscale, offset):
-            # Do things
-            return wavefront, pixelscale
-    
-    wavefront must be input as an array with shape (size_in, size_in) and it 
-    must be returned with shape (size_out, size_out).
-    
-    The parameters size_in, size_out must be set in the __init__() class of
-    children classes.
-    
-    Parameters
-    ----------
-    size_in: int, equinox.static_field
-        defines the linear size of the input wavefront to the __call__()
-        function
-    size_out: int, equinox.static_field
-        defines the linear size of the output wavefront to the __call__()
-        function
-    """
-    size_in: int = static_field()
-    size_out: int = static_field()
-    
-    def __init__(self, size_in, size_out):
-        self.size_in = size_in
-        self.size_out = size_out
+__all__ = ['Wavefront', 'OpticalSystem']
         
-class Wavefront(Module):
+class Wavefront(eqx.Module):
     """
     Class to store the optical information and paramaters
     """
-    wavefront: ndarray
-    wavel: float
-    offset: ndarray
+    wavefront:  np.ndarray
+    wavel:      float
+    offset:     np.ndarray
     pixelscale: float
-    planetype: str
+    planetype:  str
     
     def __init__(self, wavel, offset):
-        self.wavel = wavel
-        self.offset = offset
+        self.wavel = wavel.astype(float)
+        self.offset = np.array(offset)
         self.planetype = "Pupil"
         self.pixelscale = None
         self.wavefront = None
 
     def wf2psf(self):
+        """
+        """
         return np.abs(self.wavefront)**2
     
     def get_XXYY(self, shift=0.):
+        """
+        """
         npix = self.wavefront.shape[0]
         xs = np.arange(-npix//2, npix//2) + shift
         YY, XX = np.meshgrid(xs, xs)
         return np.array([XX, YY])
     
     def get_xycoords(self, shift=0.):
+        """
+        returns x_coords, y,_coords
+        """
         return self.pixelscale * self.get_XXYY(shift=shift)
     
-class OpticalSystem(Module):
+class OpticalSystem(eqx.Module):
     """ Optical System class, Equinox Modle
     
     DOCSTRING NOT COMPLETE
@@ -98,16 +68,16 @@ class OpticalSystem(Module):
     """
     layers: list
     detector_layers: list
-    wavels: ndarray
-    positions: ndarray
-    fluxes: ndarray
-    weights: ndarray
-    dithers: ndarray
+    wavels: np.ndarray
+    positions: np.ndarray
+    fluxes: np.ndarray
+    weights: np.ndarray
+    dithers: np.ndarray
     
     # Determined from inputs
-    Nstars:  int = static_field()
-    Nwavels: int = static_field()
-    Nims:    int = static_field()
+    Nstars:  int = eqx.static_field()
+    Nwavels: int = eqx.static_field()
+    Nims:    int = eqx.static_field()
     
     # To Do - add asset conditions to ensure that everything is formatted correctly 
     # To Do - pass in positions for multiple images, ignoring dither (ie multi image)
@@ -124,9 +94,9 @@ class OpticalSystem(Module):
         self.detector_layers = [] if detector_layers is None else detector_layers
         
         # Determined from inputs
-        self.Nstars = len(self.positions)
+        self.Nstars =  len(self.positions)
         self.Nwavels = len(self.wavels)
-        self.Nims = len(self.dithers)
+        self.Nims =    len(self.dithers)
         
         # Format weights
         if wavels is None:
@@ -147,10 +117,12 @@ class OpticalSystem(Module):
         """
         params_dict = {"Wavefront": Wavefront(wavel, offset)}
         intermeds = []
+        layers_applied = []
         for i in range(len(self.layers)):
             params_dict = self.layers[i](params_dict)
             intermeds.append(params_dict)
-        return params_dict["Wavefront"].wf2psf(), intermeds
+            layers_applied.append(self.layers[i].__str__())
+        return params_dict["Wavefront"].wf2psf(), intermeds, layers_applied
             
         
         
@@ -186,13 +158,14 @@ class OpticalSystem(Module):
         psfs = self.weight_psfs(psfs)
         
         # Sum into images and remove empty dims for single image props
-        psf_images = np.squeeze(psfs.sum([1, 2]))
+        # psf_images = np.squeeze(psfs.sum([1, 2]))
+        psf_images = psfs.sum([1, 2])
         
         # Vmap operation over each image
         detector_vmap = vmap(self.apply_detector_layers, in_axes=0)
         images = detector_vmap(psf_images)
         
-        return images
+        return np.squeeze(images)
 
     def propagate_mono(self, wavel, offset=np.zeros(2)):        
         """

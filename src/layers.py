@@ -1,67 +1,30 @@
-from .base import Layer
 import jax.numpy as np
-from jax.numpy import ndarray
-from equinox import static_field
+import equinox as eqx
 from .jaxinterp2d import interp2d
 from .zernike import zernike_basis
 
-__all__ = [
+
+# __all__ = [
     
-    # Optics Layers
-    'CreateWavefront', 'TiltedWavefront', 'CircularAperture', 'Wavefront2PSF', 
-    'NormaliseWavefront', 'AddPhase', 'ApplyOPD', 'ApplyZernike', 'ThinLens', 
+#     # Optics Layers
+#     'CreateWavefront', 'TiltedWavefront', 'CircularAperture', 'Wavefront2PSF', 
+#     'NormaliseWavefront', 'AddPhase', 'ApplyOPD', 'ApplyZernike', 'ThinLens', 
     
-    # Instrument Layers
-   'ApplyPixelResponse',
+#     # Instrument Layers
+#    'ApplyPixelResponse',
     
-    # Generic Layers
-   'Pad', 'Crop', 'MultiplyArray', 'AddScalar', 'AddArray', 
-   'MultiplyScalar', 'Interpolator', 'InvertXY', 'InvertX', 'InvertY'
+#     # Generic Layers
+#    'Pad', 'Crop', 'MultiplyArray', 'AddScalar', 'AddArray', 
+#    'MultiplyScalar', 'Interpolator', 'InvertXY', 'InvertX', 'InvertY'
 
-]
-
-
-
-
-
-
-
-
-""" All Classes in this script inherit from the Layer() base classand must
-define 2 static parameters, size_in and size_out.
-
-Each child class can either be some optical or array operation, transform
-or neural network like operation. Thier __call__() function must be 
-differentiable in order for things to work and follow this formatting:
-
-    def __call__(self, wavelength, wavefront, pixelscale, offset):
-        # Do things
-        return wavefront, pixelscale
-
-wavefront must be input as an array with shape (size_in, size_in) and it 
-must be returned with shape (size_out, size_out).
-
-Parameters
-----------
-size_in: int, equinox.static_field
-    defines the linear size of the input wavefront to the __call__()
-    function
-size_out: int, equinox.static_field
-    defines the linear size of the output wavefront to the __call__()
-    function
-"""
-
-
-
-
-
+# ]
 
 
 ###################################################
 ############## Optical Layers #####################
 ###################################################
 
-class CreateWavefront(Layer):
+class CreateWavefront(eqx.Module):
     """ 
     Initialises an on-axis input wavefront
 
@@ -77,27 +40,35 @@ class CreateWavefront(Layer):
         Width of the array representing the wavefront in physical units
         
     """
-    pixelscale: float = static_field()
+    npix:           int
     wavefront_size: float
+    pixelscale:     float
     
-    def __init__(self, size, wavefront_size):
-        self.size_in = size
-        self.size_out = size
-        self.wavefront_size = wavefront_size
-        self.pixelscale = wavefront_size/size
+    def __init__(self, npix, wavefront_size):
+        self.npix = int(npix)
+        self.wavefront_size = float(wavefront_size)
+        self.pixelscale = float(wavefront_size/npix)
     
-    def __call__(self, dummy_wavefront, wavel, dummy_offset, dummy_pixelscale):
+    def __call__(self, params_dict):
         """
-        pixelscale input is always None - take definition from class property
         
         """
-        npix = self.size_in
-        wavefront = np.ones([npix, npix]) * np.exp(1j * np.zeros([npix, npix]))
-        return wavefront, self.pixelscale
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = np.ones([self.npix, self.npix], dtype=complex)
+        pixelscale = self.pixelscale
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront,  
+                         is_leaf=lambda x: x is None)
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, pixelscale, 
+                         is_leaf=lambda x: x is None)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-class TiltedWavefront(Layer):
+class TiltWavefront(eqx.Module):
     """ 
-    Initialises an input wavefront
+    Tilts an input wavefront
 
     Parameters
     ----------
@@ -111,90 +82,91 @@ class TiltedWavefront(Layer):
         Width of the array representing the wavefront in physical units
         
     """
-    pixelscale: float = static_field()
-    wavefront_size: float
-    _XX: ndarray
-    _YY: ndarray
+    shift: float
     
-    def __init__(self, size, wavefront_size, shift=0.):
-        self.size_in = size
-        self.size_out = size
-        self.wavefront_size = wavefront_size
-        self.pixelscale = wavefront_size/size
-    
-        c = self.size_in//2
-        xs = np.arange(-c, c) + shift # Shift what is the optical axis
-        self._XX, self._YY = self.pixelscale * np.array(np.meshgrid(xs, xs))
-    
-    def __call__(self, dummy_wavefront, wavel, offset, dummy_pixelscale):
+    def __init__(self, shift=0.):
+        self.shift = float(shift)
+        
+    def __call__(self, params_dict):
         """
-        offset: (offset_x, offset_y) - measured in radians deviation from the optical axis
-        pixelscale input is always None - take definition from class property
         
         """
-        xangle, yangle = offset
-        npix = self.size_in
-        tiltphasor = np.exp(-2.0j * np.pi * (self._YY*xangle + self._XX*yangle) / wavel)
-        wavefront = tiltphasor * np.ones([npix, npix]) * np.exp(1j * np.zeros([npix, npix]))
-        return wavefront, self.pixelscale
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+        xangle, yangle = WF.offset
+        
+        # Calc and apply tilt phasor
+        xcoords, ycoords = WF.get_xycoords(shift=self.shift)
+        tiltphasor = np.exp(-2.0j * np.pi * (xcoords*xangle + ycoords*yangle) / wavel)
+        wavefront_out = wavefront * tiltphasor
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-class CircularAperture(Layer):
+class CircularAperture(eqx.Module):
     """
     Multiplies the input wavefront by a pre calculated circular binary mask
     that fills the size of the array
     __call__() is a mirror of MultiplyArray(Layer)
     """
-    array: ndarray = static_field()
-    def __init__(self, size):
-        self.size_in = size
-        self.size_out = size
-        self.array = self._create_aperture(size)
+    npix:  int       
+    array: np.ndarray
     
-    def __call__(self, wavefront, dummy_wavel, dummy_offset, pixelscale):
-        """
+    def __init__(self, npix):
+        self.npix = int(npix)
+        self.array = self.create_aperture(self.npix)
         
-        """
-        wavefront_out = np.multiply(wavefront, self.array)
-        return wavefront_out, pixelscale
-    
-    def _create_aperture(self, npix):
-        """
-        
-        """
+    def create_aperture(self, npix):
         xs = np.arange(-npix//2, npix//2)
         XX, YY = np.meshgrid(xs, xs)
         RR = np.hypot(XX, YY)
         aperture = RR < npix//2
-        return aperture
+        return aperture.astype(float)
     
-    
-class Wavefront2PSF(Layer):
-    """ 
-    Returns the modulus squared of the input wavefront
-    """
-    def __init__(self, size):
-        self.size_in = size
-        self.size_out = size
+    def __call__(self, params_dict):
+        """
         
-    def __call__(self, wavefront, dummy_wavel, dummy_offset, pixelscale):
-        psf = np.abs(wavefront)**2
-        return psf, pixelscale
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        
+        # Multiple by pre-calcauted circular aperture
+        wavefront_out = np.multiply(WF.wavefront, self.array)
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-class NormaliseWavefront(Layer):
+class NormaliseWavefront(eqx.Module):
     """ 
     Normalises the input wavefront
     """
-    def __init__(self, size):
-        self.size_in = size
-        self.size_out = size
-    
-    def __call__(self, wavefront, dummy_wavel, dummy_offset, pixelscale):
+    def __init__(self):
+        pass
+                
+    def __call__(self, params_dict):
+        """
+        
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+
+        # Normalise input wavefront
         norm_factor = np.sqrt(np.sum(np.abs(wavefront)**2))
-        norm_wavefront = wavefront/norm_factor
-        return norm_wavefront, pixelscale
+        wavefront_out = wavefront/norm_factor
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-    
-class ApplyZernike(Layer):
+class ApplyZernike(eqx.Module):
     """
     NEW DOCTRING:
         TO DO
@@ -215,24 +187,28 @@ class ApplyZernike(Layer):
         Array of shape (nterns) of coefficients to be applied to each 
         Zernike term
     """
-    basis: ndarray = static_field()
-    coefficients: ndarray
-    names: list = static_field()
+    npix:  int       
+    names: list      
+    basis: np.ndarray
     
-    def __init__(self, size, coefficients, indexes=None):
-        self.size_in = size
-        self.size_out = size
+    coefficients: np.ndarray
+    
+    def __init__(self, npix, coefficients, indexes=None):
+        self.npix = int(npix)
         self.coefficients = np.array(coefficients)
         
         # Load basis
         indexes = np.arange(len(coefficients)) if indexes is None else indexes
         
+        # Check indexes
         if np.max(indexes) >= 22:
-            raise ValueError("Zernike indexes above 22 not supported")
+            raise ValueError("Zernike indexes above 22 not currently supported")
             
+        # Get full basis
         full_basis = np.array(np.nan_to_num(
-                zernike_basis(nterms=np.max(indexes)+1, npix=size)))
+                zernike_basis(nterms=np.max(indexes)+1, npix=npix)))
         
+        # Get basis
         self.basis = np.array([full_basis[indx] for indx in indexes])
         
         # Names - Helper
@@ -244,81 +220,47 @@ class ApplyZernike(Layer):
                      'Tetrafoil 0', 'Tetrafoil 22.5',
                      '2nd coma X', '2nd coma Y', '3rd Astig X', '3rd Astig Y',
                      'Pentafoil X', 'Pentafoil Y', '5th order spherical']
+        
+        # Load in names
         self.names = [all_names[indx] for indx in indexes]
+
+    def __call__(self, params_dict):
+        """
         
-    def __call__(self, complex_array, wavel, dummy_offset, pixelscale):
-        amplitude = np.abs(complex_array)
-        phase = np.angle(complex_array)
-        zernike_opd = np.dot(self.basis.T, self.coefficients)
-        zernike_phase = self._opd_to_phase(zernike_opd, wavel)
-        phase_out = phase + zernike_phase
-        wavefront_out = amplitude * np.exp(1j*phase_out)
-        return wavefront_out, pixelscale
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+
+        # Get zernike phase
+        zernike_opd = self.get_opd(self.basis, self.coefficients)
+        zernike_phase = self.opd_to_phase(zernike_opd, wavel)
+        
+        # Add phase to wavefront
+        phase_out = np.angle(wavefront) + zernike_phase
+        
+        # Recombine into wavefront
+        wavefront_out = np.abs(wavefront) * np.exp(1j*phase_out)
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-    def _opd_to_phase(self, opd, wavel):
+    def opd_to_phase(self, opd, wavel):
+        """
+        
+        """
         return 2*np.pi*opd/wavel
     
-    def get_total_opd(self):
-        return np.dot(self.basis.T, self.coefficients)
-    
-class ApplyZernikeOld(Layer):
-    """ Old function, will be deleted eventually
-    Adds an array of phase values to the input wavefront calculated from the OPD
-    
-    Currently relies on poppy to import zernikes
-    To Do: 
-     - Check units output from poppy basis 
-     - Check order of terms output by poppy
-     
-    Parameters
-    ----------
-    nterms: int, equinox.static_field
-        The number of zernike terms to apply, ignoring the first two radial
-        terms: Piston, Tip, Tilt
+    def get_opd(self, basis, coefficients):
+        """
         
-    basis: jax.numpy.ndarray, equinox.static_field
-        Arrays holding the pre-calculated zernike basis terms
-        
-    coefficients: jax.numpy.ndarray
-        Array of shape (nterns) of coefficients to be applied to each 
-        Zernike term
-    """
-    nterms: int = static_field()
-    basis: ndarray = static_field()
-    coefficients: ndarray
+        """
+        return np.dot(basis.T, coefficients)
     
-    def __init__(self, size, nterms, coefficients, defocus=True):
-        self.size_in = size
-        self.size_out = size
-        self.nterms = nterms
-        self.coefficients = coefficients
-        
-        # Load basis
-        if defocus:
-            self.basis = np.array(np.nan_to_num(
-                zernike_basis(nterms=nterms+3, npix=size)[3:])).T
-            print("Ignoring Piston Tip Tilt")
-        else:
-            self.basis = np.array(np.nan_to_num(
-                zernike_basis(nterms=nterms+4, npix=size)[4:])).T
-            print("Ignoring Piston Tip Tilt Defocus")
-        
-    def __call__(self, complex_array, wavel, dummy_offset, pixelscale):
-        amplitude = np.abs(complex_array)
-        phase = np.angle(complex_array)
-        zernike_opd = np.dot(self.basis, self.coefficients)
-        zernike_phase = self._opd_to_phase(zernike_opd, wavel)
-        phase_out = phase + zernike_phase
-        wavefront_out = amplitude * np.exp(1j*phase_out)
-        return wavefront_out, pixelscale
-    
-    def _opd_to_phase(self, opd, wavel):
-        return 2*np.pi*opd/wavel
-    
-    def get_total_opd(self):
-        return np.dot(self.basis, self.coefficients)
-    
-class ThinLens(Layer):
+class ThinLens(eqx.Module):
     """
     Applies the thin-lens formula
     To Do:
@@ -335,36 +277,34 @@ class ThinLens(Layer):
         array center
     f: float equinox.static_field
         Units: meters
+        Focal length
     """
-    pixelscale: float = static_field()
-    r_coords: ndarray = static_field()
     f: float
     
-    def __init__(self, size, f, aperture):
-        self.size_in = size
-        self.size_out = size
-        self.f = f
-        self.pixelscale = aperture/size # m/pix ie pixel size (OF THE APERTURE)
-
-        # Check if this matches PSF centering
-        xs = np.arange(0, size) - size//2 
-        XX, YY = np.meshgrid(xs, xs)
-        x_coords = XX * self.pixelscale
-        y_coords = YY * self.pixelscale
-        self.r_coords = np.hypot(x_coords, y_coords)
+    def __init__(self, f):
+        self.f = float(f)
         
-    
-    def __call__(self, wavefront, wavel, dummy_offset, pixelscale):
+    def __call__(self, params_dict):
         """
-        k: Wavenumber
-        f: Focal length (m)
         x/y_coords: spatial coordinate system (m)
         """
-        k = 2*np.pi / wavel
-        wavefront_out = wavefront * np.exp(-0.5j * k * self.r_coords**2 * 1/self.f)
-        return wavefront_out, pixelscale
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+
+        # Apply Thin Lens Equation
+        k = 2*np.pi / wavel # Wavenumber
+        x_coords, y_coords = WF.get_xycoords()
+        r_coords = np.hypot(x_coords, y_coords)
+        wavefront_out = wavefront * np.exp(-0.5j * k * r_coords**2 * 1/self.f)
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-class AddPhase(Layer):
+class AddPhase(eqx.Module):
     """ 
     
     Takes in an array of phase values and adds them to the phase term of the 
@@ -378,22 +318,28 @@ class AddPhase(Layer):
         Units: radians
         Array of phase values to be applied to the input wavefront
     """
-    array: ndarray
-    def __init__(self, size, array):
-        self.size_in = size
-        self.size_out = size
-        self.array = array
-    
-    def __call__(self, complex_array, dummy_wavel, dummy_offset, pixelscale):
+    phase_array: np.ndarray
+    def __init__(self, phase_array):
+        self.phase_array = phase_array
+        
+    def __call__(self, params_dict):
         """
         
         """
-        amplitude = np.abs(complex_array)
-        phase = np.angle(complex_array) + self.array
-        wavefront_out = amplitude * np.exp(1j*phase)
-        return wavefront_out, pixelscale
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+
+        # Add phase to input wavefront
+        phase = np.angle(wavefront) + self.phase_array
+        wavefront_out = np.abs(wavefront) * np.exp(1j*phase)
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-class ApplyOPD(Layer):
+class ApplyOPD(eqx.Module):
     """ 
     
     Takes in an array representing the Optical Path Difference (OPD) and 
@@ -407,30 +353,105 @@ class ApplyOPD(Layer):
         Units: radians
         Array of OPD values to be applied to the input wavefront
     """
-    array: ndarray
-    def __init__(self, size, array):
-        self.size_in = size
-        self.size_out = size
-        self.array = array
-    
-    def __call__(self, complex_array, wavel, dummy_offset, pixelscale):
+    opd_array: np.ndarray
+    def __init__(self, opd_array):
+        self.opd_array = opd_array
+        
+    def __call__(self, params_dict):
         """
         
         """
-        amplitude = np.abs(complex_array)
-        phase = np.angle(complex_array)
-        phase_in = self._opd_to_phase(self.array, wavel)
-        phase_out = phase + phase_in
-        wavefront_out = amplitude * np.exp(1j*phase_out)
-        return wavefront_out, pixelscale
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+
+        # Apply opd phase to input wavefront
+        phase_array = self.opd_to_phase(self.opd_array, wavel)
+        phase = np.angle(wavefront) + phase_array
+        wavefront_out = np.abs(wavefront) * np.exp(1j*phase)
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-    def _opd_to_phase(self, opd, wavel):
+    def opd_to_phase(self, opd, wavel):
         return 2*np.pi*opd/wavel
     
+class Interpolator(eqx.Module):
+    """
+    
+    """
+    npix_out: int
+    pixelscale_out: float
+    
+    def __init__(self, npix_out, pixelscale_out):
+        self.npix_out = int(npix_out)
+        self.pixelscale_out = float(pixelscale_out)
+        
+    def __call__(self, params_dict):
+        """
+        NOTE: Poppy pads all arrays by 2 pixels before interpolating to reduce 
+        edge effects - We will not do that here, chosing instead to have
+        all layers as minimal as possible, and have guidelines around best 
+        practice to get the best results
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+        pixelscale = WF.pixelscale
+
+        # Resample
+        wavefront_out = self.interpolate(
+                                wavefront, 
+                                pixelscale,
+                                self.npix_out,
+                                self.pixelscale_out)
+        
+        # Enforce conservation of energy:
+        pixscale_ratio = pixelscale / self.pixelscale_out
+        wavefront_out *= 1. / pixscale_ratio
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
+
+    def interpolate(self, wf_in, pixscale_in, npix_out, pixscale_out):
+        
+        npix_in = wf_in.shape[0]
+        x_in =  self._make_axis(npix_in,  pixscale_in)
+        y_in =  self._make_axis(npix_in,  pixscale_in)
+        x_out = self._make_axis(npix_out, pixscale_out)
+        y_out = self._make_axis(npix_out, pixscale_out)
+
+        # New Method
+        shape_out = (self.npix_out, self.npix_out)
+        XX_out, YY_out = np.meshgrid(x_out, y_out)
+        
+        # # Real and imag
+        # real = interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in, wavefront.real).reshape(shape_out)
+        # imag = interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in, wavefront.imag).reshape(shape_out)
+        # new_wf = real + 1j * imag
+        
+        # Mag and Phase
+        mag =   interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in,   np.abs(wf_in)).reshape(shape_out)
+        phase = interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in, np.angle(wf_in)).reshape(shape_out)
+        wf_out = mag * np.exp(1j*phase)
+        
+        return wf_out
+
+    def _make_axis(self, npix, step):
+        """ Helper function to make coordinate axis for interpolation """
+        return step * np.arange(-npix // 2, npix // 2, dtype=float)
     
     
     
-class PadToWavel(Layer):
+    
+class PadToWavel(eqx.Module):
     """ 
     To Do
     Implement this as an aleternative to interpolate
@@ -444,41 +465,29 @@ class PadToWavel(Layer):
 
 
 
-
-
-
-
-
-
-
-
 ######################################################
 ############## Instrumental Layers ###################
 ######################################################
     
     
-class ApplyPixelResponse(Layer):
-    pixel_response: ndarray
+class ApplyPixelResponse(eqx.Module):
+    """
     
-    def __init__(self, size, pixel_response):
-        self.size_in = size
-        self.size_out = size
+    """
+    pixel_response: np.ndarray
+    
+    def __init__(self, pixel_response):
+        """
+        
+        """
         self.pixel_response = pixel_response
         
     def __call__(self, image):
+        """
+        
+        """
         image *= self.pixel_response
         return image
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     
@@ -489,180 +498,234 @@ class ApplyPixelResponse(Layer):
 ############## Generic Array Ops #####################
 ######################################################
 
-class Pad(Layer):
-    def __init__(self, size_in, size_out):
-        self.size_in = size_in
-        self.size_out = size_out
-    
-    def __call__(self, wavefront, dummy_wavel, dummy_offset, pixelscale):
-        """
-        Pads the input to the given size
-        Places the array in the center
-        """
-        c, s = self.size_out//2, self.size_in//2
-        padded = np.zeros([self.size_out, self.size_out], dtype=wavefront.dtype)
-        wavefront_out = padded.at[c-s:c+s, c-s:c+s].set(wavefront)
-        return wavefront_out, pixelscale
-    
-class Crop(Layer):
-    
-    def __init__(self, size_in, size_out):
-        self.size_in = size_in
-        self.size_out = size_out
-    
-    def __call__(self, wavefront, dummy_wavel, dummy_offset, pixelscale):
-        """
-        Crops the input to the given size
-        Crops from the center
-        """
-        c, s = self.size_in//2, self.size_out//2
-        wavefront_out = wavefront[c-s:c+s, c-s:c+s]
-        return wavefront_out, pixelscale
-
-class MultiplyArray(Layer):
+class Pad(eqx.Module):
     """
-    Multiplies the input wavefront by an array
-    """
-    array: ndarray
-    def __init__(self, size, array):
-        self.size_in = size
-        self.size_out = size
-        self.array = array
     
-    def __call__(self, wavefront, dummy_wavel, dummy_offset, pixelscale):
-        wavefront_out = np.multiply(wavefront, self.array)
-        return wavefront_out, pixelscale
-
-class AddScalar(Layer):
     """
-    Add a scalar to the input wavefront
-    """
-    value: float
-    def __init__(self, size, value):
-        self.size_in = size
-        self.size_out = size
-        self.value = value
+    npix_in:  int
+    npix_out: int
+    
+    def __init__(self, npix_in, npix_out):
+        self.npix_in = int(npix_in)
+        self.npix_out = int(npix_out)
+    
+    def __call__(self, params_dict):
+        """
         
-    def __call__(self, wavefront, dummy_wavel, dummy_offset, pixelscale):
-        wavefront_out = np.add(wavefront, self.value)
-        return wavefront_out, pixelscale
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
 
-class AddArray(Layer):
-    """
-    Adds an array of values to the input wavefront
-    """
-    array: ndarray
-    def __init__(self, size, array):
-        self.size_in = size
-        self.size_out = size
-        self.array = array
+        # Pad wavefront
+        padded = np.zeros([self.npix_out, self.npix_out], dtype=wavefront.dtype)
+        cen = self.npix_out//2
+        s = self.npix_in//2
+        wavefront_out = padded.at[cen-s:cen+s, cen-s:cen+s].set(wavefront)
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict  
     
-    def __call__(self, wavefront, dummy_wavel, dummy_offset, pixelscale):
-        wavefront_out = np.add(wavefront, self.array)
-        return wavefront_out, pixelscale
+class Crop(eqx.Module):
+    """
     
-class MultiplyScalar(Layer):
+    """
+    npix_in:  int
+    npix_out: int
+    
+    def __init__(self, npix_in, npix_out):
+        self.npix_in = int(npix_in)
+        self.npix_out = int(npix_out)
+    
+    def __call__(self, params_dict):
+        """
+        
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+
+        # Crop wavefront
+        cen = self.npix_in//2
+        s = self.npix_out//2
+        wavefront_out = wavefront[cen-s:cen+s, cen-s:cen+s]
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict  
+
+class MultiplyScalar(eqx.Module):
     """
     Multiplies the input wavefront by a scalar
     """
     value: float
-    def __init__(self, size, value):
-        self.size_in = size
-        self.size_out = size
-        self.value = value
-        
-    def __call__(self, wavefront, dummy_wavel, dummy_offset, pixelscale):
-        wavefront_out = np.multiply(wavefront, self.value)
-        return wavefront_out, pixelscale
     
-class Interpolator(Layer):
-    pixelscale_out: float = static_field()
+    def __init__(self, value):
+        self.value = float(value)
     
-    def __init__(self, size_in, size_out, pixelscale_out):
-        self.size_in = size_in
-        self.size_out = size_out
-        self.pixelscale_out = pixelscale_out
-        
-
-    def __call__(self, wavefront, wavel, dummy_offset, pixelscale):
+    def __call__(self, params_dict):
         """
-        NOTE: Poppy pads all arrays by 2 pixels before interpolating to reduce 
-        edge effects - We will not do that here, chosing instead to have
-        all layers as minimal as possible, and have guidelines around best 
-        practice to get the best results
+        
         """
-        # Resample
-        wavefront = self._interpolate(wavefront, pixelscale)
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
         
-        # enforce conservation of energy:
-        pixscale_ratio = pixelscale / self.pixelscale_out
-        wavefront *= 1. / pixscale_ratio
+        # Multiply by value
+        wavefront_out = WF.wavefront * self.value
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
 
-        return wavefront, self.pixelscale_out
-        
-
-    def _interpolate(self, wavefront, pixelscale_in):
-        x_in = self._make_axis(self.size_in, pixelscale_in)
-        y_in = self._make_axis(self.size_in, pixelscale_in)
-        x_out = self._make_axis(self.size_out, self.pixelscale_out)
-        y_out = self._make_axis(self.size_out, self.pixelscale_out)
-
-        # New Method
-        shape_out = (self.size_out, self.size_out)
-        XX_out, YY_out = np.meshgrid(x_out, y_out)
-        
-        # # Real and imag
-        # real = interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in, wavefront.real).reshape(shape_out)
-        # imag = interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in, wavefront.imag).reshape(shape_out)
-        # new_wf = real + 1j * imag
-        
-        # Mag and Phase
-        mag = interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in, np.abs(wavefront)).reshape(shape_out)
-        phase = interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in, np.angle(wavefront)).reshape(shape_out)
-        new_wf = mag * np.exp(1j*phase)
-        
-        return new_wf
-
-    def _make_axis(self, npix, step):
-        """ Helper function to make coordinate axis for interpolation """
-        return step * np.arange(-npix // 2, npix // 2, dtype=np.float64)
+class MultiplyArray(eqx.Module):
+    """
+    Multiplies the input wavefront by an array
+    """
+    npix:  int       
+    array: np.ndarray
     
-class InvertXY(Layer):
+    def __init__(self, npix, array):
+        self.npix = int(npix)
+        self.array = np.array(array)
+    
+    def __call__(self, params_dict):
+        """
+        
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        
+        # Multiply by array
+        wavefront_out = WF.wavefront * self.array
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
+
+class AddScalar(eqx.Module):
+    """
+    Add a scalar tp the input wavefront
+    """
+    value: float
+    
+    def __init__(self, value):
+        self.value = float(value)
+    
+    def __call__(self, params_dict):
+        """
+        
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        
+        # Multiply by pvalue
+        wavefront_out = WF.wavefront + self.value
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
+
+class AddArray(eqx.Module):
+    """
+    Adds an array of values to the input wavefront
+    """
+    npix:  int       
+    array: np.ndarray
+    
+    def __init__(self, npix, array):
+        self.npix = int(npix)
+        self.array = np.array(array)
+    
+    def __call__(self, params_dict):
+        """
+        
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        
+        # Multiply by pvalue
+        wavefront_out = WF.wavefront + self.array
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
+    
+class InvertXY(eqx.Module):
     """
     Layer for axis invertions
     NOTE: Untested
     """
+    def __init__(self):
+        pass
     
-    def __init__(self, size):
-        self.size_in = size
-        self.size_out = size
+    def __call__(self, params_dict):
+        """
         
-    def __call__(self, array, dummy_wavel, dummy_offset, dummy_pixelscale):
-        return array[::-1, ::-1]
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        
+        # Invert Axis
+        wavefront_out = wavefront[::-1, ::-1]
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-class InvertX(Layer):
+class InvertX(eqx.Module):
     """
     Layer for axis invertions
     NOTE: Untested
     """
+    def __init__(self):
+        pass
     
-    def __init__(self, size):
-        self.size_in = size
-        self.size_out = size
+    def __call__(self, params_dict):
+        """
         
-    def __call__(self, array, dummy_wavel, dummy_offset, dummy_pixelscale):
-        return array[:, ::-1]
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        
+        # Invert Axis
+        wavefront_out = wavefront[:, ::-1]
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
-class InvertY(Layer):
+class InvertY(eqx.Module):
     """
     Layer for axis invertions
     NOTE: Untested
     """
+    def __init__(self):
+        pass
     
-    def __init__(self, size):
-        self.size_in = size
-        self.size_out = size
+    def __call__(self, params_dict):
+        """
         
-    def __call__(self, array, dummy_wavel, dummy_offset, dummy_pixelscale):
-        return array[::-1]
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        
+        # Invert Axis
+        wavefront_out = wavefront[::-1]
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
     
