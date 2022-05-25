@@ -15,8 +15,8 @@ class Wavefront(eqx.Module):
     planetype:  str
     
     def __init__(self, wavel, offset):
-        self.wavel = wavel.astype(float)
-        self.offset = np.array(offset)
+        self.wavel = np.array(wavel).astype(float)
+        self.offset = np.array(offset).astype(float)
         self.planetype = "Pupil"
         self.pixelscale = None
         self.wavefront = None
@@ -66,15 +66,15 @@ class OpticalSystem(eqx.Module):
     use np.squeeze to remove empy axes
     
     """
-    layers: list
+    layers:          list
     detector_layers: list
-    wavels: np.ndarray
-    positions: np.ndarray
-    fluxes: np.ndarray
-    weights: np.ndarray
-    dithers: np.ndarray
+    wavels:          np.ndarray
+    positions:       np.ndarray
+    fluxes:          np.ndarray
+    weights:         np.ndarray
+    dithers:         np.ndarray
     
-    # Determined from inputs
+    # Helpers, Determined from inputs, not real params
     Nstars:  int = eqx.static_field()
     Nwavels: int = eqx.static_field()
     Nims:    int = eqx.static_field()
@@ -85,7 +85,7 @@ class OpticalSystem(eqx.Module):
                        weights=None, dithers=None, detector_layers=None):
         # Required Inputs
         self.layers = layers
-        self.wavels = np.array(wavels)
+        self.wavels = np.array(wavels).astype(float)
         
         # Set to default values
         self.positions = np.zeros(2) if positions is None else np.array(positions)
