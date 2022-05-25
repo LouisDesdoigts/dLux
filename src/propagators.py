@@ -5,14 +5,14 @@ class MFT(eqx.Module):
     """
     Matches poppy but assumes square
     """
-    npix_out:       int
+    npix_out: int = eqx.static_field()
     focal_length:   float
     pixelscale_out: float
     
     def __init__(self, npix_out, focal_length, pixelscale_out):
-        self.npix_out =       int(npix_out)
-        self.focal_length =   float(focal_length)
-        self.pixelscale_out = float(pixelscale_out)
+        self.npix_out = int(npix_out)
+        self.focal_length =   np.array(focal_length).astype(float)
+        self.pixelscale_out = np.array(pixelscale_out).astype(float)
         
     def __call__(self, params_dict):
         """
@@ -37,7 +37,7 @@ class MFT(eqx.Module):
 
         # Calulate Arrays
         dX = 1.0 / float(npup)
-        dU = nlamD / float(npix)
+        dU = nlamD / npix
         
         Xs = (np.arange(npup, dtype=float) - float(npup) / 2.0) * dX
         Us = (np.arange(npix, dtype=float) - float(npix) / 2.0) * dU
@@ -63,14 +63,14 @@ class OffsetMFT(eqx.Module):
     """
     Matches poppy but assumes square
     """
-    npix_out:       int
+    npix_out: int = eqx.static_field()
     focal_length:   float
     pixelscale_out: float
     
     def __init__(self, npix_out, focal_length, pixelscale_out):
-        self.npix_out =       int(npix_out)
-        self.focal_length =   float(focal_length)
-        self.pixelscale_out = float(pixelscale_out)
+        self.npix_out =       np.array(npix_out).astype(int)
+        self.focal_length =   np.array(focal_length).astype(float)
+        self.pixelscale_out = np.array(pixelscale_out).astype(float)
         
     def __call__(self, params_dict):
         """
@@ -131,7 +131,7 @@ class FFT(eqx.Module):
     focal_length: float
     
     def __init__(self, focal_length):
-        self.focal_length = float(focal_length)
+        self.focal_length = np.array(focal_length).astype(float)
         
     def __call__(self, params_dict):
         """
@@ -163,7 +163,7 @@ class IFFT(eqx.Module):
     focal_length: float
     
     def __init__(self, focal_length):
-        self.focal_length = float(focal_length)
+        self.focal_length = np.array(focal_length).astype(float)
         
     def __call__(self, params_dict):
         """
@@ -217,7 +217,7 @@ class FresnelProp(eqx.Module):
         and the effective propagated distance is different too
           -> What about free space propagation?
         """
-        self.prop_dist = prop_dist
+        self.prop_dist = np.array(prop_dist).astype(float)
 
     def __call__(self, params_dict):
         """
