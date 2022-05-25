@@ -3,7 +3,6 @@ import equinox as eqx
 from .jaxinterp2d import interp2d
 from .zernike import zernike_basis
 
-
 # __all__ = [
     
 #     # Optics Layers
@@ -18,6 +17,34 @@ from .zernike import zernike_basis
 #    'MultiplyScalar', 'Interpolator', 'InvertXY', 'InvertX', 'InvertY'
 
 # ]
+
+
+"""
+Layer __call__ functions Template:
+
+    def __call__(self, params_dict):
+    
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        wavel = WF.wavel
+        offset = WF.offset
+        pixelscale = WF.pixelscale
+        planetype = WF.planetype
+
+        # Do things
+
+
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = eqx.tree_at(lambda WF: WF.offset,     WF, offset)
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, pixelscale)
+        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, planetype)
+        params_dict["Wavefront"] = WF
+        return params_dict
+
+"""
+
 
 
 ###################################################
@@ -40,14 +67,14 @@ class CreateWavefront(eqx.Module):
         Width of the array representing the wavefront in physical units
         
     """
-    npix:           int
+    npix:           int = eqx.static_field()
     wavefront_size: float
     pixelscale:     float
     
     def __init__(self, npix, wavefront_size):
         self.npix = int(npix)
-        self.wavefront_size = float(wavefront_size)
-        self.pixelscale = float(wavefront_size/npix)
+        self.wavefront_size = np.array(wavefront_size).astype(float)
+        self.pixelscale = np.array(wavefront_size/npix).astype(float)
     
     def __call__(self, params_dict):
         """
@@ -85,7 +112,7 @@ class TiltWavefront(eqx.Module):
     shift: float
     
     def __init__(self, shift=0.):
-        self.shift = float(shift)
+        self.shift = np.array(shift).astype(float)
         
     def __call__(self, params_dict):
         """
@@ -113,7 +140,7 @@ class CircularAperture(eqx.Module):
     that fills the size of the array
     __call__() is a mirror of MultiplyArray(Layer)
     """
-    npix:  int       
+    npix:  int = eqx.static_field()
     array: np.ndarray
     
     def __init__(self, npix):
@@ -187,10 +214,9 @@ class ApplyZernike(eqx.Module):
         Array of shape (nterns) of coefficients to be applied to each 
         Zernike term
     """
-    npix:  int       
-    names: list      
-    basis: np.ndarray
-    
+    npix: int = eqx.static_field()
+    names: list 
+    basis: np.ndarray 
     coefficients: np.ndarray
     
     def __init__(self, npix, coefficients, indexes=None):
@@ -206,7 +232,7 @@ class ApplyZernike(eqx.Module):
             
         # Get full basis
         full_basis = np.array(np.nan_to_num(
-                zernike_basis(nterms=np.max(indexes)+1, npix=npix)))
+                zernike_basis(nterms=np.max(indexes)+1, npix=int(npix))))
         
         # Get basis
         self.basis = np.array([full_basis[indx] for indx in indexes])
@@ -282,7 +308,7 @@ class ThinLens(eqx.Module):
     f: float
     
     def __init__(self, f):
-        self.f = float(f)
+        self.f = np.array(f).astype(float)
         
     def __call__(self, params_dict):
         """
@@ -318,9 +344,12 @@ class AddPhase(eqx.Module):
         Units: radians
         Array of phase values to be applied to the input wavefront
     """
+    npix: int = eqx.static_field()
     phase_array: np.ndarray
+    
     def __init__(self, phase_array):
-        self.phase_array = phase_array
+        self.phase_array = np.array(phase_array)
+        self.npix = phase_array.shape[0]
         
     def __call__(self, params_dict):
         """
@@ -353,9 +382,12 @@ class ApplyOPD(eqx.Module):
         Units: radians
         Array of OPD values to be applied to the input wavefront
     """
+    npix: int = eqx.static_field()
     opd_array: np.ndarray
+    
     def __init__(self, opd_array):
-        self.opd_array = opd_array
+        self.opd_array = np.array(opd_array)
+        self.npix = opd_array.shape[0]
         
     def __call__(self, params_dict):
         """
@@ -383,12 +415,12 @@ class Interpolator(eqx.Module):
     """
     
     """
-    npix_out: int
+    npix_out: int = eqx.static_field()
     pixelscale_out: float
     
     def __init__(self, npix_out, pixelscale_out):
         self.npix_out = int(npix_out)
-        self.pixelscale_out = float(pixelscale_out)
+        self.pixelscale_out = np.array(pixelscale_out).astype(float)
         
     def __call__(self, params_dict):
         """
@@ -402,7 +434,7 @@ class Interpolator(eqx.Module):
         wavefront = WF.wavefront
         wavel = WF.wavel
         pixelscale = WF.pixelscale
-
+        
         # Resample
         wavefront_out = self.interpolate(
                                 wavefront, 
@@ -480,7 +512,7 @@ class ApplyPixelResponse(eqx.Module):
         """
         
         """
-        self.pixel_response = pixel_response
+        self.pixel_response = np.array(pixel_response)
         
     def __call__(self, image):
         """
@@ -502,11 +534,11 @@ class Pad(eqx.Module):
     """
     
     """
-    npix_in:  int
-    npix_out: int
+    npix_in:  int = eqx.static_field()
+    npix_out: int = eqx.static_field()
     
     def __init__(self, npix_in, npix_out):
-        self.npix_in = int(npix_in)
+        self.npix_in =  int(npix_in)
         self.npix_out = int(npix_out)
     
     def __call__(self, params_dict):
@@ -532,11 +564,11 @@ class Crop(eqx.Module):
     """
     
     """
-    npix_in:  int
-    npix_out: int
+    npix_in:  int = eqx.static_field()
+    npix_out: int = eqx.static_field()
     
     def __init__(self, npix_in, npix_out):
-        self.npix_in = int(npix_in)
+        self.npix_in =  int(npix_in)
         self.npix_out = int(npix_out)
     
     def __call__(self, params_dict):
@@ -564,7 +596,7 @@ class MultiplyScalar(eqx.Module):
     value: float
     
     def __init__(self, value):
-        self.value = float(value)
+        self.value = np.array(value).astype(float)
     
     def __call__(self, params_dict):
         """
@@ -585,13 +617,13 @@ class MultiplyArray(eqx.Module):
     """
     Multiplies the input wavefront by an array
     """
-    npix:  int       
+    npix: int = eqx.static_field()
     array: np.ndarray
     
-    def __init__(self, npix, array):
-        self.npix = int(npix)
+    def __init__(self, array):
         self.array = np.array(array)
-    
+        self.npix = array.shape
+        
     def __call__(self, params_dict):
         """
         
@@ -614,7 +646,7 @@ class AddScalar(eqx.Module):
     value: float
     
     def __init__(self, value):
-        self.value = float(value)
+        self.value = np.array(value).astype(float)
     
     def __call__(self, params_dict):
         """
@@ -635,12 +667,12 @@ class AddArray(eqx.Module):
     """
     Adds an array of values to the input wavefront
     """
-    npix:  int       
+    npix: int = eqx.static_field()
     array: np.ndarray
     
-    def __init__(self, npix, array):
-        self.npix = int(npix)
+    def __init__(self, array):
         self.array = np.array(array)
+        self.npix = array.shape[0]
     
     def __call__(self, params_dict):
         """
