@@ -1,6 +1,6 @@
 import jax.numpy as np
 import equinox as eqx
-from .jaxinterp2d import interp2d
+from jax.scipy.ndimage import map_coordinates
 from .zernike import zernike_basis
 
 # __all__ = [
@@ -403,18 +403,14 @@ class Interpolator(eqx.Module):
         
         # Get coords arrays
         npix_in = wavefront.shape[0]
-        xs_in = pixelscale * np.arange(-npix_in//2, npix_in//2, dtype=float)
-        xs_out = np.arange(-self.npix_out//2, self.npix_out//2, dtype=float)
+        ratio = self.pixelscale_out/pixelscale
+        shift = (npix_in - ratio*self.npix_out)/2
+        xs = ratio*(np.arange(self.npix_out)) + shift
+        coords = np.meshgrid(xs, xs)
         
-        XX, YY = np.meshgrid(xs_out, xs_out)
-        XX_out = (self.pixelscale_out * XX).flatten()
-        YY_out = (self.pixelscale_out * YY).flatten()
-        
-        # Interp Mag and Phase
-        mag = interp2d(XX_out, YY_out, xs_in, xs_in, 
-                    np.abs(wavefront)).reshape([self.npix_out, self.npix_out])
-        phase = interp2d(XX_out, YY_out, xs_in, xs_in, 
-                 np.angle(wavefront)).reshape([self.npix_out, self.npix_out])
+        # Interp mag and phase
+        mag   = map_coordinates(np.abs(wavefront),   coords, order=1)
+        phase = map_coordinates(np.angle(wavefront), coords, order=1)
         
         # Recombine
         wavefront_out = mag * np.exp(1j*phase)
@@ -428,6 +424,8 @@ class Interpolator(eqx.Module):
         WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
         params_dict["Wavefront"] = WF
         return params_dict
+    
+
     
     
     
