@@ -1,6 +1,7 @@
 import jax.numpy as np
 from jax import vmap
 import equinox as eqx
+from copy import deepcopy
 
 __all__ = ['Wavefront', 'OpticalSystem']
         
@@ -120,7 +121,7 @@ class OpticalSystem(eqx.Module):
         layers_applied = []
         for i in range(len(self.layers)):
             params_dict = self.layers[i](params_dict)
-            intermeds.append(params_dict)
+            intermeds.append(deepcopy(params_dict))
             layers_applied.append(self.layers[i].__str__())
         return params_dict["Wavefront"].wf2psf(), intermeds, layers_applied
             
