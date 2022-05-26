@@ -382,7 +382,7 @@ class ApplyOPD(eqx.Module):
     def opd_to_phase(self, opd, wavel):
         return 2*np.pi*opd/wavel
     
-class Interpolator(eqx.Module):
+class InterpReIm(eqx.Module):
     """
     Note this has strange behvaiour with hessian calcuations (gives nans)
     """
@@ -413,13 +413,57 @@ class Interpolator(eqx.Module):
         YY, XX = np.meshgrid(xs, xs)
         coords = np.array([XX, YY])
         
+        # Interp real and imag
+        re = map_coordinates(wavefront.real, coords, order=1, mode='nearest')
+        im = map_coordinates(wavefront.imag, coords, order=1, mode='nearest')
+        wavefront_out = re + 1j*im
+        
+        # Enforce conservation of energy:
+        pixscale_ratio = pixelscale / self.pixelscale_out
+        wavefront_out *= 1. / pixscale_ratio
+        
+        # Update Wavefront Object
+        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
+        params_dict["Wavefront"] = WF
+        return params_dict
+    
+class InterpAmPh(eqx.Module):
+    """
+    Note this has strange behvaiour with hessian calcuations (gives nans)
+    """
+    npix_out: int = eqx.static_field()
+    pixelscale_out: float
+    
+    def __init__(self, npix_out, pixelscale_out):
+        self.npix_out = int(npix_out)
+        self.pixelscale_out = np.array(pixelscale_out).astype(float)
+
+    def __call__(self, params_dict):
+        """
+        NOTE: Poppy pads all arrays by 2 pixels before interpolating to reduce 
+        edge effects - We will not do that here, chosing instead to have
+        all layers as minimal as possible, and have guidelines around best 
+        practice to get the best results
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        wavefront = WF.wavefront
+        pixelscale = WF.pixelscale
+        
+        # Get coords arrays
+        npix_in = wavefront.shape[0]
+        ratio = self.pixelscale_out/pixelscale
+        shift = (npix_in - ratio*self.npix_out)/2
+        xs = ratio*(np.arange(self.npix_out)) + shift
+        YY, XX = np.meshgrid(xs, xs)
+        coords = np.array([XX, YY])
+
         # Interp mag and phase
         mag   = map_coordinates(np.abs(wavefront),   coords, order=1)
         phase = map_coordinates(np.angle(wavefront), coords, order=1)
-        
-        # Recombine
         wavefront_out = mag * np.exp(1j*phase)
-        
+
         # Enforce conservation of energy:
         pixscale_ratio = pixelscale / self.pixelscale_out
         wavefront_out *= 1. / pixscale_ratio
