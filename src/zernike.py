@@ -38,8 +38,7 @@ def zernike_basis(nterms=15, npix=512, rho=None, theta=None, **kwargs):
     else:
         shape = (npix, npix)
         use_polar = False
-
-    zern_output = np.zeros((nterms,) + shape)
+    zern_output = np.zeros([nterms, npix, npix])
 
     if use_polar:
         for j in range(nterms):
@@ -94,7 +93,8 @@ def noll_indices(j):
     # This seems semi-complicated to me...
 
     # figure out which row of the triangle we're in (easy):
-    n = int(np.ceil((-1 + np.sqrt(1 + 8 * j)) / 2) - 1)
+    # n = int(np.ceil((-1 + np.sqrt(1 + 8 * j)) / 2) - 1)
+    n = (np.ceil((-1 + np.sqrt(1 + 8 * j)) / 2) - 1).astype(int)
     if n == 0:
         m = 0
     else:
@@ -119,8 +119,6 @@ def noll_indices(j):
             row_m.append(row_m[-1])
 
         m = row_m[resid] * sign
-
-    # _log.debug("J=%d:\t(n=%d, m=%d)" % (j, n, m))
     return n, m
 
 def zernike(n, m, npix=100, rho=None, theta=None, outside=np.nan,
@@ -174,10 +172,6 @@ def zernike(n, m, npix=100, rho=None, theta=None, outside=np.nan,
     """
     if not n >= m:
         raise ValueError("Zernike index m must be >= index n")
-    # if (n - m) % 2 != 0:
-    #     _log.warning("Radial polynomial is zero for these inputs: m={}, n={} "
-    #               "(are you sure you wanted this Zernike?)".format(m, n))
-    # _log.debug("Zernike(n=%d, m=%d)" % (n, m))
 
     if theta is None and rho is None:
         x = (np.arange(npix, dtype=np.float64) - (npix - 1) / 2.) / ((npix - 1) / 2.)
@@ -207,8 +201,6 @@ def zernike(n, m, npix=100, rho=None, theta=None, outside=np.nan,
     else:
         norm_coeff = np.sqrt(2) * np.sqrt(n + 1) if noll_normalize else 1
         zernike_result = norm_coeff * R(n, m, rho) * np.sin(np.abs(m) * theta) * aperture
-
-    # zernike_result[(rho > 1)] = outside
     zernike_result = zernike_result.at[(rho > 1)].set(outside)
     
     return zernike_result
