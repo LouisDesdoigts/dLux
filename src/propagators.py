@@ -66,11 +66,13 @@ class OffsetMFT(eqx.Module):
     npix_out: int = eqx.static_field()
     focal_length:   float
     pixelscale_out: float
+    _offset: float
     
-    def __init__(self, npix_out, focal_length, pixelscale_out):
-        self.npix_out =       np.array(npix_out).astype(int)
+    def __init__(self, npix_out, focal_length, pixelscale_out, offset=0.5):
+        self.npix_out = int(npix_out)
         self.focal_length =   np.array(focal_length).astype(float)
         self.pixelscale_out = np.array(pixelscale_out).astype(float)
+        self._offset = float(offset)
         
     def __call__(self, params_dict):
         """
@@ -101,10 +103,10 @@ class OffsetMFT(eqx.Module):
         dY = 1.0 / float(npup)
         dV = nlamD / float(npix)
         
-        Xs = (np.arange(npup, dtype=float) - float(npup) / 2.0 + offsetX) * dX
-        Ys = (np.arange(npup, dtype=float) - float(npup) / 2.0 + offsetY) * dY
-        Us = (np.arange(npix, dtype=float) - float(npix) / 2.0 + offsetX) * dU
-        Vs = (np.arange(npix, dtype=float) - float(npix) / 2.0 + offsetY) * dV
+        Xs = (np.arange(npup, dtype=float) - float(npup) / 2.0 + offsetX + self._offset) * dX
+        Ys = (np.arange(npup, dtype=float) - float(npup) / 2.0 + offsetY + self._offset) * dY
+        Us = (np.arange(npix, dtype=float) - float(npix) / 2.0 + offsetX + self._offset) * dU
+        Vs = (np.arange(npix, dtype=float) - float(npix) / 2.0 + offsetY + self._offset) * dV
         
         XU = np.outer(Xs, Us)
         YV = np.outer(Ys, Vs)
