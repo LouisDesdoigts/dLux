@@ -136,9 +136,11 @@ class TiltWavefront(eqx.Module):
     
 class CircularAperture(eqx.Module):
     """
-    Multiplies the input wavefront by a pre calculated circular binary mask
-    that fills the size of the array
-    __call__() is a mirror of MultiplyArray(Layer)
+    Multiplies the input wavefront by a pre calculated circular binary 
+    (float) mask that fills the size of the array
+    
+    Note there is a known bug where gradients become nan if phase operations
+    are applied after this layer
     """
     npix:  int = eqx.static_field()
     array: np.ndarray
@@ -146,12 +148,14 @@ class CircularAperture(eqx.Module):
     def __init__(self, npix):
         self.npix = int(npix)
         self.array = self.create_aperture(self.npix)
-        
+
+    
     def create_aperture(self, npix):
-        xs = np.arange(-npix//2, npix//2)
-        XX, YY = np.meshgrid(xs, xs)
-        RR = np.hypot(XX, YY)
-        aperture = RR < npix//2
+        c = (npix - 1) / 2.
+        xs = (np.arange(npix, dtype=np.float64) - c) / c
+        xx, yy = np.meshgrid(xs, xs)
+        rr = np.sqrt(xx ** 2 + yy ** 2)
+        aperture = (rr <= 1).astype(float)
         return aperture.astype(float)
     
     def __call__(self, params_dict):
@@ -380,7 +384,7 @@ class ApplyOPD(eqx.Module):
     
 class Interpolator(eqx.Module):
     """
-    
+    Note this has strange behvaiour with hessian calcuations (gives nans)
     """
     npix_out: int = eqx.static_field()
     pixelscale_out: float
