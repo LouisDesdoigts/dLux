@@ -193,7 +193,7 @@ class NormaliseWavefront(eqx.Module):
         params_dict["Wavefront"] = WF
         return params_dict
     
-class ApplyZernike(eqx.Module):
+class ApplyBasisOPD(eqx.Module):
     """
     NEW DOCTRING:
         TO DO
@@ -208,47 +208,20 @@ class ApplyZernike(eqx.Module):
         terms: Piston, Tip, Tilt
         
     basis: jax.numpy.ndarray, equinox.static_field
-        Arrays holding the pre-calculated zernike basis terms
+        Arrays holding the pre-calculated basis terms
         
     coefficients: jax.numpy.ndarray
         Array of shape (nterns) of coefficients to be applied to each 
         Zernike term
     """
     npix: int = eqx.static_field()
-    names: list = eqx.static_field()
-    basis: np.ndarray = eqx.static_field()
+    basis: np.ndarray
     coefficients: np.ndarray
     
-    def __init__(self, npix, coefficients, indexes=None):
-        self.npix = int(npix)
+    def __init__(self, basis, coefficients):
+        self.basis = np.array(basis)
+        self.npix = self.basis.shape[-1]
         self.coefficients = np.array(coefficients)
-        
-        # Load basis
-        indexes = np.arange(len(coefficients)) if indexes is None else indexes
-        
-        # Check indexes
-        if np.max(indexes) >= 22:
-            raise ValueError("Zernike indexes above 22 not currently supported")
-            
-        # Get full basis
-        full_basis = np.array(np.nan_to_num(
-                zernike_basis(nterms=np.max(indexes)+1, npix=int(npix))))
-        
-        # Get basis
-        self.basis = np.array([full_basis[indx] for indx in indexes])
-        
-        # Names - Helper
-        all_names = ['Piston', 'Tilt X', 'Tilt Y',
-                     'Focus', 'Astigmatism 45', 'Astigmatism 0',
-                     'Coma Y', 'Coma X',
-                     'Trefoil Y', 'Trefoil X',
-                     'Spherical', '2nd Astig 0', '2nd Astig 45',
-                     'Tetrafoil 0', 'Tetrafoil 22.5',
-                     '2nd coma X', '2nd coma Y', '3rd Astig X', '3rd Astig Y',
-                     'Pentafoil X', 'Pentafoil Y', '5th order spherical']
-        
-        # Load in names
-        self.names = [all_names[indx] for indx in indexes]
 
     def __call__(self, params_dict):
         """
@@ -259,12 +232,12 @@ class ApplyZernike(eqx.Module):
         wavefront = WF.wavefront
         wavel = WF.wavel
 
-        # Get zernike phase
-        zernike_opd = self.get_opd(self.basis, self.coefficients)
-        zernike_phase = self.opd_to_phase(zernike_opd, wavel)
+        # Get basis phase
+        opd = self.get_opd(self.basis, self.coefficients)
+        phase = self.opd_to_phase(opd, wavel)
         
         # Add phase to wavefront
-        phase_out = np.angle(wavefront) + zernike_phase
+        phase_out = np.angle(wavefront) + phase
         
         # Recombine into wavefront
         wavefront_out = np.abs(wavefront) * np.exp(1j*phase_out)
@@ -275,15 +248,9 @@ class ApplyZernike(eqx.Module):
         return params_dict
     
     def opd_to_phase(self, opd, wavel):
-        """
-        
-        """
         return 2*np.pi*opd/wavel
     
     def get_opd(self, basis, coefficients):
-        """
-        
-        """
         return np.dot(basis.T, coefficients)
     
 class ThinLens(eqx.Module):
@@ -421,7 +388,7 @@ class Interpolator(eqx.Module):
     def __init__(self, npix_out, pixelscale_out):
         self.npix_out = int(npix_out)
         self.pixelscale_out = np.array(pixelscale_out).astype(float)
-        
+
     def __call__(self, params_dict):
         """
         NOTE: Poppy pads all arrays by 2 pixels before interpolating to reduce 
@@ -432,15 +399,25 @@ class Interpolator(eqx.Module):
         # Get relevant parameters
         WF = params_dict["Wavefront"]
         wavefront = WF.wavefront
-        wavel = WF.wavel
         pixelscale = WF.pixelscale
         
-        # Resample
-        wavefront_out = self.interpolate(
-                                wavefront, 
-                                pixelscale,
-                                self.npix_out,
-                                self.pixelscale_out)
+        # Get coords arrays
+        npix_in = wavefront.shape[0]
+        xs_in = pixelscale * np.arange(-npix_in//2, npix_in//2, dtype=float)
+        xs_out = np.arange(-self.npix_out//2, self.npix_out//2, dtype=float)
+        
+        XX, YY = np.meshgrid(xs_out, xs_out)
+        XX_out = (self.pixelscale_out * XX).flatten()
+        YY_out = (self.pixelscale_out * YY).flatten()
+        
+        # Interp Mag and Phase
+        mag = interp2d(XX_out, YY_out, xs_in, xs_in, 
+                    np.abs(wavefront)).reshape([self.npix_out, self.npix_out])
+        phase = interp2d(XX_out, YY_out, xs_in, xs_in, 
+                 np.angle(wavefront)).reshape([self.npix_out, self.npix_out])
+        
+        # Recombine
+        wavefront_out = mag * np.exp(1j*phase)
         
         # Enforce conservation of energy:
         pixscale_ratio = pixelscale / self.pixelscale_out
@@ -451,34 +428,6 @@ class Interpolator(eqx.Module):
         WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
         params_dict["Wavefront"] = WF
         return params_dict
-
-    def interpolate(self, wf_in, pixscale_in, npix_out, pixscale_out):
-        
-        npix_in = wf_in.shape[0]
-        x_in =  self._make_axis(npix_in,  pixscale_in)
-        y_in =  self._make_axis(npix_in,  pixscale_in)
-        x_out = self._make_axis(npix_out, pixscale_out)
-        y_out = self._make_axis(npix_out, pixscale_out)
-
-        # New Method
-        shape_out = (self.npix_out, self.npix_out)
-        XX_out, YY_out = np.meshgrid(x_out, y_out)
-        
-        # # Real and imag
-        # real = interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in, wavefront.real).reshape(shape_out)
-        # imag = interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in, wavefront.imag).reshape(shape_out)
-        # new_wf = real + 1j * imag
-        
-        # Mag and Phase
-        mag =   interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in,   np.abs(wf_in)).reshape(shape_out)
-        phase = interp2d(XX_out.flatten(), YY_out.flatten(), x_in, y_in, np.angle(wf_in)).reshape(shape_out)
-        wf_out = mag * np.exp(1j*phase)
-        
-        return wf_out
-
-    def _make_axis(self, npix, step):
-        """ Helper function to make coordinate axis for interpolation """
-        return step * np.arange(-npix // 2, npix // 2, dtype=float)
     
     
     
@@ -622,7 +571,7 @@ class MultiplyArray(eqx.Module):
     
     def __init__(self, array):
         self.array = np.array(array)
-        self.npix = array.shape
+        self.npix = array.shape[0]
         
     def __call__(self, params_dict):
         """
