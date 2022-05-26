@@ -215,8 +215,8 @@ class ApplyZernike(eqx.Module):
         Zernike term
     """
     npix: int = eqx.static_field()
-    names: list 
-    basis: np.ndarray 
+    names: list = eqx.static_field()
+    basis: np.ndarray = eqx.static_field()
     coefficients: np.ndarray
     
     def __init__(self, npix, coefficients, indexes=None):
