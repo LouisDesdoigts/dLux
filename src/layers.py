@@ -145,9 +145,9 @@ class CircularAperture(eqx.Module):
     npix:  int = eqx.static_field()
     array: np.ndarray
     
-    def __init__(self, npix):
+    def __init__(self, npix, eps=1e-12):
         self.npix = int(npix)
-        self.array = self.create_aperture(self.npix)
+        self.array = self.create_aperture(self.npix) + eps
 
     
     def create_aperture(self, npix):
@@ -410,7 +410,8 @@ class Interpolator(eqx.Module):
         ratio = self.pixelscale_out/pixelscale
         shift = (npix_in - ratio*self.npix_out)/2
         xs = ratio*(np.arange(self.npix_out)) + shift
-        coords = np.meshgrid(xs, xs)
+        YY, XX = np.meshgrid(xs, xs)
+        coords = np.array([XX, YY])
         
         # Interp mag and phase
         mag   = map_coordinates(np.abs(wavefront),   coords, order=1)
