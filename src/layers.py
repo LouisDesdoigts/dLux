@@ -257,6 +257,9 @@ class ApplyBasisOPD(eqx.Module):
     def get_opd(self, basis, coefficients):
         return np.dot(basis.T, coefficients)
     
+    def get_total_opd(self):
+        return self.get_opd(self.basis, self.coefficients)
+    
 class ThinLens(eqx.Module):
     """
     Applies the thin-lens formula
