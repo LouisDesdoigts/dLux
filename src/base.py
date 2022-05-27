@@ -96,8 +96,8 @@ class OpticalSystem(eqx.Module):
         
         # Determined from inputs
         self.Nstars =  len(self.positions)
-        self.Nwavels = len(self.wavels)
         self.Nims =    len(self.dithers)
+        self.Nwavels = 0 if wavels is None else len(self.wavels)
         
         # Format weights
         if wavels is None:
