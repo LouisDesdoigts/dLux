@@ -1,5 +1,5 @@
 
-$\partial$Lux  Docs
+∂Lux  Docs
 
 ---
 
@@ -33,11 +33,11 @@ We are currently building examples and documentation! We currently have two tutr
 
 ## The Basics
 
-The goal of $\partial$Lux is to revolutionalise the way in which optical modelling is approached. We believe that the mathematical symmetry betweeen neural networks and optical systems means that the current state of optical modelling is stuck in the old ways, and that differentiable optical models that harness the power of automatic differention is imperative to pushing the bounds of what is possible. 
+The goal of ∂Lux is to revolutionalise the way in which optical modelling is approached. We believe that the mathematical symmetry betweeen neural networks and optical systems means that the current state of optical modelling is stuck in the old ways, and that differentiable optical models that harness the power of automatic differention is imperative to pushing the bounds of what is possible. 
 
 For the uninitiated, automatic differentaion (auto-diff) is the mathematical tool that underpins the revolution in machine learning. The power of auto-diff ultimately lies in its ability to divorce the time it takes to optimise a model from the number of parameters being optimised in that model. This represents a *fundamental paradigm shift* in the way in which problems can be approached. Much time and effort has been focused in the past on making problems in optical modelling computationally tracatable, forcing compromises on what is learnt. This is no longer the case, directly optimising physics-based forwards models with millions of parameters is not only possible, but practical without requiring vast computation power. 
 
-We have built $\partial$Lux using Jax - googles numpy-like auto-diff library and Equinox. Together these two packages allow us to build an optical simulator that takes full advantage of the bleeding edge of computer science. For example each individual PSF calcualtion is natively performed in parallel across however many computational resources are available without any work from the end-user. Similarly these models can be compiled at run time into XLA without. 
+We have built ∂Lux using Jax - googles numpy-like auto-diff library and Equinox. Together these two packages allow us to build an optical simulator that takes full advantage of the bleeding edge of computer science. For example each individual PSF calcualtion is natively performed in parallel across however many computational resources are available without any work from the end-user. Similarly these models can be compiled at run time into XLA without. 
 
 TBC...
 
@@ -46,9 +46,9 @@ TBC...
 
 ## Package Overview
 
-$\partial$Lux has been built to be as simple and easy as possible for end-users, without abstracting them away from the underlying computations. 
+∂Lux has been built to be as simple and easy as possible for end-users, without abstracting them away from the underlying computations. 
 
-There are two main types of classes that form the foundation of $\partial$Lux, the `OpticalSystem()` and the layers. In order to construct a model of an optical system one simply defines the series of operations/transforms that is performed on the input wavefront in a list, which is passed as an argument to the `OpticalSystem()` class. Each transformation or operation is a single 'layer' in that list. For a very simple optical a typical list of layers would look something like this:
+There are two main types of classes that form the foundation of ∂Lux, the `OpticalSystem()` and the layers. In order to construct a model of an optical system one simply defines the series of operations/transforms that is performed on the input wavefront in a list, which is passed as an argument to the `OpticalSystem()` class. Each transformation or operation is a single 'layer' in that list. For a very simple optical a typical list of layers would look something like this:
 
 ```
 layers = [
