@@ -35,7 +35,7 @@ class Wavefront(eqx.Module):
         YY, XX = np.meshgrid(xs, xs)
         return np.array([XX, YY])
     
-    def get_xycoords(self, shift=0.):
+    def get_xycoords(self, shift=0.5):
         """
         returns x_coords, y,_coords
         """
@@ -67,18 +67,20 @@ class OpticalSystem(eqx.Module):
     use np.squeeze to remove empy axes
     
     """
-    layers:          list
-    detector_layers: list
+    # Helpers, Determined from inputs, not real params
+    Nstars:  int# = eqx.static_field()
+    Nwavels: int# = eqx.static_field()
+    Nims:    int# = eqx.static_field()
+    
     wavels:          np.ndarray
     positions:       np.ndarray
     fluxes:          np.ndarray
     weights:         np.ndarray
     dithers:         np.ndarray
+    layers:          list
+    detector_layers: list
     
-    # Helpers, Determined from inputs, not real params
-    Nstars:  int = eqx.static_field()
-    Nwavels: int = eqx.static_field()
-    Nims:    int = eqx.static_field()
+
     
     # To Do - add asset conditions to ensure that everything is formatted correctly 
     # To Do - pass in positions for multiple images, ignoring dither (ie multi image)
