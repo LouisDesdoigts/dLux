@@ -260,50 +260,6 @@ class ApplyBasisOPD(eqx.Module):
     def get_total_opd(self):
         return self.get_opd(self.basis, self.coefficients)
     
-# class ThinLens(eqx.Module):
-#     """
-#     Applies the thin-lens formula
-#     To Do:
-#     Check if the center of r_coords is on the corner or center of a pixel
-    
-#     Parameters
-#     ----------
-#     pixelscale: float equinox.static_field
-#         Units: meters/pixel
-#         The pixelscae of each array between each layer operation
-#         Its value is automatically calculated from the input values
-#     r_coords: jax.numpy.ndarray equinox.static_field
-#         Pre-calcualted array defining the physical radial distance from the
-#         array center
-#     f: float equinox.static_field
-#         Units: meters
-#         Focal length
-#     """
-#     f: float
-    
-#     def __init__(self, f):
-#         self.f = np.array(f).astype(float)
-        
-#     def __call__(self, params_dict):
-#         """
-#         x/y_coords: spatial coordinate system (m)
-#         """
-#         # Get relevant parameters
-#         WF = params_dict["Wavefront"]
-#         wavefront = WF.wavefront
-#         wavel = WF.wavel
-
-#         # Apply Thin Lens Equation
-#         k = 2*np.pi / wavel # Wavenumber
-#         x_coords, y_coords = WF.get_xycoords()
-#         r_coords = np.hypot(x_coords, y_coords)
-#         wavefront_out = wavefront * np.exp(-0.5j * k * r_coords**2 * 1/self.f)
-
-#         # Update Wavefront Object
-#         WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
-#         params_dict["Wavefront"] = WF
-#         return params_dict
-    
 class AddPhase(eqx.Module):
     """ 
     
