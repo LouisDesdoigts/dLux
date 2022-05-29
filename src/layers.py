@@ -125,7 +125,7 @@ class TiltWavefront(eqx.Module):
         xangle, yangle = WF.offset
         
         # Calc and apply tilt phasor
-        xcoords, ycoords = WF.get_xycoords(shift=self.shift)
+        xcoords, ycoords = WF.get_xycoords()
         tiltphasor = np.exp(-2.0j * np.pi * (xcoords*xangle + ycoords*yangle) / wavel)
         wavefront_out = wavefront * tiltphasor
         
