@@ -27,7 +27,7 @@ class MFT(eqx.Module):
         wavefront = WF.wavefront
         wavel = WF.wavel
         pixelscale = WF.pixelscale
-        offset = WF.offset if self.tilt_wf is False else np.array([0, 0])
+        offset = WF.offset if self.tilt_wf else np.array([0., 0.])
         
         # Calculate NlamD parameter (Do on Wavefront class??)
         npup = wavefront.shape[0] 
@@ -48,10 +48,10 @@ class MFT(eqx.Module):
         dV = nlamD / float(npix)
         
         # Generate arrays
-        Xs = (np.arange(npup, dtype=float) - float(npup) / 2.0 + offsetX) * dX
-        Ys = (np.arange(npup, dtype=float) - float(npup) / 2.0 + offsetY) * dY
-        Us = (np.arange(npix, dtype=float) - float(npix) / 2.0 + offsetX) * dU
-        Vs = (np.arange(npix, dtype=float) - float(npix) / 2.0 + offsetY) * dV
+        Xs = (np.arange(npup, dtype=float) - float(npup)/2 + offsetX + 0.5) * dX
+        Ys = (np.arange(npup, dtype=float) - float(npup)/2 + offsetY + 0.5) * dY
+        Us = (np.arange(npix, dtype=float) - float(npix)/2 + offsetX + 0.5) * dU
+        Vs = (np.arange(npix, dtype=float) - float(npix)/2 + offsetY + 0.5) * dV
         XU = np.outer(Xs, Us)
         YV = np.outer(Ys, Vs)
 
