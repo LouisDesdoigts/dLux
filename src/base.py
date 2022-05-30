@@ -41,7 +41,6 @@ class Wavefront(eqx.Module):
         """
         return self.pixelscale * self.get_XXYY(shift=shift)
     
-from jax import vmap
 class OpticalSystem(eqx.Module):
     """ Optical System class, Equinox Modle
     
@@ -91,7 +90,7 @@ class OpticalSystem(eqx.Module):
         
         # Set to default values
         self.positions = np.zeros([1, 2]) if positions is None else np.array(positions)
-        self.fluxes = np.ones(1) if fluxes is None else np.array([np.squeeze(fluxes)])
+        self.fluxes = np.ones(1) if fluxes is None else np.array(fluxes)
         self.weights = np.ones(1) if weights is None else np.array(weights)
         self.dithers = np.zeros([1, 2]) if dithers is None else dithers
         self.detector_layers = [] if detector_layers is None else detector_layers
@@ -105,8 +104,9 @@ class OpticalSystem(eqx.Module):
         assert self.positions.shape[-1] == 2, """Input positions must be 
         of shape (Nstars, 2)"""
         
-        assert len(self.fluxes) == self.Nstars, """Input fluxes must be
-        match input positions."""
+        if isinstance(self.fluxes, np.ndarray):
+            assert len(self.fluxes) == self.Nstars, """Input fluxes must be
+            match input positions."""
         
         weight_shape = self.weights.shape
         if len(weight_shape) == 1 and weights is not None:
