@@ -90,10 +90,15 @@ class OpticalSystem(eqx.Module):
         
         # Set to default values
         self.positions = np.zeros([1, 2]) if positions is None else np.array(positions)
+        
         self.fluxes = np.ones(1) if fluxes is None else np.array(fluxes)
+        
         self.weights = np.ones(1) if weights is None else np.array(weights)
         self.dithers = np.zeros([1, 2]) if dithers is None else dithers
         self.detector_layers = [] if detector_layers is None else detector_layers
+        
+        if self.fluxes.shape == ():
+            self.fluxes = np.array([self.fluxes])
         
         # Determined from inputs
         self.Nstars =  len(self.positions)
@@ -104,9 +109,8 @@ class OpticalSystem(eqx.Module):
         assert self.positions.shape[-1] == 2, """Input positions must be 
         of shape (Nstars, 2)"""
         
-        if isinstance(self.fluxes, np.ndarray):
-            assert len(self.fluxes) == self.Nstars, """Input fluxes must be
-            match input positions."""
+        assert self.fluxes.shape[0] == self.Nstars, """Input fluxes must be
+        match input positions."""
         
         weight_shape = self.weights.shape
         if len(weight_shape) == 1 and weights is not None:
@@ -224,7 +228,11 @@ class OpticalSystem(eqx.Module):
             weights_in = self.weights
         
         # Format Fluxes
-        fluxes = self.fluxes.reshape([1, Nstars, 1, 1, 1])
+        if len(self.fluxes) == 1:
+            fluxes = self.fluxes
+        else:
+            fluxes = self.fluxes.reshape([1, Nstars, 1, 1, 1])
+        
         
         # Apply weights and fluxus
         psfs *= weights_in
