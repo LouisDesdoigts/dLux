@@ -41,6 +41,7 @@ class Wavefront(eqx.Module):
         """
         return self.pixelscale * self.get_XXYY(shift=shift)
     
+from jax import vmap
 class OpticalSystem(eqx.Module):
     """ Optical System class, Equinox Modle
     
@@ -68,9 +69,9 @@ class OpticalSystem(eqx.Module):
     
     """
     # Helpers, Determined from inputs, not real params
-    Nstars:  int# = eqx.static_field()
-    Nwavels: int# = eqx.static_field()
-    Nims:    int# = eqx.static_field()
+    Nstars:  int
+    Nwavels: int
+    Nims:    int
     
     wavels:          np.ndarray
     positions:       np.ndarray
@@ -79,8 +80,6 @@ class OpticalSystem(eqx.Module):
     dithers:         np.ndarray
     layers:          list
     detector_layers: list
-    
-
     
     # To Do - add asset conditions to ensure that everything is formatted correctly 
     # To Do - pass in positions for multiple images, ignoring dither (ie multi image)
@@ -92,7 +91,8 @@ class OpticalSystem(eqx.Module):
         
         # Set to default values
         self.positions = np.zeros([1, 2]) if positions is None else np.array(positions)
-        self.fluxes = np.ones(1) if fluxes is None else np.array(fluxes)
+        self.fluxes = np.ones(1) if fluxes is None else np.array([np.squeeze(fluxes)])
+        self.weights = np.ones(1) if weights is None else np.array(weights)
         self.dithers = np.zeros([1, 2]) if dithers is None else dithers
         self.detector_layers = [] if detector_layers is None else detector_layers
         
@@ -101,18 +101,22 @@ class OpticalSystem(eqx.Module):
         self.Nims =    len(self.dithers)
         self.Nwavels = 0 if wavels is None else len(self.wavels)
         
-        # Format weights
-        if wavels is None:
-            self.weights = np.ones([1, 1, 1, 1, 1])
-        elif weights is None:
-            # Each star has the same uniform spectrum
-            self.weights = np.ones([1, 1, len(wavels), 1, 1])
-        elif len(weights.shape) == 1:
-            # Each star has the same non-uniform spectrum
-            self.weights = np.expand_dims(weights, axis=(-1, 0, 1, 3))
-        else:
-            # Each star has a different non-uniform spectrum
-            self.weights = np.expand_dims(weights, axis=(-2, -1, 0))
+        # Check Input shapes
+        assert self.positions.shape[-1] == 2, """Input positions must be 
+        of shape (Nstars, 2)"""
+        
+        assert len(self.fluxes) == self.Nstars, """Input fluxes must be
+        match input positions."""
+        
+        weight_shape = self.weights.shape
+        if len(weight_shape) == 1 and weights is not None:
+            assert weight_shape[0] == self.Nwavels, """Inputs weights shape 
+            must be either (len(wavels)) or  (len(positions), len(wavels)), 
+            got shape: {}""".format(self.weights.shape)
+        elif len(weight_shape) == 2:
+            assert weight_shape == [self.Nstars, self.Nwavels], """Inputs 
+            weights shape must be either (len(wavels)) or  (len(positions), 
+            len(wavels))"""
 
     def debug_prop(self, wavel, offset=np.zeros(2)):        
         """
@@ -146,27 +150,24 @@ class OpticalSystem(eqx.Module):
         # Mapping over wavelengths
         propagate_single = vmap(self.propagate_mono, in_axes=(0, None))
         
-        # Then over the positions for each image
-        # Mapping over the stars in a single image first (zeroth axis of positions)
-        propagate_multi = vmap(propagate_single, in_axes=(None, 0))
-        
-        # Mapping over each image (first axis of positions)
-        propagator = vmap(propagate_multi, in_axes=(None, 1))
+        # Then over the positions 
+        propagator = vmap(propagate_single, in_axes=(None, 0))
 
-        # Generate positions 
-        dithered_positions = self.dither_positions(self.dithers, self.positions)
+        # Generate input positions vector
+        dithered_positions = self.dither_positions()
         
-        # Calc PSFs and apply weights/fluxes
+        # Calculate PSFs
         psfs = propagator(self.wavels, dithered_positions)
-        psfs = self.weight_psfs(psfs)
         
-        # Sum into images and remove empty dims for single image props
-        # psf_images = np.squeeze(psfs.sum([1, 2]))
-        psf_images = psfs.sum([1, 2])
+        # Reshape output into images
+        psfs = self.reshape_psfs(psfs)
+        
+        # Weight PSFs and sum into images
+        psfs = self.weight_psfs(psfs).sum([1, 2])
         
         # Vmap operation over each image
         detector_vmap = vmap(self.apply_detector_layers, in_axes=0)
-        images = detector_vmap(psf_images)
+        images = detector_vmap(psfs)
         
         return np.squeeze(images)
 
@@ -179,19 +180,23 @@ class OpticalSystem(eqx.Module):
             params_dict = self.layers[i](params_dict)
         return params_dict["Wavefront"].wf2psf()
     
-    def dither_positions(self, dithers, positions):
+    def reshape_psfs(self, psfs):
         """
-        Function to do an outer sum becuase it is more flexible than
-        Formatting array shapes and using +
-        Turns out I might actually be learning something!
-        Output shape: (Nstars, Ndithers, 2)
         
-        # dithered_positions = self.positions() + self.dithers.T # Outer sum operation
-        # dithered_positions = self.positions + np.expand_dims(self.dithers, axis=(1))
         """
-        outer = vmap(vmap(lambda a, b: a + b, in_axes=(0, None)), in_axes=(None, 0))
-        dithered_positions = outer(dithers, positions) 
+        npix = psfs.shape[-1]
+        return psfs.reshape([self.Nims, self.Nstars, self.Nwavels, npix, npix])
+    
+    def dither_positions(self):
+        """
+        Dithers the input positions, returned with shape (Npsfs, 2)
+        """
+        Npsfs = self.Nstars * self.Nims
+        shaped_pos = self.positions.reshape([1, self.Nstars, 2])
+        shaped_dith = self.dithers.reshape([self.Nims, 1, 2])
+        dithered_positions = (shaped_pos + shaped_dith).reshape([Npsfs, 2])
         return dithered_positions
+    
     
     def weight_psfs(self, psfs):
         """
@@ -200,17 +205,32 @@ class OpticalSystem(eqx.Module):
         We want weights shape: (1, 1, Nwavels, 1, 1)
         We want fluxes shape: (1, Nstars, 1, 1, 1)
         """
-        # Normliase along each stellar wavelength
-        weights_in = self.weights / np.expand_dims(self.weights.sum(2), axis=2)   
+        # Get values
+        Nims = self.Nims
+        Nstars = self.Nstars
+        Nwavels = self.Nwavels
         
-        # Expand dimension of Fluxes to match PSFs shape
-        fluxes_in = np.expand_dims(self.fluxes, axis=(0, -1, -2, -3)) # Expand to correct dims
+        # Format and normalise weights
+        if len(self.weights.shape) == 3:
+            weights_in = self.weights.reshape([Nims, Nstars, Nwavels, 1, 1])
+            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
+        elif len(self.weights.shape) == 2:
+            weights_in = self.weights.reshape([1, Nstars, Nwavels, 1, 1])
+            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
+        elif self.weights.shape[0] == self.Nwavels:
+            weights_in = self.weights.reshape([1, 1, Nwavels, 1, 1])
+            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
+        else:
+            weights_in = self.weights
         
-        # Apply weights and fluxes
+        # Format Fluxes
+        fluxes = self.fluxes.reshape([1, Nstars, 1, 1, 1])
+        
+        # Apply weights and fluxus
         psfs *= weights_in
-        psfs *= fluxes_in
-        
+        psfs *= fluxes
         return psfs
+        
         
     def propagate_single(self, wavels, offset=np.zeros(2), weights=1.):
         """
