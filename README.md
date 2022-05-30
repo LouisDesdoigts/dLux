@@ -25,7 +25,7 @@ To install from source: clone this git repo, enter the directory, and run
 
 ## Use
 
-We are currently building examples and documentation! We currently have two tutrial notebooks, showing the basics of how to optimise simple and more complex models [here](https://github.com/LouisDesdoigts/dLux/tree/main/notebooks). Please note that this software is still under development and so is subject to change!
+We are currently building examples and [documentation!](https://louisdesdoigts.github.io/dLux/) We currently have two tutrial notebooks, showing the basics of how to optimise simple and more complex models [here](https://github.com/LouisDesdoigts/dLux/tree/main/notebooks). Please note that this software is still under development and so is subject to change!
 
 ## History
 
