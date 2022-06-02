@@ -32,7 +32,8 @@ class Wavefront(eqx.Module):
         """
         npix = self.wavefront.shape[0]
         xs = np.arange(-npix//2, npix//2) + shift
-        YY, XX = np.meshgrid(xs, xs)
+        # YY, XX = np.meshgrid(xs, xs)
+        XX, YY = np.meshgrid(xs, xs)
         return np.array([XX, YY])
     
     def get_xycoords(self, shift=0.5):
@@ -91,7 +92,7 @@ class OpticalSystem(eqx.Module):
         # Set to default values
         self.positions = np.zeros([1, 2]) if positions is None else np.array(positions)
         
-        self.fluxes = np.ones(1) if fluxes is None else np.array(fluxes)
+        self.fluxes = np.ones(len(self.positions)) if fluxes is None else np.array(fluxes)
         
         self.weights = np.ones(1) if weights is None else np.array(weights)
         self.dithers = np.zeros([1, 2]) if dithers is None else dithers
