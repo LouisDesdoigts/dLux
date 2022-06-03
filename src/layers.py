@@ -214,18 +214,19 @@ class ApplyBasisOPD(eqx.Module):
     basis: jax.numpy.ndarray, equinox.static_field
         Arrays holding the pre-calculated basis terms
         
-    coefficients: jax.numpy.ndarray
+    coeffs: jax.numpy.ndarray
         Array of shape (nterns) of coefficients to be applied to each 
         Zernike term
     """
     npix: int = eqx.static_field()
     basis: np.ndarray
-    coefficients: np.ndarray
+    coeffs: np.ndarray
     
-    def __init__(self, basis, coefficients):
+    def __init__(self, basis, coeffs=None):
         self.basis = np.array(basis)
         self.npix = self.basis.shape[-1]
-        self.coefficients = np.array(coefficients)
+        self.coeffs = np.zeros(len(self.basis)) if coeffs is None \
+                 else np.array(coeffs).astype(float)
 
     def __call__(self, params_dict):
         """
@@ -237,7 +238,7 @@ class ApplyBasisOPD(eqx.Module):
         wavel = WF.wavel
 
         # Get basis phase
-        opd = self.get_opd(self.basis, self.coefficients)
+        opd = self.get_opd(self.basis, self.coeffs)
         phase = self.opd_to_phase(opd, wavel)
         
         # Add phase to wavefront
@@ -254,11 +255,11 @@ class ApplyBasisOPD(eqx.Module):
     def opd_to_phase(self, opd, wavel):
         return 2*np.pi*opd/wavel
     
-    def get_opd(self, basis, coefficients):
-        return np.dot(basis.T, coefficients)
+    def get_opd(self, basis, coeffs):
+        return np.dot(basis.T, coeffs)
     
     def get_total_opd(self):
-        return self.get_opd(self.basis, self.coefficients)
+        return self.get_opd(self.basis, self.coeffs)
     
 class AddPhase(eqx.Module):
     """ 
