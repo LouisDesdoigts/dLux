@@ -82,7 +82,8 @@ class CreateWavefront(eqx.Module):
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]
-        wavefront = np.ones([self.npix, self.npix], dtype=complex)
+        # wavefront = np.ones([self.npix, self.npix], dtype=complex)
+        wavefront = 1 + 1j*np.ones([self.npix, self.npix])
         pixelscale = self.pixelscale
         
         # Update Wavefront Object
