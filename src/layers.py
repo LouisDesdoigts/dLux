@@ -433,22 +433,6 @@ class InterpAmPh(eqx.Module):
         WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
         params_dict["Wavefront"] = WF
         return params_dict
-    
-
-    
-    
-    
-    
-class PadToWavel(eqx.Module):
-    """ 
-    To Do
-    Implement this as an aleternative to interpolate
-     -> How to do this with static array sizes since size out depends on wavel?
-     -> Probably not possible
-    
-    Possibly pre-calculate array sizes and store than in osys object?
-    """
-    pass
 
 
 
@@ -476,6 +460,50 @@ class ApplyPixelResponse(eqx.Module):
         """
         image *= self.pixel_response
         return image
+    
+class ApplyJitter(eqx.Module):
+    """
+    Convolves the output image with a gaussian kernal
+    """
+    kernel_size: int
+    sigma: float
+    
+    def __init__(self, sigma, kernel_size=25):
+        self.kernel_size = int(kernel_size)
+        self.sigma = np.array(sigma).astype(float)
+        
+    def __call__(self, image):
+        """
+        
+        """
+        # Generate distribution
+        x = np.linspace(-10, 10, self.kernel_size)
+        window = jax.scipy.stats.norm.pdf(x,          scale=self.sigma) * \
+                 jax.scipy.stats.norm.pdf(x[:, None], scale=self.sigma)
+        
+        # Normalise
+        window /= np.sum(window)
+        
+        # Convolve with image
+        image_out = jax.scipy.signal.convolve(image, window, mode='same')
+        return image_out
+    
+class ApplySaturation(eqx.Module):
+    """
+    Reduces any values above self.saturation to self.saturation
+    """
+    saturation: float
+    
+    def __init__(self, saturation):
+        self.saturation = np.array(saturation).astype(float)
+        
+    def __call__(self, image):
+        """
+        
+        """
+        # Apply saturation
+        image_out = np.minimum(image, self.saturation)
+        return image_out
     
     
     
@@ -717,3 +745,13 @@ class InvertY(eqx.Module):
         params_dict["Wavefront"] = WF
         return params_dict
     
+
+    
+# class PadToWavel(eqx.Module):
+#     """ 
+#     To Do
+#     Implement this 
+#     Possibly force fixed wavelength and pre-calc array sizes
+#     Possibly pre-calculate array sizes and store than in osys object?
+#     """
+#     pass
