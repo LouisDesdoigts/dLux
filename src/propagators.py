@@ -29,7 +29,7 @@ class MFT(eqx.Module):
         pixelscale = WF.pixelscale
         offset = WF.offset if self.tilt_wf else np.array([0., 0.])
         
-        # Calculate NlamD parameter (Do on Wavefront class??)
+        # Calculate NlamD parameter (Do in Wavefront class??)
         npup = wavefront.shape[0] 
         npix = self.npix_out
         
@@ -38,14 +38,14 @@ class MFT(eqx.Module):
         
         # wavel_scale =  wf_size_in * npix * pixel_rad
         wavel_scale = det_size * wf_size_in / self.focal_length
-        nlamD = wavel_scale / wavel
+        num_fringe = wavel_scale / wavel
         
         # Calulate values
         offsetX, offsetY = offset * self.focal_length / self.pixelscale_out
         dX = 1.0 / float(npup)
         dY = 1.0 / float(npup)
-        dU = nlamD / float(npix)
-        dV = nlamD / float(npix)
+        dU = num_fringe / float(npix)
+        dV = num_fringe / float(npix)
         
         # Generate arrays
         Xs = (np.arange(npup, dtype=float) - float(npup)/2 + offsetX + 0.5) * dX
@@ -63,7 +63,8 @@ class MFT(eqx.Module):
         wavefront = np.dot(t1, expXU)
 
         # Normalise wavefront
-        norm_coeff = np.sqrt((nlamD**2) / (npup**2 * npix**2))         
+        # norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2))
+        norm_coeff = np.exp(np.log(num_fringe) - (np.log(npup) + np.log(npix)))
         wavefront_out = wavefront * norm_coeff
         
         # Update Wavefront Object
@@ -151,6 +152,8 @@ class FresnelProp(eqx.Module):
     def __call__(self, params_dict):
         """
         Propagates Fresnel
+        
+        Note: Normalisation calcuated in the Far-Field
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]
@@ -217,7 +220,8 @@ class FresnelProp(eqx.Module):
         expXU = np.exp(-2.0 * np.pi * 1j * XU)
 
         # Note: Can casue overflow issues on 32-bit
-        norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2)) 
+        # norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2))
+        norm_coeff = np.exp(np.log(num_fringe) - (np.log(npup) + np.log(npix)))
 
         # Perform MFT
         t1 = np.dot(expXU.T, wavefront)
