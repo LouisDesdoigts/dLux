@@ -174,7 +174,7 @@ def zernike(n, m, npix=100, rho=None, theta=None, outside=np.nan,
         raise ValueError("Zernike index m must be >= index n")
 
     if theta is None and rho is None:
-        x = (np.arange(npix, dtype=np.float64) - (npix - 1) / 2.) / ((npix - 1) / 2.)
+        x = (np.arange(npix) - (npix - 1) / 2.) / ((npix - 1) / 2.)
         y = x
         xx, yy = np.meshgrid(x, y)
 
