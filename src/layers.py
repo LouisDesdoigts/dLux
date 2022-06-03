@@ -146,17 +146,16 @@ class CircularAperture(eqx.Module):
     npix:  int = eqx.static_field()
     array: np.ndarray
     
-    def __init__(self, npix, eps=1e-12):
+    def __init__(self, npix, rmin=0., rmax=1., eps=1e-8):
         self.npix = int(npix)
-        self.array = self.create_aperture(self.npix) + eps
-
+        self.array = self.create_aperture(self.npix, rmin=rmin, rmax=rmax) + eps
     
-    def create_aperture(self, npix):
+    def create_aperture(self, npix, rmin=0., rmax=1.):        
         c = (npix - 1) / 2.
-        xs = (np.arange(npix, dtype=np.float64) - c) / c
-        xx, yy = np.meshgrid(xs, xs)
-        rr = np.sqrt(xx ** 2 + yy ** 2)
-        aperture = (rr <= 1).astype(float)
+        xs = (np.arange(npix) - c) / c
+        XX, YY = np.meshgrid(xs, xs)
+        RR = np.sqrt(XX ** 2 + YY ** 2)
+        aperture = np.logical_and(RR <= rmax, RR > rmin).astype(float)
         return aperture.astype(float)
     
     def __call__(self, params_dict):
