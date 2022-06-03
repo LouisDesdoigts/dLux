@@ -1,7 +1,7 @@
 import jax
 import jax.numpy as np
 import equinox as eqx
-# from jax.scipy.ndimage import map_coordinates
+from jax.scipy.ndimage import map_coordinates
 # from .zernike import zernike_basis
 
 # __all__ = [
