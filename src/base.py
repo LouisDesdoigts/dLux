@@ -86,15 +86,15 @@ class OpticalSystem(eqx.Module):
     # To Do - pass in positions for multiple images, ignoring dither (ie multi image)
     def __init__(self, layers, wavels=None, positions=None, fluxes=None, 
                        weights=None, dithers=None, detector_layers=None):
+        
         # Required Inputs
         self.layers = layers
         self.wavels = np.array(wavels).astype(float)
         
         # Set to default values
+        
         self.positions = np.zeros([1, 2]) if positions is None else np.array(positions)
-        
         self.fluxes = np.ones(len(self.positions)) if fluxes is None else np.array(fluxes)
-        
         self.weights = np.ones(1) if weights is None else np.array(weights)
         self.dithers = np.zeros([1, 2]) if dithers is None else dithers
         self.detector_layers = [] if detector_layers is None else detector_layers
