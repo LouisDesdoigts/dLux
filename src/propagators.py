@@ -24,12 +24,14 @@ class MFT(eqx.Module):
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]
-        wavefront = WF.wavefront
+        
+        # Convert 
+        wavefront = WF.amplitude * np.exp(1j * WF.phase)
         wavel = WF.wavel
         pixelscale = WF.pixelscale
         offset = WF.offset if self.tilt_wf else np.array([0., 0.])
         
-        # Calculate NlamD parameter (Do in Wavefront class??)
+        # Calculate NlamD parameter (Do in __init__?)
         npup = wavefront.shape[0] 
         npix = self.npix_out
         
@@ -68,7 +70,7 @@ class MFT(eqx.Module):
         wavefront_out = wavefront * norm_coeff
         
         # Update Wavefront Object
-        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = WF.update_phasor(np.abs(wavefront_out), np.angle(wavefront_out))
         WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
         WF = eqx.tree_at(lambda WF: WF.planetype,  WF, "Focal")
         params_dict["Wavefront"] = WF
@@ -76,7 +78,8 @@ class MFT(eqx.Module):
 
 class FFT(eqx.Module):
     """
-    
+    Note: FFT's natively center the zero frequency on a pixel center, basically
+    fuck FFTs MFT 4 lyf
     """
     focal_length: float
     inverse: bool
@@ -91,7 +94,7 @@ class FFT(eqx.Module):
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]
-        wavefront = WF.wavefront
+        wavefront = WF.amplitude * np.exp(1j * WF.phase)
         wavel = WF.wavel
         pixelscale = WF.pixelscale
 
@@ -106,7 +109,7 @@ class FFT(eqx.Module):
         pixelscale_out = wavel * self.focal_length / (pixelscale * npix_in)
 
         # Update Wavefront Object
-        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = WF.update_phasor(np.abs(wavefront_out), np.angle(wavefront_out))
         WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, pixelscale_out)
         WF = eqx.tree_at(lambda WF: WF.planetype,  WF, "Focal")
         params_dict["Wavefront"] = WF
@@ -157,7 +160,7 @@ class FresnelProp(eqx.Module):
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]
-        wavefront = WF.wavefront
+        wavefront = WF.amplitude * np.exp(1j * WF.phase)
         wavel = WF.wavel
         pixelscale = WF.pixelscale
 
@@ -196,7 +199,7 @@ class FresnelProp(eqx.Module):
         wavefront_out = rho2 * wavefront
 
         # Update Wavefront Object
-        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
+        WF = WF.update_phasor(np.abs(wavefront_out), np.angle(wavefront_out))
         WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
         WF = eqx.tree_at(lambda WF: WF.planetype,  WF, None)
         params_dict["Wavefront"] = WF
