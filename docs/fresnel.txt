@@ -1,3 +1,18 @@
 Here I am going to write the spec for the GaussianWavefront class 
 once I have understood how the mathematics behind the science works;
 that is the primary goal of today.
+
+Ok, so first things first, I need to work out what the inputs and the 
+outputs are and write a paragraph that describes full behaviour of the 
+class. I can then apply textual analysis to my description to start 
+working out what the required behaviours are. Next step is to write the 
+spec formally. I need to check with @Louis Desdoigts if we are writing 
+the doc's as a html or markdown.
+
+I think if I can have a spec by midday I would be very pleased although
+it might just be the goal for today. I still need to finsih reviewing 
+chapter 11 of Hetch and then the material on the intermediate Fresnel 
+in Shanon. I should also just implement some Poppy models using the 
+intermediate Fresnel stuff and this can be repurposed as tests.
+
+ 
