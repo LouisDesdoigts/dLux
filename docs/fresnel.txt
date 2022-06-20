@@ -1,0 +1,3 @@
+Here I am going to write the spec for the GaussianWavefront class 
+once I have understood how the mathematics behind the science works;
+that is the primary goal of today.
