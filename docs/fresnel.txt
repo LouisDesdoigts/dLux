@@ -19,3 +19,9 @@ intermediate Fresnel stuff and this can be repurposed as tests.
 #### Fresnel 
 Propagation of optical disturbances between optical elements at a finite 
 distance. 
+===============================================================================
+
+So my goal for the day was probably a little ambitious as I am still studing 
+the much more basic Fourier optics stuff, having not got as far as to 
+understand MFT or DFT for today, I still have 1 hour ish so I guess that 
+I will just keep tanking on with the reading. 
