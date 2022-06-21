@@ -15,4 +15,7 @@ chapter 11 of Hetch and then the material on the intermediate Fresnel
 in Shanon. I should also just implement some Poppy models using the 
 intermediate Fresnel stuff and this can be repurposed as tests.
 
- 
+===============================================================================
+#### Fresnel 
+Propagation of optical disturbances between optical elements at a finite 
+distance. 
