@@ -3,10 +3,13 @@ import jax
 import jax.numpy as numpy
 import equinox
 import typing
+import functools
 
 # Type annotations
 Array = numpy.array
 Float64 = numpy.float64
+Integer = numpy.int32
+Boolean = numpy.bool_
 Wavefront = dLux.PhysicalWavefront
 FresnelWavefront = typing.NewType("FresnelWavefront", Wavefront)
 
@@ -26,7 +29,13 @@ class FresnelWavefront(dLux.PhysicalWavefront):
     Rayleigh distance. Propagation is based on two different regimes 
     for a total of four different opertations. 
     """
-    rayleigh_distance: Float64
+    # Dunder attributes
+    __slots__ = ("INDEX_GENERATOR", "position")
+
+    # Constants
+    INDEX_GENERATOR = numpy.array([1, 2], dtype=Integer)
+
+    # Variables 
     phase_radius: Float64
     beam_radius: Array
     position: Float64
@@ -57,6 +66,7 @@ class FresnelWavefront(dLux.PhysicalWavefront):
         # self.phase_radius = phase_radius(beam_radius, wavelength) 
 
 
+    @functools.cached_property
     def rayleigh_distance(self: FresnelWavefront) -> None:
         """
         Calculates the rayleigh distance $z_{R}$ of the Gaussian beam.
@@ -195,65 +205,78 @@ class FresnelWavefront(dLux.PhysicalWavefront):
         """
 
 
-    def outside_to_outside(self: FresnelWavefront, start: Float64, 
-            finish: Float64) -> None:
+    def outside_to_outside(self: FresnelWavefront, distance: Float64) -> None:
         """
         Propagation from outside the Rayleigh range to another 
         position outside the Rayleigh range. 
 
         Parameters
         ----------
-        start : Float64
-            The initial position of the wavefront in metres.
-        finish : Float64
-            The final position of the wavefront in metres.
+        distance : Float64
+            The distance to propagate in metres.
         """
 
 
-    def outside_to_inside(self: FresnelWavefront, start: Float64,
-            finish: Float64) -> None:
+    def outside_to_inside(self: FresnelWavefront, distance: Float64) -> None:
         """
         Propagation from outside the Rayleigh range to inside the 
         rayleigh range. 
 
         Parameters
         ----------
-        start : Float64
-            The initial position of the wavefront in metres.
-        finish : Float64
-            The final position of the wavefront in metres.
+        distance : Float64
+            The distance to propagate in metres.
         """
 
 
-    def inside_to_inside(self: FresnelWavefront, start: Float64,
-            finish: Float64) -> None:
+    def inside_to_inside(self: FresnelWavefront, distance: Float64) -> None:
         """
         Propagation from inside the Rayleigh range to inside the 
         rayleigh range. 
 
         Parameters
         ----------
-        start : Float64
-            The initial position of the wavefront in metres.
-        finish : Float64
-            The final position of the wavefront in metres.
+        distance : Float64
+            The distance to propagate in metres.
         """
 
 
-    def inside_to_outside(self: FresnelWavefront, start: Float64,
-            finish: Float64) -> None:
+    def inside_to_outside(self: FresnelWavefront, distance: Float64) -> None:
         """
         Propagation from inside the Rayleigh range to outside the 
         rayleigh range. 
 
         Parameters
         ----------
-        start : Float64
-            The initial position of the wavefront in metres.
-        finish : Float64
-            The final position of the wavefront in metres.
+        distance : Float64
+            The distance to propagate in metres.
         """
+        self.waist_to_spherical(self.position + distance - \
+            self.location_of_waist()) * planar_to_planar(
+            self.location_of_waist() - self.position)
 
+
+    @functools.partial(jax.vmap, in_axis=(None, 0))
+    def is_inside(self: FresnelWavefront, distance: Float64) -> Boolean:
+        """ 
+        Determines whether a point at along the axis of propagation 
+        at distance away from the current position is inside the 
+        rayleigh distance. 
+
+        Parameters
+        ----------
+        distance : Float64
+            The distance to test in metres.
+
+        Returns
+        -------
+        : Boolean
+            true if the point is within the rayleigh distance false 
+            otherwise.
+        """
+        return Float(numpy.abs(self.position + distance - \
+            self.location_of_waist()) <= self.rayleigh_distance())
+        
 
     def propagate(self: FresnelWavefront, distance: Float64) -> None:
         """
@@ -266,9 +289,25 @@ class FresnelWavefront(dLux.PhysicalWavefront):
         distance : Float64
             The distance to propagate in metres.
         """
-        is_current_position_inside = numpy.abs(self.position - self.rayleigh_distance())
-        is_
-        
+        # This works by considering the current position and distnace 
+        # as a boolean array. The INDEX_GENERATOR converts this to 
+        # and index according to the following table.
+        #
+        # sum((0, 0) * (1, 2)) == 0
+        # sum((1, 0) * (1, 2)) == 1
+        # sum((0, 1) * (1, 2)) == 2
+        # sum((1, 1) * (1, 2)) == 3
+        #
+        # TODO: Test if a simple lookup is faster. 
+        decision_vector = self.is_inside(Float64([0., distance]))
+        decision_index = numpy.sum(self.INDEX_GENERATOR * descision_vector)
+ 
+        # Enters the correct function differentiably depending on 
+        # the descision.
+        jax.lax.switch(decision_index, 
+            [self.inside_to_inside, self.inside_to_outside,
+            self.outside_to_inside, self.outside_to_outside],
+            distance)
 
 
     
