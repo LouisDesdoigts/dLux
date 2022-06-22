@@ -2,6 +2,12 @@ import dLux
 import jax 
 import jax.numpy as numpy
 import equinox
+import typing
+
+# Type annotations
+Array = numpy.array
+Wavefront = dLux.PhysicalWavefront
+FresnelWavefront = typing.NewType("FresnelWavefront", Wavefront)
 
 class FresnelWavefront(dLux.PhysicalWavefront):
     """
@@ -27,13 +33,12 @@ class FresnelWavefront(dLux.PhysicalWavefront):
     four different opertations. 
     """
     rayleigh_distance: float
-    global_phase: numpy.array
     phase_radius: float
-    beam_radius: numpy.array
+    beam_radius: Array
 
 
-    def __init__(self, beam_radius: numpy.array, wavelength: float,
-            offset: numpy.array):
+    def __init__(self, beam_radius: Array, wavelength: float,
+            offset: Array, amplitude: Array, phase: Array) -> FresnelWavefront:
         """
         Creates a wavefront with an empty amplitude and phase 
         arrays but of a given wavelength and phase offset. 
@@ -47,11 +52,11 @@ class FresnelWavefront(dLux.PhysicalWavefront):
         offset : ndarray
             Phase shift of the initial optical plane.         
         """
+        super(wavelength, offset)
         self.beam_radius = beam_radius
         self.rayleigh_distance = rayleigh_distance(beam_radius, wavelength)
-        self.global_phase = global_phase(beam_radius, wavelength)
+        self.amplitude = global_phase(beam_radius, wavelength)
         self.phase_radius = phase_radius(beam_radius, wavelength) 
-        super(wavelength, offset)
 
 
     def rayleigh_distance(self, beam_radius: float,
