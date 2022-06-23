@@ -33,10 +33,11 @@ class FresnelWavefront(dLux.PhysicalWavefront):
     for a total of four different opertations. 
     """
     # Dunder attributes
-    __slots__ = ("INDEX_GENERATOR", "position", "wavelength")
+    # TODO: Test and profile a working slots implementation.
+    # __slots__ = ("INDEX_GENERATOR", "position", "wavelength")
 
     # Constants
-    INDEX_GENERATOR = numpy.array([1, 2], dtype=Integer)
+    INDEX_GENERATOR = numpy.array([1, 2])
 
     # Variables 
     phase_radius: Float
@@ -187,8 +188,7 @@ class FresnelWavefront(dLux.PhysicalWavefront):
         return numpy.arccos(numpy.real(wavefront / numpy.abs(wavefront)))
 
     
-    def transfer_function(self: FresnelWavefront, 
-            distance: Float) -> Array[Float]:
+    def transfer_function(self: FresnelWavefront, distance: Float) -> Array:
         """
         The optical transfer function (OTF) for the gaussian beam.
         Assumes propagation is along the axis. 
@@ -359,7 +359,7 @@ class FresnelWavefront(dLux.PhysicalWavefront):
             self.location_of_waist() - self.position)
 
 
-    @functools.partial(jax.vmap, in_axis=(None, 0))
+    @functools.partial(jax.vmap, in_axes=(None, 0))
     def is_inside(self: FresnelWavefront, distance: Float) -> Boolean:
         """ 
         Determines whether a point at along the axis of propagation 
