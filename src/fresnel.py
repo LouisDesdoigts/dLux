@@ -1,7 +1,6 @@
 import dLux
 import jax 
 import jax.numpy as numpy
-import equinox
 import typing
 import functools
 
@@ -39,33 +38,40 @@ class GaussianWavefront(dLux.PhysicalWavefront):
     # Constants
     INDEX_GENERATOR = numpy.array([1, 2])
 
-    # Variables 
-    phase_radius: Float
+    # Variables
+    position: Float 
     beam_radius: Array
-    position: Float
 
 
     def __init__(self: FresnelWavefront, beam_radius: Array, 
             wavelength: Float, offset: Array, amplitude: Array, 
-            phase: Array, phase_radius: Float) -> FresnelWavefront:
+            phase: Array, phase_radius: Float, 
+            position = 0.: Float) -> FresnelWavefront:
         """
         Creates a wavefront with an empty amplitude and phase 
         arrays but of a given wavelength and phase offset. 
 
         Parameters
         ----------
-        beam_radius : float 
+        beam_radius : Float
             Radius of the beam at the initial optical plane.
-        wavelength : float
+        wavelength : Float
             Wavelength of the monochromatic light.
-        offset : ndarray
-            Phase shift of the initial optical plane.         
+        offset : Array
+            Phase shift of the initial optical plane. 
+        amplitude : Array        
+            An array containing the electric field amplitudes over the 
+            wavefront. Assumed to be square.
+        phase : Array
+            An array containing the electric field phase over the 
+            wavefront. Assumed to be square.
+        
         """
         super().__init__(wavelength, offset)
         self.beam_radius = beam_radius
         self.amplitude = amplitude
         self.phase = phase
-        self.phase_radius = phase_radius
+        self.position = position
         # TODO: Determine if I need to implement some method of 
         # best fit for the phase_radius and beam_radius. 
 
