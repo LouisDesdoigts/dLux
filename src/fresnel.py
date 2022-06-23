@@ -61,7 +61,7 @@ class GaussianWavefront(dLux.PhysicalWavefront):
         offset : ndarray
             Phase shift of the initial optical plane.         
         """
-        super(wavelength, offset)
+        super().__init__(wavelength, offset)
         self.beam_radius = beam_radius
         self.amplitude = amplitude
         self.phase = phase
