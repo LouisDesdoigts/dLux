@@ -35,7 +35,7 @@ class TestGaussianWavefront():
 
     # Test Cases 
     ONES = numpy.ones((SIZE, SIZE))
-    NORMALISED_MESHGRID = numpy.meshgrid(
+    GRID_ONE, GRID_TWO = numpy.meshgrid(
         numpy.linspace(0., 1., SIZE), 
         numpy.linspace(0., 1., SIZE))
     
@@ -65,8 +65,8 @@ class TestGaussianWavefront():
         """
         # TODO: Implement more complex test cases
         full_real_wavefront = set_up()
-        part_real_wavefront = set_up(phase = Pi * self.AMPLITUDE / 4)
-        none_real_wavefront = set_up(phase = Pi * self.AMPLITUDE / 2)
+        part_real_wavefront = set_up(phase = Pi * self.ONES / 4)
+        none_real_wavefront = set_up(phase = Pi * self.ONES / 2)
 
         assert (full_real_wavefront.get_real() == 1.).all()
         assert (part_real_wavefront.get_real() == 1. / numpy.sqrt(2)).all()
@@ -80,8 +80,8 @@ class TestGaussianWavefront():
         """
         # TODO: Implement more complex test cases. 
         none_imaginary_wavefront = set_up()
-        part_imaginary_wavefront = set_up(phase = Pi * self.AMPLITUDE / 4)
-        full_imaginary_wavefront = set_up(phase = Pi * self.AMPLITUDE / 2)
+        part_imaginary_wavefront = set_up(phase = Pi * self.ONES / 4)
+        full_imaginary_wavefront = set_up(phase = Pi * self.ONES / 2)
 
         assert (full_imaginary_wavefront.get_real() == 1.).all() == True
         assert (part_imaginary_wavefront.get_real() == numpy.cos(Pi/4)).all() == True
@@ -94,9 +94,9 @@ class TestGaussianWavefront():
         operations
         """
         # TODO: Check modification by array valued inputs.
-        wavefront = set_up()
+        initial_wavefront = set_up()
         initial_amplitude = wavefront.get_amplitude()
-        wavefront.multiply_ampl(Pi)
+        changed_wavefront.multiply_ampl(Pi)
         changed_amplitude = wavefront.get_amplitude()
         
         assert (initial_amplitude == 1.).all() == True
@@ -109,9 +109,9 @@ class TestGaussianWavefront():
         operations. 
         """
         # TODO: Check modification by array valued inputs.
-        wavefront = set_up()
+        initial_wavefront = set_up()
         initial_phase = wavefront.get_phase()
-        wavefront.add_phase(Pi)
+        changed_wavefront = wavefront.add_phase(Pi)
         changed_phase = wavefront.get_phase()
         
         assert (initial_phase == 0.).all() == True
@@ -125,19 +125,46 @@ class TestGaussianWavefront():
         """
         # TODO: Assumes that the imputs are real
         # TODO: Implement more complex example arrays
-        new_amplitude = self.AMPLITUDE * Pi
-        new_phase = self.AMPLITUDE * Pi
+        new_amplitude = self.ONES * Pi
+        new_phase = self.ONES * Pi
         wavefront = set_up()
-        wavefront.update_phasor(new_amplitude, new_phase)
+        wavefront = wavefront.update_phasor(new_amplitude, new_phase)
 
         assert (wavefront.get_phase() == Pi).all() == True
         assert (wavefront.get_amplitude() == Pi).all() == True
         
 
     def test_wavefront_to_point_spread_function(self):
+        """
+        Test that the point spread function is correctly generated
+        from the amplitude and phase arrays. Considered correct
+        if the output is the amplitude ** 2 and modifying the phase 
+        does not affect the PSF
+        """
+        wavefront = set_up(amplitude = 2. * self.ONES)
+        uniform_zero_phase_psf = wavefront.wf2psf()
+        wavefront.add_phase(Pi)
+        uniform_pi_phase_psf = wavefront.wf2psf()
+        wavefront.multiply_ampl(0.5 * self.GRID_ONE)
+        variable_pi_phase_psf = wavefront.wf2psf()
+        
+        assert (uniform_zero_phase_psf == 4.).all() == True
+        # TODO: This may be overkill and is a little blackboxy 
+        assert (unifrom_pi_phase_psf == 4.).all() == True
+        assert (variable_pi_phase_psf == self.GRID_ONE ** 2) == True
 
 
     def test_add_optical_path_difference():
+        """
+        Testing for correct behaviour when optical paths length 
+        distances are added. 
+        """
+        # So if I were to add some phase I would want to be able to 
+        # interfere this beam with another
+        # TODO: Raise a github issue about this functionality
+        # TODO: Raise a github issue about immutability vs mutability 
+        # get some real evidence as to the performance re-creating 
+        # vs modifying the classes.  
 
 
     def test_normalise():
