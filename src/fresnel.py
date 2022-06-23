@@ -17,7 +17,7 @@ Wavefront = dLux.PhysicalWavefront
 FresnelWavefront = typing.NewType("FresnelWavefront", Wavefront)
 
 
-class FresnelWavefront(dLux.PhysicalWavefront):
+class GaussianWavefront(dLux.PhysicalWavefront):
     """
     Expresses the behaviour and state of a wavefront propagating in 
     an optical system under the fresnel assumptions. This 
