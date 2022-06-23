@@ -241,7 +241,7 @@ class AddPhase(eqx.Module):
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]
-        WF = WF.add_phase(phase_array)
+        WF = WF.add_phase(self.phase_array)
         params_dict["Wavefront"] = WF
         return params_dict
     
@@ -273,5 +273,36 @@ class ApplyOPD(eqx.Module):
         # Get relevant parameters
         WF = params_dict["Wavefront"]
         WF = WF.add_opd(self.opd_array)
+        params_dict["Wavefront"] = WF
+        return params_dict
+    
+class ApplyAperture(eqx.Module):
+    """ 
+    
+    Takes in an array representing the Optical Path Difference (OPD) and 
+    applies the corresponding phase difference to the input wavefront. 
+
+    This would represent an etched reflective optic, or phase plate
+    
+    Parameters
+    ----------
+    array: jax.numpy.ndarray, equinox.static_field
+        Units: radians
+        Array of OPD values to be applied to the input wavefront
+    """
+    npix: int = eqx.static_field()
+    aperture: np.ndarray
+    
+    def __init__(self, aperture):
+        self.aperture = np.array(aperture)
+        self.npix = aperture.shape[0]
+        
+    def __call__(self, params_dict):
+        """
+        
+        """
+        # Get relevant parameters
+        WF = params_dict["Wavefront"]
+        WF = WF.multiply_ampl(self.aperture)
         params_dict["Wavefront"] = WF
         return params_dict
