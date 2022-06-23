@@ -17,7 +17,7 @@ Wavefront = dLux.PhysicalWavefront
 FresnelWavefront = typing.NewType("FresnelWavefront", Wavefront)
 
 
-class FresnelWavefront(dLux.PhysicalWavefront):
+class GaussianWavefront(dLux.PhysicalWavefront):
     """
     Expresses the behaviour and state of a wavefront propagating in 
     an optical system under the fresnel assumptions. This 
@@ -61,7 +61,7 @@ class FresnelWavefront(dLux.PhysicalWavefront):
         offset : ndarray
             Phase shift of the initial optical plane.         
         """
-        super(wavelength, offset)
+        super().__init__(wavelength, offset)
         self.beam_radius = beam_radius
         self.amplitude = amplitude
         self.phase = phase
