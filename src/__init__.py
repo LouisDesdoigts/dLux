@@ -5,3 +5,4 @@ from .base import *
 from .layers import *
 from .detector_layers import *
 from .propagators import *
+from .fresnel import GaussianWavefront
