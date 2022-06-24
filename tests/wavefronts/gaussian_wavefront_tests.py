@@ -83,9 +83,9 @@ class TestGaussianWavefront():
         part_imaginary_wavefront = set_up(phase = Pi * self.ONES / 4)
         full_imaginary_wavefront = set_up(phase = Pi * self.ONES / 2)
 
-        assert (full_imaginary_wavefront.get_real() == 1.).all() == True
-        assert (part_imaginary_wavefront.get_real() == numpy.cos(Pi/4)).all() == True
-        assert (none_imaginary_wavefront.get_real() == 0.).all() == True
+        assert (full_imaginary_wavefront.get_real() == 1.).all() 
+        assert (part_imaginary_wavefront.get_real() == numpy.cos(Pi/4)).all() 
+        assert (none_imaginary_wavefront.get_real() == 0.).all() 
 
 
     def test_multiply_amplitude(self):
@@ -99,8 +99,8 @@ class TestGaussianWavefront():
         changed_wavefront.multiply_ampl(Pi)
         changed_amplitude = wavefront.get_amplitude()
         
-        assert (initial_amplitude == 1.).all() == True
-        assert (changed_amplitude == Pi).all() == True
+        assert (initial_amplitude == 1.).all() 
+        assert (changed_amplitude == Pi).all() 
         
 
     def test_add_phase(self):   
@@ -114,8 +114,8 @@ class TestGaussianWavefront():
         changed_wavefront = wavefront.add_phase(Pi)
         changed_phase = wavefront.get_phase()
         
-        assert (initial_phase == 0.).all() == True
-        assert (changed_phase == Pi).all() == True
+        assert (initial_phase == 0.).all()
+        assert (changed_phase == Pi).all()
 
 
     def test_update_phasor(self):
@@ -130,8 +130,8 @@ class TestGaussianWavefront():
         wavefront = set_up()
         wavefront = wavefront.update_phasor(new_amplitude, new_phase)
 
-        assert (wavefront.get_phase() == Pi).all() == True
-        assert (wavefront.get_amplitude() == Pi).all() == True
+        assert (wavefront.get_phase() == Pi).all()
+        assert (wavefront.get_amplitude() == Pi).all()
         
 
     def test_wavefront_to_point_spread_function(self):
@@ -148,13 +148,13 @@ class TestGaussianWavefront():
         wavefront.multiply_ampl(0.5 * self.GRID_ONE)
         variable_pi_phase_psf = wavefront.wf2psf()
         
-        assert (uniform_zero_phase_psf == 4.).all() == True
+        assert (uniform_zero_phase_psf == 4.).all()
         # TODO: This may be overkill and is a little blackboxy 
-        assert (unifrom_pi_phase_psf == 4.).all() == True
-        assert (variable_pi_phase_psf == self.GRID_ONE ** 2) == True
+        assert (unifrom_pi_phase_psf == 4.).all()
+        assert (variable_pi_phase_psf == self.GRID_ONE ** 2)
 
 
-    def test_add_optical_path_difference():
+    def test_add_optical_path_difference(self):
         """
         Testing for correct behaviour when optical paths length 
         distances are added. 
@@ -165,30 +165,169 @@ class TestGaussianWavefront():
         # TODO: Raise a github issue about immutability vs mutability 
         # get some real evidence as to the performance re-creating 
         # vs modifying the classes.  
+        initial_wavefront = set_up()
+        initial_phase = wavefront.get_phase()
+        changed_wavefront = wavefront.add_opd(self.WAVELENGTH / 2)
+        changed_phase = wavefront.get_phase()
+
+        assert (initial_phase == 0.).all()
+        assert (changed_phase == Pi / 2).all()
 
 
-    def test_normalise():
+    def test_normalise(self):
+        """
+        Checks that the normalise functionality is working. The 
+        behaviour is considered functional if the maximum 
+        value encountered is 1. and the minimum value encountered 
+        is 0.
+        """
+        initial_wavefront = set_up(amplitude = 2 * GRID_ONE * GRID_TWO)
+        changed_wavefront = initial_wavefront.normalise()
+        changed_amplitude = changed_wavefront.get_amplitude()
+
+        assert (changed_amplitude.max() == 1.)
+        assert (changed_amplitude.min() == 0.)
+        
+
+    def test_get_pixel_position_vector(self):
+        """
+        The get_xs_vec() function is consider correct if the 
+        minimum value -(npix - 1) / 2 and the maximum value is
+        (npix - 1) / 2
+        """
+        initial_wavefront = set_up()
+        pixel_coordinates = initial_wavefront.get_xs_vec(self.SIZE)
+        
+        assert (pixel_coordinates.max() == (self.SIZE - 1) / 2)
+        assert (pixel_coorsinates.min() == -(self.SIZE - 1) / 2)
+        #TODO: implement a check that the increment between the 
+        # max and min values is uniform. 
 
 
-    def test_get_pixel_position_vector():
+    def test_get_pixel_position_grid(self):
+        """
+        The get_XXYY function is considered correct if it produces 
+        an array that is of dimensions (2, self.SIZE, self.SIZE)
+        as it uses the get_xs_vec() function under the hood.
+        """
+        initial_wavefront = set_up()
+        pixel_position_grid = initial_wavefront.get_XXYY()
+        
+        assert pixel_position_grid.shape() == (2, self.SIZE, self.SIZE)
 
 
-    def test_get_pixel_position_grid():
+    def test_get_physical_position_gird(self):
+        """
+        The get_xycoords() function is considered correct if it 
+        produces an array with the correct dimesions such that the 
+        minimum and maximum values are plus and minus
+        self.pixelscale * (npix - 1) / 2
+        """
+        initial_wavefront = set_up()
+        changed_wavefront = dLux.CreateWavefront(self.SIZE, 1.)\
+            ({"Wavefront": initial_wavefront})["Wavefront"]
+        physical_coordinates = changed_wavefront.get_xycoords()
+        
+        assert (physical_coordinates.max() == (self.SIZE - 1) / (2 * self.SIZE))
+        assert (physical_coordinates.min() == -(self.SIZE - 1) / (2 * self.SIZE))
+        assert physical_coordinates.shape() == (2, self.SIZE, self.SIZE)
 
-
-    def test_get_physical_position_gird():
     
     # TODO: implement accessors in the GaussianWavefront class.
     # Mutators and Accessors
-    def test_get_phase():
-    def test_get_amplitude():
-    def test_set_phase():
-    def test_set_amplitude():
+    def test_set_phase(self):
+        """
+        Functionality that is not currently supported, allows the 
+        state to be immutably changed and viewed from outside the 
+        namespace. 
+        """
+        initial_wavefront = set_up()
+        changed_wavefront = initial_wavefront.set_phase(self.GRID_ONE)
+        
+        assert (changed_wavefront.get_phase() == self.GRID_ONE).all()
+        assert (initial_wavefront.get_phase() == self.PHASE).all()
+ 
+
+    def test_set_amplitude(self):
+        """
+        Functionality that is not currently supported, provides 
+        immutable access to the state of the wavefront. 
+        """
+        initial_wavefront = set_up()
+        changed_wavefront = initial_wavefront.set_amplitude(self.GRID_ONE)
+        
+        assert (changed_wavefront.get_amplitude() == self.GRID_ONE).all()
+        assert (initial_wavefront.get_amplitude() == self.AMPLITUDE).all()
+
+
+    def test_set_beam_waist(self):
+        """
+        Provides immutable access to the state of the wavefront. 
+        Considered correct if the intial state is not modfied and
+        a modified clone is created.
+        """
+        initial_wavefront = set_up()
+        changed_wavefront = initial_wavefront.set_beam_waist(2.)
+        
+        assert (changed_wavefront.get_beam_waist() == 2.)
+        assert (initial_wavefront.get_beam_waist() == 1.)
+
+
+    def test_set_wavelength(self):
+        """
+        Provides immutable access to the state of the wavefront. 
+        Considered correct if the initial wavefront is not modified 
+        and a modified wavefront is created. 
+        """
+
+
+    def test_set_position(self):
+       
 
     # Properties 
-    def test_rayleigh_distance_correct():
-    def test_rayleigh_distance_cached():
-    def test_rayleigh_distance_updated():
+    def test_rayleigh_distance_correct(self):
+        """
+        Checks that the rayleigh distance is calculated correctly
+        based on the parameters that are input. 
+        """
+        # TODO: will not work because equinox enforces immutability
+        # need to check that equinox is compatible with cached
+        # properties
+        wavefront = set_up()
+        rayleigh_distance = wavefront.rayleigh_distance
+        correct_rayleigh_distance = numpy.pi * \
+            wavefront.get_beam_radius() ** 2 / \
+            wavefront.get_wavelength()        
+
+        assert rayleigh_distance == correct_rayleigh_distance
+
+
+    def test_rayleigh_distance_cached(self):
+        """
+        Checks that after getting called this becomes a class 
+        property stored in GaussianWavefront.__dict__
+        """
+        wavefront = set_up()
+        wavefront.rayleigh_distance
+        
+        assert wavefront.__dict__["rayleigh_distance"] not None    
+    
+
+    def test_rayleigh_distance_updated(self):
+        """
+        Checks that if beam_radius and wavelength are changed then 
+        the rayleigh distance is also updated.
+        """
+        # TODO: I can enforce this behaviour using setter methods
+        # or mutators. These need to be implemented. 
+        initial_wavefront = set_up()
+        initial_wavefront.rayleigh_distance
+        changed_wavefront = wavefront.set_beam_waist(2.)
+        changed_wavefront.rayleigh_distance
+
+        correct_rayleigh_distance
+               
+
 
     def test_location_of_waist_correct():
     def test_location_of_waist_cached():
