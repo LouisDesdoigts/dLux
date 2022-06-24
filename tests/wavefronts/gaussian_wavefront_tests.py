@@ -279,9 +279,38 @@ class TestGaussianWavefront():
         Considered correct if the initial wavefront is not modified 
         and a modified wavefront is created. 
         """
+        initial_wavefront = set_up()
+        changed_wavefront = initial_wavefront.set_wavelength(2 * self.WAVELENGTH)
+
+        assert (changed_wavefront.get_wavelength() == 2 * self.WAVELENGTH)
+        assert (initial_wavefront.get_wavelength() == self.WAVELENGTH)
 
 
     def test_set_position(self):
+        """
+        Provides immutable access to the state of the wavefront.
+        Considered cocrect if the initial instance is not modified 
+        and a modified wavefront is created.
+        """
+        initial_wavefront = set_up()
+        changed_wavefront = initial_wavefront.set_position(1.)
+
+        assert (initial_wavefront.get_position() = 0.)
+        assert (changed_wavefront.get_position() = 1.)
+
+
+    def test_set_phase_radius(self):
+        """
+        Provides immutable access to the state of the wavefront. 
+        Considered correct if the initial instance is not modified
+        and a modified wavefront is created.
+        """
+        initial_wavefront = set_up()
+        changed_wavefront = initial_wavefront.set_phase_radius(1.)
+
+        # TODO: Work out a good default value for this. 
+        assert initial_wavefront.get_phase_radius() == 0.
+        assert changed_wavefront.get_phase_radius() == 1.
        
 
     # Properties 
@@ -324,39 +353,267 @@ class TestGaussianWavefront():
         initial_wavefront.rayleigh_distance
         changed_wavefront = wavefront.set_beam_waist(2.)
         changed_wavefront.rayleigh_distance
+        correct_rayleigh_distance = numpy.pi * \
+            changed_wavefront.get_beam_radius() ** 2 / \
+            changed_wavefront.get_wavelength() 
 
-        correct_rayleigh_distance
+        assert correct_rayleigh_distance = changed_wavefront.rayleigh_distance
                
 
+    def test_location_of_waist_correct(self):
+        """
+        Checks that the location of the waist is correctly determined.
+        Simply runs the explicit calculations externally and compares.
+        """
+        wavefront = set_up()
+        correct_location_of_waist = - wavefront.get_phase_radius() / \
+            (1 + (wavefront.get_phase_radius() / \
+                wavefront.rayleigh_distance) ** 2)
 
-    def test_location_of_waist_correct():
-    def test_location_of_waist_cached():
-    def test_location_of_waist_updated():
+        assert (wavefront.location_of_waist == correct_location_of_waist)
+
+
+    def test_location_of_waist_cached(self):
+        """
+        Checks that after the state is set it is added to the cache
+        as a value. 
+        """
+        # TODO: This could also be assigned in the constructor
+        # need to discus the style with @LouisDesdoigts.
+        wavefront = set_up()
+        wavefront.location_of_waist
+
+        assert wavefront.__dict__["location_of_waist"] not None        
+        
+
+    def test_location_of_waist_updated(self):
+        """
+        Checks that if the phase_radius is updated or the 
+        rayleigh_distance is updated then the location_of_waist is 
+        also updated
+        """
+        # TODO: location of waist needs to be updated when the 
+        # rayleigh distance is changed, This implies that it needs 
+        # to be updated when the beam_radius and the wavelength are
+        # changed
+
+        # TODO: Fix how the cached property is implemented
+        initial_wavefront = set_up()
+        initial_location_of_waist = initial_wavefront.location_of_waist
+        changed_beam_radius = initial_wavefront.set_beam_radius(2.)
+        changed_phase_radius = initial_wavefront.set_phase_radius(2.)
+        changed_wavelength = initial_wavefront.set_wavelength(2. * self.WAVELENGTH)
+
+        assert initial_wavefront.location_of_waist == initial_location_of_waist
+        assert changed_beam_radius.location_of_waist != initial_location_of_waist 
+        assert changed_phase_radius.location_of_waist != initial_location_of_waist
+        assert changed_wavelength != initial_location_of_waist 
+
 
     # TODO: Implement the waist radius as a chached property 
-    def test_waist_radius_correct():
-    def test_waist_radius_cached():
-    def test_waist_radius_updated():
+    def test_waist_radius_correct(self):
+        """
+        Directly confirms that the correct numerical calculations are 
+        implemented, by the method
+        """
+        # TODO: fix the call of rayleigh_distance() to rayleigh_distance 
+        # and also beam_radius to self.beam_radius
+        wavefront = set_up()
+        correct_waist_radius = wavefront.get_beam_radius() / \
+            numpy.sqrt(1 + (wavefront.rayleigh_distance / \
+            wavefront.beam_radius) ** 2)
+
+        assert wavefront.waist_radius == correct_waist_radius        
+
+
+    def test_waist_radius_cached(self):
+        """
+        This checks that the waist radius is added to the cache after 
+        getting calculated.
+        """
+        wavefront = set_up()
+        wavefront.waist_radius
+
+        assert wavefront.__dict__["waist_radius"] not None
+
+
+    def test_waist_radius_updated(self):
+        """
+        Tests that when properties influencing the waist_radius are 
+        changed so too is the waist radius.
+        """
+        initial_wavefront = set_up()
+        initial_waist_radius = initial_wavefront.waist_radius
+        changed_wavelength = initial_wavefront.set_wavelength(2 * self.WAVELENGTH)
+        changed_beam_radius = initial_wavefront.set_beam_radius(2.)
+
+        assert initial_waist_radius != changed_wavelength.waist_radius 
+        assert initial_waist_radius != changed_beam_radius.waist_radius
+
 
     # State modifying behaviours 
-    def test_planar_to_planar_not_nan():
-    def test_planar_to_planar_not_inf():
-    def test_planar_to_planar_correct():
+    def test_planar_to_planar_not_nan(self):
+        """
+        So I will just test the edge cases, distance = 0. and 
+        distance = numpy.inf and the typical cases distance = 1.
+        and distance = 10.
+        """
+        # TODO: Work out what the fuck is going on with update_phasor 
+        # Should this be a mutable state operation as I have treated it
+        
+        # TODO: Work out what the fuck is going on with update_phasor
+        zero_case = set_up().planar_to_planar(0.)
+        infinte_case = set_up().planar_to_planar(numpy.inf)
+        small_case = set_up().planar_to_planar(1.)
+        large_case = set_up().planar_to_planar(10.)
 
-    def test_waist_to_spherical_not_nan():
-    def test_waist_to_spherical_not_inf():
-    def test_waist_to_spherical_correct():
+        assert not numpy.isnan(zero_case).any()
+        assert not numpy.isnan(infinite_case).any()
+        assert not numpy.isnan(small_case).any()
+        assert not numpy.isnan(large_case).any()
 
-    def test_spherical_to_waist_not_nan():
-    def test_spherical_to_waist_not_inf():
-    def test_spherical_to_waist_correct():
+
+    def test_planar_to_planar_not_inf(self):
+        """
+        So I will test the same cases as above this time looking 
+        for infinite values. Not sure how to consider the case of the 
+        infinite propagation distance
+        """
+        zero_case = set_up().planar_to_planar(0.)
+        infinte_case = set_up().planar_to_planar(numpy.inf)
+        small_case = set_up().planar_to_planar(1.)
+        large_case = set_up().planar_to_planar(10.)
+
+        assert not numpy.isinf(zero_case).any()
+        assert not numpy.isinf(infinite_case).any()
+        assert not numpy.isinf(small_case).any()
+        assert not numpy.isinf(large_case).any()
+
+
+    # TODO: Discuss with @benjaminpope and @LouisDesdoigts how they 
+    # want to do these tests if at all. Perhaps analytic cases.
+    # For now I will leave this blanck.
+    def test_planar_to_planar_correct(self):
+        """
+        To be implemented according to the TODO:
+        """
+        pass
+
+
+    def test_waist_to_spherical_not_nan(self):
+        """
+        Tests the boundary cases distance = 0. and 
+        distance = self.rayleigh_distance as well as two standard 
+        cases.  
+        """
+        rayleigh_distance = set_up().rayleigh_distance
+        zero_case = set_up().waist_to_spherical(0.)
+        rayleigh_case = set_up().waist_to_spherical(rayleigh_distance)
+        small_case = set_up().waist_to_spherical(0.01 * rayleigh_distance)
+        large_case = set_up().waist_to_spherical(0.9 * rayleigh_distance)
+
+        assert not numpy.isnan(zero_case).any()
+        assert not numpy.isnan(rayleigh_case).any()
+        assert not numpy.isnan(small_case).any()
+        assert not numpy.isnan(large_case).any()
+
+
+    def test_waist_to_spherical_not_inf(self):
+        """
+        Checks that the boundary values and typical values defined in
+        the test above do not generate infinite values
+        """
+        rayleigh_distance = set_up().rayleigh_distance
+        zero_case = set_up().waist_to_spherical(0.)
+        rayleigh_case = set_up().waist_to_spherical(rayleigh_distance)
+        small_case = set_up().waist_to_spherical(0.01 * rayleigh_distance)
+        large_case = set_up().waist_to_spherical(0.9 * rayleigh_distance)
+
+        assert not numpy.isinf(zero_case).any()
+        assert not numpy.isinf(rayleigh_case).any()
+        assert not numpy.isinf(small_case).any()
+        assert not numpy.isinf(large_case).any()
+
+
+    def test_waist_to_spherical_correct(self):
+        """
+        Not yet implemented; under review
+        """
+        pass
+
+
+    def test_spherical_to_waist_not_nan(self):
+        """
+        Tests the boundary cases distance = 0. and 
+        distance = self.rayleigh_distance as well as two standard 
+        cases for nan values 
+        """
+        rayleigh_distance = set_up().rayleigh_distance
+        zero_case = set_up().spherical_to_waist(0.)
+        rayleigh_case = set_up().spherical_to_waist(rayleigh_distance)
+        small_case = set_up().spherical_to_waist(0.01 * rayleigh_distance)
+        large_case = set_up().spherical_to_waist(0.9 * rayleigh_distance)
+
+        assert not numpy.isnan(zero_case).any()
+        assert not numpy.isnan(rayleigh_case).any()
+        assert not numpy.isnan(small_case).any()
+        assert not numpy.isnan(large_case).any()
+
+
+    def test_spherical_to_waist_not_inf(self):
+        """
+        Tests the boundary cases distance = 0. and 
+        distance = self.rayleigh_distance as well as two standard 
+        cases for numpy.inf values 
+        """
+        rayleigh_distance = set_up().rayleigh_distance
+        zero_case = set_up().spherical_to_waist(0.)
+        rayleigh_case = set_up().spherical_to_waist(rayleigh_distance)
+        small_case = set_up().spherical_to_waist(0.01 * rayleigh_distance)
+        large_case = set_up().spherical_to_waist(0.9 * rayleigh_distance)
+
+        assert not numpy.isinf(zero_case).any()
+        assert not numpy.isinf(rayleigh_case).any()
+        assert not numpy.isinf(small_case).any()
+        assert not numpy.isinf(large_case).any()
+
+
+    def test_spherical_to_waist_correct(self):
+        """
+        under review    
+        """
+        pass
 
     # State independent behavious (static)
-    def test_calculate_phase_not_nan():
-    def test_calculate_phase_not_inf():
-    def test_calculate_phase_correct(): 
+    def test_calculate_phase_correct(self):
+        """
+        Checks that the phase retrieval from a complex valued array 
+        is correct. I check phases of Pi / 2, 0. and Pi / 4 as well 
+        as a combination.
+        """
+        # TODO: Type annotation for Imaginary
+        pi_on_two = 1j * numpy.ones((2, 2))
+        pi_on_four = 1 / numpy.sqrt(2) * numpy.ones((2, 2)) + \
+            1j / numpy.sqrt(2) * numpy.ones((2, 2))
+        zero = numpy.ones((2, 2))
+        # TODO: probably should make this more complex
+        combination = numpy.array([[1j, 1], [1, 1j]])
+        wavefront = set_up()
 
-    def test_transfer_function_not_nan():
+        assert (wavefront.calculate_phase(pi_on_two) == Pi / 2.).all()
+        assert (wavefront.calculate_phase(pi_on_four) == Pi / 4.).all()
+        assert (wavefront.calculate_phase(zero) == 0.).all()
+        assert (wavefront.calculate_phase(combination) == \
+            numpy.array([[Pi / 2., 0.], [0., Pi / 2.]])).all()
+ 
+ 
+    def test_transfer_function_not_nan(self):
+        """
+        Check the boundary case distance = 0. and then two normal
+        inputs a large and a small.
+        """
+
+
     def test_transfer_function_not_inf():
     def test_transfer_function_correct():
 
