@@ -42,7 +42,7 @@ class TestGaussianWavefront():
 
 
     @pytest.fixture
-    def self.set_up(self, /, amplitude = None, phase = None, 
+    def set_up(self, /, amplitude = None, phase = None, 
             beam_radius = None, offset = None, position = None,
             wavelength = None):
         """
@@ -932,6 +932,8 @@ class TestGaussianWavefront():
         inside_to_outside
         outside_to_inside
         outside_to_outside
+
+        NOTE: We are checking for nan results
         """
         # TODO: Implement blank() as a minimal wavefront fixture
         # NOTE: The outside_to_inside() ect. tests already tested 
@@ -943,16 +945,75 @@ class TestGaussianWavefront():
         zero = set_up().propagate(0.)
         positive_infinity = set_up().propagate(numpy.inf)
 
-        inside_to_inside =
-        inside_to_outside = 
-        outside_to_inside =
-        outside_to_outside = 
+        inside_to_inside = set_up().propagate(rayleigh_distance / 2.)
+        inside_to_outside = set_up().propagate(rayleigh_distance + 1.)
+        # TODO: Adopt this syntax for future use
+        outside_to_inside = \
+            set_up(position = -rayleigh_distance - 1.)\
+            .propagate(rayleigh_distance)
+        outside_to_outside = \
+            set_up(position = -rayleigh_distance - 1.)  
+            .propgate(2 * (rayleigh_distance + 1.))
+
+        assert not numpy.isnan(negative_infinity).any()
+        assert not numpy.isnan(zero).any()
+        assert not numpy.isnan(positive_infinity).any()
+
+        assert not numpy.isnan(inside_to_inside).any()
+        assert not numpy.isnan(inside_to_outside).any()
+        assert not numpy.isnan(outside_to_inside).any()
+        assert not numpy.isnan(outside_to_outside).any()
         
 
-    def test_propagate_not_inf():
-    def test_propagate_correct():
+    def test_propagate_not_inf(self):
+        """
+        Tests full branch coverage and then the boundary cases 
+        distance == -numpy.inf, distance == numpy.inf and distance 
+        == 0. The branches covered are:
+        
+        inside_to_inside
+        inside_to_outside
+        outside_to_inside
+        outside_to_outside
+
+        Note: we are checking for inf results. 
+        """
+        rayleigh_distance = blank().rayleigh_distance
+
+        negative_infinity = set_up().propagate(-numpy.inf)
+        zero = set_up().propagate(0.)
+        positive_infinity = set_up().propagate(numpy.inf)
+
+        inside_to_inside = set_up().propagate(rayleigh_distance / 2.)
+        inside_to_outside = set_up().propagate(rayleigh_distance + 1.)
+        # TODO: Adopt this syntax for future use
+        outside_to_inside = \
+            set_up(position = -rayleigh_distance - 1.)\
+            .propagate(rayleigh_distance)
+        outside_to_outside = \
+            set_up(position = -rayleigh_distance - 1.)  
+            .propgate(2 * (rayleigh_distance + 1.))
+
+        assert not numpy.isinf(negative_infinity).any()
+        assert not numpy.isinf(zero).any()
+        assert not numpy.isinf(positive_infinity).any()
+
+        assert not numpy.isinf(inside_to_inside).any()
+        assert not numpy.isinf(inside_to_outside).any()
+        assert not numpy.isinf(outside_to_inside).any()
+        assert not numpy.isinf(outside_to_outside).any()
 
 
+    def test_propagate_correct(self):
+        """
+        In review
+        """
+
+
+# TODO: Implement a GaussianWavefrontTemplate() that contains the 
+# set_up and blank fixtures for future use.
+# TODO: Reduce code duplication by moving the nan and inf tests 
+# together. Discuss this with @benjaminpope and @LouisDesdoigts 
 class TestGaussianWavefrontAutodiff():
     """
     This class is designed to automatically test that the autodiff 
@@ -960,16 +1021,75 @@ class TestGaussianWavefrontAutodiff():
     GaussianWavefront class
     """
 
+    # TODO: Implement blank and full set_up fixtures.
+    # NOTE: I may need to make internal wrapper functions for the 
+    # gradient testing. 
+
+
     def grad_transfer_function_nan(self):
         """
+        Checking that the gradient of the transfer function taken with 
+        respect to the following attributes does not return nan.
+
+        Attribute tested:
+         - distance : Float
+
+        The boundary cases -numpy.inf, 0. and numpy.inf are tested
+        as well as some typical cases both positive and negative. 
         """
-        pass 
+        # TODO: Talk to @LouisDesdoigts about taking gradient with 
+        # respect to the wavelength.
+        transfer_function_gradient = jax.grad(set_up().transfer_function)
+        rayleigh_distance = blank().rayleigh_distance()        
+
+        # NOTE: May require some more finesse because I am not passing
+        # anything for self
+        negative_infinity = transfer_function_gradient(-numpy.inf)
+        zero = transfer_function_gradient(0.)
+        positive_infinity = transfer_function_gradient(numpy.inf)
+
+        negative = transfer_function_gradient(- rayleigh_distance)
+        positive = transfer_function_gradient(rayleigh_distance)
+
+        assert not numpy.isnan(negative_infinity).any()
+        assert not numpy.isnan(zero).any()
+        assert not numpy.isnan(positive_infinity).any()
+
+        assert not numpy.isnan(negative).any()
+        assert not numpy.isnan(positive).any()
 
 
-    def grad_transfer_function_inf(self):
+     def grad_transfer_function_inf(self):
         """
+        Checking that the gradient of the transfer function taken with 
+        respect to the following attributes does not return inf.
+
+        Attribute tested:
+         - distance : Float
+
+        The boundary cases -numpy.inf, 0. and numpy.inf are tested
+        as well as some typical cases both positive and negative. 
         """
-        pass 
+        # TODO: Talk to @LouisDesdoigts about taking gradient with 
+        # respect to the wavelength.
+        transfer_function_gradient = jax.grad(set_up().transfer_function)
+        rayleigh_distance = blank().rayleigh_distance()        
+
+        # NOTE: May require some more finesse because I am not passing
+        # anything for self
+        negative_infinity = transfer_function_gradient(-numpy.inf)
+        zero = transfer_function_gradient(0.)
+        positive_infinity = transfer_function_gradient(numpy.inf)
+
+        negative = transfer_function_gradient(- rayleigh_distance)
+        positive = transfer_function_gradient(rayleigh_distance)
+
+        assert not numpy.isinf(negative_infinity).any()
+        assert not numpy.isinf(zero).any()
+        assert not numpy.isinf(positive_infinity).any()
+
+        assert not numpy.isinf(negative).any()
+        assert not numpy.isinf(positive).any()
 
 
     def grad_quadratic_phase_factor_nan(self):
@@ -996,19 +1116,79 @@ class TestGaussianWavefrontAutodiff():
         pass 
 
     
-    def grad_waist_to_spherical
-    def grad_waist_to_spherical
+    def grad_waist_to_spherical_nan(self):
+        """
+        """
+        pass 
 
-    def grad_spherical_to_waist
-    def grad_spherical_to_waist
 
-    def grad_inside_to_inside
-    def grad_inside_to_inside
+    def grad_waist_to_spherical_inf(self):
+        """
+        """
+        pass
 
-    def grad_inside_to_outside
-    def grad_inside_to_outside
 
-    def grad_outside_to_inside
-    def grad_outside_to_outside
-    def grad_propagate
-    
+    def grad_spherical_to_waist_nan(self):
+        """
+        """
+        pass 
+
+
+    def grad_spherical_to_waist_inf(self):
+        """
+        """
+        pass
+
+
+    def grad_inside_to_inside_nan(self):
+        """
+        """
+        pass 
+
+
+    def grad_inside_to_inside_inf(self):
+        """
+        """
+        pass
+
+
+    def grad_inside_to_outside_nan(self):
+        """
+        """
+        pass
+
+
+    def grad_inside_to_outside_inf(self)
+        """
+        """
+        pass
+
+
+    def grad_outside_to_inside_nan(self):
+        """
+        """
+        pass
+
+
+    def grad_outside_to_inside_inf(self):
+        """
+        """
+        pass
+
+
+    def grad_outside_to_outside_nan(self):
+        """
+        """
+        pass 
+
+
+    def grad_outside_to_outside_inf(self):
+        """
+        """
+        pass
+
+
+    def grad_propagate(self):
+        """
+        """
+        pass
