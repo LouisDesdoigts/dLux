@@ -1,23 +1,53 @@
 import jax
-import jax.numpy as np
+import jax.numpy as numpy
 from jax import vmap
-import equinox as eqx
+import equinox
 from copy import deepcopy
 
-class PhysicalWavefront(eqx.Module):
+
+class Wavefront(equinox.Module):
+    """
+    An abstract module that should never be directly substantiated.
+    This class represents a general optical wavefront although the 
+    exact implementation must go through a subclass. Wavefront
+    objects are assumed to be square.
+
+    Attributes
+    ----------
+    amplitude : Array
+        The electric field amplitudes over the wavefront. The 
+        amplitude is assumed to be in SI units. 
+    phase : Array
+        The phases of each pixel on the Wavefront. The phases are 
+        assumed to be unitless.
+    wavel : Float
+        The wavelength of the light. Assumed to be in metres.
+    pixelscale : Float
+        The physical dimensions of each square pixel. Assumed to be 
+        metres. 
+    """
+    amplitude : numpy.ndarray
+    phase : numpy.ndarray
+    wavel : float
+
+
+    def __init__(self, ):
+
+
+class PhysicalWavefront(equinox.Module):
     """
     Class to store the optical information and paramaters
     """
-    amplitude:  np.ndarray
-    phase:      np.ndarray
+    amplitude:  numpy.ndarray
+    phase:      numpy.ndarray
     wavel:      float
-    offset:     np.ndarray
+    offset:     numpy.ndarray
     pixelscale: float
     planetype:  str
     
     def __init__(self, wavel, offset):
-        self.wavel = np.array(wavel).astype(float)
-        self.offset = np.array(offset).astype(float)
+        self.wavel = numpy.array(wavel).astype(float)
+        self.offset = numpy.array(offset).astype(float)
         self.planetype = "Pupil"
         self.pixelscale = None
         self.amplitude = None
@@ -28,10 +58,10 @@ class PhysicalWavefront(eqx.Module):
         
     """Real and Imag"""
     def get_real(self):
-        return self.ampltidue * np.cos(self.phase)
+        return self.ampltidue * numpy.cos(self.phase)
     
     def get_imag(self):
-        return self.ampltidue * np.sin(self.phase)
+        return self.ampltidue * numpy.sin(self.phase)
     
     
     
@@ -39,15 +69,15 @@ class PhysicalWavefront(eqx.Module):
     """Updating the Phasor"""
     def multiply_ampl(self, array_like):
         new_ampl = self.amplitude * array_like
-        return eqx.tree_at(lambda wf: wf.amplitude, self, new_ampl)
+        return equinox.tree_at(lambda wf: wf.amplitude, self, new_ampl)
         
     def add_phase(self, array_like):
         new_phase = self.phase + array_like
-        return eqx.tree_at(lambda wf: wf.phase, self, new_phase)
+        return equinox.tree_at(lambda wf: wf.phase, self, new_phase)
         
     def update_phasor(self, amplitude, phase):
-        self = eqx.tree_at(lambda wf: wf.amplitude, self, amplitude)
-        self = eqx.tree_at(lambda wf: wf.phase,     self, phase)
+        self = equinox.tree_at(lambda wf: wf.amplitude, self, amplitude)
+        self = equinox.tree_at(lambda wf: wf.phase,     self, phase)
         return self
     
     
@@ -57,11 +87,11 @@ class PhysicalWavefront(eqx.Module):
         return self.amplitude**2
         
     def add_opd(self, opd):
-        phase = 2*np.pi*opd/self.wavel
+        phase = 2*numpy.pi*opd/self.wavel
         return self.add_phase(phase)
         
     def normalise(self):
-        total_intensity = np.sqrt(np.sum(self.amplitude**2))
+        total_intensity = numpy.sqrt(np.sum(self.amplitude**2))
         return self.multiply_ampl(1/total_intensity)
     
     
@@ -69,15 +99,15 @@ class PhysicalWavefront(eqx.Module):
     
         
     """Coordinates"""    
-    def get_xs_vec(self, npix):
+    def get_xs_vec(self, numpyix):
         """ Returns a paraxial 1d vector """
-        return np.arange(npix) - (npix-1)/2 
+        return numpy.arange(npix) - (npix-1)/2 
     
     def get_XXYY(self):
         """ """
         xs = self.get_xs_vec(self.amplitude.shape[0])
-        XX, YY = np.meshgrid(xs, xs)
-        return np.array([XX, YY])
+        XX, YY = numpy.meshgrid(xs, xs)
+        return numpy.array([XX, YY])
     
     def get_xycoords(self):
         """Returns x_coords, y,_coords"""
@@ -95,21 +125,21 @@ class PhysicalWavefront(eqx.Module):
         else:
             real = map_coordinates(self.get_real, coords, order=1)
             imag = map_coordinates(self.get_imag, coords, order=1)
-            ampl = np.hypot(real, imag)
-            phase = np.arctan2(imag, real)
+            ampl = numpy.hypot(real, imag)
+            phase = numpy.arctan2(imag, real)
         return ampl, phase
         
-    def paraxial_interp(self, pixelscale_out, npix_out, reim=False):
+    def paraxial_interp(self, pixelscale_out, numpyix_out, reim=False):
         """ Paraxially interpolates """
         # Get coords arrays
-        npix_in = self.amplitude.shape[0]
+        numpyix_in = self.amplitude.shape[0]
         ratio = pixelscale_out/self.pixelscale
         
-        c_in = (npix_in-1)/2
-        c_out = (npix_out-1)/2
-        xs = ratio*(-c_out, c_out, npix_out) + c_in
-        YY, XX = np.meshgrid(xs, xs)
-        coords = np.array([XX, YY])
+        c_in = (numpyix_in-1)/2
+        c_out = (numpyix_out-1)/2
+        xs = ratio*(-c_out, c_out, numpyix_out) + c_in
+        YY, XX = numpy.meshgrid(xs, xs)
+        coords = numpy.array([XX, YY])
         ampl, phase = self.interp(ampl, phase, reim=reim)
         
         # Update Phasor
@@ -119,35 +149,35 @@ class PhysicalWavefront(eqx.Module):
         self = self.multiply_ampl(ratio)
         
         # Update pixelscale
-        return eqx.tree_at(lambda wf: wf.pixelscale, self, pixelscale_out)
+        return equinox.tree_at(lambda wf: wf.pixelscale, self, pixelscale_out)
 
     
     
     """ Pad and Crop """
-    def pad_to(self, npix_out):
+    def pad_to(self, numpyix_out):
         """ Pads an array paraxially to a given size
         Works for even -> even or odd -> odd """
-        npix_in = self.amplitude.shape[0]
+        numpyix_in = self.amplitude.shape[0]
         
-        if npix_in%2 != npix_out%2:
+        if numpyix_in%2 != npix_out%2:
             raise ValueError("Only supports even -> even or 0dd -> odd padding")
         
-        c, s, rem = npix_out//2, npix_in//2, npix_in%2
-        padded = np.zeros([npix_out, npix_out])
+        c, s, rem = numpyix_out//2, npix_in//2, npix_in%2
+        padded = numpy.zeros([npix_out, npix_out])
         
         ampl  = padded.at[c-s:c+s+rem, c-s:c+s+rem].set(self.amplitude)
         phase = padded.at[c-s:c+s+rem, c-s:c+s+rem].set(self.phase)
         return self.update_phasor(ampl, phase)
 
-    def crop_to(self, npix_out):
+    def crop_to(self, numpyix_out):
         """ Crops an array paraxially to a given size
         Works for even -> even or odd -> odd """
-        npix_in = self.amplitude.shape[0]
+        numpyix_in = self.amplitude.shape[0]
         
-        if npix_in%2 != npix_out%2:
+        if numpyix_in%2 != npix_out%2:
             raise ValueError("Only supports even -> even or 0dd -> odd cropping")
         
-        c, s = npix_in//2, npix_out//2
+        c, s = numpyix_in//2, npix_out//2
         ampl  = self.amplitude[c-s:c+s, c-s:c+s]
         phase = self.phase[c-s:c+s, c-s:c+s]
         return self.update_phasor(ampl, phase)
@@ -173,7 +203,7 @@ class PhysicalWavefront(eqx.Module):
     
 
     
-class OpticalSystem(eqx.Module):
+class OpticalSystem(equinox.Module):
     """ Optical System class, Equinox Modle
     
     DOCSTRING NOT COMPLETE
@@ -196,19 +226,19 @@ class OpticalSystem(eqx.Module):
      - Currently doesnt allow temporal variation in flux becuase im lazy
     
     ToDo: Add getter methods for acessing weights and fluxes attributes that
-    use np.squeeze to remove empy axes
+    use numpy.squeeze to remove empy axes
     
     """
-    # Helpers, Determined from inputs, not real params
+    # Helpers, Determined from inumpyuts, not real params
     Nstars:  int
     Nwavels: int
     Nims:    int
     
-    wavels:          np.ndarray
-    positions:       np.ndarray
-    fluxes:          np.ndarray
-    weights:         np.ndarray
-    dithers:         np.ndarray
+    wavels:          numpy.ndarray
+    positions:       numpy.ndarray
+    fluxes:          numpy.ndarray
+    weights:         numpy.ndarray
+    dithers:         numpy.ndarray
     layers:          list
     detector_layers: list
     
@@ -217,43 +247,43 @@ class OpticalSystem(eqx.Module):
     def __init__(self, layers, wavels=None, positions=None, fluxes=None, 
                        weights=None, dithers=None, detector_layers=None):
         
-        # Required Inputs
+        # Required Inumpyuts
         self.layers = layers
-        self.wavels = np.array(wavels).astype(float)
+        self.wavels = numpy.array(wavels).astype(float)
         
         # Set to default values
-        self.positions = np.zeros([1, 2]) if positions is None else np.array(positions)
-        self.fluxes = np.ones(len(self.positions)) if fluxes is None else np.array(fluxes)
-        self.weights = np.ones(len(self.wavels)) if weights is None else np.array(weights)
-        self.dithers = np.zeros([1, 2]) if dithers is None else dithers
+        self.positions = numpy.zeros([1, 2]) if positions is None else np.array(positions)
+        self.fluxes = numpy.ones(len(self.positions)) if fluxes is None else np.array(fluxes)
+        self.weights = numpy.ones(len(self.wavels)) if weights is None else np.array(weights)
+        self.dithers = numpy.zeros([1, 2]) if dithers is None else dithers
         self.detector_layers = [] if detector_layers is None else detector_layers
         
         if self.fluxes.shape == ():
-            self.fluxes = np.array([self.fluxes])
+            self.fluxes = numpy.array([self.fluxes])
         
-        # Determined from inputs - treated as static
+        # Determined from inumpyuts - treated as static
         self.Nstars =  len(self.positions)
         self.Nims =    len(self.dithers)
         self.Nwavels = 0 if wavels is None else len(self.wavels)
         
-        # Check Input shapes
-        assert self.positions.shape[-1] == 2, """Input positions must be 
+        # Check Inumpyut shapes
+        assert self.positions.shape[-1] == 2, """Inumpyut positions must be 
         of shape (Nstars, 2)"""
         
-        assert self.fluxes.shape[0] == self.Nstars, """Input fluxes must be
-        match input positions."""
+        assert self.fluxes.shape[0] == self.Nstars, """Inumpyut fluxes must be
+        match inumpyut positions."""
         
         weight_shape = self.weights.shape
         if len(weight_shape) == 1 and weights is not None:
-            assert weight_shape[0] == self.Nwavels, """Inputs weights shape 
+            assert weight_shape[0] == self.Nwavels, """Inumpyuts weights shape 
             must be either (len(wavels)) or  (len(positions), len(wavels)), 
             got shape: {}""".format(self.weights.shape)
         elif len(weight_shape) == 2:
-            assert weight_shape == [self.Nstars, self.Nwavels], """Inputs 
+            assert weight_shape == [self.Nstars, self.Nwavels], """Inumpyuts 
             weights shape must be either (len(wavels)) or  (len(positions), 
             len(wavels))"""
 
-    def debug_prop(self, wavel, offset=np.zeros(2)):        
+    def debug_prop(self, wavel, offset=numpy.zeros(2)):        
         """
         I believe this is diffable but there is no reason to force it to be
         """
@@ -289,7 +319,7 @@ class OpticalSystem(eqx.Module):
         # Then over the positions 
         propagator = vmap(propagate_single, in_axes=(None, 0))
 
-        # Generate input positions vector
+        # Generate inumpyut positions vector
         dithered_positions = self.dither_positions()
         
         # Calculate PSFs
@@ -305,9 +335,9 @@ class OpticalSystem(eqx.Module):
         detector_vmap = vmap(self.apply_detector_layers, in_axes=0)
         images = detector_vmap(psfs)
         
-        return np.squeeze(images)
+        return numpy.squeeze(images)
 
-    def propagate_mono(self, wavel, offset=np.zeros(2)):        
+    def propagate_mono(self, wavel, offset=numpy.zeros(2)):        
         """
         
         """
@@ -317,9 +347,9 @@ class OpticalSystem(eqx.Module):
             params_dict = self.layers[i](params_dict)
         return params_dict["Wavefront"].wf2psf()
     
-    def propagate_single(self, wavels, offset=np.zeros(2), weights=1.):
+    def propagate_single(self, wavels, offset=numpy.zeros(2), weights=1.):
         """
-        Only propagates a single star, allowing wavelength input
+        Only propagates a single star, allowing wavelength inumpyut
         sums output to single array
         
         Wavels must be an array and the same shape as weights if provided
@@ -347,12 +377,12 @@ class OpticalSystem(eqx.Module):
         """
         
         """
-        npix = psfs.shape[-1]
-        return psfs.reshape([self.Nims, self.Nstars, self.Nwavels, npix, npix])
+        numpyix = psfs.shape[-1]
+        return psfs.reshape([self.Nims, self.Nstars, self.Nwavels, numpyix, npix])
     
     def dither_positions(self):
         """
-        Dithers the input positions, returned with shape (Npsfs, 2)
+        Dithers the inumpyut positions, returned with shape (Npsfs, 2)
         """
         Npsfs = self.Nstars * self.Nims
         shaped_pos = self.positions.reshape([1, self.Nstars, 2])
@@ -364,7 +394,7 @@ class OpticalSystem(eqx.Module):
     def weight_psfs(self, psfs):
         """
         Normalise Weights, and format weights/fluxes
-        Psfs output shape: (Nims, Nstars, Nwavels, npix, npix)
+        Psfs output shape: (Nims, Nstars, Nwavels, numpyix, npix)
         We want weights shape: (1, 1, Nwavels, 1, 1)
         We want fluxes shape: (1, Nstars, 1, 1, 1)
         """
@@ -376,13 +406,13 @@ class OpticalSystem(eqx.Module):
         # Format and normalise weights
         if len(self.weights.shape) == 3:
             weights_in = self.weights.reshape([Nims, Nstars, Nwavels, 1, 1])
-            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
+            weights_in /= numpy.expand_dims(weights_in.sum(2), axis=2) 
         elif len(self.weights.shape) == 2:
             weights_in = self.weights.reshape([1, Nstars, Nwavels, 1, 1])
-            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
+            weights_in /= numpy.expand_dims(weights_in.sum(2), axis=2) 
         elif self.weights.shape[0] == self.Nwavels:
             weights_in = self.weights.reshape([1, 1, Nwavels, 1, 1])
-            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
+            weights_in /= numpy.expand_dims(weights_in.sum(2), axis=2) 
         else:
             weights_in = self.weights
         
