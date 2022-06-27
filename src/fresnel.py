@@ -46,7 +46,7 @@ class GaussianWavefront(dLux.PhysicalWavefront):
     def __init__(self: FresnelWavefront, beam_radius: Array, 
             wavelength: Float, offset: Array, amplitude: Array, 
             phase: Array, phase_radius: Float, 
-            position = 0.: Float) -> FresnelWavefront:
+            position: Float=0.0) -> FresnelWavefront:
         """
         Creates a wavefront with an empty amplitude and phase 
         arrays but of a given wavelength and phase offset. 

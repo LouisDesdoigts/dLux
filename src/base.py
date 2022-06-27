@@ -5,33 +5,6 @@ import equinox
 from copy import deepcopy
 
 
-class Wavefront(equinox.Module):
-    """
-    An abstract module that should never be directly substantiated.
-    This class represents a general optical wavefront although the 
-    exact implementation must go through a subclass. Wavefront
-    objects are assumed to be square.
-
-    Attributes
-    ----------
-    amplitude : Array
-        The electric field amplitudes over the wavefront. The 
-        amplitude is assumed to be in SI units. 
-    phase : Array
-        The phases of each pixel on the Wavefront. The phases are 
-        assumed to be unitless.
-    wavel : Float
-        The wavelength of the light. Assumed to be in metres.
-    pixelscale : Float
-        The physical dimensions of each square pixel. Assumed to be 
-        metres. 
-    """
-    amplitude : numpy.ndarray
-    phase : numpy.ndarray
-    wavel : float
-
-
-    def __init__(self, ):
 
 
 class PhysicalWavefront(equinox.Module):
@@ -58,10 +31,10 @@ class PhysicalWavefront(equinox.Module):
         
     """Real and Imag"""
     def get_real(self):
-        return self.ampltidue * numpy.cos(self.phase)
+        return self.amplitude * numpy.cos(self.phase)
     
     def get_imag(self):
-        return self.ampltidue * numpy.sin(self.phase)
+        return self.amplitude * numpy.sin(self.phase)
     
     
     
