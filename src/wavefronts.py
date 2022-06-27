@@ -57,7 +57,44 @@ class Wavefront(equinox.Module):
         self.amplitude = None # To be instantiated by CreateWavefront
         self.phase = None # To be instantiated by CreateWavefront
         self.pixel_scale = None # To be instantiated by CreateWavefront        
- 
+
+
+    def get_amplitude(self : Wavefront) -> Array:
+        """
+        Accessor for the amplitude.
+
+        Returns
+        -------
+        : Array 
+            The electric field amplitude in SI units of electric field. 
+        """
+        return self.amplitude
+
+
+    def get_phase(self : Wavefront) -> Array:
+        """
+        Accessor for the phase.
+
+        Returns
+        -------
+        : Array 
+            The phase of the Wavefront; a unitless qunatity.
+        """
+        return self.phase
+
+
+    def set_amplitude(self : Wavefront, ampltiude : Array) -> Wavefront:
+        """
+        Mutator for the amplitude. 
+
+        Parameters
+        ---------
+        return equinox.tree_at(
+            lambda wavefront : wavefront.amplitude, self, amplitude)
+
+    def set_phase(self : Wavefront, phase : Array) -> Wavefront:
+        return equinox.tree_at(
+            lambda wavefront : wavefront.phase, self, phase) 
 
     # TODO: Reconfirm the debate over getters. 
     def get_real(self : Wavefront) -> Array:
