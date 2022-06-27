@@ -100,6 +100,7 @@ class Wavefront(equinox.Module):
 
         Parameters
         ----------
+
         """
         
 
