@@ -800,7 +800,6 @@ class GaussianWavefront(PhysicalWavefront):
             The phase radius of the GuasianWavefront. This is a unitless
             quantity. 
         """
-        # TODO: Is offset required in this wavefront
         super().__init__(wavel, offset)
         self.beam_radius = beam_radius
         self.phase_radius = phase_radius
