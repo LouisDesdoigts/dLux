@@ -558,7 +558,6 @@ class PhysicalWavefront(Wavefront):
         return self.update_phasor(new_amplitude, new_phase)
 
 
-
     # TODO: Make logic Jax-Safe
     def interpolate(self : PlanarWavefront, coordinates : Array, 
             real_imaginary : bool = False) -> tuple[Array, Array]:
@@ -777,9 +776,14 @@ class GaussianWavefront(PhysicalWavefront):
     beam_radius : float
     phase_radius : float
 
-    def __init__(self: FresnelWavefront, beam_radius: float, 
-            wavel: float, phase_radius: float, 
-            position: float=0.0) -> FresnelWavefront:
+    def __init__(# TODO: Discuss full @PatrixkKidger layout with 
+                # @LouisDesdoigts and @benjaminpope
+            self : GaussianWavefront, 
+            beam_radius : float, 
+            wavelength : float, 
+            phase_radius : float, 
+            position : float=0.0, 
+            offset : Array) -> FresnelWavefront:
         """
         Creates a wavefront with an empty amplitude and phase 
         arrays but of a given wavel and phase offset. 
@@ -788,24 +792,83 @@ class GaussianWavefront(PhysicalWavefront):
         ----------
         beam_radius : float
             Radius of the beam at the initial optical plane.
-        wavel : float
+        wavelength : float
             Wavelength of the monochromatic light.
         offset : Array
             Phase shift of the initial optical plane. 
-        amplitude : Array        
-            An array containing the electric field amplitudes over the 
-            wavefront. Assumed to be square.
-        phase : Array
-            An array containing the electric field phase over the 
-            wavefront. Assumed to be square.
+        phase_radius :  float
+            The phase radius of the GuasianWavefront. This is a unitless
+            quantity. 
         """
         # TODO: Is offset required in this wavefront
-        super().__init__(wavel)
+        super().__init__(wavel, offset)
         self.beam_radius = beam_radius
         self.phase_radius = phase_radius
-        self.amplitude = None
-        self.phase = None
         self.position = position
+
+
+    def get_position(self : GaussianWavefront) -> float:
+        """
+        Accessor for the position of the wavefront. 
+
+        Returns 
+        -------
+        : float 
+            The position of the `Wavefront` from its starting point 
+            in meters.
+        """
+        return self.position
+
+
+    def set_position(self : GaussianWavefront, 
+            position : float) -> GaussianWavefront:
+        """
+        Mutator for the position of the wavefront. This method
+        should not be used explicitly as the pixel_scale is ...
+
+        Parameters
+        ----------
+        position : float
+            The new position of the wavefront from its starting point 
+            assumed to be in meters. 
+        
+        Returns
+        -------
+        : GaussianWavefront
+            This wavefront at the new position. 
+        """
+        # TODO: Make safe by also updating the pixel_scale in this 
+        # method. Rather discuss with @LouisDesdoigts as an example 
+        # of how helpful setters can be at maintaining invariants.
+        new_pixel_scale = self.calculate_pixel_scale(position)
+        new_wavefront = self.set_pixel_scale(new_pixel_scale)
+        return equinox.tree_at(
+            lambda wavefront : wavefront.position, self, position)
+
+
+    def get_beam_radius(self : GaussianWavefront) -> float:
+        """
+        Accessor for the radius of the wavefront.
+
+        Returns
+        -------
+        : float
+            The radius of the `GaussianWavefront` in meters.
+        """
+        return self.beam_radius
+
+
+    def get_phase_radius(self : GaussianWavefront) -> float:
+        """
+        Accessor for the phase radius of the wavefront.
+
+        Returns
+        -------
+        : float 
+            The phase radius of the wavefront. This is a unitless 
+            quantity.
+        """
+        return self.phase_radius
 
 
     def rayleigh_distance(self: FresnelWavefront) -> float:
@@ -847,17 +910,11 @@ class GaussianWavefront(PhysicalWavefront):
         In Wikipedia, The Free Encyclopedia. June 23, 2022, from 
         https://en.wikipedia.org/wiki/Spatial_frequency
         """
-        # TODO: Take this to a code review because I believe it is 
-        # wrong. 
-        # - I need to confirm that this is the correct generation of 
-        # the spatial frequency variables as this is not clarified in 
-        # the primary reference/ 
-        # - I need to confirm that we use the distance not the position 
-        coordinates = self.get_xycoords()
+        coordinates = self.get_pixel_positions()
         radius = numpy.sqrt((coordinates ** 2).sum(axis=0))
-        xi = coordinates[0, :, :] / radius / self.wavel
-        eta = coordinates[1, :, :] / radius / self.wavel       
-        return numpy.exp(1j * numpy.Pi * self.wavel \
+        xi = coordinates[0, :, :] / radius / self.get_wavelength()
+        eta = coordinates[1, :, :] / radius / self.get_wavelength()
+        return numpy.exp(1j * numpy.pi * self.get_wavelength() \
             * distance * (xi ** 2 + eta ** 2))
 
 
@@ -879,9 +936,9 @@ class GaussianWavefront(PhysicalWavefront):
             The near-field quadratic phase accumulated by the beam
             from a propagation of distance.
         """      
-        return 1j * numpy.pi * \
-            (self.get_xycoords() ** 2).sum(axis=0) \
-            / self.wavel / distance
+        return numpy.exp(1j * numpy.pi * \
+            (self.get_pixel_positions() ** 2).sum(axis=0) \
+            / self.get_wavelength() / distance)
 
 
     def location_of_waist(self: FresnelWavefront) -> float:
@@ -894,8 +951,9 @@ class GaussianWavefront(PhysicalWavefront):
         : float
             The position of the waist in metres.
         """
-        return - self.phase_radius / \
-            (1 + (self.phase_radius / self.rayleigh_distance()) ** 2)
+        return - self.get_phase_radius() / \
+            (1 + (self.get_phase_radius() / \
+            self.rayleigh_distance()) ** 2)
 
 
     def waist_radius(self: FresnelWavefront) -> float:
@@ -907,8 +965,9 @@ class GaussianWavefront(PhysicalWavefront):
         : float
             The radius of the beam at the waist in metres.
         """
-        return beam_radius / \
-            numpy.sqrt(1 + (self.rayleigh_distance() / self.beam_radius) ** 2) 
+        return self.get_beam_radius() / \
+            numpy.sqrt(1 + (self.rayleigh_distance() \
+                / self.get_beam_radius()) ** 2) 
 
 
     def calculate_pixel_scale(self: FresnelWavefront, position: float) -> None:
@@ -926,11 +985,11 @@ class GaussianWavefront(PhysicalWavefront):
             The position of the wavefront aling the axis of propagation
             in metres.
         """
+        # TODO: get_number_of_pixels() Used frequenctly not a function
         number_of_pixels = self.amplitude.shape[0]
-        new_pixel_scale = self.wavel * numpy.abs(position) / \
-            number_of_pixels / self.pixel_scale  
-        return equinox.tree_at(lambda wavefront : self.pixel_scale,
-            self, new_pixel_scale)   
+        new_pixel_scale = self.get_wavelength() * numpy.abs(position) / \
+            number_of_pixels / self.get_pixel_scale()  
+        return new_pixel_scale 
         
 
     def is_inside(self: FresnelWavefront, distance: float) -> Boolean:
@@ -950,7 +1009,5 @@ class GaussianWavefront(PhysicalWavefront):
             true if the point is within the rayleigh distance false 
             otherwise.
         """
-        # TODO: Review the location of this function which increases
-        # coupling with the GaussianPropagator. 
-        return numpy.abs(self.position + distance - \
+        return numpy.abs(self.get_position() + distance - \
             self.location_of_waist()) <= self.rayleigh_distance()
