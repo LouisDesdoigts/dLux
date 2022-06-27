@@ -235,6 +235,15 @@ class FresnelProp(eqx.Module):
 
 
 class GaussianPropagator(Propagator):
+    """
+    An intermediate plane fresnel algorithm for propagating the
+    `GaussianWavefront` class between the planes. The propagator 
+    is separate from the `Wavefront` to emphasise the similarity 
+    of these algorithms to the layers in machine learning algorithms.
+
+    Attributes:
+    ----------
+    """
 
 
     # Constants
