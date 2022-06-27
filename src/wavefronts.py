@@ -5,6 +5,7 @@ import typing
 
 Wavefront = typing.UserType("Wavefront", equinox.Module)
 PlanaWavefront = typing.UserType("PlanarWavefront", Wavefront)
+FresnelWavefront = typing.UserType("FresnelWavefront", Wavefront)
 Array = typing.UserType("Array", numpy.ndarray)
 
 
@@ -29,9 +30,9 @@ class Wavefront(equinox.Module):
     phase : Array
         The phases of each pixel on the Wavefront. The phases are 
         assumed to be unitless.
-    wavel : Float
-        The wavelength of the light. Assumed to be in metres.
-    pixelscale : Float
+    wavel : float
+        The wavel of the light. Assumed to be in metres.
+    pixelscale : float
         The physical dimensions of each square pixel. Assumed to be 
         metres. 
     """
@@ -41,18 +42,18 @@ class Wavefront(equinox.Module):
     pixel_scale : float
 
 
-    def __init__(self : Wavefront, wavelength : float):
+    def __init__(self : Wavefront, wavel : float):
         """
         Initialises a minimal wavefront specified only by the 
-        wavelength. 
+        wavel. 
 
         Parameters
         ----------
-        wavelength : float 
-            The monochromatic wavelength associated with this 
+        wavel : float 
+            The monochromatic wavel associated with this 
             wavefront. 
         """
-        self.wavelength = wavelength # Jax Safe
+        self.wavel = wavelength # Jax Safe
         self.amplitude = None # To be instantiated by CreateWavefront
         self.phase = None # To be instantiated by CreateWavefront
         self.pixel_scale = None # To be instantiated by CreateWavefront        
@@ -435,7 +436,7 @@ class PlanarWavefront(Wavefront):
     self.plane_type : str
 
 
-    def __init__(self : Wavefront, wavelength : float,
+    def __init__(self : Wavefront, wavel : float,
             offset : Array) -> PlanarWavefront:
         """
         Parameters
@@ -450,7 +451,7 @@ class PlanarWavefront(Wavefront):
             A minimal `PlanaWavefront` to be externally initialised
             by `CreateWavefront`. 
         """
-        super().__init__(wavelength)
+        super().__init__(wavel)
         self.offset = offset # Jax Safe
         self.plane_type = "Pupil" # Jax Unsafe
 
@@ -651,3 +652,392 @@ class PlanarWavefront(Wavefront):
             new_centre - centre : new_centre + centre]
 
         return self.update_phasor(new_amplitude, new_phase)
+
+
+class GaussianWavefront(dLux.PhysicalWavefront):
+    """
+    Expresses the behaviour and state of a wavefront propagating in 
+    an optical system under the fresnel assumptions. This 
+    implementation is based on the same class from the `poppy` 
+    library [poppy](https://github.com/spacetelescope/poppy/fresnel.py)
+    and Chapter 3 from _Applied Optics and Optical Engineering_
+    by Lawrence G. N.
+
+
+    Approximates the wavefront as a Gaussian Beam parametrised by the 
+    radius of the beam, the phase radius, the phase factor and the 
+    Rayleigh distance. Propagation is based on two different regimes 
+    for a total of four different opertations. 
+    """
+    # Dunder attributes
+    # TODO: Test and profile a working slots implementation.
+    # __slots__ = ("INDEX_GENERATOR", "position", "wavel")
+
+    # Constants
+    INDEX_GENERATOR = numpy.array([1, 2])
+
+    # Variables
+    position : float 
+    beam_radius : Array
+    phase_radius : 
+
+
+    def __init__(self: FresnelWavefront, beam_radius: Array, 
+            wavel: float, offset: Array, amplitude: Array, 
+            phase: Array, phase_radius: float, 
+            position: float=0.0) -> FresnelWavefront:
+        """
+        Creates a wavefront with an empty amplitude and phase 
+        arrays but of a given wavel and phase offset. 
+
+        Parameters
+        ----------
+        beam_radius : float
+            Radius of the beam at the initial optical plane.
+        wavel : float
+            Wavelength of the monochromatic light.
+        offset : Array
+            Phase shift of the initial optical plane. 
+        amplitude : Array        
+            An array containing the electric field amplitudes over the 
+            wavefront. Assumed to be square.
+        phase : Array
+            An array containing the electric field phase over the 
+            wavefront. Assumed to be square.
+        
+        """
+        super().__init__(wavel, offset)
+        self.beam_radius = beam_radius
+        self.amplitude = amplitude
+        self.phase = phase
+        self.position = position
+        # TODO: Determine if I need to implement some method of 
+        # best fit for the phase_radius and beam_radius. 
+
+
+    def rayleigh_distance(self: FresnelWavefront) -> None:
+        """
+        Calculates the rayleigh distance of the Gaussian beam.
+        
+        Returns
+        -------
+        : float
+            The Rayleigh distance of the wavefront in metres.
+        """
+        return numpy.pi * self.beam_radius ** 2 / self.wavel
+
+
+    def planar_to_planar(self: FresnelWavefront, distance: float) -> None:
+        """
+        Modifies the state of the wavefront by propagating a planar 
+        wavefront to a planar wavefront. 
+
+        Parameters
+        ----------
+        distance : float
+            The distance of the propagation in metres.
+        """
+        wavefront = self.amplitude * \
+            numpy.exp(1j * self.phase)
+
+        new_wavefront = numpy.fft.ifft2(
+            self.transfer_function(distance) * \
+            numpy.fft.fft2(wavefront))
+
+        amplitude = numpy.abs(new_wavefront)
+        phase = self.calculate_phase(new_wavefront)
+        return self.update_phasor(amplitude, phase)        
+
+
+    def waist_to_spherical(self: FresnelWavefront, 
+            distance: float) -> None:
+        """
+        Modifies the state of the wavefront by propagating it from 
+        the waist of the gaussian beam to a spherical wavefront. 
+
+        Parameters
+        ----------
+        distance : float 
+            The distance of the propagation in metres.
+        """
+        coefficient = 1 / 1j / self.wavel / distance
+
+        wavefront = self.amplitude * numpy.exp(1j * self.phase)
+
+        # TODO: Check that these are the correct algorithms to 
+        # use and ask if we are going to actually require the 
+        # reverse direction
+        fourier_transform = jax.lax.cond(numpy.sign(distance) > 0, 
+            lambda wavefront, distance: \
+                quadratic_phase_factor(distance) * \
+                numpy.fft.fft2(wavefront), 
+            lambda wavefront, distance: \
+                quadratic_phase_factor(distance) * \
+                numpy.fft.ifft2(wavefront),
+            wavefront, distance)
+
+        new_wavefront = coefficient * fourier_transform
+        phase = self.calculate_phase(new_wavefront)
+        amplitude = jax.numpy.abs(new_wavefront)
+        self.update_phasor(amplitude, phase)
+
+        # TODO: Confirm that I need to update the pixel scale for 
+        # this transformation.
+
+
+    def spherical_to_waist(self: FresnelWavefront, 
+            distance: float) -> None:
+        """
+        Modifies the state of the wavefront by propagating it from 
+        a spherical wavefront to the waist of the Gaussian beam. 
+
+        Parameters
+        ----------
+        distance : float
+            The distance of propagation in metres
+        """
+        coefficient = 1 / 1j / self.wavel / distance * \
+            quadratic_phase_factor(distance)
+
+        wavefront = self.amplitude * numpy.exp(1j * self.phase)
+
+        # TODO: Check that these are the correct algorithms to 
+        # use and ask if we are going to actually require the 
+        # reverse direction
+        fourier_transform = jax.lax.cond(numpy.sign(distance) > 0, 
+            lambda wavefront: numpy.fft.fft2(wavefront), 
+            lambda wavefront: numpy.fft.ifft2(wavefront),
+            wavefront)
+
+        new_wavefront = coefficient * fourier_transform
+        phase = self.calculate_phase(new_wavefront)
+        amplitude = jax.numpy.abs(new_wavefront)
+        self.update_phasor(amplitude, phase)
+
+        # TODO: Confirm that I need to update the pixel scale for 
+        # this transformation.
+
+
+    def transfer_function(self: FresnelWavefront, distance: float) -> Array:
+        """
+        The optical transfer function (OTF) for the gaussian beam.
+        Assumes propagation is along the axis. 
+
+        Parameters
+        ----------
+        distance : float
+            The distance to propagate the wavefront along the beam 
+            via the optical transfer function in metres.
+
+        Returns
+        -------
+        : float 
+            A phase representing the evolution of the wavefront over 
+            the distance. 
+
+        References
+        ----------
+        Wikipedia contributors. (2022, January 3). Direction cosine. 
+        In Wikipedia, The Free Encyclopedia. June 23, 2022, from 
+        https://en.wikipedia.org/wiki/Direction_cosine
+
+        Wikipedia contributors. (2022, January 3). Spatial frequecy.
+        In Wikipedia, The Free Encyclopedia. June 23, 2022, from 
+        https://en.wikipedia.org/wiki/Spatial_frequency
+        """
+        # TODO: Take this to a code review because I believe it is 
+        # wrong. 
+        # - I need to confirm that this is the correct generation of 
+        # the spatial frequency variables as this is not clarified in 
+        # the primary reference/ 
+        # - I need to confirm that we use the distance not the position 
+        coordinates = self.get_xycoords()
+        radius = numpy.sqrt((coordinates ** 2).sum(axis=0))
+        xi = coordinates[0, :, :] / radius / self.wavel
+        eta = coordinates[1, :, :] / radius / self.wavel       
+        return numpy.exp(1j * numpy.Pi * self.wavel \
+            * distance * (xi ** 2 + eta ** 2))
+
+
+    def quadratic_phase_factor(self: FresnelWavefront, 
+            distance: float) -> Float:
+        """
+        Convinience function that simplifies many of the diffraction
+        equations. Caclulates a quadratic phase factor associated with 
+        the beam. 
+
+        Parameters
+        ----------
+        distance : float
+            The distance of the propagation measured in metres. 
+
+        Returns
+        -------
+        : float
+            The near-field quadratic phase accumulated by the beam
+            from a propagation of distance.
+        """      
+        return 1j * numpy.pi * \
+            (self.get_xycoords() ** 2).sum(axis=0) \
+            / self.wavel / distance
+
+
+    def location_of_waist(self: FresnelWavefront) -> float:
+        """
+        Calculates the position of the waist along the direction of 
+        propagation based of the current state of the wave.
+
+        Returns
+        -------
+        : float
+            The position of the waist in metres.
+        """
+        return - self.phase_radius / \
+            (1 + (self.phase_radius / self.rayleigh_distance()) ** 2)
+
+
+    def waist_radius(self: FresnelWavefront) -> float:
+        """
+        The radius of the beam at the waist.
+
+        Returns
+        -------
+        : float
+            The radius of the beam at the waist in metres.
+        """
+        return beam_radius / \
+            numpy.sqrt(1 + (self.rayleigh_distance() / self.beam_radius) ** 2) 
+
+
+    def calculate_pixel_scale(self: FresnelWavefront, position: float) -> None:
+        """
+        The pixel scale at the position along the axis of propagation.
+        Assumes that the wavefront is square. That is:
+        ```
+        x, y = self.amplitude.shape
+        (x == y) == True
+        ```
+
+        Parameters
+        ----------
+        position : float
+            The position of the wavefront aling the axis of propagation
+            in metres.
+        """
+        number_of_pixels = self.amplitude.shape[0]
+        new_pixel_scale = self.wavel * numpy.abs(position) / \
+            number_of_pixels / self.pixel_scale     
+        
+
+
+    def outside_to_outside(self: FresnelWavefront, distance: float) -> None:
+        """
+        Propagation from outside the Rayleigh range to another 
+        position outside the Rayleigh range. 
+
+        Parameters
+        ----------
+        distance : float
+            The distance to propagate in metres.
+        """
+        self.waist_to_spherical(self.position + distance - \
+            self.location_of_waist()) * self.waist_to_spherical(
+            self.location_of_waist() - self.position)
+
+
+    def outside_to_inside(self: FresnelWavefront, distance: float) -> None:
+        """
+        Propagation from outside the Rayleigh range to inside the 
+        rayleigh range. 
+
+        Parameters
+        ----------
+        distance : float
+            The distance to propagate in metres.
+        """
+        self.planar_to_planar(self.position + distance - \
+            self.location_of_waist()) * self.spherical_to_waist(
+            self.location_of_waist() - self.position)
+
+
+    def inside_to_inside(self: FresnelWavefront, distance: float) -> None:
+        """
+        Propagation from inside the Rayleigh range to inside the 
+        rayleigh range. 
+
+        Parameters
+        ----------
+        distance : float
+            The distance to propagate in metres.
+        """
+        # Consider removing after checking the Jaxpr for speed. 
+        # This is just an alias for another function. 
+        self.planar_to_planar(distance)
+
+
+    def inside_to_outside(self: FresnelWavefront, distance: float) -> None:
+        """
+        Propagation from inside the Rayleigh range to outside the 
+        rayleigh range. 
+
+        Parameters
+        ----------
+        distance : float
+            The distance to propagate in metres.
+        """
+        self.waist_to_spherical(self.position + distance - \
+            self.location_of_waist()) * planar_to_planar(
+            self.location_of_waist() - self.position)
+
+
+    def is_inside(self: FresnelWavefront, distance: float) -> Boolean:
+        """ 
+        Determines whether a point at along the axis of propagation 
+        at distance away from the current position is inside the 
+        rayleigh distance. 
+
+        Parameters
+        ----------
+        distance : float
+            The distance to test in metres.
+
+        Returns
+        -------
+        : Boolean
+            true if the point is within the rayleigh distance false 
+            otherwise.
+        """
+        return float(numpy.abs(self.position + distance - \
+            self.location_of_waist()) <= self.rayleigh_distance())
+        
+
+    def propagate(self: FresnelWavefront, distance: float) -> None:
+        """
+        Propagates the wavefront approximated by a Gaussian beam 
+        the amount specified by distance. Note that distance can 
+        be negative.
+
+        Parameters 
+        ----------
+        distance : float
+            The distance to propagate in metres.
+        """
+        # This works by considering the current position and distnace 
+        # as a boolean array. The INDEX_GENERATOR converts this to 
+        # and index according to the following table.
+        #
+        # sum((0, 0) * (1, 2)) == 0
+        # sum((1, 0) * (1, 2)) == 1
+        # sum((0, 1) * (1, 2)) == 2
+        # sum((1, 1) * (1, 2)) == 3
+        #
+        # TODO: Test if a simple lookup is faster. 
+        decision_vector = self.is_inside([0., distance])
+        decision_index = numpy.sum(self.INDEX_GENERATOR * descision_vector)
+ 
+        # Enters the correct function differentiably depending on 
+        # the descision.
+        jax.lax.switch(decision_index, 
+            [self.inside_to_inside, self.inside_to_outside,
+            self.outside_to_inside, self.outside_to_outside],
+            distance) 
