@@ -40,7 +40,7 @@ class Wavefront(equinox.Module):
     wavel : float
 
 
-    def __init__(self, wavelength : float):
+    def __init__(self : Wavefront, wavelength : float):
         """
         Initialises a minimal wavefront specified only by the 
         wavelength. 
@@ -51,10 +51,16 @@ class Wavefront(equinox.Module):
             The monochromatic wavelength associated with this 
             wavefront. 
         """
+        self.wavelength = wavelength # Jax Safe
+        self.amplitude = None # To be instantiated by CreateWavefront
+        self.phase = None # To be instantiated by CreateWavefront
+        
 
-
-    def get_real(self) -> Array:
+    # TODO: Reconfirm the debate over getters. 
+    def get_real(self : Wavefront) -> Array:
         """
+        The real component of the `Wavefront`. 
+
         Throws
         ------
         : TypeError
@@ -66,12 +72,14 @@ class Wavefront(equinox.Module):
         : Array
             The real component of the optical disturbance with 
             SI units of electric field.  
-            
         """
+        return self.amplitude * numpy.cos(self.phase)
+        
 
-
-    def get_imaginary(self) -> Array:
+    def get_imaginary(self : Wavefront) -> Array:
         """
+        The imaginary component of the `Wavefront`
+
         Throws
         ------
         : TypeError
@@ -84,9 +92,10 @@ class Wavefront(equinox.Module):
             The imaginary component of the optical disturbance with 
             the SI units of electric field. 
         """
+        return self.amplitude * numpy.sin(self.phase)
 
 
-    def multiply_amplitude(self, 
+    def multiply_amplitude(self : Wavefront, 
             weights : typing.Union[float, Array]) -> Wavefront:
         """
         Modify the amplitude of the wavefront via elementwise 
@@ -118,9 +127,13 @@ class Wavefront(equinox.Module):
             The new Wavefront with the applied changes to the 
             amplitude array. 
         """
+        # TODO: lambda wavefront : wavefront.get_phase() over 
+        # lambda : wavefront.phase
+        return equinox.tree_at(lambda wavefront : wavefront.phase,
+            self, self.amplitude * weights)
 
 
-    def add_phase(self: Wavefront, 
+    def add_phase(self : Wavefront, 
             amounts : typing.Union[float, Array]) -> Wavefront:
         """
         Used to update the wavefront phases based on the current 
@@ -150,9 +163,11 @@ class Wavefront(equinox.Module):
         : Wavefront
             The new wavefront with the updated array of phases. 
         """
+        return equinox.tree_at(lambda wavefront : wavefront.phase,
+            self, self.phase + amounts)
 
 
-    def update_phasor(self, amplitude : Array, 
+    def update_phasor(self : Wavefront, amplitude : Array, 
             phase : Array) -> Wavefront:  
         """
         Used to write         Throws
@@ -177,6 +192,11 @@ class Wavefront(equinox.Module):
         : Wavefront
             The new wavefront with specified by `amplitude` and `phase`        
         """
+        # TODO: Although the others do not want basix mutators and 
+        # accessors point out that the body of this code could be:
+        # return self.set_phase(phase).set_amplitude(amplitude)
+        new_wavefront = equinox.tree_at(
+            lambda wavefront : wavefront.amplitude, )
 
 
     def wavefront_to_point_spread_function(self) -> Array:
