@@ -4,6 +4,7 @@ import typing
 
 
 Wavefront = typing.UserType("Wavefront", equinox.Module)
+PlanaWavefront = typing.UserType("PlanarWavefront", Wavefront)
 Array = typing.UserType("Array", numpy.ndarray)
 
 
@@ -154,7 +155,8 @@ class Wavefront(equinox.Module):
     def update_phasor(self, amplitude : Array, 
             phase : Array) -> Wavefront:  
         """
-        Used to write the state of the optical disturbance. Ignores 
+        Used to write         Throws
+        ------ the state of the optical disturbance. Ignores 
         the current state. It is assumed that `amplitude` and `phase`
         have the same shape i.e. `amplitude.shape == phase.shape`.
         It is not assumed that the shape of the wavefront is 
@@ -363,6 +365,166 @@ class Wavefront(equinox.Module):
         """
 
 
+# TODO: Ask @LouisDesdoigts what the `plane_type` attribute is 
 class PlanarWavefront(Wavefront):
     """
-    
+    A simple plane wave extending the abstract `Wavefront` class. 
+    Assumes that the wavefront is square. 
+
+    Attributes
+    ----------
+    offset : Array[float]
+        The polarisation state of the wave described by the x and 
+        y phase lag of the wavefront. This quantity is unitless and 
+        it is assumed that `offset.shape == (2, )`  
+    pixel_scale : float
+        The physical size in meters of each pixel on the detector 
+        screen. 
+    plane_type : str
+        The type of plane occupied by the wavefront. 
+    """
+    self.offset : Array
+    self.pixel_scale : float
+    self.plane_type : str
+
+
+    def __init__(self : Wavefront, wavelength : float,
+            offset : Array) -> PlanarWavefront:
+        """
+        Parameters
+        ----------
+        offset : Array
+            The polarisation state of the wavefront specified by the 
+            x and y phase differences. 
+
+        Returns
+        -------
+        : PlanarWavefront
+            A minimal `PlanaWavefront` to be externally initialised
+            by `CreateWavefront`. 
+        """
+        super().__init__(wavelength)
+
+
+    # TODO: Ask @LouisDesdoigts if this logic needs to be gradable.
+    # and non-statically `jit`able. 
+    def interpolate(self : PlanarWavefront, coordinates : Array, 
+            real_imaginary : bool = False) -> tuple[Array, Array]:
+        """
+        Interpolates the `Wavefront` at the points specified by 
+        coordinates. The default interpolation uses the amplitude 
+        and phase although by passing `real_imgainary == True` 
+        the interpolation can be based on the real and imaginary 
+        information. The main use of this function is as a helper 
+        method to `self.paraxial_interpolate`.
+
+        Parameters
+        ----------
+        coordinates : Array
+            The coordinates to interpolate the optical disturbance
+            at. Assumed to have the units meters. 
+        real_imaginary : bool
+            Whether to use the amplitude-phase or real-imaginary
+            representation for the interpolation. The amplitude-
+            phase representation is slightly faster.
+
+        Returns
+        -------
+        : tuple[Array, Array]
+            The amplitude and phase of the wavefront at `coordinates`
+            based on a linear interpolation.
+        """
+
+
+    def paraxial_interpolate(self : PlanarWavefront, 
+            pixel_scale_out : float, number_of_pixels_out : int,
+            real_imaginary : bool = False) -> PlanarWavefront: 
+        """
+        Interpolates the `Wavefront` so that it remains centered on 
+        each pixel (paraxial). Calculation can be performed using 
+        either the real-imaginary or amplitude-phase representations 
+        of the wavefront. The default is amplitude-phase. 
+
+        Parameters
+        ----------
+        pixel_scale_out : float
+            The dimensions of a single square pixel after the 
+            interpolation.
+        number_of_pixels_out : int
+            The number of pixels along one side of the square
+            `Wavefront` after the interpolation. 
+        real_imaginary : bool = False
+            Whether to use the real-imaginary representation of the 
+            wavefront for the interpolation. 
+
+        Returns
+        -------
+        : PlanarWavefront
+            The new wavefront with the updated optical disturbance. 
+        """
+
+
+    # TODO: Need to review the `jit` and `grad` issues with 
+    # @LouisDesdoigts and check that side effects are permitted 
+    # for the function.
+    # TODO: Point out that the `.at` syntax guarantees that this 
+    # breaks silently when padding is smaller than wavefront. 
+    def pad_to(self : PlanarWavefront, 
+            number_of_pixels_out : int) -> PlanarWavefront:
+        """
+        Pads the `Wavefront` with zeros. Assumes that 
+        `number_of_pixels_out > self.amplitude.shape[0]`. 
+        Note that `Wavefronts` with even pixel dimensions can 
+        only be padded (without interpolation) to even pixel 
+        dimensions and vice-versa. 
+
+        Throws
+        ------
+        : ValueError
+            If `number_of_pixels_out%2 != self.amplitude.shape[0]%2`
+            i.e. padding an even (odd) `Wavefront` to odd (even).
+
+        Parameters
+        ----------
+        number_of_pixels_out : int
+            The square side length of the array after it has been 
+            zero padded. 
+
+
+        Returns
+        -------
+        : PlanarWavefront
+            The new `Wavefront` with the optical disturbance zero 
+            padded to the new dimensions.
+        """
+
+
+    def crop_to(self : PlanarWavefront, 
+            number_of_pixels_out : int) -> PlanarWavefront:
+        """
+        Crops a `Wavefront`'s optical disturbance. Assumes that 
+        `number_of_pixels_out < self.amplitude.shape[0]`. 
+        `Wavefront`s with an even number of pixels can only 
+        be cropped to an even number of pixels without interpolation
+        and vice-versa.    
+        
+        Throws
+        ------
+        : ValueError
+            If `number_of_pixels_out%2 != self.amplitude.shape[0]%2`
+            i.e. padding an even (odd) `Wavefront` to odd (even).
+
+        Parameters
+        ----------
+        number_of_pixels_out : int
+            The square side length of the array after it has been 
+            zero padded. 
+
+
+        Returns
+        -------
+        : PlanarWavefront
+            The new `Wavefront` with the optical disturbance zero 
+            cropped to the new dimensions.
+        """
+
