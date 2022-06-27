@@ -24,25 +24,20 @@ class Wavefront(equinox.Module):
 
     Attributes
     ----------
-    amplitude : Array
-        The electric field amplitudes over the wavefront. The 
-        amplitude is assumed to be in SI units. 
-    phase : Array
-        The phases of each pixel on the Wavefront. The phases are 
-        assumed to be unitless.
     wavel : float
         The wavel of the light. Assumed to be in metres.
-    pixelscale : float
-        The physical dimensions of each square pixel. Assumed to be 
-        metres. 
+    offset : Array[float]
+        The polarisation state of the wave described by the x and 
+        y phase lag of the wavefront. This quantity is unitless and 
+        it is assumed that `offset.shape == (2, )`  
     """
-    amplitude : Array
-    phase : Array
+
     wavel : float
-    pixel_scale : float
+    offset : Array[float]
 
 
-    def __init__(self : Wavefront, wavel : float):
+    def __init__(self : Wavefront, wavel : float, 
+            offset : Array[float]) -> Wavefront:
         """
         Initialises a minimal wavefront specified only by the 
         wavel. 
@@ -52,11 +47,13 @@ class Wavefront(equinox.Module):
         wavel : float 
             The monochromatic wavel associated with this 
             wavefront. 
+        offset : Array[float]
+            The x and y angles of incidence to the surface assumed to 
+            be in radians. 
         """
         self.wavel = wavelength # Jax Safe
-        self.amplitude = None # To be instantiated by CreateWavefront
-        self.phase = None # To be instantiated by CreateWavefront
         self.pixel_scale = None # To be instantiated by CreateWavefront        
+<<<<<<< Updated upstream
 
 
     def get_amplitude(self : Wavefront) -> Array:
@@ -95,8 +92,66 @@ class Wavefront(equinox.Module):
     def set_phase(self : Wavefront, phase : Array) -> Wavefront:
         return equinox.tree_at(
             lambda wavefront : wavefront.phase, self, phase) 
+=======
+        self.offset = offset
 
-    # TODO: Reconfirm the debate over getters. 
+
+    def get_offset(self : Wavefront) -> Array[float]:
+        """
+        The offset of this `Wavefront`.
+
+        Parameters
+        ----------
+        
+ 
+        
+
+class PhysicalWavefront(Wavefront):
+    """
+    A simple plane wave extending the abstract `Wavefront` class. 
+    Assumes that the wavefront is square. This is Physical as 
+    opposed to Angular, because there are no infinite distances.  
+
+    Attributes
+    ----------
+    plane_type : str
+        The type of plane occupied by the wavefront. 
+    amplitude : Array
+        The electric field amplitudes over the wavefront. The 
+        amplitude is assumed to be in SI units. 
+    phase : Array
+        The phases of each pixel on the Wavefront. The phases are 
+        assumed to be unitless.
+    pixel_scale : float
+        The physical dimensions of each square pixel. Assumed to be 
+        metres. 
+    """
+    self.plane_type : str # For debugging
+    amplitude : Array
+    phase : Array
+
+
+    def __init__(self : Wavefront, wavel : float,
+            offset : Array) -> PlanarWavefront:
+        """
+        Parameters
+        ----------
+        offset : Array
+            The polarisation state of the wavefront specified by the 
+            x and y phase differences. 
+
+        Returns
+        -------
+        : PlanarWavefront
+            A minimal `PlanaWavefront` to be externally initialised
+            by `CreateWavefront`. 
+        """
+        super().__init__(wavel, offset)
+        self.plane_type : str = "Pupil" # Jax Unsafe
+        self.amplitude : Array = None
+        self.phase : Array = None
+
+    
     def get_real(self : Wavefront) -> Array:
         """
         The real component of the `Wavefront`. 
@@ -168,8 +223,6 @@ class Wavefront(equinox.Module):
             The new Wavefront with the applied changes to the 
             amplitude array. 
         """
-        # TODO: lambda wavefront : wavefront.get_phase() over 
-        # lambda : wavefront.phase
         return equinox.tree_at(lambda wavefront : wavefront.phase,
             self, self.amplitude * weights)
 
@@ -211,8 +264,7 @@ class Wavefront(equinox.Module):
     def update_phasor(self : Wavefront, amplitude : Array, 
             phase : Array) -> Wavefront:  
         """
-        Used to write         Throws
-        ------ the state of the optical disturbance. Ignores 
+        Used to write the state of the optical disturbance. Ignores 
         the current state. It is assumed that `amplitude` and `phase`
         have the same shape i.e. `amplitude.shape == phase.shape`.
         It is not assumed that the shape of the wavefront is 
@@ -245,7 +297,8 @@ class Wavefront(equinox.Module):
 
     # TODO: Probably on the nose, taking PEP8 too far like some 
     # fanatical nerd
-    def wavefront_to_point_spread_function(self) -> Array:
+    # TODO: Possibly not neccessary. 
+    def wavefront_to_psf(self : Wavefront) -> Array:
         """
         Calculates the _P_oint _S_pread _F_unction (PSF) of the 
         wavefront. 
@@ -263,8 +316,7 @@ class Wavefront(equinox.Module):
         return self.amplitude ** 2
 
 
-    # TODO: Review name. More being a fanatical nerd.
-    def add_optical_path_difference(self: Wavefront, 
+    def add_opd(self: Wavefront, 
             path_difference : typing.Union[float, Array]) -> Wavefront:
         """
         Changes the state of the wavefront based on the optical path 
@@ -294,8 +346,6 @@ class Wavefront(equinox.Module):
         return self.add_phase(phase_difference)
 
 
-    # TODO: Notify @LouisDesdoigts of the numpy.norm and numpy.pnorm
-    # family of functions. 
     def normalise(self : Wavefront) -> Wavefront:
         """
         Reduce the electric field amplitude of the wavefront to a 
@@ -316,11 +366,12 @@ class Wavefront(equinox.Module):
             The new wavefront with the normalised electric field 
             amplitudes. The amplitude is now unitless. 
         """
-        total_intensity = numpy.norm(self.amplitude ** 2)
+        # TODO: Double check
+        total_intensity = numpy.norm(self.amplitude)
         return self.multiply_amplitude(1 / total_intenstiy)
 
 
-    def get_pixel_positions(self : Wavefront, 
+    def get_pixel_coordinates(self : Wavefront, 
             number_of_pixels : int) -> Array:
         """
         A static helper method for correctly creating paraxially pixel 
@@ -363,7 +414,7 @@ class Wavefront(equinox.Module):
         return numpy.array([x_positions, y_positions])
 
 
-    def get_coordinates(self : Wavefront) -> Array:
+    def get_pixel_positions(self : Wavefront) -> Array:
         """
         The physical coordinates of each optical disturbance in meters.
 
@@ -384,8 +435,6 @@ class Wavefront(equinox.Module):
         return self.pixel_scale * self.get_pixel_grid()
 
 
-    # TODO: Confirm ownership of the `invert` family.
-    # TODO: Compare jaxpr with reverse. 
     def invert_x_and_y(self : Wavefront) -> Wavefront:
         """
         Reflects the wavefront across both axes. 
@@ -403,7 +452,6 @@ class Wavefront(equinox.Module):
             The new `Wavefront` with the phase and amplitude arrays
             reversed accros both axes.
         """
-        # TODO: Review the syntax below with @LouisDesdoigs
         return self.invert_x().invert_y()
 
 
@@ -451,50 +499,8 @@ class Wavefront(equinox.Module):
         return self.update_phasor(new_amplitude, new_phase)
 
 
-# TODO: Ask @LouisDesdoigts what the `plane_type` attribute is 
-class PlanarWavefront(Wavefront):
-    """
-    A simple plane wave extending the abstract `Wavefront` class. 
-    Assumes that the wavefront is square. 
 
-    Attributes
-    ----------
-    offset : Array[float]
-        The polarisation state of the wave described by the x and 
-        y phase lag of the wavefront. This quantity is unitless and 
-        it is assumed that `offset.shape == (2, )`  
-    pixel_scale : float
-        The physical size in meters of each pixel on the detector 
-        screen. 
-    plane_type : str
-        The type of plane occupied by the wavefront. 
-    """
-    self.offset : Array
-    self.plane_type : str
-
-
-    def __init__(self : Wavefront, wavel : float,
-            offset : Array) -> PlanarWavefront:
-        """
-        Parameters
-        ----------
-        offset : Array
-            The polarisation state of the wavefront specified by the 
-            x and y phase differences. 
-
-        Returns
-        -------
-        : PlanarWavefront
-            A minimal `PlanaWavefront` to be externally initialised
-            by `CreateWavefront`. 
-        """
-        super().__init__(wavel)
-        self.offset = offset # Jax Safe
-        self.plane_type = "Pupil" # Jax Unsafe
-
-
-    # TODO: Ask @LouisDesdoigts if this logic needs to be gradable.
-    # and non-statically `jit`able. 
+    # TODO: Make logic Jax-Safe
     def interpolate(self : PlanarWavefront, coordinates : Array, 
             real_imaginary : bool = False) -> tuple[Array, Array]:
         """
@@ -521,7 +527,6 @@ class PlanarWavefront(Wavefront):
             The amplitude and phase of the wavefront at `coordinates`
             based on a linear interpolation.
         """
-        # TODO: Review new names with @LouisDesdoigts. 
         if not real_imaginary:
             new_amplitude = map_coordinates(
                 self.amplitude, coordinates, order=1)
@@ -570,12 +575,10 @@ class PlanarWavefront(Wavefront):
         centre = (number_of_pixels_in - 1) / 2
         new_centre = (number_of_pixels_out - 1) / 2
         pixels = ratio * (-new_centre, new_centre, number_of_pixels_out) + centre
-        # TODO: These seem to be assigned backwards. 
-        y_pixels, x_pixels = numpy.meshgrid(pixels, pixels)
-        coordinates = numpy.array([x_pixels, y_pixels])
-        # TODO: ampl and phase are not defined here.
-        new_amplitude, new_phase = self.interp(
-            self.amplitude, self.phase, real_imaginary=real_imaginary)
+        x_pixels, y_pixels = numpy.meshgrid(pixels, pixels)
+        coordinates = numpy.array([y_pixels, x_pixels])
+        new_amplitude, new_phase = self.interpolate(
+            coordinates, real_imaginary=real_imaginary)
         
         # Update Phasor
         self = self.update_phasor(new_amplitude, new_phase)
@@ -589,11 +592,6 @@ class PlanarWavefront(Wavefront):
             lambda wavefront : wavefront.pixelscale, self, pixel_scale_out)
 
 
-    # TODO: Need to review the `jit` and `grad` issues with 
-    # @LouisDesdoigts and check that side effects are permitted 
-    # for the function.
-    # TODO: Point out that the `.at` syntax guarantees that this 
-    # breaks silently when padding is smaller than wavefront. 
     def pad_to(self : PlanarWavefront, 
             number_of_pixels_out : int) -> PlanarWavefront:
         """
@@ -624,10 +622,11 @@ class PlanarWavefront(Wavefront):
         """
         number_of_pixels_in = self.amplitude.shape[0]
 
-        # TODO: number_of_pixels_out and npix_in are not defined here.  
         if number_of_pixels_in % 2 != number_of_pixels_out % 2:
             raise ValueError("Only supports even -> even or odd -> odd padding")
-        
+       
+        # TODO: Error (>) for the JAX silent error. 
+ 
         new_centre = number_of_pixels_out // 2
         centre = number_of_pixels_in // 2
         remainder = number_of_pixels_in % 2
@@ -674,7 +673,6 @@ class PlanarWavefront(Wavefront):
         """
         number_of_pixels_in = self.amplitude.shape[0]
         
-        # TODO: npix_in and npix_out not defined. Does this logic work?
         if number_of_pixels_in%2 != number_of_pixels_out%2:
             raise ValueError("Only supports even -> even or 0dd -> odd cropping")
         
@@ -691,7 +689,7 @@ class PlanarWavefront(Wavefront):
         return self.update_phasor(new_amplitude, new_phase)
 
 
-class GaussianWavefront(dLux.PhysicalWavefront):
+class GaussianWavefront(PhysicalWavefront):
     """
     Expresses the behaviour and state of a wavefront propagating in 
     an optical system under the fresnel assumptions. This 
