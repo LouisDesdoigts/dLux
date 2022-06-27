@@ -823,8 +823,8 @@ class GaussianWavefront(PhysicalWavefront):
     def set_position(self : GaussianWavefront, 
             position : float) -> GaussianWavefront:
         """
-        Mutator for the position of the wavefront. This method
-        should not be used explicitly as the pixel_scale is ...
+        Mutator for the position of the wavefront. Changes the 
+        pixel_scale which is a function of the position.  
 
         Parameters
         ----------
