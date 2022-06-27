@@ -52,8 +52,7 @@ class Wavefront(equinox.Module):
             be in radians. 
         """
         self.wavel = wavelength # Jax Safe
-        self.pixel_scale = None # To be instantiated by CreateWavefront        
-<<<<<<< Updated upstream
+        self.offset = offset # To be instantiated by CreateWavefront        
 
 
     def get_amplitude(self : Wavefront) -> Array:
@@ -88,12 +87,11 @@ class Wavefront(equinox.Module):
         ---------
         return equinox.tree_at(
             lambda wavefront : wavefront.amplitude, self, amplitude)
+        """
 
     def set_phase(self : Wavefront, phase : Array) -> Wavefront:
         return equinox.tree_at(
             lambda wavefront : wavefront.phase, self, phase) 
-=======
-        self.offset = offset
 
 
     def get_offset(self : Wavefront) -> Array[float]:
@@ -102,8 +100,7 @@ class Wavefront(equinox.Module):
 
         Parameters
         ----------
-        
- 
+        """
         
 
 class PhysicalWavefront(Wavefront):
@@ -151,7 +148,7 @@ class PhysicalWavefront(Wavefront):
         self.amplitude : Array = None
         self.phase : Array = None
 
-    
+
     def get_real(self : Wavefront) -> Array:
         """
         The real component of the `Wavefront`. 
