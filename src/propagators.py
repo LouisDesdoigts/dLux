@@ -280,7 +280,10 @@ class GaussianPropagator(object):
 
         new_amplitude = numpy.abs(new_complex_wavefront)
         new_phase = numpy.angle(new_complex_wavefront)
-        return wavefront.update_phasor(amplitude, phase)        
+        
+        return wavefront\
+            .set_position(wavefront.get_position() + distance)\
+            .update_phasor(new_amplitude, new_phase)        
 
 
     def waist_to_spherical(self : GaussianPropagator, 
@@ -307,9 +310,6 @@ class GaussianPropagator(object):
         complex_wavefront = wavefront.get_amplitude() * \
             numpy.exp(1j * self.get_phase())
 
-        # TODO: Check that these are the correct algorithms to 
-        # use and ask if we are going to actually require the 
-        # reverse direction
         fourier_transform = jax.lax.cond(numpy.sign(distance) > 0, 
             lambda wavefront, distance: \
                 quadratic_phase_factor(distance) * \
@@ -322,107 +322,181 @@ class GaussianPropagator(object):
         new_complex_wavefront = coefficient * fourier_transform
         new_phase = numpy.angle(new_complex_wavefront)
         new_amplitude = numpy.abs(new_complex_wavefront)
-        new_pixel_scale = wavefront.calculate_pixel_scale()
-        self.update_phasor(amplitude, phase)
 
-        # TODO: Confirm that I need to update the pixel scale for 
-        # this transformation.
+        return wavefront\
+            .update_phasor(new_amplitude, new_phase)\
+            .set_position(wavefront.get_position() + distance)
 
 
-    def spherical_to_waist(self: FresnelWavefront, 
-            distance: float) -> None:
+    def spherical_to_waist(self : GaussianPropagator, 
+            wavefront: GaussianWavefront, distance: float) -> GaussianWavefront:
         """
         Modifies the state of the wavefront by propagating it from 
         a spherical wavefront to the waist of the Gaussian beam. 
 
         Parameters
         ----------
+        wavefront : GaussianWavefront 
+            The `Wavefront` that is getting propagated. Must be either 
+            a `GaussianWavefront` or a direct subclass.
         distance : float
-            The distance of propagation in metres
+            The distance of propagation in metres.
+
+        Returns
+        -------
+        : GaussianWavefront
+            The `wavefront` propagated by distance. 
         """
-        coefficient = 1 / 1j / self.wavel / distance * \
-            quadratic_phase_factor(distance)
+        # TODO: consider adding get_complex_wavefront() as this is 
+        # used in a number of locations. This could be implemented
+        # in the PhysicalWavefront and inherrited. 
+        coefficient = 1 / 1j / wavefront.get_wavelength() / \
+            distance * wavefront.quadratic_phase_factor(distance)
+        complex_wavefront = wavefront.get_amplitude() * \
+            numpy.exp(1j * wavefront.get_phase())
 
-        wavefront = self.amplitude * numpy.exp(1j * self.phase)
-
-        # TODO: Check that these are the correct algorithms to 
-        # use and ask if we are going to actually require the 
-        # reverse direction
         fourier_transform = jax.lax.cond(numpy.sign(distance) > 0, 
             lambda wavefront: numpy.fft.fft2(wavefront), 
             lambda wavefront: numpy.fft.ifft2(wavefront),
-            wavefront)
+            complex_wavefront)
 
         new_wavefront = coefficient * fourier_transform
-        phase = self.calculate_phase(new_wavefront)
-        amplitude = jax.numpy.abs(new_wavefront)
-        self.update_phasor(amplitude, phase)
+        new_phase = numpy.angle(new_wavefront)
+        new_amplitude = numpy.abs(new_wavefront)
+        return wavefront\
+            .update_phasor(new_amplitude, new_phase)
+            .set_position(wavefront.get_position() + distance)
 
-        # TODO: Confirm that I need to update the pixel scale for 
-        # this transformation.
 
-
-    def outside_to_outside(self: FresnelWavefront, distance: float) -> None:
+    def outside_to_outside(self : GaussianWavefront, 
+            wavefront : GaussianWavefront, 
+            distance: float) -> GaussianWavefront:
         """
         Propagation from outside the Rayleigh range to another 
         position outside the Rayleigh range. 
 
         Parameters
         ----------
+        wavefront : GaussianWavefront
+            The wavefront to propagate. Assumed to be either a 
+            `GaussianWavefront` or a direct subclass.
         distance : float
             The distance to propagate in metres.
+    
+        Returns
+        -------
+        : GaussianWavefront 
+            The new `Wavefront` propgated by distance. 
         """
-        self.waist_to_spherical(self.position + distance - \
-            self.location_of_waist()) * self.waist_to_spherical(
-            self.location_of_waist() - self.position)
+        # TODO: Make sure that the displacements are called by the 
+        # correct function.
+        from_waist_displacement = wavefront.get_position() \
+            + distance - wavefront.location_of_waist()
+        to_waist_displacement = wavefront.location_of_waist() \
+            - wavefront.get_position()
+
+        wavefront_at_waist = self.spherical_to_waist(
+            wavefront, to_waist_displacement)
+        wavefront_at_distance = self.spherical_to_waist(
+            wavefront_at_waist, from_waist_displacement)
+
+        return wavefront_at_distance
 
 
-    def outside_to_inside(self: FresnelWavefront, distance: float) -> None:
+    def outside_to_inside(self : GaussianPropagator,
+            wavefront: GaussianWavefront, distance: float) -> None:
         """
         Propagation from outside the Rayleigh range to inside the 
         rayleigh range. 
 
         Parameters
         ----------
+        wavefront : GaussianWavefront
+            The wavefront to propagate. Must be either 
+            `GaussianWavefront` or a direct subclass.
         distance : float
             The distance to propagate in metres.
+
+        Returns
+        -------
+        : GaussianWavefront
+            The `Wavefront` propagated by `distance` 
         """
-        self.planar_to_planar(self.position + distance - \
-            self.location_of_waist()) * self.spherical_to_waist(
-            self.location_of_waist() - self.position)
+        from_waist_displacement = wavefront.position + distance - \
+            wavefront.location_of_waist()
+        to_waist_position = wavefront.location_of_waist() - \
+            wavefront.get_position()
+
+        wavefront_at_waist = self.planar_to_planar(
+            wavefront, to_waist_displacement)
+        wavefront_at_distance = self.spherical_to_waist(
+            wavefront_at_waist, from_waist_displacement)
+
+        return wavefront_at_distance
 
 
-    def inside_to_inside(self: FresnelWavefront, distance: float) -> None:
+    def inside_to_inside(self : GaussianPropagator, 
+            wavefront : GaussianWavefront, 
+            distance: float) -> GaussianWavefront:
         """
         Propagation from inside the Rayleigh range to inside the 
         rayleigh range. 
 
         Parameters
         ----------
+        wavefront : GaussianWavefront
+            The `Wavefront` to propagate. This must be either a 
+            `GaussianWavefront` or a direct subclass.
         distance : float
             The distance to propagate in metres.
+
+
+        Returns
+        -------
+        : GaussianWavefront
+            The `Wavefront` propagated by `distance`
         """
-        # Consider removing after checking the Jaxpr for speed. 
+        # TODO: Consider removing after checking the Jaxpr for speed. 
         # This is just an alias for another function. 
-        self.planar_to_planar(distance)
+        return self.planar_to_planar(wavefront, distance)
 
 
-    def inside_to_outside(self: FresnelWavefront, distance: float) -> None:
+    def inside_to_outside(self : GaussianPropagator, 
+            wavefront : GaussianWavefront, 
+            distance: float) -> GaussianWavefront:
         """
         Propagation from inside the Rayleigh range to outside the 
         rayleigh range. 
 
         Parameters
         ----------
+        wavefront : GaussianWavefront
+            The `Wavefront` to propgate. Must be either a 
+            `GaussianWavefront` or a direct subclass.
         distance : float
             The distance to propagate in metres.
+
+        Returns
+        -------
+        : GaussianWavefront 
+            The `Wavefront` propagated `distance`.
         """
-        self.waist_to_spherical(self.position + distance - \
-            self.location_of_waist()) * planar_to_planar(
-            self.location_of_waist() - self.position)
+        from_waist_displacement = wavefront.get_position() + \
+            distance - wavefront.location_of_waist()
+        to_waist_displacement = wavefront.location_of_waist() - \
+            wavefront.get_position()
+
+        wavefront_at_waist = self.planar_to_planar(
+            wavefront, to_waist_displacement)
+        wavefront_at_distance = self.waist_to_spherical(
+            wavefront_at_waist, from_waist_displacement)
+
+        return wavefront_at_distance
 
 
-    def propagate(self: FresnelWavefront, distance: float) -> None:
+    def __call__(self : GaussianPropagator, 
+            wavefront : GaussianWavefront, 
+            distance: float) -> GaussianWavefront:
         """
         Propagates the wavefront approximated by a Gaussian beam 
         the amount specified by distance. Note that distance can 
@@ -430,8 +504,16 @@ class GaussianPropagator(object):
 
         Parameters 
         ----------
+        wavefront : GaussianWavefront
+            The `Wavefront` to propagate. Must be a `GaussianWavefront`
+            or a direct subclass.
         distance : float
             The distance to propagate in metres.
+
+        Returns
+        -------
+        : GaussianWavefront 
+            The `Wavefront` propagated `distance`.
         """
         # This works by considering the current position and distnace 
         # as a boolean array. The INDEX_GENERATOR converts this to 
@@ -443,12 +525,17 @@ class GaussianPropagator(object):
         # sum((1, 1) * (1, 2)) == 3
         #
         # TODO: Test if a simple lookup is faster. 
-        decision_vector = self.is_inside([0., distance])
-        decision_index = numpy.sum(self.INDEX_GENERATOR * descision_vector)
+        decision_vector = wavefront.is_inside([
+            wavefront.get_position(), 
+            wavefront.get_position() + distance])
+        decision_index = numpy.sum(
+            self.INDEX_GENERATOR * descision_vector)
  
         # Enters the correct function differentiably depending on 
         # the descision.
-        jax.lax.switch(decision_index, 
+        new_wavefront = jax.lax.switch(decision_index, 
             [self.inside_to_inside, self.inside_to_outside,
             self.outside_to_inside, self.outside_to_outside],
-            distance) 
+            wavefront, distance) 
+
+        return new_wavefront
