@@ -38,6 +38,7 @@ class Wavefront(equinox.Module):
     amplitude : Array
     phase : Array
     wavel : float
+    pixel_scale : float
 
 
     def __init__(self : Wavefront, wavelength : float):
@@ -54,7 +55,8 @@ class Wavefront(equinox.Module):
         self.wavelength = wavelength # Jax Safe
         self.amplitude = None # To be instantiated by CreateWavefront
         self.phase = None # To be instantiated by CreateWavefront
-        
+        self.pixel_scale = None # To be instantiated by CreateWavefront        
+ 
 
     # TODO: Reconfirm the debate over getters. 
     def get_real(self : Wavefront) -> Array:
@@ -95,6 +97,7 @@ class Wavefront(equinox.Module):
         return self.amplitude * numpy.sin(self.phase)
 
 
+    # TODO: Name review. 
     def multiply_amplitude(self : Wavefront, 
             weights : typing.Union[float, Array]) -> Wavefront:
         """
@@ -196,9 +199,14 @@ class Wavefront(equinox.Module):
         # accessors point out that the body of this code could be:
         # return self.set_phase(phase).set_amplitude(amplitude)
         new_wavefront = equinox.tree_at(
-            lambda wavefront : wavefront.amplitude, )
+            lambda wavefront : wavefront.amplitude, self, amplitude)
+        new_wavefront = equinox.tree_at(
+            lambda wavefront : wavefront.phase, new_wavefront, phase)
+        return new_wavefront
 
 
+    # TODO: Probably on the nose, taking PEP8 too far like some 
+    # fanatical nerd
     def wavefront_to_point_spread_function(self) -> Array:
         """
         Calculates the _P_oint _S_pread _F_unction (PSF) of the 
@@ -214,8 +222,10 @@ class Wavefront(equinox.Module):
         : Array
             The PSF of the wavefront.
         """
+        return self.amplitude ** 2
 
 
+    # TODO: Review name. More being a fanatical nerd.
     def add_optical_path_difference(self: Wavefront, 
             path_difference : typing.Union[float, Array]) -> Wavefront:
         """
@@ -242,6 +252,8 @@ class Wavefront(equinox.Module):
             The new wavefront with the phases updated according to 
             `path_difference`     
         """
+        phase_difference = 2 * numpy.pi * path_difference / self.wavel
+        return self.add_phase(phase_difference)
 
 
     # TODO: Notify @LouisDesdoigts of the numpy.norm and numpy.pnorm
@@ -266,6 +278,8 @@ class Wavefront(equinox.Module):
             The new wavefront with the normalised electric field 
             amplitudes. The amplitude is now unitless. 
         """
+        total_intensity = numpy.norm(self.amplitude ** 2)
+        return self.multiply_amplitude(1 / total_intenstiy)
 
 
     def get_pixel_positions(self : Wavefront, 
@@ -285,6 +299,7 @@ class Wavefront(equinox.Module):
             The paraxial pixel positions of with dimensions 
             `number_of_pixels`
         """
+        return numpy.arange(number_of_pixels) - (number_of_pixels - 1) / 2
 
 
     def get_pixel_grid(self : Wavefront) -> Array:
@@ -304,6 +319,10 @@ class Wavefront(equinox.Module):
             Guarantees `self.get_pixel_grid().shape == 
             self.amplitude.shape`
         """
+        pixel_positions = self.get_pixel_positions(self.amplitude.shape[0])
+        x_positions, y_positions = \
+            numpy.meshgrid(pixel_positions, pixel_positions)
+        return numpy.array([x_positions, y_positions])
 
 
     def get_coordinates(self : Wavefront) -> Array:
@@ -324,6 +343,7 @@ class Wavefront(equinox.Module):
             Guarantees that `self.get_coordinates().shape == 
             self.amplitude.shape`.
         """
+        return self.pixel_scale * self.get_pixel_grid()
 
 
     # TODO: Confirm ownership of the `invert` family.
@@ -345,6 +365,8 @@ class Wavefront(equinox.Module):
             The new `Wavefront` with the phase and amplitude arrays
             reversed accros both axes.
         """
+        # TODO: Review the syntax below with @LouisDesdoigs
+        return self.invert_x().invert_y()
 
 
     def invert_x(self : Wavefront) -> Wavefront:
@@ -364,6 +386,9 @@ class Wavefront(equinox.Module):
             The new `Wavefront` with the phase and the amplitude arrays
             reversed along the x axis. 
         """
+        new_amplitude = self.amplitude[:, ::-1]
+        new_phase = self.phase[:, ::-1]
+        return self.update_phasor(new_amplitude, new_phase)
 
 
     def invert_y(self : Wavefront) -> Wavefront:
@@ -383,6 +408,9 @@ class Wavefront(equinox.Module):
             The new wavefront with the phase and the amplitude arrays 
             reversed along the y axis.
         """
+        new_amplitude = self.amplitude[::-1, :]
+        new_phase = self.phase[::-1, :]
+        return self.update_phasor(new_amplitude, new_phase)
 
 
 # TODO: Ask @LouisDesdoigts what the `plane_type` attribute is 
@@ -404,7 +432,6 @@ class PlanarWavefront(Wavefront):
         The type of plane occupied by the wavefront. 
     """
     self.offset : Array
-    self.pixel_scale : float
     self.plane_type : str
 
 
@@ -424,6 +451,8 @@ class PlanarWavefront(Wavefront):
             by `CreateWavefront`. 
         """
         super().__init__(wavelength)
+        self.offset = offset # Jax Safe
+        self.plane_type = "Pupil" # Jax Unsafe
 
 
     # TODO: Ask @LouisDesdoigts if this logic needs to be gradable.
@@ -454,6 +483,20 @@ class PlanarWavefront(Wavefront):
             The amplitude and phase of the wavefront at `coordinates`
             based on a linear interpolation.
         """
+        # TODO: Review new names with @LouisDesdoigts. 
+        if not real_imaginary:
+            new_amplitude = map_coordinates(
+                self.amplitude, coordinates, order=1)
+            new_phase = map_coordinates(
+                self.phase, coordinates, order=1)
+        else:
+            real = map_coordinates(
+                self.get_real, coordinates, order=1)
+            imaginary = map_coordinates(
+                self.get_imaginary, coordinates, order=1)
+            new_amplitude = numpy.hypot(real, imaginary)
+            new_phase = numpy.arctan2(imaginary, real)
+        return new_amplitude, new_phase
 
 
     def paraxial_interpolate(self : PlanarWavefront, 
@@ -482,6 +525,30 @@ class PlanarWavefront(Wavefront):
         : PlanarWavefront
             The new wavefront with the updated optical disturbance. 
         """
+        # Get coords arrays
+        number_of_pixels_in = self.amplitude.shape[0]
+        ratio = pixel_scale_out / self.pixel_scale
+        
+        centre = (number_of_pixels_in - 1) / 2
+        new_centre = (number_of_pixels_out - 1) / 2
+        pixels = ratio * (-new_centre, new_centre, number_of_pixels_out) + centre
+        # TODO: These seem to be assigned backwards. 
+        y_pixels, x_pixels = numpy.meshgrid(pixels, pixels)
+        coordinates = numpy.array([x_pixels, y_pixels])
+        # TODO: ampl and phase are not defined here.
+        new_amplitude, new_phase = self.interp(
+            self.amplitude, self.phase, real_imaginary=real_imaginary)
+        
+        # Update Phasor
+        self = self.update_phasor(new_amplitude, new_phase)
+        
+        # Conserve energy
+        self = self.multiply_amplitude(ratio)
+        
+        # Update pixelscale
+        # TODO: This could be a set_pixel_scale()
+        return equinox.tree_at(
+            lambda wavefront : wavefront.pixelscale, self, pixel_scale_out)
 
 
     # TODO: Need to review the `jit` and `grad` issues with 
@@ -517,6 +584,26 @@ class PlanarWavefront(Wavefront):
             The new `Wavefront` with the optical disturbance zero 
             padded to the new dimensions.
         """
+        number_of_pixels_in = self.amplitude.shape[0]
+
+        # TODO: number_of_pixels_out and npix_in are not defined here.  
+        if number_of_pixels_in % 2 != number_of_pixels_out % 2:
+            raise ValueError("Only supports even -> even or odd -> odd padding")
+        
+        new_centre = number_of_pixels_out // 2
+        centre = number_of_pixels_in // 2
+        remainder = number_of_pixels_in % 2
+        padded = numpy.zeros([number_of_pixels_out, number_of_pixels_out])
+        
+        new_amplitude = padded.at[
+                new_centre - centre : centre + new_centre + remainder, 
+                new_centre - centre : centre + new_centre + remainder
+            ].set(self.amplitude)
+        new_phase = padded.at[
+                new_centre - centre : centre + new_centre + remainder, 
+                new_centre - centre : centre + new_centre + remainder
+            ].set(self.phase)
+        return self.update_phasor(new_amplitude, new_phase)
 
 
     def crop_to(self : PlanarWavefront, 
@@ -547,4 +634,20 @@ class PlanarWavefront(Wavefront):
             The new `Wavefront` with the optical disturbance zero 
             cropped to the new dimensions.
         """
+        number_of_pixels_in = self.amplitude.shape[0]
+        
+        # TODO: npix_in and npix_out not defined. Does this logic work?
+        if number_of_pixels_in%2 != number_of_pixels_out%2:
+            raise ValueError("Only supports even -> even or 0dd -> odd cropping")
+        
+        new_centre = number_of_pixels_in // 2
+        centre = number_of_pixels_out // 2
 
+        new_amplitude = self.amplitude[
+            new_centre - centre : new_centre + centre, 
+            new_centre - centre : new_centre + centre]
+        new_phase = self.phase[
+            new_centre - centre : new_centre + centre, 
+            new_centre - centre : new_centre + centre]
+
+        return self.update_phasor(new_amplitude, new_phase)
