@@ -55,53 +55,66 @@ class Wavefront(equinox.Module):
         self.offset = offset # To be instantiated by CreateWavefront        
 
 
-    def get_amplitude(self : Wavefront) -> Array:
-        """
-        Accessor for the amplitude.
-
-        Returns
-        -------
-        : Array 
-            The electric field amplitude in SI units of electric field. 
-        """
-        return self.amplitude
-
-
-    def get_phase(self : Wavefront) -> Array:
-        """
-        Accessor for the phase.
-
-        Returns
-        -------
-        : Array 
-            The phase of the Wavefront; a unitless qunatity.
-        """
-        return self.phase
-
-
-    def set_amplitude(self : Wavefront, ampltiude : Array) -> Wavefront:
-        """
-        Mutator for the amplitude. 
-
-        Parameters
-        ---------
-        return equinox.tree_at(
-            lambda wavefront : wavefront.amplitude, self, amplitude)
-        """
-
-    def set_phase(self : Wavefront, phase : Array) -> Wavefront:
-        return equinox.tree_at(
-            lambda wavefront : wavefront.phase, self, phase) 
-
-
-    def get_offset(self : Wavefront) -> Array[float]:
+    def get_offset(self : Wavefront) -> Array:
         """
         The offset of this `Wavefront`.
 
+        Returns
+        -------
+        : Array[float]
+            The x and y angles of deviation that the wavefront makes
+            from the mirror.
+        """
+        return self.offset
+
+
+    def set_offset(self : Wavefront, offset : Array) -> Wavefront:
+        """
+        Mutator for the offset.
+
         Parameters
         ----------
-
+        offset : Array (f64[2])
+            The angles that the `Wavefront` makes with the x and y 
+            axis assumed to be in radians.
+        
+        Returns
+        -------
+        : Wavefront
+            The new `Wavefront` with the updated offset. 
         """
+        return equinox.tree_at(
+            lambda wavefront : wavefront.offset, self, offset)
+
+
+    def get_wavelength(self : Wavefront) -> float:
+        """
+        Accessor for the wavelength.
+
+        Returns
+        -------
+        : float
+            The wavelength of the `Wavefront` in meters. 
+        """
+        return self.wavel
+
+
+    def set_wavelength(self : Wavefront, wavelength : float) -> Wavefront:
+        """
+        Mutator for the wavelength.
+
+        Parameters
+        ----------
+        wavelength : float  
+            The new wavelength of the `Wavefront` assumed to be in meters.
+
+        Returns
+        -------
+        : Wavefront
+            The new `Wavefront` with the updated wavelength. 
+        """
+        return equinox.tree_at(
+            lambda wavefront : wavefront.wavel, self, wavelength)
         
 
 class PhysicalWavefront(Wavefront):
@@ -150,6 +163,67 @@ class PhysicalWavefront(Wavefront):
         self.phase : Array = None
 
 
+    def get_amplitude(self : Wavefront) -> Array:
+        """
+        Accessor for the amplitude.
+
+        Returns
+        -------
+        : Array 
+            The electric field amplitude in SI units of electric field. 
+        """
+        return self.amplitude
+
+
+    def get_phase(self : Wavefront) -> Array:
+        """
+        Accessor for the phase.
+
+        Returns
+        -------
+        : Array 
+            The phase of the Wavefront; a unitless qunatity.
+        """
+        return self.phase
+
+
+    def set_amplitude(self : Wavefront, ampltiude : Array) -> Wavefront:
+        """
+        Mutator for the amplitude. 
+
+        Parameters
+        ---------
+        amplitude : Array[float]
+            The new amplitudes of the `Wavefront` assumed to be in the 
+            SI units of electric field.         
+
+        Returns
+        -------
+        : Wavefront
+            The new `Wavefront` with the updated amplitude. 
+        """
+        return equinox.tree_at(
+            lambda wavefront : wavefront.amplitude, self, amplitude)
+
+
+    def set_phase(self : Wavefront, phase : Array) -> Wavefront:
+        """
+        Mutator for the phase.
+
+        Parameters
+        ----------
+        phase : Array[float]
+            The new phases of the `Wavefront` assumed to be unitless.
+
+        Returns
+        -------
+        : Wavefront
+            The new `Wavefront` with `Wavefront.get_phase() == phase`.
+        """
+        return equinox.tree_at(
+            lambda wavefront : wavefront.phase, self, phase) 
+
+
     def get_real(self : Wavefront) -> Array:
         """
         The real component of the `Wavefront`. 
@@ -166,7 +240,7 @@ class PhysicalWavefront(Wavefront):
             The real component of the optical disturbance with 
             SI units of electric field.  
         """
-        return self.amplitude * numpy.cos(self.phase)
+        return self.get_amplitude() * numpy.cos(self.get_phase())
         
 
     def get_imaginary(self : Wavefront) -> Array:
@@ -185,10 +259,9 @@ class PhysicalWavefront(Wavefront):
             The imaginary component of the optical disturbance with 
             the SI units of electric field. 
         """
-        return self.amplitude * numpy.sin(self.phase)
+        return self.get_amplitude() * numpy.sin(self.get_phase())
 
 
-    # TODO: Name review. 
     def multiply_amplitude(self : Wavefront, 
             weights : typing.Union[float, Array]) -> Wavefront:
         """
@@ -221,8 +294,7 @@ class PhysicalWavefront(Wavefront):
             The new Wavefront with the applied changes to the 
             amplitude array. 
         """
-        return equinox.tree_at(lambda wavefront : wavefront.phase,
-            self, self.amplitude * weights)
+        return self.set_amplitude(self.get_amplitude() * weights)
 
 
     def add_phase(self : Wavefront, 
@@ -255,8 +327,7 @@ class PhysicalWavefront(Wavefront):
         : Wavefront
             The new wavefront with the updated array of phases. 
         """
-        return equinox.tree_at(lambda wavefront : wavefront.phase,
-            self, self.phase + amounts)
+        return self.set_phase(self.get_phase() + amounts)
 
 
     def update_phasor(self : Wavefront, amplitude : Array, 
@@ -283,19 +354,9 @@ class PhysicalWavefront(Wavefront):
         : Wavefront
             The new wavefront with specified by `amplitude` and `phase`        
         """
-        # TODO: Although the others do not want basix mutators and 
-        # accessors point out that the body of this code could be:
-        # return self.set_phase(phase).set_amplitude(amplitude)
-        new_wavefront = equinox.tree_at(
-            lambda wavefront : wavefront.amplitude, self, amplitude)
-        new_wavefront = equinox.tree_at(
-            lambda wavefront : wavefront.phase, new_wavefront, phase)
-        return new_wavefront
+        return self.set_phase(phase).set_amplitude(amplitude)
 
 
-    # TODO: Probably on the nose, taking PEP8 too far like some 
-    # fanatical nerd
-    # TODO: Possibly not neccessary. 
     def wavefront_to_psf(self : Wavefront) -> Array:
         """
         Calculates the _P_oint _S_pread _F_unction (PSF) of the 
@@ -311,7 +372,7 @@ class PhysicalWavefront(Wavefront):
         : Array
             The PSF of the wavefront.
         """
-        return self.amplitude ** 2
+        return self.get_amplitude() ** 2
 
 
     def add_opd(self: Wavefront, 
@@ -532,9 +593,9 @@ class PhysicalWavefront(Wavefront):
                 self.phase, coordinates, order=1)
         else:
             real = map_coordinates(
-                self.get_real, coordinates, order=1)
+                self.get_real(), coordinates, order=1)
             imaginary = map_coordinates(
-                self.get_imaginary, coordinates, order=1)
+                self.get_imaginary(), coordinates, order=1)
             new_amplitude = numpy.hypot(real, imaginary)
             new_phase = numpy.arctan2(imaginary, real)
         return new_amplitude, new_phase
