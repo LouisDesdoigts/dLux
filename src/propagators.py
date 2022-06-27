@@ -234,58 +234,78 @@ class FresnelProp(eqx.Module):
         return wavefront_out
 
 
-class GaussianPropagator(Propagator):
+class GaussianPropagator(object):
     """
     An intermediate plane fresnel algorithm for propagating the
     `GaussianWavefront` class between the planes. The propagator 
     is separate from the `Wavefront` to emphasise the similarity 
     of these algorithms to the layers in machine learning algorithms.
 
-    Attributes:
+    Attributes
     ----------
+    INDEX_GENERATOR : Array[int]
+        A constant used to generate the `jax.lax.switch` branch
+        indexes.
     """
-
-
     # Constants
     INDEX_GENERATOR = numpy.array([1, 2])
 
 
-    def planar_to_planar(self: FresnelWavefront, distance: float) -> None:
+    def planar_to_planar(self : GaussianPropagator, 
+            wavefront: GaussianWavefront, 
+            distance: float) -> GaussianWavefront:
         """
         Modifies the state of the wavefront by propagating a planar 
         wavefront to a planar wavefront. 
 
         Parameters
         ----------
+        wavefront : GaussianWavefront
+            The wavefront to propagate. Must be `GaussianWavefront`
+            or a subclass. 
         distance : float
             The distance of the propagation in metres.
+
+        Returns
+        -------
+        : GaussianWavefront
+            The new `Wavefront` propagated by `distance`. 
         """
-        wavefront = self.amplitude * \
-            numpy.exp(1j * self.phase)
+        complex_wavefront = wavefront.get_amplitude() * \
+            numpy.exp(1j * self.get_phase())
 
-        new_wavefront = numpy.fft.ifft2(
-            self.transfer_function(distance) * \
-            numpy.fft.fft2(wavefront))
+        new_complex_wavefront = numpy.fft.ifft2(
+            wavefront.transfer_function(distance) * \
+            numpy.fft.fft2(complex_wavefront))
 
-        amplitude = numpy.abs(new_wavefront)
-        phase = self.calculate_phase(new_wavefront)
-        return self.update_phasor(amplitude, phase)        
+        new_amplitude = numpy.abs(new_complex_wavefront)
+        new_phase = numpy.angle(new_complex_wavefront)
+        return wavefront.update_phasor(amplitude, phase)        
 
 
-    def waist_to_spherical(self: FresnelWavefront, 
-            distance: float) -> None:
+    def waist_to_spherical(self : GaussianPropagator, 
+            wavefront: GaussianWavefront, 
+            distance: float) -> GaussianWavefront:
         """
         Modifies the state of the wavefront by propagating it from 
         the waist of the gaussian beam to a spherical wavefront. 
 
         Parameters
         ----------
+        wavefront : GaussianWavefront
+            The `Wavefront` that is getting propagated. Must be either 
+            a `GaussianWavefront` or a valid subclass.
         distance : float 
             The distance of the propagation in metres.
-        """
-        coefficient = 1 / 1j / self.wavel / distance
 
-        wavefront = self.amplitude * numpy.exp(1j * self.phase)
+        Returns 
+        -------
+        : GaussianWavefront
+            `wavefront` propgated by `distance`.
+        """
+        coefficient = 1 / 1j / wavefront.get_wavelength() / distance
+        complex_wavefront = wavefront.get_amplitude() * \
+            numpy.exp(1j * self.get_phase())
 
         # TODO: Check that these are the correct algorithms to 
         # use and ask if we are going to actually require the 
@@ -297,11 +317,12 @@ class GaussianPropagator(Propagator):
             lambda wavefront, distance: \
                 quadratic_phase_factor(distance) * \
                 numpy.fft.ifft2(wavefront),
-            wavefront, distance)
+            complex_wavefront, distance)
 
-        new_wavefront = coefficient * fourier_transform
-        phase = self.calculate_phase(new_wavefront)
-        amplitude = jax.numpy.abs(new_wavefront)
+        new_complex_wavefront = coefficient * fourier_transform
+        new_phase = numpy.angle(new_complex_wavefront)
+        new_amplitude = numpy.abs(new_complex_wavefront)
+        new_pixel_scale = wavefront.calculate_pixel_scale()
         self.update_phasor(amplitude, phase)
 
         # TODO: Confirm that I need to update the pixel scale for 
