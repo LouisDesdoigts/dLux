@@ -33,6 +33,9 @@ class Wavefront(equinox.Module):
     """
     wavel : float
     offset : Array
+    plane_type : str # For debugging
+    amplitude : Array
+    phase : Array
 
 
     def __init__(self : Wavefront, wavel : float, 
@@ -52,6 +55,9 @@ class Wavefront(equinox.Module):
         """
         self.wavel = wavelength # Jax Safe
         self.offset = offset # To be instantiated by CreateWavefront        
+        self.plane_type = "Pupil"
+        self.amplitude = None
+        self.phase = None
 
 
     def get_offset(self : Wavefront) -> Array:
@@ -114,52 +120,6 @@ class Wavefront(equinox.Module):
         """
         return equinox.tree_at(
             lambda wavefront : wavefront.wavel, self, wavelength)
-        
-
-class PhysicalWavefront(Wavefront):
-    """
-    A simple plane wave extending the abstract `Wavefront` class. 
-    Assumes that the wavefront is square. This is Physical as 
-    opposed to Angular, because there are no infinite distances.  
-
-    Attributes
-    ----------
-    plane_type : str
-        The type of plane occupied by the wavefront. 
-    amplitude : Array
-        The electric field amplitudes over the wavefront. The 
-        amplitude is assumed to be in SI units. 
-    phase : Array
-        The phases of each pixel on the Wavefront. The phases are 
-        assumed to be unitless.
-    pixel_scale : float
-        The physical dimensions of each square pixel. Assumed to be 
-        metres. 
-    """
-    self.plane_type : str # For debugging
-    amplitude : Array
-    phase : Array
-
-
-    def __init__(self : Wavefront, wavel : float,
-            offset : Array) -> PlanarWavefront:
-        """
-        Parameters
-        ----------
-        offset : Array
-            The polarisation state of the wavefront specified by the 
-            x and y phase differences. 
-
-        Returns
-        -------
-        : PlanarWavefront
-            A minimal `PlanaWavefront` to be externally initialised
-            by `CreateWavefront`. 
-        """
-        super().__init__(wavel, offset)
-        self.plane_type : str = "Pupil" # Jax Unsafe
-        self.amplitude : Array = None
-        self.phase : Array = None
 
 
     def get_amplitude(self : Wavefront) -> Array:
@@ -453,7 +413,6 @@ class PhysicalWavefront(Wavefront):
         """
         The pixel positions corresponding to each entry in the 
         optical disturbances stored in the Wavefront. 
-GaussianWavefrontUtility = typing.NewType("GaussianWavefrontUtility", PhysicalWavefrontUtilities)
 
         Throws
         ------
@@ -747,7 +706,95 @@ GaussianWavefrontUtility = typing.NewType("GaussianWavefrontUtility", PhysicalWa
         return self.update_phasor(new_amplitude, new_phase)
 
 
-class GaussianWavefront(PhysicalWavefront):
+class PhysicalWavefront(Wavefront):
+    """
+    A simple plane wave extending the abstract `Wavefront` class. 
+    Assumes that the wavefront is square. This is Physical as 
+    opposed to Angular, because there are no infinite distances.  
+
+    Attributes
+    ----------
+    plane_type : str
+        The type of plane occupied by the wavefront. 
+    amplitude : Array
+        The electric field amplitudes over the wavefront. The 
+        amplitude is assumed to be in SI units. 
+    phase : Array
+        The phases of each pixel on the Wavefront. The phases are 
+        assumed to be unitless.
+    pixel_scale : float
+        The physical dimensions of each square pixel. Assumed to be 
+        metres.
+    offset : Array
+        The angle that the `Wavefront` makes with the OpticalElement
+        in radians. This is a (1, 2) array such that 
+        `offset <= 2 * numpy.pi`. 
+    """
+    def __init__(self : PhysicalWavefront, wavelength : float, 
+            offset : Array) -> PhysicalWavefront:
+        """
+        Constructor for a `PhysicalWavefront`.
+
+        Parameters
+        ----------
+        wavelength : float 
+            The wavelength associated with this wavefront in 
+            meters.
+        offset : Array
+            The angle that the wavefront makes with the element
+            in the x and y coordinates.
+
+        Returns
+        -------
+        : PhysicalWavefront
+            The new wavefront with `None` at the extra leaves. 
+        """
+        super().__init__(wavelength, offset)
+
+
+class AngularWavefront(Wavefront):
+    """
+    A wavefront parametrised by phase and amplitude arrays, as 
+    well as the pixel scale. The units are radians as opposed to 
+    meters (in `PhysicalWavefront`).
+
+    Attributes
+    ----------
+    plane_type : str
+        The type of plane occupied by the wavefront. 
+    amplitude : Array
+        The electric field amplitudes over the wavefront. The 
+        amplitude is assumed to be in SI units. 
+    phase : Array
+        The phases of each pixel on the Wavefront. The phases are 
+        assumed to be unitless.
+    pixel_scale : float
+        The physical dimensions of each square pixel. Assumed to be 
+        metres.
+    """ 
+    def __init__(self : AngularWavefront, wavelength : float, 
+            offset : Array) -> AngularWavefront:
+        """
+        Constructor for a `AngularWavefront`.
+
+        Parameters
+        ----------
+        wavelength : float 
+            The wavelength associated with this wavefront in 
+            meters.
+        offset : Array
+            The angle that the wavefront makes with the element
+            in the x and y coordinates.
+
+        Returns
+        -------
+        : AngularWavefront
+            The new wavefront with `None` at the extra leaves. 
+        """
+        super().__init__(wavelength, offset)
+
+
+class GaussianWavefront(Wavefront):
     """
     Expresses the behaviour and state of a wavefront propagating in 
     an optical system under the fresnel assumptions. This 
@@ -775,6 +822,7 @@ class GaussianWavefront(PhysicalWavefront):
     position : float 
     beam_radius : float
     phase_radius : float
+
 
     def __init__(# TODO: Discuss full @PatrixkKidger layout with 
                 # @LouisDesdoigts and @benjaminpope
