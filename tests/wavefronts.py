@@ -1,19 +1,24 @@
-import dLux
 import jax.numpy as numpy
 import pytest
 import jax.random as random
 import typing
-from utilities import WavefrontUtility, PhysicalWavefrontUtility, \
-    GaussianWavefrontUtility
+
+from dLux import Wavefront
+from dLux import PhysicalWavefront
+from dLux import AngularWavefront
+from dLux import GaussianWavefront
+
+from utilities import WavefrontUtility
+from utilities import PhysicalWavefrontUtility
+from utilities import GaussianWavefrontUtility
+from utilities import AngularWavefrontUtility
+from utilities import UtilityUser
 
 
 Array = typing.NewType("Array", numpy.ndarray)
-Wavefront = typing.NewType("Wavefront", object)
-PhysicalWavefront = typing.NewType("PhysicalWavefront", Wavefront)
-GaussainWavefront = typing.NewType("GaussianWavefront", PhysicalWavefront)
 
 
-class TestWavefront(object):
+class TestWavefront(UtilityUser):
     """
     Tests the Wavefront class. Tests are written looking 
     for null and nan values, with only simple end to end tests.
@@ -30,22 +35,32 @@ class TestWavefront(object):
         """
         Test for the accessor get_wavelength.
         """
-        wavefront = self.utility.construct_wavefront()
-        assert wavefront.get_wavelength() == \
-            self.utility.get_wavelength()
+        OUTPUT_WAVELENGTH = self\
+            .get_utility()\
+            .get_wavelength()
+
+        wavefront = self\
+            .get_utility()\
+            .construct_wavefront()
+
+        assert wavefront.get_wavelength() == OUTPUT_WAVELENGTH
+            
 
 
     def test_set_wavelength(self : TestWavefront) -> None:
         """
         Test for the mutator set_wavelength.
         """
+        OLD_WAVELENGTH = self.get_utility().get_wavelength()
         NEW_WAVELENGTH = 540.e-09
+
         wavefront = self\
-            .utility\
+            .get_utility()\
             .construct_wavefront()\
             .set_wavelength(NEW_WAVELENGTH)
+
         assert wavefront.get_wavelength() == NEW_WAVELENGTH
-        assert wavefront.get_wavelength() != self.utility.wavelength
+        assert wavefront.get_wavelength() != OLD_WAVELENGTH
 
 
     def test_get_offset(self : TestWavefront) -> None:
@@ -56,27 +71,36 @@ class TestWavefront(object):
         assert wavefront.get_offset() == utility.offset
 
 
-    # TODO: Should this error check for bad inputs 
     def test_set_offset(self : TestWavefront) -> None:
         """
         Test for the mutator method set_offset.
         """
         NEW_OFFSET = [numpy.pi] * 2
+        OLD_OFFSET = self\
+            .get_utility()\
+            .get_offset()
+
         wavefront = self\
             .utility\
             .construct_wavefront()\
             .set_offset(NEW_OFFSET)
+
         assert wavefront.get_offset() == NEW_OFFSET
-        assert wavefront.get_offset() != self.utility.offset
+        assert wavefront.get_offset() != OLD_OFFSET
     
 
-    def test_get_real(self : TestPhysicalWavefront) -> None:
+    def test_get_real(self : TestWavefront) -> None:
         """
         Rotates the phasor through real -> imaginary and checks that 
         the output is correct.         
         """
+        FULL_REAL = 0.
         PART_REAL = numpy.pi / 4
         NONE_REAL = numpy.pi / 2
+
+        FULL_REAL_OUTPUT = 1.
+        PART_REAL_OUTPUT = 1. / numpy.sqrt(2.)
+        NONE_REAL_OUTPUT = 0.        
 
         full_real_wavefront = self\
             .utility\
@@ -92,12 +116,12 @@ class TestWavefront(object):
             .construct_wavefront()\
             .add_phase(NONE_REAL)
 
-        assert (full_real_wavefront.get_real() == 1.).all()
-        assert (part_real_wavefront.get_real() == 1. / numpy.sqrt(2)).all()
-        assert (none_real_wavefront.get_real() == 0.).all()        
+        assert (full_real_wavefront.get_real() == FULL_REAL_OUTPUT).all()
+        assert (part_real_wavefront.get_real() == PART_REAL_OUTPUT).all()
+        assert (none_real_wavefront.get_real() == NONE_REAL_OUTPUT).all()        
         
 
-    def test_get_imaginary(self : TestPhysicalWavefront) -> None:
+    def test_get_imaginary(self : TestWavefront) -> None:
         """
         Rotates the phasor through real -> imaginary and checks that 
         the output is correct
@@ -133,7 +157,7 @@ class TestWavefront(object):
             NONE_IMAGINARY_OUT).all() 
 
 
-    def test_multiply_amplitude(self : TestPhysicalWavefront) -> None:
+    def test_multiply_amplitude(self : TestWavefront) -> None:
         """
         Checks that the amplitude array has been updated, after 
         operations
@@ -141,7 +165,7 @@ class TestWavefront(object):
         INITIAL_AMPLITUDE = 1.
         CHANGED_AMPLITUDE = 2.
 
-        initial_wavefront = self.utility.construct_wavefront()
+        initial_wavefront = self.get_utility().construct_wavefront()
         initial_amplitude = initial_wavefront.get_amplitude()
         changed_wavefront = initial_wavefront.multiply_amplitude(2)
         changed_amplitude = changed_wavefront.get_amplitude()
@@ -150,7 +174,7 @@ class TestWavefront(object):
         assert (changed_amplitude == CHANGED_AMPLITUDE).all() 
         
 
-    def test_add_phase(self : TestPhysicalWavefront) -> None:   
+    def test_add_phase(self : TestWavefront) -> None:   
         """
         Checks that the phase array is correctly updated by the 
         operations. 
@@ -158,7 +182,7 @@ class TestWavefront(object):
         INITIAL_PHASE = 0.
         CHANGED_PHASE = numpy.pi
 
-        initial_wavefront = self.utility.construct_wavefront()
+        initial_wavefront = self.get_utility().construct_wavefront()
         initial_phase = initial_wavefront.get_phase()
         changed_wavefront = intial_wavefront.add_phase(numpy.pi)
         changed_phase = wavefront.get_phase()
@@ -167,7 +191,7 @@ class TestWavefront(object):
         assert (changed_phase == CHANGED_PHASE).all()
 
 
-    def test_update_phasor(self : TestingPhysicalWavefront) -> None:
+    def test_update_phasor(self : TestWavefront) -> None:
         """
         Checks that the phasor is correctly updated by changes to
         both the phase and the amplitude. 
@@ -178,7 +202,7 @@ class TestWavefront(object):
             (self.utility.size, self.utility.size))
 
         wavefront = self\
-            .utility\
+            .get_utility()\
             .construct_wavefront()\
             .update_phasor(NEW_AMPLITUDE, NEW_PHASE)
 
@@ -187,7 +211,7 @@ class TestWavefront(object):
         
 
     def test_wavefront_to_point_spread_function(
-            self : TestingPhysicalWavefront) -> None:
+            self : TestWavefront) -> None:
         """
         Test that the point spread function is correctly generated
         from the amplitude and phase arrays. Considered correct
@@ -198,7 +222,7 @@ class TestWavefront(object):
         OUTPUT_PSF = OUTPUT_AMPLITUDE ** 2
 
         output_psf = self\
-            .utility
+            .get_utility()\
             .construct_wavefront()\
             .set_amplitude(OUTPUT_AMPLITUDE)\
             .wavefront_to_psf()
@@ -207,7 +231,7 @@ class TestWavefront(object):
 
 
     def test_add_optical_path_difference(
-            self : TestingPhysicalWavefront) -> None:
+            self : TestWavefront) -> None:
         """
         Testing for correct behaviour when optical paths length 
         distances are added. 
@@ -215,7 +239,7 @@ class TestWavefront(object):
         INITIAL_PHASE = 0.
         CHANGED_PHASE = numpy.pi / 2
 
-        initial_wavefront = self.utitlity.construct_wavefront()
+        initial_wavefront = self.get_utitlity().construct_wavefront()
         initial_phase = wavefront.get_phase()
         changed_wavefront = wavefront.add_opd(self.WAVELENGTH / 2)
         changed_phase = wavefront.get_phase()
@@ -224,7 +248,7 @@ class TestWavefront(object):
         assert (changed_phase == CHANGED_PHASE).all()
 
 
-    def test_normalise(self : TestingPhysicalWavefront) -> None:
+    def test_normalise(self : TestWavefront) -> None:
         """
         Checks that the normalise functionality is working. The 
         behaviour is considered functional if the maximum 
@@ -239,7 +263,7 @@ class TestWavefront(object):
         INITIAL_AMPLITUDE = random.norm(key, (size, size))
 
         normalised_amplitude = self\
-            .utility\
+            .get_utility()\
             .construct_wavefront(amplitude = INITIAL_AMPLITUDE)\
             .normalise()\
             .get_amplitude()
@@ -248,91 +272,119 @@ class TestWavefront(object):
         assert (changed_amplitude.min() == 0.)
         
 
-    def test_get_pixel_position_vector(self):
+    def test_get_pixel_position_vector(
+            self : TestWavefront) -> None:
         """
         The get_xs_vec() function is consider correct if the 
         minimum value -(npix - 1) / 2 and the maximum value is
         (npix - 1) / 2
         """
-        initial_wavefront = self.set_up()
-        pixel_coordinates = initial_wavefront.get_xs_vec(self.SIZE)
+        size = self\
+            .get_utility()\
+            .get_size()
+
+        pixel_coordinates = self\
+            .get_utility()\
+            .construct()\
+            .get_pixel_coordinates(size)
         
-        assert (pixel_coordinates.max() == (self.SIZE - 1) / 2)
-        assert (pixel_coorsinates.min() == -(self.SIZE - 1) / 2)
-        #TODO: implement a check that the increment between the 
-        # max and min values is uniform. 
+        assert (pixel_coordinates.max() == (size - 1) / 2)
+        assert (pixel_coorsinates.min() == -(size - 1) / 2)
 
 
-    def test_get_pixel_position_grid(self):
+    def test_get_pixel_grid(self : TestWavefront) -> None:
         """
         The get_XXYY function is considered correct if it produces 
         an array that is of dimensions (2, self.SIZE, self.SIZE)
         as it uses the get_xs_vec() function under the hood.
         """
-        initial_wavefront = self.set_up()
-        pixel_position_grid = initial_wavefront.get_XXYY()
+        size = self\
+            .get_utility()\
+            .get_size()
+
+        pixel_grid = self\
+            .get_utility()\
+            .construct()\
+            .get_pixel_grid()
         
-        assert pixel_position_grid.shape() == (2, self.SIZE, self.SIZE)
+        assert pixel_position_grid.shape() == (2, size, size)
 
 
-    def test_get_physical_position_gird(self):
+    # TODO: Update the docstrings to match the new implementations
+    def test_get_pixel_positions(self : TestWavefront) -> None:
         """
         The get_xycoords() function is considered correct if it 
         produces an array with the correct dimesions such that the 
         minimum and maximum values are plus and minus
         self.pixelscale * (npix - 1) / 2
         """
-        initial_wavefront = self.set_up()
-        changed_wavefront = dLux.CreateWavefront(self.SIZE, 1.)\
-            ({"Wavefront": initial_wavefront})["Wavefront"]
-        physical_coordinates = changed_wavefront.get_xycoords()
+        size = self\
+            .get_utility()\
+            .get_size()
+
+        physical_coordinates = self\
+            .get_utility()\
+            .construct()\
+            .get_pixel_positions()
         
-        assert (physical_coordinates.max() == (self.SIZE - 1) / (2 * self.SIZE))
-        assert (physical_coordinates.min() == -(self.SIZE - 1) / (2 * self.SIZE))
-        assert physical_coordinates.shape() == (2, self.SIZE, self.SIZE)
+        assert (physical_coordinates.max() == (size - 1) / (2 * size))
+        assert (physical_coordinates.min() == -(size - 1) / (2 * size))
+        assert physical_coordinates.shape() == (2, size, size)
 
 
-    # TODO: implement accessors in the GaussianWavefront class.
-    # Mutators and Accessors
-    def test_set_phase(self):
+    def test_set_phase(self : TestWavefront) -> None:
         """
         Functionality that is not currently supported, allows the 
         state to be immutably changed and viewed from outside the 
         namespace. 
         """
-        initial_wavefront = self.set_up()
-        changed_wavefront = initial_wavefront.set_phase(self.GRID_ONE)
+        size = self.get_utility().get_size()
+        key = random.PRNGKey(0)
+        phase = random.norm(key, (size, size))
+
+        initial_wavefront = self\
+            .get_utility()\
+            .construct()\
+            .set_phase(phase)
         
         assert (changed_wavefront.get_phase() == self.GRID_ONE).all()
-        assert (initial_wavefront.get_phase() == self.PHASE).all()
  
 
-    def test_set_amplitude(self):
+    def test_set_amplitude(self : TestWavefront) -> None:
         """
         Functionality that is not currently supported, provides 
         immutable access to the state of the wavefront. 
         """
-        initial_wavefront = self.set_up()
-        changed_wavefront = initial_wavefront.set_amplitude(self.GRID_ONE)
+        size = self.get_utility().get_size()
+        key = random.PRNGKey(0)
+        amplitude = random.norm(key, (size, size))
+
+        initial_wavefront = self\
+            .get_utility()\
+            .construct()\
+            .set_amplitude(amplitude)
         
-        assert (changed_wavefront.get_amplitude() == self.GRID_ONE).all()
-        assert (initial_wavefront.get_amplitude() == self.AMPLITUDE).all()
+        assert (changed_wavefront.get_amplitude() == amplitude).all()
 
 
-    def test_set_wavelength(self):
+    def test_set_wavelength(self : TestWavefront) -> None
         """
         Provides immutable access to the state of the wavefront. 
         Considered correct if the initial wavefront is not modified 
         and a modified wavefront is created. 
         """
-        initial_wavefront = self.set_up()
-        changed_wavefront = initial_wavefront.set_wavelength(2 * self.WAVELENGTH)
+        key = random.PRNGKey(0)
+        WAVELENGTH = random.nrom(key) * self.get_utility().get_wavelength()
 
-        assert (changed_wavefront.get_wavelength() == 2 * self.WAVELENGTH)
-        assert (initial_wavefront.get_wavelength() == self.WAVELENGTH)
+        initial_wavefront = self\
+            .get_utility()\
+            .construct()\
+            .set_wavelength(WAVELENGTH)
+
+        assert changed_wavefront.get_wavelength() == WAVELENGTH 
 
 
-class TestPhysicalWavefront(object):
+class TestPhysicalWavefront(UtilityUser):
     """
     Tests the dLux.PhysicalWavefront class. 
 
@@ -344,7 +396,23 @@ class TestPhysicalWavefront(object):
     utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
 
 
-class TestAngularWavefront(object):
+    def test_constructor(self : TestPhysicalWavefront) -> None:
+        """
+        Tests the `PhysicaleWavefront` constructor.
+        """
+        WAVELENGTH = self.get_utility().get_wavelength()
+        OFFSET = self.get_utility().get_offset()
+
+        wavefront = PhysicalWavefront(WAVELENGTH, OFFSET)
+        
+        assert wavefront.get_wavelength() == WAVELENGTH
+        assert (wavefront.get_offset() == OFFSET).all()
+        assert wavefront.get_amplitude() == None
+        assert wavefront.get_phase() == None
+        
+
+
+class TestAngularWavefront(UtilityUser):
     """
     Tests the `AngularWavefront` class. As `PhysicalWavefront` is 
     just a type ecosystem extension this only tests the constructor. 
@@ -362,10 +430,18 @@ class TestAngularWavefront(object):
         Checks that the constructor initialises all the required 
         fields.
         """
-        angular_wavefront = self.get_utility()
-    
+        WAVELENGTH = self.get_utility().get_wavelength()
+        OFFSET = self.get_utility().get_offset()
 
-class TestGaussianWavefront(object):
+        wavefront = AngularWavefront(WAVELENGTH, OFFSET)
+        
+        assert wavefront.get_wavelength() == WAVELENGTH
+        assert (wavefront.get_offset() == OFFSET).all()
+        assert wavefront.get_amplitude() == None
+        assert wavefront.get_phase() == None
+
+
+class TestGaussianWavefront(UtilityUser):
     """
     Tests the exteded functionality of the `GaussianWavefront`
     class.
@@ -378,41 +454,39 @@ class TestGaussianWavefront(object):
     utility : GaussianWavefront = GaussianWavefrontUtility()
 
 
-    def test_set_beam_waist(self):
+    def test_set_beam_waist(self : TestGaussianWavefront) -> None:
         """
         Provides immutable access to the state of the wavefront. 
         Considered correct if the intial state is not modfied and
         a modified clone is created.
         """
-        initial_wavefront = self.set_up()
+        initial_wavefront = self.get_utility().construct()
         changed_wavefront = initial_wavefront.set_beam_waist(2.)
         
         assert (changed_wavefront.get_beam_waist() == 2.)
         assert (initial_wavefront.get_beam_waist() == 1.)
 
 
-
-
-    def test_set_position(self):
+    def test_set_position(self : TestGaussianWavefront) -> None:
         """
         Provides immutable access to the state of the wavefront.
         Considered cocrect if the initial instance is not modified 
         and a modified wavefront is created.
         """
-        initial_wavefront = self.set_up()
+        initial_wavefront = self.get_utility().construct()
         changed_wavefront = initial_wavefront.set_position(1.)
 
         assert (initial_wavefront.get_position() = 0.)
         assert (changed_wavefront.get_position() = 1.)
 
 
-    def test_set_phase_radius(self):
+    def test_set_phase_radius(self : TestGaussianWavefront) -> None:
         """
         Provides immutable access to the state of the wavefront. 
         Considered correct if the initial instance is not modified
         and a modified wavefront is created.
         """
-        initial_wavefront = self.set_up()
+        initial_wavefront = self.get_utility().construct()
         changed_wavefront = initial_wavefront.set_phase_radius(1.)
 
         # TODO: Work out a good default value for this. 
@@ -421,16 +495,13 @@ class TestGaussianWavefront(object):
        
 
     # Properties 
-    def test_rayleigh_distance_correct(self):
+    def test_rayleigh_distance(self : TestGaussianWavefront) -> None:
         """
         Checks that the rayleigh distance is calculated correctly
         based on the parameters that are input. 
         """
-        # TODO: will not work because equinox enforces immutability
-        # need to check that equinox is compatible with cached
-        # properties
-        wavefront = self.set_up()
-        rayleigh_distance = wavefront.rayleigh_distance
+        wavefront = self.get_utility().construct()
+        rayleigh_distance = wavefront.rayleigh_distance()
         correct_rayleigh_distance = numpy.pi * \
             wavefront.get_beam_radius() ** 2 / \
             wavefront.get_wavelength()        
@@ -438,12 +509,12 @@ class TestGaussianWavefront(object):
         assert rayleigh_distance == correct_rayleigh_distance
                
 
-    def test_location_of_waist_correct(self):
+    def test_location_of_waist(self : TestGaussianWavefront) -> None:
         """
         Checks that the location of the waist is correctly determined.
         Simply runs the explicit calculations externally and compares.
         """
-        wavefront = self.set_up()
+        wavefront = self.get_utility().construct()
         correct_location_of_waist = - wavefront.get_phase_radius() / \
             (1 + (wavefront.get_phase_radius() / \
                 wavefront.rayleigh_distance) ** 2)
@@ -451,15 +522,12 @@ class TestGaussianWavefront(object):
         assert (wavefront.location_of_waist == correct_location_of_waist)
 
 
-    # TODO: Implement the waist radius as a chached property 
-    def test_waist_radius(self):
+    def test_waist_radius(self : TestGaussianWavefront) -> None:
         """
         Directly confirms that the correct numerical calculations are 
         implemented, by the method
         """
-        # TODO: fix the call of rayleigh_distance() to rayleigh_distance 
-        # and also beam_radius to self.beam_radius
-        wavefront = self.set_up()
+        wavefront = self.get_utility().construct()
         correct_waist_radius = wavefront.get_beam_radius() / \
             numpy.sqrt(1 + (wavefront.rayleigh_distance / \
             wavefront.beam_radius) ** 2)
@@ -467,12 +535,13 @@ class TestGaussianWavefront(object):
         assert wavefront.waist_radius == correct_waist_radius        
 
 
-    def test_transfer_function_not_nan(self):
+    def test_transfer_function_not_nan(
+            self : TestGaussianWavefront) -> None:
         """
         Check the boundary case distance = 0. and then two normal
         inputs a large and a small.
         """
-        wavefront = self.set_up()
+        wavefront = self.get_utility().construct()
         zero = wavefront.transfer_function(0.)
         small = wavefront.transfer_function(0.01)
         larger = wavefront.transfer_function(1.)
@@ -482,12 +551,13 @@ class TestGaussianWavefront(object):
         assert not numpy.isnan(large).any()
 
 
-    def test_transfer_function_not_inf(self):
+    def test_transfer_function_not_inf(
+            self : TestGaussianWavefront) -> None:
         """
         Checks that the boundary case distance == 0. and then two 
         normal inputs do not produce infinte results
         """
-        wavefront = self.set_up()
+        wavefront = self.get_utility().construct()
         zero = wavefront.transfer_function(0.)
         small = wavefront.transfer_function(0.01)
         larger = wavefront.transfer_function(1.)
@@ -497,12 +567,13 @@ class TestGaussianWavefront(object):
         assert not numpy.ininf(large).any()
 
 
-    def test_quadratic_phase_factor_not_nan(self):
+    def test_quadratic_phase_factor_not_nan(
+            self : TestGaussianWavefront) -> None:
         """
         Checks the boundary case distance == 0. for nan inputs 
         as well as a small and a large typical use case
         """
-        wavefront = set_up()
+        wavefront = self.get_utility().construct()
         zero = wavefront.quadratic_phase_factor(0.)
         infinte = wavefront.quadratic_phase_factor(numpy.inf)
         small = wavefront.quadratic_phase_factor(0.001)
@@ -514,12 +585,14 @@ class TestGaussianWavefront(object):
         assert not numpy.isnan(large).any()        
 
 
-    def test_quadratic_phase_factor_not_inf(self):
+    def test_quadratic_phase_factor_not_inf(
+            self : TestGaussianWavefront) -> None:
         """
         Tests the boundary cases distance == numpy.inf and distance 
         == 0. as well as a small and a large typical case for 
         infinite values
         """
+        wavefront = self.get_utility().construct()
         zero = wavefront.quadratic_phase_factor(0.)
         infinte = wavefront.quadratic_phase_factor(numpy.inf)
         small = wavefront.quadratic_phase_factor(0.001)
@@ -531,12 +604,13 @@ class TestGaussianWavefront(object):
         assert not numpy.isinf(large).any()  
 
         
-    def test_pixel_scale_not_nan(self):
+    def test_pixel_scale_not_nan(
+            self : TestGaussianWavefront) -> None:
         """
         Checks that the new pixel scale is not generated to be nan 
         by a negative, zero and positive use case
         """
-        wavefront = set_up()
+        wavefront = self.get_utility().construct()
         negative = wavefront.pixel_scale(-0.01)
         zero = wavefront.pixel_scale(0.)
         positive = wavefront.pixel_scale(0.01)
@@ -546,12 +620,13 @@ class TestGaussianWavefront(object):
         assert not numpy.isnan(positive).any()        
 
 
-    def test_pixel_scale_not_inf(self):
+    def test_pixel_scale_not_inf(
+            self : TestGaussianWavefront) -> None:
         """
         Tests the pixel scale for infinite values when passed a 
         negative, zero and positive position.
         """
-        wavefront = set_up()
+        wavefront = self.get_utility().construct()
         negative = wavefront.pixel_scale(-0.01)
         zero = wavefront.pixel_scale(0.)
         positive = wavefront.pixel_scale(0.01)
@@ -561,7 +636,7 @@ class TestGaussianWavefront(object):
         assert not numpy.isinf(positive).any()       
 
 
-    def test_is_inside(self):
+    def test_is_inside(self : TestGaussianWavefront) -> None:
         """
         Branch coverage for a two dimensional is_inside call. That is 
         to say:
@@ -571,7 +646,7 @@ class TestGaussianWavefront(object):
         true, false
         true, true
         """
-        wavefront = set_up()
+        wavefront = self.get_utility().construct()
         rayleigh_distance = wavefront.rayleigh_distance
 
         false_false = wavefront.is_inside(
@@ -586,7 +661,3 @@ class TestGaussianWavefront(object):
         assert (false_true == numpy.array([False, True])).all()
         assert (true_false == numpy.array([True, False])).all()
         assert (true_true == numpy.array([True, True])).all()
-
-
-
-
