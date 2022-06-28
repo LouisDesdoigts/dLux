@@ -68,6 +68,22 @@ class WavefrontUtility(object):
         return dLux.Wavefront(self.wavelength, self.offset)
 
 
+    def get_wavelength(self : WavefrontUtitlity) -> int:
+        """
+        Accessor for the wavelength associated with this utility.
+
+        Returns
+        -------
+        : int
+            The wavelength of the utility and hence any `Wavefront` 
+            objects it creates in meters.
+        """
+        return self.wavelength
+
+    # TODO: Reshufle this to match the new structure
+    # TODO: Add the nessecary getters.
+
+
 class PhysicalWavefrontUtility(WavefontUtility):
     """
     Defines useful safes state constants as well as a basic 
