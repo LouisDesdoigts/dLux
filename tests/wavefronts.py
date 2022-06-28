@@ -70,19 +70,6 @@ class TestWavefront(object):
         assert wavefront.get_offset() != self.utility.offset
     
 
-class TestPhysicalWavefront(object):
-    """
-    Tests the dLux.PhysicalWavefront class. Specifically, checks 
-    for nan and inf values. 
-
-    Attributes
-    ----------
-    utility : PhysicalWavefrontUtility
-        A helper object for generating safe test cases.
-    """
-    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
-
-
     def test_get_real(self : TestPhysicalWavefront) -> None:
         """
         Rotates the phasor through real -> imaginary and checks that 
@@ -304,7 +291,7 @@ class TestPhysicalWavefront(object):
         assert (physical_coordinates.min() == -(self.SIZE - 1) / (2 * self.SIZE))
         assert physical_coordinates.shape() == (2, self.SIZE, self.SIZE)
 
-    
+
     # TODO: implement accessors in the GaussianWavefront class.
     # Mutators and Accessors
     def test_set_phase(self):
@@ -332,6 +319,65 @@ class TestPhysicalWavefront(object):
         assert (initial_wavefront.get_amplitude() == self.AMPLITUDE).all()
 
 
+    def test_set_wavelength(self):
+        """
+        Provides immutable access to the state of the wavefront. 
+        Considered correct if the initial wavefront is not modified 
+        and a modified wavefront is created. 
+        """
+        initial_wavefront = self.set_up()
+        changed_wavefront = initial_wavefront.set_wavelength(2 * self.WAVELENGTH)
+
+        assert (changed_wavefront.get_wavelength() == 2 * self.WAVELENGTH)
+        assert (initial_wavefront.get_wavelength() == self.WAVELENGTH)
+
+
+class TestPhysicalWavefront(object):
+    """
+    Tests the dLux.PhysicalWavefront class. 
+
+    Attributes
+    ----------
+    utility : PhysicalWavefrontUtility
+        A helper object for generating safe test cases.
+    """
+    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+
+
+class TestAngularWavefront(object):
+    """
+    Tests the `AngularWavefront` class. As `PhysicalWavefront` is 
+    just a type ecosystem extension this only tests the constructor. 
+
+    Attributes 
+    ----------
+    utility : AngularWavefrontUtility
+        A helper class for generating safe test cases.
+    """
+    utility : AngularWavefrontUtility = AngularWavefrontUtility()
+
+
+    def test_constructor(self : TestAngularWavefront) -> None:
+        """
+        Checks that the constructor initialises all the required 
+        fields.
+        """
+        angular_wavefront = self.get_utility()
+    
+
+class TestGaussianWavefront(object):
+    """
+    Tests the exteded functionality of the `GaussianWavefront`
+    class.
+
+    Attributes
+    ----------
+    utility : GaussianWavefrontUtility
+        A helper class for testing the `GaussianWavefront`.
+    """
+    utility : GaussianWavefront = GaussianWavefrontUtility()
+
+
     def test_set_beam_waist(self):
         """
         Provides immutable access to the state of the wavefront. 
@@ -345,17 +391,6 @@ class TestPhysicalWavefront(object):
         assert (initial_wavefront.get_beam_waist() == 1.)
 
 
-    def test_set_wavelength(self):
-        """
-        Provides immutable access to the state of the wavefront. 
-        Considered correct if the initial wavefront is not modified 
-        and a modified wavefront is created. 
-        """
-        initial_wavefront = self.set_up()
-        changed_wavefront = initial_wavefront.set_wavelength(2 * self.WAVELENGTH)
-
-        assert (changed_wavefront.get_wavelength() == 2 * self.WAVELENGTH)
-        assert (initial_wavefront.get_wavelength() == self.WAVELENGTH)
 
 
     def test_set_position(self):
@@ -401,35 +436,6 @@ class TestPhysicalWavefront(object):
             wavefront.get_wavelength()        
 
         assert rayleigh_distance == correct_rayleigh_distance
-
-
-    def test_rayleigh_distance_cached(self):
-        """
-        Checks that after getting called this becomes a class 
-        property stored in GaussianWavefront.__dict__
-        """
-        wavefront = self.set_up()
-        wavefront.rayleigh_distance
-        
-        assert wavefront.__dict__["rayleigh_distance"] not None    
-    
-
-    def test_rayleigh_distance_updated(self):
-        """
-        Checks that if beam_radius and wavelength are changed then 
-        the rayleigh distance is also updated.
-        """
-        # TODO: I can enforce this behaviour using setter methods
-        # or mutators. These need to be implemented. 
-        initial_wavefront = self.set_up()
-        initial_wavefront.rayleigh_distance
-        changed_wavefront = wavefront.set_beam_waist(2.)
-        changed_wavefront.rayleigh_distance
-        correct_rayleigh_distance = numpy.pi * \
-            changed_wavefront.get_beam_radius() ** 2 / \
-            changed_wavefront.get_wavelength() 
-
-        assert correct_rayleigh_distance = changed_wavefront.rayleigh_distance
                
 
     def test_location_of_waist_correct(self):

@@ -3,13 +3,6 @@ utilities.py
 This file contains testing utilities to help with the generation of 
 safe test wavefronts, propagators, layers and detectors. The defined
 classes are:
-
-WavefrontUtitlity
-PhysicalWavefrontUtility
-GaussianWavefrontUtility
-GaussianPropagatorUtility
-FraunhoferPropagatorUtility
-FresnelPropagatorUtility
 """
 __author__ = "Jordan Dennis"
 __date__ = "28/06/2022"
@@ -17,9 +10,58 @@ __date__ = "28/06/2022"
 
 import jax.numpy as numpy
 import dLux
+import typing
 
 
-class WavefrontUtility(object):
+Array = typing.NewType("Array", numpy.ndarray)
+Wavefront = typing.NewType("Wavefront", object)
+PhysicalWavefront = typing.NewType("PhysicalWavefront", Wavefront)
+AngularWavefront = typing.NewType("AngularWavefont", Wavefront)
+GaussianWavefront = typing.NewType("GaussianWavefront", Wavefront)
+Utility = typing.NewType("Utility", object)
+WavefrontUtility = typing.NewType("WavefrontUtility", Utility)
+PhysicalWavefrontUtility = typing.NewType("PhysicalWavefrontUtility", 
+    WavefrontUtility)
+AngularWavefrontUtility = typing.NewType("AngularWavefrontUtility", 
+    WavefrontUtility)
+GaussianWavefrontUtility = typing.NewType("GaussianWavefrontUtility",
+    WavefrontUtility)
+
+
+class Utility(object):
+    """
+    The base utility class. These utility classes are designed to 
+    define safe constructors and constants for testing. These   
+    classes are for testing purposes only. 
+    """
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for a utility. This constructor should never 
+        be invoked directly and must go through a subclass 
+        implementation. 
+
+        Returns
+        -------
+        : Utility   
+            The new utility.
+        """
+        raise TypeError("The abstract Utility class should " + \
+            "never be instantiated.")         
+
+
+    def get_utility(self : Utility) -> Utility:
+        """
+        Accessor for the utility. 
+
+        Returns 
+        -------
+        : Utility
+            The utility
+        """
+        return self 
+
+
+class WavefrontUtility(Utility):
     """
     Defines safe state constants and a simple constructor for a safe
     `Wavefront` object. 
@@ -34,11 +76,17 @@ class WavefrontUtility(object):
     """
     wavelength : float
     offset : Array
+    size : int
+    amplitude : Array 
+    phase : Array
 
 
     def __init__(self : WavefrontUtility, /, 
             wavelength : float = None, 
-            offset : Array = None) -> WavefrontUtility:
+            offset : Array = None,
+            size : int = None,
+            amplitude : Array = None,
+            phase : Array = None) -> WavefrontUtility:
         """
         Parameters
         ----------
@@ -46,6 +94,15 @@ class WavefrontUtility(object):
             The safe wavelength for the utility in meters.
         offset : Array = [0., 0.]
             The safe offset for the utility in meters.
+        size : int
+            A parameter for defining consistent wavefront pixel arrays 
+            without causing errors.
+        amplitude : Array[float] 
+            A simple array defining electric field amplitudes without 
+            causing errors.
+        phase : Array[float]
+            A simple array defining the pixel phase for a wavefront, 
+            defined to be safe. 
 
         Returns 
         -------
@@ -54,7 +111,17 @@ class WavefrontUtility(object):
         """
         self.wavelength = 550.e-09 if not wavelength else wavelength
         self.offset = [0., 0.] if not offset else offset           
-            
+        self.size = 128 if not size else size
+        self.amplitude = numpy.ones((self.size, self.size)) if not \
+            amplitude else amplitude
+        self.phase = numpy.zeros((self.size, self.size)) if not \
+            phase else phase
+
+        assert self.size == self.amplitude.shape[0]
+        assert self.size == self.amplitude.shape[1]
+        assert self.size == self.phase.shape[0]
+        assert self.size == self.phase.shape[1]          
+ 
 
     def construct_wavefront(self : WavefrontUtility) -> Wavefront:
         """
@@ -65,10 +132,12 @@ class WavefrontUtility(object):
         : Wavefront
             The safe testing wavefront.
         """
-        return dLux.Wavefront(self.wavelength, self.offset)
+        return dLux\
+            .Wavefront(self.wavelength, self.offset)\
+            .update_phasor(self.amplitude, self.phase)
 
 
-    def get_wavelength(self : WavefrontUtitlity) -> int:
+    def get_wavelength(self : WavefrontUtitlity) -> float:
         """
         Accessor for the wavelength associated with this utility.
 
@@ -80,32 +149,62 @@ class WavefrontUtility(object):
         """
         return self.wavelength
 
-    # TODO: Reshufle this to match the new structure
-    # TODO: Add the nessecary getters.
+
+    def get_size(self : WavefrontUtility) -> int:
+        """
+        Accessor for the `size` constant.
+
+        Returns
+        -------
+        : int
+            The side length of a pixel array currently stored.
+        """
+        return self.size
+
+
+    def get_amplitude(self : WavefrontUtility) -> Array:
+        """
+        Accessor for the `amplitude` constant.
+
+        Returns 
+        -------
+        : Array
+            The square array of pixel amplitudes in SI units of 
+            electric field.
+        """
+        return self.amplitude
+
+
+    def get_phase(self : WavefrontUtility) -> Array:
+        """
+        Accessor for the `phase` constant.
+
+        Returns
+        -------
+        : Array
+            The square array of pixel phases in radians.
+        """
+        return self.phase
+
+
+    def get_offset(self : WavefrontUtility) -> Array:
+        """
+        Accessor for the `offset` constant.
+
+        Returns
+        -------
+        : Array
+            The angle that the wavefront makes with the x and 
+            y planes in radians.
+        """
+        return self.offset
 
 
 class PhysicalWavefrontUtility(WavefontUtility):
     """
     Defines useful safes state constants as well as a basic 
     constructor for a safe `PhysicalWavefront`.
-
-    Attributes
-    ----------
-    size : int
-        A parameter for defining consistent wavefront pixel arrays 
-        without causing errors.
-    amplitude : Array[float] 
-        A simple array defining electric field amplitudes without 
-        causing errors.
-    phase : Array[float]
-        A simple array defining the pixel phase for a wavefront, 
-        defined to be safe. 
     """
-    size : int
-    amplitude : Array 
-    phase : Array
-
-
     def __init__(self : PhysicalWavefrontUtility, /,
             wavelength : float = None, 
             offset : Array = None,
@@ -132,17 +231,7 @@ class PhysicalWavefrontUtility(WavefontUtility):
         : PhysicalWavefrontUtility 
             A helpful class for implementing the tests. 
         """
-        super().__init__(wavelength, offset)
-        self.size = 128 if not size else size
-        self.amplitude = numpy.ones((self.size, self.size)) if not \
-            amplitude else amplitude
-        self.phase = numpy.zeros((self.size, self.size)) if not \
-            phase else phase
-
-        assert self.size == self.amplitude.shape[0]
-        assert self.size == self.amplitude.shape[1]
-        assert self.size == self.phase.shape[0]
-        assert self.size == self.phase.shape[1]
+        super().__init__(wavelength, offset, size, amplitude, phase)
 
 
     def construct_wavefront(
@@ -157,6 +246,56 @@ class PhysicalWavefrontUtility(WavefontUtility):
         """
         wavefront = dLux\
             .PhysicalWavefront(self.wavelength, self.offset)\
+            .update_phasor(self.amplitude, self.phase)
+        return wavefront
+
+
+class AngularWavefrontUtility(WavefontUtility):
+    """
+    Defines useful safes state constants as well as a basic 
+    constructor for a safe `PhysicalWavefront`.
+    """
+    def __init__(self : AngularWavefrontUtility, /,
+            wavelength : float = None, 
+            offset : Array = None,
+            size : int = None, 
+            amplitude : Array = None, 
+            phase : Array = None) -> AngularWavefrontUtility:
+        """
+        Parameters
+        ----------
+        wavelength : float 
+            The safe wavelength to use for the constructor in meters.
+        offset : Array[float]
+            The safe offset to use for the constructor in radians.
+        size : int
+            The static size of the pixel arrays.
+        amplitude : Array[float]
+            The electric field amplitudes in SI units for electric
+            field.
+        phase : Array[float]
+            The phases of each pixel in radians. 
+
+        Returns
+        -------
+        : AngularWavefrontUtility 
+            A helpful class for implementing the tests. 
+        """
+        super().__init__(wavelength, offset, size, amplitude, phase)
+
+
+    def construct_wavefront(
+            self : AngularWavefrontUtility) -> AngularWavefront:
+        """
+        Build a safe wavefront for testing.
+
+        Returns 
+        -------
+        : PhysicalWavefront
+            The safe testing wavefront.
+        """
+        wavefront = dLux\
+            .AngularWavefront(self.wavelength, self.offset)\
             .update_phasor(self.amplitude, self.phase)
         return wavefront
 
@@ -236,5 +375,4 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
                 self.beam_radius, self.wavelength, 
                 self.phase_radius, self.position, self.offset)\
             .update_phasor(self.amplitude, self.phase)
-
         return wavefront
