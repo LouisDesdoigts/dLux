@@ -31,9 +31,8 @@ class Wavefront(equinox.Module):
         y phase lag of the wavefront. This quantity is unitless and 
         it is assumed that `offset.shape == (2, )`  
     """
-
     wavel : float
-    offset : Array[float]
+    offset : Array
 
 
     def __init__(self : Wavefront, wavel : float, 
@@ -454,6 +453,7 @@ class PhysicalWavefront(Wavefront):
         """
         The pixel positions corresponding to each entry in the 
         optical disturbances stored in the Wavefront. 
+GaussianWavefrontUtility = typing.NewType("GaussianWavefrontUtility", PhysicalWavefrontUtilities)
 
         Throws
         ------
