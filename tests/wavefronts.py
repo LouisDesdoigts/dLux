@@ -1,6 +1,7 @@
 import dLux
 import jax.numpy as numpy
 import pytest
+import jax.random as random
 import typing
 from utilities import WavefrontUtility, PhysicalWavefrontUtility, \
     GaussianWavefrontUtility
@@ -76,134 +77,185 @@ class TestPhysicalWavefront(object):
 
     Attributes
     ----------
-    utility : Physical    
-    # TODO: These need to be moved into the superclass test file.
-    def test_get_real(self):
+    utility : PhysicalWavefrontUtility
+        A helper object for generating safe test cases.
+    """
+    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+
+
+    def test_get_real(self : TestPhysicalWavefront) -> None:
         """
         Rotates the phasor through real -> imaginary and checks that 
-        the output is correct
+        the output is correct.         
         """
-        # TODO: Implement more complex test cases
-        full_real_wavefront = self.set_up()
-        part_real_wavefront = self.set_up(phase = Pi * self.ONES / 4)
-        none_real_wavefront = self.set_up(phase = Pi * self.ONES / 2)
+        PART_REAL = numpy.pi / 4
+        NONE_REAL = numpy.pi / 2
+
+        full_real_wavefront = self\
+            .utility\
+            .construct_wavefront()
+
+        part_real_wavefront = self\
+            .utility\
+            .construct_wavefront()\
+            .add_phase(PART_REAL)
+
+        none_real_wavefront = self\
+            .utility\
+            .construct_wavefront()\
+            .add_phase(NONE_REAL)
 
         assert (full_real_wavefront.get_real() == 1.).all()
         assert (part_real_wavefront.get_real() == 1. / numpy.sqrt(2)).all()
         assert (none_real_wavefront.get_real() == 0.).all()        
         
 
-    def test_get_imag(self):
+    def test_get_imaginary(self : TestPhysicalWavefront) -> None:
         """
         Rotates the phasor through real -> imaginary and checks that 
         the output is correct
         """
-        # TODO: Implement more complex test cases. 
-        none_imaginary_wavefront = self.set_up()
-        part_imaginary_wavefront = self.set_up(phase = Pi * self.ONES / 4)
-        full_imaginary_wavefront = self.set_up(phase = Pi * self.ONES / 2)
+        NONE_IMAGINARY = numpy.pi
+        PART_IMAGINARY = numpy.pi / 4
+        FULL_IMAGINARY = numpy.pi / 2
 
-        assert (full_imaginary_wavefront.get_real() == 1.).all() 
-        assert (part_imaginary_wavefront.get_real() == numpy.cos(Pi/4)).all() 
-        assert (none_imaginary_wavefront.get_real() == 0.).all() 
+        NONE_IMAGINARY_OUT = 0.
+        PART_IMAGINARY_OUT = 1. / numpy.sqrt(2)
+        FULL_IMAGINARY_OUT = -1.
+
+        none_imaginary_wavefront = self\
+            .utility\
+            .construct_wavefront()\
+            .add_phase(NON_IMAGINARY)
+
+        part_imagnary_wavefront = self\
+            .utility\
+            .construct_wavefront()\
+            .add_phase(PART_IMAGINARY)
+
+        full_imaginary_wavefront = self\
+            .utility\
+            .construct_wavefront()\
+            .add_phase(FULL_IMAGINARY)
+
+        assert (full_imaginary_wavefront.get_imaginary() == \
+            FULL_IMAGINARY_OUT).all() 
+        assert (part_imaginary_wavefront.get_imaginary() == \
+            PART_IMAGINARY_OUT).all() 
+        assert (none_imaginary_wavefront.get_imaginary() == \
+            NONE_IMAGINARY_OUT).all() 
 
 
-    def test_multiply_amplitude(self):
+    def test_multiply_amplitude(self : TestPhysicalWavefront) -> None:
         """
         Checks that the amplitude array has been updated, after 
         operations
         """
-        # TODO: Check modification by array valued inputs.
-        initial_wavefront = self.set_up()
-        initial_amplitude = wavefront.get_amplitude()
-        changed_wavefront.multiply_ampl(Pi)
-        changed_amplitude = wavefront.get_amplitude()
+        INITIAL_AMPLITUDE = 1.
+        CHANGED_AMPLITUDE = 2.
+
+        initial_wavefront = self.utility.construct_wavefront()
+        initial_amplitude = initial_wavefront.get_amplitude()
+        changed_wavefront = initial_wavefront.multiply_amplitude(2)
+        changed_amplitude = changed_wavefront.get_amplitude()
         
-        assert (initial_amplitude == 1.).all() 
-        assert (changed_amplitude == Pi).all() 
+        assert (initial_amplitude == INITIAL_AMPLITUDE).all() 
+        assert (changed_amplitude == CHANGED_AMPLITUDE).all() 
         
 
-    def test_add_phase(self):   
+    def test_add_phase(self : TestPhysicalWavefront) -> None:   
         """
         Checks that the phase array is correctly updated by the 
         operations. 
         """
-        # TODO: Check modification by array valued inputs.
-        initial_wavefront = self.set_up()
-        initial_phase = wavefront.get_phase()
-        changed_wavefront = wavefront.add_phase(Pi)
+        INITIAL_PHASE = 0.
+        CHANGED_PHASE = numpy.pi
+
+        initial_wavefront = self.utility.construct_wavefront()
+        initial_phase = initial_wavefront.get_phase()
+        changed_wavefront = intial_wavefront.add_phase(numpy.pi)
         changed_phase = wavefront.get_phase()
         
-        assert (initial_phase == 0.).all()
-        assert (changed_phase == Pi).all()
+        assert (initial_phase == INITIAL_PHASE).all()
+        assert (changed_phase == CHANGED_PHASE).all()
 
 
-    def test_update_phasor(self):
+    def test_update_phasor(self : TestingPhysicalWavefront) -> None:
         """
         Checks that the phasor is correctly updated by changes to
         both the phase and the amplitude. 
         """
-        # TODO: Assumes that the imputs are real
-        # TODO: Implement more complex example arrays
-        new_amplitude = self.ONES * Pi
-        new_phase = self.ONES * Pi
-        wavefront = self.set_up()
-        wavefront = wavefront.update_phasor(new_amplitude, new_phase)
+        NEW_AMPLITUDE = numpy.ones(
+            (self.utility.size, self.utility.size))
+        NEW_PHASE = numpy.ones(
+            (self.utility.size, self.utility.size))
 
-        assert (wavefront.get_phase() == Pi).all()
-        assert (wavefront.get_amplitude() == Pi).all()
+        wavefront = self\
+            .utility\
+            .construct_wavefront()\
+            .update_phasor(NEW_AMPLITUDE, NEW_PHASE)
+
+        assert (wavefront.get_phase() == NEW_PHASE).all()
+        assert (wavefront.get_amplitude() == NEW_AMPLITUDE).all()
         
 
-    def test_wavefront_to_point_spread_function(self):
+    def test_wavefront_to_point_spread_function(
+            self : TestingPhysicalWavefront) -> None:
         """
         Test that the point spread function is correctly generated
         from the amplitude and phase arrays. Considered correct
         if the output is the amplitude ** 2 and modifying the phase 
         does not affect the PSF
         """
-        wavefront = self.set_up(amplitude = 2. * self.ONES)
-        uniform_zero_phase_psf = wavefront.wf2psf()
-        wavefront.add_phase(Pi)
-        uniform_pi_phase_psf = wavefront.wf2psf()
-        wavefront.multiply_ampl(0.5 * self.GRID_ONE)
-        variable_pi_phase_psf = wavefront.wf2psf()
-        
-        assert (uniform_zero_phase_psf == 4.).all()
-        # TODO: This may be overkill and is a little blackboxy 
-        assert (unifrom_pi_phase_psf == 4.).all()
-        assert (variable_pi_phase_psf == self.GRID_ONE ** 2)
+        OUTPUT_AMPLITUDE = self.utility.amplitude * 2.
+        OUTPUT_PSF = OUTPUT_AMPLITUDE ** 2
+
+        output_psf = self\
+            .utility
+            .construct_wavefront()\
+            .set_amplitude(OUTPUT_AMPLITUDE)\
+            .wavefront_to_psf()
+         
+        assert (output_psf == OUTPUT_PSF).all()
 
 
-    def test_add_optical_path_difference(self):
+    def test_add_optical_path_difference(
+            self : TestingPhysicalWavefront) -> None:
         """
         Testing for correct behaviour when optical paths length 
         distances are added. 
         """
-        # So if I were to add some phase I would want to be able to 
-        # interfere this beam with another
-        # TODO: Raise a github issue about this functionality
-        # TODO: Raise a github issue about immutability vs mutability 
-        # get some real evidence as to the performance re-creating 
-        # vs modifying the classes.  
-        initial_wavefront = self.set_up()
+        INITIAL_PHASE = 0.
+        CHANGED_PHASE = numpy.pi / 2
+
+        initial_wavefront = self.utitlity.construct_wavefront()
         initial_phase = wavefront.get_phase()
         changed_wavefront = wavefront.add_opd(self.WAVELENGTH / 2)
         changed_phase = wavefront.get_phase()
 
-        assert (initial_phase == 0.).all()
-        assert (changed_phase == Pi / 2).all()
+        assert (initial_phase == INITIAL_PHASE).all()
+        assert (changed_phase == CHANGED_PHASE).all()
 
 
-    def test_normalise(self):
+    def test_normalise(self : TestingPhysicalWavefront) -> None:
         """
         Checks that the normalise functionality is working. The 
         behaviour is considered functional if the maximum 
         value encountered is 1. and the minimum value encountered 
         is 0.
         """
-        initial_wavefront = self.set_up(amplitude = 2 * GRID_ONE * GRID_TWO)
-        changed_wavefront = initial_wavefront.normalise()
-        changed_amplitude = changed_wavefront.get_amplitude()
+        # TODO: Implement getters for the utility. 
+        # NOTE: I don't think that we need to have setters.
+        key = random.PRNGKey(0).split()[0]
+        size = self.utility.get_size() 
+        
+        INITIAL_AMPLITUDE = random.norm(key, (size, size))
+
+        normalised_amplitude = self\
+            .utility\
+            .construct_wavefront(amplitude = INITIAL_AMPLITUDE)\
+            .normalise()\
+            .get_amplitude()
 
         assert (changed_amplitude.max() == 1.)
         assert (changed_amplitude.min() == 0.)
