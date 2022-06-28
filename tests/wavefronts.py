@@ -1,62 +1,231 @@
 import dLux
 import jax.numpy as numpy
-import jax.numpy.pi as Pi 
 import pytest
-
-# TODO: Implement type annotations for the tests. Is this nessecary 
-# I am not sure and will consult stackoverflow. 
-# TODO: I need to make some interesting arrays and add them as class 
-# constants based on the way that this is currently shaking out. 
+import typing
 
 
-class TestGaussianWavefront():
+Array = typing.NewType("Array", numpy.ndarray)
+Wavefront = typing.NewType("Wavefront", object)
+PhysicalWavefront = typing.NewType("PhysicalWavefront", Wavefront)
+GaussainWavefront = typing.NewType("GaussianWavefront", PhysicalWavefront)
+WavefrontUtility = typing.NewType("WavefrontUtility", object)
+PhysicalWavefrontUtility = typing.NewType("PhysicalWavefrontUtility", WavefrontUtilities)
+GaussianWavefrontUtility = typing.NewType("GaussianWavefrontUtility", PhysicalWavefrontUtilities)
+
+
+class WavefrontUtility(object):
     """
-    Tests the GaussianWavefront class. Tests are written looking 
-    for null and nan values, with only simple end to end tests. 
-    Some properties are cached and the caching process is also tested
-    as well as stateful updates when the dependencies are updated. 
-    This may require some reimplementation to get correct. 
+    Defines safe state constants and a simple constructor for a safe
+    `Wavefront` object. 
 
-    A common testing pattern is that nan's and inf's are not generated
-    at Runtime under a variety of circumstances. Once this is confirmed 
-    the correctness is checked against some simple examples.
+    Attributes
+    ----------
+    offset : Array[float]
+        A simple array defining the angular displacement of the 
+        wavefront. 
+    wavelength : float
+        A safe wavelength for the testing wavefronts in meters
     """
+    wavelength : float
+    offset : Array
 
 
-    # Constants
-    SIZE = 128
-    AMPLITUDE = numpy.ones((SIZE, SIZE))
-    PHASE = numpy.zeros((SIZE, SIZE))
-    WAVELENGTH = 550e-09
-    OFFSET = [0., 0.]
-    POSITION = 0.
-    BEAM_RADIUS = 1
+    def __init__(self : WavefrontUtility, /, 
+            wavelength : float = None, 
+            offset : Array = None) -> WavefrontUtility:
+        """
+        Parameters
+        ----------
+        wavelength : float = 550.e-09
+            The safe wavelength for the utility in meters.
+        offset : Array = [0., 0.]
+            The safe offset for the utility in meters.
+
+        Returns 
+        -------
+        : WavefrontUtility 
+            The new utility for generating test cases.
+        """
+        self.wavelength = 550.e-09 if not wavelength else wavelength
+        self.offset = [0., 0.] if not offset else offset           
+            
+
+    def construct_wavefront(self : WavefrontUtility) -> Wavefront:
+        """
+        Build a safe wavefront for testing.
+
+        Returns 
+        -------
+        : Wavefront
+            The safe testing wavefront.
+        """
+        return dLux.Wavefront(self.wavelength, self.offset)
 
 
-    # Test Cases 
-    ONES = numpy.ones((SIZE, SIZE))
-    GRID_ONE, GRID_TWO = numpy.meshgrid(
-        numpy.linspace(0., 1., SIZE), 
-        numpy.linspace(0., 1., SIZE))
+class PhysicalWavefrontUtility(WavefontUtility):
+    """
+    Defines useful safes state constants as well as a basic 
+    constructor for a safe `PhysicalWavefront`.
+
+    Attributes
+    ----------
+    size : int
+        A parameter for defining consistent wavefront pixel arrays 
+        without causing errors.
+    amplitude : Array[float] 
+        A simple array defining electric field amplitudes without 
+        causing errors.
+    phase : Array[float]
+        A simple array defining the pixel phase for a wavefront, 
+        defined to be safe. 
+    """
+    size : int
+    amplitude : Array 
+    phase : Array
+
+
+    def __init__(self : PhysicalWavefrontUtility, /,
+            wavelength : float = None, 
+            offset : Array = None,
+            size : int = None, 
+            amplitude : Array = None, 
+            phase : Array = None) -> PhysicalWavefront:
+        """
+        Parameters
+        ----------
+        wavelength : float 
+            The safe wavelength to use for the constructor in meters.
+        offset : Array[float]
+            The safe offset to use for the constructor in radians.
+        size : int
+            The static size of the pixel arrays.
+        amplitude : Array[float]
+            The electric field amplitudes in SI units for electric
+            field.
+        phase : Array[float]
+            The phases of each pixel in radians. 
+
+        Returns
+        -------
+        : PhysicalWavefrontUtility 
+            A helpful class for implementing the tests. 
+        """
+        super().__init__(wavelength, offset)
+        self.size = 128 if not size else size
+        self.amplitude = numpy.ones((self.size, self.size)) if not \
+            amplitude else amplitude
+        self.phase = numpy.zeros((self.size, self.size)) if not \
+            phase else phase
+
+        assert self.size == self.amplitude.shape[0]
+        assert self.size == self.amplitude.shape[1]
+        assert self.size == self.phase.shape[0]
+        assert self.size == self.phase.shape[1]
+
+
+    def construct_wavefront(
+            self : PhysicalWavefrontUtility) -> PhysicalWavefront:
+        """
+        Build a safe wavefront for testing.
+
+        Returns 
+        -------
+        : PhysicalWavefront
+            The safe testing wavefront.
+        """
+        wavefront = dLux\
+            .PhysicalWavefront(self.wavelength, self.offset)
+            .update_phasor(self.amplitude, self.phase)
+        return wavefront
+
+
+class GaussianWavefrontUtility(PhysicalWavefrontUtility):
+    """
+    Defines safe state constants and a simple constructor for a 
+    safe state `GaussianWavefront` object. 
+
+    Attributes
+    ----------
+    beam_radius : float
+        A safe radius for the GaussianWavefront in meters.
+    phase_radius : float
+        A safe phase radius for the GaussianWavefront in radians.
+    position : float
+        A safe position for the GaussianWavefront in meters.
+    """
+    beam_radius : float 
+    phase_radius : float
+    position : float
+
+
+    def __init__(self : GaussianWavefrontUtility, 
+            wavelength : float = None,
+            offset : Array = None,
+            size : int = None,
+            amplitude : Array = None,
+            phase : Array = None,
+            beam_radius : float = None,
+            phase_radius : float = None,
+            position : float = None) -> GaussianWavefrontUtility:
+        """
+        Parameters
+        ----------
+        wavelength : float 
+            The safe wavelength to use for the constructor in meters.
+        offset : Array[float]
+            The safe offset to use for the constructor in radians.
+        size : int
+            The static size of the pixel arrays.
+        amplitude : Array[float]
+            The electric field amplitudes in SI units for electric
+            field.
+        phase : Array[float]
+            The phases of each pixel in radians.
+        beam_radius : float 
+            The radius of the gaussian beam in meters.
+        phase_radius : float
+            The phase radius of the gaussian beam in radians.
+        position : float
+            The position of the gaussian beam in meters.
+
+        Returns
+        -------
+        : GaussianWavefrontUtility 
+            A helpful class for implementing the tests. 
+        """
+        super().__init__(wavelength, offset, size, amplitude, phase)
+        self.beam_radius = 1. if not beam_radius else beam_radius
+        self.phase_radius = 0. if not phase_radius else phase_radius
+        self.position = 0. if not position else position
+
+
+    def construct_wavefront(
+            self : GaussianWavefrontUtility) -> GaussianWavefront:
+        """
+        Build a safe wavefront for testing.
+
+        Returns 
+        -------
+        : PhysicalWavefront
+            The safe testing wavefront.
+        """
+        wavefront = dLux\
+            .GaussianWavefront(
+                self.beam_radius, self.wavelength, 
+                self.phase_radius, self.position, self.offset)\
+            .update_phasor(self.amplitude, self.phase)
+
+        return wavefront
     
 
+class TestWavefront(object):
+    """
+    Tests the Wavefront class. Tests are written looking 
+    for null and nan values, with only simple end to end tests.
+    """    
+    utility : WavefontUtility = WavefrontUtility()
 
-    @pytest.fixture
-    def set_up(self, /, amplitude = None, phase = None, 
-            beam_radius = None, offset = None, position = None,
-            wavelength = None):
-        """
-        Convinience fixture to create a testing object. Effectively 
-        adds default parameters to the GaussianWavefront constructor.
-        """
-        return dLux.GaussianWavefront(
-            amplitude = self.AMPLITUDE if amplitude is None else amplitude,
-            phase = self.PHASE if amplitude is None else phase,
-            beam_radius = self.BEAM_RADIUS if amplitude is None else beam_radius,
-            offset = self.OFFSET if offset is None else offset,
-            position = self.POSITION if position is None else position,
-            wavelength = self.WAVELENGTH if wavelength is None else wavelength)
-
+    
     # TODO: These need to be moved into the superclass test file.
     def test_get_real(self):
         """
