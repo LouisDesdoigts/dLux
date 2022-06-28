@@ -2,237 +2,81 @@ import dLux
 import jax.numpy as numpy
 import pytest
 import typing
+from utilities import WavefrontUtility, PhysicalWavefrontUtility, \
+    GaussianWavefrontUtility
 
 
 Array = typing.NewType("Array", numpy.ndarray)
 Wavefront = typing.NewType("Wavefront", object)
 PhysicalWavefront = typing.NewType("PhysicalWavefront", Wavefront)
 GaussainWavefront = typing.NewType("GaussianWavefront", PhysicalWavefront)
-WavefrontUtility = typing.NewType("WavefrontUtility", object)
-PhysicalWavefrontUtility = typing.NewType("PhysicalWavefrontUtility", WavefrontUtilities)
-GaussianWavefrontUtility = typing.NewType("GaussianWavefrontUtility", PhysicalWavefrontUtilities)
 
-
-class WavefrontUtility(object):
-    """
-    Defines safe state constants and a simple constructor for a safe
-    `Wavefront` object. 
-
-    Attributes
-    ----------
-    offset : Array[float]
-        A simple array defining the angular displacement of the 
-        wavefront. 
-    wavelength : float
-        A safe wavelength for the testing wavefronts in meters
-    """
-    wavelength : float
-    offset : Array
-
-
-    def __init__(self : WavefrontUtility, /, 
-            wavelength : float = None, 
-            offset : Array = None) -> WavefrontUtility:
-        """
-        Parameters
-        ----------
-        wavelength : float = 550.e-09
-            The safe wavelength for the utility in meters.
-        offset : Array = [0., 0.]
-            The safe offset for the utility in meters.
-
-        Returns 
-        -------
-        : WavefrontUtility 
-            The new utility for generating test cases.
-        """
-        self.wavelength = 550.e-09 if not wavelength else wavelength
-        self.offset = [0., 0.] if not offset else offset           
-            
-
-    def construct_wavefront(self : WavefrontUtility) -> Wavefront:
-        """
-        Build a safe wavefront for testing.
-
-        Returns 
-        -------
-        : Wavefront
-            The safe testing wavefront.
-        """
-        return dLux.Wavefront(self.wavelength, self.offset)
-
-
-class PhysicalWavefrontUtility(WavefontUtility):
-    """
-    Defines useful safes state constants as well as a basic 
-    constructor for a safe `PhysicalWavefront`.
-
-    Attributes
-    ----------
-    size : int
-        A parameter for defining consistent wavefront pixel arrays 
-        without causing errors.
-    amplitude : Array[float] 
-        A simple array defining electric field amplitudes without 
-        causing errors.
-    phase : Array[float]
-        A simple array defining the pixel phase for a wavefront, 
-        defined to be safe. 
-    """
-    size : int
-    amplitude : Array 
-    phase : Array
-
-
-    def __init__(self : PhysicalWavefrontUtility, /,
-            wavelength : float = None, 
-            offset : Array = None,
-            size : int = None, 
-            amplitude : Array = None, 
-            phase : Array = None) -> PhysicalWavefront:
-        """
-        Parameters
-        ----------
-        wavelength : float 
-            The safe wavelength to use for the constructor in meters.
-        offset : Array[float]
-            The safe offset to use for the constructor in radians.
-        size : int
-            The static size of the pixel arrays.
-        amplitude : Array[float]
-            The electric field amplitudes in SI units for electric
-            field.
-        phase : Array[float]
-            The phases of each pixel in radians. 
-
-        Returns
-        -------
-        : PhysicalWavefrontUtility 
-            A helpful class for implementing the tests. 
-        """
-        super().__init__(wavelength, offset)
-        self.size = 128 if not size else size
-        self.amplitude = numpy.ones((self.size, self.size)) if not \
-            amplitude else amplitude
-        self.phase = numpy.zeros((self.size, self.size)) if not \
-            phase else phase
-
-        assert self.size == self.amplitude.shape[0]
-        assert self.size == self.amplitude.shape[1]
-        assert self.size == self.phase.shape[0]
-        assert self.size == self.phase.shape[1]
-
-
-    def construct_wavefront(
-            self : PhysicalWavefrontUtility) -> PhysicalWavefront:
-        """
-        Build a safe wavefront for testing.
-
-        Returns 
-        -------
-        : PhysicalWavefront
-            The safe testing wavefront.
-        """
-        wavefront = dLux\
-            .PhysicalWavefront(self.wavelength, self.offset)
-            .update_phasor(self.amplitude, self.phase)
-        return wavefront
-
-
-class GaussianWavefrontUtility(PhysicalWavefrontUtility):
-    """
-    Defines safe state constants and a simple constructor for a 
-    safe state `GaussianWavefront` object. 
-
-    Attributes
-    ----------
-    beam_radius : float
-        A safe radius for the GaussianWavefront in meters.
-    phase_radius : float
-        A safe phase radius for the GaussianWavefront in radians.
-    position : float
-        A safe position for the GaussianWavefront in meters.
-    """
-    beam_radius : float 
-    phase_radius : float
-    position : float
-
-
-    def __init__(self : GaussianWavefrontUtility, 
-            wavelength : float = None,
-            offset : Array = None,
-            size : int = None,
-            amplitude : Array = None,
-            phase : Array = None,
-            beam_radius : float = None,
-            phase_radius : float = None,
-            position : float = None) -> GaussianWavefrontUtility:
-        """
-        Parameters
-        ----------
-        wavelength : float 
-            The safe wavelength to use for the constructor in meters.
-        offset : Array[float]
-            The safe offset to use for the constructor in radians.
-        size : int
-            The static size of the pixel arrays.
-        amplitude : Array[float]
-            The electric field amplitudes in SI units for electric
-            field.
-        phase : Array[float]
-            The phases of each pixel in radians.
-        beam_radius : float 
-            The radius of the gaussian beam in meters.
-        phase_radius : float
-            The phase radius of the gaussian beam in radians.
-        position : float
-            The position of the gaussian beam in meters.
-
-        Returns
-        -------
-        : GaussianWavefrontUtility 
-            A helpful class for implementing the tests. 
-        """
-        super().__init__(wavelength, offset, size, amplitude, phase)
-        self.beam_radius = 1. if not beam_radius else beam_radius
-        self.phase_radius = 0. if not phase_radius else phase_radius
-        self.position = 0. if not position else position
-
-
-    def construct_wavefront(
-            self : GaussianWavefrontUtility) -> GaussianWavefront:
-        """
-        Build a safe wavefront for testing.
-
-        Returns 
-        -------
-        : PhysicalWavefront
-            The safe testing wavefront.
-        """
-        wavefront = dLux\
-            .GaussianWavefront(
-                self.beam_radius, self.wavelength, 
-                self.phase_radius, self.position, self.offset)\
-            .update_phasor(self.amplitude, self.phase)
-
-        return wavefront
-    
 
 class TestWavefront(object):
     """
     Tests the Wavefront class. Tests are written looking 
     for null and nan values, with only simple end to end tests.
+
+    Attributes
+    ----------
+    utility : WavefrontUtility
+        A helper for generating safe test cases.
     """    
     utility : WavefontUtility = WavefrontUtility()
 
 
-    def test_get_wavelength():
-    def test_set_wavelength():
-    def test_get_offset():
-    def test_set_offset():
+    # TODO: Should I implement getters for the utilities?
+    def test_get_wavelength(self : TestWavefront) -> None:
+        """
+        Test for the accessor get_wavelength.
+        """
+        wavefront = self.utility.construct_wavefront()
+        assert wavefront.get_wavelength() == utility.wavelength
+
+
+    def test_set_wavelength(self : TestWavefront) -> None:
+        """
+        Test for the mutator set_wavelength.
+        """
+        NEW_WAVELENGTH = 540.e-09
+        wavefront = self\
+            .utility\
+            .construct_wavefront()\
+            .set_wavelength(NEW_WAVELENGTH)
+        assert wavefront.get_wavelength() == NEW_WAVELENGTH
+        assert wavefront.get_wavelength() != self.utility.wavelength
+
+
+    def test_get_offset(self : TestWavefront) -> None:
+        """
+        Test for the accessor method get_offset.
+        """
+        wavefront = self.utility.construct_wavefront()
+        assert wavefront.get_offset() == utility.offset
+
+
+    # TODO: Should this error check for bad inputs 
+    def test_set_offset(self : TestWavefront) -> None:
+        """
+        Test for the mutator method set_offset.
+        """
+        NEW_OFFSET = [numpy.pi] * 2
+        wavefront = self\
+            .utility\
+            .construct_wavefront()\
+            .set_offset(NEW_OFFSET)
+        assert wavefront.get_offset() == NEW_OFFSET
+        assert wavefront.get_offset() != self.utility.offset
     
 
-class TestPhysicalWavefront(object):   
+class TestPhysicalWavefront(object):
+    """
+    Tests the dLux.PhysicalWavefront class. Specifically, checks 
+    for nan and inf values. 
+
+    Attributes
+    ----------
+    utility : Physical    
     # TODO: These need to be moved into the superclass test file.
     def test_get_real(self):
         """
@@ -549,45 +393,8 @@ class TestPhysicalWavefront(object):
         assert (wavefront.location_of_waist == correct_location_of_waist)
 
 
-    def test_location_of_waist_cached(self):
-        """
-        Checks that after the state is set it is added to the cache
-        as a value. 
-        """
-        # TODO: This could also be assigned in the constructor
-        # need to discus the style with @LouisDesdoigts.
-        wavefront = self.set_up()
-        wavefront.location_of_waist
-
-        assert wavefront.__dict__["location_of_waist"] not None        
-        
-
-    def test_location_of_waist_updated(self):
-        """
-        Checks that if the phase_radius is updated or the 
-        rayleigh_distance is updated then the location_of_waist is 
-        also updated
-        """
-        # TODO: location of waist needs to be updated when the 
-        # rayleigh distance is changed, This implies that it needs 
-        # to be updated when the beam_radius and the wavelength are
-        # changed
-
-        # TODO: Fix how the cached property is implemented
-        initial_wavefront = self.set_up()
-        initial_location_of_waist = initial_wavefront.location_of_waist
-        changed_beam_radius = initial_wavefront.set_beam_radius(2.)
-        changed_phase_radius = initial_wavefront.set_phase_radius(2.)
-        changed_wavelength = initial_wavefront.set_wavelength(2. * self.WAVELENGTH)
-
-        assert initial_wavefront.location_of_waist == initial_location_of_waist
-        assert changed_beam_radius.location_of_waist != initial_location_of_waist 
-        assert changed_phase_radius.location_of_waist != initial_location_of_waist
-        assert changed_wavelength != initial_location_of_waist 
-
-
     # TODO: Implement the waist radius as a chached property 
-    def test_waist_radius_correct(self):
+    def test_waist_radius(self):
         """
         Directly confirms that the correct numerical calculations are 
         implemented, by the method
@@ -602,187 +409,6 @@ class TestPhysicalWavefront(object):
         assert wavefront.waist_radius == correct_waist_radius        
 
 
-    def test_waist_radius_cached(self):
-        """
-        This checks that the waist radius is added to the cache after 
-        getting calculated.
-        """
-        wavefront = self.set_up()
-        wavefront.waist_radius
-
-        assert wavefront.__dict__["waist_radius"] not None
-
-
-    def test_waist_radius_updated(self):
-        """
-        Tests that when properties influencing the waist_radius are 
-        changed so too is the waist radius.
-        """
-        initial_wavefront = self.set_up()
-        initial_waist_radius = initial_wavefront.waist_radius
-        changed_wavelength = initial_wavefront.set_wavelength(2 * self.WAVELENGTH)
-        changed_beam_radius = initial_wavefront.set_beam_radius(2.)
-
-        assert initial_waist_radius != changed_wavelength.waist_radius 
-        assert initial_waist_radius != changed_beam_radius.waist_radius
-
-
-    # State modifying behaviours 
-    def test_planar_to_planar_not_nan(self):
-        """
-        So I will just test the edge cases, distance = 0. and 
-        distance = numpy.inf and the typical cases distance = 1.
-        and distance = 10.
-        """
-        # TODO: Work out what the fuck is going on with update_phasor 
-        # Should this be a mutable state operation as I have treated it
-        
-        # TODO: Work out what the fuck is going on with update_phasor
-        zero_case = self.set_up().planar_to_planar(0.)
-        infinte_case = self.set_up().planar_to_planar(numpy.inf)
-        small_case = self.set_up().planar_to_planar(1.)
-        large_case = self.set_up().planar_to_planar(10.)
-
-        assert not numpy.isnan(zero_case).any()
-        assert not numpy.isnan(infinite_case).any()
-        assert not numpy.isnan(small_case).any()
-        assert not numpy.isnan(large_case).any()
-
-
-    def test_planar_to_planar_not_inf(self):
-        """
-        So I will test the same cases as above this time looking 
-        for infinite values. Not sure how to consider the case of the 
-        infinite propagation distance
-        """
-        zero_case = self.set_up().planar_to_planar(0.)
-        infinte_case = self.set_up().planar_to_planar(numpy.inf)
-        small_case = self.set_up().planar_to_planar(1.)
-        large_case = self.set_up().planar_to_planar(10.)
-
-        assert not numpy.isinf(zero_case).any()
-        assert not numpy.isinf(infinite_case).any()
-        assert not numpy.isinf(small_case).any()
-        assert not numpy.isinf(large_case).any()
-
-
-    # TODO: Discuss with @benjaminpope and @LouisDesdoigts how they 
-    # want to do these tests if at all. Perhaps analytic cases.
-    # For now I will leave this blanck.
-    def test_planar_to_planar_correct(self):
-        """
-        To be implemented according to the TODO:
-        """
-        pass
-
-
-    def test_waist_to_spherical_not_nan(self):
-        """
-        Tests the boundary cases distance = 0. and 
-        distance = self.rayleigh_distance as well as two standard 
-        cases.  
-        """
-        rayleigh_distance = self.set_up().rayleigh_distance
-        zero_case = self.set_up().waist_to_spherical(0.)
-        rayleigh_case = self.set_up().waist_to_spherical(rayleigh_distance)
-        small_case = self.set_up().waist_to_spherical(0.01 * rayleigh_distance)
-        large_case = self.set_up().waist_to_spherical(0.9 * rayleigh_distance)
-
-        assert not numpy.isnan(zero_case).any()
-        assert not numpy.isnan(rayleigh_case).any()
-        assert not numpy.isnan(small_case).any()
-        assert not numpy.isnan(large_case).any()
-
-
-    def test_waist_to_spherical_not_inf(self):
-        """
-        Checks that the boundary values and typical values defined in
-        the test above do not generate infinite values
-        """
-        rayleigh_distance = self.set_up().rayleigh_distance
-        zero_case = self.set_up().waist_to_spherical(0.)
-        rayleigh_case = self.set_up().waist_to_spherical(rayleigh_distance)
-        small_case = self.set_up().waist_to_spherical(0.01 * rayleigh_distance)
-        large_case = self.set_up().waist_to_spherical(0.9 * rayleigh_distance)
-
-        assert not numpy.isinf(zero_case).any()
-        assert not numpy.isinf(rayleigh_case).any()
-        assert not numpy.isinf(small_case).any()
-        assert not numpy.isinf(large_case).any()
-
-
-    def test_waist_to_spherical_correct(self):
-        """
-        Not yet implemented; under review
-        """
-        pass
-
-
-    def test_spherical_to_waist_not_nan(self):
-        """
-        Tests the boundary cases distance = 0. and 
-        distance = self.rayleigh_distance as well as two standard 
-        cases for nan values 
-        """
-        rayleigh_distance = self.set_up().rayleigh_distance
-        zero_case = self.set_up().spherical_to_waist(0.)
-        rayleigh_case = self.set_up().spherical_to_waist(rayleigh_distance)
-        small_case = self.set_up().spherical_to_waist(0.01 * rayleigh_distance)
-        large_case = self.set_up().spherical_to_waist(0.9 * rayleigh_distance)
-
-        assert not numpy.isnan(zero_case).any()
-        assert not numpy.isnan(rayleigh_case).any()
-        assert not numpy.isnan(small_case).any()
-        assert not numpy.isnan(large_case).any()
-
-
-    def test_spherical_to_waist_not_inf(self):
-        """
-        Tests the boundary cases distance = 0. and 
-        distance = self.rayleigh_distance as well as two standard 
-        cases for numpy.inf values 
-        """
-        rayleigh_distance = self.set_up().rayleigh_distance
-        zero_case = self.set_up().spherical_to_waist(0.)
-        rayleigh_case = self.set_up().spherical_to_waist(rayleigh_distance)
-        small_case = self.set_up().spherical_to_waist(0.01 * rayleigh_distance)
-        large_case = self.set_up().spherical_to_waist(0.9 * rayleigh_distance)
-
-        assert not numpy.isinf(zero_case).any()
-        assert not numpy.isinf(rayleigh_case).any()
-        assert not numpy.isinf(small_case).any()
-        assert not numpy.isinf(large_case).any()
-
-
-    def test_spherical_to_waist_correct(self):
-        """
-        under review    
-        """
-        pass
-
-    # State independent behavious (static)
-    def test_calculate_phase_correct(self):
-        """
-        Checks that the phase retrieval from a complex valued array 
-        is correct. I check phases of Pi / 2, 0. and Pi / 4 as well 
-        as a combination.
-        """
-        # TODO: Type annotation for Imaginary
-        pi_on_two = 1j * numpy.ones((2, 2))
-        pi_on_four = 1 / numpy.sqrt(2) * numpy.ones((2, 2)) + \
-            1j / numpy.sqrt(2) * numpy.ones((2, 2))
-        zero = numpy.ones((2, 2))
-        # TODO: probably should make this more complex
-        combination = numpy.array([[1j, 1], [1, 1j]])
-        wavefront = self.set_up()
-
-        assert (wavefront.calculate_phase(pi_on_two) == Pi / 2.).all()
-        assert (wavefront.calculate_phase(pi_on_four) == Pi / 4.).all()
-        assert (wavefront.calculate_phase(zero) == 0.).all()
-        assert (wavefront.calculate_phase(combination) == \
-            numpy.array([[Pi / 2., 0.], [0., Pi / 2.]])).all()
- 
- 
     def test_transfer_function_not_nan(self):
         """
         Check the boundary case distance = 0. and then two normal
@@ -813,23 +439,11 @@ class TestPhysicalWavefront(object):
         assert not numpy.ininf(large).any()
 
 
-    def test_transfer_function_correct(self):
-        """
-        In review
-        """
-
-
     def test_quadratic_phase_factor_not_nan(self):
         """
         Checks the boundary case distance == 0. for nan inputs 
         as well as a small and a large typical use case
         """
-        # TODO: I think that I forgot to wrap the calculation in 
-        # a numpy.exp operation
-        # TODO: I need to work out what is going on with the 
-        # zero and infinite cases
-        # TODO: fix the type annotations
-        # TODO: Make distance > 0. a precondition
         wavefront = set_up()
         zero = wavefront.quadratic_phase_factor(0.)
         infinte = wavefront.quadratic_phase_factor(numpy.inf)
@@ -858,23 +472,12 @@ class TestPhysicalWavefront(object):
         assert not numpy.isinf(small).any()
         assert not numpy.isinf(large).any()  
 
-
-    def test_quadratic_phase_factor_correct(self):
-        """
-        In review
-        """
-
         
     def test_pixel_scale_not_nan(self):
         """
         Checks that the new pixel scale is not generated to be nan 
         by a negative, zero and positive use case
         """
-        # TODO: fix assignment currently will not work. Consider 
-        # using functools.cached_property
-        # TODO: self does not have npix as a field. This needs to 
-        # be reviewed with @LouisDesdoigts, for now add as a field 
-        # to the GaussianWavefront class
         wavefront = set_up()
         negative = wavefront.pixel_scale(-0.01)
         zero = wavefront.pixel_scale(0.)
@@ -900,175 +503,6 @@ class TestPhysicalWavefront(object):
         assert not numpy.isinf(positive).any()       
 
 
-    def test_outside_to_outside_not_nan(self):
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        # TODO: Implement location of waist as cached_property and 
-        # fix from location_of_waist() to location_of_waist
-        # TODO: Check that position is actually outside of the 
-        # waist. 
-        # TODO: Consult with @benjaminpope if the inf testing is 
-        # neccessary 
-        rayleigh_distance = set_up().rayleigh_distance
-        negative_infinity = set_up().outside_to_outside(-numpy.inf)
-        negative = set_up().outside_to_outside(-rayleigh_distance - 0.01)
-        positive = set_up().outside_to_outside(rayleigh_distance + 0.01)
-        positive_infinity = set_up().outside_to_outside(numpy.inf)
-        
-        assert not numpy.isnan(negative_infinity).any()
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
-        assert not numpy.isnan(positive_infinity).any()     
-
-
-    def test_outside_to_outside_not_inf(self):
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        rayleigh_distance = set_up().rayleigh_distance
-        negative_infinity = set_up().outside_to_outside(-numpy.inf)
-        negative = set_up().outside_to_outside(-rayleigh_distance - 0.01)
-        positive = set_up().outside_to_outside(rayleigh_distance + 0.01)
-        positive_infinity = set_up().outside_to_outside(numpy.inf)
-        
-        assert not numpy.isinf(negative_infinity).any()
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
-        assert not numpy.isinf(positive_infinity).any()     
-    
-
-    def test_outside_to_outside_correct(self):
-        """
-        In review
-        """
-
-
-    def test_outside_to_inside_not_nan(self):
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        rayleigh_distance = set_up().rayleigh_distance
-        negative_infinity = set_up().outside_to_inside(-numpy.inf)
-        negative = set_up().outside_to_inside(-rayleigh_distance - 0.01)
-        positive = set_up().outside_to_inside(rayleigh_distance + 0.01)
-        positive_infinity = set_up().outside_to_inside(numpy.inf)
-        
-        assert not numpy.isnan(negative_infinity).any()
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
-        assert not numpy.isnan(positive_infinity).any()     
-
-
-    def test_outside_to_inside_not_inf(self):
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        rayleigh_distance = set_up().rayleigh_distance
-        negative_infinity = set_up().outside_to_inside(-numpy.inf)
-        negative = set_up().outside_to_inside(-rayleigh_distance - 0.01)
-        positive = set_up().outside_to_inside(rayleigh_distance + 0.01)
-        positive_infinity = set_up().outside_to_inside(numpy.inf)
-        
-        assert not numpy.isinf(negative_infinity).any()
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
-        assert not numpy.isinf(positive_infinity).any()     
-    
-
-    def test_outside_to_inside_correct(self):
-        """
-        In review
-        """
-
-
-    def test_inside_to_outside_not_nan(self):
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        rayleigh_distance = set_up().rayleigh_distance
-        negative_infinity = set_up().inside_to_outside(-numpy.inf)
-        negative = set_up().inside_to_outside(-rayleigh_distance - 0.01)
-        positive = set_up().inside_to_outside(rayleigh_distance + 0.01)
-        positive_infinity = set_up().inside_to_outside(numpy.inf)
-        
-        assert not numpy.isnan(negative_infinity).any()
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
-        assert not numpy.isnan(positive_infinity).any()     
-
-
-    def test_inside_to_outside_not_inf(self):
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        rayleigh_distance = set_up().rayleigh_distance
-        negative_infinity = set_up().inside_to_outside(-numpy.inf)
-        negative = set_up().inside_to_outside(-rayleigh_distance - 0.01)
-        positive = set_up().inside_to_outside(rayleigh_distance + 0.01)
-        positive_infinity = set_up().inside_to_outside(numpy.inf)
-        
-        assert not numpy.isinf(negative_infinity).any()
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
-        assert not numpy.isinf(positive_infinity).any()     
-    
-
-    def test_inside_to_outside_correct(self):
-        """
-        In review
-        """
-
-
-    def test_inside_to_inside_not_nan(self):
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        rayleigh_distance = set_up().rayleigh_distance
-        negative_infinity = set_up().inside_to_inside(-numpy.inf)
-        negative = set_up().inside_to_inside(-rayleigh_distance - 0.01)
-        positive = set_up().inside_to_inside(rayleigh_distance + 0.01)
-        positive_infinity = set_up().inside_to_inside(numpy.inf)
-        
-        assert not numpy.isnan(negative_infinity).any()
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
-        assert not numpy.isnan(positive_infinity).any()     
-
-
-    def test_inside_to_inside_not_inf(self):
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        rayleigh_distance = set_up().rayleigh_distance
-        negative_infinity = set_up().inside_to_inside(-numpy.inf)
-        negative = set_up().inside_to_inside(-rayleigh_distance - 0.01)
-        positive = set_up().inside_to_inside(rayleigh_distance + 0.01)
-        positive_infinity = set_up().inside_to_inside(numpy.inf)
-        
-        assert not numpy.isinf(negative_infinity).any()
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
-        assert not numpy.isinf(positive_infinity).any()     
-    
-
-    def test_inside_to_inside_correct(self):
-        """
-        In review
-        """
-
-
-    # TODO: Remove the Float call from is_inside
-    # TODO: Implement a light set_up() so that not all arrays are 
-    # created in functions like this. 
     def test_is_inside(self):
         """
         Branch coverage for a two dimensional is_inside call. That is 
@@ -1096,87 +530,5 @@ class TestPhysicalWavefront(object):
         assert (true_true == numpy.array([True, True])).all()
 
 
-    # TODO: Change the sel.is_inside([0., distance]) to use 
-    # self.position instead.
-    def test_propagate_not_nan(self):
-        """
-        Tests full branch coverage and then the boundary cases 
-        distance == -numpy.inf, distance == numpy.inf and distance 
-        == 0. The branches covered are:
-        
-        inside_to_inside
-        inside_to_outside
-        outside_to_inside
-        outside_to_outside
-
-        NOTE: We are checking for nan results
-        """
-        # TODO: Implement blank() as a minimal wavefront fixture
-        # NOTE: The outside_to_inside() ect. tests already tested 
-        # negative values in the typical range so we only need to 
-        # consider positive ones here
-        rayleigh_distance = blank().rayleigh_distance
-
-        negative_infinity = set_up().propagate(-numpy.inf)
-        zero = set_up().propagate(0.)
-        positive_infinity = set_up().propagate(numpy.inf)
-
-        inside_to_inside = set_up().propagate(rayleigh_distance / 2.)
-        inside_to_outside = set_up().propagate(rayleigh_distance + 1.)
-        # TODO: Adopt this syntax for future use
-        outside_to_inside = \
-            set_up(position = -rayleigh_distance - 1.)\
-            .propagate(rayleigh_distance)
-        outside_to_outside = \
-            set_up(position = -rayleigh_distance - 1.)  
-            .propgate(2 * (rayleigh_distance + 1.))
-
-        assert not numpy.isnan(negative_infinity).any()
-        assert not numpy.isnan(zero).any()
-        assert not numpy.isnan(positive_infinity).any()
-
-        assert not numpy.isnan(inside_to_inside).any()
-        assert not numpy.isnan(inside_to_outside).any()
-        assert not numpy.isnan(outside_to_inside).any()
-        assert not numpy.isnan(outside_to_outside).any()
-        
-
-    def test_propagate_not_inf(self):
-        """
-        Tests full branch coverage and then the boundary cases 
-        distance == -numpy.inf, distance == numpy.inf and distance 
-        == 0. The branches covered are:
-        
-        inside_to_inside
-        inside_to_outside
-        outside_to_inside
-        outside_to_outside
-
-        Note: we are checking for inf results. 
-        """
-        rayleigh_distance = blank().rayleigh_distance
-
-        negative_infinity = set_up().propagate(-numpy.inf)
-        zero = set_up().propagate(0.)
-        positive_infinity = set_up().propagate(numpy.inf)
-
-        inside_to_inside = set_up().propagate(rayleigh_distance / 2.)
-        inside_to_outside = set_up().propagate(rayleigh_distance + 1.)
-        # TODO: Adopt this syntax for future use
-        outside_to_inside = \
-            set_up(position = -rayleigh_distance - 1.)\
-            .propagate(rayleigh_distance)
-        outside_to_outside = \
-            set_up(position = -rayleigh_distance - 1.)  
-            .propgate(2 * (rayleigh_distance + 1.))
-
-        assert not numpy.isinf(negative_infinity).any()
-        assert not numpy.isinf(zero).any()
-        assert not numpy.isinf(positive_infinity).any()
-
-        assert not numpy.isinf(inside_to_inside).any()
-        assert not numpy.isinf(inside_to_outside).any()
-        assert not numpy.isinf(outside_to_inside).any()
-        assert not numpy.isinf(outside_to_outside).any()
 
 
