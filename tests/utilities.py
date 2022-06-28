@@ -28,25 +28,13 @@ GaussianWavefrontUtility = typing.NewType("GaussianWavefrontUtility",
     WavefrontUtility)
 
 
-class Utility(object):
+class UtilityUser(object):
     """
     The base utility class. These utility classes are designed to 
     define safe constructors and constants for testing. These   
     classes are for testing purposes only. 
     """
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for a utility. This constructor should never 
-        be invoked directly and must go through a subclass 
-        implementation. 
-
-        Returns
-        -------
-        : Utility   
-            The new utility.
-        """
-        raise TypeError("The abstract Utility class should " + \
-            "never be instantiated.")         
+    utility : Utility
 
 
     def get_utility(self : Utility) -> Utility:
@@ -59,6 +47,37 @@ class Utility(object):
             The utility
         """
         return self 
+
+
+class Utility(object):
+    """
+    """
+
+
+    def __init__(self : Utility) -> Utility:
+        """
+        Construct a new Utility.
+
+        Returns
+        : Utility 
+            The utility. 
+        """
+        raise TypeError("Abstract class Utility should" + \
+            "not be directly substantiated.")
+
+    
+    def construct(self : Utility) -> dLuxModule:
+        """
+        Safe constructor for the dLuxModule, associated with 
+        this utility.
+
+        Returns
+        -------
+        : dLuxModule
+            A safe dLuxModule for testing.
+        """
+        raise TypeError("The abstract construct method" + \
+            "should never be directly invoked")
 
 
 class WavefrontUtility(Utility):
@@ -123,7 +142,7 @@ class WavefrontUtility(Utility):
         assert self.size == self.phase.shape[1]          
  
 
-    def construct_wavefront(self : WavefrontUtility) -> Wavefront:
+    def construct(self : WavefrontUtility) -> Wavefront:
         """
         Build a safe wavefront for testing.
 
@@ -234,8 +253,7 @@ class PhysicalWavefrontUtility(WavefontUtility):
         super().__init__(wavelength, offset, size, amplitude, phase)
 
 
-    def construct_wavefront(
-            self : PhysicalWavefrontUtility) -> PhysicalWavefront:
+    def construct(self : PhysicalWavefrontUtility) -> PhysicalWavefront:
         """
         Build a safe wavefront for testing.
 
@@ -284,8 +302,7 @@ class AngularWavefrontUtility(WavefontUtility):
         super().__init__(wavelength, offset, size, amplitude, phase)
 
 
-    def construct_wavefront(
-            self : AngularWavefrontUtility) -> AngularWavefront:
+    def construct(self : AngularWavefrontUtility) -> AngularWavefront:
         """
         Build a safe wavefront for testing.
 
@@ -360,8 +377,7 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
         self.position = 0. if not position else position
 
 
-    def construct_wavefront(
-            self : GaussianWavefrontUtility) -> GaussianWavefront:
+    def construct(self : GaussianWavefrontUtility) -> GaussianWavefront:
         """
         Build a safe wavefront for testing.
 

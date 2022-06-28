@@ -26,13 +26,13 @@ class TestWavefront(object):
     utility : WavefontUtility = WavefrontUtility()
 
 
-    # TODO: Should I implement getters for the utilities?
     def test_get_wavelength(self : TestWavefront) -> None:
         """
         Test for the accessor get_wavelength.
         """
         wavefront = self.utility.construct_wavefront()
-        assert wavefront.get_wavelength() == utility.wavelength
+        assert wavefront.get_wavelength() == \
+            self.utility.get_wavelength()
 
 
     def test_set_wavelength(self : TestWavefront) -> None:
