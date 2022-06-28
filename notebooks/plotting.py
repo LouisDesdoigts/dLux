@@ -2,9 +2,9 @@ import jax.numpy as np
 import matplotlib.pyplot as plt
 import equinox as eqx
 import numpy as onp
-
 from matplotlib.patches import Circle
-def plot_batch(batch, filename=None, dpi=96, ncols=4, apply_det=False, rmask=False, rmin=None, rmax=None, s=100):
+
+def plot_batch(batch, filename=None, dpi=96, ncols=4, apply_det=False, rmask=False, rmin=None, rmax=None, s=None, single=False):
     nrows = int(np.ceil(2*int(len(batch))/ncols))
     scale = 3
     
@@ -20,8 +20,13 @@ def plot_batch(batch, filename=None, dpi=96, ncols=4, apply_det=False, rmask=Fal
         aperture = model.layers[2].array
         opd = model.layers[4].get_binary_phase()
 
-        psf = model()
+        if single:
+            psf = model.propagate_single(model.wavels)
+        else:
+            psf = model()
+            
         c = psf.shape[0]//2
+        s = c if s is None else s
         psf = psf[c-s:c+s, c-s:c+s]
 
         plt.subplot(nrows, ncols, indxs1[i])
