@@ -3,10 +3,11 @@ import jax.numpy as numpy
 import typing
 
 
-Wavefront = typing.UserType("Wavefront", equinox.Module)
-PlanaWavefront = typing.UserType("PlanarWavefront", Wavefront)
-FresnelWavefront = typing.UserType("FresnelWavefront", Wavefront)
-Array = typing.UserType("Array", numpy.ndarray)
+Wavefront = typing.NewType("Wavefront", equinox.Module)
+PhysicalWavefront = typing.NewType("PhysicalWavefront", Wavefront)
+AngularWavefront = typing.NewType("AngularWavefront", Wavefront)
+GaussianWavefront = typing.NewType("FresnelWavefront", Wavefront)
+Array = typing.NewType("Array", numpy.ndarray)
 
 
 class Wavefront(equinox.Module):
@@ -24,40 +25,54 @@ class Wavefront(equinox.Module):
 
     Attributes
     ----------
-    wavel : float
-        The wavel of the light. Assumed to be in metres.
-    offset : Array[float]
+    wavelength : float
+        The wavelength of the light. Assumed to be in metres.
+    offset : Array
         The polarisation state of the wave described by the x and 
         y phase lag of the wavefront. This quantity is unitless and 
         it is assumed that `offset.shape == (2, )`  
     """
-    wavel : float
+    wavelength : float
     offset : Array
     plane_type : str # For debugging
     amplitude : Array
     phase : Array
+    pixel_scale : float
 
 
-    def __init__(self : Wavefront, wavel : float, 
-            offset : Array[float]) -> Wavefront:
+    def __init__(self : Wavefront, wavelength : float, 
+            offset : Array) -> Wavefront:
         """
         Initialises a minimal wavefront specified only by the 
         wavel. 
 
         Parameters
         ----------
-        wavel : float 
-            The monochromatic wavel associated with this 
+        wavelength : float 
+            The monochromatic wavelength associated with this 
             wavefront. 
-        offset : Array[float]
+        offset : Array
             The x and y angles of incidence to the surface assumed to 
             be in radians. 
         """
-        self.wavel = wavelength # Jax Safe
+        self.wavelength = wavelength # Jax Safe
         self.offset = offset # To be instantiated by CreateWavefront        
         self.plane_type = "Pupil"
         self.amplitude = None
         self.phase = None
+        self.pixel_scale = None
+
+
+    def get_pixel_scale(self : GaussianWavefront) -> float:
+        """
+        Accessor for the pixel_scale.
+
+        Returns
+        -------
+        : float
+            The pixel_scale associated with the current position.
+        """
+        return self.pixel_scale
 
 
     def get_offset(self : Wavefront) -> Array:
@@ -66,7 +81,7 @@ class Wavefront(equinox.Module):
 
         Returns
         -------
-        : Array[float]
+        : Array
             The x and y angles of deviation that the wavefront makes
             from the mirror.
         """
@@ -89,7 +104,8 @@ class Wavefront(equinox.Module):
             The new `Wavefront` with the updated offset. 
         """
         return equinox.tree_at(
-            lambda wavefront : wavefront.offset, self, offset)
+            lambda wavefront : wavefront.offset, self, offset,
+            is_leaf = lambda leaf : leaf is None )
 
 
     def get_wavelength(self : Wavefront) -> float:
@@ -101,7 +117,7 @@ class Wavefront(equinox.Module):
         : float
             The wavelength of the `Wavefront` in meters. 
         """
-        return self.wavel
+        return self.wavelength
 
 
     def set_wavelength(self : Wavefront, wavelength : float) -> Wavefront:
@@ -119,7 +135,8 @@ class Wavefront(equinox.Module):
             The new `Wavefront` with the updated wavelength. 
         """
         return equinox.tree_at(
-            lambda wavefront : wavefront.wavel, self, wavelength)
+            lambda wavefront : wavefront.wavelength, self, wavelength,
+            is_leaf = lambda leaf : leaf is None)
 
 
     def get_amplitude(self : Wavefront) -> Array:
@@ -146,13 +163,13 @@ class Wavefront(equinox.Module):
         return self.phase
 
 
-    def set_amplitude(self : Wavefront, ampltiude : Array) -> Wavefront:
+    def set_amplitude(self : Wavefront, amplitude : Array) -> Wavefront:
         """
         Mutator for the amplitude. 
 
         Parameters
         ---------
-        amplitude : Array[float]
+        amplitude : Array
             The new amplitudes of the `Wavefront` assumed to be in the 
             SI units of electric field.         
 
@@ -162,7 +179,8 @@ class Wavefront(equinox.Module):
             The new `Wavefront` with the updated amplitude. 
         """
         return equinox.tree_at(
-            lambda wavefront : wavefront.amplitude, self, amplitude)
+            lambda wavefront : wavefront.amplitude, self, amplitude,
+            is_leaf = lambda leaf : leaf is None)
 
 
     def set_phase(self : Wavefront, phase : Array) -> Wavefront:
@@ -171,7 +189,7 @@ class Wavefront(equinox.Module):
 
         Parameters
         ----------
-        phase : Array[float]
+        phase : Array
             The new phases of the `Wavefront` assumed to be unitless.
 
         Returns
@@ -180,7 +198,8 @@ class Wavefront(equinox.Module):
             The new `Wavefront` with `Wavefront.get_phase() == phase`.
         """
         return equinox.tree_at(
-            lambda wavefront : wavefront.phase, self, phase) 
+            lambda wavefront : wavefront.phase, self, phase,
+            is_leaf = lambda leaf : leaf is None) 
 
 
     def get_real(self : Wavefront) -> Array:
@@ -360,7 +379,7 @@ class Wavefront(equinox.Module):
             The new wavefront with the phases updated according to 
             `path_difference`     
         """
-        phase_difference = 2 * numpy.pi * path_difference / self.wavel
+        phase_difference = 2 * numpy.pi * path_difference / self.wavelength
         return self.add_phase(phase_difference)
 
 
@@ -368,10 +387,6 @@ class Wavefront(equinox.Module):
         """
         Reduce the electric field amplitude of the wavefront to a 
         range between 0 and 1. Guarantees that:
-        ```py
-        self.get_amplitude().max() == 1.
-        self.get_amplitude().min() == 0.
-        ```
         
         Throws
         ------
@@ -384,9 +399,8 @@ class Wavefront(equinox.Module):
             The new wavefront with the normalised electric field 
             amplitudes. The amplitude is now unitless. 
         """
-        # TODO: Double check
-        total_intensity = numpy.norm(self.amplitude)
-        return self.multiply_amplitude(1 / total_intenstiy)
+        total_intensity = numpy.linalg.norm(self.amplitude)
+        return self.multiply_amplitude(1 / total_intensity)
 
 
     def get_pixel_coordinates(self : Wavefront, 
@@ -402,7 +416,7 @@ class Wavefront(equinox.Module):
 
         Returns
         -------
-        : Array[float]
+        : Array
             The paraxial pixel positions of with dimensions 
             `number_of_pixels`
         """
@@ -426,7 +440,7 @@ class Wavefront(equinox.Module):
             Guarantees `self.get_pixel_grid().shape == 
             self.amplitude.shape`
         """
-        pixel_positions = self.get_pixel_positions(self.amplitude.shape[0])
+        pixel_positions = self.get_pixel_coordinates(self.amplitude.shape[0])
         x_positions, y_positions = \
             numpy.meshgrid(pixel_positions, pixel_positions)
         return numpy.array([x_positions, y_positions])
@@ -450,7 +464,7 @@ class Wavefront(equinox.Module):
             Guarantees that `self.get_coordinates().shape == 
             self.amplitude.shape`.
         """
-        return self.pixel_scale * self.get_pixel_grid()
+        return self.get_pixel_scale() * self.get_pixel_grid()
 
 
     def invert_x_and_y(self : Wavefront) -> Wavefront:
@@ -518,7 +532,7 @@ class Wavefront(equinox.Module):
 
 
     # TODO: Make logic Jax-Safe
-    def interpolate(self : PlanarWavefront, coordinates : Array, 
+    def interpolate(self : PhysicalWavefront, coordinates : Array, 
             real_imaginary : bool = False) -> tuple[Array, Array]:
         """
         Interpolates the `Wavefront` at the points specified by 
@@ -559,9 +573,9 @@ class Wavefront(equinox.Module):
         return new_amplitude, new_phase
 
 
-    def paraxial_interpolate(self : PlanarWavefront, 
+    def paraxial_interpolate(self : PhysicalWavefront, 
             pixel_scale_out : float, number_of_pixels_out : int,
-            real_imaginary : bool = False) -> PlanarWavefront: 
+            real_imaginary : bool = False) -> PhysicalWavefront: 
         """
         Interpolates the `Wavefront` so that it remains centered on 
         each pixel (paraxial). Calculation can be performed using 
@@ -582,7 +596,7 @@ class Wavefront(equinox.Module):
 
         Returns
         -------
-        : PlanarWavefront
+        : PhysicalWavefront
             The new wavefront with the updated optical disturbance. 
         """
         # Get coords arrays
@@ -603,14 +617,30 @@ class Wavefront(equinox.Module):
         # Conserve energy
         self = self.multiply_amplitude(ratio)
         
-        # Update pixelscale
-        # TODO: This could be a set_pixel_scale()
+        return self.set_pixel_scale(pixel_scale_out)
+
+
+    def set_pixel_scale(self : Wavefront, pixel_scale : float) -> Wavefront:
+        """
+        Mutator for the pixel_scale.
+
+        Parameters
+        ----------
+        pixel_scale : float
+            The new pixel_scale associated with the wavefront.
+
+        Returns
+        -------
+        : Wavefront
+            The new Wavefront object with the updated pixel_scale
+        """
         return equinox.tree_at(
-            lambda wavefront : wavefront.pixelscale, self, pixel_scale_out)
+            lambda wavefront : wavefront.pixel_scale, self, pixel_scale,
+            is_leaf = lambda leaf : leaf is None)
 
 
-    def pad_to(self : PlanarWavefront, 
-            number_of_pixels_out : int) -> PlanarWavefront:
+    def pad_to(self : PhysicalWavefront, 
+            number_of_pixels_out : int) -> PhysicalWavefront:
         """
         Pads the `Wavefront` with zeros. Assumes that 
         `number_of_pixels_out > self.amplitude.shape[0]`. 
@@ -633,7 +663,7 @@ class Wavefront(equinox.Module):
 
         Returns
         -------
-        : PlanarWavefront
+        : PhysicalWavefront
             The new `Wavefront` with the optical disturbance zero 
             padded to the new dimensions.
         """
@@ -660,8 +690,8 @@ class Wavefront(equinox.Module):
         return self.update_phasor(new_amplitude, new_phase)
 
 
-    def crop_to(self : PlanarWavefront, 
-            number_of_pixels_out : int) -> PlanarWavefront:
+    def crop_to(self : PhysicalWavefront, 
+            number_of_pixels_out : int) -> PhysicalWavefront:
         """
         Crops a `Wavefront`'s optical disturbance. Assumes that 
         `number_of_pixels_out < self.amplitude.shape[0]`. 
@@ -684,7 +714,7 @@ class Wavefront(equinox.Module):
 
         Returns
         -------
-        : PlanarWavefront
+        : PhysicalWavefront
             The new `Wavefront` with the optical disturbance zero 
             cropped to the new dimensions.
         """
@@ -824,17 +854,15 @@ class GaussianWavefront(Wavefront):
     phase_radius : float
 
 
-    def __init__(# TODO: Discuss full @PatrixkKidger layout with 
-                # @LouisDesdoigts and @benjaminpope
-            self : GaussianWavefront, 
+    def __init__(self : GaussianWavefront, 
+            offset : Array,
+            wavelength : float,  
             beam_radius : float, 
-            wavelength : float, 
             phase_radius : float, 
-            position : float=0.0, 
-            offset : Array) -> FresnelWavefront:
+            position : float=0.0) -> GaussianWavefront:
         """
         Creates a wavefront with an empty amplitude and phase 
-        arrays but of a given wavel and phase offset. 
+        arrays but of a given wavelength and phase offset. 
 
         Parameters
         ----------
@@ -848,7 +876,7 @@ class GaussianWavefront(Wavefront):
             The phase radius of the GuasianWavefront. This is a unitless
             quantity. 
         """
-        super().__init__(wavel, offset)
+        super().__init__(wavelength, offset)
         self.beam_radius = beam_radius
         self.phase_radius = phase_radius
         self.position = position
@@ -884,13 +912,11 @@ class GaussianWavefront(Wavefront):
         : GaussianWavefront
             This wavefront at the new position. 
         """
-        # TODO: Make safe by also updating the pixel_scale in this 
-        # method. Rather discuss with @LouisDesdoigts as an example 
-        # of how helpful setters can be at maintaining invariants.
         new_pixel_scale = self.calculate_pixel_scale(position)
         new_wavefront = self.set_pixel_scale(new_pixel_scale)
         return equinox.tree_at(
-            lambda wavefront : wavefront.position, self, position)
+            lambda wavefront : wavefront.position, self, position,
+            is_leaf = lambda leaf : leaf is None)
 
 
     def get_beam_radius(self : GaussianWavefront) -> float:
@@ -918,7 +944,7 @@ class GaussianWavefront(Wavefront):
         return self.phase_radius
 
 
-    def rayleigh_distance(self: FresnelWavefront) -> float:
+    def rayleigh_distance(self: GaussianWavefront) -> float:
         """
         Calculates the rayleigh distance of the Gaussian beam.
         
@@ -927,10 +953,10 @@ class GaussianWavefront(Wavefront):
         : float
             The Rayleigh distance of the wavefront in metres.
         """
-        return numpy.pi * self.beam_radius ** 2 / self.wavel
+        return numpy.pi * self.beam_radius ** 2 / self.wavelength
 
 
-    def transfer_function(self: FresnelWavefront, distance: float) -> Array:
+    def transfer_function(self: GaussianWavefront, distance: float) -> Array:
         """
         The optical transfer function (OTF) for the gaussian beam.
         Assumes propagation is along the axis. 
@@ -965,8 +991,8 @@ class GaussianWavefront(Wavefront):
             * distance * (xi ** 2 + eta ** 2))
 
 
-    def quadratic_phase_factor(self: FresnelWavefront, 
-            distance: float) -> Float:
+    def quadratic_phase_factor(self: GaussianWavefront, 
+            distance: float) -> float:
         """
         Convinience function that simplifies many of the diffraction
         equations. Caclulates a quadratic phase factor associated with 
@@ -988,7 +1014,7 @@ class GaussianWavefront(Wavefront):
             / self.get_wavelength() / distance)
 
 
-    def location_of_waist(self: FresnelWavefront) -> float:
+    def location_of_waist(self: GaussianWavefront) -> float:
         """
         Calculates the position of the waist along the direction of 
         propagation based of the current state of the wave.
@@ -1003,7 +1029,7 @@ class GaussianWavefront(Wavefront):
             self.rayleigh_distance()) ** 2)
 
 
-    def waist_radius(self: FresnelWavefront) -> float:
+    def waist_radius(self: GaussianWavefront) -> float:
         """
         The radius of the beam at the waist.
 
@@ -1017,7 +1043,7 @@ class GaussianWavefront(Wavefront):
                 / self.get_beam_radius()) ** 2) 
 
 
-    def calculate_pixel_scale(self: FresnelWavefront, position: float) -> None:
+    def calculate_pixel_scale(self: GaussianWavefront, position: float) -> None:
         """
         The pixel scale at the position along the axis of propagation.
         Assumes that the wavefront is square. That is:
@@ -1039,7 +1065,7 @@ class GaussianWavefront(Wavefront):
         return new_pixel_scale 
         
 
-    def is_inside(self: FresnelWavefront, distance: float) -> Boolean:
+    def is_inside(self: GaussianWavefront, distance: float) -> bool:
         """ 
         Determines whether a point at along the axis of propagation 
         at distance away from the current position is inside the 
@@ -1052,9 +1078,28 @@ class GaussianWavefront(Wavefront):
 
         Returns
         -------
-        : Boolean
+        : bool
             true if the point is within the rayleigh distance false 
             otherwise.
         """
-        return numpy.abs(self.get_position() + distance - \
-            self.location_of_waist()) <= self.rayleigh_distance()
+        return numpy.abs(float(self.get_position()) + distance - \
+            float(self.location_of_waist())) <= self.rayleigh_distance()
+
+
+    def set_phase_radius(self : GaussianWavefront, 
+            phase_radius : float) -> GaussianWavefront:
+        """
+        Mutator for the phase_radius.
+
+        Parameters
+        ----------
+        phase_radius : float
+            The new phase_radius in meters.
+
+        Returns
+        -------
+        : GaussianWavefront
+            A modified GaussianWavefront with the new phase_radius.
+        """
+        return equinox.tree_at(lambda wavefront : wavefront.phase_radius, 
+            self, phase_radius, is_leaf = lambda leaf : leaf is None)
