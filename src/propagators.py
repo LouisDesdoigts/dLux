@@ -1,5 +1,5 @@
-import jax.numpy as numpy
-import equinox as equinox
+import jax.numpy as np
+import equinox as eqx
 import typing
 
 
@@ -7,11 +7,11 @@ GaussianPropagator = typing.NewType("GaussianPropgator", object)
 GaussianWavefront = typing.NewType("GaussianWavefront", object)
 
 
-class MFT(equinox.Module):
+class MFT(eqx.Module):
     """
     Matches poppy but assumes square
     """
-    npix_out: int = equinox.static_field()
+    npix_out: int = eqx.static_field()
     tilt_wf: bool
     inverse: bool
     focal_length:   float
@@ -21,8 +21,8 @@ class MFT(equinox.Module):
         self.npix_out = int(npix_out)
         self.tilt_wf = tilt_wf
         self.inverse = inverse
-        self.focal_length =   numpy.array(focal_length).astype(float)
-        self.pixelscale_out = numpy.array(pixelscale_out).astype(float)
+        self.focal_length =   np.array(focal_length).astype(float)
+        self.pixelscale_out = np.array(pixelscale_out).astype(float)
     
     def __call__(self, params_dict):
         """
@@ -32,10 +32,10 @@ class MFT(equinox.Module):
         WF = params_dict["Wavefront"]
         
         # Convert 
-        wavefront = WF.amplitude * numpy.exp(1j * WF.phase)
+        wavefront = WF.amplitude * np.exp(1j * WF.phase)
         wavel = WF.wavel
         pixelscale = WF.pixelscale
-        offset = WF.offset if self.tilt_wf else numpy.array([0., 0.])
+        offset = WF.offset if self.tilt_wf else np.array([0., 0.])
         
         # Calculate NlamD parameter (Do in __init__?)
         npup = wavefront.shape[0] 
@@ -56,33 +56,33 @@ class MFT(equinox.Module):
         dV = num_fringe / float(npix)
         
         # Generate arrays
-        Xs = (numpy.arange(npup, dtype=float) - float(npup)/2 + offsetX + 0.5) * dX
-        Ys = (numpy.arange(npup, dtype=float) - float(npup)/2 + offsetY + 0.5) * dY
-        Us = (numpy.arange(npix, dtype=float) - float(npix)/2 + offsetX + 0.5) * dU
-        Vs = (numpy.arange(npix, dtype=float) - float(npix)/2 + offsetY + 0.5) * dV
-        XU = numpy.outer(Xs, Us)
-        YV = numpy.outer(Ys, Vs)
+        Xs = (np.arange(npup, dtype=float) - float(npup)/2 + offsetX + 0.5) * dX
+        Ys = (np.arange(npup, dtype=float) - float(npup)/2 + offsetY + 0.5) * dY
+        Us = (np.arange(npix, dtype=float) - float(npix)/2 + offsetX + 0.5) * dU
+        Vs = (np.arange(npix, dtype=float) - float(npix)/2 + offsetY + 0.5) * dV
+        XU = np.outer(Xs, Us)
+        YV = np.outer(Ys, Vs)
 
         # Propagate wavefront
         sign = -1 if self.inverse else +1
-        expXU = numpy.exp(sign * -2.0 * numpy.pi * 1j * XU)
-        expYV = numpy.exp(sign * -2.0 * numpy.pi * 1j * YV).T
-        t1 = numpy.dot(expYV, wavefront)
-        wavefront = numpy.dot(t1, expXU)
+        expXU = np.exp(sign * -2.0 * numpy.pi * 1j * XU)
+        expYV = np.exp(sign * -2.0 * numpy.pi * 1j * YV).T
+        t1 = np.dot(expYV, wavefront)
+        wavefront = np.dot(t1, expXU)
 
         # Normalise wavefront
         # norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2))
-        norm_coeff = numpy.exp(numpy.log(num_fringe) - (numpy.log(npup) + numpy.log(npix)))
+        norm_coeff = np.exp(numpy.log(num_fringe) - (numpy.log(npup) + numpy.log(npix)))
         wavefront_out = wavefront * norm_coeff
         
         # Update Wavefront Object
-        WF = WF.update_phasor(numpy.abs(wavefront_out), numpy.angle(wavefront_out))
-        WF = equinox.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
-        WF = equinox.tree_at(lambda WF: WF.planetype,  WF, "Focal")
+        WF = WF.update_phasor(np.abs(wavefront_out), numpy.angle(wavefront_out))
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
+        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, "Focal")
         params_dict["Wavefront"] = WF
         return params_dict
 
-class FFT(equinox.Module):
+class FFT(eqx.Module):
     """
     Note: FFT's natively center the zero frequency on a pixel center, basically
     fuck FFTs MFT 4 lyf
@@ -91,7 +91,7 @@ class FFT(equinox.Module):
     inverse: bool
     
     def __init__(self, focal_length, inverse=False):
-        self.focal_length = numpy.array(focal_length).astype(float)
+        self.focal_length = np.array(focal_length).astype(float)
         self.inverse = inverse
         
     def __call__(self, params_dict):
@@ -100,28 +100,28 @@ class FFT(equinox.Module):
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]
-        wavefront = WF.amplitude * numpy.exp(1j * WF.phase)
+        wavefront = WF.amplitude * np.exp(1j * WF.phase)
         wavel = WF.wavel
         pixelscale = WF.pixelscale
 
         # Calculate Wavefront & Pixelscale
         npix_in = wavefront.shape[0]
         if not self.inverse: # Forwards
-            wavefront_out = npix_in * numpy.fft.fftshift(numpy.fft.ifft2(wavefront))
+            wavefront_out = npix_in * np.fft.fftshift(numpy.fft.ifft2(wavefront))
         else: # Inverse
-            wavefront_out = 1./npix_in * numpy.fft.fft2(numpy.fft.ifftshift(wavefront))
+            wavefront_out = 1./npix_in * np.fft.fft2(numpy.fft.ifftshift(wavefront))
         
         # Calculate Pixelscale
         pixelscale_out = wavel * self.focal_length / (pixelscale * npix_in)
 
         # Update Wavefront Object
-        WF = WF.update_phasor(numpy.abs(wavefront_out), numpy.angle(wavefront_out))
-        WF = equinox.tree_at(lambda WF: WF.pixelscale, WF, pixelscale_out)
-        WF = equinox.tree_at(lambda WF: WF.planetype,  WF, "Focal")
+        WF = WF.update_phasor(np.abs(wavefront_out), numpy.angle(wavefront_out))
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, pixelscale_out)
+        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, "Focal")
         params_dict["Wavefront"] = WF
         return params_dict
 
-class FresnelProp(equinox.Module):
+class FresnelProp(eqx.Module):
     """
     Layer for Fresnel propagation
     
@@ -154,9 +154,9 @@ class FresnelProp(equinox.Module):
           -> What about free space propagation?
         """
         self.npix_out = int(npix_out)
-        self.focal_length =   numpy.array(focal_length).astype(float)
-        self.focal_shift = numpy.array(focal_shift).astype(float)
-        self.pixelscale_out = numpy.array(pixelscale_out).astype(float)
+        self.focal_length =   np.array(focal_length).astype(float)
+        self.focal_shift = np.array(focal_shift).astype(float)
+        self.pixelscale_out = np.array(pixelscale_out).astype(float)
         
     def __call__(self, params_dict):
         """
@@ -166,17 +166,17 @@ class FresnelProp(equinox.Module):
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]
-        wavefront = WF.amplitude * numpy.exp(1j * WF.phase)
+        wavefront = WF.amplitude * np.exp(1j * WF.phase)
         wavel = WF.wavel
         pixelscale = WF.pixelscale
 
         # Coords
         x_coords, y_coords = WF.get_xycoords()
-        r_coords = numpy.hypot(x_coords, y_coords)
+        r_coords = np.hypot(x_coords, y_coords)
 
         # Apply Thin Lens Equation
-        k = 2*numpy.pi / wavel # Wavenumber
-        wavefront *= numpy.exp(-0.5j * k * r_coords**2 * 1/self.focal_length)
+        k = 2*np.pi / wavel # Wavenumber
+        wavefront *= np.exp(-0.5j * k * r_coords**2 * 1/self.focal_length)
         
         # Calc prop parameters
         npix = wavefront.shape[0]
@@ -187,7 +187,7 @@ class FresnelProp(equinox.Module):
         num_fringe_out = focal_ratio * wf_size * det_size / (wavel * self.focal_length)
 
         # First Phase Operation
-        rho1 = numpy.exp(1.0j * k * (x_coords ** 2 + y_coords ** 2) / (2 * z_prop))
+        rho1 = np.exp(1.0j * k * (x_coords ** 2 + y_coords ** 2) / (2 * z_prop))
         wavefront *= rho1
         wavefront = self.mft(wavefront, num_fringe_out, self.npix_out)
         wavefront *= pixelscale ** 2
@@ -195,19 +195,19 @@ class FresnelProp(equinox.Module):
         # Coords
         # NOTE: This needs to be able to match the cenetering convtion
         # of the input wavefront
-        xs = numpy.arange(self.npix_out) - self.npix_out//2
-        YY, XX = numpy.meshgrid(xs, xs)
-        x_coords, y_coords = self.pixelscale_out * numpy.array([XX, YY])
+        xs = np.arange(self.npix_out) - self.npix_out//2
+        YY, XX = np.meshgrid(xs, xs)
+        x_coords, y_coords = self.pixelscale_out * np.array([XX, YY])
 
         # Second Phase Operation
-        rho2 = numpy.exp(1.0j * k * z_prop) / (1.0j * wavel * z_prop) * numpy.exp(1.0j * k * 
+        rho2 = np.exp(1.0j * k * z_prop) / (1.0j * wavel * z_prop) * numpy.exp(1.0j * k * 
                                 (x_coords ** 2 + y_coords ** 2) / (2 * z_prop))
         wavefront_out = rho2 * wavefront
 
         # Update Wavefront Object
-        WF = WF.update_phasor(numpy.abs(wavefront_out), numpy.angle(wavefront_out))
-        WF = equinox.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
-        WF = equinox.tree_at(lambda WF: WF.planetype,  WF, None)
+        WF = WF.update_phasor(np.abs(wavefront_out), numpy.angle(wavefront_out))
+        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
+        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, None)
         params_dict["Wavefront"] = WF
         return params_dict
     
@@ -223,24 +223,24 @@ class FresnelProp(equinox.Module):
         dX = 1.0 / float(npup)
         dU = num_fringe / npix
 
-        Xs = (numpy.arange(npup, dtype=float) - float(npup) / 2.0) * dX
-        Us = (numpy.arange(npix, dtype=float) - float(npix) / 2.0) * dU
-        XU = numpy.outer(Xs, Us)
-        expXU = numpy.exp(-2.0 * numpy.pi * 1j * XU)
+        Xs = (np.arange(npup, dtype=float) - float(npup) / 2.0) * dX
+        Us = (np.arange(npix, dtype=float) - float(npix) / 2.0) * dU
+        XU = np.outer(Xs, Us)
+        expXU = np.exp(-2.0 * numpy.pi * 1j * XU)
 
         # Note: Can casue overflow issues on 32-bit
         # norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2))
-        norm_coeff = numpy.exp(numpy.log(num_fringe) - (numpy.log(npup) + numpy.log(npix)))
+        norm_coeff = np.exp(numpy.log(num_fringe) - (numpy.log(npup) + numpy.log(npix)))
 
         # Perform MFT
-        t1 = numpy.dot(expXU.T, wavefront)
-        t2 = numpy.dot(t1, expXU)
+        t1 = np.dot(expXU.T, wavefront)
+        t2 = np.dot(t1, expXU)
         wavefront_out = norm_coeff * t2
 
         return wavefront_out
 
 
-class GaussianPropagator(object):
+class GaussianPropagator(eqx.Module):
     """
     An intermediate plane fresnel algorithm for propagating the
     `GaussianWavefront` class between the planes. The propagator 
@@ -249,12 +249,23 @@ class GaussianPropagator(object):
 
     Attributes
     ----------
-    INDEX_GENERATOR : Array[int]
-        A constant used to generate the `jax.lax.switch` branch
-        indexes.
+    distance : float 
+       The distance to propagate in meters. 
     """
-    # Constants
-    INDEX_GENERATOR = numpy.array([1, 2])
+    distance : float 
+
+
+    def __init__(self : GaussianPropagator, 
+            distance : float) -> GaussianPropagator:
+        """
+        Constructor for the GaussianPropagator.
+
+        Parameters
+        ----------
+        distance : float
+            The distance to propagate the wavefront in meters.
+        """
+        self.distance = distance
 
 
     def planar_to_planar(self : GaussianPropagator, 
@@ -278,14 +289,14 @@ class GaussianPropagator(object):
             The new `Wavefront` propagated by `distance`. 
         """
         complex_wavefront = wavefront.get_amplitude() * \
-            numpy.exp(1j * self.get_phase())
+            np.exp(1j * self.get_phase())
 
-        new_complex_wavefront = numpy.fft.ifft2(
+        new_complex_wavefront = np.fft.ifft2(
             wavefront.transfer_function(distance) * \
-            numpy.fft.fft2(complex_wavefront))
+            np.fft.fft2(complex_wavefront))
 
-        new_amplitude = numpy.abs(new_complex_wavefront)
-        new_phase = numpy.angle(new_complex_wavefront)
+        new_amplitude = np.abs(new_complex_wavefront)
+        new_phase = np.angle(new_complex_wavefront)
         
         return wavefront\
             .set_position(wavefront.get_position() + distance)\
@@ -314,20 +325,20 @@ class GaussianPropagator(object):
         """
         coefficient = 1 / 1j / wavefront.get_wavelength() / distance
         complex_wavefront = wavefront.get_amplitude() * \
-            numpy.exp(1j * self.get_phase())
+            np.exp(1j * self.get_phase())
 
-        fourier_transform = jax.lax.cond(numpy.sign(distance) > 0, 
+        fourier_transform = jax.lax.cond(np.sign(distance) > 0, 
             lambda wavefront, distance: \
                 quadratic_phase_factor(distance) * \
-                numpy.fft.fft2(wavefront), 
+                np.fft.fft2(wavefront), 
             lambda wavefront, distance: \
                 quadratic_phase_factor(distance) * \
-                numpy.fft.ifft2(wavefront),
+                np.fft.ifft2(wavefront),
             complex_wavefront, distance)
 
         new_complex_wavefront = coefficient * fourier_transform
-        new_phase = numpy.angle(new_complex_wavefront)
-        new_amplitude = numpy.abs(new_complex_wavefront)
+        new_phase = np.angle(new_complex_wavefront)
+        new_amplitude = np.abs(new_complex_wavefront)
 
         return wavefront\
             .update_phasor(new_amplitude, new_phase)\
@@ -359,16 +370,16 @@ class GaussianPropagator(object):
         coefficient = 1 / 1j / wavefront.get_wavelength() / \
             distance * wavefront.quadratic_phase_factor(distance)
         complex_wavefront = wavefront.get_amplitude() * \
-            numpy.exp(1j * wavefront.get_phase())
+            np.exp(1j * wavefront.get_phase())
 
-        fourier_transform = jax.lax.cond(numpy.sign(distance) > 0, 
-            lambda wavefront: numpy.fft.fft2(wavefront), 
-            lambda wavefront: numpy.fft.ifft2(wavefront),
+        fourier_transform = jax.lax.cond(np.sign(distance) > 0, 
+            lambda wavefront: np.fft.fft2(wavefront), 
+            lambda wavefront: np.fft.ifft2(wavefront),
             complex_wavefront)
 
         new_wavefront = coefficient * fourier_transform
-        new_phase = numpy.angle(new_wavefront)
-        new_amplitude = numpy.abs(new_wavefront)
+        new_phase = np.angle(new_wavefront)
+        new_amplitude = np.abs(new_wavefront)
         return wavefront\
             .update_phasor(new_amplitude, new_phase)\
             .set_position(wavefront.get_position() + distance)
@@ -531,10 +542,13 @@ class GaussianPropagator(object):
         # sum((1, 1) * (1, 2)) == 3
         #
         # TODO: Test if a simple lookup is faster. 
+        # Constants
+        INDEX_GENERATOR = np.array([1, 2])
+
         decision_vector = wavefront.is_inside([
             wavefront.get_position(), 
             wavefront.get_position() + distance])
-        decision_index = numpy.sum(
+        decision_index = np.sum(
             self.INDEX_GENERATOR * descision_vector)
  
         # Enters the correct function differentiably depending on 

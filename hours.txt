@@ -1,0 +1,123 @@
+Date: Sun Jun 19 2022
+Name: Jordan Dennis
+Hours: 3hr
+===== 07:00 =====
+Reading Conaire's Thesis
+===== 09:00 =====
+Reading the Gouyong Paper
+===== 10:00 =====
+
+
+Date: Mon Jun 20 2022 
+Name: Jordan Dennis
+Hours: 3hr
+===== 13:00 =====
+Meeting with @Louis Desdoigts
+===== 15:00 =====
+===== 16:00 =====
+Downloading Shanon, Applied Optics and Optical 
+Engineering 11 Edition.
+Setting up development environment and making 
+some empty initial commits. 
+===== 17:00 =====
+
+
+Date: Tue Jun 21 2022
+Name: Jordan Dennis 
+Hours: 8hr
+===== 07:00 =====
+Reviewing Hetch Chapter 10 - 11
+===== 12:00 =====
+Lunch break
+===== 13:00 =====
+Starting work on the unit tests 
+===== 14:00 =====
+Continuing to study the theory from 
+Hecht Chapter 11
+Briefly start reading from Shannon 
+Chapter 3
+===== 16:00 =====
+ 
+
+Date: Wed Jun 22 2022
+Name: Jordan Dennis
+Hours: 9hrs
+===== 07:00 =====
+Reviewing Shannon Chapter 3
+===== 09:00 =====
+Coffee Break 
+===== 09:10 =====
+Finishing the review of Shannon
+Chapter 3. 
+Setting up Testing and Documentation 
+branches.
+Team discussions.
+===== 12:00 =====
+Lunch Break
+===== 13:00 =====
+Documentation
+Implementing the Shannon algorithm
+===== 16:00 =====
+===== 17:30 =====
+Meeting with Ben and Louis
+===== 18:30 =====
+
+
+Date: Thur Jun 23 2022
+Name: Jordan Dennis
+Hours: 9hrs
+===== 07:00 =====
+Setting up MkDocs
+Implementing the GaussianWavefront
+attempt 1 that is
+===== 12:00 =====
+Lunch break
+===== 12:10 =====
+Planning and implementing tests
+===== 16:00 =====
+
+
+Date: Fri Jun 24 2022
+Name: Jordan Dennis
+Hours: 8hrs
+===== 07:00 =====
+Implementing unit tests
+Github dsicussions
+Github issues.
+===== 12:00 =====
+Lunch
+===== 12:30 =====
+Implementing tests
+Meeting with @LouisDesdoigts
+===== 16:00 =====
+
+
+Date: Mon Jun 27 2022
+Name: Jordan Dennis 
+Hours: 
+===== 07:00 =====
+Splitting into Wavefront, PhysicalWavefront 
+and GaussianWavefront. 
+===== 12:00 =====
+Lunch break
+===== 12:30 =====
+Splitting GaussianWavefront into 
+GaussianWavefront and GaussianPropagator
+===== 15:00 =====
+
+
+Date: Tue Jun 28 2022
+Name: Jordan Dennis
+Hours:
+===== 07:00 =====
+Redoing the division of labor 
+between the `Wavefront` classes.
+Fixing the tests to match the new 
+system. 
+===== 12:00 =====
+Lunch break
+===== 12:30 =====
+More test fixing
+Meeting with @LouisDesdoigts to discuss
+the propagators and other functionality.
+===== 15:30 =====
