@@ -533,7 +533,7 @@ class Wavefront(eqx.Module):
 
     # TODO: Make logic Jax-Safe
     def interpolate(self : PhysicalWavefront, coordinates : Array, 
-            real_imaginary : bool = False) -> tuple[Array, Array]:
+            real_imaginary : bool = False) -> tuple:
         """
         Interpolates the `Wavefront` at the points specified by 
         coordinates. The default interpolation uses the amplitude 
