@@ -14,10 +14,13 @@ import typing
 
 
 Array = typing.NewType("Array", numpy.ndarray)
+
+dLuxModule = typing.NewType("dLuxModule", object)
 Wavefront = typing.NewType("Wavefront", object)
 PhysicalWavefront = typing.NewType("PhysicalWavefront", Wavefront)
-AngularWavefront = typing.NewType("AngularWavefont", Wavefront)
+AngularWavefront = typing.NewType("AngularWavefront", Wavefront)
 GaussianWavefront = typing.NewType("GaussianWavefront", Wavefront)
+
 Utility = typing.NewType("Utility", object)
 WavefrontUtility = typing.NewType("WavefrontUtility", Utility)
 PhysicalWavefrontUtility = typing.NewType("PhysicalWavefrontUtility", 
@@ -26,6 +29,8 @@ AngularWavefrontUtility = typing.NewType("AngularWavefrontUtility",
     WavefrontUtility)
 GaussianWavefrontUtility = typing.NewType("GaussianWavefrontUtility",
     WavefrontUtility)
+
+UtilityUser = typing.NewType("UtilityUser", object)
 
 
 class UtilityUser(object):
@@ -37,7 +42,7 @@ class UtilityUser(object):
     utility : Utility
 
 
-    def get_utility(self : Utility) -> Utility:
+    def get_utility(self : UtilityUser) -> Utility:
         """
         Accessor for the utility. 
 
@@ -46,7 +51,7 @@ class UtilityUser(object):
         : Utility
             The utility
         """
-        return self 
+        return self.utility 
 
 
 class Utility(object):
@@ -80,6 +85,29 @@ class Utility(object):
             "should never be directly invoked")
 
 
+    def approx(self : Utility, result : Array, comparator : Array) -> Array:
+        """
+        Compare two arrays to within floating point precision.
+
+        Parameters
+        ----------
+        result : Array
+            The result that you want to test for nearness to
+            comparator.
+        comparator : Array
+            The comparison array.
+
+        Returns
+        -------
+        : Array[bool]
+            True if the array elements are similar to float 
+            error, False otherwise. 
+        """
+        lower_bound = (result - 0.0005) <= comparator
+        upper_bound = (result + 0.0005) >= comparator
+        return lower_bound & upper_bound 
+
+
 class WavefrontUtility(Utility):
     """
     Defines safe state constants and a simple constructor for a safe
@@ -98,6 +126,7 @@ class WavefrontUtility(Utility):
     size : int
     amplitude : Array 
     phase : Array
+    pixel_scale : float
 
 
     def __init__(self : WavefrontUtility, /, 
@@ -105,7 +134,8 @@ class WavefrontUtility(Utility):
             offset : Array = None,
             size : int = None,
             amplitude : Array = None,
-            phase : Array = None) -> WavefrontUtility:
+            phase : Array = None,
+            pixel_scale : float = None) -> WavefrontUtility:
         """
         Parameters
         ----------
@@ -135,6 +165,7 @@ class WavefrontUtility(Utility):
             amplitude else amplitude
         self.phase = numpy.zeros((self.size, self.size)) if not \
             phase else phase
+        self.pixel_scale = 1. if not pixel_scale else pixel_scale
 
         assert self.size == self.amplitude.shape[0]
         assert self.size == self.amplitude.shape[1]
@@ -153,10 +184,11 @@ class WavefrontUtility(Utility):
         """
         return dLux\
             .Wavefront(self.wavelength, self.offset)\
-            .update_phasor(self.amplitude, self.phase)
+            .update_phasor(self.amplitude, self.phase)\
+            .set_pixel_scale(self.pixel_scale)
 
 
-    def get_wavelength(self : WavefrontUtitlity) -> float:
+    def get_wavelength(self : WavefrontUtility) -> float:
         """
         Accessor for the wavelength associated with this utility.
 
@@ -219,7 +251,19 @@ class WavefrontUtility(Utility):
         return self.offset
 
 
-class PhysicalWavefrontUtility(WavefontUtility):
+    def get_pixel_scale(self : WavefrontUtility) -> Array:
+        """
+        Accessor for the `pixel_scale` constant.
+
+        Returns
+        -------
+        : Array
+            The `pixel_scale` associated with the wavefront.
+        """
+        return self.pixel_scale
+
+
+class PhysicalWavefrontUtility(WavefrontUtility):
     """
     Defines useful safes state constants as well as a basic 
     constructor for a safe `PhysicalWavefront`.
@@ -264,11 +308,13 @@ class PhysicalWavefrontUtility(WavefontUtility):
         """
         wavefront = dLux\
             .PhysicalWavefront(self.wavelength, self.offset)\
-            .update_phasor(self.amplitude, self.phase)
+            .update_phasor(self.amplitude, self.phase)\
+            .set_pixel_scale(self.pixel_scale)
+
         return wavefront
 
 
-class AngularWavefrontUtility(WavefontUtility):
+class AngularWavefrontUtility(WavefrontUtility):
     """
     Defines useful safes state constants as well as a basic 
     constructor for a safe `PhysicalWavefront`.
@@ -313,7 +359,9 @@ class AngularWavefrontUtility(WavefontUtility):
         """
         wavefront = dLux\
             .AngularWavefront(self.wavelength, self.offset)\
-            .update_phasor(self.amplitude, self.phase)
+            .update_phasor(self.amplitude, self.phase)\
+            .set_pixel_scale(pixel_scale)
+            
         return wavefront
 
 
@@ -387,8 +435,10 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
             The safe testing wavefront.
         """
         wavefront = dLux\
-            .GaussianWavefront(
-                self.beam_radius, self.wavelength, 
-                self.phase_radius, self.position, self.offset)\
-            .update_phasor(self.amplitude, self.phase)
+            .GaussianWavefront(self.offset,
+               self.wavelength, self.beam_radius, 
+                self.phase_radius, self.position)\
+            .update_phasor(self.amplitude, self.phase)\
+            .set_pixel_scale(self.pixel_scale)
+
         return wavefront
