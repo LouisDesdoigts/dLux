@@ -1,4 +1,4 @@
-import jax.np.as np
+import jax.numpy as np
 import equinox as eqx
 import typing
 
@@ -72,7 +72,7 @@ class MFT(eqx.Module):
 
         # Normalise wavefront
         # norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2))
-        norm_coeff = np.exp(np.log(num_fringe) - (numpy.log(npup) + numpy.log(npix)))
+        norm_coeff = np.exp(np.log(num_fringe) - (np.log(npup) + np.log(npix)))
         wavefront_out = wavefront * norm_coeff
         
         # Update Wavefront Object
@@ -230,7 +230,7 @@ class FresnelProp(eqx.Module):
 
         # Note: Can casue overflow issues on 32-bit
         # norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2))
-        norm_coeff = np.exp(np.log(num_fringe) - (numpy.log(npup) + numpy.log(npix)))
+        norm_coeff = np.exp(np.log(num_fringe) - (np.log(npup) + np.log(npix)))
 
         # Perform MFT
         t1 = np.dot(expXU.T, wavefront)
