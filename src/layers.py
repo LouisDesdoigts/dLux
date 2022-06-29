@@ -11,9 +11,9 @@ Layer __call__ functions Template:
         # Get relevant parameters
         WF = params_dict["Wavefront"]
         wavefront = WF.wavefront
-        wavel = WF.wavel
+        wavel = WF.wavelength
         offset = WF.offset
-        pixelscale = WF.pixelscale
+        pixel_scale = WF.pixel_scale
         planetype = WF.planetype
 
         # Do things
@@ -22,7 +22,7 @@ Layer __call__ functions Template:
         # Update Wavefront Object
         WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
         WF = eqx.tree_at(lambda WF: WF.offset,     WF, offset)
-        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, pixelscale)
+        WF = eqx.tree_at(lambda WF: WF.pixel_scale, WF, pixel_scale)
         WF = eqx.tree_at(lambda WF: WF.planetype,  WF, planetype)
         params_dict["Wavefront"] = WF
         return params_dict
@@ -41,7 +41,7 @@ class CreateWavefront(eqx.Module):
 
     Parameters
     ----------
-    pixelscale: float, equinox.static_field
+    pixel_scale: float, equinox.static_field
         Units: meters/pixel
         The pixelscae of each array between each layer operation
         Its value is automatically calculated from the input values
@@ -53,12 +53,12 @@ class CreateWavefront(eqx.Module):
     """
     npix:           int = eqx.static_field()
     wavefront_size: float
-    pixelscale:     float
+    pixel_scale:     float
     
     def __init__(self, npix, wavefront_size):
         self.npix = int(npix)
         self.wavefront_size = np.array(wavefront_size).astype(float)
-        self.pixelscale = np.array(wavefront_size/npix).astype(float)
+        self.pixel_scale = np.array(wavefront_size/npix).astype(float)
     
     def __call__(self, params_dict):
         """
@@ -68,7 +68,7 @@ class CreateWavefront(eqx.Module):
         WF = params_dict["Wavefront"]
         ampl = np.ones([self.npix, self.npix])
         phase = np.zeros([self.npix, self.npix])
-        pixelscale = self.pixelscale
+        pixel_scale = self.pixel_scale
         
         # # Update Wavefront Object
         WF = eqx.tree_at(lambda WF: WF.amplitude,  WF, ampl,  
@@ -77,7 +77,7 @@ class CreateWavefront(eqx.Module):
         WF = eqx.tree_at(lambda WF: WF.phase,  WF, phase,  
                          is_leaf=lambda x: x is None)
         
-        WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, pixelscale, 
+        WF = eqx.tree_at(lambda WF: WF.pixel_scale, WF, pixel_scale, 
                          is_leaf=lambda x: x is None)
         params_dict["Wavefront"] = WF
         return params_dict
@@ -88,7 +88,7 @@ class TiltWavefront(eqx.Module):
 
     Parameters
     ----------
-    pixelscale: float, equinox.static_field
+    pixel_scale: float, equinox.static_field
         Units: meters/pixel
         The pixelscae of each array between each layer operation
         Its value is automatically calculated from the input values
@@ -111,8 +111,8 @@ class TiltWavefront(eqx.Module):
         
         # Calc phase tilt 
         xangle, yangle = WF.offset
-        xcoords, ycoords = WF.get_xycoords()
-        k = 2*np.pi/WF.wavel
+        xcoords, ycoords = WF.get_pixel_positions()
+        k = 2*np.pi/WF.wavelength
         phase = -k * (xcoords*xangle + ycoords*yangle)
         WF = WF.add_phase(phase)
         
@@ -149,7 +149,7 @@ class CircularAperture(eqx.Module):
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]        
-        WF = WF.multiply_ampl(self.array)
+        WF = WF.multiply_amplitude(self.array)
 
         # Update Wavefront Object
         params_dict["Wavefront"] = WF
@@ -305,7 +305,7 @@ class ApplyAperture(eqx.Module):
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]
-        WF = WF.multiply_ampl(self.aperture)
+        WF = WF.multiply_amplitude(self.aperture)
         params_dict["Wavefront"] = WF
         return params_dict
     
@@ -348,7 +348,7 @@ class ApplyBasisCLIMB(eqx.Module):
         """
         # Get relevant parameters
         WF = params_dict["Wavefront"]
-        wavel = WF.wavel
+        wavel = WF.wavelength
 
         # Get basis phase
         latent = self.get_opd(self.basis, self.coeffs)
