@@ -76,16 +76,19 @@ class TestWavefront(UtilityUser):
             .get_utility()\
             .construct()
 
-        assert wavefront.get_offset() == self\
+        is_correct = (wavefront.get_offset() == self\
             .get_utility()\
-            .get_offset()
+            .get_offset())\
+            .all()
+
+        assert is_correct
 
 
     def test_set_offset(self : TestWavefront) -> None:
         """
         Test for the mutator method set_offset.
         """
-        NEW_OFFSET = [numpy.pi] * 2
+        NEW_OFFSET = numpy.array([numpy.pi] * 2)
         OLD_OFFSET = self\
             .get_utility()\
             .get_offset()
@@ -95,8 +98,8 @@ class TestWavefront(UtilityUser):
             .construct()\
             .set_offset(NEW_OFFSET)
 
-        assert wavefront.get_offset() == NEW_OFFSET
-        assert wavefront.get_offset() != OLD_OFFSET
+        assert (wavefront.get_offset() == NEW_OFFSET).all()
+        assert (wavefront.get_offset() != OLD_OFFSET).all()
     
 
     def test_get_real(self : TestWavefront) -> None:
@@ -436,7 +439,7 @@ class TestPhysicalWavefront(UtilityUser):
         wavefront = PhysicalWavefront(WAVELENGTH, OFFSET)
         
         assert wavefront.get_wavelength() == WAVELENGTH
-        assert wavefront.get_offset() == OFFSET
+        assert (wavefront.get_offset() == OFFSET).all()
         assert wavefront.get_amplitude() == None
         assert wavefront.get_phase() == None
         
@@ -466,7 +469,7 @@ class TestAngularWavefront(UtilityUser):
         wavefront = AngularWavefront(WAVELENGTH, OFFSET)
         
         assert wavefront.get_wavelength() == WAVELENGTH
-        assert wavefront.get_offset() == OFFSET
+        assert (wavefront.get_offset() == OFFSET).all()
         assert wavefront.get_amplitude() == None
         assert wavefront.get_phase() == None
 
@@ -507,7 +510,10 @@ class TestGaussianWavefront(UtilityUser):
         changed_wavefront = initial_wavefront.set_phase_radius(1.)
 
         # TODO: Work out a good default value for this. 
-        assert initial_wavefront.get_phase_radius() == 0.
+        assert initial_wavefront.get_phase_radius() == self\
+            .get_utility()\
+            .get_phase_radius()
+
         assert changed_wavefront.get_phase_radius() == 1.
        
 
@@ -531,7 +537,11 @@ class TestGaussianWavefront(UtilityUser):
         Checks that the location of the waist is correctly determined.
         Simply runs the explicit calculations externally and compares.
         """
-        wavefront = self.get_utility().construct()
+        wavefront = self\
+            .get_utility()\
+            .construct()\
+            .set_phase_radius(1.)
+
         correct_location_of_waist = - wavefront.get_phase_radius() / \
             (1 + (wavefront.get_phase_radius() / \
                 wavefront.rayleigh_distance()) ** 2)
@@ -663,15 +673,26 @@ class TestGaussianWavefront(UtilityUser):
         true, false
         true, true
         """
-        wavefront = self.get_utility().construct()
+        wavefront = self\
+            .get_utility()\
+            .construct()\
+            .set_phase_radius(1.)
+
         rayleigh_distance = wavefront.rayleigh_distance()
 
         false_false = wavefront.is_inside(
             rayleigh_distance * numpy.ones((2, )) + 1.)
-        false_true = wavefront.is_inside(
-            numpy.array([rayleigh_distance + 1., 0.]))
-        true_false = wavefront.is_inside(
-            numpy.array([0., rayleigh_distance + 1.]))
+
+        false_true = wavefront.is_inside(numpy\
+            .zeros((2, ))\
+            .at[0]\
+            .set(numpy.squeeze(rayleigh_distance) + 1.))
+
+        true_false = wavefront.is_inside(numpy\
+            .zeros((2, ))\
+            .at[1]\
+            .set(numpy.squeeze(rayleigh_distance) + 1.))
+
         true_true = wavefront.is_inside(numpy.array([0., 0.]))
 
         assert (false_false == numpy.array([False, False])).all() 
