@@ -439,9 +439,6 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
                self.wavelength, self.beam_radius, 
                 self.phase_radius, self.position)\
             .update_phasor(self.amplitude, self.phase)\
-            .set_pixel_scale(self.pixel_scale)\
-            .set_position(0.)\
-            .set_phase_radius(numpy.inf)\
-            .set_beam_radius(1.)
+            .set_pixel_scale(self.pixel_scale)
 
         return wavefront
