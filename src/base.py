@@ -1,11 +1,11 @@
 import jax
-import jax.np as numpy
+import jax.numpy as np
 from jax import vmap
-import equinox
+import equinox as eqx
 from copy import deepcopy
 
 
-class OpticalSystem(equinox.Module):
+class OpticalSystem(eqx.Module):
     """ Optical System class, Equinox Modle
     
     DOCSTRING NOT COMPLETE
