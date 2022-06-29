@@ -1,14 +1,14 @@
-# Required Modules
 jax
 jaxlib
 equinox
 optax
-
-# Helper Modules
 numpy
 matplotlib
 tqdm
 jupyter
 jupyterlab
+chainconsumer
+sklearn
+imageio
 
 
