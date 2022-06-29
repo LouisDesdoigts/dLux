@@ -55,8 +55,8 @@ class Wavefront(eqx.Module):
             The x and y angles of incidence to the surface assumed to 
             be in radians. 
         """
-        self.wavelength = np.array([wavelength]).astype(float) # Jax Safe
-        self.offset = np.array([offset]).astype(float) # To be instantiated by CreateWavefront        
+        self.wavelength = np.array(wavelength).astype(float) # Jax Safe
+        self.offset = np.array(offset).astype(float) # To be instantiated by CreateWavefront        
         self.plane_type = "Pupil"
         self.amplitude = None
         self.phase = None
