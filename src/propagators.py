@@ -2,9 +2,49 @@ import jax.numpy as np
 import equinox as eqx
 import typing
 
+from wavefronts import GaussianWavefront, AngularWavefront, 
+    PhysicalWavefront
 
+
+Propagator = typing.NewType("Propagator", eqx.Module)
 GaussianPropagator = typing.NewType("GaussianPropgator", object)
-GaussianWavefront = typing.NewType("GaussianWavefront", object)
+
+
+# TODO: write a get_complex_format() method for the base Wavefront
+class Propagator(eqx.Module):
+    """
+    An abstract class indicating a spatial transfromation of the
+    `Wavefront`. This is a separate class because it allows 
+    us to take gradients with respect to the fields of the 
+    propagator and hence optimise distances ect.     
+    """
+
+
+    def _fourier_transform():
+    def _inverse_fourier_transform():
+    def _is_tilted():
+    def __init__():
+    def __call__():
+
+
+# TODO: Review naming conventions with @LouisDesdoigts. When we are 
+# only applying the Fourier transform it is Fraunhofer diffraction.
+# I am a fan of using the name AngularFraunhoferMFT or something 
+# similar. I need to do my research though. 
+
+
+# TODO: Talk to @LouisDesdoigts about having many propagators instead 
+# of using logic. Actually no this can be filtered into the abstract 
+# class. 
+
+
+# TODO: Talk to @LouisDesdoigts about using this as an opportunity to 
+# get rid of the fft reliance. Also talk to @LouisDesdoigts about 
+# implementing our own algorithm that uses the symmetries of the 
+# matrix and point out that our MFT then becomes a paraxial FFT.
+
+
+# TODO: Research the symmetry algorithm and give this a crack. 
 
 
 class MFT(eqx.Module):
