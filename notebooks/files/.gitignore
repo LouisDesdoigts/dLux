@@ -2,3 +2,5 @@
 *
 # Except this file
 !.gitignore
+!egg_mask.npy
+!ttol_mask.npy
