@@ -1,4 +1,4 @@
-import jax.numpy as np
+import jax.np.as np
 import equinox as eqx
 import typing
 
@@ -65,18 +65,18 @@ class MFT(eqx.Module):
 
         # Propagate wavefront
         sign = -1 if self.inverse else +1
-        expXU = np.exp(sign * -2.0 * numpy.pi * 1j * XU)
-        expYV = np.exp(sign * -2.0 * numpy.pi * 1j * YV).T
+        expXU = np.exp(sign * -2.0 * np.pi * 1j * XU)
+        expYV = np.exp(sign * -2.0 * np.pi * 1j * YV).T
         t1 = np.dot(expYV, wavefront)
         wavefront = np.dot(t1, expXU)
 
         # Normalise wavefront
         # norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2))
-        norm_coeff = np.exp(numpy.log(num_fringe) - (numpy.log(npup) + numpy.log(npix)))
+        norm_coeff = np.exp(np.log(num_fringe) - (numpy.log(npup) + numpy.log(npix)))
         wavefront_out = wavefront * norm_coeff
         
         # Update Wavefront Object
-        WF = WF.update_phasor(np.abs(wavefront_out), numpy.angle(wavefront_out))
+        WF = WF.update_phasor(np.abs(wavefront_out), np.angle(wavefront_out))
         WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
         WF = eqx.tree_at(lambda WF: WF.planetype,  WF, "Focal")
         params_dict["Wavefront"] = WF
@@ -107,15 +107,15 @@ class FFT(eqx.Module):
         # Calculate Wavefront & Pixelscale
         npix_in = wavefront.shape[0]
         if not self.inverse: # Forwards
-            wavefront_out = npix_in * np.fft.fftshift(numpy.fft.ifft2(wavefront))
+            wavefront_out = npix_in * np.fft.fftshift(np.fft.ifft2(wavefront))
         else: # Inverse
-            wavefront_out = 1./npix_in * np.fft.fft2(numpy.fft.ifftshift(wavefront))
+            wavefront_out = 1./npix_in * np.fft.fft2(np.fft.ifftshift(wavefront))
         
         # Calculate Pixelscale
         pixelscale_out = wavel * self.focal_length / (pixelscale * npix_in)
 
         # Update Wavefront Object
-        WF = WF.update_phasor(np.abs(wavefront_out), numpy.angle(wavefront_out))
+        WF = WF.update_phasor(np.abs(wavefront_out), np.angle(wavefront_out))
         WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, pixelscale_out)
         WF = eqx.tree_at(lambda WF: WF.planetype,  WF, "Focal")
         params_dict["Wavefront"] = WF
@@ -200,12 +200,12 @@ class FresnelProp(eqx.Module):
         x_coords, y_coords = self.pixelscale_out * np.array([XX, YY])
 
         # Second Phase Operation
-        rho2 = np.exp(1.0j * k * z_prop) / (1.0j * wavel * z_prop) * numpy.exp(1.0j * k * 
+        rho2 = np.exp(1.0j * k * z_prop) / (1.0j * wavel * z_prop) * np.exp(1.0j * k * 
                                 (x_coords ** 2 + y_coords ** 2) / (2 * z_prop))
         wavefront_out = rho2 * wavefront
 
         # Update Wavefront Object
-        WF = WF.update_phasor(np.abs(wavefront_out), numpy.angle(wavefront_out))
+        WF = WF.update_phasor(np.abs(wavefront_out), np.angle(wavefront_out))
         WF = eqx.tree_at(lambda WF: WF.pixelscale, WF, self.pixelscale_out)
         WF = eqx.tree_at(lambda WF: WF.planetype,  WF, None)
         params_dict["Wavefront"] = WF
@@ -226,11 +226,11 @@ class FresnelProp(eqx.Module):
         Xs = (np.arange(npup, dtype=float) - float(npup) / 2.0) * dX
         Us = (np.arange(npix, dtype=float) - float(npix) / 2.0) * dU
         XU = np.outer(Xs, Us)
-        expXU = np.exp(-2.0 * numpy.pi * 1j * XU)
+        expXU = np.exp(-2.0 * np.pi * 1j * XU)
 
         # Note: Can casue overflow issues on 32-bit
         # norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2))
-        norm_coeff = np.exp(numpy.log(num_fringe) - (numpy.log(npup) + numpy.log(npix)))
+        norm_coeff = np.exp(np.log(num_fringe) - (numpy.log(npup) + numpy.log(npix)))
 
         # Perform MFT
         t1 = np.dot(expXU.T, wavefront)
