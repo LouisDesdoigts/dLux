@@ -159,7 +159,8 @@ class WavefrontUtility(Utility):
             The new utility for generating test cases.
         """
         self.wavelength = 550.e-09 if not wavelength else wavelength
-        self.offset = [0., 0.] if not offset else offset           
+        self.offset = numpy.array([0., 0.]).astype(float) if not \
+            offset else numpy.array(offset).astype(float)           
         self.size = 128 if not size else size
         self.amplitude = numpy.ones((self.size, self.size)) if not \
             amplitude else amplitude
@@ -421,8 +422,15 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
         """
         super().__init__(wavelength, offset, size, amplitude, phase)
         self.beam_radius = 1. if not beam_radius else beam_radius
-        self.phase_radius = 0. if not phase_radius else phase_radius
+        self.phase_radius = numpy.inf if not phase_radius else phase_radius
         self.position = 0. if not position else position
+
+
+    # TODO: get_beam_radius and get_position
+    def get_phase_radius(self : GaussianWavefrontUtility) -> float:
+        """
+        """
+        return self.phase_radius
 
 
     def construct(self : GaussianWavefrontUtility) -> GaussianWavefront:
@@ -436,9 +444,11 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
         """
         wavefront = dLux\
             .GaussianWavefront(self.offset,
-               self.wavelength, self.beam_radius, 
-                self.phase_radius, self.position)\
+               self.wavelength)\
             .update_phasor(self.amplitude, self.phase)\
-            .set_pixel_scale(self.pixel_scale)
+            .set_pixel_scale(self.pixel_scale)\
+            .set_position(0.)\
+            .set_phase_radius(numpy.inf)\
+            .set_beam_radius(1.)
 
         return wavefront
