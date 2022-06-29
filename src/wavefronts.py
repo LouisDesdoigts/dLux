@@ -383,6 +383,20 @@ class Wavefront(eqx.Module):
         return self.add_phase(phase_difference)
 
 
+    def get_complex_form(self : Wavefront) -> Array:
+        """
+        The electric field described by this Wavefront in complex 
+        form.
+
+        Returns
+        -------
+        : Array[complex]
+            The complex electric field with both the real and 
+            imaginary components in SI units.
+        """
+        return self.get_amplitude() * np.exp(1j * self.get_phase()) 
+
+
     def normalise(self : Wavefront) -> Wavefront:
         """
         Reduce the electric field amplitude of the wavefront to a 
