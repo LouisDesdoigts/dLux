@@ -3,6 +3,7 @@ import jax.numpy as np
 from jax import vmap
 import equinox as eqx
 from copy import deepcopy
+from dLux.wavefronts import *
 
 
 class OpticalSystem(eqx.Module):
@@ -97,7 +98,7 @@ class OpticalSystem(eqx.Module):
             params_dict = self.layers[i](params_dict)
             intermeds.append(deepcopy(params_dict))
             layers_applied.append(self.layers[i].__str__())
-        return params_dict["Wavefront"].wf2psf(), intermeds, layers_applied
+        return params_dict["Wavefront"].wavefront_to_psf(), intermeds, layers_applied
             
         
         
@@ -147,7 +148,7 @@ class OpticalSystem(eqx.Module):
         params_dict = {"Wavefront": PhysicalWavefront(wavel, offset)}
         for i in range(len(self.layers)):
             params_dict = self.layers[i](params_dict)
-        return params_dict["Wavefront"].wf2psf()
+        return params_dict["Wavefront"].wavefront_to_psf()
     
     def propagate_single(self, wavels, offset=np.zeros(2), weights=1.):
         """
