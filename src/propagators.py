@@ -148,59 +148,6 @@ class Propagator(eqx.Module):
         return wavefront.update_phasor(amplitude, phase)
 
 
-    def _inverse_fourier_transform(self : Propagator, 
-            wavefront : Wavefront) -> Wavefront:
-
-        """
-        Take the paraxial fourier transform of the wavefront in the 
-        complex representation.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The `Wavefront` object that we want to Fourier transform.
-        number_of_fringes : float
-            The size of the output region in wavelength / distance 
-            units. i.e. The number of diffraction fringes. 
-        pixel_offsets : Array
-            The displacement of the centre of the transform from the 
-            centre of the wavefront in pixels in the input plane. 
-        pixels_out : int
-            The number of pixels following the transform in the 
-            detector layer. 
-
-        Returns
-        -------
-        : Wavefront
-            The wavefront with the updated amplitude and phase after 
-            the Fourier transform.
-        """
-        complex_wavefront = wavefront.complex_form()
-        pixels_input = wavefront.number_of_pixels()
- 
-        input_scale = 1.0 / pixels_input
-        output_scale = number_of_fringes / pixels_output
-        
-        x_offset, y_offset = pixel_offsets
-        
-        x_twiddle_factors = self._get_twiddle_factors(
-            x_offset, (input_scale, output_scale), 
-            (pixels_input, pixels_output), -1.)
-
-        y_twiddle_factors = self._get_twiddle_factors(
-            y_offset, (input_scale, output_scale), 
-            (pixels_input, pixels_output), -1.)
-        
-        complex_wavefront = (y_twiddle_factors @ complex_wavefront) \
-            @ x_twiddle_factors)
-
-        normalised_wavefront = self._normalise(complex_wavefront)
-        amplitude = np.abs(normlised_wavefront)
-        phase = np.angle(normalised_wavefront)
-        
-        return wavefront.update_phasor(amplitude, phase)      
-
-
     def __init__(self : Propagator) -> Propagator:
         """
         Abstract method that must be implemented by the subclasses.
@@ -243,6 +190,41 @@ class PhysicalMFT(Propagator):
     pixel_scale_out : float 
         The dimensions of an output pixel in meters.    
     """
+    focal_length : float
+    pixel_scale_out : float = eqx.static_field()
+
+
+    def __init__(focal_length : float, pixels_out : int, 
+            pixel_scale_out : float, inverse : bool) -> PhysicalMFT:
+        """
+        Parameters
+        ----------
+        focal_length : float
+            The focal length of the mirror or lens that the Wavefront
+            is propagating away from.
+        pixels_out : int
+            The number of pixels in the output image. 
+        pixel_scale_out : float 
+        iverse : bool
+        """
+        # TODO: So I could partial lock all of the parameters that 
+        # I do not want to trace. Not sure how useful or why I want
+        # to do it this way. 
+        self._fourier_transform = functools.partial(
+            self._fourier_transform, sign = 1 if inverse else -1,
+            pixels_out = pixels_out)
+
+        self.pixel_scale_out = pixel_scale_out
+        self.focal_length = focal_length
+
+
+    def get_focal_length():
+    def get_pixel_scale():
+    def get_number_of_fringes():
+    def get_pixel_offsets():
+
+    def __call__():
+
 
 class PhysicalFFT(Propagator):
 class PhysicalFresnel(Propagator):
