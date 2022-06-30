@@ -94,9 +94,8 @@ class Propagator(eqx.Module):
 
     def _fourier_transform(self : Propagator, 
             wavefront : Wavefront, number_of_fringes : float, 
-            pixel_offsets : tuple, pixels_out : int) -> Wavefront:
-        # TODO: Two parameters, number_of_fringes, wavefront and pixel_shit
-        # subject to review. 
+            pixel_offsets : tuple, pixels_out : int, 
+            sign : int) -> Wavefront:
         """
         Take the paraxial fourier transform of the wavefront in the 
         complex representation.
@@ -114,6 +113,8 @@ class Propagator(eqx.Module):
         pixels_out : int
             The number of pixels following the transform in the 
             detector layer. 
+        sign : int
+            1. if forward Fourier transform else -1.
 
         Returns
         -------
@@ -131,11 +132,11 @@ class Propagator(eqx.Module):
         
         x_twiddle_factors = self._get_twiddle_factors(
             x_offset, (input_scale, output_scale), 
-            (pixels_input, pixels_output), 1.)
+            (pixels_input, pixels_output), sign)
 
         y_twiddle_factors = self._get_twiddle_factors(
             y_offset, (input_scale, output_scale), 
-            (pixels_input, pixels_output), 1.)
+            (pixels_input, pixels_output), sign)
         
         complex_wavefront = (y_twiddle_factors @ complex_wavefront) \
             @ x_twiddle_factors)
@@ -228,46 +229,26 @@ class Propagator(eqx.Module):
             "never be instantiated directly.")
 
 
-# TODO: Discuss naming conventions for the propagators with 
-# @LouisDesdoigts. Discuss location of the normalise method.
-# Perhaps a subclass NormalisedPropagator is required with an 
-# abstract normalise method to be overiden by the subclasses. 
-class NormalisedPhysicalFraunhoferPropagator(Propagator):
+class PhysicalMFT(Propagator):
     """
-    Fraunhofer propagation of a PhysicalWavefront or GaussianWavefront.
-    The `Wavefront` is re-normalised after the propagation. 
+    Fraunhofer propagation based on the a matrix fourier transfrom 
+    with adjustable scaling. 
 
-    Attributes
+    Attributes 
     ----------
     focal_length : float
-        The focal length of the Mirror or Lens that is getting propagated 
-        from in meters.
-    pixel_scale_out : float
-        The 
+        The focal length of the propagation distance.
+    pixels_out : int
+        The number of pixels out. 
+    pixel_scale_out : float 
+        The dimensions of an output pixel in meters.    
     """
-    focal_length : float
-    pixel_scale_out : float
 
-
-
-# TODO: Review naming conventions with @LouisDesdoigts. When we are 
-# only applying the Fourier transform it is Fraunhofer diffraction.
-# I am a fan of using the name AngularFraunhoferMFT or something 
-# similar. I need to do my research though. 
-
-
-# TODO: Talk to @LouisDesdoigts about having many propagators instead 
-# of using logic. Actually no this can be filtered into the abstract 
-# class. 
-
-
-# TODO: Talk to @LouisDesdoigts about using this as an opportunity to 
-# get rid of the fft reliance. Also talk to @LouisDesdoigts about 
-# implementing our own algorithm that uses the symmetries of the 
-# matrix and point out that our MFT then becomes a paraxial FFT.
-
-
-# TODO: Research the symmetry algorithm and give this a crack. 
+class PhysicalFFT(Propagator):
+class PhysicalFresnel(Propagator):
+class AngularMFT(Propagator):
+class AngularFFT(Propagator):
+class AngularFresnel(Propagator):
 
 
 class MFT(eqx.Module):
