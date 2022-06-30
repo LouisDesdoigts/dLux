@@ -139,7 +139,7 @@ class Propagator(eqx.Module):
             (pixels_input, pixels_output), sign)
         
         complex_wavefront = (y_twiddle_factors @ complex_wavefront) \
-            @ x_twiddle_factors)
+            @ x_twiddle_factors
 
         normalised_wavefront = self._normalise(complex_wavefront)
         amplitude = np.abs(normlised_wavefront)
@@ -185,13 +185,12 @@ class PhysicalMFT(Propagator):
     ----------
     focal_length : float
         The focal length of the propagation distance.
-    pixels_out : int
-        The number of pixels out. 
     pixel_scale_out : float 
         The dimensions of an output pixel in meters.    
     """
     focal_length : float
-    pixel_scale_out : float = eqx.static_field()
+    pixel_scale_out : float 
+    pixels_out : int
 
 
     def __init__(focal_length : float, pixels_out : int, 
@@ -207,24 +206,126 @@ class PhysicalMFT(Propagator):
         pixel_scale_out : float 
         iverse : bool
         """
-        # TODO: So I could partial lock all of the parameters that 
-        # I do not want to trace. Not sure how useful or why I want
-        # to do it this way. 
         self._fourier_transform = functools.partial(
-            self._fourier_transform, sign = 1 if inverse else -1,
-            pixels_out = pixels_out)
+            self._fourier_transform, sign = 1 if inverse else -1)
 
         self.pixel_scale_out = pixel_scale_out
         self.focal_length = focal_length
+        self.pixels_out = pixels_out
 
 
-    def get_focal_length():
-    def get_pixel_scale():
-    def get_number_of_fringes():
-    def get_pixel_offsets():
+    def get_focal_length(self : Propagator) -> float:
+        """
+        Accessor for the focal_length.
 
-    def __call__():
+        Returns 
+        -------
+        : float
+            The focal length in meters. 
+        """
+        return self.focal_length
 
+
+    def get_pixel_scale(self : Propagator) -> float:
+        """
+        Accessor fro the `pixel_scale_out` parameter.
+
+        Returns
+        -------
+        : float
+            The pixel scale in the plane of propagation in meters per 
+            pixel.
+        """
+        return self.pixel_scale_out
+
+
+    def get_pixels_out(self : Propagator) -> int:
+        """
+        Accessor for the `pixels_out` parameter.
+
+        Returns
+        -------
+        : int
+            The number of pixels in the plane of propagation.
+        """
+        return self.pixels_out
+
+
+    def get_number_of_fringes(self : Propagator, 
+            wavefront : Wavefront) -> float:
+        """
+        Determines the number of diffraction fringes in the plane of 
+        propagation.
+
+        Parameters 
+        ----------
+        wavefront : Wavefront
+            The `Wavefront` that is getting propagated.
+
+        Returns 
+        -------
+        : float
+            The floating point number of diffraction fringes in the 
+            plane of propagation.
+        """
+        size_in = wavefront.get_pixel_scale() * \
+            wavefront.number_of_pixels()        
+        size_out = self.get_pixel_scale() * \
+            self.get_pixels_out()
+        
+        return size_in * size_out / self.get_focal_length() /\
+            wavefront.get_wavelength()
+
+
+    def get_pixel_offsets(self : Propagator, 
+            wavefront : Wavefront) -> Array:
+        """
+        The offset(s) in units of pixels.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to propagate.
+
+        Returns
+        -------
+        : Array
+            The offset from the x and y plane in units of pixels.
+        """
+        # TODO: Confirm that if the wavefront.get_offset != 0. then 
+        # we will always want to use that offset.
+        return wavefront.get_offset() * self.get_focal_length() / \
+            self.get_pixel_scale()
+
+
+    # TODO: Still not convinced that params_dict is nessecary
+    # need to confirm this be examining some of the higher level 
+    # code.
+    def __call__(self : Propagator, parameters : dict) -> dict:
+        """
+        Propagate a `Wavefront` to the focal_plane of the lens or 
+        mirror.
+
+        Parameters
+        ----------
+        parameters : dict
+            A dictionary that must contain a "Wavefront" key.
+
+        Returns 
+        -------
+        : dict 
+            A dictionary with the updated "Wavefront" key; value
+        """
+        wavefront = parameters.get("Wavefront")
+
+        number_of_fringes = self.get_number_of_fringes(wavefront)
+        pixel_offsets = self.get_pixel_offsets(wavefront)
+        new_wavefront = self._fourier_transform(number_of_fringes,
+            pixel_offsets, self.get_pixels_out())
+
+        parameters["Wavefront"] = new_wavefront
+        return parameters
+        
 
 class PhysicalFFT(Propagator):
 class PhysicalFresnel(Propagator):
