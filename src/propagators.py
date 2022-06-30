@@ -10,7 +10,6 @@ Propagator = typing.NewType("Propagator", eqx.Module)
 GaussianPropagator = typing.NewType("GaussianPropgator", object)
 
 
-# TODO: write a get_complex_format() method for the base Wavefront
 class Propagator(eqx.Module):
     """
     An abstract class indicating a spatial transfromation of the
@@ -19,77 +18,85 @@ class Propagator(eqx.Module):
     propagator and hence optimise distances ect.     
     """
     def _get_scaled_coordinates(self : Propagator, 
-            wavefront : Wavefront, offset : float,
+            wavefront : Wavefront, pixel_offset : float,
             pixel_scale : float, number_of_pixels : int) -> Array:
         """
         Generate the pixel coordinates for the 
         """
-        # TODO: Check if this division of labour is slow. 
-        # NOTE: Not sure if dividing the logic up like this is 
-        # a good idea. 
         return (wavefront.get_pixel_coordinates(number_of_pixels) + \
-                1. + offset) * pixel_scale
+            pixel_offset) * pixel_scale
 
 
     def _generate_twiddle_factors(self : Propagator,            
-            offsets : tuple, pixel_scales : tuple, pixels : tuple) -> Array:
-        # TODO: This needs to be mappable or directly vectorised for
-        # the x and y inputs.
-        # NOTE: Because the arrays are square it makes the most sense
-        # to attempt the vectorisation down lower, at the coordinate
-        # calculation. This is all a bit of premature optimisation 
-        # though. 
+            pixel_offset : float, pixel_scales : tuple, 
+            pixels : tuple, sign : int) -> Array:
         """
         The twiddle factors for the fourier transforms.
 
         Parameters
         ----------
-        size : int
-            Determines the size of the twiddle factor array to be 
-            created which is size by size.
+        pixel_offset : float
+            The offset in units of pixels.
+        pixel_scales : tuple
+            The input and output pixel scales. 
+        pixels : tuple
+            The number of input and output pixels.
+        sign : int
+            1. for Fourier transform and -1. for inverse Fourier 
+            transform. 
 
         Returns
         -------
         : Array
             The twiddle factors.
         """
+        input_scale, output_scale = pixel_scales
+        pixels_input, pixels_output = pixels
+
         input_coordinates = self._get_scaled_coordinates(
-            wavefront, offset, input_scale, pixels_input)
+            wavefront, pixel_offset, input_scale, pixels_input)
 
         output_coordinates = self._get_scaled_coordinates(
-            wavefront, offset, output_scale, pixels_output)
+            wavefront, pixel_offset, output_scale, pixels_output)
 
         input_to_output = np.outer(
             input_coordinates, output_coordinates)
 
-        return np.exp(-2. * np.pi * 1j * input_to_output)
+        return np.exp(-2. * sign * np.pi * 1j * input_to_output)
          
 
-
-    def _normalise(self : Propagator, wavefront : Wavefront) -> Wavefront:
+    def _normalise(self : Propagator, complex_wavefront : Array, 
+            number_of_fringes : int, pixels_input : int, 
+            pixels_output : int) -> Wavefront:
         """
         Normalise the `Wavefront` according to the `poppy` convention. 
 
         Parameters
         ----------
-        wavefront : Wavefront
-            The `Wavefront` to normalise. 
+        complex_wavefront : Array
+            The `Wavefront` to normalise in the complex representation.
+        number_of_fringes : int 
+            The number of diffraction fringes at the detector layer.
+        pixels_input : int 
+            The number of pixels in the input image.
+        pixels_output : int 
+            The number of pixels in the output image.  
 
         Returns
         -------
         : Wavefront
             The normalised `Wavefront`.
         """
-        norm_coeff = np.exp(np.log(num_fringe) - (np.log(npup) + np.log(npix)))
-        wavefront_out = wavefront * norm_coeff
+        normalising_factor = np.exp(np.log(number_of_fringes) - \
+            (np.log(pixels_input) + np.log(pixels_output)))
+        return complex_wavefront * normalising_factor
 
 
-    # TODO: Confirm this interface wit @LouisDesdoigts
-    # TODO; Implement this as an FFT but paraxial using the radix-2 DIT
     def _fourier_transform(self : Propagator, 
-            wavefront : Wavefront, pixel_scale_out : float, 
-            pixels_output : int, number_of_fringes : float, 
-            offset : Array) -> Wavefront:
+            wavefront : Wavefront, number_of_fringes : float, 
+            pixel_offsets : tuple, pixels_out : int) -> Wavefront:
+        # TODO: Two parameters, number_of_fringes, wavefront and pixel_shit
+        # subject to review. 
         """
         Take the paraxial fourier transform of the wavefront in the 
         complex representation.
@@ -98,17 +105,15 @@ class Propagator(eqx.Module):
         ----------
         wavefront : Wavefront
             The `Wavefront` object that we want to Fourier transform.
-        pixel_scale_out : float
-            The size of a pixel in the output plane in meters per 
-            pixel or radians per pixel.
-        number_of_pixels_out : int
-            The number of pixels in the output plane. 
         number_of_fringes : float
             The size of the output region in wavelength / distance 
-            units.
-        offset : Array
+            units. i.e. The number of diffraction fringes. 
+        pixel_offsets : Array
             The displacement of the centre of the transform from the 
-            centre of the wavefront. 
+            centre of the wavefront in pixels in the input plane. 
+        pixels_out : int
+            The number of pixels following the transform in the 
+            detector layer. 
 
         Returns
         -------
@@ -119,73 +124,108 @@ class Propagator(eqx.Module):
         complex_wavefront = wavefront.complex_form()
         pixels_input = wavefront.number_of_pixels()
  
-        # TODO: Check that the float casts are not requiredi.
         input_scale = 1.0 / pixels_input
-        output_scale = number_of_fringes / pixels_input
+        output_scale = number_of_fringes / pixels_output
         
-        # Generate arrays
-        # TODO: Review this with @LouisDesdoigts regarding the -1
-        # in the get_pixel_coordinates() function, 
-        # NOTE: To counter this I have added 1. instead of 0.5
-        # NOTE: it should be possible to cast this all as array
-        # or PyTree operations on multidimensional arrays.
-        x_input, y_input = self._get_scaled_coordinates(
-            wavefront, x_offset, y_offset, input_scale, 
-            pixels_in_plane)
-
-        x_output, y_output = self._get_scaled_coordinates(
-            wavefront, x_offset, y_offset, output_scale,
-            pixels_output)
-
-        x_input_to_output = np.outer(x_input, x_output)
-        y_input_to_output = np.outer(y_input, y_output)
-
-
-        # TODO: There is a lot of opportunity for mapping because the same 
-        # operations are applied to x and y. 
-        # TODO: Discuss use of vmap with @LouisDesdoigts or alternatively
-        # python map, which chould generate the same Jaxpr and this can 
-        # be checked. 
-
-        # Propagate wavefront
-        x_twiddle_factors = np.exp(-2. * np.pi * 1j * x_input_to_output)
-        y_twiddle_factors = np.exp(-2. * np.pi * 1j * y_input_to_output).T
+        x_offset, y_offset = pixel_offsets
         
-        # TODO: First wavefront to t1. Coming up with good names here 
-        # will be difficult. 
-        wavefront = np.dot(expYV, wavefront)
-        wavefront = np.dot(t1, expXU)
+        x_twiddle_factors = self._get_twiddle_factors(
+            x_offset, (input_scale, output_scale), 
+            (pixels_input, pixels_output), 1.)
 
-        # Normalise wavefront
-        # norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2))
-        norm_coeff = np.exp(np.log(num_fringe) - (np.log(npup) + np.log(npix)))
-        wavefront_out = wavefront * norm_coeff
+        y_twiddle_factors = self._get_twiddle_factors(
+            y_offset, (input_scale, output_scale), 
+            (pixels_input, pixels_output), 1.)
+        
+        complex_wavefront = (y_twiddle_factors @ complex_wavefront) \
+            @ x_twiddle_factors)
+
+        normalised_wavefront = self._normalise(complex_wavefront)
+        amplitude = np.abs(normlised_wavefront)
+        phase = np.angle(normalised_wavefront)
+        
+        return wavefront.update_phasor(amplitude, phase)
 
 
     def _inverse_fourier_transform(self : Propagator, 
             wavefront : Wavefront) -> Wavefront:
+
         """
-        Take the paraxial inverse Foruier transform of the wavefront'
-        in the complex representation.
+        Take the paraxial fourier transform of the wavefront in the 
+        complex representation.
 
         Parameters
         ----------
         wavefront : Wavefront
-            The `Wavefront` object that we want to take the discrete 
-            Fourier transform of.
+            The `Wavefront` object that we want to Fourier transform.
+        number_of_fringes : float
+            The size of the output region in wavelength / distance 
+            units. i.e. The number of diffraction fringes. 
+        pixel_offsets : Array
+            The displacement of the centre of the transform from the 
+            centre of the wavefront in pixels in the input plane. 
+        pixels_out : int
+            The number of pixels following the transform in the 
+            detector layer. 
 
-
-        Returns 
+        Returns
         -------
         : Wavefront
-            The wavefront with the updated amplitude and phase after
-            the foruier transform.
+            The wavefront with the updated amplitude and phase after 
+            the Fourier transform.
         """
+        complex_wavefront = wavefront.complex_form()
+        pixels_input = wavefront.number_of_pixels()
+ 
+        input_scale = 1.0 / pixels_input
+        output_scale = number_of_fringes / pixels_output
+        
+        x_offset, y_offset = pixel_offsets
+        
+        x_twiddle_factors = self._get_twiddle_factors(
+            x_offset, (input_scale, output_scale), 
+            (pixels_input, pixels_output), -1.)
+
+        y_twiddle_factors = self._get_twiddle_factors(
+            y_offset, (input_scale, output_scale), 
+            (pixels_input, pixels_output), -1.)
+        
+        complex_wavefront = (y_twiddle_factors @ complex_wavefront) \
+            @ x_twiddle_factors)
+
+        normalised_wavefront = self._normalise(complex_wavefront)
+        amplitude = np.abs(normlised_wavefront)
+        phase = np.angle(normalised_wavefront)
+        
+        return wavefront.update_phasor(amplitude, phase)      
 
 
-    def _is_tilted():
-    def __init__():
-    def __call__():
+    def __init__(self : Propagator) -> Propagator:
+        """
+        Abstract method that must be implemented by the subclasses.
+
+        Throws 
+        ------
+        : AbstractClassError
+            This is an abstract class and should not be directly 
+            instansiated.
+        """
+        raise TypeError("This is an Abstract Class and should " +\
+            "never be instantiated directly")
+
+
+    def __call__(self : Propagator, parameters : dict) -> dict:
+        """
+        Propagate light through some optical path length.
+
+        Parameters
+        ----------
+        parameters : dict 
+            A dictionary of parameters containing a "Wavefront" 
+            key.
+        """
+        raise TypeError("This is an Abstract Class and should " + \
+            "never be instantiated directly.")
 
 
 # TODO: Discuss naming conventions for the propagators with 
