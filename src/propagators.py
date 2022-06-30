@@ -18,21 +18,18 @@ class Propagator(eqx.Module):
     us to take gradients with respect to the fields of the 
     propagator and hence optimise distances ect.     
     """
-
-    
     def _get_scaled_coordinates(self : Propagator, 
             wavefront : Wavefront, offset : float,
             pixel_scale : float, number_of_pixels : int) -> Array:
         """
+        Generate the pixel coordinates for the 
         """
         # TODO: Check if this division of labour is slow. 
         # NOTE: Not sure if dividing the logic up like this is 
         # a good idea. 
-        coordinates = \
-            (wavefront.get_pixel_coordinates(number_of_pixels) + \
-                1. + offset) * input_scale
+        return (wavefront.get_pixel_coordinates(number_of_pixels) + \
+                1. + offset) * pixel_scale
 
-        return coordinates
 
     def _generate_twiddle_factors(self : Propagator,            
             offsets : tuple, pixel_scales : tuple, pixels : tuple) -> Array:
@@ -56,20 +53,16 @@ class Propagator(eqx.Module):
         : Array
             The twiddle factors.
         """
-        x_input, y_input = self._get_scaled_coordinates(
-            wavefront, x_offset, y_offset, input_scale, 
-            pixels_in_plane)
+        input_coordinates = self._get_scaled_coordinates(
+            wavefront, offset, input_scale, pixels_input)
 
-        x_output, y_output = self._get_scaled_coordinates(
-            wavefront, x_offset, y_offset, output_scale,
-            pixels_output)
+        output_coordinates = self._get_scaled_coordinates(
+            wavefront, offset, output_scale, pixels_output)
 
-        x_input_to_output = np.outer(x_input, x_output)
-        y_input_to_output = np.outer(y_input, y_output)
+        input_to_output = np.outer(
+            input_coordinates, output_coordinates)
 
-        # Propagate wavefront
-        x_twiddle_factors = np.exp(-2. * np.pi * 1j * x_input_to_output)
-        y_twiddle_factors = np.exp(-2. * np.pi * 1j * y_input_to_output).T
+        return np.exp(-2. * np.pi * 1j * input_to_output)
          
 
 
