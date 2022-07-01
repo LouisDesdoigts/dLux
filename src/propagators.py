@@ -488,128 +488,241 @@ class PhysicalFFT(Propagator):
   
 
 class PhysicalFresnel(Propagator):
+    """
+    Near field diffraction based on the Frensel approximation.
+    This implementation does not conserve flux because the 
+    normalisation happens in the far field. 
+
+    Attributes
+    ----------
+    focal_length : float
+        The focal length of the lens or mirror in meters. This 
+        is a differentiable parameter.
+    focal_shift : float
+        The displacement of the plane of propagation from the 
+        the focal_length in meters. This is a differentiable
+        parameter. The focal shift is positive if the plane of 
+        propagation is beyond the focal length and negative 
+        if the plane of propagation is inside the focal length.
+    pixels_out : int
+        The number of pixels in the plane of propagation. This 
+        is not a differentiable parameter.
+    pixel_scale_out : float
+        The pixel scale in the plane of propagation in meters per 
+        pixel. This is a differentiable parameter. 
+    """
+    focal_length : float
+    focal_shift : float
+    pixels_out : int = eqx.static_field()
+    pixel_scale_out : float
+
+
+    def __init__(self : Propagator, focal_length : float, 
+            focal_shift : float, pixels_out : float, 
+            pixel_scale_out : float, inverse : bool) -> Propagator:
+        """
+        Parameters
+        ----------
+        focal_length : float
+            The focal length of the mirror or the lens in meters.
+        focal_shift : float
+            The distance away from the focal plane to be propagated
+            to in meters. This quantity 
+        pixels_out : int
+            The number if pixels in the plane of propagation.
+        pixel_scale_out : float
+            The scale of a pixel in the plane of propagation in 
+            units of meters per pixel. 
+        inverse : bool
+            True if propagating from the plane of propagation and
+            False if propagating to the plane of propagation. 
+        """
+        self.focal_shift = numpy.asarray(focal_shift).astype(float)
+        self.focal_length = numpy.asarray(focal_length).astype(float)
+        self.pixels_out = int(pixels_out)
+        self.pixel_scale_out = numpy.asarry(pixel_scale_out).astype(float)
+
+        self._fourier_transform = functools.partial(
+            self._matrix_fourier_transform, sign = 1 if inverse else -1)
+
+
+    def get_focal_length(self : Propagator) -> float:
+        """
+        Accessor for the focal length.
+
+        Returns
+        -------
+        : float
+            The focal length of the mirror or lens in meters.
+        """
+        return self.focal_length
+    
+
+    def get_pixels_out(self : Propagator) -> int:
+        """
+        Accessor for the number of pixels in the plane of propagation.
+
+        Returns
+        : int
+            The number of pixels in the plane of propagation.
+        """
+        return self.pixels_out
+
+
+    def get_pixel_scale_out(self : Propagator) -> float:
+        """
+        Accessor for the pixel scale in the plane of propagation.
+
+        Returns
+        -------
+        : float
+            The pixel scale in the plane of propgation in meters per 
+            pixel.
+        """
+        return self.pixel_scale_out
+
+
+    def number_of_fringes(self : Propagtor, 
+            wavefront : Wavefront) -> float:
+        """
+        The number of diffraction fringes in the plane of propagation.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront that is getting propagated. 
+
+        Returns
+        -------
+        : float
+            The number of diffraction fringes visible in the plane of 
+            propagation.
+        """
+        size_in = wavefront.number_of_pixels() * wavefront.get_pixel_scale()
+        size_out = self.get_pixels_out() * self.get_pixel_scale_out()
+        propagtion_distance = self.get_focal_length() + self.get_focal_shift()
+        focal_ratio = self.get_focal_length() / propagation_distance
+        return focal_ratio * size_in * size_out / \
+            (wavefront.get_wavelength() * self.get_focal_length()) 
+               
+        
+    def quadratic_phase(self : Propagator, x_coordinates : Array, 
+            y_coordinates : Array, wavelength : float) -> Array:
+        """
+        A convinience function for calculating quadratic phase factors
+        
+        Parameters
+        ----------
+        x_coordinates : Array 
+            The x coordinates of the pixels in meters. This will be 
+            different in the plane of propagation and the initial 
+            plane.
+        y_coordinates : Array
+            The y coordinates of the pixels in meters. This will be 
+            different in the plane of propagation and the initial 
+            plane.
+        wavelength : float
+            The wavelength of the wavefront in meters.
+        """
+        wavenumber = 2 * np.pi / wavelength
+        radial_coordinates = np.hypot(x_coordinates, y_coordinates)
+        return np.exp(-0.5j * wavenumber * radial_coordinates ** 2 \
+            / self.get_focal_length())
+
+    
+    # TODO: This duplication seems to be inevitable unless we were
+    # to build a more complex class heirachy.
+    def get_pixel_positions(self : Propagator) -> Array:
+        """
+        The pixel positions in meters in the plane of propagation.
+
+        Returns 
+        -------
+        : Array
+            The pixel positions in meters.
+        """
+        # TODO: confirm (npix - 1) / 2 or npix // 2
+        pixel_coordinates = (np.arange(self.get_pixels_out()) - \
+            self.get_pixels_out() // 2) * self.get_pixel_scale_out()
+        return np.meshgrid(pixel_coordinates, pixel_coordinates)
+        
+
+    def thin_lens(self : Propagator, wavefront : Wavefront) -> Array:
+        # TODO: Review this documentation 
+        """
+        A thin lens focusing the wavefront into the plane of 
+        propagation instead of the focal plane.
+
+        Parameters
+        ----------
+        wavefront : Wavefront 
+            The wavefront that is getting focussed.
+
+        Returns
+        -------
+        : Array
+            The complex electric field in SI units of electric field. 
+        """
+        x_coordinates, y_coordinates = wavefront.get_pixel_positions()
+        radial_coordinates = np.hypot(x_coordinates, y_coordinates)
+        wavenumber = 2 * np.pi / self.get_wavelength() # Wavenumber
+        return np.exp(-0.5j * wavenumber * radial_coordinates ** 2 \
+            / self.get_focal_length())
+
+
+    def __call__(self : Propagator, parameters : dict) -> dict:
+        """
+        Propagate the wavefront within the Fresnel approximation.
+
+        Parameters
+        ----------
+        parameters : dict
+            A dictionary of parameters that contains a key "Wavefront"
+
+        Returns
+        -------
+        parameters : dict
+            The `parameters` with an updated key "wavefront"; 
+            value. 
+        """
+        # Get relevant parameters
+        wavefront = parameters["Wavefront"]
+
+        complex_wavefront = self.thin_lens(wavefront)
+        input_positions = wavefront.get_pixel_positions()
+        output_positions = self.get_pixel_positions()
+        number_of_fringes = self.number_of_fringes(wavefront)
+        first_quadratic_phase = self.quadractic_phase(
+            *input_positions, wavefront.get_wavelength())
+        transfer = wavefront.transfer_function(
+            self.get_focal_length() + self.get_focal_shift())
+        second_quadratic_phase = self.quadratic_phase(
+            *output_positions, wavefront.get_wavelength())
+
+        complex_wavefront *= first_quadratic_phase
+        complex_wavefront = self._fourier_transform(complex_wavefront, 
+            number_of_fringes, [0., 0.], self.get_pixels_out()) 
+        complex_wavefront = self._normalise(complex_wavefront,
+            number_of_fringes, wavefront.number_of_pixels(), 
+            self.get_pixels_out)
+        complex_wavefront *= wavefront.get_pixel_scale() ** 2
+        complex_wavefront *= transfer * second_quadratic_phase
+        
+        amplitude = np.abs(wavefront_out)
+        phase = np.angle(wavefront_out)
+
+        # Update Wavefront Object
+        new_wavefront = wavefront\
+            .update_phasor(amplitude, phase)\
+            .set_pixel_scale(self.get_pixel_scale_out())
+
+        parameters["Wavefront"] = new_wavefront
+        return parameters
+
+
 class AngularMFT(Propagator):
 class AngularFFT(Propagator):
 class AngularFresnel(Propagator):
-
-
-class FresnelProp(eqx.Module):
-    """
-    Layer for Fresnel propagation
-    
-    Note this algorithm is completely not intensity conservative and will
-    give different answers for each wavelength too
-    
-    Note this probably gives wrong answers for tilted input wavefronts becuase
-    I believe its based on the paraxial wave equation and tilted wavefronts
-    are not paraxial
-    
-    -> Do something clever with MFTs in the final TF with the offset term to 
-    get propper off axis behaviour?
-    """
-    npix_out: int
-    focal_length: float
-    focal_shift: float
-    pixel_scale_out: float
-    
-    def __init__(self, npix_out, focal_length, focal_shift, pixel_scale_out):
-        """
-        Initialisation
-        pixelscale must be in m/pixel, ie aperture/npix
-        
-        Aperture pixelscale is the pixelscale at the ORIGINAL lens -> for multiple
-        non-conjuagte lens systems is it slightly more complex (EFL, EFZ?)
-        
-        Do we need 'effective focal length' and 'effective final distance' in order to 
-        track pixelscales correctly? Ie in an RC telescope after M2 the EFL is changed
-        and the effective propagated distance is different too
-          -> What about free space propagation?
-        """
-        self.npix_out = int(npix_out)
-        self.focal_length =   np.array(focal_length).astype(float)
-        self.focal_shift = np.array(focal_shift).astype(float)
-        self.pixel_scale_out = np.array(pixel_scale_out).astype(float)
-        
-    def __call__(self, params_dict):
-        """
-        Propagates Fresnel
-        
-        Note: Normalisation calcuated in the Far-Field
-        """
-        # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        wavefront = WF.amplitude * np.exp(1j * WF.phase)
-        wavel = WF.wavelength
-        pixelscale = WF.pixel_scale
-
-        # Coords
-        x_coords, y_coords = WF.get_xycoords()
-        r_coords = np.hypot(x_coords, y_coords)
-
-        # Apply Thin Lens Equation
-        k = 2*np.pi / wavel # Wavenumber
-        wavefront *= np.exp(-0.5j * k * r_coords**2 * 1/self.focal_length)
-        
-        # Calc prop parameters
-        npix = wavefront.shape[0]
-        wf_size = npix * pixelscale
-        det_size = self.npix_out * self.pixel_scale_out
-        z_prop = self.focal_length + self.focal_shift
-        focal_ratio = self.focal_length / z_prop
-        num_fringe_out = focal_ratio * wf_size * det_size / (wavel * self.focal_length)
-
-        # First Phase Operation
-        rho1 = np.exp(1.0j * k * (x_coords ** 2 + y_coords ** 2) / (2 * z_prop))
-        wavefront *= rho1
-        wavefront = self.mft(wavefront, num_fringe_out, self.npix_out)
-        wavefront *= pixelscale ** 2
-
-        # Coords
-        # NOTE: This needs to be able to match the cenetering convtion
-        # of the input wavefront
-        xs = np.arange(self.npix_out) - self.npix_out//2
-        YY, XX = np.meshgrid(xs, xs)
-        x_coords, y_coords = self.pixel_scale_out * np.array([XX, YY])
-
-        # Second Phase Operation
-        rho2 = np.exp(1.0j * k * z_prop) / (1.0j * wavel * z_prop) * np.exp(1.0j * k * 
-                                (x_coords ** 2 + y_coords ** 2) / (2 * z_prop))
-        wavefront_out = rho2 * wavefront
-
-        # Update Wavefront Object
-        WF = WF.update_phasor(np.abs(wavefront_out), np.angle(wavefront_out))
-        WF = eqx.tree_at(lambda WF: WF.pixel_scale, WF, self.pixel_scale_out)
-        WF = eqx.tree_at(lambda WF: WF.plane_type,  WF, None)
-        params_dict["Wavefront"] = WF
-        return params_dict
-    
-    def mft(self, wavefront, num_fringe, npix):
-        """
-        Minimal on-axis MFT function
-        """
-
-        # npix = wavefront.shape[0]
-        npup = wavefront.shape[0]
-
-        # Calulate Arrays
-        dX = 1.0 / float(npup)
-        dU = num_fringe / npix
-
-        Xs = (np.arange(npup, dtype=float) - float(npup) / 2.0) * dX
-        Us = (np.arange(npix, dtype=float) - float(npix) / 2.0) * dU
-        XU = np.outer(Xs, Us)
-        expXU = np.exp(-2.0 * np.pi * 1j * XU)
-
-        # Note: Can casue overflow issues on 32-bit
-        # norm_coeff = np.sqrt((num_fringe**2) / (npup**2 * npix**2))
-        norm_coeff = np.exp(np.log(num_fringe) - (np.log(npup) + np.log(npix)))
-
-        # Perform MFT
-        t1 = np.dot(expXU.T, wavefront)
-        t2 = np.dot(t1, expXU)
-        wavefront_out = norm_coeff * t2
-
-        return wavefront_out
 
 
 class GaussianPropagator(eqx.Module):
