@@ -529,6 +529,27 @@ class FixedSamplingPropagator(Propagator):
         return np.fft.fftshift(np.fft.ifft2(wavefront.get_complex_form()))
 
 
+    def _normalising_factor(self : Propagator, 
+            wavefront : Wavefront) -> float:
+        """
+        The normalising factor associated with the propagtion.
+        This is a unitless quanitity.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront that is getting propagated.
+
+        Returns
+        -------
+        : float
+            The normalising factor that is appropriate to the 
+            method of propagation.
+        """
+        return (self.inverse - 1) / wavefront.number_of_pixels() + \
+            self.inverse * wavefront.number_of_pixels()
+
+
     @abc.abstractmethod
     def get_pixel_scale_out(self : Propagator, 
             wavefront : Wavefront) -> float:
@@ -692,27 +713,6 @@ class PhysicalFFT(FixedSamplingPropagator):
         super().__init__(inverse)
         self.focal_length = focal_length
 
-
-    def _normalising_factor(self : Propagator, 
-            wavefront : Wavefront) -> float:
-        """
-        The normalising factor associated with the propagtion.
-        This is a unitless quanitity.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront that is getting propagated.
-
-        Returns
-        -------
-        : float
-            The normalising factor that is appropriate to the 
-            method of propagation.
-        """
-        return (self.inverse - 1) / wavefront.number_of_pixels() + \
-            self.inverse * wavefront.number_of_pixels()
-         
             
     def get_focal_length(self : Propagtor) -> float:
         """
@@ -948,47 +948,47 @@ class AngularMFT(Propagator):
     def get_number_of_fringes(self : Propagator, 
             wavefront : Wavefront) -> float:
         """
-        Calculate the number of diffraction fringes in the output 
-        plane. 
+        Determines the number of diffraction fringes in the plane of 
+        propagation.
 
-        Parameters
-        ----------
-        wavefront : Wavefront 
-            The `Wavefront` that is getting propagated. 
-
-        Overrides 
-        ---------
-        VariableSamplingPropagator::get_number_of_fringes
-
-        Returns
-        -------
-        : float
-            The number of diffraction fringes in the output plane.
-        """
-        pass
-
-
-    def get_pixel_offsets(self : Propagator, wavefront : Wavefront) -> tuple:
-        """
-        Calculate the pixel offsets in the output plane in units of 
-        pixels.
-
-        Parameters
+        Parameters 
         ----------
         wavefront : Wavefront
             The `Wavefront` that is getting propagated.
 
-        Overrides
-        ---------
-        VariableSamplingPropagator::get_pixel_offsets
+        Returns 
+        -------
+        : float
+            The floating point number of diffraction fringes in the 
+            plane of propagation.
+        """
+        size_in = wavefront.get_pixel_scale() * \
+            wavefront.number_of_pixels()        
+        size_out = self.get_pixel_scale() * \
+            self.get_pixels_out()
+        # TODO: The focal length is not a tracked parameter
+        # so this does not work. 
+        return size_in * size_out / wavefront.get_wavelength()
+
+
+    def get_pixel_offsets(self : Propagator, 
+            wavefront : Wavefront) -> Array:
+        """
+        The offset(s) in units of pixels.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to propagate.
 
         Returns
         -------
-        : tuple
-            The x and y offsets of the Wavefront in the plane of
-            propagation.
+        : Array
+            The offset from the x and y plane in units of pixels.
         """
-        pass
+        # TODO: Confirm that if the wavefront.get_offset != 0. then 
+        # we will always want to use that offset.
+        return wavefront.get_offset() / self.get_pixel_scale()
 
 
 class AngularFFT(Propagator):
@@ -1028,13 +1028,19 @@ class AngularFFT(Propagator):
             The pixel scale in the ouptut plane in units of radians 
             per pixel. 
         """
-        pass
+        # TODO: This needs to be reviewed by @LouisDesdoigts.
+        return wavefront.get_wavelength() * \
+            (wavefront.get_pixel_scale() * wavefront.number_of_pixels())
 
 
 class AngularFresnel(Propagator):
     """
     Propagates an AngularWavefront in the Fresnel approximation.
+
+    Attributes
+    ----------
     """
+    pass
 
 
 class GaussianPropagator(eqx.Module):
