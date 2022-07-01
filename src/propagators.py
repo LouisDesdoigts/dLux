@@ -43,6 +43,30 @@ this file that are listed below:
  - AngularFixedFraunhofer
  - AngularVariableFresnel
  - VariableGaussianFresnel
+
+
+Propagator
+    Concrete Methods
+    - _normalise
+    - get_pixel_positions
+    - generate_twiddle_factors
+
+    Abstract Methods
+    - __init__
+    - __call__
+    - get_pixel_offsets()
+    - _fourier_transform()
+    - _inverse_fourier_transform()
+
+    VariableSampling (mft)
+        PhysicalMFT
+        PhysicalFresnel
+        AngularMFT
+        AngularFresnel
+    FixedSampling (fft)
+        PhysicalFFT
+        AngularFFT
+    GaussianPropagator
 """
 __author__ = "Louis Desdoigts"
 __author__ = "Jordan Dennis"
@@ -225,7 +249,23 @@ class Propagator(eqx.Module, abc.ABC):
             A dictionary of parameters containing a "Wavefront" 
             key.
         """
-        pass        
+        pass 
+
+
+    # TODO: Review the location of this method
+    @abc.abstractmethod
+    def pixel_offests(self : Propagator) -> float:
+        """
+        Determine the offset of the wavefront from the plane 
+        of propagation in units of pixels. 
+
+        Returns
+        -------
+        : float
+            The number of pixels in the x and y direction that the
+            wavefront is offset from the plane of propagation.
+        """              
+        pass  
 
 
 class VariableSamplingPropagator(Propagator, abc.ABC):
@@ -235,11 +275,46 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
     rather than the enforced; one pixel in the input plane = one 
     diffraction fringe in the output plane, fast fourier transform 
     algorithm.
+
+    Attributes
+    ----------
+    pixel_scale_out : float 
+        The pixel scale in the plane of propagation measured in 
+        meters (radians) per pixel.
+    pixels_out : int
+        The number of pixels in the plane of propagation. 
     """
+    pixel_scale_out : float
+    pixels_out : float = eqx.static_field()
+
+
+    def get_pixel_scale_out(self : Propagator) -> float:
+        """
+        Accessor for the pixel scale in the output plane. 
+
+        Returns
+        -------
+        : float
+            The pixel scale in the output plane in meters (radians)
+            per pixel.
+        """
+        return self.pixel_scale_out
+
+
+    def get_pixels_out(self : Propagator) -> int:
+        """
+        Accessor for the `pixels_out` parameter.
+
+        Returns
+        -------
+        : int
+            The number of pixels in the plane of propagation.
+        """
+        return self.pixels_out
+
+
     def _matrix_fourier_transform(self : Propagator, 
-            wavefront : Wavefront, number_of_fringes : float, 
-            pixel_offsets : tuple, pixels_out : int, 
-            sign : int) -> Array:
+            wavefront : Wavefront, sign : int) -> Array:
         """
         Take the paraxial fourier transform of the wavefront in the 
         complex representation.
@@ -248,15 +323,6 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
         ----------
         wavefront : Wavefront
             The `Wavefront` object that we want to Fourier transform.
-        number_of_fringes : float
-            The size of the output region in wavelength / distance 
-            units. i.e. The number of diffraction fringes. 
-        pixel_offsets : Array
-            The displacement of the centre of the transform from the 
-            centre of the wavefront in pixels in the input plane. 
-        pixels_out : int
-            The number of pixels following the transform in the 
-            detector layer. 
         sign : int
             1. if forward Fourier transform else -1.
 
@@ -267,12 +333,12 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
             propagation.
         """
         complex_wavefront = wavefront.complex_form()
-        pixels_input = wavefront.number_of_pixels()
+        pixels_input = 
  
-        input_scale = 1.0 / pixels_input
-        output_scale = number_of_fringes / pixels_output
+        input_scale = 1.0 / wavefront.number_of_pixels()
+        output_scale = number_of_fringes / self.get_pixels_out()
         
-        x_offset, y_offset = pixel_offsets
+        x_offset, y_offset = self.get_pixel_offsets()
         
         x_twiddle_factors = self._get_twiddle_factors(
             x_offset, (input_scale, output_scale), 
@@ -287,6 +353,20 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
 
         return complex_wavefront
 
+
+    def _fourier_transform(self : Propagator, wavefront : Wavefront) -> Array:
+        """
+        Compute the fourier transform of the electric field of the 
+        input wavefront. This represents propagation from the input
+        plane to the plane of propagation.
+
+        Parameters
+        ----------
+        """
+        return self._matrix_fourier_transform(wavefront, sign = 1)
+
+
+    def _inverse_fourier_transform(self :)
 
     @abc.abstractmethod
     def number_of_fringes(self : Propagator, wavefront : Wavefront) -> float:
@@ -406,29 +486,6 @@ class PhysicalMFT(Propagator):
         return self.focal_length
 
 
-    def get_pixel_scale_out(self : Propagator) -> float:
-        """
-        Accessor fro the `pixel_scale_out` parameter.
-
-        Returns
-        -------
-        : float
-            The pixel scale in the plane of propagation in meters per 
-            pixel.
-        """
-        return self.pixel_scale_out
-
-
-    def get_pixels_out(self : Propagator) -> int:
-        """
-        Accessor for the `pixels_out` parameter.
-
-        Returns
-        -------
-        : int
-            The number of pixels in the plane of propagation.
-        """
-        return self.pixels_out
 
 
     def get_number_of_fringes(self : Propagator, 
@@ -496,10 +553,10 @@ class PhysicalMFT(Propagator):
         : dict 
             A dictionary with the updated "Wavefront" key; value
         """
-        wavefront = parameters.get("Wavefront")
+        wavefront = parameters["Wavefront"]
 
-        number_of_fringes = self.get_number_of_fringes(wavefront)
-        pixel_offsets = self.get_pixel_offsets(wavefront)
+#        number_of_fringes = self.get_number_of_fringes(wavefront)
+#        pixel_offsets = self.get_pixel_offsets(wavefront)
         complex_wavefront = self._fourier_transform(wavefront,
             number_of_fringes, pixel_offsets, self.get_pixels_out())
 
