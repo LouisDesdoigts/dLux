@@ -721,7 +721,23 @@ class PhysicalFresnel(Propagator):
 
 
 class AngularMFT(Propagator):
+    """
+    Propagation of an AngularWavefront by a paraxial matrix fourier
+    transform. 
+
+    Attributes
+    ----------
+
+    """
+    def __init__():
+    def get_number_of_fringes():
+    def get_pixel_offsets():
+    def __call__():
+
+
 class AngularFFT(Propagator):
+
+
 class AngularFresnel(Propagator):
 
 
