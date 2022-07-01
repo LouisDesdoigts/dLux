@@ -1,30 +1,95 @@
+"""
+This file contains the propagator classes. These sit low on the 
+cohesion spectrum and high on the coupling spectrum as they are 
+typically specific to a Wavefront class and implement something 
+that is a behaviour of the Wavefront; that is to __propagate__.
+They were separated so that propagation distances could be made
+class attributes and hence differentiated using Patrick Kidgers
+`equinox` package.
+
+
+To avoid code duplication at the expense of coupling between 
+propagtors, a complex system of abstract classes was created
+by Jordan Dennis. The abstract Propagator class is primarily 
+for self documentation of the code and implements only a few 
+simple helper methods. Concrete methods are added within the 
+next level of classes; which are VariableSamplingPropagator 
+and FixedSamolingPropagtor. 
+
+
+The primary difference at this level is the style of Fourier 
+transform algorithm that is used. The VariableSamplingPropagator
+uses the Soummer et. al. 2007 algorithm which allows the scale
+of the plane of propagation to be varied. On the other hand the,
+FixedSamplingPropagator uses the numpy.fft module, which has the
+fixed sample of one diffraction fringe in the output plane per
+pixel in the input plane. 
+
+
+The units are handled at the next level of classes which also
+implement the exact algorithm. For both angular units and 
+physical units there is a FixedSampling and a VariableSampling
+option for far field diffraction as well as a VairableSampling
+near field algorithm. There is also a special intermediate 
+plane Fresnel algorithm based on the GaussianWavefront class.
+
+
+There is a total of seven non-abstract propagators defined in 
+this file that are listed below:
+ - PhysicalVariableFraunhofer
+ - PhysicalFixedFraunhofer
+ - PhysicalVariableFresnel
+ - AngularVariableFraunhofer
+ - AngularFixedFraunhofer
+ - AngularVariableFresnel
+ - VariableGaussianFresnel
+"""
+__author__ = "Louis Desdoigts"
+__author__ = "Jordan Dennis"
+__date__ = "01/07/2022"
+
 import jax.numpy as np
 import equinox as eqx
 import typing
-
-from wavefronts import GaussianWavefront, AngularWavefront, 
-    PhysicalWavefront
+import abc 
+from wavefronts import *
 
 
 Propagator = typing.NewType("Propagator", eqx.Module)
-GaussianPropagator = typing.NewType("GaussianPropgator", object)
 
 
-class Propagator(eqx.Module):
+class Propagator(eqx.Module, abc.ABC):
     """
     An abstract class indicating a spatial transfromation of the
     `Wavefront`. This is a separate class because it allows 
     us to take gradients with respect to the fields of the 
     propagator and hence optimise distances ect.     
     """
-    def _get_scaled_coordinates(self : Propagator, 
-            wavefront : Wavefront, pixel_offset : float,
-            pixel_scale : float, number_of_pixels : int) -> Array:
+    def _get_pixel_positions(self : Propagator, 
+            pixel_offset : float, pixel_scale : float, 
+            number_of_pixels : int) -> Array:
         """
-        Generate the pixel coordinates for the 
+        Generate the pixel coordinates for the plane of propagation.
+
+        Parameters
+        ----------
+        pixel_offset : float
+            The displacement of the center from the center of the 
+            pixel array in pixels.
+        pixel_scale : float
+            The dimension of the pixel in meters/radians per pixel 
+            in the plane of propagation.
+        number_of_pixels : int
+            The number of pixels in the plane of propagation. 
+
+        Returns
+        -------
+        : Array
+            The pixel positions along one dimension in meters.
         """
-        return (wavefront.get_pixel_coordinates(number_of_pixels) + \
-            pixel_offset) * pixel_scale
+        # TODO: Review the npix // 2
+        unscaled = np.arange(number_of_pixels) - number_of_pixels // 2
+        return (unscaled + pixel_offset) * pixel_scale
 
 
     def _generate_twiddle_factors(self : Propagator,            
@@ -53,7 +118,7 @@ class Propagator(eqx.Module):
         input_scale, output_scale = pixel_scales
         pixels_input, pixels_output = pixels
 
-        input_coordinates = self._get_scaled_coordinates(
+        input_coordinates = self.get_scaled_coordinates(
             wavefront, pixel_offset, input_scale, pixels_input)
 
         output_coordinates = self._get_scaled_coordinates(
@@ -92,6 +157,85 @@ class Propagator(eqx.Module):
         return complex_wavefront * normalising_factor
 
 
+    @abc.abstractmethod
+    def _fourier_transform(self : Propagtor, wavefront : Wavefront) -> Array:
+        """
+        The implementation of the Fourier transform that is to 
+        be used for the optical propagation. This is for propagation 
+        from the input plane to the plane of propagation. 
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront that is to be propagted.
+
+        Returns 
+        -------
+        : Array
+            The complex electric field amplitude following the 
+            propagation in SI units of electric field. 
+        """
+        pass  
+
+
+    @abc.abstractmethod
+    def _inverse_fourier_transform(self : Propagator,
+            wavefront : Wavefront) -> Array:
+        """
+        The implementation of the inverse Fourier transform that is 
+        to be used for the optical propagation. The inverse represents
+        propagtion from the plane of propagation to the input plane.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront that is getting propagated. 
+
+        Returns 
+        -------
+        : Array
+            The complex electric field amplitude following the 
+            propagation in SI units of electric field. 
+        """  
+        pass
+
+
+    @abc.abstractmethod
+    def __init__(self : Propagator) -> Propagator:
+        """
+        Abstract method that must be implemented by the subclasses.
+
+        Throws 
+        ------
+        : AbstractClassError
+            This is an abstract class and should not be directly 
+            instansiated.
+        """
+        pass         
+
+
+    @abc.abstractmethod
+    def __call__(self : Propagator, parameters : dict) -> dict:
+        """
+        Propagate light through some optical path length.
+
+        Parameters
+        ----------
+        parameters : dict 
+            A dictionary of parameters containing a "Wavefront" 
+            key.
+        """
+        pass        
+
+
+class VariableSamplingPropagator(Propagator, abc.ABC):
+    """
+    A propagator that users the Soummer et. al. 2007 MFT algorithm 
+    to implement variable sampling in the plane of propagation 
+    rather than the enforced; one pixel in the input plane = one 
+    diffraction fringe in the output plane, fast fourier transform 
+    algorithm.
+    """
     def _matrix_fourier_transform(self : Propagator, 
             wavefront : Wavefront, number_of_fringes : float, 
             pixel_offsets : tuple, pixels_out : int, 
@@ -122,9 +266,6 @@ class Propagator(eqx.Module):
             The complex un-normalised electric field after the 
             propagation.
         """
-        # TODO: This is actually doing the inverse and the Fourier 
-        # transform at once and as a result I think it needs to be 
-        # split, so that they happen separately. 
         complex_wavefront = wavefront.complex_form()
         pixels_input = wavefront.number_of_pixels()
  
@@ -147,30 +288,29 @@ class Propagator(eqx.Module):
         return complex_wavefront
 
 
-    # TODO: I don't like the way that we have mutliple types of 
-    # transform. 
-    # TODO: Discuss with @LouisDesdoigts the alternative, where 
-    # the only functions that are required to be written for 
-    # the propagator are the get_number_of_fringes and get_pixel_offsets
-    def _fast_fourier_transform(self : Propagator, 
-            wavefront : Wavefront) -> Array:
+    @abc.abstractmethod
+    def number_of_fringes(self : Propagator, wavefront : Wavefront) -> float:
         """
-        Perfrom a fast fourier transform on the wavefront.
+        Calculates the number of diffraction fringes in the plane of
+        propagation. 
 
         Parameters
         ----------
         wavefront : Wavefront 
-            The wavefront to propagate.
+            The wavefront that is getting propagated. Ussually 
+            required for access to the `wavelength` parameter.
 
-        Returns
+        Returns 
         -------
-        : Array
-            The complex electric field in SI units following propagation.
+        : float
+            The number of diffraction fringes in the plane of 
+            propagation.
         """
-        return 1. / wavefront.number_of_pixels() * \
-            np.fft.fft2(np.fft.ifftshift(wavefront.get_complex_form()))
+        pass
 
 
+
+class FixedSamplingPropagator(Propagator):
     def _inverse_fast_fourier_transform(self : Propagator,
             wavefront : Wavefront) -> Array
         """
@@ -190,32 +330,27 @@ class Propagator(eqx.Module):
             np.fft.fftshift(np.fft.ifft2(wavefront.get_complex_form()))
         
 
-    def __init__(self : Propagator) -> Propagator:
+    def _fast_fourier_transform(self : Propagator, 
+            wavefront : Wavefront) -> Array:
         """
-        Abstract method that must be implemented by the subclasses.
-
-        Throws 
-        ------
-        : AbstractClassError
-            This is an abstract class and should not be directly 
-            instansiated.
-        """
-        raise TypeError("This is an Abstract Class and should " +\
-            "never be instantiated directly")
-
-
-    def __call__(self : Propagator, parameters : dict) -> dict:
-        """
-        Propagate light through some optical path length.
+        Perfrom a fast fourier transform on the wavefront.
 
         Parameters
         ----------
-        parameters : dict 
-            A dictionary of parameters containing a "Wavefront" 
-            key.
+        wavefront : Wavefront 
+            The wavefront to propagate.
+
+        Returns
+        -------
+        : Array
+            The complex electric field in SI units following propagation.
         """
-        raise TypeError("This is an Abstract Class and should " + \
-            "never be instantiated directly.")
+        return 1. / wavefront.number_of_pixels() * \
+            np.fft.fft2(np.fft.ifftshift(wavefront.get_complex_form()))
+
+
+
+class FocalPropagtor(): 
 
 
 class PhysicalMFT(Propagator):
@@ -642,8 +777,7 @@ class PhysicalFresnel(Propagator):
             The pixel positions in meters.
         """
         # TODO: confirm (npix - 1) / 2 or npix // 2
-        pixel_coordinates = (np.arange(self.get_pixels_out()) - \
-            self.get_pixels_out() // 2) * self.get_pixel_scale_out()
+        pixel_coordinates = self._get_scaled_coordinates()
         return np.meshgrid(pixel_coordinates, pixel_coordinates)
         
 
