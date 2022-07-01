@@ -116,42 +116,18 @@ class Propagator(eqx.Module, abc.ABC):
         return (unscaled + pixel_offset) * pixel_scale
 
 
-    def _generate_twiddle_factors(self : Propagator,            
-            pixel_offset : float, pixel_scales : tuple, 
-            pixels : tuple, sign : int) -> Array:
+    def _get_pixel_positions(self : Propagator) -> Array:
         """
-        The twiddle factors for the fourier transforms.
+        The pixel positions in meters in the plane of propagation.
 
-        Parameters
-        ----------
-        pixel_offset : float
-            The offset in units of pixels.
-        pixel_scales : tuple
-            The input and output pixel scales. 
-        pixels : tuple
-            The number of input and output pixels.
-        sign : int
-            1. for Fourier transform and -1. for inverse Fourier 
-            transform. 
-
-        Returns
+        Returns 
         -------
         : Array
-            The twiddle factors.
+            The pixel positions in meters.
         """
-        input_scale, output_scale = pixel_scales
-        pixels_input, pixels_output = pixels
-
-        input_coordinates = self.get_scaled_coordinates(
-            wavefront, pixel_offset, input_scale, pixels_input)
-
-        output_coordinates = self._get_scaled_coordinates(
-            wavefront, pixel_offset, output_scale, pixels_output)
-
-        input_to_output = np.outer(
-            input_coordinates, output_coordinates)
-
-        return np.exp(-2. * sign * np.pi * 1j * input_to_output)
+        # TODO: confirm (npix - 1) / 2 or npix // 2
+        pixel_coordinates = self._get_scaled_coordinates()
+        return np.meshgrid(pixel_coordinates, pixel_coordinates)
          
 
     def _normalise(self : Propagator, complex_wavefront : Array, 
@@ -179,6 +155,38 @@ class Propagator(eqx.Module, abc.ABC):
         normalising_factor = np.exp(np.log(number_of_fringes) - \
             (np.log(pixels_input) + np.log(pixels_output)))
         return complex_wavefront * normalising_factor
+
+
+    def __call__(self : Propagator, parameters : dict) -> dict:
+        """
+        Propagate a `Wavefront` to the focal_plane of the lens or 
+        mirror.
+
+        Parameters
+        ----------
+        parameters : dict
+            A dictionary that must contain a "Wavefront" key.
+
+        Returns 
+        -------
+        : dict 
+            A dictionary with the updated "Wavefront" key; value
+        """
+        wavefront = parameters["Wavefront"]
+
+        complex_wavefront = self._propagate(wavefront)
+        normalised_wavefront = self._normalise(complex_wavefront)
+
+        amplitude = np.abs(normlised_wavefront)
+        phase = np.angle(normalised_wavefront)
+
+        new_wavefront wavefront\
+            .update_phasor(amplitude, phase)\
+            .set_pixel_scale(self.get_pixel_scale_out())\
+            .set_plane_type("Pupil")
+
+        parameters["Wavefront"] = new_wavefront
+        return parameters
 
 
     @abc.abstractmethod
@@ -225,6 +233,25 @@ class Propagator(eqx.Module, abc.ABC):
 
 
     @abc.abstractmethod
+    def _propagate(self : Propagator, wavefront : Wavefront) -> Array:
+        """
+        Applies the actual propagation. 
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to propagate.
+
+        Returns
+        -------
+        : Array
+            The complex electric field of the wavefront following the 
+            propagation in SI units of electric field.
+        """
+        pass
+
+
+    @abc.abstractmethod
     def __init__(self : Propagator) -> Propagator:
         """
         Abstract method that must be implemented by the subclasses.
@@ -236,36 +263,6 @@ class Propagator(eqx.Module, abc.ABC):
             instansiated.
         """
         pass         
-
-
-    @abc.abstractmethod
-    def __call__(self : Propagator, parameters : dict) -> dict:
-        """
-        Propagate light through some optical path length.
-
-        Parameters
-        ----------
-        parameters : dict 
-            A dictionary of parameters containing a "Wavefront" 
-            key.
-        """
-        pass 
-
-
-    # TODO: Review the location of this method
-    @abc.abstractmethod
-    def pixel_offests(self : Propagator) -> float:
-        """
-        Determine the offset of the wavefront from the plane 
-        of propagation in units of pixels. 
-
-        Returns
-        -------
-        : float
-            The number of pixels in the x and y direction that the
-            wavefront is offset from the plane of propagation.
-        """              
-        pass  
 
 
 class VariableSamplingPropagator(Propagator, abc.ABC):
@@ -313,6 +310,44 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
         return self.pixels_out
 
 
+    def _generate_twiddle_factors(self : Propagator,            
+            pixel_offset : float, pixel_scales : tuple, 
+            pixels : tuple, sign : int) -> Array:
+        """
+        The twiddle factors for the fourier transforms.
+
+        Parameters
+        ----------
+        pixel_offset : float
+            The offset in units of pixels.
+        pixel_scales : tuple
+            The input and output pixel scales. 
+        pixels : tuple
+            The number of input and output pixels.
+        sign : int
+            1. for Fourier transform and -1. for inverse Fourier 
+            transform. 
+
+        Returns
+        -------
+        : Array
+            The twiddle factors.
+        """
+        input_scale, output_scale = pixel_scales
+        pixels_input, pixels_output = pixels
+
+        input_coordinates = self.get_scaled_coordinates(
+            wavefront, pixel_offset, input_scale, pixels_input)
+
+        output_coordinates = self._get_scaled_coordinates(
+            wavefront, pixel_offset, output_scale, pixels_output)
+
+        input_to_output = np.outer(
+            input_coordinates, output_coordinates)
+
+        return np.exp(-2. * sign * np.pi * 1j * input_to_output)
+
+
     def _matrix_fourier_transform(self : Propagator, 
             wavefront : Wavefront, sign : int) -> Array:
         """
@@ -333,7 +368,6 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
             propagation.
         """
         complex_wavefront = wavefront.complex_form()
-        pixels_input = 
  
         input_scale = 1.0 / wavefront.number_of_pixels()
         output_scale = number_of_fringes / self.get_pixels_out()
@@ -362,11 +396,36 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
 
         Parameters
         ----------
+        wavefront : Wavefront
+            The wavefront that is getting propagated. 
+
+        Returns
+        -------
+        : Array
+            The complex electric field after propagation in SI units 
+            of electric field. Not yet normalised.
         """
         return self._matrix_fourier_transform(wavefront, sign = 1)
 
 
-    def _inverse_fourier_transform(self :)
+    def _inverse_fourier_transform(self : Propagator, 
+            wavefront : Wavefront) -> Array:
+        """
+        The inverse fourier transform of the wavefront. This represents
+        propagation from the focal plane to the pupil plane. 
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront that is to be propagated. 
+
+        Returns
+        -------
+        : Array
+            The complex electric field in SI units of electric field.
+        """
+        return self._matrix_fourier_transform(wavefront, sign = -1)
+
 
     @abc.abstractmethod
     def number_of_fringes(self : Propagator, wavefront : Wavefront) -> float:
@@ -389,28 +448,39 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
         pass
 
 
-
-class FixedSamplingPropagator(Propagator):
-    def _inverse_fast_fourier_transform(self : Propagator,
-            wavefront : Wavefront) -> Array
+    # TODO: Review the location of this method
+    @abc.abstractmethod
+    def get_pixel_offests(self : Propagator, 
+            wavefront : Wavefront) -> float:
         """
-        Perfrom an inverse fourier transform of a wavefront.
+        Determine the offset of the wavefront from the plane 
+        of propagation in units of pixels. 
 
         Parameters
         ----------
         wavefront : Wavefront
-            The wavefront to be propagated.
+            The wavefront that is getting propagated.
 
         Returns
         -------
-        : Array
-            The complex electric field in SI units following propagation.
-        """
-        return wavefront.number_of_pixels() * \
-            np.fft.fftshift(np.fft.ifft2(wavefront.get_complex_form()))
-        
+        : float
+            The number of pixels in the x and y direction that the
+            wavefront is offset from the plane of propagation.
+        """              
+        pass  
 
-    def _fast_fourier_transform(self : Propagator, 
+
+class FixedSamplingPropagator(Propagator):
+    """
+    A propagator that samples the electric field in the output plane
+    at the rate of one fringe per pixel where a fringe is a wavelength 
+    on the apperture diameter. 
+
+
+    These propagators are implemented using the numpy.fft sub-sub-package
+    and cannot be modified elsewise. 
+    """
+    def _fourier_transform(self : Propagator, 
             wavefront : Wavefront) -> Array:
         """
         Perfrom a fast fourier transform on the wavefront.
@@ -429,11 +499,47 @@ class FixedSamplingPropagator(Propagator):
             np.fft.fft2(np.fft.ifftshift(wavefront.get_complex_form()))
 
 
+    def _inverse_fourier_transform(self : Propagator,
+            wavefront : Wavefront) -> Array
+        """
+        Perfrom an inverse fourier transform of a wavefront.
 
-class FocalPropagtor(): 
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to be propagated.
+
+        Returns
+        -------
+        : Array
+            The complex electric field in SI units following propagation.
+        """
+        return wavefront.number_of_pixels() * \
+            np.fft.fftshift(np.fft.ifft2(wavefront.get_complex_form()))
 
 
-class PhysicalMFT(Propagator):
+    @abc.abstractmethod
+    def get_pixel_scale_out(self : Propagator, 
+            wavefront : Wavefront) -> float:
+        """
+        The pixel scale in the output plane. Calculated based on the 
+        wavefront and the units of the wavefront. 
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront that is getting propagated.
+
+        Returns 
+        -------
+        : float
+            The pixel scale in the output plane in units of meters
+            (radians) per pixel.
+        """
+        pass
+
+
+class PhysicalMFT(VariableSamplingPropagator):
     """
     Fraunhofer propagation based on the a matrix fourier transfrom 
     with adjustable scaling. 
@@ -441,18 +547,11 @@ class PhysicalMFT(Propagator):
     Attributes 
     ----------
     focal_length : float
-        The focal length of the propagation distance.
-    pixel_scale_out : float 
-        The dimensions of an output pixel in meters.    
+        The focal length of the propagation distance.    
     """
-    focal_length : float
-    pixel_scale_out : float 
     pixels_out : int
 
 
-    # TODO: Talk to @LouisDesdoigts about how the FFT can be run 
-    # using the MFT by passing pixels_out == pixels_in and 
-    # pixel_scale_out = wavel * self.focal_length / (pixelscale * npix_in)
     def __init__(focal_length : float, pixels_out : int, 
             pixel_scale_out : float, inverse : bool) -> PhysicalMFT:
         """
@@ -463,11 +562,16 @@ class PhysicalMFT(Propagator):
             is propagating away from.
         pixels_out : int
             The number of pixels in the output image. 
-        pixel_scale_out : float 
-        iverse : bool
+        pixel_scale_out : float
+            The pixel scale in the output plane in units of meters 
+            per pixel. 
+        inverse : bool
+            Whether or not the propagation is input plane to output 
+            plane or output plane to input plane. The inverse algorithm
+            is used if True is provided.
         """
-        self._fourier_transform = functools.partial(
-            self._matrix_fourier_transform, sign = 1 if inverse else -1)
+        self._propagate = self._inverse_fourier_transform if inverse \
+            else self._fourier_transform
 
         self.pixel_scale_out = pixel_scale_out
         self.focal_length = focal_length
@@ -484,8 +588,6 @@ class PhysicalMFT(Propagator):
             The focal length in meters. 
         """
         return self.focal_length
-
-
 
 
     def get_number_of_fringes(self : Propagator, 
@@ -533,46 +635,9 @@ class PhysicalMFT(Propagator):
         # we will always want to use that offset.
         return wavefront.get_offset() * self.get_focal_length() / \
             self.get_pixel_scale()
-
-
-    # TODO: Still not convinced that params_dict is nessecary
-    # need to confirm this be examining some of the higher level 
-    # code.
-    def __call__(self : Propagator, parameters : dict) -> dict:
-        """
-        Propagate a `Wavefront` to the focal_plane of the lens or 
-        mirror.
-
-        Parameters
-        ----------
-        parameters : dict
-            A dictionary that must contain a "Wavefront" key.
-
-        Returns 
-        -------
-        : dict 
-            A dictionary with the updated "Wavefront" key; value
-        """
-        wavefront = parameters["Wavefront"]
-
-#        number_of_fringes = self.get_number_of_fringes(wavefront)
-#        pixel_offsets = self.get_pixel_offsets(wavefront)
-        complex_wavefront = self._fourier_transform(wavefront,
-            number_of_fringes, pixel_offsets, self.get_pixels_out())
-
-        normalised_wavefront = self._normalise(complex_wavefront)
-        amplitude = np.abs(normlised_wavefront)
-        phase = np.angle(normalised_wavefront)
-
-        new_wavefront wavefront\
-            .update_phasor(amplitude, phase)\
-            .set_pixel_scale(self.get_pixel_scale_out())
-
-        parameters["Wavefront"] = new_wavefront
-        return parameters
         
 
-class PhysicalFFT(Propagator):
+class PhysicalFFT(FixedSamplingPropagator):
     """
     Perfrom an FFT propagation on a `PhysicalWavefront`. This is the 
     same as the MFT however it samples 1 diffraction fringe per pixel.
@@ -605,14 +670,13 @@ class PhysicalFFT(Propagator):
             A `Propagator` object representing the optical path from 
             the mirror to the focal plane. 
         """
-        self._fourier_transform = self._fast_fourier_transform if \
-            inverse else self._inverse_fast_fourier_transform
+        # Not the best syntax here.
+        self._propagate = self._fourier_transform if not \
+            inverse else self._inverse_fourier_transform
 
         self.focal_length = focal_length
 
 
-    # TODO: Consider clever ways of writing automatic getters and 
-    # setters. 
     def get_focal_length(self : Propagtor) -> float:
         """
         Accessor for the focal length in meters.
@@ -642,44 +706,10 @@ class PhysicalFFT(Propagator):
         """
         return wavefront.get_wavelength() * \
             self.get_focal_length() / (wavefront.get_pixel_scale() \
-                * wavefront.number_of_pixels())
-
-
-    # TODO: Talk to @LouisDesdoigts about this. 
-    def __call__(self : Propagtor, parameters : dict) -> dict:
-        """
-        Propagate the wavefront to or from the focal plane. 
-
-        Parameters
-        ----------
-        parameters : dict
-            A dictionary containing the field "Wavefront"
-
-        Returns 
-        -------
-        : dict
-            The dictionary of parameters with the updated "Wavefront"
-            key; value.
-        """
-        wavefront = parameters.get("Wavefront")
-
-        complex_wavefront = self._fourier_transform(wavefront)
-        normalised_wavefront = self._normalise(complex_wavefront)
-
-        amplitude = np.abs(normlised_wavefront)
-        phase = np.angle(normalised_wavefront)
-
-        # TODO: Update the debugging information regarding the plane 
-        # of the propagation.
-        new_wavefront wavefront\
-            .update_phasor(amplitude, phase)\
-            .set_pixel_scale(self.get_pixel_scale_out())
-
-        parameters["Wavefront"] = new_wavefront
-        return parameters
+                * wavefront.number_of_pixels())     
   
 
-class PhysicalFresnel(Propagator):
+class PhysicalFresnel(VariableSamplingPropagator):
     """
     Near field diffraction based on the Frensel approximation.
     This implementation does not conserve flux because the 
@@ -696,17 +726,9 @@ class PhysicalFresnel(Propagator):
         parameter. The focal shift is positive if the plane of 
         propagation is beyond the focal length and negative 
         if the plane of propagation is inside the focal length.
-    pixels_out : int
-        The number of pixels in the plane of propagation. This 
-        is not a differentiable parameter.
-    pixel_scale_out : float
-        The pixel scale in the plane of propagation in meters per 
-        pixel. This is a differentiable parameter. 
     """
     focal_length : float
     focal_shift : float
-    pixels_out : int = eqx.static_field()
-    pixel_scale_out : float
 
 
     def __init__(self : Propagator, focal_length : float, 
@@ -748,30 +770,6 @@ class PhysicalFresnel(Propagator):
             The focal length of the mirror or lens in meters.
         """
         return self.focal_length
-    
-
-    def get_pixels_out(self : Propagator) -> int:
-        """
-        Accessor for the number of pixels in the plane of propagation.
-
-        Returns
-        : int
-            The number of pixels in the plane of propagation.
-        """
-        return self.pixels_out
-
-
-    def get_pixel_scale_out(self : Propagator) -> float:
-        """
-        Accessor for the pixel scale in the plane of propagation.
-
-        Returns
-        -------
-        : float
-            The pixel scale in the plane of propgation in meters per 
-            pixel.
-        """
-        return self.pixel_scale_out
 
 
     def number_of_fringes(self : Propagtor, 
@@ -820,22 +818,6 @@ class PhysicalFresnel(Propagator):
         radial_coordinates = np.hypot(x_coordinates, y_coordinates)
         return np.exp(-0.5j * wavenumber * radial_coordinates ** 2 \
             / self.get_focal_length())
-
-    
-    # TODO: This duplication seems to be inevitable unless we were
-    # to build a more complex class heirachy.
-    def get_pixel_positions(self : Propagator) -> Array:
-        """
-        The pixel positions in meters in the plane of propagation.
-
-        Returns 
-        -------
-        : Array
-            The pixel positions in meters.
-        """
-        # TODO: confirm (npix - 1) / 2 or npix // 2
-        pixel_coordinates = self._get_scaled_coordinates()
-        return np.meshgrid(pixel_coordinates, pixel_coordinates)
         
 
     def thin_lens(self : Propagator, wavefront : Wavefront) -> Array:
@@ -861,28 +843,30 @@ class PhysicalFresnel(Propagator):
             / self.get_focal_length())
 
 
-    def __call__(self : Propagator, parameters : dict) -> dict:
+    def _propagate(self : Propagator, wavefront : Wavefront) -> Array:
         """
-        Propagate the wavefront within the Fresnel approximation.
-
+        Propagte the wavefront to the point specified by the pair 
+        of parameters self._focal_length and self._focal_shift.
+        
         Parameters
         ----------
-        parameters : dict
-            A dictionary of parameters that contains a key "Wavefront"
+        wavefront : Wavefront 
+            The wavefront to propagate.
 
         Returns
-        -------
-        parameters : dict
-            The `parameters` with an updated key "wavefront"; 
-            value. 
+        : Array
+            The complex electric field in the output plane in SI 
+            units of electric field.
         """
-        # Get relevant parameters
-        wavefront = parameters["Wavefront"]
-
+        # NOTE: Far field normalisation is applied in the __call__
+        # method.
         complex_wavefront = self.thin_lens(wavefront)
+
         input_positions = wavefront.get_pixel_positions()
         output_positions = self.get_pixel_positions()
+
         number_of_fringes = self.number_of_fringes(wavefront)
+
         first_quadratic_phase = self.quadractic_phase(
             *input_positions, wavefront.get_wavelength())
         transfer = wavefront.transfer_function(
@@ -891,24 +875,14 @@ class PhysicalFresnel(Propagator):
             *output_positions, wavefront.get_wavelength())
 
         complex_wavefront *= first_quadratic_phase
-        complex_wavefront = self._fourier_transform(complex_wavefront, 
-            number_of_fringes, [0., 0.], self.get_pixels_out()) 
-        complex_wavefront = self._normalise(complex_wavefront,
-            number_of_fringes, wavefront.number_of_pixels(), 
-            self.get_pixels_out)
+
+        complex_wavefront = self._fourier_transform(complex_wavefront) 
+        # TODO: Normalisation was here, but I have moved it since
+        # we are only dealing with multiplications.
         complex_wavefront *= wavefront.get_pixel_scale() ** 2
         complex_wavefront *= transfer * second_quadratic_phase
-        
-        amplitude = np.abs(wavefront_out)
-        phase = np.angle(wavefront_out)
 
-        # Update Wavefront Object
-        new_wavefront = wavefront\
-            .update_phasor(amplitude, phase)\
-            .set_pixel_scale(self.get_pixel_scale_out())
-
-        parameters["Wavefront"] = new_wavefront
-        return parameters
+        return complex_wavefront        
 
 
 class AngularMFT(Propagator):
