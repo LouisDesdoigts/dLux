@@ -49,12 +49,10 @@ Propagator
     Concrete Methods
     - _normalise
     - get_pixel_positions
-    - generate_twiddle_factors
 
     Abstract Methods
     - __init__
     - __call__
-    - get_pixel_offsets()
     - _fourier_transform()
     - _inverse_fourier_transform()
 
@@ -124,9 +122,21 @@ class Propagator(eqx.Module, abc.ABC):
         return (unscaled + pixel_offset) * pixel_scale
 
 
-    def _get_pixel_positions(self : Propagator) -> Array:
+    def _get_pixel_gird(self : Propagator, pixel_offset : float, 
+            pixel_scale : float, number_of_pixels : int) -> Array:
         """
         The pixel positions in meters in the plane of propagation.
+
+        Parameters
+        ----------
+        pixel_offset : float
+            The displacement of the center from the center of the 
+            pixel array in pixels.
+        pixel_scale : float
+            The dimension of the pixel in meters/radians per pixel 
+            in the plane of propagation.
+        number_of_pixels : int
+            The number of pixels in the plane of propagation. 
 
         Returns 
         -------
@@ -134,7 +144,8 @@ class Propagator(eqx.Module, abc.ABC):
             The pixel positions in meters.
         """
         # TODO: confirm (npix - 1) / 2 or npix // 2
-        pixel_coordinates = self._get_scaled_coordinates()
+        pixel_coordinates = self._get_pixel_positions(
+            pixel_offset, pixel_scale, number_of_pixels)
         return np.meshgrid(pixel_coordinates, pixel_coordinates)
 
 
@@ -280,6 +291,26 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
     pixels_out : float = eqx.static_field()
 
 
+    def __init__(self : Propagator, pixel_scale_out : float, 
+            pixels_out : int, inverse : bool) -> Propagator:
+        """
+        Constructor for VariableSampling propagators.
+
+        Parameters
+        ----------
+        pixels_out : int
+            The number of pixels in the output plane (side length).
+        pixel_scale_out : float 
+            The pixel scale in the output plane in units of meters
+            (radians) per pixel.
+        inverse : bool
+            True if the inverse algorithm is to be used else False.
+        """
+        super().__init__(inverse)
+        self.pixel_scale_out = pixel_scale_out
+        self.pixels_out = pixels_out        
+
+
     def get_pixel_scale_out(self : Propagator) -> float:
         """
         Accessor for the pixel scale in the output plane. 
@@ -331,10 +362,10 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
         input_scale, output_scale = pixel_scales
         pixels_input, pixels_output = pixels
 
-        input_coordinates = self.get_scaled_coordinates(
+        input_coordinates = self._get_pixel_positions(
             wavefront, pixel_offset, input_scale, pixels_input)
 
-        output_coordinates = self._get_scaled_coordinates(
+        output_coordinates = self._get_pixel_positions(
             wavefront, pixel_offset, output_scale, pixels_output)
 
         input_to_output = np.outer(
@@ -605,11 +636,8 @@ class PhysicalMFT(VariableSamplingPropagator):
         """
         self._propagate = self._inverse_fourier_transform if inverse \
             else self._fourier_transform
-
-        super().__init__(inverse) 
-        self.pixel_scale_out = pixel_scale_out
+        super().__init__(inverse, pixel_scale_out, pixels_out) 
         self.focal_length = focal_length
-        self.pixels_out = pixels_out
 
 
     def get_focal_length(self : Propagator) -> float:
@@ -624,7 +652,7 @@ class PhysicalMFT(VariableSamplingPropagator):
         return self.focal_length
 
 
-    def get_number_of_fringes(self : Propagator, 
+    def number_of_fringes(self : Propagator, 
             wavefront : Wavefront) -> float:
         """
         Determines the number of diffraction fringes in the plane of 
@@ -790,9 +818,7 @@ class PhysicalFresnel(VariableSamplingPropagator):
         """
         self.focal_shift = numpy.asarray(focal_shift).astype(float)
         self.focal_length = numpy.asarray(focal_length).astype(float)
-        self.pixels_out = int(pixels_out)
-        self.pixel_scale_out = numpy.asarry(pixel_scale_out).astype(float)
-        super().__init__(inverse)       
+        super().__init__(inverse, pixel_scale_out, pixels_out)       
 
 
     def get_focal_length(self : Propagator) -> float:
@@ -939,13 +965,12 @@ class AngularMFT(Propagator):
             True if the inverse transformation is te be applied else 
             False.
         """
-        self.pixel_scale_out = pixel_scale_out
-        self.pixels_out = pixels_out
+        super().__init__(pixel_scale_out, pixels_out, inverse)
         self._propagate = self._inverse_fourier_transform if inverse \
             else self._fourier_transform
 
 
-    def get_number_of_fringes(self : Propagator, 
+    def number_of_fringes(self : Propagator, 
             wavefront : Wavefront) -> float:
         """
         Determines the number of diffraction fringes in the plane of 
