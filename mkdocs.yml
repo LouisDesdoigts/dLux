@@ -1,3 +1,8 @@
+# ===== mkdocs.yml =====
+# Configuration file for the automatic generation of package 
+# documentation formatted with markdown. 
+
+# ===== Setup and Themes =====
 markdown_extensions:
   - pymdownx.arithmatex:
       generic: true
@@ -8,15 +13,14 @@ extra_javascript:
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 site_name: ∂Lux - Differentiable Optical Simulation
-nav:
-    - Home: index.md
+repo_url: https://github.com/LouisDesdoigts/dLux
 
 theme:
-  name: "material"
-repo_url: https://github.com/LouisDesdoigts/dLux
+  name: material
+
+# ===== Plugins =====
 plugins:
-  - search
-  - mkdocs-jupyter
+  - search 
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -29,3 +33,30 @@ plugins:
           rendering:
             show_source: false
       custom_templates: templates
+
+# ===== Navigation =====
+nav:
+    - 'Home': 'index.md'
+    - 'Installation': 'installation.md'
+    - 'User Documentation': 
+        - 'Optical System': 'user_docs/optical_system.md'
+    - 'Developer Documetation':
+        - 'Wavefronts':
+            - 'Wavefront': 'dev_docs/wavefronts/wavefront.md'
+            - 'Physical Wavefront': 'dev_docs/wavefronts/physical_wavefront.md'
+            - 'Angular Wavefront': 'dev_docs/wavefronts/angular_wavefront.md'
+            - 'Guassian Wavefront': 'dev_docs/wavefronts/gaussian_wavefront.md'
+        - 'Propagators':
+            - 'Propagator': 'dev_docs/propagators/propagator.md'
+            - 'Gaussian Propagator': 'dev_docs/propagators/gaussian_propagator.md'
+            - 'Variable Sampling': 
+                - 'Variable Sampling Propagator': 'dev_docs/propagators/variable_sampling/variable_sampling_propagator.md'
+                - 'PhysicalMFT': 'dev_docs/propagators/variable_sampling/physical_mft.md'
+                - 'PhysicalFresnel': 'dev_docs/propagators/variable_sampling/physical_fresnel.md'
+                - 'AngularMFT': 'dev_docs/propagators/variable_sampling/angular_mft.md'
+                - 'AngularFresnel': 'dev_docs/propagators/variable_sampling/angular_fresnel.md'
+            - 'Fixed Sampling': 
+                - 'Fixed Sampling Propagator': 'dev_docs/propagators/fixed_sampling/fixed_sampling_propagator.md'
+                - 'PhysicalFFT': 'dev_docs/propagators/fixed_sampling/physical_fft.md'
+                - 'AngularFFT': 'dev_docs/propagators/fixed_sampling/angular_fft.md'
+
