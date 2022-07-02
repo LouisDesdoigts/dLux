@@ -383,6 +383,20 @@ class Wavefront(eqx.Module):
         return self.add_phase(phase_difference)
 
 
+    def get_complex_form(self : Wavefront) -> Array:
+        """
+        The electric field described by this Wavefront in complex 
+        form.
+
+        Returns
+        -------
+        : Array[complex]
+            The complex electric field with both the real and 
+            imaginary components in SI units.
+        """
+        return self.get_amplitude() * np.exp(1j * self.get_phase()) 
+
+
     def normalise(self : Wavefront) -> Wavefront:
         """
         Reduce the electric field amplitude of the wavefront to a 
@@ -532,7 +546,7 @@ class Wavefront(eqx.Module):
 
 
     # TODO: Make logic Jax-Safe
-    def interpolate(self : PhysicalWavefront, coordinates : Array, 
+    def interpolate(self : Wavefront, coordinates : Array, 
             real_imaginary : bool = False) -> tuple:
         """
         Interpolates the `Wavefront` at the points specified by 
@@ -573,9 +587,9 @@ class Wavefront(eqx.Module):
         return new_amplitude, new_phase
 
 
-    def paraxial_interpolate(self : PhysicalWavefront, 
+    def paraxial_interpolate(self : Wavefront, 
             pixel_scale_out : float, number_of_pixels_out : int,
-            real_imaginary : bool = False) -> PhysicalWavefront: 
+            real_imaginary : bool = False) -> Wavefront: 
         """
         Interpolates the `Wavefront` so that it remains centered on 
         each pixel (paraxial). Calculation can be performed using 
@@ -639,8 +653,7 @@ class Wavefront(eqx.Module):
             is_leaf = lambda leaf : leaf is None)
 
 
-    def pad_to(self : PhysicalWavefront, 
-            number_of_pixels_out : int) -> PhysicalWavefront:
+    def pad_to(self : Wavefront, number_of_pixels_out : int) -> Wavefront:
         """
         Pads the `Wavefront` with zeros. Assumes that 
         `number_of_pixels_out > self.amplitude.shape[0]`. 
@@ -690,8 +703,7 @@ class Wavefront(eqx.Module):
         return self.update_phasor(new_amplitude, new_phase)
 
 
-    def crop_to(self : PhysicalWavefront, 
-            number_of_pixels_out : int) -> PhysicalWavefront:
+    def crop_to(self : Wavefront, number_of_pixels_out : int) -> Wavefront:
         """
         Crops a `Wavefront`'s optical disturbance. Assumes that 
         `number_of_pixels_out < self.amplitude.shape[0]`. 
@@ -780,6 +792,22 @@ class PhysicalWavefront(Wavefront):
             The new wavefront with `None` at the extra leaves. 
         """
         super().__init__(wavelength, offset)
+
+
+    def transfer_function(self : PhysicalWavefront, 
+            distance : float) -> float:
+        """
+        The _O_ptical _T_ransfer _F_unction corresponding to the 
+        evolution of the wavefront when propagating a distance.
+        
+        Parameters
+        ----------
+        distance : float
+            The distance that is getting propagated in meters.
+        """
+        wavenumber = 2. * np.pi / self.get_wavelength()
+        return np.exp(1.0j * wavenumber * distance) / \
+            (1.0j * self.get_wavelength() * distance)
 
 
 class AngularWavefront(Wavefront):
