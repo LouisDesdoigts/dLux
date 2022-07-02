@@ -78,6 +78,7 @@ from wavefronts import *
 
 
 Propagator = typing.NewType("Propagator", eqx.Module)
+GaussianPropagator = typing.NewType("GaussianPropagator", eqx.Module)
 
 
 class Propagator(eqx.Module, abc.ABC):
@@ -182,7 +183,7 @@ class Propagator(eqx.Module, abc.ABC):
         new_amplitude = np.abs(new_wavefront)
         new_phase = np.angle(new_wavefront)
 
-        new_wavefront = wavefront.\
+        new_wavefront = wavefront\
             .set_pixel_scale(self.get_pixel_scale_out())\
             .set_plane_type("Pupil")
 
@@ -191,7 +192,7 @@ class Propagator(eqx.Module, abc.ABC):
 
 
     @abc.abstractmethod
-    def _fourier_transform(self : Propagtor, wavefront : Wavefront) -> Array:
+    def _fourier_transform(self : Propagator, wavefront : Wavefront) -> Array:
         """
         The implementation of the Fourier transform that is to 
         be used for the optical propagation. This is for propagation 
@@ -543,7 +544,7 @@ class FixedSamplingPropagator(Propagator):
 
 
     def _inverse_fourier_transform(self : Propagator,
-            wavefront : Wavefront) -> Array
+            wavefront : Wavefront) -> Array:
         """
         Perfrom an inverse fourier transform of a wavefront.
 
@@ -617,7 +618,7 @@ class PhysicalMFT(VariableSamplingPropagator):
 
     def __init__(self : Propagator, focal_length : float, 
             pixels_out : int, pixel_scale_out : float, 
-            inverse : bool) -> Physical:
+            inverse : bool) -> Propagator:
         """
         Parameters
         ----------
@@ -715,7 +716,7 @@ class PhysicalFFT(FixedSamplingPropagator):
 
 
     def __init__(self : Propagator, focal_length : float, 
-            inverse : bool) -> Propagtor:
+            inverse : bool) -> Propagator:
         # TODO: Confirm documentation for inverse this is not currently 
         # correct.
         """
@@ -742,7 +743,7 @@ class PhysicalFFT(FixedSamplingPropagator):
         self.focal_length = focal_length
 
             
-    def get_focal_length(self : Propagtor) -> float:
+    def get_focal_length(self : Propagator) -> float:
         """
         Accessor for the focal length in meters.
 
@@ -833,7 +834,7 @@ class PhysicalFresnel(VariableSamplingPropagator):
         return self.focal_length
 
 
-    def number_of_fringes(self : Propagtor, 
+    def number_of_fringes(self : Propagator, 
             wavefront : Wavefront) -> float:
         """
         The number of diffraction fringes in the plane of propagation.
