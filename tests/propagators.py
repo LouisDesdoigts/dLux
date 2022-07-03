@@ -648,6 +648,9 @@ class TestPhysicalFresnel(UtilityUser):
     - get_focal_length()
     - get_focal_shift()
     - number_of_fringes()
+
+    Some methods are not tested due to faith in the mathematical 
+    process. These methods are:
     - quadratic_phase()
     - thin_lens()
 
@@ -704,6 +707,21 @@ class TestPhysicalFresnel(UtilityUser):
         assert long_focal_length.get_focal_length() == LONG
 
 
+    def test_get_focal_shift(self : Tester) -> None:
+        """
+        Tests that the `get_focal_shift` method is correctly 
+        reporting the state of the object.
+        """
+        POSITIVE = .1
+        NEGATIVE = -.1
+        
+        positive = self.get_utility().construct(focal_shift = POSITIVE)
+        negative = self.get_utility().construct(focal_shift = NEGATIVE)
+
+        assert positive.get_focal_shift() == POSITIVE
+        assert negative.get_focal_shift() == NEGATIVE
+
+
     def test_number_of_fringes(self : Tester) -> None:
         """
         Implements the full calculation in a single scope to check
@@ -713,28 +731,133 @@ class TestPhysicalFresnel(UtilityUser):
         propagator = self.get_utility().construct() 
         wavefront = self.get_utility().get_utility().construct()
 
+        size_in = wavefront.number_of_pixels() * \
+            wavefront.get_pixel_scale()
+        size_out = propagator.get_pixels_out() * \
+            propagator.get_pixel_scale_out()
+        propagation_distance = propagator.get_focal_length() + \
+            propagator.get_focal_shift()
+        focal_ratio = propagator.get_focal_length() / \
+            propagation_distance
 
-    def test_quadratic_phase(self : Tester) -> None:
-    def test_thin_lens(self : Tester) -> None:
+        NUMBER_OF_FRINGES = focal_ratio * size_in * size_out / \
+            propagator.get_focal_length() \ wavefront.get_wavelength()
+
+        assert NUMBER_OF_FRINGES == propagator.number_of_fringes(wavefront)        
+
+
+    # TODO: Forwards propagation is the only supported direction.
     def test_propagate(self : Tester) -> None:
+        """
+        Passes some simple inputs and checks for `numpy.nan` 
+        `numpy.inf`. 
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        electric_field = propagator._propagate(wavefront)
+
+        assert not electric_field.isnan().any()
+        assert not electric_field.isinf().any()
+
+
     def test_physical_fresnel(self : Tester) -> None:
+        """
+        tests that the `__call__` method is correctly activated and
+        makes sure that the output is instantiated in terms of
+        the correct operations.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        OUTPUT = propagator._normalising_factor(wavefront) * \
+            propagator._propagate(wavefront)
+
+        output = propagator({"Wavefront": wavefront})["Wavefront"]\
+            .get_complex_form()
+
+        assert output == OUTPUT         
 
 
 class TestAngularMFT(UtilityUser):
+    """
+    Tests the `AngularMFT` class concrete methods. These methods 
+    are.
+    - __init__()
+    - __call__()
+    - _proagate()
+
+    Some methods have not been tested because they are purely 
+    methematical. These functions are.
+    - number_of_fringes()
+    - get_pixel_offsets()
+
+    Attributes
+    ----------
+    utility : AngularMFTUtility 
+        Contain helpful constructors and other methods.
+    """
+    utility : AngularMFTUtility = AngularMFTUtility()
+
+
     def test_constructor(self : Tester) -> None:
-    def test_number_of_fringes(self : Tester) -> None:
-    def test_get_pixel_offsets(self : Tester) -> None:
+        """
+        Checks that the state of the class is correctly initialised 
+        by the constructor. The states is
+        - inverse : bool
+        - pixels_out : int
+        - pixel_scale_out : float
+        """
+        propagator = self.get_utility().construct()
+
+        assert propagator.is_inverse() == \
+            self.get_utility().is_inverse()
+        assert propagator.get_pixels_out() == \
+            self.get_utility().get_pixels_out()
+        assert propagtor.get_pixel_scale_out() == \
+            self.get_utility().get_pixel_scale_out()
+
+
     def test_propagate(self : Tester) -> None:
+        """
+        Tests that `_propagate` is correctly assigned in the 
+        constructor.
+        """
+        forwards = self.get_utility().construct(inverse = False)
+        backwards = self.get_utility().construct(inverse = True)
+
+        assert forwards._propagate == forwards._fourier_transform
+        assert backwards._propagate == backwards._inverse_fourier_transform
+
+
     def test_angular_mft(self : Tester) -> None:
+        """
+        tests that the `__call__` method is correctly activated and
+        makes sure that the output is instantiated in terms of
+        the correct operations.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        OUTPUT = propagator._normalising_factor(wavefront) * \
+            propagator._propagate(wavefront)
+
+        output = propagator({"Wavefront": wavefront})["Wavefront"]\
+            .get_complex_form()
+
+        assert output == OUTPUT     
 
 
 class TestAngularFFT(UtilityUser):
     def test_constructor(self : Tester) -> None:
     def test_pixel_scale_out(self : Tester) -> None:
+    def test_propagate(self : Tester) -> None:
+    def test_angular_fft
 
 
 class TestAngularFresnel(UtilityUser):
     pass
+
 
 class TestGaussianPropagator(object):
     def test_propagate_not_nan(self):
