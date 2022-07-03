@@ -849,18 +849,103 @@ class TestAngularMFT(UtilityUser):
 
 
 class TestAngularFFT(UtilityUser):
+    """
+    Tests the concrete methods of the `AngularFFT` class. The methods 
+    tested are:
+    - __init__()
+    - __call__()
+    - _propagate()
+
+    Some functions are not tested because they are purely mathematical 
+    entities. These functions are.
+    - pixel_scale_out()
+
+    Attributes
+    ----------
+    Utility : AngularFFT = AngularFFTUtility()
+        A collection of safe cosntructors and helpful functions.
+    """
+    utility : AngularFFTUtility = AngularFFTUtility()
+
+
     def test_constructor(self : Tester) -> None:
-    def test_pixel_scale_out(self : Tester) -> None:
+        """
+        Checks that the state of the class is correctly instantiated 
+        by the constructor. The state of the class consists of.
+        - inverse : bool
+        """
+        propagator = self.get_utility().construct()
+
+        assert propagator.is_inverse() == self.get_utility().is_invser()
+
+
     def test_propagate(self : Tester) -> None:
-    def test_angular_fft
+        """
+        Checks that the propagate method of this class is correctly 
+        assiged during construction.
+        """
+        forward = self.get_utility().construct(inverse = False)
+        backward = self.get_utility().construct(inverse = True)
+
+        assert forward._propagate == forward._fourier_transform
+        assert backward._propagate == backward._inverse_fourier_transform
+
+
+    def test_angular_fft(self : Tester) -> None:
+        """
+        tests that the `__call__` method is correctly activated and
+        makes sure that the output is instantiated in terms of
+        the correct operations.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        OUTPUT = propagator._normalising_factor(wavefront) * \
+            propagator._propagate(wavefront)
+
+        output = propagator({"Wavefront": wavefront})["Wavefront"]\
+            .get_complex_form()
+
+        assert output == OUTPUT    
 
 
 class TestAngularFresnel(UtilityUser):
+    """
+    This class will hold tests for the concrete methods of the 
+    AngularFresnel wavefront when the class is written. For now 
+    this is a stub.
+    """
     pass
 
 
 class TestGaussianPropagator(object):
-    def test_propagate_not_nan(self):
+    """
+    Holds tests for the concrete methods of the GaussianPropagator 
+    class. These methods are:
+    - __init__()
+    - __call__()
+    - _propagate()
+    - _outside_to_outside()
+    - _outside_to_inside()
+    - _inside_to_outside()
+    - _inside_to_inside()
+    - _waist_to_spherical()
+    - _spherical_to_waist()
+    - _planar_to_planar()
+
+    Due to the increased complexity of many of these methods they
+    are only checked for `numpy.nan` and `numpy.inf` values. With
+    correctness testing relegated to the end to end tests.
+
+    Attributes
+    ----------
+    utility : GaussianProapagatorUtility
+        A collection of helpful constructors and functions for testing.
+    """
+    utility : GaussianPropagatorUtility = GaussianPropagatorUtility()
+
+
+    def test_propagate(self : Tester):
         """
         Tests full branch coverage and then the boundary cases 
         distance == -numpy.inf, distance == numpy.inf and distance 
@@ -870,28 +955,50 @@ class TestGaussianPropagator(object):
         inside_to_outside
         outside_to_inside
         outside_to_outside
-
-        NOTE: We are checking for nan results
         """
-        # TODO: Implement blank() as a minimal wavefront fixture
-        # NOTE: The outside_to_inside() ect. tests already tested 
-        # negative values in the typical range so we only need to 
-        # consider positive ones here
-        rayleigh_distance = blank().rayleigh_distance
+        wavefront = self\
+            .get_utility()\
+            .get_utility()\
+            .construct()
 
-        negative_infinity = set_up().propagate(-numpy.inf)
-        zero = set_up().propagate(0.)
-        positive_infinity = set_up().propagate(numpy.inf)
+        rayleigh_distance = wavefront.rayleigh_distance()
 
-        inside_to_inside = set_up().propagate(rayleigh_distance / 2.)
-        inside_to_outside = set_up().propagate(rayleigh_distance + 1.)
-        # TODO: Adopt this syntax for future use
-        outside_to_inside = \
-            set_up(position = -rayleigh_distance - 1.)\
-            .propagate(rayleigh_distance)
-        outside_to_outside = \
-            set_up(position = -rayleigh_distance - 1.)  
-            .propgate(2 * (rayleigh_distance + 1.))
+        negative_infinity = self\
+            .get_utility()\
+            .construct(distance = -numpy.inf)\
+            ._propagate(wavefront)
+
+        zero = .self\
+            .get_utility()\
+            .construct(distance = 0.)\
+            ._propagate(wavefront)
+
+        positive_infinity = self\
+            .get_utility()\
+            .construct(distance = numpy.inf)\
+            ._propagate(wavefront)
+
+        inside_to_inside = self\
+            .get_utility()\
+            .construct(distance = rayleigh_distance / 2.)\
+            ._propagate(wavefront)
+
+        inside_to_outside = self\
+            .get_utility()\
+            .construct(distance = rayleigh_distance + 1.)\
+            ._propagate()
+
+        outside_to_inside = self\
+            .get_utility()\
+            .construct(rayleigh_distance)\
+            .propagate(wavefront\
+                .set_position(-rayleigh_distance - 1.))
+
+        outside_to_outside = self\
+            .get_utility()\
+            .construct(2 * (rayleigh_distance + 1.))\
+            .propagate(wavefront\
+                .set_position(-rayleigh_distance - 1.))
 
         assert not numpy.isnan(negative_infinity).any()
         assert not numpy.isnan(zero).any()
@@ -901,36 +1008,6 @@ class TestGaussianPropagator(object):
         assert not numpy.isnan(inside_to_outside).any()
         assert not numpy.isnan(outside_to_inside).any()
         assert not numpy.isnan(outside_to_outside).any()
-        
-
-    def test_propagate_not_inf(self):
-        """
-        Tests full branch coverage and then the boundary cases 
-        distance == -numpy.inf, distance == numpy.inf and distance 
-        == 0. The branches covered are:
-        
-        inside_to_inside
-        inside_to_outside
-        outside_to_inside
-        outside_to_outside
-
-        Note: we are checking for inf results. 
-        """
-        rayleigh_distance = blank().rayleigh_distance
-
-        negative_infinity = set_up().propagate(-numpy.inf)
-        zero = set_up().propagate(0.)
-        positive_infinity = set_up().propagate(numpy.inf)
-
-        inside_to_inside = set_up().propagate(rayleigh_distance / 2.)
-        inside_to_outside = set_up().propagate(rayleigh_distance + 1.)
-        # TODO: Adopt this syntax for future use
-        outside_to_inside = \
-            set_up(position = -rayleigh_distance - 1.)\
-            .propagate(rayleigh_distance)
-        outside_to_outside = \
-            set_up(position = -rayleigh_distance - 1.)  
-            .propgate(2 * (rayleigh_distance + 1.))
 
         assert not numpy.isinf(negative_infinity).any()
         assert not numpy.isinf(zero).any()
@@ -947,7 +1024,13 @@ class TestGaussianPropagator(object):
         Tests the three boundary cases -numpy.inf, and numpy.inf as
         well as a negative and a positive valid input.
         """
-        rayleigh_distance = set_up().rayleigh_distance
+        wavefront = self\
+            .get_utility()\
+            .get_utility()\
+            .construct()
+
+        rayleigh_distance = wavefront.rayleigh_distance()
+
         negative_infinity = set_up().outside_to_outside(-numpy.inf)
         negative = set_up().outside_to_outside(-rayleigh_distance - 0.01)
         positive = set_up().outside_to_outside(rayleigh_distance + 0.01)
