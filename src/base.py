@@ -150,7 +150,8 @@ class OpticalSystem(eqx.Module):
             params_dict = self.layers[i](params_dict)
         return params_dict["Wavefront"].wavefront_to_psf()
     
-    def propagate_single(self, wavels, offset=np.zeros(2), weights=1.):
+    def propagate_single(self, wavels, offset=np.zeros(2), weights=1., flux=1.,
+                         apply_detector=False):
         """
         Only propagates a single star, allowing wavelength input
         sums output to single array
@@ -164,9 +165,13 @@ class OpticalSystem(eqx.Module):
         # Apply spectral weighting
         psfs = weights * prop_wf_map(wavels, offset)/len(wavels)
         
-        # Sum into single psf
-        psf = psfs.sum(0)
-        return psf
+        # Sum into single psf and apply flux
+        image = flux * psfs.sum(0)
+        
+        if apply_detector:
+            image = self.apply_detector_layers(image)
+        
+        return image
     
     def apply_detector_layers(self, image):
         """
