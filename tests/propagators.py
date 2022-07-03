@@ -293,6 +293,7 @@ class TestVariableSamplingPropagator(UtilityUser):
 
         assert is_correct
 
+
     def test_inverse_fourier_transform(self : Tester) -> None:
         """
         Tests that the inverse fourier transform is correctly 
@@ -320,39 +321,399 @@ class TestVariableSamplingPropagator(UtilityUser):
         assert is_correct
 
 
-class TestFixedSamplingPropagator(UtilityUser):
-    def test_fourier_transform(self : Tester) -> None:
-    def test_inverse_fourier_transfrom(self : Tester) -> None:
-    def test_normalising_factor(self : Tester) -> None:
-
-
-class TestPhysicalMFT(UtilityUser):
-    def test_constructor(self : Tester) -> None:
     def test_normalising_factor(self : Tester) -> None:
         """
         Tests that the normalising factor is correctly implemented. 
+        The normalising factor is the far field normalisation factor.
+        and is the same for the forward and backward directions. 
         """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        NORMALISING_FACTOR = numpy.exp(
+            propagator._number_of_fringes() * \
+            propagator.get_pixels_out() / \
+            wavefront.number_of_pixels())
+
+        assert NORMALISING_FACTOR == \
+            propagator._normalising_factor(wavefront) 
+
+
+    def test_number_of_fringes(self : Tester) -> None:
+        """
+        Tests that the number of fringes is implemented correctly. 
+        Simply repeats the calculation here, mainly for formalism.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        FRINGES = wavefront.get_pixel_scale() * wavefront.number_of_pixels() * \
+            propagator.get_pixel_scale_out() * propagator.get_pixels_out() /\
+            propagator.get_focal_length() / wavefront.get_wavefront()
+
+        assert propagator.number_of_fringes(wavefront) == FRINGES
+
+
+class TestFixedSamplingPropagator(UtilityUser):
+    """
+    Contains the tests for the abstract FixedSamplingPropagator class.
+    The concrete methods tested:
+    - fourier_transform()
+    - inverse_fourier_transform()
+    - normalising_factor()
+    """
+    def test_fourier_transform(self : Tester) -> None:
+        """
+        Tests the fourier transform of the FixedSamplingPropagator.
+        The Fourier transform is based on the inbuilt `numpy.fft`
+        so the tests are simple and mostly a formaility,
+        """
+        propagtor = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        CORRECT = numpy.fft.fft2(numpy.ifftshift(
+            wavefront.get_complex_form()))
+
+        is_correct = self\
+            .get_utility()\
+            .approx(propagator._fourier_transform(wavefront), CORRECT)\
+            .all()
+
+        assert is_correct
+
+
+    def test_inverse_fourier_transfrom(self : Tester) -> None:
+        """
+        Tests the inverse fourier transform of the FixedSamplingPropagator
+        As above this method is based on the inbuilt `numpy.fft` module so
+        the tests are mostly a formality.
+        """
+        propagtor = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        CORRECT = numpy.fft.fftshift(numpy.ifft2(
+            wavefront.get_complex_form()))
+
+        is_correct = self\
+            .get_utility()\
+            .approx(propagator._inverse_fourier_transform(wavefront), 
+                CORRECT)\
+            .all()
+
+        assert is_correct
+
+
+    def test_normalising_factor(self : Tester) -> None:
+        """
+        Tests that the correct normalising factor is generated for both 
+        the forward and reverse modes. The correct forward mode is 
+        `1. / wavefront.number_of_pixels()` and the correct inverse 
+        mode factor is `wavefront.number_of_pixels()`
+        """
+        wavefront = self.get_utility().get_utility().construct() 
+        forward = self.get_utility().construct(inverse = False)
+        backward = self.get_utility().construct(inverse = True)
+
+        assert forward._normalising_factor(wavefront) == \
+            1. / wavefront.number_of_pixels()
+        assert backward._normalising_factor(wavefront) == \
+            wavefront.number_of_pixels()
+
+
+
+class TestPhysicalMFT(UtilityUser):
+    """
+    Tests the concrete methods of the concrete class PhysicalMFT. 
+    The concrete methods that are tested are.
+    - __init__
+    - __call__
+    - _normalising_factor()
+    - _propagate()
+    - get_focal_length()
+    - get_pixel_offsets()
+
+    Attributes 
+    ----------
+    utility : PhysicalMFTUtility
+        Provides access to safe constructors for both PhysicalWavefronts
+        and PhysicalMFT objects as well as other helper functions.
+    """
+    utility : PhysicalMFTUtility = PhysicalMFTUtility()
+
+
+    def test_constructor(self : Tester) -> None:
+        """
+        Tests that the constructor correctly initialises all of the 
+        fields of the constructor. 
+        """
+        propagator = self.get_utility().construct()
+
+        assert propagator.get_focal_length() == \
+            self.get_utility().get_focal_length()
+        assert propagator.get_pixel_scale() == \
+            self.get_utility().get_pixel_scale() 
+        assert propagator.get_pixels_out() == \
+            self.get_utility().get_pixels_out()
+        assert propagator.is_inside() == \
+            self.get_utility().is_inverse()
 
 
     def test_get_focal_length(self : Tester) -> None:
-    def test_number_of_fringes(self : Tester) -> None:
+        """
+        Tests that the `get_focal_length` method correctly
+        tracks the state of the object.
+        """
+        SHORT = 0.01
+        LONG = 1.0
+
+        short_focal_length = self\
+            .get_utility()\
+            .construct(focal_length = SHORT)
+
+        long_focal_length = self\
+            .get_utility()\
+            .construct(focal_length = LONG)
+
+        assert short_focal_length.get_focal_length() == SHORT
+        assert long_focal_length.get_focal_length() == LONG
+
+
     def test_get_pixel_offsets(self : Tester) -> None:
+        """
+        Tests that the get_pixel_offsets function correctly generates
+        the wavefront offsets in picels. 
+        """
+        OFFSET_RADIANS = numpy.array([0., 1.])
+
+        propagator = self\
+            .get_utility()\
+            .construct()
+
+        wavefront = self\
+            .get_utility()\
+            .get_utility()\
+            .construct()\
+            .set_offset(OFFSET_RADIANS)
+
+        OFFSET_PIXELS = OFFSET_RADIANS * \
+            self.get_utility().get_focal_length() /\
+            self.get_utility().get_pixel_scale()
+
+        assert propagator.get_pixel_offsets() == OFFSET_PIXELS
+
+
     def test_propagate(self : Tester) -> None:
+        """
+        Checks that the propagate function is correctly assigned in 
+        the constructor.
+        """
+        forwards = self.get_utility().construct(inverse = False)
+        backwards = self.get_utility().construct(inverse = True)
+
+        assert forwards._propagate == forwards._fourier_transform
+        assert bakcwards._propagate == backwards._inverse_fourier_transform
+
+
     def test_physical_mft(self : Tester) -> None:
+        """
+        Checks the __call__ method can be made without errors and 
+        repeats the calculation in the function namespace to check 
+        for correctness.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        OUTPUT_FIELD = propagator._propagate(wavefront) * \
+            propagator._normalising_factor(wavefront)
+
+        output_field = propagator({"Wavefront": wavefront})\
+            ["Wavefront"].get_complex_form()
+
+        is_correct = self\
+            .get_utility()\
+            .approx(OUTPUT_FIELD, output_field)\
+            .all()
+
+        assert is_correct
 
 
 class TestPhysicalFFT(UtilityUser):
+    """
+    Tests the concrete methods of the PhysicalMFT class. The concrete 
+    methods tested are. 
+    - __init__
+    - __call__
+    - get_focal_length()
+    - get_pixel_scale_out()
+
+    Attributes
+    ----------
+    utility : PhysicalFFTUtility
+        Provides access to safe constructors for both PhysicalWavefronts
+        and PhysicalMFT objects as well as other helper functions.
+    """
+    utility : PhysicalFFTUtility = PhysicalFFTUtility()
+
+
     def test_constructor(self : Tester) -> None:
+        """
+        Tests that all the parameters of the PhysicalFFT are correctly
+        initialised in the constructor. The parameters are:
+        - inverse : bool
+        - focal_length : float
+        """
+        propagator = self.get_utility().construct()
+
+        assert propagator.is_inverse() == self.get_utility().is_inverse()
+        assert propagator.get_focal_length() == \
+            self.get_utility().get_focal_length()
+        
+
     def test_get_focal_length(self : Tester) -> None:   
+        """
+        Tests that the `get_focal_length` method correctly
+        tracks the state of the object.
+        """
+        SHORT = 0.01
+        LONG = 1.0
+
+        short_focal_length = self\
+            .get_utility()\
+            .construct(focal_length = SHORT)
+
+        long_focal_length = self\
+            .get_utility()\
+            .construct(focal_length = LONG)
+
+        assert short_focal_length.get_focal_length() == SHORT
+        assert long_focal_length.get_focal_length() == LONG
+  
+ 
     def test_get_pixel_scale_out(self : Tester) -> None:
+        """
+        Repeats the calculation of the pixel_scale_out to make sure
+        that it is correct.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        PIXEL_SCALE = wavefront.get_wavelength() * \
+            propagator.get_focal_length() / \
+            wavefront.get_pixel_scale() * wavefront.number_of_pixels()
+
+        assert PIXEL_SCALE == propagator.get_pixel_scale_out(wavefront)
+                   
+
     def test_propagate(self : Tester) -> None:
+        """
+        Checks that `_propagate` is correctly assigned in the 
+        constructor, but does not check for correctness.
+        """
+        forwards = self.get_utility().construct(inverse = False)
+        backwards = self.get_utility().construct(inverse = True)
+
+        assert forwards._propagate == forwards._fourier_transform
+        assert backwards._propagate == backwards._inverse_fourier_transform
+
+
     def test_physical_fft(self : Tester) -> None:
+        """
+        Tests that the __call__ method is made without error and 
+        returns the correct result.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        OUTPUT_FIELD = propagator._normalising_factor(wavefront) * \
+            propagator._propagate(wavefront)
+
+        output_field = propagator({"Wavefront": wavefront})\
+            ["Wavefront"].get_complex_form()
+
+        is_correct = self\
+            .get_utility()\
+            .approx(OUTPUT_FIELD, output_field)\
+            .all()
+
+        assert is_correct
 
 
 class TestPhysicalFresnel(UtilityUser):
+    """
+    Tests the concrete methods of the `PhysicalFresnel` propagator.
+    The concrete methods tested are.
+    - __init__
+    - __call__
+    - _propagate()
+    - get_focal_length()
+    - get_focal_shift()
+    - number_of_fringes()
+    - quadratic_phase()
+    - thin_lens()
+
+    Attributes
+    ----------
+    utility : PhysicalFresnelUtility
+        A utility that provides access to safe testing constructors
+        and other helpful functionalty.
+    """
+    utility : PhysicalFresnelUtility = PhysicalFresnelUtility()
+
+
     def test_constructor(self : Tester) -> None:
+        """
+        Checks that the constructor correctly initialises all of the
+        relevant fields. The relevant fields are:
+        - inverse : bool
+        - focal_length : float
+        - focal_shift : float
+        - pixels_out : int
+        - pixel_scale_out : float
+        """
+        propagator = self.get_utility().construct()
+        
+        assert propagator.is_inverse() == \
+            self.get_utility().is_inverse()
+        assert propagator.get_focal_length() == \
+            self.get_utility().get_focal_length()
+        assert propagator.get_focal_shift() == \
+            self.get_utility().get_focal_shift() 
+        assert propagator.get_pixels_out() == \
+            self.get_utility().get_pixels_out() 
+        assert propagator.get_pixel_scale_out() == \
+            self.get_utility().get_pixel_scale_out()
+
+
     def test_get_focal_length(self : Tester) -> None:
+        """
+        Tests that the `get_focal_length` method correctly tracks 
+        the state of the class.
+        """
+        SHORT = 0.01
+        LONG = 1.0
+
+        short_focal_length = self\
+            .get_utility()\
+            .construct(focal_length = SHORT)
+
+        long_focal_length = self\
+            .get_utility()\
+            .construct(focal_length = LONG)
+
+        assert short_focal_length.get_focal_length() == SHORT
+        assert long_focal_length.get_focal_length() == LONG
+
+
     def test_number_of_fringes(self : Tester) -> None:
+        """
+        Implements the full calculation in a single scope to check
+        for correctness. This is nessecary because the implementation
+        makes use of super.
+        """
+        propagator = self.get_utility().construct() 
+        wavefront = self.get_utility().get_utility().construct()
+
+
     def test_quadratic_phase(self : Tester) -> None:
     def test_thin_lens(self : Tester) -> None:
     def test_propagate(self : Tester) -> None:
