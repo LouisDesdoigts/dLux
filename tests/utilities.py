@@ -1,8 +1,30 @@
 """
 utilities.py
+------------
 This file contains testing utilities to help with the generation of 
-safe test wavefronts, propagators, layers and detectors. The defined
-classes are:
+safe test wavefronts, propagators, layers and detectors. 
+
+Abstract Classes 
+----------------
+- Utility (abstract)
+- UtilityUser (abstract)
+
+Concrete Classes
+----------------
+- WavefrontUtility
+- PhysicalWavefrontUtility
+- AngularWavefrontUtility
+- GaussianWavefrontUtility
+- PropagatorUtility
+- VariabelSamplingUtility
+- FixedSamplingUtility
+- PhysicalMFTUtility
+- PhysicalFFTUtility
+- PhysicalFresnelUtility
+- AngularMFTUtility
+- AngularFFTUtility
+- AngularFresnelUtility
+- GaussianPropagatorUtility
 """
 __author__ = "Jordan Dennis"
 __date__ = "28/06/2022"
@@ -11,26 +33,12 @@ __date__ = "28/06/2022"
 import jax.numpy as numpy
 import dLux
 import typing
+import abc
 
 
 Array = typing.NewType("Array", numpy.ndarray)
-
-dLuxModule = typing.NewType("dLuxModule", object)
 Wavefront = typing.NewType("Wavefront", object)
-PhysicalWavefront = typing.NewType("PhysicalWavefront", Wavefront)
-AngularWavefront = typing.NewType("AngularWavefront", Wavefront)
-GaussianWavefront = typing.NewType("GaussianWavefront", Wavefront)
-
 Utility = typing.NewType("Utility", object)
-WavefrontUtility = typing.NewType("WavefrontUtility", Utility)
-PhysicalWavefrontUtility = typing.NewType("PhysicalWavefrontUtility", 
-    WavefrontUtility)
-AngularWavefrontUtility = typing.NewType("AngularWavefrontUtility", 
-    WavefrontUtility)
-GaussianWavefrontUtility = typing.NewType("GaussianWavefrontUtility",
-    WavefrontUtility)
-
-UtilityUser = typing.NewType("UtilityUser", object)
 
 
 class UtilityUser(object):
@@ -54,11 +62,10 @@ class UtilityUser(object):
         return self.utility 
 
 
-class Utility(object):
+class Utility(abc.ABC):
     """
     """
-
-
+    @abc.abstractmethod
     def __init__(self : Utility) -> Utility:
         """
         Construct a new Utility.
@@ -67,10 +74,10 @@ class Utility(object):
         : Utility 
             The utility. 
         """
-        raise TypeError("Abstract class Utility should" + \
-            "not be directly substantiated.")
+        pass
 
     
+    @abc.abstractmethod
     def construct(self : Utility) -> dLuxModule:
         """
         Safe constructor for the dLuxModule, associated with 
@@ -81,8 +88,7 @@ class Utility(object):
         : dLuxModule
             A safe dLuxModule for testing.
         """
-        raise TypeError("The abstract construct method" + \
-            "should never be directly invoked")
+        pass
 
 
     def approx(self : Utility, result : Array, comparator : Array) -> Array:
@@ -452,3 +458,122 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
             .set_beam_radius(1.)
 
         return wavefront
+
+class PropagatorUtility(Utility):
+    """
+    Testing utility for the Propagator (abstract) class.
+
+    Attributes 
+    ----------
+    inverse : bool
+        The directionality of the generated propagators. 
+    """
+    inverse : bool
+
+
+    def __init__(self : Utility) -> Utility:
+        """
+        Initialises a safe state for the Propagator attributes 
+        stored as attributes in this Utility.
+        """
+        self.inverse = False;
+
+
+    def construct(self : Utility) -> Propagator:
+    def is_inverse(self : Utility) -> bool:
+
+
+class VariableSamplingUtility(PropagatorUtility, UtilityUser):
+    utility : WavefrontUtility = WavefrontUtility()
+    pixels_out : int
+    pixel_scale_out : float
+   
+
+    def __init__(self : Utility) -> Utility:
+    def construct(self : Utility, /, inverse : bool = False, 
+            pixels_out : int = 256, 
+            pixel_scale_out : float = 1.e-3) -> Propagator:
+    def get_pixels_out(self : Utility) -> int:
+    def get_pixel_scale_out(self : Utility) -> float:
+ 
+
+class FixedSamplingUtility(PropagatorUtility, UtilityUser):
+    utility : WavefrontUtility = WavefrontUtility()
+
+
+    def __init__(self : Utility) -> Utility:
+    def construct(self : Utility, inverse : bool = False) -> Propagator
+
+
+class PhysicalMFTUtility(VaraibleSamplingUtility, UtilityUser):
+    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+    focal_length : float
+
+
+    def __init__(self : Utility) -> Utility:
+    def construct(self : Utility, inverse : bool = False, 
+            pixels_out : int = 256, 
+            pixel_scale_out : float = 1.e-3) -> Propagator:
+    def get_focal_length(self : Utility) -> float:
+
+
+class PhysicalFFTUtility(Utility, UtilityUser):
+    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+    focal_length : float
+
+
+    def __init__(self : Utility) -> Utility:
+    def construct(self : Utility, inverse : bool = False, 
+            pixels_out : int = 256, 
+            pixel_scale_out : float = 1.e-3) -> Propagator:
+    def get_focal_length(self : Utility) -> float:
+
+
+class PhysicalFresnelUtility(Utility, UtilityUser):
+    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+    focal_length : float
+    focal_shift : float
+
+
+    def __init__(self : Utility) -> Utility:
+    def construct(self : Utility, inverse : bool = False, 
+            pixels_out : int = 256, 
+            pixel_scale_out : float = 1.e-3) -> Propagator:
+    def get_focal_length(self : Utility) -> float:
+    def get_focal_shift(self : Utility) -> float:
+
+
+class AngularMFTUtility(FixedSamplingUtility, UtilityUser):
+    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+
+
+    def __init__(self : Utility) -> Utility:
+    def construct(self : Utility, inverse : bool = False, 
+            pixels_out : int = 256, 
+            pixel_scale_out : float = 1.e-3) -> Propagator:
+
+
+class AngularFFTUtility(Utility, UtilityUser):
+    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+
+
+    def __init__(self : Utility) -> Utility:
+    def construct(self : Utility, inverse : bool = False, 
+            pixels_out : int = 256, 
+            pixel_scale_out : float = 1.e-3) -> Propagator:
+
+
+class AngularFresnelUtility(Utility, UtilityUser):
+    """
+    """
+    pass
+
+
+class GaussianPropagatorUtility(Utility, UtilityUser):
+    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+    distance : float
+
+
+    def __init__(self : Utility) -> Utility:
+    def construct(self : Utility, distance : float, 
+            inverse : bool = False) -> Propagator:
