@@ -397,7 +397,8 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
         complex_wavefront = wavefront.complex_form()
  
         input_scale = 1.0 / wavefront.number_of_pixels()
-        output_scale = number_of_fringes / self.get_pixels_out()
+        output_scale = self._number_of_fringes() / \
+            self.get_pixels_out()
         
         x_offset, y_offset = self.get_pixel_offsets()
         
@@ -472,25 +473,30 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
                 np.log(self.get_pixels_out())))
 
 
-    @abc.abstractmethod
-    def number_of_fringes(self : Propagator, wavefront : Wavefront) -> float:
+    def number_of_fringes(self : Propagator, 
+            wavefront : Wavefront) -> float:
         """
-        Calculates the number of diffraction fringes in the plane of
-        propagation. 
+        Determines the number of diffraction fringes in the plane of 
+        propagation.
 
-        Parameters
+        Parameters 
         ----------
-        wavefront : Wavefront 
-            The wavefront that is getting propagated. Ussually 
-            required for access to the `wavelength` parameter.
+        wavefront : Wavefront
+            The `Wavefront` that is getting propagated.
 
         Returns 
         -------
         : float
-            The number of diffraction fringes in the plane of 
-            propagation.
+            The floating point number of diffraction fringes in the 
+            plane of propagation.
         """
-        pass
+        size_in = wavefront.get_pixel_scale() * \
+            wavefront.number_of_pixels()        
+        size_out = self.get_pixel_scale() * \
+            self.get_pixels_out()
+        
+        return size_in * size_out / self.get_focal_length() /\
+            wavefront.get_wavelength()
 
 
     # TODO: Review the location of this method
@@ -653,32 +659,6 @@ class PhysicalMFT(VariableSamplingPropagator):
         return self.focal_length
 
 
-    def number_of_fringes(self : Propagator, 
-            wavefront : Wavefront) -> float:
-        """
-        Determines the number of diffraction fringes in the plane of 
-        propagation.
-
-        Parameters 
-        ----------
-        wavefront : Wavefront
-            The `Wavefront` that is getting propagated.
-
-        Returns 
-        -------
-        : float
-            The floating point number of diffraction fringes in the 
-            plane of propagation.
-        """
-        size_in = wavefront.get_pixel_scale() * \
-            wavefront.number_of_pixels()        
-        size_out = self.get_pixel_scale() * \
-            self.get_pixels_out()
-        
-        return size_in * size_out / self.get_focal_length() /\
-            wavefront.get_wavelength()
-
-
     def get_pixel_offsets(self : Propagator, 
             wavefront : Wavefront) -> Array:
         """
@@ -839,6 +819,11 @@ class PhysicalFresnel(VariableSamplingPropagator):
         """
         The number of diffraction fringes in the plane of propagation.
 
+        Overrides
+        ---------
+        VariableSamplingPropagator : number_of_fringes()
+            Adds somplexity to deal with the near field. 
+
         Parameters
         ----------
         wavefront : Wavefront
@@ -850,12 +835,9 @@ class PhysicalFresnel(VariableSamplingPropagator):
             The number of diffraction fringes visible in the plane of 
             propagation.
         """
-        size_in = wavefront.number_of_pixels() * wavefront.get_pixel_scale()
-        size_out = self.get_pixels_out() * self.get_pixel_scale_out()
         propagtion_distance = self.get_focal_length() + self.get_focal_shift()
         focal_ratio = self.get_focal_length() / propagation_distance
-        return focal_ratio * size_in * size_out / \
-            (wavefront.get_wavelength() * self.get_focal_length()) 
+        return focal_ratio * super().normalising_factor(wavefront) 
                
         
     def quadratic_phase(self : Propagator, x_coordinates : Array, 
