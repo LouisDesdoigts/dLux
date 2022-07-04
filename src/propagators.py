@@ -581,7 +581,7 @@ class FixedSamplingPropagator(Propagator):
             The normalising factor that is appropriate to the 
             method of propagation.
         """
-        return (self.inverse - 1) / wavefront.number_of_pixels() + \
+        return (1 - self.inverse) / wavefront.number_of_pixels() + \
             self.inverse * wavefront.number_of_pixels()
 
 
@@ -638,7 +638,8 @@ class PhysicalMFT(VariableSamplingPropagator):
             plane or output plane to input plane. The inverse algorithm
             is used if True is provided.
         """
-        super().__init__(inverse, pixel_scale_out, pixels_out) 
+        super().__init__(inverse = inverse, 
+            pixel_scale_out = pixel_scale_out, pixels_out = pixels_out) 
         self.focal_length = focal_length
 
 
@@ -797,7 +798,8 @@ class PhysicalFresnel(VariableSamplingPropagator):
         """
         self.focal_shift = np.asarray(focal_shift).astype(float)
         self.focal_length = np.asarray(focal_length).astype(float)
-        super().__init__(inverse, pixel_scale_out, pixels_out)       
+        super().__init__(inverse = inverse, 
+            pixel_scale_out = pixel_scale_out, pixels_out = pixels_out)       
 
 
     def get_focal_length(self : Propagator) -> float:
