@@ -11,10 +11,10 @@ Abstract Classes
 
 Concrete Classes
 ----------------
-- WavefrontUtility
-- PhysicalWavefrontUtility
-- AngularWavefrontUtility
-- GaussianWavefrontUtility
+- Utility
+- PhysicalUtility
+- AngularUtility
+- GaussianUtility
 - PropagatorUtility
 - VariabelSamplingUtility
 - FixedSamplingUtility
@@ -38,7 +38,9 @@ import abc
 
 Array = typing.NewType("Array", numpy.ndarray)
 Wavefront = typing.NewType("Wavefront", object)
+Propagator = typing.NewType("Propagator", object)
 Utility = typing.NewType("Utility", object)
+UtilityUser = typing.NewType("UtilityUser", object)
 
 
 class UtilityUser(abc.ABC):
@@ -78,7 +80,7 @@ class Utility(abc.ABC):
 
     
     @abc.abstractmethod
-    def construct(self : Utility) -> dLuxModule:
+    def construct(self : Utility) -> object:
         """
         Safe constructor for the dLuxModule, associated with 
         this utility.
@@ -135,13 +137,13 @@ class WavefrontUtility(Utility):
     pixel_scale : float
 
 
-    def __init__(self : WavefrontUtility, /, 
+    def __init__(self : Utility, /, 
             wavelength : float = None, 
             offset : Array = None,
             size : int = None,
             amplitude : Array = None,
             phase : Array = None,
-            pixel_scale : float = None) -> WavefrontUtility:
+            pixel_scale : float = None) -> Utility:
         """
         Parameters
         ----------
@@ -161,7 +163,7 @@ class WavefrontUtility(Utility):
 
         Returns 
         -------
-        : WavefrontUtility 
+        : Utility 
             The new utility for generating test cases.
         """
         self.wavelength = 550.e-09 if not wavelength else wavelength
@@ -180,13 +182,13 @@ class WavefrontUtility(Utility):
         assert self.size == self.phase.shape[1]          
  
 
-    def construct(self : WavefrontUtility) -> Wavefront:
+    def construct(self : Utility) -> Wavefront:
         """
         Build a safe wavefront for testing.
 
         Returns 
         -------
-        : Wavefront
+        wavefront : Wavefront
             The safe testing wavefront.
         """
         return dLux\
@@ -195,76 +197,76 @@ class WavefrontUtility(Utility):
             .set_pixel_scale(self.pixel_scale)
 
 
-    def get_wavelength(self : WavefrontUtility) -> float:
+    def get_wavelength(self : Utility) -> float:
         """
         Accessor for the wavelength associated with this utility.
 
         Returns
         -------
-        : int
+        wavelength : int
             The wavelength of the utility and hence any `Wavefront` 
             objects it creates in meters.
         """
         return self.wavelength
 
 
-    def get_size(self : WavefrontUtility) -> int:
+    def get_size(self : Utility) -> int:
         """
         Accessor for the `size` constant.
 
         Returns
         -------
-        : int
+        size : int
             The side length of a pixel array currently stored.
         """
         return self.size
 
 
-    def get_amplitude(self : WavefrontUtility) -> Array:
+    def get_amplitude(self : Utility) -> Array:
         """
         Accessor for the `amplitude` constant.
 
         Returns 
         -------
-        : Array
+        amplitude : Array
             The square array of pixel amplitudes in SI units of 
             electric field.
         """
         return self.amplitude
 
 
-    def get_phase(self : WavefrontUtility) -> Array:
+    def get_phase(self : Utility) -> Array:
         """
         Accessor for the `phase` constant.
 
         Returns
         -------
-        : Array
+        phase : Array
             The square array of pixel phases in radians.
         """
         return self.phase
 
 
-    def get_offset(self : WavefrontUtility) -> Array:
+    def get_offset(self : Utility) -> Array:
         """
         Accessor for the `offset` constant.
 
         Returns
         -------
-        : Array
+        offset : Array
             The angle that the wavefront makes with the x and 
             y planes in radians.
         """
         return self.offset
 
 
-    def get_pixel_scale(self : WavefrontUtility) -> Array:
+    def get_pixel_scale(self : Utility) -> Array:
         """
         Accessor for the `pixel_scale` constant.
 
         Returns
         -------
-        : Array
+        pixel_scale : Array
             The `pixel_scale` associated with the wavefront.
         """
         return self.pixel_scale
@@ -275,12 +277,12 @@ class PhysicalWavefrontUtility(WavefrontUtility):
     Defines useful safes state constants as well as a basic 
     constructor for a safe `PhysicalWavefront`.
     """
-    def __init__(self : PhysicalWavefrontUtility, /,
+    def __init__(self : Utility, /,
             wavelength : float = None, 
             offset : Array = None,
             size : int = None, 
             amplitude : Array = None, 
-            phase : Array = None) -> PhysicalWavefront:
+            phase : Array = None) -> Utility:
         """
         Parameters
         ----------
@@ -298,19 +300,19 @@ class PhysicalWavefrontUtility(WavefrontUtility):
 
         Returns
         -------
-        : PhysicalWavefrontUtility 
+        utility : PhysicalWavefrontUtility 
             A helpful class for implementing the tests. 
         """
         super().__init__(wavelength, offset, size, amplitude, phase)
 
 
-    def construct(self : PhysicalWavefrontUtility) -> PhysicalWavefront:
+    def construct(self : Utility) -> Wavefront:
         """
         Build a safe wavefront for testing.
 
         Returns 
         -------
-        : PhysicalWavefront
+        wavefront : PhysicalWavefront
             The safe testing wavefront.
         """
         wavefront = dLux\
@@ -326,12 +328,12 @@ class AngularWavefrontUtility(WavefrontUtility):
     Defines useful safes state constants as well as a basic 
     constructor for a safe `PhysicalWavefront`.
     """
-    def __init__(self : AngularWavefrontUtility, /,
+    def __init__(self : Utility, /,
             wavelength : float = None, 
             offset : Array = None,
             size : int = None, 
             amplitude : Array = None, 
-            phase : Array = None) -> AngularWavefrontUtility:
+            phase : Array = None) -> Utility:
         """
         Parameters
         ----------
@@ -349,19 +351,19 @@ class AngularWavefrontUtility(WavefrontUtility):
 
         Returns
         -------
-        : AngularWavefrontUtility 
+        wavefront : AngularWavefrontUtility 
             A helpful class for implementing the tests. 
         """
         super().__init__(wavelength, offset, size, amplitude, phase)
 
 
-    def construct(self : AngularWavefrontUtility) -> AngularWavefront:
+    def construct(self : Utility) -> Wavefront:
         """
         Build a safe wavefront for testing.
 
         Returns 
         -------
-        : PhysicalWavefront
+        wavefront : PhysicalWavefront
             The safe testing wavefront.
         """
         wavefront = dLux\
@@ -391,7 +393,7 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
     position : float
 
 
-    def __init__(self : GaussianWavefrontUtility, 
+    def __init__(self : Utility, 
             wavelength : float = None,
             offset : Array = None,
             size : int = None,
@@ -399,7 +401,7 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
             phase : Array = None,
             beam_radius : float = None,
             phase_radius : float = None,
-            position : float = None) -> GaussianWavefrontUtility:
+            position : float = None) -> Utility:
         """
         Parameters
         ----------
@@ -423,7 +425,7 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
 
         Returns
         -------
-        : GaussianWavefrontUtility 
+        utility : GaussianWavefrontUtility 
             A helpful class for implementing the tests. 
         """
         super().__init__(wavelength, offset, size, amplitude, phase)
@@ -433,19 +435,43 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
 
 
     # TODO: get_beam_radius and get_position
-    def get_phase_radius(self : GaussianWavefrontUtility) -> float:
+    def get_phase_radius(self : Utility) -> float:
         """
+        Returns
+        -------
+        phase_radius : float
+            The phase radius safe state.
         """
         return self.phase_radius
 
 
-    def construct(self : GaussianWavefrontUtility) -> GaussianWavefront:
+    def get_beam_radius(self : Utility) -> float:
+        """
+        Returns
+        -------
+        beam_radius : float
+            The safe beam radius in meters.
+        """
+        return self.beam_radius
+
+
+    def get_position(self : Utility) -> float:
+        """
+        Returns
+        -------
+        position : float
+            The safe position in meters
+        """
+        return self.position
+
+
+    def construct(self : Utility) -> Wavefront:
         """
         Build a safe wavefront for testing.
 
         Returns 
         -------
-        : PhysicalWavefront
+        wavefront : PhysicalWavefront
             The safe testing wavefront.
         """
         wavefront = dLux\
@@ -453,9 +479,9 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
                self.wavelength)\
             .update_phasor(self.amplitude, self.phase)\
             .set_pixel_scale(self.pixel_scale)\
-            .set_position(0.)\
+            .set_position(self.position)\
             .set_phase_radius(numpy.inf)\
-            .set_beam_radius(1.)
+            .set_beam_radius(self.beam_radius)
 
         return wavefront
 
@@ -487,7 +513,8 @@ class PropagatorUtility(Utility):
         propagator : Propagator 
             A safe propagator for testing purposes. 
         """
-        return dLux.Propagator(self.is_inverse() if inverse is None)
+        return dLux.Propagator(
+            self.inverse if inverse is None else inverse)
 
 
     def is_inverse(self : Utility) -> bool:
@@ -507,7 +534,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
 
     Attributes
     ----------
-    utility : WavefrontUtility 
+    utility : Utility 
         A utility for building `Wavefront` objects that interact 
         with the `VariableSamplingPropagator`.
     pixels_out : int
@@ -517,7 +544,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         The safe pixel scale in the output plane for the `Propagator`.
         The units are (radians) meters per pixel.
     """
-    utility : WavefrontUtility = WavefrontUtility()
+    utility : Utility = WavefrontUtility()
     pixels_out : int
     pixel_scale_out : float
    
@@ -556,9 +583,11 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         # TODO: These should not be accessible in the importable 
         # dLux. need to confer with @LouisDesdoigts.
         return dLux.VariableSamplingPropagator(
-            inverse = self.inverse if inverse is None,
-            pixels_out = self.pixels_out if pixels_out is None,
-            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None)
+            inverse = self.inverse if inverse is None else inverse,
+            pixels_out = self.pixels_out if pixels_out is None \
+                else pixels_out,
+            pixel_scale_out = self.pixel_scale_out if pixel_scale_out \
+                is None else pixel_scale_out) 
 
 
     def get_pixels_out(self : Utility) -> int:
@@ -589,11 +618,11 @@ class FixedSamplingUtility(PropagatorUtility, UtilityUser):
 
     Attributes
     ----------
-    utility : WavefrontUtility 
+    utility : Utility 
         A utility for building `Wavefront` objects that interact 
         with the `FixedSamplingPropagator`.
     """
-    utility : WavefrontUtility = WavefrontUtility()
+    utility : Utility = WavefrontUtility()
 
 
     def __init__(self : Utility) -> Utility:
@@ -604,7 +633,7 @@ class FixedSamplingUtility(PropagatorUtility, UtilityUser):
         super().__init__()
 
 
-    def construct(self : Utility, inverse : bool = False) -> Propagator
+    def construct(self : Utility, inverse : bool = False) -> Propagator:
         """
         Build a safe `FixedSamplingPropagator` for testing purposes.
 
@@ -619,24 +648,24 @@ class FixedSamplingUtility(PropagatorUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.FixedSamplingPropagator(
-            self.is_inverse() if inverse is None)
+            self.inverse if inverse is None else inverse)
 
 
-class PhysicalMFTUtility(VaraibleSamplingUtility, UtilityUser):
+class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
     """
     Container of useful functions and constructors for testing the 
     PhysicalMFT class.
 
     Attributes
     ----------
-    utility : WavefrontUtility 
+    utility : Utility 
         A utility for building `Wavefront` objects that interact 
         with the `PhysicalMFT`.
     focal_length : float
         The safe focal length of the lens or mirror associated with 
         the porpagation.
     """
-    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+    utility : Utility = PhysicalWavefrontUtility()
     focal_length : float
 
 
@@ -674,10 +703,10 @@ class PhysicalMFTUtility(VaraibleSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.PhysicalMFT(
-            inverse = self.inverse if inverse is None,
-            pixels_out = self.pixels_out if pixels_out is None,
-            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None,
-            focal_length = self.focal_length if focal_length is None)
+            inverse = self.inverse if inverse is None else inverse,
+            pixels_out = self.pixels_out if pixels_out is None else pixels_out,
+            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None else pixel_scale_out,
+            focal_length = self.focal_length if focal_length is None else focal_length)
 
 
     def get_focal_length(self : Utility) -> float:
@@ -698,7 +727,7 @@ class PhysicalFFTUtility(Utility, UtilityUser):
 
     Attributes
     ----------
-    utility : WavefrontUtility 
+    utility : Utility 
         A utility for building `Wavefront` objects that interact 
         with the `PhysicalFFT`.
     focal_length : float
@@ -706,7 +735,7 @@ class PhysicalFFTUtility(Utility, UtilityUser):
         the porpagation.
     """
 
-    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+    utility : Utility = PhysicalWavefrontUtility()
     focal_length : float
 
 
@@ -738,8 +767,8 @@ class PhysicalFFTUtility(Utility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.PhysicalFFT(
-            inverse = self.inverse if inverse is None,
-            focal_length = self.focal_length if focal_length is None)
+            inverse = self.inverse if inverse is None else inverse,
+            focal_length = self.focal_length if focal_length is None else focal_length)
 
 
     # TODO: Set up a FocalPlane abstract class. 
@@ -761,7 +790,7 @@ class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
 
     Attributes
     ----------
-    utility : WavefrontUtility 
+    utility : Utility 
         A utility for building `Wavefront` objects that interact 
         with the `PhysicalFresnel`.
     focal_length : float
@@ -771,7 +800,7 @@ class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
         The shift away from focus that the Fresnel approximation is
         to be applied to.
     """
-    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+    utility : Utility = PhysicalWavefrontUtility()
     focal_length : float
     focal_shift : float
 
@@ -814,11 +843,11 @@ class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.PhysicalFresnel(
-            inverse = self.inverse if inverse is None,
-            pixels_out = self.pixels_out if pixels_out is None,
-            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None,
-            focal_length = self.focal_length if focal_length is None,
-            focal_shift = self.focal_shift of focal_shift is None)
+            inverse = self.inverse if inverse is None else inverse,
+            pixels_out = self.pixels_out if pixels_out is None else pixels_out,
+            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None else pixel_scale_out,
+            focal_length = self.focal_length if focal_length is None else focal_length,
+            focal_shift = self.focal_shift if focal_shift is None else focal_shift)
 
 
     def get_focal_length(self : Utility) -> float:
@@ -849,11 +878,11 @@ class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
 
     Attributes
     ----------
-    utility : WavefrontUtility 
+    utility : Utility 
         A utility for building `Wavefront` objects that interact 
         with the `AngularMFT`.
     """
-    utility : AngularWavefrontUtility = AngularWavefrontUtility()
+    utility : Utility = AngularWavefrontUtility()
 
 
     def __init__(self : Utility) -> Utility:
@@ -887,9 +916,9 @@ class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.AngularMFT(
-            inverse = self.inverse if inverse is None,
-            pixels_out = self.pixels_out if pixels_out is None,
-            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None)
+            inverse = self.inverse if inverse is None else inverse,
+            pixels_out = self.pixels_out if pixels_out is None else pixels_out,
+            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None else pixel_scale_out)
 
 
 class AngularFFTUtility(FixedSamplingUtility, UtilityUser):
@@ -899,11 +928,11 @@ class AngularFFTUtility(FixedSamplingUtility, UtilityUser):
 
     Attributes
     ----------
-    utility : WavefrontUtility 
+    utility : Utility 
         A utility for building `Wavefront` objects that interact 
         with the `AngularFFT`.
     """
-    utility : AngularWavefrontUtility = AngularWavefrontUtility()
+    utility : Utility = AngularWavefrontUtility()
 
 
     def __init__(self : Utility) -> Utility:
@@ -929,7 +958,7 @@ class AngularFFTUtility(FixedSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.AngularFFT(
-            inverse = self.inverse if inverse is None)
+            inverse = self.inverse if inverse is None else inverse)
 
 
 class GaussianPropagatorUtility(Utility, UtilityUser):
@@ -939,11 +968,11 @@ class GaussianPropagatorUtility(Utility, UtilityUser):
 
     Attributes
     ----------
-    utility : WavefrontUtility 
+    utility : Utility 
         A utility for building `Wavefront` objects that interact 
         with the `GaussianPropagator`.
     """
-    utility : GaussianWavefrontUtility = GaussianWavefrontUtility()
+    utility : Utility = GaussianWavefrontUtility()
 
 
     def __init__(self : Utility) -> Utility:
