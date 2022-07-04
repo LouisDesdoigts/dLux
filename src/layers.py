@@ -1,10 +1,13 @@
-import jax
-import jax.numpy as np
-import equinox as eqx
-
-
 """
-Layer __call__ functions Template:
+layers.py
+---------
+A layer is a mathematical abstraction of an optical interaction. 
+The physical interpretation of most layers is straightforward but 
+some are not obvious. This structure was chosen because of the 
+constrainst of automatic differentiation using `equinox`.
+
+
+As outlined in the abst
 
     def __call__(self, params_dict):
     
@@ -26,6 +29,20 @@ Layer __call__ functions Template:
         WF = eqx.tree_at(lambda WF: WF.planetype,  WF, planetype)
         params_dict["Wavefront"] = WF
         return params_dict
+
+"""
+__author__ = "Louis Desdoigts"
+__date__ = "05/07/2022"
+
+
+import jax
+import jax.numpy as np
+import equinox as eqx
+
+
+"""
+Layer __call__ functions Template:
+
 
 """
 
