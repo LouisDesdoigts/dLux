@@ -19,7 +19,7 @@ import pytest
 import jax.numpy as numpy
 import dLux
 import typing
-from .utilities.py import *
+from utilities import *
 
 
 Tester = typing.NewType("Tester", UtilityUser)
@@ -232,7 +232,7 @@ class TestVariableSamplingPropagator(UtilityUser):
             ._generate_twiddle_factors(OFFSETS, PIXEL_SCALES, 
                 PIXESL, SIGN)
 
-         is_correct = self\
+        is_correct = self\
             .get_utility()\
             .approx(twiddle_factors, TWIDDLE_FACTORS)\
             .all()
@@ -251,8 +251,8 @@ class TestVariableSamplingPropagator(UtilityUser):
 
         wavefront = self\
             .get_utility()\
-            .get_utility()\ # Not sure about the nesting here but it
-            .construct()    # will do for not.
+            .get_utility()\
+            .construct()    
 
         fourier_transform = \
             propagator._matrix_fourier_transform(wavefront, sign = 1)
@@ -278,8 +278,8 @@ class TestVariableSamplingPropagator(UtilityUser):
 
         wavefront = self\
             .get_utility()\
-            .get_utility()\ # Not sure about the nesting here but it
-            .construct()    # will do for not.
+            .get_utility()\
+            .construct()
 
         fourier_transform = \
             propagator._matrix_fourier_transform(wavefront, sign = 1)
@@ -305,8 +305,8 @@ class TestVariableSamplingPropagator(UtilityUser):
 
         wavefront = self\
             .get_utility()\
-            .get_utility()\ # Not sure about the nesting here but it
-            .construct()    # will do for not.
+            .get_utility()\
+            .construct()
 
         fourier_transform = \
             propagator._matrix_fourier_transform(wavefront, sign = -1)
@@ -741,7 +741,7 @@ class TestPhysicalFresnel(UtilityUser):
             propagation_distance
 
         NUMBER_OF_FRINGES = focal_ratio * size_in * size_out / \
-            propagator.get_focal_length() \ wavefront.get_wavelength()
+            propagator.get_focal_length() / wavefront.get_wavelength()
 
         assert NUMBER_OF_FRINGES == propagator.number_of_fringes(wavefront)        
 
@@ -971,7 +971,7 @@ class TestGaussianPropagator(object):
             .construct(distance = -numpy.inf)\
             ._propagate(wavefront)
 
-        zero = .self\
+        zero = self\
             .get_utility()\
             .construct(distance = 0.)\
             ._propagate(wavefront)
