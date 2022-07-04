@@ -38,7 +38,7 @@ class TestPropagator(UtilityUser):
     ----------
     utility : PropagatorUtility
     """
-    utility : PropagatorUtility = PropagatorUtility()
+    utility : Utility = PropagatorUtility()
 
 
     def test_constructor(self : Tester) -> None:
@@ -54,7 +54,7 @@ class TestPropagator(UtilityUser):
             .get_utility()\
             .construct(inverse = True)
 
-        assert false_constructor.is_inverse() == False
+        assert false_propagator.is_inverse() == False
         assert true_propagator.is_inverse() == True
 
 
@@ -83,24 +83,17 @@ class TestPropagator(UtilityUser):
         correct shape.
         """
         utility = self.get_utility()
+        OFFSET = numpy.array([0., 0.])
+        PIXEL_SCALE = 1.
+        PIXELS = 10.
 
         pixel_grid = utility\
             .construct()\
-            ._get_pixel_grid(
-                utility.get_pixel_offset(), 
-                utility.get_pixel_scale(), 
-                utility.get_number_of_pixels())
+            ._get_pixel_grid(OFFSET, PIXEL_SCALE, PIXELS)
 
-        assert pixel_grid.max() == \
-            utility.get_number_of_pixels() // 2 * \
-            utility.get_pixel_scale()
-
-        assert pixel_grid.min() == \
-            - utility.get_number_of_pixels() // 2 * \
-            utility.get_pixel_scale()
-
-        assert pixel_grid.shape == (2, utility.get_number_of_pixels(),
-            utility.get_number_of_pixels)        
+        assert pixel_grid[0].max() == (PIXELS - 1) / 2 * PIXEL_SCALE
+        assert pixel_grid[0].min() == (- PIXELS + 1) / 2 * PIXEL_SCALE
+        assert pixel_grid[0].shape == (PIXELS, PIXELS)        
 
 
     def test_get_pixel_positions(self : Tester) -> None:
@@ -110,22 +103,16 @@ class TestPropagator(UtilityUser):
         the correct maximum, minimum and shape.
         """    
         utility = self.get_utility()
+        OFFSET = 0.
+        PIXEL_SCALE = 1.
+        PIXELS = 10.
 
         pixel_positions = utility\
             .construct()\
-            ._get_pixel_positions()    
+            ._get_pixel_positions(OFFSET, PIXEL_SCALE, PIXELS)    
 
-        assert pixel_positions.max() == \
-            utility.get_nuber_of_pixels() // 2 * \
-            utility.get_pixel_scale()
-
-        assert pixel_grid.min() == \
-            - utility.get_number_of_pixels() // 2 * \
-            utility.get_pixel_scale()
-
-        assert pixel_grid.shape == (2, utility.get_number_of_pixels(),
-            utility.get_number_of_pixels)    
-
+        assert pixel_positions.max() == (PIXELS - 1) / 2 * PIXEL_SCALE
+        assert pixel_positions.min() == (- PIXELS + 1) / 2 * PIXEL_SCALE
 
 class TestVariableSamplingPropagator(UtilityUser):
     """
@@ -151,7 +138,7 @@ class TestVariableSamplingPropagator(UtilityUser):
         Provides acces to the `get_utitlity` method, broadcast 
         accross all test classes.
     """
-    utility : VariableSamplingUtility = VariableSamplingUtility()
+    utility : Utility = VariableSamplingUtility()
 
 
     def test_constructor(self : Tester) -> None:
@@ -164,10 +151,14 @@ class TestVariableSamplingPropagator(UtilityUser):
         """
         propagator = self.get_utility().construct()
 
-        assert propagator.is_inverse() == utility.get_inverse()
-        assert propagator.get_pixels_out() == utility.get_pixels_out()
+        assert propagator.is_inverse() == \
+            self.get_utility().is_inverse()
+
+        assert propagator.get_pixels_out() == \
+            self.get_utility().get_pixels_out()
+
         assert propagator.get_pixel_scale_out() == \
-            utility.get_pixel_scale_out()
+            self.get_utility().get_pixel_scale_out()
 
 
     def test_get_pixel_scale_out(self : Tester) -> None:
@@ -178,7 +169,7 @@ class TestVariableSamplingPropagator(UtilityUser):
         OLD_PIXEL_SCALE = 0.7
         NEW_PIXEL_SCALE = 0.5
 
-        old_propagtor = self\
+        old_propagator = self\
             .get_utility()\
             .construct(pixel_scale_out = OLD_PIXEL_SCALE)
 
@@ -221,16 +212,16 @@ class TestVariableSamplingPropagator(UtilityUser):
             [1. + 0.j, 0. - 1.j, -1. + 0.j, 0. + 1.j],
             [1. + 0.j, -1. + 0.j, 1. + 0.j, -1. + 0.j],
             [1. + 0.j, 0. + 0.j, -1. + 0.j, 0. - 1.j]])
-        OFFSET : Array = numpy.array([2., 2.])
-        PIXELS : int = 4
-        PIXEL_SCALES : float = 1.
+        OFFSETS : float = 2. 
+        PIXELS : Array = numpy.array([4., 4.])
+        PIXEL_SCALES : Array = numpy.array([1., 1.])
         SIGN : int = 1
 
         twiddle_factors = self\
             .get_utility()\
             .construct()\
             ._generate_twiddle_factors(OFFSETS, PIXEL_SCALES, 
-                PIXESL, SIGN)
+                PIXELS, SIGN)
 
         is_correct = self\
             .get_utility()\
@@ -321,38 +312,6 @@ class TestVariableSamplingPropagator(UtilityUser):
         assert is_correct
 
 
-    def test_normalising_factor(self : Tester) -> None:
-        """
-        Tests that the normalising factor is correctly implemented. 
-        The normalising factor is the far field normalisation factor.
-        and is the same for the forward and backward directions. 
-        """
-        propagator = self.get_utility().construct()
-        wavefront = self.get_utility().get_utility().construct()
-
-        NORMALISING_FACTOR = numpy.exp(
-            propagator._number_of_fringes() * \
-            propagator.get_pixels_out() / \
-            wavefront.number_of_pixels())
-
-        assert NORMALISING_FACTOR == \
-            propagator._normalising_factor(wavefront) 
-
-
-    def test_number_of_fringes(self : Tester) -> None:
-        """
-        Tests that the number of fringes is implemented correctly. 
-        Simply repeats the calculation here, mainly for formalism.
-        """
-        propagator = self.get_utility().construct()
-        wavefront = self.get_utility().get_utility().construct()
-
-        FRINGES = wavefront.get_pixel_scale() * wavefront.number_of_pixels() * \
-            propagator.get_pixel_scale_out() * propagator.get_pixels_out() /\
-            propagator.get_focal_length() / wavefront.get_wavefront()
-
-        assert propagator.number_of_fringes(wavefront) == FRINGES
-
 
 class TestFixedSamplingPropagator(UtilityUser):
     """
@@ -420,7 +379,6 @@ class TestFixedSamplingPropagator(UtilityUser):
             wavefront.number_of_pixels()
 
 
-
 class TestPhysicalMFT(UtilityUser):
     """
     Tests the concrete methods of the concrete class PhysicalMFT. 
@@ -456,6 +414,39 @@ class TestPhysicalMFT(UtilityUser):
             self.get_utility().get_pixels_out()
         assert propagator.is_inside() == \
             self.get_utility().is_inverse()
+
+
+    def test_number_of_fringes(self : Tester) -> None:
+        """
+        Tests that the number of fringes is implemented correctly. 
+        Simply repeats the calculation here, mainly for formalism.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        FRINGES = wavefront.get_pixel_scale() * wavefront.number_of_pixels() * \
+            propagator.get_pixel_scale_out() * propagator.get_pixels_out() /\
+            propagator.get_focal_length() / wavefront.get_wavefront()
+
+        assert propagator.number_of_fringes(wavefront) == FRINGES
+
+
+    def test_normalising_factor(self : Tester) -> None:
+        """
+        Tests that the normalising factor is correctly implemented. 
+        The normalising factor is the far field normalisation factor.
+        and is the same for the forward and backward directions. 
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        NORMALISING_FACTOR = numpy.exp(
+            propagator.number_of_fringes() * \
+            propagator.get_pixels_out() / \
+            wavefront.number_of_pixels())
+
+        assert NORMALISING_FACTOR == \
+            propagator._normalising_factor(wavefront) 
 
 
     def test_get_focal_length(self : Tester) -> None:
@@ -814,7 +805,7 @@ class TestAngularMFT(UtilityUser):
             self.get_utility().is_inverse()
         assert propagator.get_pixels_out() == \
             self.get_utility().get_pixels_out()
-        assert propagtor.get_pixel_scale_out() == \
+        assert propagator.get_pixel_scale_out() == \
             self.get_utility().get_pixel_scale_out()
 
 
@@ -918,7 +909,7 @@ class TestAngularFresnel(UtilityUser):
     pass
 
 
-class TestGaussianPropagator(object):
+class TestGaussianPropagator(UtilityUser):
     """
     Holds tests for the concrete methods of the GaussianPropagator 
     class. These methods are:
@@ -966,60 +957,60 @@ class TestGaussianPropagator(object):
 
         rayleigh_distance = wavefront.rayleigh_distance()
 
-        negative_infinity = self\
-            .get_utility()\
-            .construct(distance = -numpy.inf)\
-            ._propagate(wavefront)
-
-        zero = self\
-            .get_utility()\
-            .construct(distance = 0.)\
-            ._propagate(wavefront)
-
-        positive_infinity = self\
-            .get_utility()\
-            .construct(distance = numpy.inf)\
-            ._propagate(wavefront)
+#        negative_infinity = self\
+#            .get_utility()\
+#            .construct(distance = -numpy.inf)\
+#            ({"Wavefront": wavefront})
+#
+#        zero = self\
+#            .get_utility()\
+#            .construct(distance = 0.)\
+#            ({"Wavefront": wavefront})
+#
+#        positive_infinity = self\
+#            .get_utility()\
+#            .construct(distance = numpy.inf)\
+#            ({"Wavefront": wavefront})
 
         inside_to_inside = self\
             .get_utility()\
             .construct(distance = rayleigh_distance / 2.)\
-            ._propagate(wavefront)
+            ({"Wavefront": wavefront})
 
         inside_to_outside = self\
             .get_utility()\
             .construct(distance = rayleigh_distance + 1.)\
-            ._propagate()
+            
 
         outside_to_inside = self\
             .get_utility()\
             .construct(rayleigh_distance)\
-            .propagate(wavefront\
-                .set_position(-rayleigh_distance - 1.))
+            ({"Wavefront": wavefront\
+                .set_position(-rayleigh_distance - 1.)})
 
         outside_to_outside = self\
             .get_utility()\
             .construct(2 * (rayleigh_distance + 1.))\
-            .propagate(wavefront\
-                .set_position(-rayleigh_distance - 1.))
+            ({"Wavefront": wavefront\
+                .set_position(-rayleigh_distance - 1.)})
 
-        assert not numpy.isnan(negative_infinity).any()
-        assert not numpy.isnan(zero).any()
-        assert not numpy.isnan(positive_infinity).any()
+        # assert not numpy.isnan(negative_infinity.get_complex_form()).any()
+        # assert not numpy.isnan(zero.get_complex_form()).any()
+        # assert not numpy.isnan(positive_infinity.get_complex_form()).any()
 
-        assert not numpy.isnan(inside_to_inside).any()
-        assert not numpy.isnan(inside_to_outside).any()
-        assert not numpy.isnan(outside_to_inside).any()
-        assert not numpy.isnan(outside_to_outside).any()
+        assert not numpy.isnan(inside_to_inside.get_complex_form()).any()
+        assert not numpy.isnan(inside_to_outside.get_complex_form()).any()
+        assert not numpy.isnan(outside_to_inside.get_complex_form()).any()
+        assert not numpy.isnan(outside_to_outside.get_complex_form()).any()
 
-        assert not numpy.isinf(negative_infinity).any()
-        assert not numpy.isinf(zero).any()
-        assert not numpy.isinf(positive_infinity).any()
+        # assert not numpy.isinf(negative_infinity.get_complex_form()).any()
+        # assert not numpy.isinf(zero.get_complex_form()).any()
+        # assert not numpy.isinf(positive_infinity.get_complex_form()).any()
 
-        assert not numpy.isinf(inside_to_inside).any()
-        assert not numpy.isinf(inside_to_outside).any()
-        assert not numpy.isinf(outside_to_inside).any()
-        assert not numpy.isinf(outside_to_outside).any()
+        assert not numpy.isinf(inside_to_inside.get_complex_form()).any()
+        assert not numpy.isinf(inside_to_outside.get_complex_form()).any()
+        assert not numpy.isinf(outside_to_inside.get_complex_form()).any()
+        assert not numpy.isinf(outside_to_outside.get_complex_form()).any()
 
 
     def test_outside_to_outside(self : Tester) -> None:
@@ -1034,39 +1025,43 @@ class TestGaussianPropagator(object):
 
         rayleigh_distance = wavefront.rayleigh_distance()
 
-        negative_infinity = self\
-            .get_utility()\
-            .construct(-numpy.inf)\
-            .outside_to_outside(wavefront\
-                .set_position(rayleigh_distance + 1.))
+#        negative_infinity = self\
+#            .get_utility()\
+#            .construct(-numpy.inf)\
+#            .outside_to_outside(wavefront\
+#                .set_position(rayleigh_distance + 1.),
+#                -numpy.inf)
 
         negative = self\
             .get_utility()\
             .construct(- .2 * rayleigh_distance - 1.)\
             .outside_to_outside(wavefront\
-                .set_position(rayleigh_distance + .5))
+                .set_position(rayleigh_distance + .5),
+                - .2 * rayleigh_distance - 1.)
 
         positive = self\
             .get_utility()\
             .construct(2. * rayleigh_distance + 1.)\
             .outside_to_outside(wavefront\
-                .set_position(- rayleigh_distance - .5))
+                .set_position(- rayleigh_distance - .5), 
+                2. * rayleigh_distance + 1.)
 
-        positive_infinity = self\
-            .get_utility()\
-            .construct(numpy.inf)\
-            .outside_to_outside(wavefront\
-                .set_position(- rayleigh_ditance - 1.))
+#        positive_infinity = self\
+#            .get_utility()\
+#            .construct(numpy.inf)\
+#            .outside_to_outside(wavefront\
+#                .set_position(- rayleigh_ditance - 1.),
+#                numpy.inf)
         
-        assert not numpy.isnan(negative_infinity).any()
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
-        assert not numpy.isnan(positive_infinity).any()     
+#        assert not numpy.isnan(negative_infinity.get_complex_form()).any()
+        assert not numpy.isnan(negative.get_complex_form()).any()
+        assert not numpy.isnan(positive.get_complex_form()).any()
+#        assert not numpy.isnan(positive_infinity.get_complex_form()).any()     
 
-        assert not numpy.isinf(negative_infinity).any()
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
-        assert not numpy.isinf(positive_infinity).any()    
+#        assert not numpy.isinf(negative_infinity.get_complex_form()).any()
+        assert not numpy.isinf(negative.get_complex_form()).any()
+        assert not numpy.isinf(positive.get_complex_form()).any()
+#        assert not numpy.isinf(positive_infinity.get_complex_form()).any()    
 
 
     def test_outside_to_inside(self : Tester) -> None:
@@ -1086,19 +1081,21 @@ class TestGaussianPropagator(object):
             .get_utility()\
             .construct(- rayleigh_distance - 0.01)\
             .outside_to_outside(wavefront\
-                .set_position(rayleigh_distance + 0.01))
+                .set_position(rayleigh_distance + 0.01),
+                - rayleigh_distance - 0.01)
 
         positive = self\
             .get_utility()\
             .construct(rayleigh_distance + 0.01)\
             .outside_to_outside(wavefront\
-                .set_position(- rayleigh_distance - 0.01))
+                .set_position(- rayleigh_distance - 0.01),
+                rayleigh_distance + 0.01)
         
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
+        assert not numpy.isnan(negative.get_complex_form()).any()
+        assert not numpy.isnan(positive.get_complex_form()).any()
 
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
+        assert not numpy.isinf(negative.get_complex_form).any()
+        assert not numpy.isinf(positive.get_complex_form).any()
     
 
     def test_inside_to_outside(self : Tester) -> None:
@@ -1116,18 +1113,18 @@ class TestGaussianPropagator(object):
         negative = self\
             .get_utility()\
             .construct(- rayleigh_distance - 0.01)\
-            .outside_to_outside(wavefront)
+            .outside_to_outside(wavefront, - rayleigh_distance - 0.01)
 
         positive = self\
             .get_utility()\
             .construct(rayleigh_distance + 0.01)\
-            .outside_to_outside(wavefront)
+            .outside_to_outside(wavefront, rayleigh_distance + 0.01)
 
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
+        assert not numpy.isnan(negative.get_complex_form()).any()
+        assert not numpy.isnan(positive.get_complex_form()).any()
         
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
+        assert not numpy.isinf(negative.get_complex_form()).any()
+        assert not numpy.isinf(positive.get_complex_form()).any()
 
 
     def test_inside_to_inside(self : Tester) -> None:
@@ -1145,15 +1142,15 @@ class TestGaussianPropagator(object):
         negative = self\
             .get_utility()\
             .construct(- rayleigh_distance + 0.01)\
-            .outside_to_outside(wavefront)
+            .outside_to_outside(wavefront, - rayleigh_distance + 0.01)
 
         positive = self\
             .get_utility()\
             .construct(rayleigh_distance - 0.01)\
-            .outside_to_outside(wavefront)
+            .outside_to_outside(wavefront, rayleigh_distance - 0.01)
                 
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
+        assert not numpy.isnan(negative.get_complex_form()).any()
+        assert not numpy.isnan(positive.get_complex_form()).any()
         
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
+        assert not numpy.isinf(negative.get_complex_form()).any()
+        assert not numpy.isinf(positive.get_complex_form()).any()

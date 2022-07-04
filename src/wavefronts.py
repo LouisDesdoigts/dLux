@@ -69,7 +69,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : float
+        pixel_scale : float
             The pixel_scale associated with the current position.
         """
         return self.pixel_scale
@@ -81,7 +81,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Array
+        offset : Array
             The x and y angles of deviation that the wavefront makes
             from the mirror.
         """
@@ -100,7 +100,7 @@ class Wavefront(eqx.Module):
         
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new `Wavefront` with the updated offset. 
         """
         return eqx.tree_at(
@@ -114,7 +114,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : float
+        wavelength : float
             The wavelength of the `Wavefront` in meters. 
         """
         return self.wavelength
@@ -131,7 +131,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new `Wavefront` with the updated wavelength. 
         """
         return eqx.tree_at(
@@ -145,7 +145,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Array 
+        amplitude : Array 
             The electric field amplitude in SI units of electric field. 
         """
         return self.amplitude
@@ -157,7 +157,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Array 
+        phase : Array 
             The phase of the Wavefront; a unitless qunatity.
         """
         return self.phase
@@ -175,7 +175,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new `Wavefront` with the updated amplitude. 
         """
         return eqx.tree_at(
@@ -194,7 +194,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new `Wavefront` with `Wavefront.get_phase() == phase`.
         """
         return eqx.tree_at(
@@ -214,7 +214,7 @@ class Wavefront(eqx.Module):
 
         Returns 
         -------
-        : Array
+        wavefront : Array
             The real component of the optical disturbance with 
             SI units of electric field.  
         """
@@ -233,11 +233,31 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Array
+        wavefront : Array
             The imaginary component of the optical disturbance with 
             the SI units of electric field. 
         """
         return self.get_amplitude() * np.sin(self.get_phase())
+
+    
+    def number_of_pixels(self : Wavefront) -> int:
+        """
+        The side length of the pixel array that represents the 
+        electric field of this wavefront.
+
+        Throws
+        ------
+        error : TypeError
+            If the amplitude and phase of the wavefront have not been
+            externally initialised.
+
+        Returns 
+        -------
+        pixels : int
+            The number of pixels that represent this wavefront in 
+            memory along one side.
+        """
+        return self.get_amplitude().shape[0]        
 
 
     def multiply_amplitude(self : Wavefront, 
@@ -248,9 +268,9 @@ class Wavefront(eqx.Module):
 
         Throws
         ------
-        : TypeError
+        error : TypeError
             If `self.amplitude` has not initialised externally.
-        : ValueError
+        error : ValueError
             If `weights` is not a scalar, or an array of the same 
             dimensions. i.e.
             ```py
@@ -268,7 +288,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new Wavefront with the applied changes to the 
             amplitude array. 
         """
@@ -283,9 +303,9 @@ class Wavefront(eqx.Module):
 
         Throws
         ------
-        : TypeError
+        error : TypeError
             If self.phase has not been initialised externally.
-        : ValueError
+        error : ValueError
             If `amounts` is not of the same dimensions as `self.phases`
             or `amounts`. i.e. 
             ```py
@@ -302,7 +322,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new wavefront with the updated array of phases. 
         """
         return self.set_phase(self.get_phase() + phases)
@@ -329,7 +349,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new wavefront with specified by `amplitude` and `phase`        
         """
         return self.set_phase(phase).set_amplitude(amplitude)
@@ -342,12 +362,12 @@ class Wavefront(eqx.Module):
 
         Throws
         ------
-        : TypeError
+        error : TypeError
             If `self.amplitude` has not been externally initialised.
 
         Returns
         -------
-        : Array
+        psf : Array
             The PSF of the wavefront.
         """
         return self.get_amplitude() ** 2
@@ -361,9 +381,9 @@ class Wavefront(eqx.Module):
 
         Throws
         ------
-        : TypeError
+        error : TypeError
             If `self.phase` has not been externally initialised
-        : ValueError
+        error : ValueError
             If `path_difference.shape != self.phase.shape` or 
             If `path_difference.shape != (1,)`
 
@@ -375,7 +395,7 @@ class Wavefront(eqx.Module):
         
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new wavefront with the phases updated according to 
             `path_difference`     
         """
@@ -388,9 +408,16 @@ class Wavefront(eqx.Module):
         The electric field described by this Wavefront in complex 
         form.
 
+        Throws
+        ------
+        error : TypeError
+            If `self.amplitude` has not been externally instantiated.
+        error : TypeError
+            If `self.phase` has not been externally instantiated.
+        
         Returns
         -------
-        : Array[complex]
+        field : Array[complex]
             The complex electric field with both the real and 
             imaginary components in SI units.
         """
@@ -404,12 +431,12 @@ class Wavefront(eqx.Module):
         
         Throws
         ------
-        : TypeError
+        error : TypeError
             If `self.amplitude` has not been externally instantiated.
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new wavefront with the normalised electric field 
             amplitudes. The amplitude is now unitless. 
         """
@@ -430,7 +457,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Array
+        pixel_coordinates : Array
             The paraxial pixel positions of with dimensions 
             `number_of_pixels`
         """
@@ -444,12 +471,12 @@ class Wavefront(eqx.Module):
 
         Throws
         ------
-        : TypeError
+        error : TypeError
             If `self.amplitude` has not been externally initialised
 
         Returns
         -------
-        : Array 
+        pixel_grid : Array 
             The pixel positions of the optical disturbances. 
             Guarantees `self.get_pixel_grid().shape == 
             self.amplitude.shape`
@@ -466,14 +493,14 @@ class Wavefront(eqx.Module):
 
         Throws
         ------
-        : TypeError
+        error : TypeError
             If `self.amplitude` has not been externally initialised
-        : TypeError
-            If `self.pixelscale` has not been externally initialised
+        error : TypeError
+            If `self.pixel_scale` has not been externally initialised
 
         Returns
         -------
-        : Array
+        pixel_positions : Array
             The physical positions of the optical disturbance. 
             Guarantees that `self.get_coordinates().shape == 
             self.amplitude.shape`.
@@ -487,14 +514,14 @@ class Wavefront(eqx.Module):
 
         Throws
         ------
-        : ValueError
+        error : ValueError
             If `self.amplitude` is not externally initialised.
-        : ValueError
+        error : ValueError
             If `self.phase` not externally initialised.
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new `Wavefront` with the phase and amplitude arrays
             reversed accros both axes.
         """
@@ -507,14 +534,14 @@ class Wavefront(eqx.Module):
 
         Throws
         ------
-        : ValueError
+        error : ValueError
             If `self.amplitude` is not externally initialised.
-        : ValueError 
+        error : ValueError 
             If `self.phase` is not externally initialised. 
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new `Wavefront` with the phase and the amplitude arrays
             reversed along the x axis. 
         """
@@ -529,14 +556,14 @@ class Wavefront(eqx.Module):
 
         Throws
         ------        
-        : ValueError
+        error : ValueError
             If `self.amplitude` is not externally initialised.
-        : ValueError 
+        error : ValueError 
             If `self.phase` is not externally initialised. 
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new wavefront with the phase and the amplitude arrays 
             reversed along the y axis.
         """
@@ -568,7 +595,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : tuple[Array, Array]
+        field : tuple[Array, Array]
             The amplitude and phase of the wavefront at `coordinates`
             based on a linear interpolation.
         """
@@ -610,7 +637,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : PhysicalWavefront
+        wavefront : PhysicalWavefront
             The new wavefront with the updated optical disturbance. 
         """
         # Get coords arrays
@@ -645,7 +672,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : Wavefront
+        wavefront : Wavefront
             The new Wavefront object with the updated pixel_scale
         """
         return eqx.tree_at(
@@ -663,7 +690,7 @@ class Wavefront(eqx.Module):
 
         Throws
         ------
-        : ValueError
+        error : ValueError
             If `number_of_pixels_out%2 != self.amplitude.shape[0]%2`
             i.e. padding an even (odd) `Wavefront` to odd (even).
 
@@ -673,10 +700,9 @@ class Wavefront(eqx.Module):
             The square side length of the array after it has been 
             zero padded. 
 
-
         Returns
         -------
-        : PhysicalWavefront
+        wavefront : PhysicalWavefront
             The new `Wavefront` with the optical disturbance zero 
             padded to the new dimensions.
         """
@@ -713,7 +739,7 @@ class Wavefront(eqx.Module):
         
         Throws
         ------
-        : ValueError
+        error : ValueError
             If `number_of_pixels_out%2 != self.amplitude.shape[0]%2`
             i.e. padding an even (odd) `Wavefront` to odd (even).
 
@@ -726,7 +752,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        : PhysicalWavefront
+        wavefront : PhysicalWavefront
             The new `Wavefront` with the optical disturbance zero 
             cropped to the new dimensions.
         """
@@ -788,7 +814,7 @@ class PhysicalWavefront(Wavefront):
 
         Returns
         -------
-        : PhysicalWavefront
+        wavefront : PhysicalWavefront
             The new wavefront with `None` at the extra leaves. 
         """
         super().__init__(wavelength, offset)
@@ -804,6 +830,11 @@ class PhysicalWavefront(Wavefront):
         ----------
         distance : float
             The distance that is getting propagated in meters.
+
+        Returns
+        -------
+        phase : Array
+            The phase that represents the optical transfer. 
         """
         wavenumber = 2. * np.pi / self.get_wavelength()
         return np.exp(1.0j * wavenumber * distance) / \
@@ -846,7 +877,7 @@ class AngularWavefront(Wavefront):
 
         Returns
         -------
-        : AngularWavefront
+        wavefront : AngularWavefront
             The new wavefront with `None` at the extra leaves. 
         """
         super().__init__(wavelength, offset)
@@ -913,7 +944,7 @@ class GaussianWavefront(Wavefront):
 
         Returns 
         -------
-        : float 
+        position : float 
             The position of the `Wavefront` from its starting point 
             in meters.
         """
@@ -934,7 +965,7 @@ class GaussianWavefront(Wavefront):
         
         Returns
         -------
-        : GaussianWavefront
+        wavefront : GaussianWavefront
             This wavefront at the new position. 
         """
         return eqx.tree_at(
@@ -948,7 +979,7 @@ class GaussianWavefront(Wavefront):
 
         Returns
         -------
-        : float
+        beam_radius : float
             The radius of the `GaussianWavefront` in meters.
         """
         return self.beam_radius
@@ -960,7 +991,7 @@ class GaussianWavefront(Wavefront):
 
         Returns
         -------
-        : float 
+        phase_radius : float 
             The phase radius of the wavefront. This is a unitless 
             quantity.
         """
@@ -973,7 +1004,7 @@ class GaussianWavefront(Wavefront):
         
         Returns
         -------
-        : float
+        rayleigh_distance : float
             The Rayleigh distance of the wavefront in metres.
         """
         return np.pi * self.get_beam_radius() ** 2\
@@ -993,7 +1024,7 @@ class GaussianWavefront(Wavefront):
 
         Returns
         -------
-        : float 
+        phase : float 
             A phase representing the evolution of the wavefront over 
             the distance. 
 
@@ -1029,7 +1060,7 @@ class GaussianWavefront(Wavefront):
 
         Returns
         -------
-        : float
+        phase : float
             The near-field quadratic phase accumulated by the beam
             from a propagation of distance.
         """      
@@ -1045,7 +1076,7 @@ class GaussianWavefront(Wavefront):
 
         Returns
         -------
-        : float
+        waist : float
             The position of the waist in metres.
         """
         return - self.get_phase_radius() / \
@@ -1059,7 +1090,7 @@ class GaussianWavefront(Wavefront):
 
         Returns
         -------
-        : float
+        waist_radius : float
             The radius of the beam at the waist in metres.
         """
         return self.get_beam_radius() / \
@@ -1102,7 +1133,7 @@ class GaussianWavefront(Wavefront):
 
         Returns
         -------
-        : bool
+        inside : bool
             true if the point is within the rayleigh distance false 
             otherwise.
         """
@@ -1122,7 +1153,7 @@ class GaussianWavefront(Wavefront):
 
         Returns
         -------
-        : GaussianWavefront
+        wavefront : GaussianWavefront
             A modified GaussianWavefront with the new phase_radius.
         """
         return eqx.tree_at(lambda wavefront : wavefront.phase_radius, 
@@ -1141,7 +1172,7 @@ class GaussianWavefront(Wavefront):
 
         Returns
         -------
-        : GaussianWavefront
+        wavefront : GaussianWavefront
             A modified GaussianWavefront with the new beam_radius.
         """
         return eqx.tree_at(
