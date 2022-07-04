@@ -34,7 +34,6 @@ class Wavefront(eqx.Module):
     """
     wavelength : float
     offset : Array
-    plane_type : str # For debugging
     amplitude : Array
     phase : Array
     pixel_scale : float
@@ -57,7 +56,6 @@ class Wavefront(eqx.Module):
         """
         self.wavelength = np.array(wavelength).astype(float) # Jax Safe
         self.offset = np.array(offset).astype(float) # To be instantiated by CreateWavefront        
-        self.plane_type = "Pupil"
         self.amplitude = None
         self.phase = None
         self.pixel_scale = None
@@ -182,35 +180,6 @@ class Wavefront(eqx.Module):
         return eqx.tree_at(
             lambda wavefront : wavefront.phase, self, phase,
             is_leaf = lambda leaf : leaf is None) 
-
-
-    def get_plane_type(self : Wavefront) -> str:
-        """
-        Returns
-        -------
-        plane : str
-            The plane that the `Wavefront` is currently in. The 
-            options are currently "Pupil", "Focal" and "None".
-        """
-        return self.plane_type
-
-
-    def set_plane_type(self : Wavefront, plane : str) -> Wavefront:
-        """
-        Parameters
-        ----------
-        plane : str
-            A string describing the plane that the `Wavefront` is 
-            currently in.
-
-        Returns 
-        -------
-        wavefront : Wavefront 
-            The new `Wavefront` with the update plane information.
-        """
-        return eqx.tree_at(
-            lambda wavefront : wavefront.plane_type, self, plane,
-            is_leaf = lambda leaf : leaf is None)
 
 
     def get_real(self : Wavefront) -> Array:
@@ -809,6 +778,9 @@ class PhysicalWavefront(Wavefront):
         in radians. This is a (1, 2) array such that 
         `offset <= 2 * np.pi`. 
     """
+    plane_type : str # For debugging
+
+
     def __init__(self : PhysicalWavefront, wavelength : float, 
             offset : Array) -> PhysicalWavefront:
         """
@@ -829,6 +801,36 @@ class PhysicalWavefront(Wavefront):
             The new wavefront with `None` at the extra leaves. 
         """
         super().__init__(wavelength, offset)
+        self.plane_type = None
+
+
+    def get_plane_type(self : Wavefront) -> str:
+        """
+        Returns
+        -------
+        plane : str
+            The plane that the `Wavefront` is currently in. The 
+            options are currently "Pupil", "Focal" and "None".
+        """
+        return self.plane_type
+
+
+    def set_plane_type(self : Wavefront, plane : str) -> Wavefront:
+        """
+        Parameters
+        ----------
+        plane : str
+            A string describing the plane that the `Wavefront` is 
+            currently in.
+
+        Returns 
+        -------
+        wavefront : Wavefront 
+            The new `Wavefront` with the update plane information.
+        """
+        return eqx.tree_at(
+            lambda wavefront : wavefront.plane_type, self, plane,
+            is_leaf = lambda leaf : leaf is None)
 
 
     def transfer_function(self : PhysicalWavefront, 
@@ -872,6 +874,11 @@ class AngularWavefront(Wavefront):
         The physical dimensions of each square pixel. Assumed to be 
         metres.
     """ 
+    # TODO: Convince @LouisDesdoigts that this should be in a 
+    # separate debugging class.
+    plane_type : str
+
+
     def __init__(self : AngularWavefront, wavelength : float, 
             offset : Array) -> AngularWavefront:
         """
@@ -892,6 +899,36 @@ class AngularWavefront(Wavefront):
             The new wavefront with `None` at the extra leaves. 
         """
         super().__init__(wavelength, offset)
+        self.plane_type = None        
+
+
+    def get_plane_type(self : Wavefront) -> str:
+        """
+        Returns
+        -------
+        plane : str
+            The plane that the `Wavefront` is currently in. The 
+            options are currently "Pupil", "Focal" and "None".
+        """
+        return self.plane_type
+
+
+    def set_plane_type(self : Wavefront, plane : str) -> Wavefront:
+        """
+        Parameters
+        ----------
+        plane : str
+            A string describing the plane that the `Wavefront` is 
+            currently in.
+
+        Returns 
+        -------
+        wavefront : Wavefront 
+            The new `Wavefront` with the update plane information.
+        """
+        return eqx.tree_at(
+            lambda wavefront : wavefront.plane_type, self, plane,
+            is_leaf = lambda leaf : leaf is None)
 
 
 class GaussianWavefront(Wavefront):
