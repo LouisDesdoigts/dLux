@@ -65,9 +65,7 @@ class Wavefront(eqx.Module):
 
     def get_pixel_scale(self : GaussianWavefront) -> float:
         """
-        Accessor for the pixel_scale.
-
-        Returns
+         Returns
         -------
         pixel_scale : float
             The pixel_scale associated with the current position.
@@ -77,8 +75,6 @@ class Wavefront(eqx.Module):
 
     def get_offset(self : Wavefront) -> Array:
         """
-        The offset of this `Wavefront`.
-
         Returns
         -------
         offset : Array
@@ -90,8 +86,6 @@ class Wavefront(eqx.Module):
 
     def set_offset(self : Wavefront, offset : Array) -> Wavefront:
         """
-        Mutator for the offset.
-
         Parameters
         ----------
         offset : Array (f64[2])
@@ -110,8 +104,6 @@ class Wavefront(eqx.Module):
 
     def get_wavelength(self : Wavefront) -> float:
         """
-        Accessor for the wavelength.
-
         Returns
         -------
         wavelength : float
@@ -122,8 +114,6 @@ class Wavefront(eqx.Module):
 
     def set_wavelength(self : Wavefront, wavelength : float) -> Wavefront:
         """
-        Mutator for the wavelength.
-
         Parameters
         ----------
         wavelength : float  
@@ -141,8 +131,6 @@ class Wavefront(eqx.Module):
 
     def get_amplitude(self : Wavefront) -> Array:
         """
-        Accessor for the amplitude.
-
         Returns
         -------
         amplitude : Array 
@@ -153,8 +141,6 @@ class Wavefront(eqx.Module):
 
     def get_phase(self : Wavefront) -> Array:
         """
-        Accessor for the phase.
-
         Returns
         -------
         phase : Array 
@@ -165,8 +151,6 @@ class Wavefront(eqx.Module):
 
     def set_amplitude(self : Wavefront, amplitude : Array) -> Wavefront:
         """
-        Mutator for the amplitude. 
-
         Parameters
         ---------
         amplitude : Array
@@ -185,8 +169,6 @@ class Wavefront(eqx.Module):
 
     def set_phase(self : Wavefront, phase : Array) -> Wavefront:
         """
-        Mutator for the phase.
-
         Parameters
         ----------
         phase : Array
@@ -200,6 +182,35 @@ class Wavefront(eqx.Module):
         return eqx.tree_at(
             lambda wavefront : wavefront.phase, self, phase,
             is_leaf = lambda leaf : leaf is None) 
+
+
+    def get_plane_type(self : Wavefront) -> str:
+        """
+        Returns
+        -------
+        plane : str
+            The plane that the `Wavefront` is currently in. The 
+            options are currently "Pupil", "Focal" and "None".
+        """
+        return self.plane_type
+
+
+    def set_plane_type(self : Wavefront, plane : str) -> Wavefront:
+        """
+        Parameters
+        ----------
+        plane : str
+            A string describing the plane that the `Wavefront` is 
+            currently in.
+
+        Returns 
+        -------
+        wavefront : Wavefront 
+            The new `Wavefront` with the update plane information.
+        """
+        return eqx.tree_at(
+            lambda wavefront : wavefront.plane_type, self, plane,
+            is_leaf = lambda leaf : leaf is None)
 
 
     def get_real(self : Wavefront) -> Array:
