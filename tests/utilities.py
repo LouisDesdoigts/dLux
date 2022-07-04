@@ -41,7 +41,7 @@ Wavefront = typing.NewType("Wavefront", object)
 Utility = typing.NewType("Utility", object)
 
 
-class UtilityUser(object):
+class UtilityUser(abc.ABC):
     """
     The base utility class. These utility classes are designed to 
     define safe constructors and constants for testing. These   
@@ -459,6 +459,7 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
 
         return wavefront
 
+
 class PropagatorUtility(Utility):
     """
     Testing utility for the Propagator (abstract) class.
@@ -479,101 +480,493 @@ class PropagatorUtility(Utility):
         self.inverse = False;
 
 
-    def construct(self : Utility) -> Propagator:
+    def construct(self : Utility, inverse : bool = None) -> Propagator:
+        """
+        Returns 
+        -------
+        propagator : Propagator 
+            A safe propagator for testing purposes. 
+        """
+        return dLux.Propagator(self.is_inverse() if inverse is None)
+
+
     def is_inverse(self : Utility) -> bool:
+        """
+        Returns
+        -------
+        inverse : bool
+            The safe inverse setting of the Utility.
+        """
+        return self.inverse
 
 
 class VariableSamplingUtility(PropagatorUtility, UtilityUser):
+    """
+    Container of useful functions and constructors for testing the 
+    VariableSamplingPropagator (abstract) class.
+
+    Attributes
+    ----------
+    utility : WavefrontUtility 
+        A utility for building `Wavefront` objects that interact 
+        with the `VariableSamplingPropagator`.
+    pixels_out : int
+        The safe number of pixels in the output plane for the 
+        `Propagator`.
+    pixel_scale_out : float
+        The safe pixel scale in the output plane for the `Propagator`.
+        The units are (radians) meters per pixel.
+    """
     utility : WavefrontUtility = WavefrontUtility()
     pixels_out : int
     pixel_scale_out : float
    
 
     def __init__(self : Utility) -> Utility:
-    def construct(self : Utility, /, inverse : bool = False, 
-            pixels_out : int = 256, 
-            pixel_scale_out : float = 1.e-3) -> Propagator:
+        """
+        Initialises a safe state for the Propagator attributes 
+        stored as attributes in this Utility.
+        """
+        super().__init__()
+        pixels_out = 256
+        pixel_scale_out = 1.e-3
+
+
+    def construct(self : Utility, /, inverse : bool = None, 
+            pixels_out : int = None, 
+            pixel_scale_out : float = None) -> Propagator:
+        """
+        Build a safe `VariableSamplingPropagator` for testing purposes.
+
+        Parameters
+        ----------
+        inverse : bool
+            True if the inverse `Propagtor` is to be set.
+        pixels_out : int
+            The number of pixels in the output plane.
+        pixel_scale_out : float
+            The pixel scale in the output plane in units of (radians)
+            meters per pixel.
+        
+        Returns
+        -------
+        propagator : Propagator
+            The safe testing `Propagator`
+        """
+        # TODO: These should not be accessible in the importable 
+        # dLux. need to confer with @LouisDesdoigts.
+        return dLux.VariableSamplingPropagator(
+            inverse = self.inverse if inverse is None,
+            pixels_out = self.pixels_out if pixels_out is None,
+            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None)
+
+
     def get_pixels_out(self : Utility) -> int:
+        """
+        Returns
+        -------
+        pixels_out : int
+            The number of pixels in the output plane for the safe
+            `Propagator`
+        """
+        return self.pixels_out
+
+
     def get_pixel_scale_out(self : Utility) -> float:
+        """
+        Returns
+        -------
+        pixel_scale_out : float
+            The pixel scale in the output plane for the safe `Propagator`
+        """
+        return self.pixel_scale_out
  
 
 class FixedSamplingUtility(PropagatorUtility, UtilityUser):
+    """
+    Container of useful functions and constructors for testing the 
+    FixedSamplingPropagator (abstract) class.
+
+    Attributes
+    ----------
+    utility : WavefrontUtility 
+        A utility for building `Wavefront` objects that interact 
+        with the `FixedSamplingPropagator`.
+    """
     utility : WavefrontUtility = WavefrontUtility()
 
 
     def __init__(self : Utility) -> Utility:
+        """
+        Initialises a safe state for the Propagator attributes 
+        stored as attributes in this Utility.
+        """
+        super().__init__()
+
+
     def construct(self : Utility, inverse : bool = False) -> Propagator
+        """
+        Build a safe `FixedSamplingPropagator` for testing purposes.
+
+        Parameters
+        ----------
+        inverse : bool
+            True if the inverse `Propagtor` is to be set.
+        
+        Returns
+        -------
+        propagator : Propagator
+            The safe testing `Propagator`
+        """
+        return dLux.FixedSamplingPropagator(
+            self.is_inverse() if inverse is None)
 
 
 class PhysicalMFTUtility(VaraibleSamplingUtility, UtilityUser):
+    """
+    Container of useful functions and constructors for testing the 
+    PhysicalMFT class.
+
+    Attributes
+    ----------
+    utility : WavefrontUtility 
+        A utility for building `Wavefront` objects that interact 
+        with the `PhysicalMFT`.
+    focal_length : float
+        The safe focal length of the lens or mirror associated with 
+        the porpagation.
+    """
     utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
     focal_length : float
 
 
     def __init__(self : Utility) -> Utility:
-    def construct(self : Utility, inverse : bool = False, 
-            pixels_out : int = 256, 
-            pixel_scale_out : float = 1.e-3) -> Propagator:
+        """
+        Initialises a safe state for the Propagator attributes 
+        stored as attributes in this Utility.
+        """
+        super().__init__()
+        self.focal_length = 1.
+
+
+    def construct(self : Utility, inverse : bool = None, 
+            pixels_out : int = None, pixel_scale_out : float = None, 
+            focal_length = None) -> Propagator:
+        """
+        Build a safe `PhysicalMFT` for testing purposes.
+
+        Parameters
+        ----------
+        inverse : bool
+            True if the inverse `Propagtor` is to be set.
+        pixels_out : int
+            The number of pixels in the output plane.
+        pixel_scale_out : float
+            The pixel scale in the output plane in units of (radians)
+            meters per pixel.
+        focal_length : float
+            The focal length associated with the mirror or lens 
+            associated with the propagation.
+        
+        Returns
+        -------
+        propagator : Propagator
+            The safe testing `Propagator`
+        """
+        return dLux.PhysicalMFT(
+            inverse = self.inverse if inverse is None,
+            pixels_out = self.pixels_out if pixels_out is None,
+            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None,
+            focal_length = self.focal_length if focal_length is None)
+
+
     def get_focal_length(self : Utility) -> float:
+        """
+        Returns
+        -------
+        focal_length : float
+            The focal length in meters of the mirror or lens associated
+            with the propagation.
+        """
+        return self.focal_length
 
 
 class PhysicalFFTUtility(Utility, UtilityUser):
+    """
+    Container of useful functions and constructors for testing the 
+    PhysicalFFT class.
+
+    Attributes
+    ----------
+    utility : WavefrontUtility 
+        A utility for building `Wavefront` objects that interact 
+        with the `PhysicalFFT`.
+    focal_length : float
+        The safe focal length of the lens or mirror associated with 
+        the porpagation.
+    """
+
     utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
     focal_length : float
 
 
     def __init__(self : Utility) -> Utility:
-    def construct(self : Utility, inverse : bool = False, 
-            pixels_out : int = 256, 
-            pixel_scale_out : float = 1.e-3) -> Propagator:
+        """
+        Initialises a safe state for the Propagator attributes 
+        stored as attributes in this Utility.
+        """
+        super().__init__()
+        self.focal_length = 1.
+
+
+    def construct(self : Utility, inverse : bool = None, 
+            focal_length = None) -> Propagator:
+        """
+        Build a safe `PhysicalFFT` for testing purposes.
+
+        Parameters
+        ----------
+        inverse : bool
+            True if the inverse `Propagtor` is to be set.
+        focal_length : float
+            The focal length associated with the mirror or lens 
+            associated with the propagation.
+        
+        Returns
+        -------
+        propagator : Propagator
+            The safe testing `Propagator`
+        """
+        return dLux.PhysicalFFT(
+            inverse = self.inverse if inverse is None,
+            focal_length = self.focal_length if focal_length is None)
+
+
+    # TODO: Set up a FocalPlane abstract class. 
     def get_focal_length(self : Utility) -> float:
+        """
+        Returns
+        -------
+        focal_length : float
+            The focal length in meters of the mirror or lens associated
+            with the propagation.
+        """
+        return self.focal_length
 
 
-class PhysicalFresnelUtility(Utility, UtilityUser):
+class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
+    """
+    Container of useful functions and constructors for testing the 
+    PhysicalFresnel class.
+
+    Attributes
+    ----------
+    utility : WavefrontUtility 
+        A utility for building `Wavefront` objects that interact 
+        with the `PhysicalFresnel`.
+    focal_length : float
+        The safe focal length of the lens or mirror associated with 
+        the porpagation.
+    focal_shift : float
+        The shift away from focus that the Fresnel approximation is
+        to be applied to.
+    """
     utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
     focal_length : float
     focal_shift : float
 
 
     def __init__(self : Utility) -> Utility:
-    def construct(self : Utility, inverse : bool = False, 
-            pixels_out : int = 256, 
-            pixel_scale_out : float = 1.e-3) -> Propagator:
+        """
+        Initialises a safe state for the Propagator attributes 
+        stored as attributes in this Utility.
+        """
+        super().__init__()
+        self.focal_length = 1.
+        self.focal_shift = -.01
+
+
+    def construct(self : Utility, inverse : bool = None, 
+            pixels_out : int = None, pixel_scale_out : float = None, 
+            focal_length = None, focal_shift :float = None) -> Propagator:
+        """
+        Build a safe `PhysicalFresnel` for testing purposes.
+
+        Parameters
+        ----------
+        inverse : bool
+            True if the inverse `Propagtor` is to be set.
+        pixels_out : int
+            The number of pixels in the output plane.
+        pixel_scale_out : float
+            The pixel scale in the output plane in units of (radians)
+            meters per pixel.
+        focal_length : float
+            The focal length associated with the mirror or lens 
+            associated with the propagation.
+        focal_shift : float
+            The disparity from the focal length to which the Fresnel
+            approximation is to be applied.
+        
+        Returns
+        -------
+        propagator : Propagator
+            The safe testing `Propagator`
+        """
+        return dLux.PhysicalFresnel(
+            inverse = self.inverse if inverse is None,
+            pixels_out = self.pixels_out if pixels_out is None,
+            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None,
+            focal_length = self.focal_length if focal_length is None,
+            focal_shift = self.focal_shift of focal_shift is None)
+
+
     def get_focal_length(self : Utility) -> float:
+        """
+        Returns
+        -------
+        focal_length : float
+            The focal length in meters of the mirror or lens associated
+            with the propagation.
+        """
+        return self.focal_length
+
+
     def get_focal_shift(self : Utility) -> float:
+        """
+        Returns
+        -------
+        focal_shift : float
+            The shift from the focal plane of the detector in meters.
+        """
+        return self.focal_shift
 
 
-class AngularMFTUtility(FixedSamplingUtility, UtilityUser):
-    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
+    """
+    Container of useful functions and constructors for testing the 
+    AngluarMFT class.
+
+    Attributes
+    ----------
+    utility : WavefrontUtility 
+        A utility for building `Wavefront` objects that interact 
+        with the `AngularMFT`.
+    """
+    utility : AngularWavefrontUtility = AngularWavefrontUtility()
 
 
     def __init__(self : Utility) -> Utility:
-    def construct(self : Utility, inverse : bool = False, 
-            pixels_out : int = 256, 
-            pixel_scale_out : float = 1.e-3) -> Propagator:
+        """
+        Initialises a safe state for the Propagator attributes 
+        stored as attributes in this Utility.
+        """
+        super().__init__()
 
 
-class AngularFFTUtility(Utility, UtilityUser):
-    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+    def construct(self : Utility, inverse : bool = None, 
+            pixels_out : int = None, pixel_scale_out : float = None, 
+            focal_length = None, focal_shift :float = None) -> Propagator:
+        """
+        Build a safe `PhysicalMFT` for testing purposes.
+
+        Parameters
+        ----------
+        inverse : bool
+            True if the inverse `Propagtor` is to be set.
+        pixels_out : int
+            The number of pixels in the output plane.
+        pixel_scale_out : float
+            The pixel scale in the output plane in units of (radians)
+            meters per pixel.
+
+        
+        Returns
+        -------
+        propagator : Propagator
+            The safe testing `Propagator`
+        """
+        return dLux.AngularMFT(
+            inverse = self.inverse if inverse is None,
+            pixels_out = self.pixels_out if pixels_out is None,
+            pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None)
+
+
+class AngularFFTUtility(FixedSamplingUtility, UtilityUser):
+    """
+    Container of useful functions and constructors for testing the 
+    AngluarFFT class.
+
+    Attributes
+    ----------
+    utility : WavefrontUtility 
+        A utility for building `Wavefront` objects that interact 
+        with the `AngularFFT`.
+    """
+    utility : AngularWavefrontUtility = AngularWavefrontUtility()
 
 
     def __init__(self : Utility) -> Utility:
-    def construct(self : Utility, inverse : bool = False, 
-            pixels_out : int = 256, 
-            pixel_scale_out : float = 1.e-3) -> Propagator:
+        """
+        Initialises a safe state for the Propagator attributes 
+        stored as attributes in this Utility.
+        """
+        super().__init__()
 
 
-class AngularFresnelUtility(Utility, UtilityUser):
-    """
-    """
-    pass
+    def construct(self : Utility, inverse : bool = None) -> Propagator:
+        """
+        Build a safe `PhysicalMFT` for testing purposes.
+
+        Parameters
+        ----------
+        inverse : bool
+            True if the inverse `Propagtor` is to be set.
+        
+        Returns
+        -------
+        propagator : Propagator
+            The safe testing `Propagator`
+        """
+        return dLux.AngularFFT(
+            inverse = self.inverse if inverse is None)
 
 
 class GaussianPropagatorUtility(Utility, UtilityUser):
-    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
-    distance : float
+    """
+    Container of useful functions and constructors for testing the 
+     `GaussianPropagator` class.
+
+    Attributes
+    ----------
+    utility : WavefrontUtility 
+        A utility for building `Wavefront` objects that interact 
+        with the `GaussianPropagator`.
+    """
+    utility : GaussianWavefrontUtility = GaussianWavefrontUtility()
 
 
     def __init__(self : Utility) -> Utility:
-    def construct(self : Utility, distance : float, 
-            inverse : bool = False) -> Propagator:
+        """
+        Initialises a safe state for the Propagator attributes 
+        stored as attributes in this Utility.
+        """
+        pass         
+
+
+    def construct(self : Utility, distance : float) -> Propagator:
+        """
+        Build a safe `GaussianPropagator` for testing purposes.
+
+        Parameters
+        ----------
+        distance : float
+            The distance of the propagation in meters.        
+        
+        Returns
+        -------
+        propagator : Propagator
+            The safe testing `Propagator`
+        """
+        return dLux.GaussianPropagator(distance)
+
