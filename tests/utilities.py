@@ -596,7 +596,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         # TODO: These should not be accessible in the importable 
         # dLux. need to confer with @LouisDesdoigts.
         return dLux.VariableSamplingPropagator(
-            inverse = super().is_inverse() if inverse is None else inverse,
+            inverse = self.is_inverse() if inverse is None else inverse,
             pixels_out = self.pixels_out if pixels_out is None \
                 else pixels_out,
             pixel_scale_out = self.pixel_scale_out if pixel_scale_out \
@@ -661,7 +661,7 @@ class FixedSamplingUtility(PropagatorUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.FixedSamplingPropagator(
-            super().is_inverse() if inverse is None else inverse)
+            self.is_inverse() if inverse is None else inverse)
 
 
 class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
@@ -716,10 +716,10 @@ class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.PhysicalMFT(
-            inverse = super().is_inverse() if inverse is None else inverse,
-            pixels_out = super().get_pixels_out() if pixels_out is None else pixels_out,
-            pixel_scale_out = super().get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
-            focal_length = super().get_focal_length() if focal_length is None else focal_length)
+            inverse = self.is_inverse() if inverse is None else inverse,
+            pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
+            pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
+            focal_length = self.get_focal_length() if focal_length is None else focal_length)
 
 
     def get_focal_length(self : Utility) -> float:
@@ -733,7 +733,7 @@ class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
         return self.focal_length
 
 
-class PhysicalFFTUtility(Utility, UtilityUser):
+class PhysicalFFTUtility(FixedSamplingUtility, UtilityUser):
     """
     Container of useful functions and constructors for testing the 
     PhysicalFFT class.
@@ -780,7 +780,7 @@ class PhysicalFFTUtility(Utility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.PhysicalFFT(
-            inverse = super().is_inverse() if inverse is None else inverse,
+            inverse = self.is_inverse() if inverse is None else inverse,
             focal_length = self.get_focal_length() if focal_length is None else focal_length)
 
 
@@ -856,9 +856,9 @@ class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.PhysicalFresnel(
-            inverse = super().is_inverse() if inverse is None else inverse,
-            pixels_out = super().get_pixels_out() if pixels_out is None else pixels_out,
-            pixel_scale_out = super().get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
+            inverse = self.is_inverse() if inverse is None else inverse,
+            pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
+            pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
             focal_length = self.get_focal_length() if focal_length is None else focal_length,
             focal_shift = self.get_focal_shift() if focal_shift is None else focal_shift)
 
@@ -921,7 +921,6 @@ class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
         pixel_scale_out : float
             The pixel scale in the output plane in units of (radians)
             meters per pixel.
-
         
         Returns
         -------
@@ -929,9 +928,9 @@ class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.AngularMFT(
-            inverse = super().is_inverse() if inverse is None else inverse,
-            pixels_out = super().get_pixels_out() if pixels_out is None else pixels_out,
-            pixel_scale_out = super().get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out)
+            inverse = self.is_inverse() if inverse is None else inverse,
+            pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
+            pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out)
 
 
 class AngularFFTUtility(FixedSamplingUtility, UtilityUser):
@@ -971,7 +970,7 @@ class AngularFFTUtility(FixedSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.AngularFFT(
-            inverse = super().is_inverse() if inverse is None else inverse)
+            inverse = self.is_inverse() if inverse is None else inverse)
 
 
 class GaussianPropagatorUtility(Utility, UtilityUser):
