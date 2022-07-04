@@ -75,7 +75,7 @@ import jax
 import equinox as eqx
 import typing
 # import abc 
-from wavefronts import *
+from .wavefronts import *
 
 
 Propagator = typing.NewType("Propagator", eqx.Module)
@@ -419,14 +419,16 @@ class VariableSamplingPropagator(Propagator):
         input_scale = 1.0 / wavefront.number_of_pixels()
         output_scale = self.number_of_fringes(wavefront) / \
             self.get_pixels_out()
+        pixels_input = wavefront.number_of_pixels()
+        pixels_output = self.get_pixels_out()
         
-        x_offset, y_offset = self.get_pixel_offsets()
+        x_offset, y_offset = self.get_pixel_offsets(wavefront)
         
-        x_twiddle_factors = self._get_twiddle_factors(
+        x_twiddle_factors = self._generate_twiddle_factors(
             x_offset, (input_scale, output_scale), 
             (pixels_input, pixels_output), sign)
 
-        y_twiddle_factors = self._get_twiddle_factors(
+        y_twiddle_factors = self._generate_twiddle_factors(
             y_offset, (input_scale, output_scale), 
             (pixels_input, pixels_output), sign)
         
@@ -493,27 +495,27 @@ class VariableSamplingPropagator(Propagator):
                 np.log(self.get_pixels_out())))
 
 
-
-    # TODO: Review the location of this method
-    # @abc.abstractmethod
-    def get_pixel_offests(self : Propagator, 
-            wavefront : Wavefront) -> float:
+    # TODO: Confirm that this is the correct algorithm to use for the 
+    # Fresnel as well.
+    def get_pixel_offsets(self : Propagator, 
+            wavefront : Wavefront) -> Array:
         """
-        Determine the offset of the wavefront from the plane 
-        of propagation in units of pixels. 
+        The offset(s) in units of pixels.
 
         Parameters
         ----------
         wavefront : Wavefront
-            The wavefront that is getting propagated.
+            The wavefront to propagate.
 
         Returns
         -------
-        : float
-            The number of pixels in the x and y direction that the
-            wavefront is offset from the plane of propagation.
-        """              
-        pass  
+        : Array
+            The offset from the x and y plane in units of pixels.
+        """
+        # TODO: Confirm that if the wavefront.get_offset != 0. then 
+        # we will always want to use that offset.
+        return wavefront.get_offset() * self.get_focal_length() / \
+            self.get_pixel_scale_out()
 
 
 class FixedSamplingPropagator(Propagator):
@@ -678,26 +680,6 @@ class PhysicalMFT(VariableSamplingPropagator):
         """
         return self.focal_length
 
-
-    def get_pixel_offsets(self : Propagator, 
-            wavefront : Wavefront) -> Array:
-        """
-        The offset(s) in units of pixels.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to propagate.
-
-        Returns
-        -------
-        : Array
-            The offset from the x and y plane in units of pixels.
-        """
-        # TODO: Confirm that if the wavefront.get_offset != 0. then 
-        # we will always want to use that offset.
-        return wavefront.get_offset() * self.get_focal_length() / \
-            self.get_pixel_scale()
         
 
 class PhysicalFFT(FixedSamplingPropagator):
@@ -813,8 +795,8 @@ class PhysicalFresnel(VariableSamplingPropagator):
             True if propagating from the plane of propagation and
             False if propagating to the plane of propagation. 
         """
-        self.focal_shift = numpy.asarray(focal_shift).astype(float)
-        self.focal_length = numpy.asarray(focal_length).astype(float)
+        self.focal_shift = np.asarray(focal_shift).astype(float)
+        self.focal_length = np.asarray(focal_length).astype(float)
         super().__init__(inverse, pixel_scale_out, pixels_out)       
 
 
@@ -859,7 +841,7 @@ class PhysicalFresnel(VariableSamplingPropagator):
             The number of diffraction fringes visible in the plane of 
             propagation.
         """
-        propagtion_distance = self.get_focal_length() + self.get_focal_shift()
+        propagation_distance = self.get_focal_length() + self.get_focal_shift()
         focal_ratio = self.get_focal_length() / propagation_distance
 
         size_in = wavefront.get_pixel_scale() * \
@@ -918,8 +900,9 @@ class PhysicalFresnel(VariableSamplingPropagator):
         electric_field : Array
             The complex electric field in SI units of electric field. 
         """
-        return self.quadratic_phase(*wavefront.get_pixel_positions(),
+        field = self.quadratic_phase(*wavefront.get_pixel_positions(),
             wavefront.get_wavelength()) 
+        return field
 
 
     def _propagate(self : Propagator, wavefront : Wavefront) -> Array:
@@ -942,11 +925,13 @@ class PhysicalFresnel(VariableSamplingPropagator):
         complex_wavefront = self.thin_lens(wavefront)
 
         input_positions = wavefront.get_pixel_positions()
-        output_positions = self.get_pixel_positions()
+        output_positions = self._get_pixel_positions(
+            wavefront.get_offset(), self.get_pixel_scale_out(),
+            self.get_pixels_out())
 
         number_of_fringes = self.number_of_fringes(wavefront)
 
-        first_quadratic_phase = self.quadractic_phase(
+        first_quadratic_phase = self.quadratic_phase(
             *input_positions, wavefront.get_wavelength())
         transfer = wavefront.transfer_function(
             self.get_focal_length() + self.get_focal_shift())
@@ -954,8 +939,11 @@ class PhysicalFresnel(VariableSamplingPropagator):
             *output_positions, wavefront.get_wavelength())
 
         complex_wavefront *= first_quadratic_phase
+        amplitude = np.abs(complex_wavefront)
+        phase = np.angle(complex_wavefront)
 
-        complex_wavefront = self._fourier_transform(complex_wavefront) 
+        wavefront = wavefront.update_phasor(amplitude, phase)
+        complex_wavefront = self._fourier_transform(wavefront) 
         # TODO: Normalisation was here, but I have moved it since
         # we are only dealing with multiplications.
         complex_wavefront *= wavefront.get_pixel_scale() ** 2
@@ -1005,7 +993,7 @@ class AngularMFT(VariableSamplingPropagator):
         """
         size_in = wavefront.get_pixel_scale() * \
             wavefront.number_of_pixels()        
-        size_out = self.get_pixel_scale() * \
+        size_out = self.get_pixel_scale_out() * \
             self.get_pixels_out()
         # TODO: The focal length is not a tracked parameter
         # so this does not work. 
@@ -1029,7 +1017,7 @@ class AngularMFT(VariableSamplingPropagator):
         """
         # TODO: Confirm that if the wavefront.get_offset != 0. then 
         # we will always want to use that offset.
-        return wavefront.get_offset() / self.get_pixel_scale()
+        return wavefront.get_offset() / self.get_pixel_scale_out()
 
 
 class AngularFFT(Propagator):
