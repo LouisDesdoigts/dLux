@@ -207,11 +207,11 @@ class TestVariableSamplingPropagator(UtilityUser):
         generated. This is done by direct comparison for a 
         simple case.
         """
-        TWIDDLE_FACTORS : Array = 0.5 * numpy.array([
-            [1. + 0.j, 1. + 0.j, 1. + 0.j, 1. + 0.j],
-            [1. + 0.j, 0. - 1.j, -1. + 0.j, 0. + 1.j],
-            [1. + 0.j, -1. + 0.j, 1. + 0.j, -1. + 0.j],
-            [1. + 0.j, 0. + 0.j, -1. + 0.j, 0. - 1.j]])
+        TWIDDLE_FACTORS : Array = numpy.array([
+            [-1.j,  1.j, -1.j, 1.j],
+            [1.j, -1.j, 1.j, -1.j],
+            [-1.j,  1.j, -1.j, 1.j],
+            [1.j, -1.j, 1.j, -1.j]])
         OFFSETS : float = 2. 
         PIXELS : Array = numpy.array([4., 4.])
         PIXEL_SCALES : Array = numpy.array([1., 1.])
@@ -231,6 +231,7 @@ class TestVariableSamplingPropagator(UtilityUser):
         assert is_correct
 
 
+# NOTE: To remain commented
 #    def test_matrix_fourier_transform(self : Tester) -> None:
 #        """
 #        Tests that the discrete foruier transform is correct for
@@ -320,17 +321,25 @@ class TestFixedSamplingPropagator(UtilityUser):
     - fourier_transform()
     - inverse_fourier_transform()
     - normalising_factor()
+    
+    Attributes
+    ----------
+    utility : Utility 
+        A container of helpful things for testing.
     """
+    utility : Utility = FixedSamplingUtility()
+
+
     def test_fourier_transform(self : Tester) -> None:
         """
         Tests the fourier transform of the FixedSamplingPropagator.
         The Fourier transform is based on the inbuilt `numpy.fft`
         so the tests are simple and mostly a formaility,
         """
-        propagtor = self.get_utility().construct()
+        propagator = self.get_utility().construct()
         wavefront = self.get_utility().get_utility().construct()
 
-        CORRECT = numpy.fft.fft2(numpy.ifftshift(
+        CORRECT = numpy.fft.fft2(numpy.fft.ifftshift(
             wavefront.get_complex_form()))
 
         is_correct = self\
@@ -341,25 +350,25 @@ class TestFixedSamplingPropagator(UtilityUser):
         assert is_correct
 
 
-#    def test_inverse_fourier_transfrom(self : Tester) -> None:
-#        """
-#        Tests the inverse fourier transform of the FixedSamplingPropagator
-#        As above this method is based on the inbuilt `numpy.fft` module so
-#        the tests are mostly a formality.
-#        """
-#        propagtor = self.get_utility().construct()
-#        wavefront = self.get_utility().get_utility().construct()
-#
-#        CORRECT = numpy.fft.fftshift(numpy.ifft2(
-#            wavefront.get_complex_form()))
-#
-#        is_correct = self\
-#            .get_utility()\
-#            .approx(propagator._inverse_fourier_transform(wavefront), 
-#                CORRECT)\
-#            .all()
-#
-#        assert is_correct
+    def test_inverse_fourier_transfrom(self : Tester) -> None:
+        """
+        Tests the inverse fourier transform of the FixedSamplingPropagator
+        As above this method is based on the inbuilt `numpy.fft` module so
+        the tests are mostly a formality.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        CORRECT = numpy.fft.fftshift(numpy.fft.ifft2(
+            wavefront.get_complex_form()))
+
+        is_correct = self\
+            .get_utility()\
+            .approx(propagator._inverse_fourier_transform(wavefront), 
+                CORRECT)\
+            .all()
+
+        assert is_correct
 
 
     def test_normalising_factor(self : Tester) -> None:
@@ -412,7 +421,7 @@ class TestPhysicalMFT(UtilityUser):
             self.get_utility().get_pixel_scale_out() 
         assert propagator.get_pixels_out() == \
             self.get_utility().get_pixels_out()
-        assert propagator.is_inside() == \
+        assert propagator.is_inverse() == \
             self.get_utility().is_inverse()
 
 
@@ -426,7 +435,7 @@ class TestPhysicalMFT(UtilityUser):
 
         FRINGES = wavefront.get_pixel_scale() * wavefront.number_of_pixels() * \
             propagator.get_pixel_scale_out() * propagator.get_pixels_out() /\
-            propagator.get_focal_length() / wavefront.get_wavefront()
+            propagator.get_focal_length() / wavefront.get_wavelength()
 
         assert propagator.number_of_fringes(wavefront) == FRINGES
 
@@ -440,13 +449,15 @@ class TestPhysicalMFT(UtilityUser):
         propagator = self.get_utility().construct()
         wavefront = self.get_utility().get_utility().construct()
 
-        NORMALISING_FACTOR = numpy.exp(
-            propagator.number_of_fringes(wavefront) * \
+        # TODO: This could be implemented in the src code
+        NORMALISING_FACTOR = propagator.number_of_fringes(wavefront) / \
             propagator.get_pixels_out() / \
-            wavefront.number_of_pixels())
+            wavefront.number_of_pixels()
 
-        assert NORMALISING_FACTOR == \
-            propagator._normalising_factor(wavefront) 
+        is_correct = self\
+            .get_utility()\
+            .approx(1., propagator\
+                ._normalising_factor(wavefront) / NORMALISING_FACTOR)
 
 
     def test_get_focal_length(self : Tester) -> None:
@@ -490,7 +501,8 @@ class TestPhysicalMFT(UtilityUser):
             self.get_utility().get_focal_length() /\
             self.get_utility().get_pixel_scale_out()
 
-        assert propagator.get_pixel_offsets(wavefront) == OFFSET_PIXELS
+        assert (propagator.get_pixel_offsets(wavefront) == \
+            OFFSET_PIXELS).all()
 
 
 #    def test_propagate(self : Tester) -> None:
@@ -590,7 +602,8 @@ class TestPhysicalFFT(UtilityUser):
 
         PIXEL_SCALE = wavefront.get_wavelength() * \
             propagator.get_focal_length() / \
-            wavefront.get_pixel_scale() * wavefront.number_of_pixels()
+            (wavefront.get_pixel_scale() * \
+                wavefront.number_of_pixels())
 
         assert PIXEL_SCALE == propagator.get_pixel_scale_out(wavefront)
                    
@@ -734,7 +747,12 @@ class TestPhysicalFresnel(UtilityUser):
         NUMBER_OF_FRINGES = focal_ratio * size_in * size_out / \
             propagator.get_focal_length() / wavefront.get_wavelength()
 
-        assert NUMBER_OF_FRINGES == propagator.number_of_fringes(wavefront)        
+        is_correct = self\
+            .get_utility()\
+            .approx(1., propagator\
+                .number_of_fringes(wavefront) / NUMBER_OF_FRINGES)
+
+        assert is_correct  
 
 
     # TODO: Forwards propagation is the only supported direction.
