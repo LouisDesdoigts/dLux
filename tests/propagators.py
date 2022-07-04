@@ -231,89 +231,6 @@ class TestVariableSamplingPropagator(UtilityUser):
         assert is_correct
 
 
-# NOTE: To remain commented
-#    def test_matrix_fourier_transform(self : Tester) -> None:
-#        """
-#        Tests that the discrete foruier transform is correct for
-#        a simple case. 
-#        """
-#        propagator = self\
-#            .get_utility()\
-#            .construct()
-#
-#        wavefront = self\
-#            .get_utility()\
-#            .get_utility()\
-#            .construct()    
-#
-#        fourier_transform = \
-#            propagator._matrix_fourier_transform(wavefront, sign = 1)
-#
-#        is_correct = self\
-#            .get_utility()\
-#            .approx(fourier_transform,
-#                self.get_utility()\
-#                    .louis_transform(wavefront, sign = 1))\
-#            .all()
-#
-#        assert is_correct
-#
-#
-#    def test_fourier_transform(self : Tester) -> None:
-#        """
-#        Tests that the Fourier transform of the wavefront is 
-#        correctly calculated. 
-#        """
-#        propagator = self\
-#            .get_utility()\
-#            .construct()
-#
-#        wavefront = self\
-#            .get_utility()\
-#            .get_utility()\
-#            .construct()
-#
-#        fourier_transform = \
-#            propagator._matrix_fourier_transform(wavefront, sign = 1)
-#
-#        is_correct = self\
-#            .get_utility()\
-#            .approx(fourier_transform,
-#                self.get_utility()\
-#                    .louis_transform(wavefront, sign = 1))\
-#            .all()
-#
-#        assert is_correct
-#
-#
-#    def test_inverse_fourier_transform(self : Tester) -> None:
-#        """
-#        Tests that the inverse fourier transform is correctly 
-#        calculated.
-#        """
-#        propagator = self\
-#            .get_utility()\
-#            .construct()
-#
-#        wavefront = self\
-#            .get_utility()\
-#            .get_utility()\
-#            .construct()
-#
-#        fourier_transform = \
-#            propagator._matrix_fourier_transform(wavefront, sign = -1)
-#
-#        is_correct = self\
-#            .get_utility()\
-#            .approx(fourier_transform,
-#                self.get_utility()\
-#                    .louis_transform(wavefront, sign = -1))\
-#            .all()
-#
-#        assert is_correct
-
-
-
 class TestFixedSamplingPropagator(UtilityUser):
     """
     Contains the tests for the abstract FixedSamplingPropagator class.
@@ -505,39 +422,53 @@ class TestPhysicalMFT(UtilityUser):
             OFFSET_PIXELS).all()
 
 
-#    def test_propagate(self : Tester) -> None:
-#        """
-#        Checks that the propagate function is correctly assigned in 
-#        the constructor.
-#        """
-#        forwards = self.get_utility().construct(inverse = False)
-#        backwards = self.get_utility().construct(inverse = True)
-#
-#        assert forwards._propagate == forwards._fourier_transform
-#        assert bakcwards._propagate == backwards._inverse_fourier_transform
-#
-#
-#    def test_physical_mft(self : Tester) -> None:
-#        """
-#        Checks the __call__ method can be made without errors and 
-#        repeats the calculation in the function namespace to check 
-#        for correctness.
-#        """
-#        propagator = self.get_utility().construct()
-#        wavefront = self.get_utility().get_utility().construct()
-#
-#        OUTPUT_FIELD = propagator._propagate(wavefront) * \
-#            propagator._normalising_factor(wavefront)
-#
-#        output_field = propagator({"Wavefront": wavefront})\
-#            ["Wavefront"].get_complex_form()
-#
-#        is_correct = self\
-#            .get_utility()\
-#            .approx(OUTPUT_FIELD, output_field)\
-#            .all()
-#
-#        assert is_correct
+    def test_propagate(self : Tester) -> None:
+        """
+        Checks that the propagate function is correctly assigned in 
+        the constructor.
+        """
+        wavefront = self.get_utility().get_utility().construct()
+
+        forwards = self.get_utility().construct(inverse = False)
+        backwards = self.get_utility().construct(inverse = True)
+
+        is_forwards_correct = self\
+            .get_utility()\
+            .approx(forwards._propagate(wavefront), 
+                forwards._fourier_transform(wavefront))\
+            .all()
+
+        is_backwards_correct = self\
+            .get_utility()\
+            .approx(backwards._propagate(wavefront),
+                backwards._inverse_fourier_transform(wavefront))\
+            .all()
+
+        assert is_forwards_correct
+        assert is_backwards_correct
+
+
+    def test_physical_mft(self : Tester) -> None:
+        """
+        Checks the __call__ method can be made without errors and 
+        repeats the calculation in the function namespace to check 
+        for correctness.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        OUTPUT_FIELD = propagator._propagate(wavefront) * \
+            propagator._normalising_factor(wavefront)
+
+        output_field = propagator({"Wavefront": wavefront})\
+            ["Wavefront"].get_complex_form()
+
+        is_correct = self\
+            .get_utility()\
+            .approx(1., OUTPUT_FIELD / output_field)\
+            .all()
+
+        assert is_correct
 
 
 class TestPhysicalFFT(UtilityUser):
@@ -608,38 +539,55 @@ class TestPhysicalFFT(UtilityUser):
         assert PIXEL_SCALE == propagator.get_pixel_scale_out(wavefront)
                    
 
-#    def test_propagate(self : Tester) -> None:
-#        """
-#        Checks that `_propagate` is correctly assigned in the 
-#        constructor, but does not check for correctness.
-#        """
-#        forwards = self.get_utility().construct(inverse = False)
-#        backwards = self.get_utility().construct(inverse = True)
-#
-#        assert forwards._propagate == forwards._fourier_transform
-#        assert backwards._propagate == backwards._inverse_fourier_transform
-#
-#
-#    def test_physical_fft(self : Tester) -> None:
-#        """
-#        Tests that the __call__ method is made without error and 
-#        returns the correct result.
-#        """
-#        propagator = self.get_utility().construct()
-#        wavefront = self.get_utility().get_utility().construct()
-#
-#        OUTPUT_FIELD = propagator._normalising_factor(wavefront) * \
-#            propagator._propagate(wavefront)
-#
-#        output_field = propagator({"Wavefront": wavefront})\
-#            ["Wavefront"].get_complex_form()
-#
-#        is_correct = self\
-#            .get_utility()\
-#            .approx(OUTPUT_FIELD, output_field)\
-#            .all()
-#
-#        assert is_correct
+    def test_propagate(self : Tester) -> None:
+        """
+        Checks that `_propagate` is correctly assigned in the 
+        constructor, but does not check for correctness.
+        """
+        wavefront = self.get_utility().get_utility().construct()
+
+        forwards = self.get_utility().construct(inverse = False)
+        backwards = self.get_utility().construct(inverse = True)
+
+        is_forwards_correct = self\
+            .get_utility()\
+            .approx(forwards._propagate(wavefront), 
+                forwards._fourier_transform(wavefront))\
+            .all()
+
+        is_backwards_correct = self\
+            .get_utility()\
+            .approx(backwards._propagate(wavefront),
+                backwards._inverse_fourier_transform(wavefront))\
+            .all()
+
+        assert is_forwards_correct
+        assert is_backwards_correct        
+
+
+    def test_physical_fft(self : Tester) -> None:
+        """
+        Tests that the __call__ method is made without error and 
+        returns the correct result.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        OUTPUT_FIELD = propagator._normalising_factor(wavefront) * \
+            propagator._propagate(wavefront)
+
+        output_field = propagator({"Wavefront": wavefront})\
+            ["Wavefront"].get_complex_form()
+
+        # Because the test wavefront has uniform electric field 
+        # the fourier transform is only non-zero in the top 
+        # left pixel. 
+        is_correct = self\
+            .get_utility()\
+            .approx(OUTPUT_FIELD, output_field)\
+            .all()
+
+        assert is_correct
 
 
 class TestPhysicalFresnel(UtilityUser):
@@ -756,36 +704,42 @@ class TestPhysicalFresnel(UtilityUser):
 
 
     # TODO: Forwards propagation is the only supported direction.
-#    def test_propagate(self : Tester) -> None:
-#        """
-#        Passes some simple inputs and checks for `numpy.nan` 
-#        `numpy.inf`. 
-#        """
-#        propagator = self.get_utility().construct()
-#        wavefront = self.get_utility().get_utility().construct()
-#
-#        electric_field = propagator._propagate(wavefront)
-#
-#        assert not electric_field.isnan().any()
-#        assert not electric_field.isinf().any()
-#
-#
-#    def test_physical_fresnel(self : Tester) -> None:
-#        """
-#        tests that the `__call__` method is correctly activated and
-#        makes sure that the output is instantiated in terms of
-#        the correct operations.
-#        """
-#        propagator = self.get_utility().construct()
-#        wavefront = self.get_utility().get_utility().construct()
-#
-#        OUTPUT = propagator._normalising_factor(wavefront) * \
-#            propagator._propagate(wavefront)
-#
-#        output = propagator({"Wavefront": wavefront})["Wavefront"]\
-#            .get_complex_form()
-#
-#        assert output == OUTPUT         
+    # TODO: Change heirachy have the fresnel in its own maybe.
+    def test_propagate(self : Tester) -> None:
+        """
+        Passes some simple inputs and checks for `numpy.nan` 
+        `numpy.inf`. 
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        electric_field = propagator._propagate(wavefront)
+
+        assert not numpy.isnan(electric_field).any()
+        assert not numpy.isnan(electric_field).any()
+
+
+    def test_physical_fresnel(self : Tester) -> None:
+        """
+        tests that the `__call__` method is correctly activated and
+        makes sure that the output is instantiated in terms of
+        the correct operations.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        OUTPUT = propagator._normalising_factor(wavefront) * \
+            propagator._propagate(wavefront)
+
+        output = propagator({"Wavefront": wavefront})["Wavefront"]\
+            .get_complex_form()
+
+        is_correct = self\
+            .get_utility()\
+            .approx(1., output / OUTPUT)\
+            .all()         
+
+        assert is_correct
 
 
 class TestAngularMFT(UtilityUser):
@@ -827,34 +781,53 @@ class TestAngularMFT(UtilityUser):
             self.get_utility().get_pixel_scale_out()
 
 
-#    def test_propagate(self : Tester) -> None:
-#        """
-#        Tests that `_propagate` is correctly assigned in the 
-#        constructor.
-#        """
-#        forwards = self.get_utility().construct(inverse = False)
-#        backwards = self.get_utility().construct(inverse = True)
-#
-#        assert forwards._propagate == forwards._fourier_transform
-#        assert backwards._propagate == backwards._inverse_fourier_transform
-#
-#
-#    def test_angular_mft(self : Tester) -> None:
-#        """
-#        tests that the `__call__` method is correctly activated and
-#        makes sure that the output is instantiated in terms of
-#        the correct operations.
-#        """
-#        propagator = self.get_utility().construct()
-#        wavefront = self.get_utility().get_utility().construct()
-#
-#        OUTPUT = propagator._normalising_factor(wavefront) * \
-#            propagator._propagate(wavefront)
-#
-#        output = propagator({"Wavefront": wavefront})["Wavefront"]\
-#            .get_complex_form()
-#
-#        assert output == OUTPUT     
+    def test_propagate(self : Tester) -> None:
+        """
+        Checks that `_propagate` is correctly assigned in the 
+        constructor, but does not check for correctness.
+        """
+        wavefront = self.get_utility().get_utility().construct()
+
+        forwards = self.get_utility().construct(inverse = False)
+        backwards = self.get_utility().construct(inverse = True)
+
+        is_forwards_correct = self\
+            .get_utility()\
+            .approx(forwards._propagate(wavefront), 
+                forwards._fourier_transform(wavefront))\
+            .all()
+
+        is_backwards_correct = self\
+            .get_utility()\
+            .approx(backwards._propagate(wavefront),
+                backwards._inverse_fourier_transform(wavefront))\
+            .all()
+
+        assert is_forwards_correct
+        assert is_backwards_correct  
+
+
+    def test_angular_mft(self : Tester) -> None:
+        """
+        tests that the `__call__` method is correctly activated and
+        makes sure that the output is instantiated in terms of
+        the correct operations.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        OUTPUT = propagator._normalising_factor(wavefront) * \
+            propagator._propagate(wavefront)
+
+        output = propagator({"Wavefront": wavefront})["Wavefront"]\
+            .get_complex_form()
+
+        is_correct = self\
+            .get_utility()\
+            .approx(1., output / OUTPUT)\
+            .all()    
+
+        assert is_correct
 
 
 class TestAngularFFT(UtilityUser):
@@ -885,37 +858,57 @@ class TestAngularFFT(UtilityUser):
         """
         propagator = self.get_utility().construct()
 
-        assert propagator.is_inverse() == self.get_utility().is_inverse()
+        assert propagator.is_inverse() == \
+            self.get_utility().is_inverse()
 
 
-#    def test_propagate(self : Tester) -> None:
-#        """
-#        Checks that the propagate method of this class is correctly 
-#        assiged during construction.
-#        """
-#        forward = self.get_utility().construct(inverse = False)
-#        backward = self.get_utility().construct(inverse = True)
-#
-#        assert forward._propagate == forward._fourier_transform
-#        assert backward._propagate == backward._inverse_fourier_transform
-#
-#
-#    def test_angular_fft(self : Tester) -> None:
-#        """
-#        tests that the `__call__` method is correctly activated and
-#        makes sure that the output is instantiated in terms of
-#        the correct operations.
-#        """
-#        propagator = self.get_utility().construct()
-#        wavefront = self.get_utility().get_utility().construct()
-#
-#        OUTPUT = propagator._normalising_factor(wavefront) * \
-#            propagator._propagate(wavefront)
-#
-#        output = propagator({"Wavefront": wavefront})["Wavefront"]\
-#            .get_complex_form()
-#
-#        assert output == OUTPUT    
+    def test_propagate(self : Tester) -> None:
+        """
+        Checks that `_propagate` is correctly assigned in the 
+        constructor, but does not check for correctness.
+        """
+        wavefront = self.get_utility().get_utility().construct()
+
+        forwards = self.get_utility().construct(inverse = False)
+        backwards = self.get_utility().construct(inverse = True)
+
+        is_forwards_correct = self\
+            .get_utility()\
+            .approx(forwards._propagate(wavefront), 
+                forwards._fourier_transform(wavefront))\
+            .all()
+
+        is_backwards_correct = self\
+            .get_utility()\
+            .approx(backwards._propagate(wavefront),
+                backwards._inverse_fourier_transform(wavefront))\
+            .all()
+
+        assert is_forwards_correct
+        assert is_backwards_correct  
+
+
+    def test_angular_fft(self : Tester) -> None:
+        """
+        tests that the `__call__` method is correctly activated and
+        makes sure that the output is instantiated in terms of
+        the correct operations.
+        """
+        propagator = self.get_utility().construct()
+        wavefront = self.get_utility().get_utility().construct()
+
+        OUTPUT = propagator._normalising_factor(wavefront) * \
+            propagator._propagate(wavefront)
+
+        output = propagator({"Wavefront": wavefront})["Wavefront"]\
+            .get_complex_form()
+
+        is_correct = self\
+            .get_utility()\
+            .approx(output, OUTPUT)\
+            .all()    
+
+        assert is_correct  
 
 
 class TestAngularFresnel(UtilityUser):
