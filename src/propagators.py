@@ -1154,7 +1154,7 @@ class GaussianPropagator(eqx.Module):
             The new `Wavefront` propagated by `distance`. 
         """
         complex_wavefront = wavefront.get_amplitude() * \
-            np.exp(1j * self.get_phase())
+            np.exp(1j * wavefront.get_phase())
 
         new_complex_wavefront = np.fft.ifft2(
             wavefront.transfer_function(distance) * \
@@ -1190,15 +1190,16 @@ class GaussianPropagator(eqx.Module):
         """
         coefficient = 1 / 1j / wavefront.get_wavelength() / distance
         complex_wavefront = wavefront.get_amplitude() * \
-            np.exp(1j * self.get_phase())
+            np.exp(1j * wavefront.get_phase())
 
+        # TODO: Move the quadratic_phase_factor into the propagator
         fourier_transform = jax.lax.cond(np.sign(distance) > 0, 
-            lambda wavefront, distance: \
-                quadratic_phase_factor(distance) * \
-                np.fft.fft2(wavefront), 
-            lambda wavefront, distance: \
-                quadratic_phase_factor(distance) * \
-                np.fft.ifft2(wavefront),
+            lambda complex_wavefront, distance: \
+                wavefront.quadratic_phase_factor(distance) * \
+                np.fft.fft2(complex_wavefront), 
+            lambda complex_wavefront, distance: \
+                wavefront.quadratic_phase_factor(distance) * \
+                np.fft.ifft2(complex_wavefront),
             complex_wavefront, distance)
 
         new_complex_wavefront = coefficient * fourier_transform
@@ -1307,7 +1308,7 @@ class GaussianPropagator(eqx.Module):
         """
         from_waist_displacement = wavefront.position + distance - \
             wavefront.location_of_waist()
-        to_waist_position = wavefront.location_of_waist() - \
+        to_waist_displacement = wavefront.location_of_waist() - \
             wavefront.get_position()
 
         wavefront_at_waist = self.planar_to_planar(
@@ -1409,11 +1410,11 @@ class GaussianPropagator(eqx.Module):
         # Constants
         INDEX_GENERATOR = np.array([1, 2])
 
-        decision_vector = wavefront.is_inside([
+        decision_vector = wavefront.is_inside(np.array([
             wavefront.get_position(), 
-            wavefront.get_position() + self.distance])
+            wavefront.get_position() + self.distance]))
         decision_index = np.sum(
-            self.INDEX_GENERATOR * descision_vector)
+            INDEX_GENERATOR * decision_vector)
  
         # Enters the correct function differentiably depending on 
         # the descision.

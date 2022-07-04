@@ -950,218 +950,191 @@ class TestGaussianPropagator(UtilityUser):
     utility : GaussianPropagatorUtility = GaussianPropagatorUtility()
 
 
-#    def test_propagate(self : Tester) -> None:
-#        """
-#        Tests full branch coverage and then the boundary cases 
-#        distance == -numpy.inf, distance == numpy.inf and distance 
-#        == 0. The branches covered are:
-#        
-#        inside_to_inside
-#        inside_to_outside
-#        outside_to_inside
-#        outside_to_outside
-#        """
-#        wavefront = self\
-#            .get_utility()\
-#            .get_utility()\
-#            .construct()
-#
-#        rayleigh_distance = wavefront.rayleigh_distance()
-#
-##        negative_infinity = self\
-##            .get_utility()\
-##            .construct(distance = -numpy.inf)\
-##            ({"Wavefront": wavefront})
-##
-##        zero = self\
-##            .get_utility()\
-##            .construct(distance = 0.)\
-##            ({"Wavefront": wavefront})
-##
-##        positive_infinity = self\
-##            .get_utility()\
-##            .construct(distance = numpy.inf)\
-##            ({"Wavefront": wavefront})
-#
-#        inside_to_inside = self\
-#            .get_utility()\
-#            .construct(distance = rayleigh_distance / 2.)\
-#            ({"Wavefront": wavefront})
-#
-#        inside_to_outside = self\
-#            .get_utility()\
-#            .construct(distance = rayleigh_distance + 1.)\
-#            
-#
-#        outside_to_inside = self\
-#            .get_utility()\
-#            .construct(rayleigh_distance)\
-#            ({"Wavefront": wavefront\
-#                .set_position(-rayleigh_distance - 1.)})
-#
-#        outside_to_outside = self\
-#            .get_utility()\
-#            .construct(2 * (rayleigh_distance + 1.))\
-#            ({"Wavefront": wavefront\
-#                .set_position(-rayleigh_distance - 1.)})
-#
-#        # assert not numpy.isnan(negative_infinity.get_complex_form()).any()
-#        # assert not numpy.isnan(zero.get_complex_form()).any()
-#        # assert not numpy.isnan(positive_infinity.get_complex_form()).any()
-#
-#        assert not numpy.isnan(inside_to_inside.get_complex_form()).any()
-#        assert not numpy.isnan(inside_to_outside.get_complex_form()).any()
-#        assert not numpy.isnan(outside_to_inside.get_complex_form()).any()
-#        assert not numpy.isnan(outside_to_outside.get_complex_form()).any()
-#
-#        # assert not numpy.isinf(negative_infinity.get_complex_form()).any()
-#        # assert not numpy.isinf(zero.get_complex_form()).any()
-#        # assert not numpy.isinf(positive_infinity.get_complex_form()).any()
-#
-#        assert not numpy.isinf(inside_to_inside.get_complex_form()).any()
-#        assert not numpy.isinf(inside_to_outside.get_complex_form()).any()
-#        assert not numpy.isinf(outside_to_inside.get_complex_form()).any()
-#        assert not numpy.isinf(outside_to_outside.get_complex_form()).any()
-#
-#
-#    def test_outside_to_outside(self : Tester) -> None:
-#        """
-#        Tests the three boundary cases -numpy.inf, and numpy.inf as
-#        well as a negative and a positive valid input.
-#        """
-#        wavefront = self\
-#            .get_utility()\
-#            .get_utility()\
-#            .construct()
-#
-#        rayleigh_distance = wavefront.rayleigh_distance()
-#
-##        negative_infinity = self\
-##            .get_utility()\
-##            .construct(-numpy.inf)\
-##            .outside_to_outside(wavefront\
-##                .set_position(rayleigh_distance + 1.),
-##                -numpy.inf)
-#
-#        negative = self\
-#            .get_utility()\
-#            .construct(- .2 * rayleigh_distance - 1.)\
-#            .outside_to_outside(wavefront\
-#                .set_position(rayleigh_distance + .5),
-#                - .2 * rayleigh_distance - 1.)
-#
-#        positive = self\
-#            .get_utility()\
-#            .construct(2. * rayleigh_distance + 1.)\
-#            .outside_to_outside(wavefront\
-#                .set_position(- rayleigh_distance - .5), 
-#                2. * rayleigh_distance + 1.)
-#
-##        positive_infinity = self\
-##            .get_utility()\
-##            .construct(numpy.inf)\
-##            .outside_to_outside(wavefront\
-##                .set_position(- rayleigh_ditance - 1.),
-##                numpy.inf)
-#        
-##        assert not numpy.isnan(negative_infinity.get_complex_form()).any()
-#        assert not numpy.isnan(negative.get_complex_form()).any()
-#        assert not numpy.isnan(positive.get_complex_form()).any()
-##        assert not numpy.isnan(positive_infinity.get_complex_form()).any()     
-#
-##        assert not numpy.isinf(negative_infinity.get_complex_form()).any()
-#        assert not numpy.isinf(negative.get_complex_form()).any()
-#        assert not numpy.isinf(positive.get_complex_form()).any()
-##        assert not numpy.isinf(positive_infinity.get_complex_form()).any()    
-#
-#
-#    def test_outside_to_inside(self : Tester) -> None:
-#        """
-#        Tests negative and a positive valid input.
-#        """
-#        # TODO: Work out if I need to be moving the wavefront
-#        # back by the rayleigh_distance in the outside tests
-#        wavefront = self\
-#            .get_utility()\
-#            .get_utility()\
-#            .construct()
-#
-#        rayleigh_distance = wavefront.rayleigh_distance()
-#
-#        negative = self\
-#            .get_utility()\
-#            .construct(- rayleigh_distance - 0.01)\
-#            .outside_to_outside(wavefront\
-#                .set_position(rayleigh_distance + 0.01),
-#                - rayleigh_distance - 0.01)
-#
-#        positive = self\
-#            .get_utility()\
-#            .construct(rayleigh_distance + 0.01)\
-#            .outside_to_outside(wavefront\
-#                .set_position(- rayleigh_distance - 0.01),
-#                rayleigh_distance + 0.01)
-#        
-#        assert not numpy.isnan(negative.get_complex_form()).any()
-#        assert not numpy.isnan(positive.get_complex_form()).any()
-#
-#        assert not numpy.isinf(negative.get_complex_form).any()
-#        assert not numpy.isinf(positive.get_complex_form).any()
-#    
-#
-#    def test_inside_to_outside(self : Tester) -> None:
-#        """
-#        Tests the three boundary cases -numpy.inf, and numpy.inf as
-#        well as a negative and a positive valid input.
-#        """
-#        wavefront = self\
-#            .get_utility()\
-#            .get_utility()\
-#            .construct()
-#
-#        rayleigh_distance = wavefront.rayleigh_distance()
-#
-#        negative = self\
-#            .get_utility()\
-#            .construct(- rayleigh_distance - 0.01)\
-#            .outside_to_outside(wavefront, - rayleigh_distance - 0.01)
-#
-#        positive = self\
-#            .get_utility()\
-#            .construct(rayleigh_distance + 0.01)\
-#            .outside_to_outside(wavefront, rayleigh_distance + 0.01)
-#
-#        assert not numpy.isnan(negative.get_complex_form()).any()
-#        assert not numpy.isnan(positive.get_complex_form()).any()
-#        
-#        assert not numpy.isinf(negative.get_complex_form()).any()
-#        assert not numpy.isinf(positive.get_complex_form()).any()
-#
-#
-#    def test_inside_to_inside(self : Tester) -> None:
-#        """
-#        Tests the three boundary cases -numpy.inf, and numpy.inf as
-#        well as a negative and a positive valid input.
-#        """
-#        wavefront = self\
-#            .get_utility()\
-#            .get_utility()\
-#            .construct()
-#
-#        rayleigh_distance = wavefront.rayleigh_distance()
-#
-#        negative = self\
-#            .get_utility()\
-#            .construct(- rayleigh_distance + 0.01)\
-#            .outside_to_outside(wavefront, - rayleigh_distance + 0.01)
-#
-#        positive = self\
-#            .get_utility()\
-#            .construct(rayleigh_distance - 0.01)\
-#            .outside_to_outside(wavefront, rayleigh_distance - 0.01)
-#                
-#        assert not numpy.isnan(negative.get_complex_form()).any()
-#        assert not numpy.isnan(positive.get_complex_form()).any()
-#        
-#        assert not numpy.isinf(negative.get_complex_form()).any()
-#        assert not numpy.isinf(positive.get_complex_form()).any()
+    def test_propagate(self : Tester) -> None:
+        """
+        Tests full branch coverage and then the boundary cases 
+        distance == -numpy.inf, distance == numpy.inf and distance 
+        == 0. The branches covered are:
+        
+        inside_to_inside
+        inside_to_outside
+        outside_to_inside
+        outside_to_outside
+        """
+        wavefront = self\
+            .get_utility()\
+            .get_utility()\
+            .construct()
+
+        rayleigh_distance = wavefront.rayleigh_distance()
+
+        inside_to_inside = self\
+            .get_utility()\
+            .construct(distance = rayleigh_distance / 2.)\
+                ({"Wavefront": wavefront})["Wavefront"]\
+            .get_complex_form()
+
+        inside_to_outside = self\
+            .get_utility()\
+            .construct(distance = rayleigh_distance + 1.)\
+                ({"Wavefront": wavefront})["Wavefront"]\
+            .get_complex_form()
+
+        outside_to_inside = self\
+            .get_utility()\
+            .construct(rayleigh_distance)({"Wavefront": wavefront\
+                .set_position(-rayleigh_distance - 1.)})["Wavefront"]\
+            .get_complex_form()
+
+        outside_to_outside = self\
+            .get_utility()\
+            .construct(2 * (rayleigh_distance + 1.))({"Wavefront": wavefront\
+                .set_position(-rayleigh_distance - 1.)})["Wavefront"]\
+            .get_complex_form()
+
+        assert not numpy.isnan(inside_to_inside).any()
+        assert not numpy.isnan(inside_to_outside).any()
+        assert not numpy.isnan(outside_to_inside).any()
+        assert not numpy.isnan(outside_to_outside).any()
+
+        assert not numpy.isinf(inside_to_inside).any()
+        assert not numpy.isinf(inside_to_outside).any()
+        assert not numpy.isinf(outside_to_inside).any()
+        assert not numpy.isinf(outside_to_outside).any()
+
+
+    def test_outside_to_outside(self : Tester) -> None:
+        """
+        Tests the three boundary cases -numpy.inf, and numpy.inf as
+        well as a negative and a positive valid input.
+        """
+        wavefront = self\
+            .get_utility()\
+            .get_utility()\
+            .construct()\
+            .set_phase_radius(1.)
+
+        rayleigh_distance = wavefront.rayleigh_distance()
+
+        negative = self\
+            .get_utility()\
+            .construct(- 2. * rayleigh_distance - 1.)\
+            .outside_to_outside(wavefront\
+                .set_position(rayleigh_distance + .5),
+                - 2. * rayleigh_distance - 1.)\
+            .get_complex_form()
+
+        positive = self\
+            .get_utility()\
+            .construct(2. * rayleigh_distance + 1.)\
+            .outside_to_outside(wavefront\
+                .set_position(- rayleigh_distance - .5), 
+                2. * rayleigh_distance + 1.)\
+            .get_complex_form()
+
+        assert not numpy.isnan(negative).any()
+        assert not numpy.isnan(positive).any()
+
+        assert not numpy.isinf(negative).any()
+        assert not numpy.isinf(positive).any()
+
+
+    def test_outside_to_inside(self : Tester) -> None:
+        """
+        Tests negative and a positive valid input.
+        """
+        # TODO: Work out if I need to be moving the wavefront
+        # back by the rayleigh_distance in the outside tests
+        wavefront = self\
+            .get_utility()\
+            .get_utility()\
+            .construct()\
+            .set_phase_radius(1.)
+
+        rayleigh_distance = wavefront.rayleigh_distance()
+
+        negative = self\
+            .get_utility()\
+            .construct(- rayleigh_distance - 0.01)\
+            .outside_to_outside(wavefront\
+                .set_position(rayleigh_distance + 0.01),
+                - rayleigh_distance - 0.01)\
+            .get_complex_form()
+
+        positive = self\
+            .get_utility()\
+            .construct(rayleigh_distance + 0.01)\
+            .outside_to_outside(wavefront\
+                .set_position(- rayleigh_distance - 0.01),
+                rayleigh_distance + 0.01)\
+            .get_complex_form()
+        
+        assert not numpy.isnan(negative).any()
+        assert not numpy.isnan(positive).any()
+
+        assert not numpy.isinf(negative).any()
+        assert not numpy.isinf(positive).any()
+    
+
+    def test_inside_to_outside(self : Tester) -> None:
+        """
+        Tests the three boundary cases -numpy.inf, and numpy.inf as
+        well as a negative and a positive valid input.
+        """
+        wavefront = self\
+            .get_utility()\
+            .get_utility()\
+            .construct()\
+            .set_phase_radius(1.)
+
+        rayleigh_distance = wavefront.rayleigh_distance()
+
+        negative = self\
+            .get_utility()\
+            .construct(- rayleigh_distance - 0.01)\
+            .outside_to_outside(wavefront, - rayleigh_distance - 0.01)\
+            .get_complex_form()
+
+        positive = self\
+            .get_utility()\
+            .construct(rayleigh_distance + 0.01)\
+            .outside_to_outside(wavefront, rayleigh_distance + 0.01)\
+            .get_complex_form()
+
+        assert not numpy.isnan(negative).any()
+        assert not numpy.isnan(positive).any()
+        
+        assert not numpy.isinf(negative).any()
+        assert not numpy.isinf(positive).any()
+
+
+    def test_inside_to_inside(self : Tester) -> None:
+        """
+        Tests the three boundary cases -numpy.inf, and numpy.inf as
+        well as a negative and a positive valid input.
+        """
+        wavefront = self\
+            .get_utility()\
+            .get_utility()\
+            .construct()\
+            .set_phase_radius(1.)
+
+        rayleigh_distance = wavefront.rayleigh_distance()
+
+        negative = self\
+            .get_utility()\
+            .construct(- rayleigh_distance + 0.01)\
+            .outside_to_outside(wavefront, - rayleigh_distance + 0.01)\
+            .get_complex_form()
+
+        positive = self\
+            .get_utility()\
+            .construct(rayleigh_distance - 0.01)\
+            .outside_to_outside(wavefront, rayleigh_distance - 0.01)\
+            .get_complex_form()
+                
+        assert not numpy.isnan(negative).any()
+        assert not numpy.isnan(positive).any()
+        
+        assert not numpy.isinf(negative).any()
+        assert not numpy.isinf(positive).any()
