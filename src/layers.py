@@ -7,28 +7,16 @@ some are not obvious. This structure was chosen because of the
 constrainst of automatic differentiation using `equinox`.
 
 
-As outlined in the abst
+Abstract Classes
+----------------
+Layers:
+- __call__(parameters : dict) -> dict:
+- (abstract) _interact(wavefront : Wavefront) -> Wavefront:
 
-    def __call__(self, params_dict):
-    
-        # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        wavefront = WF.wavefront
-        wavel = WF.wavelength
-        offset = WF.offset
-        pixel_scale = WF.pixel_scale
-        planetype = WF.planetype
-
-        # Do things
+Concrete Classes 
+----------------
 
 
-        # Update Wavefront Object
-        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
-        WF = eqx.tree_at(lambda WF: WF.offset,     WF, offset)
-        WF = eqx.tree_at(lambda WF: WF.pixel_scale, WF, pixel_scale)
-        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, planetype)
-        params_dict["Wavefront"] = WF
-        return params_dict
 
 """
 __author__ = "Louis Desdoigts"
@@ -40,84 +28,114 @@ import jax.numpy as np
 import equinox as eqx
 
 
-"""
-Layer __call__ functions Template:
+# TODO: Confirm this structure with @LouisDesdoigts.
+class Layer(eqx.Module):
+    def _interact(self, wavefront):
+        """
+        Represents the interaction of the wavefront with this layer.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront that the layer is interacting with.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront with its state altered having interacted with
+            the layer.
+        """    
+        pass
 
 
-"""
+    def __call__(self, parameters):
+        """
+        Parameters
+        ----------
+        parameters : dict
+            A dictionary of parameters that contains all the information
+            of the optical system. Must satisfy 
+            `parameters.get("Wavefront") != None`.
+
+        Returns
+        -------
+        parameters : dict
+            The updated parameters after passing through the layer. 
+        """
+        wavefront = parameters["Wavefront"]
+        new_wavefront = self._interact(wavefront)
+        parameters["Wavefront"] = new_wavefront
+        return params_dict
 
 
-
-###################################################
-############## Optical Layers #####################
-###################################################
-
-class CreateWavefront(eqx.Module):
+class CreateWavefront(Layer):
     """ 
     Initialises an on-axis input wavefront
 
     Parameters
     ----------
+    npix : int
+        The number of pixels along one side that represent the 
+        wavefront.
     pixel_scale: float, equinox.static_field
         Units: meters/pixel
         The pixelscae of each array between each layer operation
-        Its value is automatically calculated from the input values
-        
+        Its value is automatically calculated from the input values 
     wavefront_size: float
         Units: meters
         Width of the array representing the wavefront in physical units
         
     """
-    npix:           int = eqx.static_field()
-    wavefront_size: float
-    pixel_scale:     float
-    
-    def __init__(self, npix, wavefront_size):
-        self.npix = int(npix)
+    number_of_pixels : int = eqx.static_field()
+    wavefront_size : float
+    pixel_scale : float
+
+
+    # TODO: Should we have getter methods?
+    def __init__(self, number_of_pixels, wavefront_size):
+        """
+        Parameters
+        ----------
+        number_of_pixels : int
+            The number of pixels along one edge of the wavefront.
+        wavefront_size : int
+            The physical dimensions of the wavefront in units of
+            (radians) meters.
+        """
+        self.number_of_pixels = int(number_of_pixels)
         self.wavefront_size = np.array(wavefront_size).astype(float)
-        self.pixel_scale = np.array(wavefront_size/npix).astype(float)
-    
-    def __call__(self, params_dict):
+        self.pixel_scale = np.array(wavefront_size / number_of_pixels)\
+            .astype(float)
+
+
+    def _interact(self, wavefront):
         """
-        
+        Creates a safe wavefront by populating the amplitude and 
+        phase arrays as well as the pixel_scale. 
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The `Wavefront` to populate.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The updated wavefront.
         """
-        # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        ampl = np.ones([self.npix, self.npix])
-        phase = np.zeros([self.npix, self.npix])
-        pixel_scale = self.pixel_scale
-        
-        # # Update Wavefront Object
-        WF = eqx.tree_at(lambda WF: WF.amplitude,  WF, ampl,  
-                         is_leaf=lambda x: x is None)
-        
-        WF = eqx.tree_at(lambda WF: WF.phase,  WF, phase,  
-                         is_leaf=lambda x: x is None)
-        
-        WF = eqx.tree_at(lambda WF: WF.pixel_scale, WF, pixel_scale, 
-                         is_leaf=lambda x: x is None)
-        params_dict["Wavefront"] = WF
-        return params_dict
+        phase = np.zeros(self.number_of_pixels, self.number_of_pixels)
+        amplitude = np.ones(self.number_of_pixels, self.number_of_pixels)
+        return wavefront\
+            .set_phase(phase)\
+            .set_amplitude(amplitude)\
+            .set_pixel_scale(self.pixel_scale)
+
     
 class TiltWavefront(eqx.Module):
     """ 
     Applies a paraxial tilt by adding a phase slope
-
-    Parameters
-    ----------
-    pixel_scale: float, equinox.static_field
-        Units: meters/pixel
-        The pixelscae of each array between each layer operation
-        Its value is automatically calculated from the input values
-        
-    wavefront_size: float
-        Units: meters
-        Width of the array representing the wavefront in physical units
-        
     """
-    
-    def __init__(self):
-        pass
+    def _interact()
         
     def __call__(self, params_dict):
         """
