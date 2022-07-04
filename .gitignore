@@ -1,4 +1,5 @@
 my_hours.txt
 .pytest_cache
+tests/__pycache__
 *.swp
 site
