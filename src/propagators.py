@@ -175,37 +175,7 @@ class Propagator(eqx.Module): # abc.ABC):
             True if the inverse algorithm is to be used else False.
         """
         self.inverse = inverse   
-  
 
-    def __call__(self : Propagator, parameters : dict) -> dict:
-        """
-        Propagate a `Wavefront` to the focal_plane of the lens or 
-        mirror.
-
-        Parameters
-        ----------
-        parameters : dict
-            A dictionary that must contain a "Wavefront" key.
-
-        Returns 
-        -------
-        parameters : dict 
-            A dictionary with the updated "Wavefront" key; value
-        """
-        wavefront = parameters["Wavefront"]
-
-        new_wavefront = self._normalising_factor(wavefront) * \
-            self._propagate(wavefront)
-
-        new_amplitude = np.abs(new_wavefront)
-        new_phase = np.angle(new_wavefront)
-
-        new_wavefront = wavefront\
-            .set_pixel_scale(self.get_pixel_scale_out())\
-            .set_plane_type("Pupil")
-
-        parameters["Wavefront"] = new_wavefront
-        return parameters
 
 
     # # @abc.abstractmethod
@@ -410,7 +380,7 @@ class VariableSamplingPropagator(Propagator):
 
         Returns
         -------
-        : Wavefront
+        field : Array[Complex]
             The complex un-normalised electric field after the 
             propagation.
         """
@@ -430,7 +400,7 @@ class VariableSamplingPropagator(Propagator):
 
         y_twiddle_factors = self._generate_twiddle_factors(
             y_offset, (input_scale, output_scale), 
-            (pixels_input, pixels_output), sign)
+            (pixels_input, pixels_output), sign).T
         
         return (y_twiddle_factors @ complex_wavefront) \
             @ x_twiddle_factors
@@ -449,7 +419,7 @@ class VariableSamplingPropagator(Propagator):
 
         Returns
         -------
-        : Array
+        field : Array[Complex]
             The complex electric field after propagation in SI units 
             of electric field. Not yet normalised.
         """
@@ -469,7 +439,7 @@ class VariableSamplingPropagator(Propagator):
 
         Returns
         -------
-        : Array
+        field : Array[Complex]
             The complex electric field in SI units of electric field.
         """
         return self._matrix_fourier_transform(wavefront, sign = -1)
@@ -509,13 +479,44 @@ class VariableSamplingPropagator(Propagator):
 
         Returns
         -------
-        : Array
+        pixel_offset : Array
             The offset from the x and y plane in units of pixels.
         """
         # TODO: Confirm that if the wavefront.get_offset != 0. then 
         # we will always want to use that offset.
         return wavefront.get_offset() * self.get_focal_length() / \
             self.get_pixel_scale_out()
+
+    def __call__(self : Propagator, parameters : dict) -> dict:
+        """
+        Propagate a `Wavefront` to the focal_plane of the lens or 
+        mirror.
+
+        Parameters
+        ----------
+        parameters : dict
+            A dictionary that must contain a "Wavefront" key.
+
+        Returns 
+        -------
+        parameters : dict 
+            A dictionary with the updated "Wavefront" key; value
+        """
+        wavefront = parameters["Wavefront"]
+
+        new_wavefront = self._normalising_factor(wavefront) * \
+            self._propagate(wavefront)
+
+        new_amplitude = np.abs(new_wavefront)
+        new_phase = np.angle(new_wavefront)
+
+        new_wavefront = wavefront\
+            .update_phasor(new_amplitude, new_phase)\
+            .set_pixel_scale(self.get_pixel_scale_out())\
+            .set_plane_type("Pupil")
+
+        parameters["Wavefront"] = new_wavefront
+        return parameters           
 
 
 class FixedSamplingPropagator(Propagator):
@@ -540,7 +541,7 @@ class FixedSamplingPropagator(Propagator):
 
         Returns
         -------
-        : Array
+        field : Array[Complex]
             The complex electric field in SI units following propagation.
         """
         return np.fft.fft2(np.fft.ifftshift(wavefront.get_complex_form()))
@@ -558,7 +559,7 @@ class FixedSamplingPropagator(Propagator):
 
         Returns
         -------
-        : Array
+        field : Array[Complex]
             The complex electric field in SI units following propagation.
         """
         return np.fft.fftshift(np.fft.ifft2(wavefront.get_complex_form()))
@@ -577,7 +578,7 @@ class FixedSamplingPropagator(Propagator):
 
         Returns
         -------
-        : float
+        normalising_factor : float
             The normalising factor that is appropriate to the 
             method of propagation.
         """
@@ -599,11 +600,43 @@ class FixedSamplingPropagator(Propagator):
 
         Returns 
         -------
-        : float
+        pixel_scale : float
             The pixel scale in the output plane in units of meters
             (radians) per pixel.
         """
         pass
+  
+
+    def __call__(self : Propagator, parameters : dict) -> dict:
+        """
+        Propagate a `Wavefront` to the focal_plane of the lens or 
+        mirror.
+
+        Parameters
+        ----------
+        parameters : dict
+            A dictionary that must contain a "Wavefront" key.
+
+        Returns 
+        -------
+        parameters : dict 
+            A dictionary with the updated "Wavefront" key; value
+        """
+        wavefront = parameters["Wavefront"]
+
+        new_wavefront = self._normalising_factor(wavefront) * \
+            self._propagate(wavefront)
+
+        new_amplitude = np.abs(new_wavefront)
+        new_phase = np.angle(new_wavefront)
+
+        new_wavefront = wavefront\
+            .update_phasor(new_amplitude, new_phase)\
+            .set_pixel_scale(self.get_pixel_scale_out(wavefront))\
+            .set_plane_type("Pupil")
+
+        parameters["Wavefront"] = new_wavefront
+        return parameters
 
 
 class PhysicalMFT(VariableSamplingPropagator):
@@ -681,7 +714,6 @@ class PhysicalMFT(VariableSamplingPropagator):
         """
         return self.focal_length
 
-        
 
 class PhysicalFFT(FixedSamplingPropagator):
     """
@@ -927,7 +959,8 @@ class PhysicalFresnel(VariableSamplingPropagator):
         complex_wavefront = self.thin_lens(wavefront)
 
         input_positions = wavefront.get_pixel_positions()
-        output_positions = self._get_pixel_positions(
+        # TODO: Review with @LouisDesdoigts the use of tilted wavefronts
+        output_positions = self._get_pixel_grid(
             wavefront.get_offset(), self.get_pixel_scale_out(),
             self.get_pixels_out())
 
@@ -1022,7 +1055,7 @@ class AngularMFT(VariableSamplingPropagator):
         return wavefront.get_offset() / self.get_pixel_scale_out()
 
 
-class AngularFFT(Propagator):
+class AngularFFT(FixedSamplingPropagator):
     """
     Propagation of an Angular wavefront by a non-paraxial fast Fourier
     transform. 
