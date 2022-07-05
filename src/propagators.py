@@ -97,18 +97,21 @@ class Propagator(eqx.Module): # abc.ABC):
     ----------
     inverse : bool
         True if the inverse algorithm is to be used else false. 
+    tilt : bool
+        True if the offset of the `Wavefront` is to be considered
+        otherwise false. 
     """
     inverse : bool
     
     
-    def __init__(self : Propagator, inverse : bool) -> Propagator:
+    def __init__(self : Propagator, inverse : bool = False) -> Propagator:
         """
         Parameters
         ----------
-        inverse : bool
+        inverse : bool = False
             True if the inverse algorithm is to be used else False.
         """
-        self.inverse = inverse  
+        self.inverse = bool(inverse)  
 
 
     def _get_pixel_positions(self : Propagator, 
@@ -176,21 +179,13 @@ class Propagator(eqx.Module): # abc.ABC):
         return self.inverse
 
 
-    def __init__(self : Propagator, inverse : bool) -> Propagator:
-        """
-        Parameters
-        ----------
-        inverse : bool
-            True if the inverse algorithm is to be used else False.
-        """
-        self.inverse = inverse   
-
-
     def _fourier_transform(self : Propagator, wavefront : Wavefront) -> Array:
         """
         The implementation of the Fourier transform that is to 
         be used for the optical propagation. This is for propagation 
-        from the input plane to the plane of propagation. 
+        from the input plane to the plane of propagation. This 
+        method is abstract and defines a behaviour that must be 
+        implemented by the subclasses.
 
         Parameters
         ----------
@@ -212,6 +207,8 @@ class Propagator(eqx.Module): # abc.ABC):
         The implementation of the inverse Fourier transform that is 
         to be used for the optical propagation. The inverse represents
         propagtion from the plane of propagation to the input plane.
+        This method is abstract and defines a behaviour that must 
+        be implemented by the subclasses.
 
         Parameters
         ----------
@@ -242,16 +239,17 @@ class Propagator(eqx.Module): # abc.ABC):
         field : Array   
             The electric field of the wavefronts.
         """
-        if self.is_inverse():
-            return self._inverse_fourier_transform(wavefront)
-        else:
-            return self._fourier_transform(wavefront)
+        return jax.lax.cond(self.is_inverse(),
+            lambda wavefront : self._inverse_fourier_transform(wavefront),
+            lambda wavefront : self._fourier_transform(wavefront),
+            wavefront)
 
 
     def _normalising_factor(self : Propagator, wavefront : Wavefront) -> float:
         """
         Apply a normalisation to the wavefront to ensure that it 
-        conserves flux through the propagation. 
+        conserves flux through the propagation. This method is 
+        abstract and must be implemented by the subclasses. 
 
         Parameters
         ----------
@@ -285,10 +283,12 @@ class VariableSamplingPropagator(Propagator):
     """
     pixel_scale_out : float
     pixels_out : int
+    tilt : bool 
 
 
     def __init__(self : Propagator, pixel_scale_out : float, 
-            pixels_out : int, inverse : bool) -> Propagator:
+            pixels_out : int, inverse : bool = False,
+            tilt : bool = False) -> Propagator:
         """
         Constructor for VariableSampling propagators.
 
@@ -301,10 +301,25 @@ class VariableSamplingPropagator(Propagator):
             (radians) per pixel.
         inverse : bool
             True if the inverse algorithm is to be used else False.
+        tilt : bool 
+            True if the tilt of the `Wavefront` is to be considered 
+            else False. 
         """
         super().__init__(inverse)
+        self.tilt = bool(tilt)
         self.pixel_scale_out = np.array(pixel_scale_out).astype(float)
         self.pixels_out = int(pixels_out)        
+
+
+    def is_tilted(self : Propagator) -> bool:
+        """
+        Returns
+        -------
+        tilt : bool
+            Whether or not the tilt of the `Wavefront` is to be 
+            considered. 
+        """
+        return self.tilt
 
 
     def get_pixel_scale_out(self : Propagator) -> float:
@@ -468,11 +483,8 @@ class VariableSamplingPropagator(Propagator):
                 np.log(self.get_pixels_out())))
 
 
-    # TODO: Confirm that this is the correct algorithm to use for the 
-    # Fresnel as well.
-    # This can currently function as an approximation for the Fresnel
-    # and changed eventually. Add an issue to the git if we make this
-    # The same for Fresnel
+    # TODO: Approximation for the `PhysicalFresnel` algorithm. Should
+    # be a matter of some trigonometry.
     def get_pixel_offsets(self : Propagator, 
             wavefront : Wavefront) -> Array:
         """
@@ -488,13 +500,11 @@ class VariableSamplingPropagator(Propagator):
         pixel_offset : Array, pixels
             The offset from the x and y plane.
         """
-        # TODO: Optional tilt. 
-        # TODO: Confirm that if the wavefront.get_offset != 0. then 
-        # we will always want to use that offset.
-        # This behaviour wants to be controlled by a boolean value
-        # Stored in the propagation layer
-        return wavefront.get_offset() * self.get_focal_length() / \
-            self.get_pixel_scale_out()
+        return jax.lax.cond(self.is_tilted(),
+            lambda wavefront : wavefront.get_offset() * \
+                self.get_focal_length() / self.get_pixel_scale_out(),
+            lambda _ : np.array([0., 0.]).astype(float),
+            wavefront)
 
 
     def __call__(self : Propagator, parameters : dict) -> dict:
@@ -527,6 +537,26 @@ class VariableSamplingPropagator(Propagator):
 
         parameters["Wavefront"] = new_wavefront
         return parameters           
+
+
+    def number_of_fringes(self : Propagator, wavefront : Wavefront) -> float:
+        """
+        The number of diffraction fringes in the output plane. 
+        This is an abstract method and needs to be implemented 
+        by the subclasses.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The `Wavefront` that is getting propagated to the output
+            plane.
+
+        Returns
+        -------
+        fringes : float
+            The number of diffraction fringes in the output plane. 
+        """
+        pass
 
 
 class FixedSamplingPropagator(Propagator):
@@ -663,7 +693,7 @@ class PhysicalMFT(VariableSamplingPropagator):
 
     def __init__(self : Propagator, pixels_out : float, 
             focal_length : int, pixel_scale_out : float, 
-            inverse : bool) -> Propagator:
+            inverse : bool = False, tilt : bool = False) -> Propagator:
         """
         Parameters
         ----------
@@ -674,12 +704,16 @@ class PhysicalMFT(VariableSamplingPropagator):
             The number of pixels in the output image. 
         pixel_scale_out : float, meters/pixel
             The pixel scale in the output plane. 
-        inverse : bool
+        inverse : bool = False
             Whether or not the propagation is input plane to output 
             plane or output plane to input plane. The inverse algorithm
             is used if True is provided.
+        tilt : bool = False
+            Whether or not to use the propagation is to use the tilt 
+            of the wavefront. The tilt is used if True and not if 
+            False.
         """
-        super().__init__(inverse = inverse, 
+        super().__init__(inverse = inverse, tilt = tilt,
             pixel_scale_out = pixel_scale_out, pixels_out = pixels_out) 
         self.focal_length = np.array(focal_length).astype(float)
 
@@ -697,7 +731,7 @@ class PhysicalMFT(VariableSamplingPropagator):
 
         Returns 
         -------
-        : float
+        fringes : float
             The floating point number of diffraction fringes in the 
             plane of propagation.
         """
@@ -736,16 +770,19 @@ class PhysicalFFT(FixedSamplingPropagator):
 
 
     def __init__(self : Propagator, focal_length : float, 
-            inverse : bool) -> Propagator:
+            inverse : bool = False, tilt : bool = False) -> Propagator:
         """
         Parameters
         ----------
         focal_length : float, meters
             The focal length of the lens or mirror that is getting 
             propagated away from.
-        inverse : bool
+        inverse : bool = False
             Propagation direction. True for forwards and False for 
             backwards. 
+        tilt : bool
+            Whether or not to use the tilt of the `Wavefront`. True
+            if the tilt is to be accounted for. 
 
         Returns
         -------
@@ -813,7 +850,8 @@ class PhysicalFresnel(VariableSamplingPropagator):
 
     def __init__(self : Propagator, pixels_out : float,
             focal_length : float, focal_shift : float, 
-            pixel_scale_out : float, inverse : bool) -> Propagator:
+            pixel_scale_out : float, inverse : bool = False,
+            tilt : bool = False) -> Propagator:
         """
         Parameters
         ----------
@@ -830,10 +868,13 @@ class PhysicalFresnel(VariableSamplingPropagator):
         inverse : bool
             True if propagating from the plane of propagation and
             False if propagating to the plane of propagation. 
+        tilt : bool 
+            True if the tilt of the `Wavefront` is to be considered.
+            False if the tilt is to be discarded.
         """
         self.focal_shift = np.asarray(focal_shift).astype(float)
         self.focal_length = np.asarray(focal_length).astype(float)
-        super().__init__(inverse = inverse, 
+        super().__init__(inverse = inverse, tilt = tilt,
             pixel_scale_out = pixel_scale_out, pixels_out = pixels_out)       
 
 
@@ -921,11 +962,9 @@ class PhysicalFresnel(VariableSamplingPropagator):
         
 
     def thin_lens(self : Propagator, wavefront : Wavefront) -> Array:
-        # TODO: Review this documentation 
-        # TODO: This does not have a good interpretation. 
         """
-        A thin lens focusing the wavefront into the plane of 
-        propagation instead of the focal plane.
+        A physical usage of the quadratic_phase_factor, that does
+        not have a perfect interpretation.
 
         Parameters
         ----------
@@ -957,12 +996,12 @@ class PhysicalFresnel(VariableSamplingPropagator):
             The complex electric field in the output plane.
         """
         complex_wavefront = self.thin_lens(wavefront)
-
+        # See gihub issue #52
+        offsets = super().get_pixel_offsets(wavefront) 
+        
         input_positions = wavefront.get_pixel_positions()
-        # TODO: The conditional tilt. 
-        # TODO: Move noramlise. 
         output_positions = self._get_pixel_grid(
-            wavefront.get_offset(), self.get_pixel_scale_out(),
+            offsets, self.get_pixel_scale_out(),
             self.get_pixels_out())
 
         number_of_fringes = self.number_of_fringes(wavefront)
@@ -979,7 +1018,8 @@ class PhysicalFresnel(VariableSamplingPropagator):
         phase = np.angle(complex_wavefront)
 
         wavefront = wavefront.update_phasor(amplitude, phase)
-        complex_wavefront = self._fourier_transform(wavefront) 
+        # Gives the inverse capability
+        complex_wavefront = super()._propagate(wavefront) 
         complex_wavefront *= wavefront.get_pixel_scale() ** 2
         complex_wavefront *= transfer * second_quadratic_phase
 
@@ -992,7 +1032,8 @@ class AngularMFT(VariableSamplingPropagator):
     transform.  
     """
     def __init__(self : Propagator, pixel_scale_out : float, 
-            pixels_out : int, inverse : bool) -> Propagator:
+            pixels_out : int, inverse : bool = False,
+            tilt : bool = False) -> Propagator:
         """
         Parameters
         ----------
@@ -1001,11 +1042,14 @@ class AngularMFT(VariableSamplingPropagator):
             per pixel.
         pixels_out : int
             The number of pixels in the output plane.
-        inverse : bool
+        inverse : bool = False
             True if the inverse transformation is to be applied else 
             False.
+        tilt : bool = False
+            True if the tilt of the wavefront is to be considered else
+            False.
         """
-        super().__init__(pixel_scale_out, pixels_out, inverse)
+        super().__init__(pixel_scale_out, pixels_out, inverse, tilt)
 
 
     def number_of_fringes(self : Propagator, 
@@ -1047,7 +1091,11 @@ class AngularMFT(VariableSamplingPropagator):
         : Array
             The offset from the x and y plane in units of pixels.
         """
-        return wavefront.get_offset() / self.get_pixel_scale_out()
+        return jax.lax.cond(self.is_tilted(),
+            lambda wavefront : wavefront.get_offset() /\
+                 self.get_pixel_scale_out(),
+            lambda _ : np.array([0., 0.]).astype(float),
+            wavefront)
 
 
 class AngularFFT(FixedSamplingPropagator):
@@ -1055,11 +1103,11 @@ class AngularFFT(FixedSamplingPropagator):
     Propagation of an Angular wavefront by a non-paraxial fast Fourier
     transform. 
     """
-    def __init__(self : Propagator, inverse : bool) -> Propagator:
+    def __init__(self : Propagator, inverse : bool = False) -> Propagator:
         """
         Parameters
         ----------
-        inverse : bool
+        inverse : bool = False
             True if the inverse algorithm is to be used else False
         """
         super().__init__(inverse)
