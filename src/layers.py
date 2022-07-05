@@ -52,25 +52,25 @@ class CreateWavefront(eqx.Module):
         Width of the array representing the wavefront in physical units
         
     """
-    number_of_pixels : int = eqx.static_field()
+    npix : int = eqx.static_field()
     wavefront_size : float
     pixel_scale : float
 
 
     # TODO: Should we have getter methods?
-    def __init__(self, number_of_pixels, wavefront_size):
+    def __init__(self, npix, wavefront_size):
         """
         Parameters
         ----------
-        number_of_pixels : int
+        npix : int
             The number of pixels along one edge of the wavefront.
         wavefront_size : int
             The physical dimensions of the wavefront in units of
             (radians) meters.
         """
-        self.number_of_pixels = int(number_of_pixels)
+        self.npix = int(npix)
         self.wavefront_size = np.array(wavefront_size).astype(float)
-        self.pixel_scale = np.array(wavefront_size / number_of_pixels)\
+        self.pixel_scale = np.array(wavefront_size / npix)\
             .astype(float)
 
 
@@ -95,8 +95,8 @@ class CreateWavefront(eqx.Module):
             updated. 
         """
         wavefront = params_dict["Wavefront"]
-        phase = np.zeros(self.number_of_pixels, self.number_of_pixels)
-        amplitude = np.ones(self.number_of_pixels, self.number_of_pixels)
+        phase = np.zeros([self.npix, self.npix])
+        amplitude = np.ones([self.npix, self.npix])
         params_dict["Wavefront"] = wavefront\
             .set_phase(phase)\
             .set_amplitude(amplitude)\
@@ -111,7 +111,7 @@ class TiltWavefront(eqx.Module):
     """ 
     Applies a paraxial tilt by adding a phase slope
     """
-    def __call__(self, wavefront):
+    def __call__(self, params_dict):
         """
         Applies a tile to the phase of the wavefront according to the
         offset that is stored in the `Wavefront`.
@@ -153,7 +153,7 @@ class CircularAperture(eqx.Module):
 
     Attributes
     ----------
-    number_of_pixels : int 
+    npix : int 
         The number of pixels along one side of the aperture. This 
         parameters is not differentiable.
     array : Array[float]
@@ -161,7 +161,7 @@ class CircularAperture(eqx.Module):
         The parameter is differentiable but refers to _Notes_ for 
         a known bug.
     """
-    number_of_pixels : int = eqx.static_field()
+    npix : int = eqx.static_field()
     array : np.ndarray
 
     
@@ -169,7 +169,7 @@ class CircularAperture(eqx.Module):
         """
         Parameters
         ----------
-        number_of_pixels : int
+        npix : int
             The number of pixels along one side of the apperture when 
             represented as an array.
         rmin : float = 0.
@@ -190,15 +190,15 @@ class CircularAperture(eqx.Module):
             to stablize autodiff. This parameter should not be changed 
             very often.
         """
-        self.number_of_pixels = int(number_of_pixels)
-        self.array = self.create_aperture(self.number_of_pixels, 
+        self.npix = int(npix)
+        self.array = self.create_aperture(self.npix, 
             rmin = rmin, rmax = rmax) + eps
    
  
     def create_aperture(self, npix, rmin, rmax):     
         """
         Produces the aperture array from the parameters; `rmin`, `rmax` 
-        and `number_of_pixels`.
+        and `npix`.
 
         Parameters
         ----------
@@ -220,9 +220,9 @@ class CircularAperture(eqx.Module):
         """   
         centre = (npix - 1.) / 2.
         normalised_coordinates = (np.arange(npix) - centre) / centre
-        stacked_grids = np.meshgrid(normalised_coordinates, 
-            normalised_coordinates) 
-        radial_coordinates = np.sqrt(numpy.sum(stacked_grids, axis = 0))
+        stacked_grids = np.array(np.meshgrid(normalised_coordinates, 
+            normalised_coordinates)) 
+        radial_coordinates = np.sqrt(np.sum(stacked_grids ** 2, axis = 0))
         aperture = np.logical_and(radial_coordinates <= rmax,   
             radial_coordinates > rmin).astype(float)
         return aperture.astype(float)
@@ -370,7 +370,7 @@ class ApplyBasisOPD(eqx.Module):
         """
         # Get relevant parameters
         wavefront = params_dict["Wavefront"]
-        wavefront = WF.add_opd(self.get_total_opd())
+        wavefront = wavefront.add_opd(self.get_total_opd())
         params_dict["Wavefront"] = wavefront
         return params_dict
     
@@ -503,7 +503,7 @@ class ApplyOPD(eqx.Module):
         """
         # Get relevant parameters
         wavefront = params_dict["Wavefront"]
-        wavefront = WF.add_opd(self.opd_array)
+        wavefront = wavefront.add_opd(self.opd_array)
         params_dict["Wavefront"] = wavefront
         return params_dict
     
@@ -562,7 +562,7 @@ class ApplyAperture(eqx.Module):
         """
         # Get relevant parameters
         wavefront = params_dict["Wavefront"]
-        wavefront = WF.multiply_amplitude(self.aperture)
+        wavefront = wavefront.multiply_amplitude(self.aperture)
         params_dict["Wavefront"] = wavefront
         return params_dict
     
@@ -636,7 +636,7 @@ class ApplyBasisCLIMB(eqx.Module):
         latent = self.get_opd(self.basis, self.coeffs)
         binary_phase = np.pi*self.CLIMB(latent)
         opd = self.phase_to_opd(binary_phase, self.ideal_wavel)
-        wavefront = WF.add_opd(opd)
+        wavefront = wavefront.add_opd(opd)
 
         params_dict["Wavefront"] = wavefront
         return params_dict
