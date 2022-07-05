@@ -3,5 +3,6 @@ notebooks/__pycache__
 notebooks/.ipynb_checkpoints
 .pytest_cache
 tests/__pycache__
+src/__pycache__
 *.swp
 site

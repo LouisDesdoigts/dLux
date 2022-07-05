@@ -75,7 +75,7 @@ import jax
 import equinox as eqx
 import typing
 # import abc 
-from .wavefronts import *
+from wavefronts import *
 
 
 Propagator = typing.NewType("Propagator", eqx.Module)
