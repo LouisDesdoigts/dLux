@@ -34,7 +34,7 @@ import equinox as eqx
 
 
 # TODO: Confirm this structure with @LouisDesdoigts.
-class CreateWavefront(Leqx.Module):
+class CreateWavefront(eqx.Module):
     """ 
     Initialises an on-axis input wavefront
 
