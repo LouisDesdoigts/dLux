@@ -28,6 +28,11 @@ from utilities import *
 Tester = typing.NewType("Tester", object)
 
 
+# NOTE: While the utilities system proved very useful for testing 
+# The more complicated wavefronts and propagators I can see that
+# It is going to produce a very large amount of code when used 
+# for the layers. I should be anle to reverse engineer this 
+# to a junit style for better efficiency.
 class TestCreateWavefront(UtilityUser):
     """
     A `pytest` container for the `CreateWavefront` layer. Tests 
@@ -61,8 +66,35 @@ class TestCreateWavefront(UtilityUser):
 
 
 class TestTiltWavefront(UtilityUser):
-    """
-    """
-    pass
+    def test_call(self : Tester) -> None:
 
-    
+
+class TestCircularAperture(UtilityUser):
+    def test_constructor(self : Tester) -> None:
+    def test_create_apperture(self : Tester) -> None:
+    def test_call(self : Tester) -> None:
+
+
+class TestNormaliseWavefront(UtilityUser):
+    def test_call(self : Tester) -> None:
+
+
+class TestApplyBasicOPD(UtilityUser):
+    def test_constructor(self : Tester) -> None:
+    def test_get_total_opd(self : Tester) -> None:
+    def test_call(self : Tester) -> None:
+
+
+class TestAddPhase(UtiltiyUser):
+    def test_constructor(self : Tester) -> None:
+    def test_call(self : Tester) -> None:
+
+
+class TestApplyOPD(UtilityUser): 
+    def test_constructor(self : Tester) -> None:
+    def test_call(self : Tester) -> None:
+
+
+class TestApplyAperture(UtilityUser):
+    def test_constructor(self : Tester) -> None:
+    def test_call(self : Tester) -> None:
