@@ -762,21 +762,10 @@ class PhysicalWavefront(Wavefront):
 
     Attributes
     ----------
-    wavelength : float, meters
-        The wavelength of the `Wavefront`.
-    offset : Array, radians
-        The (x, y) angular offset of the `Wavefront` from 
-        the optical axis.
-    amplitude : Array, power
-        The electric field amplitude of the `Wavefront`. 
-    phase : Array, radians
-        The electric field phase of the `Wavefront`.
-    pixel_scale : float, meters/pixel
-        The physical dimensions of each square pixel.
     plane_type : str
         The type of plane occupied by the wavefront. 
     """
-    plane_type : str # For debugging
+    plane_type : str
 
     
     def __init__(self : PhysicalWavefront, wavelength : float, 
@@ -859,17 +848,6 @@ class AngularWavefront(Wavefront):
     
     Attributes
     ----------
-    wavelength : float, meters
-        The wavelength of the `Wavefront`.
-    offset : Array, radians
-        The (x, y) angular offset of the `Wavefront` from 
-        the optical axis.
-    amplitude : Array, power
-        The electric field amplitude of the `Wavefront`. 
-    phase : Array, radians
-        The electric field phase of the `Wavefront`.
-    pixel_scale : float, radians/pixel
-        The physical dimensions of each square pixel.
     plane_type : str
         The type of plane occupied by the wavefront. 
     """ 

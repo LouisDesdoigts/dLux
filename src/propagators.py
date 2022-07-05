@@ -14,7 +14,7 @@ by Jordan Dennis. The abstract Propagator class is primarily
 for self documentation of the code and implements only a few 
 simple helper methods. Concrete methods are added within the 
 next level of classes; which are VariableSamplingPropagator 
-and FixedSamolingPropagtor. 
+and FixedSamplingPropagtor. 
 
 
 The primary difference at this level is the style of Fourier 
@@ -29,19 +29,21 @@ pixel in the input plane.
 The units are handled at the next level of classes which also
 implement the exact algorithm. For both angular units and 
 physical units there is a FixedSampling and a VariableSampling
-option for far field diffraction as well as a VairableSampling
-near field algorithm. There is also a special intermediate 
+option for far-field diffraction as well as a VairableSampling
+near-field algorithm. There is also a special intermediate 
 plane Fresnel algorithm based on the GaussianWavefront class.
 
 
 There is a total of seven non-abstract propagators defined in 
 this file that are listed below:
  - PhysicalVariableFraunhofer
- - PhysicalFixedFraunhofer
  - PhysicalVariableFresnel
+ - PhysicalFixedFraunhofer
+ 
  - AngularVariableFraunhofer
- - AngularFixedFraunhofer
  - AngularVariableFresnel
+ - AngularFixedFraunhofer
+ 
  - VariableGaussianFresnel
 
 
@@ -61,9 +63,11 @@ Propagator
         PhysicalFresnel
         AngularMFT
         AngularFresnel
+        
     FixedSampling (fft)
         PhysicalFFT
         AngularFFT
+        
     GaussianPropagator
 """
 __author__ = "Louis Desdoigts"
@@ -95,6 +99,16 @@ class Propagator(eqx.Module): # abc.ABC):
         True if the inverse algorithm is to be used else false. 
     """
     inverse : bool
+    
+    
+    def __init__(self : Propagator, inverse : bool) -> Propagator:
+        """
+        Parameters
+        ----------
+        inverse : bool
+            True if the inverse algorithm is to be used else False.
+        """
+        self.inverse = inverse  
 
 
     def _get_pixel_positions(self : Propagator, 
@@ -105,19 +119,18 @@ class Propagator(eqx.Module): # abc.ABC):
 
         Parameters
         ----------
-        pixel_offset : float
+        pixel_offset : float, pixels
             The displacement of the center from the center of the 
             pixel array in pixels.
-        pixel_scale : float
-            The dimension of the pixel in meters/radians per pixel 
-            in the plane of propagation.
+        pixel_scale : float, meters/pixel or radians/pixel
+            The dimension of the pixel in the plane of propagation.
         number_of_pixels : int
             The number of pixels in the plane of propagation. 
 
         Returns
         -------
-        pixel_positions : Array
-            The pixel positions along one dimension in meters.
+        pixel_positions : Array, meters
+            The pixel positions along one dimension.
         """
         # TODO: Review the npix // 2
         unscaled = np.arange(number_of_pixels) - (number_of_pixels - 1) / 2
@@ -131,19 +144,18 @@ class Propagator(eqx.Module): # abc.ABC):
 
         Parameters
         ----------
-        pixel_offsets : float
+        pixel_offset : float, pixels
             The displacement of the center from the center of the 
             pixel array in pixels.
-        pixel_scale : float
-            The dimension of the pixel in meters/radians per pixel 
-            in the plane of propagation.
+        pixel_scale : float, meters/pixel or radians/pixel
+            The dimension of the pixel in the plane of propagation.
         number_of_pixels : int
             The number of pixels in the plane of propagation. 
 
         Returns 
         -------
-        pixel_grid : Array
-            The pixel positions in meters.
+        pixel_grid : Array, meters
+            The pixel positions.
         """
         # TODO: confirm (npix - 1) / 2 or npix // 2
         x_offset, y_offset = pixel_offsets
@@ -167,17 +179,6 @@ class Propagator(eqx.Module): # abc.ABC):
         return self.inverse
 
 
-    def __init__(self : Propagator, inverse : bool) -> Propagator:
-        """
-        Parameters
-        ----------
-        inverse : bool
-            True if the inverse algorithm is to be used else False.
-        """
-        self.inverse = inverse   
-
-
-
     # # @abc.abstractmethod
     def _fourier_transform(self : Propagator, wavefront : Wavefront) -> Array:
         """
@@ -194,7 +195,7 @@ class Propagator(eqx.Module): # abc.ABC):
         -------
         field : Array
             The complex electric field amplitude following the 
-            propagation in SI units of electric field. 
+            propagation. 
         """
         pass  
 
@@ -216,7 +217,7 @@ class Propagator(eqx.Module): # abc.ABC):
         -------
         field : Array
             The complex electric field amplitude following the 
-            propagation in SI units of electric field. 
+            propagation. 
         """  
         pass
 
@@ -234,8 +235,7 @@ class Propagator(eqx.Module): # abc.ABC):
         Returns
         -------
         field : Array   
-            The electric field of the wavefronts in SI units of 
-            electric field.
+            The electric field of the wavefronts.
         """
         if self.is_inverse():
             return self._inverse_fourier_transform(wavefront)
@@ -257,11 +257,12 @@ class Propagator(eqx.Module): # abc.ABC):
         Returns
         -------
         wavefront : Wavefront
-            The `Wavefront` where the electric field has been conserved.
+            The `Wavefront` where the electric field power has 
+            been conserved.
         """
         pass 
 
-   
+
 class VariableSamplingPropagator(Propagator):
     """
     A propagator that users the Soummer et. al. 2007 MFT algorithm 
@@ -272,7 +273,7 @@ class VariableSamplingPropagator(Propagator):
 
     Attributes
     ----------
-    pixel_scale_out : float 
+    pixel_scale_out : float, meters/pixel or radians/pixel
         The pixel scale in the plane of propagation measured in 
         meters (radians) per pixel.
     pixels_out : int
@@ -291,7 +292,7 @@ class VariableSamplingPropagator(Propagator):
         ----------
         pixels_out : int
             The number of pixels in the output plane (side length).
-        pixel_scale_out : float 
+        pixel_scale_out : float, meters/pixel or radians/pixel
             The pixel scale in the output plane in units of meters
             (radians) per pixel.
         inverse : bool
@@ -308,9 +309,8 @@ class VariableSamplingPropagator(Propagator):
 
         Returns
         -------
-        pixel_scale_out : float
-            The pixel scale in the output plane in meters (radians)
-            per pixel.
+        pixel_scale_out : float, meters/pixel or radians/pixel
+            The pixel scale in the output plane.
         """
         return self.pixel_scale_out
 
@@ -335,7 +335,7 @@ class VariableSamplingPropagator(Propagator):
 
         Parameters
         ----------
-        pixel_offset : float
+        pixel_offset : float, pixels
             The offset in units of pixels.
         pixel_scales : tuple
             The input and output pixel scales. 
@@ -420,8 +420,7 @@ class VariableSamplingPropagator(Propagator):
         Returns
         -------
         field : Array[Complex]
-            The complex electric field after propagation in SI units 
-            of electric field. Not yet normalised.
+            The complex electric field after propagation. Not yet normalised.
         """
         return self._matrix_fourier_transform(wavefront, sign = 1)
 
@@ -440,7 +439,7 @@ class VariableSamplingPropagator(Propagator):
         Returns
         -------
         field : Array[Complex]
-            The complex electric field in SI units of electric field.
+            The complex electric field.
         """
         return self._matrix_fourier_transform(wavefront, sign = -1)
 
@@ -467,6 +466,9 @@ class VariableSamplingPropagator(Propagator):
 
     # TODO: Confirm that this is the correct algorithm to use for the 
     # Fresnel as well.
+    # This can currently function as an approximation for the Fresnel
+    # and changed eventually. Add an issue to the git if we make this
+    # The same for Fresnel
     def get_pixel_offsets(self : Propagator, 
             wavefront : Wavefront) -> Array:
         """
@@ -479,11 +481,13 @@ class VariableSamplingPropagator(Propagator):
 
         Returns
         -------
-        pixel_offset : Array
-            The offset from the x and y plane in units of pixels.
+        pixel_offset : Array, pixels
+            The offset from the x and y plane.
         """
         # TODO: Confirm that if the wavefront.get_offset != 0. then 
         # we will always want to use that offset.
+        # This behaviour wants to be controlled by a boolean value
+        # Stored in the propagation layer
         return wavefront.get_offset() * self.get_focal_length() / \
             self.get_pixel_scale_out()
 
@@ -523,7 +527,7 @@ class FixedSamplingPropagator(Propagator):
     """
     A propagator that samples the electric field in the output plane
     at the rate of one fringe per pixel where a fringe is a wavelength 
-    on the apperture diameter. 
+    divided by the apperture diameter. 
 
 
     These propagators are implemented using the numpy.fft sub-sub-package
@@ -542,7 +546,7 @@ class FixedSamplingPropagator(Propagator):
         Returns
         -------
         field : Array[Complex]
-            The complex electric field in SI units following propagation.
+            The complex electric field units following propagation.
         """
         return np.fft.fft2(np.fft.ifftshift(wavefront.get_complex_form()))
 
@@ -560,7 +564,7 @@ class FixedSamplingPropagator(Propagator):
         Returns
         -------
         field : Array[Complex]
-            The complex electric field in SI units following propagation.
+            The complex electric field units following propagation.
         """
         return np.fft.fftshift(np.fft.ifft2(wavefront.get_complex_form()))
 
@@ -600,7 +604,7 @@ class FixedSamplingPropagator(Propagator):
 
         Returns 
         -------
-        pixel_scale : float
+        pixel_scale : float, meters/pixel or radians/pixel
             The pixel scale in the output plane in units of meters
             (radians) per pixel.
         """
@@ -646,7 +650,7 @@ class PhysicalMFT(VariableSamplingPropagator):
 
     Attributes 
     ----------
-    focal_length : float
+    focal_length : float, meters
         The focal length of the propagation distance.    
     """
     focal_length : float
@@ -658,14 +662,13 @@ class PhysicalMFT(VariableSamplingPropagator):
         """
         Parameters
         ----------
-        focal_length : float
+        focal_length : float, meters
             The focal length of the mirror or lens that the Wavefront
             is propagating away from.
         pixels_out : int
             The number of pixels in the output image. 
-        pixel_scale_out : float
-            The pixel scale in the output plane in units of meters 
-            per pixel. 
+        pixel_scale_out : float, meters/pixel
+            The pixel scale in the output plane. 
         inverse : bool
             Whether or not the propagation is input plane to output 
             plane or output plane to input plane. The inverse algorithm
@@ -709,8 +712,8 @@ class PhysicalMFT(VariableSamplingPropagator):
 
         Returns 
         -------
-        : float
-            The focal length in meters. 
+        : float, meters
+            The focal length. 
         """
         return self.focal_length
 
@@ -722,10 +725,8 @@ class PhysicalFFT(FixedSamplingPropagator):
 
     Attributes
     ----------
-    focal_length : float 
-        The focal length of the lens or mirror in meters.
-    inverse : bool
-        True if the inverse transformation is to be used else False
+    focal_length : float, meters 
+        The focal length of the lens or mirror.
     """
     focal_length : float
 
@@ -737,9 +738,9 @@ class PhysicalFFT(FixedSamplingPropagator):
         """
         Parameters
         ----------
-        focal_length : float
+        focal_length : float, meters
             The focal length of the lens or mirror that is getting 
-            propagated away from in meters.
+            propagated away from.
         inverse : bool
             Propagation direction. True for forwards and False for 
             backwards. 
@@ -756,12 +757,12 @@ class PhysicalFFT(FixedSamplingPropagator):
             
     def get_focal_length(self : Propagator) -> float:
         """
-        Accessor for the focal length in meters.
+        Accessor for the focal length.
 
         Returns
         -------
-        focal_length : float
-            The focal length of the lens or mirror in meters.
+        focal_length : float, meters
+            The focal length of the lens or mirror.
         """
         return self.focal_length
 
@@ -769,7 +770,7 @@ class PhysicalFFT(FixedSamplingPropagator):
     def get_pixel_scale_out(self : Propagator, 
             wavefront : Wavefront) -> float:
         """
-        The pixel scale in the focal plane in meters per pixel
+        The pixel scale in the focal plane
 
         Parameters
         ----------
@@ -778,26 +779,26 @@ class PhysicalFFT(FixedSamplingPropagator):
 
         Returns
         -------
-        pixel_scale_out : float
-            The pixel scale in meters per pixel.
+        pixel_scale_out : float, meters/pixel
+            The pixel scale.
         """
         return wavefront.get_wavelength() * \
             self.get_focal_length() / (wavefront.get_pixel_scale() \
                 * wavefront.number_of_pixels())     
-  
+
 
 class PhysicalFresnel(VariableSamplingPropagator):
     """
-    Near field diffraction based on the Frensel approximation.
-    This implementation does not conserve flux because the 
-    normalisation happens in the far field. 
+    far-field diffraction based on the Frensel approximation.
+    This implementation approximately conserves flux because the 
+    normalisation is based on focal plane MFT normalisation.
 
     Attributes
     ----------
-    focal_length : float
+    focal_length : float, meters
         The focal length of the lens or mirror in meters. This 
         is a differentiable parameter.
-    focal_shift : float
+    focal_shift : float, meters
         The displacement of the plane of propagation from the 
         the focal_length in meters. This is a differentiable
         parameter. The focal shift is positive if the plane of 
@@ -814,14 +815,14 @@ class PhysicalFresnel(VariableSamplingPropagator):
         """
         Parameters
         ----------
-        focal_length : float
-            The focal length of the mirror or the lens in meters.
-        focal_shift : float
+        focal_length : float, meters
+            The focal length of the mirror or the lens.
+        focal_shift : float, meters
             The distance away from the focal plane to be propagated
-            to in meters. This quantity 
+            to.
         pixels_out : int
             The number if pixels in the plane of propagation.
-        pixel_scale_out : float
+        pixel_scale_out : float, meters/pixel
             The scale of a pixel in the plane of propagation in 
             units of meters per pixel. 
         inverse : bool
@@ -838,8 +839,8 @@ class PhysicalFresnel(VariableSamplingPropagator):
         """
         Returns
         -------
-        focal_length : float
-            The focal length of the mirror or lens in meters.
+        focal_length : float, meters
+            The focal length of the mirror or lens.
         """
         return self.focal_length
 
@@ -848,8 +849,8 @@ class PhysicalFresnel(VariableSamplingPropagator):
         """
         Returns 
         -------
-        shift : float
-            The shift away from focus of the detector in meters.
+        shift : float, meters
+            The shift away from focus of the detector.
         """
         return self.focal_shift
 
@@ -903,8 +904,8 @@ class PhysicalFresnel(VariableSamplingPropagator):
             The y coordinates of the pixels in meters. This will be 
             different in the plane of propagation and the initial 
             plane.
-        wavelength : float
-            The wavelength of the wavefront in meters.
+        wavelength : float, meters
+            The wavelength of the wavefront.
 
         Returns
         -------
@@ -932,7 +933,7 @@ class PhysicalFresnel(VariableSamplingPropagator):
         Returns
         -------
         electric_field : Array
-            The complex electric field in SI units of electric field. 
+            The complex electric field. 
         """
         field = self.quadratic_phase(*wavefront.get_pixel_positions(),
             wavefront.get_wavelength()) 
@@ -951,8 +952,7 @@ class PhysicalFresnel(VariableSamplingPropagator):
 
         Returns
         electric_field : Array
-            The complex electric field in the output plane in SI 
-            units of electric field.
+            The complex electric field in the output plane.
         """
         # NOTE: Far field normalisation is applied in the __call__
         # method.
@@ -993,17 +993,17 @@ class AngularMFT(VariableSamplingPropagator):
     transform.  
     """
     def __init__(self : Propagator, pixel_scale_out : float, 
-            pixels_out : float, inverse : bool) -> Propagator:
+            pixels_out : int, inverse : bool) -> Propagator:
         """
         Parameters
         ----------
-        pixel_scale_out : float
+        pixel_scale_out : float, radians/pixel
             The scale of the pixels in the output plane in radians 
             per pixel.
-        pixels_out : float
+        pixels_out : int
             The number of pixels in the output plane.
         inverse : bool
-            True if the inverse transformation is te be applied else 
+            True if the inverse transformation is to be applied else 
             False.
         """
         super().__init__(pixel_scale_out, pixels_out, inverse)
@@ -1086,9 +1086,8 @@ class AngularFFT(FixedSamplingPropagator):
 
         Returns
         -------
-        : float
-            The pixel scale in the ouptut plane in units of radians 
-            per pixel. 
+        : float, radians/pixel
+            The pixel scale in the ouptut plane. 
         """
         # TODO: This needs to be reviewed by @LouisDesdoigts.
         return wavefront.get_wavelength() / \
@@ -1114,8 +1113,8 @@ class GaussianPropagator(eqx.Module):
 
     Attributes
     ----------
-    distance : float 
-       The distance to propagate in meters. 
+    distance : float, meters
+       The distance to propagate. 
     """
     distance : float 
 
@@ -1127,8 +1126,8 @@ class GaussianPropagator(eqx.Module):
 
         Parameters
         ----------
-        distance : float
-            The distance to propagate the wavefront in meters.
+        distance : float, meters
+            The distance to propagate the wavefront.
         """
         self.distance = distance
 
@@ -1145,8 +1144,8 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront
             The wavefront to propagate. Must be `GaussianWavefront`
             or a subclass. 
-        distance : float
-            The distance of the propagation in metres.
+        distance : float, meters
+            The distance of the propagation.
 
         Returns
         -------
@@ -1180,8 +1179,8 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront
             The `Wavefront` that is getting propagated. Must be either 
             a `GaussianWavefront` or a valid subclass.
-        distance : float 
-            The distance of the propagation in metres.
+        distance : float, meters 
+            The distance of the propagation.
 
         Returns 
         -------
@@ -1222,7 +1221,7 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront 
             The `Wavefront` that is getting propagated. Must be either 
             a `GaussianWavefront` or a direct subclass.
-        distance : float
+        distance : float, meters
             The distance of propagation in metres.
 
         Returns
@@ -1264,7 +1263,7 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront
             The wavefront to propagate. Assumed to be either a 
             `GaussianWavefront` or a direct subclass.
-        distance : float
+        distance : float, meters
             The distance to propagate in metres.
     
         Returns
@@ -1298,7 +1297,7 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront
             The wavefront to propagate. Must be either 
             `GaussianWavefront` or a direct subclass.
-        distance : float
+        distance : float, meters
             The distance to propagate in metres.
 
         Returns
@@ -1331,7 +1330,7 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront
             The `Wavefront` to propagate. This must be either a 
             `GaussianWavefront` or a direct subclass.
-        distance : float
+        distance : float, meters
             The distance to propagate in metres.
 
 
@@ -1357,7 +1356,7 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront
             The `Wavefront` to propgate. Must be either a 
             `GaussianWavefront` or a direct subclass.
-        distance : float
+        distance : float, meters
             The distance to propagate in metres.
 
         Returns
