@@ -6,13 +6,6 @@ The physical interpretation of most layers is straightforward but
 some are not obvious. This structure was chosen because of the 
 constrainst of automatic differentiation using `equinox`.
 
-
-Abstract Classes
-----------------
-Layers:
-- __call__(parameters : dict) -> dict:
-- (abstract) _interact(wavefront : Wavefront) -> Wavefront:
-
 Concrete Classes 
 ----------------
 - CreateWavefront
@@ -33,7 +26,6 @@ import jax.numpy as np
 import equinox as eqx
 
 
-# TODO: Confirm this structure with @LouisDesdoigts.
 class CreateWavefront(eqx.Module):
     """ 
     Initialises an on-axis input wavefront
@@ -50,14 +42,12 @@ class CreateWavefront(eqx.Module):
     wavefront_size: float
         Units: meters
         Width of the array representing the wavefront in physical units
-        
     """
     number_of_pixels : int = eqx.static_field()
     wavefront_size : float
     pixel_scale : float
 
 
-    # TODO: Should we have getter methods?
     def __init__(self, number_of_pixels, wavefront_size):
         """
         Parameters
@@ -104,16 +94,13 @@ class CreateWavefront(eqx.Module):
         return params_dict
 
 
-# TODO: Talk to @Louis abot incorporating this into the Wavefronts 
-# because it is not differentiable and only relies on the state of 
-# the wavefront. 
 class TiltWavefront(eqx.Module):
     """ 
     Applies a paraxial tilt by adding a phase slope
     """
     def __call__(self, wavefront):
         """
-        Applies a tile to the phase of the wavefront according to the
+        Applies a tilt to the phase of the wavefront according to the
         offset that is stored in the `Wavefront`.
 
         Parameters
@@ -174,7 +161,7 @@ class CircularAperture(eqx.Module):
             represented as an array.
         rmin : float = 0.
             The inner radius of the Annular aperture. Note that the 
-            description `Circular` is a misomer. Additionally notice 
+            description `Circular` is a misnomer. Additionally notice 
             that this parameter must satisfy the condition
             ```py
             0 <= rmin < rmax
@@ -220,9 +207,10 @@ class CircularAperture(eqx.Module):
         """   
         centre = (npix - 1.) / 2.
         normalised_coordinates = (np.arange(npix) - centre) / centre
-        stacked_grids = np.meshgrid(normalised_coordinates, 
-            normalised_coordinates) 
-        radial_coordinates = np.sqrt(numpy.sum(stacked_grids, axis = 0))
+        stacked_grids = np.array(np.meshgrid(normalised_coordinates, 
+            normalised_coordinates))
+        radial_coordinates = np.sqrt(np.sum(stacked_grids ** 2, 
+            axis = 0))
         aperture = np.logical_and(radial_coordinates <= rmax,   
             radial_coordinates > rmin).astype(float)
         return aperture.astype(float)
@@ -292,7 +280,7 @@ class NormaliseWavefront(eqx.Module):
 class ApplyBasisOPD(eqx.Module):
     """
     Adds an array of phase values to the input wavefront calculated 
-    from the OPD. The phases are calculated from the zernike 
+    from the OPD. The phases are calculated from the  
     polynomials, and weighted by the `coefficients`.
      
     Parameters
@@ -520,8 +508,7 @@ class ApplyAperture(eqx.Module):
         debugging purposes.
     aperture : Array[float]
         A binary array representing the aperture. Non-binary values 
-        can be passed representing translucent surfaces but this is 
-        not recommended. This is a differentiable parameter.
+        can be passed representing translucent surfaces. 
     """
     npix: int = eqx.static_field()
     aperture: np.ndarray
@@ -532,9 +519,7 @@ class ApplyAperture(eqx.Module):
         Parameters
         ----------
         aperture : Array[float]
-            The binary array representing the aperture. While values 
-            other than `1.` and `0.` will not cause errors there use 
-            is highly discouraged.
+            The binary array representing the aperture. 
         """
         self.aperture = np.array(aperture)
         self.npix = aperture.shape[0]

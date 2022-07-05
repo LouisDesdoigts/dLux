@@ -75,7 +75,7 @@ import jax
 import equinox as eqx
 import typing
 # import abc 
-from wavefronts import *
+from .wavefronts import *
 
 
 Propagator = typing.NewType("Propagator", eqx.Module)
@@ -119,7 +119,6 @@ class Propagator(eqx.Module): # abc.ABC):
         pixel_positions : Array
             The pixel positions along one dimension in meters.
         """
-        # TODO: Review the npix // 2
         unscaled = np.arange(number_of_pixels) - (number_of_pixels - 1) / 2
         return (unscaled + pixel_offset) * pixel_scale
 
@@ -145,7 +144,6 @@ class Propagator(eqx.Module): # abc.ABC):
         pixel_grid : Array
             The pixel positions in meters.
         """
-        # TODO: confirm (npix - 1) / 2 or npix // 2
         x_offset, y_offset = pixel_offsets
 
         x_pixel_coordinates = self._get_pixel_positions(
@@ -153,7 +151,6 @@ class Propagator(eqx.Module): # abc.ABC):
         y_pixel_coordinates = self._get_pixel_positions(
             y_offset, pixel_scale, number_of_pixels)
 
-        # TODO: Put arguments in a list
         return np.meshgrid(x_pixel_coordinates, y_pixel_coordinates)
 
 
@@ -177,8 +174,6 @@ class Propagator(eqx.Module): # abc.ABC):
         self.inverse = inverse   
 
 
-
-    # # @abc.abstractmethod
     def _fourier_transform(self : Propagator, wavefront : Wavefront) -> Array:
         """
         The implementation of the Fourier transform that is to 
@@ -199,7 +194,6 @@ class Propagator(eqx.Module): # abc.ABC):
         pass  
 
 
-    # # @abc.abstractmethod
     def _inverse_fourier_transform(self : Propagator,
             wavefront : Wavefront) -> Array:
         """
@@ -243,7 +237,6 @@ class Propagator(eqx.Module): # abc.ABC):
             return self._fourier_transform(wavefront)
 
 
-    # @abc.abstractmethod
     def _normalising_factor(self : Propagator, wavefront : Wavefront) -> float:
         """
         Apply a normalisation to the wavefront to ensure that it 
@@ -457,7 +450,7 @@ class VariableSamplingPropagator(Propagator):
 
         Returns
         -------
-        : Wavefront
+        normalising_factor : Wavefront
             The normalised `Wavefront`.
         """
         return np.exp(np.log(self.number_of_fringes(wavefront)) - \
@@ -465,8 +458,6 @@ class VariableSamplingPropagator(Propagator):
                 np.log(self.get_pixels_out())))
 
 
-    # TODO: Confirm that this is the correct algorithm to use for the 
-    # Fresnel as well.
     def get_pixel_offsets(self : Propagator, 
             wavefront : Wavefront) -> Array:
         """
@@ -482,10 +473,10 @@ class VariableSamplingPropagator(Propagator):
         pixel_offset : Array
             The offset from the x and y plane in units of pixels.
         """
-        # TODO: Confirm that if the wavefront.get_offset != 0. then 
-        # we will always want to use that offset.
+        # TODO: Optional tilt. 
         return wavefront.get_offset() * self.get_focal_length() / \
             self.get_pixel_scale_out()
+
 
     def __call__(self : Propagator, parameters : dict) -> dict:
         """
@@ -586,7 +577,6 @@ class FixedSamplingPropagator(Propagator):
             self.inverse * wavefront.number_of_pixels()
 
 
-    # @abc.abstractmethod
     def get_pixel_scale_out(self : Propagator, 
             wavefront : Wavefront) -> float:
         """
@@ -676,7 +666,6 @@ class PhysicalMFT(VariableSamplingPropagator):
         self.focal_length = focal_length
 
 
-
     def number_of_fringes(self : Propagator, 
             wavefront : Wavefront) -> float:
         """
@@ -732,8 +721,6 @@ class PhysicalFFT(FixedSamplingPropagator):
 
     def __init__(self : Propagator, focal_length : float, 
             inverse : bool) -> Propagator:
-        # TODO: Confirm documentation for inverse this is not currently 
-        # correct.
         """
         Parameters
         ----------
@@ -887,7 +874,6 @@ class PhysicalFresnel(VariableSamplingPropagator):
             wavefront.get_wavelength() * focal_ratio
                
 
-    # TODO: Demote to _quadratic_phase
     def quadratic_phase(self : Propagator, x_coordinates : Array, 
             y_coordinates : Array, wavelength : float) -> Array:
         """
@@ -920,6 +906,7 @@ class PhysicalFresnel(VariableSamplingPropagator):
 
     def thin_lens(self : Propagator, wavefront : Wavefront) -> Array:
         # TODO: Review this documentation 
+        # TODO: This does not have a good interpretation. 
         """
         A thin lens focusing the wavefront into the plane of 
         propagation instead of the focal plane.
@@ -954,12 +941,11 @@ class PhysicalFresnel(VariableSamplingPropagator):
             The complex electric field in the output plane in SI 
             units of electric field.
         """
-        # NOTE: Far field normalisation is applied in the __call__
-        # method.
         complex_wavefront = self.thin_lens(wavefront)
 
         input_positions = wavefront.get_pixel_positions()
-        # TODO: Review with @LouisDesdoigts the use of tilted wavefronts
+        # TODO: The conditional tilt. 
+        # TODO: Move noramlise. 
         output_positions = self._get_pixel_grid(
             wavefront.get_offset(), self.get_pixel_scale_out(),
             self.get_pixels_out())
@@ -979,8 +965,6 @@ class PhysicalFresnel(VariableSamplingPropagator):
 
         wavefront = wavefront.update_phasor(amplitude, phase)
         complex_wavefront = self._fourier_transform(wavefront) 
-        # TODO: Normalisation was here, but I have moved it since
-        # we are only dealing with multiplications.
         complex_wavefront *= wavefront.get_pixel_scale() ** 2
         complex_wavefront *= transfer * second_quadratic_phase
 
@@ -1030,8 +1014,6 @@ class AngularMFT(VariableSamplingPropagator):
             wavefront.number_of_pixels()        
         size_out = self.get_pixel_scale_out() * \
             self.get_pixels_out()
-        # TODO: The focal length is not a tracked parameter
-        # so this does not work. 
         return size_in * size_out / wavefront.get_wavelength()
 
 
@@ -1050,8 +1032,6 @@ class AngularMFT(VariableSamplingPropagator):
         : Array
             The offset from the x and y plane in units of pixels.
         """
-        # TODO: Confirm that if the wavefront.get_offset != 0. then 
-        # we will always want to use that offset.
         return wavefront.get_offset() / self.get_pixel_scale_out()
 
 
@@ -1086,11 +1066,10 @@ class AngularFFT(FixedSamplingPropagator):
 
         Returns
         -------
-        : float
+        pixel_scale : float
             The pixel scale in the ouptut plane in units of radians 
             per pixel. 
         """
-        # TODO: This needs to be reviewed by @LouisDesdoigts.
         return wavefront.get_wavelength() / \
             (wavefront.get_pixel_scale() * wavefront.number_of_pixels())
 
@@ -1192,7 +1171,6 @@ class GaussianPropagator(eqx.Module):
         complex_wavefront = wavefront.get_amplitude() * \
             np.exp(1j * wavefront.get_phase())
 
-        # TODO: Move the quadratic_phase_factor into the propagator
         fourier_transform = jax.lax.cond(np.sign(distance) > 0, 
             lambda complex_wavefront, distance: \
                 wavefront.quadratic_phase_factor(distance) * \
@@ -1230,9 +1208,6 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront
             The `wavefront` propagated by distance. 
         """
-        # TODO: consider adding get_complex_wavefront() as this is 
-        # used in a number of locations. This could be implemented
-        # in the PhysicalWavefront and inherrited. 
         coefficient = 1 / 1j / wavefront.get_wavelength() / \
             distance * wavefront.quadratic_phase_factor(distance)
         complex_wavefront = wavefront.get_amplitude() * \
@@ -1272,8 +1247,6 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront 
             The new `Wavefront` propgated by distance. 
         """
-        # TODO: Make sure that the displacements are called by the 
-        # correct function.
         from_waist_displacement = wavefront.get_position() \
             + distance - wavefront.location_of_waist()
         to_waist_displacement = wavefront.location_of_waist() \
@@ -1340,8 +1313,6 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront
             The `Wavefront` propagated by `distance`
         """
-        # TODO: Consider removing after checking the Jaxpr for speed. 
-        # This is just an alias for another function. 
         return self.planar_to_planar(wavefront, distance)
 
 
