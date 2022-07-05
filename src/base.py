@@ -134,20 +134,23 @@ class OpticalSystem(eqx.Module):
         # Weight PSFs and sum into images
         psfs = self.weight_psfs(psfs).sum([1, 2])
         
-        # Vmap operation over each image
+        # Vmap detector operations over each image
         detector_vmap = vmap(self.apply_detector_layers, in_axes=0)
         images = detector_vmap(psfs)
         
         return np.squeeze(images)
-
+    
     def propagate_mono(self, wavel, offset=np.zeros(2)):        
         """
         
         """
         # params_dict = {"Wavefront": Wavefront(wavel, offset)}
-        params_dict = {"Wavefront": PhysicalWavefront(wavel, offset)}
+        params_dict = {"Wavefront": PhysicalWavefront(wavel, offset), 
+                       "Optical System":self}
+        
         for i in range(len(self.layers)):
             params_dict = self.layers[i](params_dict)
+            
         return params_dict["Wavefront"].wavefront_to_psf()
     
     def propagate_single(self, wavels, offset=np.zeros(2), weights=1., flux=1.,
@@ -235,5 +238,3 @@ class OpticalSystem(eqx.Module):
         psfs *= weights_in
         psfs *= fluxes
         return psfs
-        
-        
