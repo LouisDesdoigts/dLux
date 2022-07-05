@@ -6,13 +6,6 @@ The physical interpretation of most layers is straightforward but
 some are not obvious. This structure was chosen because of the 
 constrainst of automatic differentiation using `equinox`.
 
-
-Abstract Classes
-----------------
-Layers:
-- __call__(parameters : dict) -> dict:
-- (abstract) _interact(wavefront : Wavefront) -> Wavefront:
-
 Concrete Classes 
 ----------------
 - CreateWavefront
@@ -43,34 +36,32 @@ class CreateWavefront(eqx.Module):
     npix : int
         The number of pixels along one side that represent the 
         wavefront.
-    pixel_scale: float, equinox.static_field
-        Units: meters/pixel
+    pixel_scale: float, meters/pixel
         The pixelscae of each array between each layer operation
         Its value is automatically calculated from the input values 
-    wavefront_size: float
-        Units: meters
+    wavefront_size: float, meters
         Width of the array representing the wavefront in physical units
         
     """
-    number_of_pixels : int = eqx.static_field()
+    npix : int = eqx.static_field()
     wavefront_size : float
     pixel_scale : float
 
 
     # TODO: Should we have getter methods?
-    def __init__(self, number_of_pixels, wavefront_size):
+    def __init__(self, npix, wavefront_size):
         """
         Parameters
         ----------
-        number_of_pixels : int
+        npix : int
             The number of pixels along one edge of the wavefront.
-        wavefront_size : int
+        wavefront_size : float, meters
             The physical dimensions of the wavefront in units of
             (radians) meters.
         """
-        self.number_of_pixels = int(number_of_pixels)
+        self.npix = int(npix)
         self.wavefront_size = np.array(wavefront_size).astype(float)
-        self.pixel_scale = np.array(wavefront_size / number_of_pixels)\
+        self.pixel_scale = np.array(wavefront_size / npix)\
             .astype(float)
 
 
@@ -95,8 +86,8 @@ class CreateWavefront(eqx.Module):
             updated. 
         """
         wavefront = params_dict["Wavefront"]
-        phase = np.zeros(self.number_of_pixels, self.number_of_pixels)
-        amplitude = np.ones(self.number_of_pixels, self.number_of_pixels)
+        phase = np.zeros([self.npix, self.npix])
+        amplitude = np.ones([self.npix, self.npix])
         params_dict["Wavefront"] = wavefront\
             .set_phase(phase)\
             .set_amplitude(amplitude)\
@@ -107,11 +98,15 @@ class CreateWavefront(eqx.Module):
 # TODO: Talk to @Louis abot incorporating this into the Wavefronts 
 # because it is not differentiable and only relies on the state of 
 # the wavefront. 
+# I now think it might be a good idea to add this into the wavefront 
+# class and then leave the call function as a simple call to it.
+# This would allow other class to apply arbitrary tilts tracked in 
+# that class.
 class TiltWavefront(eqx.Module):
     """ 
     Applies a paraxial tilt by adding a phase slope
     """
-    def __call__(self, wavefront):
+    def __call__(self, params_dict):
         """
         Applies a tile to the phase of the wavefront according to the
         offset that is stored in the `Wavefront`.
@@ -153,7 +148,7 @@ class CircularAperture(eqx.Module):
 
     Attributes
     ----------
-    number_of_pixels : int 
+    npix : int 
         The number of pixels along one side of the aperture. This 
         parameters is not differentiable.
     array : Array[float]
@@ -161,7 +156,7 @@ class CircularAperture(eqx.Module):
         The parameter is differentiable but refers to _Notes_ for 
         a known bug.
     """
-    number_of_pixels : int = eqx.static_field()
+    npix : int = eqx.static_field()
     array : np.ndarray
 
     
@@ -169,7 +164,7 @@ class CircularAperture(eqx.Module):
         """
         Parameters
         ----------
-        number_of_pixels : int
+        npix : int
             The number of pixels along one side of the apperture when 
             represented as an array.
         rmin : float = 0.
@@ -190,15 +185,15 @@ class CircularAperture(eqx.Module):
             to stablize autodiff. This parameter should not be changed 
             very often.
         """
-        self.number_of_pixels = int(number_of_pixels)
-        self.array = self.create_aperture(self.number_of_pixels, 
+        self.npix = int(npix)
+        self.array = self.create_aperture(self.npix, 
             rmin = rmin, rmax = rmax) + eps
    
  
     def create_aperture(self, npix, rmin, rmax):     
         """
         Produces the aperture array from the parameters; `rmin`, `rmax` 
-        and `number_of_pixels`.
+        and `npix`.
 
         Parameters
         ----------
@@ -220,9 +215,9 @@ class CircularAperture(eqx.Module):
         """   
         centre = (npix - 1.) / 2.
         normalised_coordinates = (np.arange(npix) - centre) / centre
-        stacked_grids = np.meshgrid(normalised_coordinates, 
-            normalised_coordinates) 
-        radial_coordinates = np.sqrt(numpy.sum(stacked_grids, axis = 0))
+        stacked_grids = np.array(np.meshgrid(normalised_coordinates, 
+            normalised_coordinates)) 
+        radial_coordinates = np.sqrt(np.sum(stacked_grids ** 2, axis = 0))
         aperture = np.logical_and(radial_coordinates <= rmax,   
             radial_coordinates > rmin).astype(float)
         return aperture.astype(float)
@@ -292,8 +287,8 @@ class NormaliseWavefront(eqx.Module):
 class ApplyBasisOPD(eqx.Module):
     """
     Adds an array of phase values to the input wavefront calculated 
-    from the OPD. The phases are calculated from the zernike 
-    polynomials, and weighted by the `coefficients`.
+    from the OPD. The phases are calculated from the basis 
+    arrays, and weighted by the coefficients.
      
     Parameters
     ----------
@@ -301,15 +296,15 @@ class ApplyBasisOPD(eqx.Module):
         The number of zernike terms to apply, ignoring the first two 
         radial terms: Piston, Tip, Tilt. This is not a differentiable
         parameter.
-    basis: jax.numpy.ndarray, equinox.static_field
-        Arrays holding the pre-calculated basis terms. This is not a 
+    basis: jax.numpy.ndarray
+        Arrays holding the pre-calculated basis vectors. This is not a 
         differentiable parameter.
     coeffs: jax.numpy.ndarray
         Array of shape (nterns) of coefficients to be applied to each 
-        Zernike term
+        basis vector.
     """
     npix: int = eqx.static_field()
-    basis: np.ndarray = eqx.static_field()
+    basis: np.ndarray
     coeffs: np.ndarray
     
 
@@ -326,10 +321,10 @@ class ApplyBasisOPD(eqx.Module):
             basis.shape[-1] == basis.shape[-2]
             ```
             The array should be 3-dimensional unless a single 
-            polynomial is getting used. The leading axes (dimesion)
-            should represent the polynomials. 
+            basis vector is getting used. The leading axes (dimesion)
+            should match the number of coefficients. 
         coeffs : Array = None
-            The coefficients by which to weight the polynomial terms.
+            The coefficients by which to weight the basis vectors.
             This is assumed to be one dimensional and have the same 
             length as the leading dimension of the `basis`. That is,
             the following conditions are met:
@@ -370,7 +365,7 @@ class ApplyBasisOPD(eqx.Module):
         """
         # Get relevant parameters
         wavefront = params_dict["Wavefront"]
-        wavefront = WF.add_opd(self.get_total_opd())
+        wavefront = wavefront.add_opd(self.get_total_opd())
         params_dict["Wavefront"] = wavefront
         return params_dict
     
@@ -378,7 +373,7 @@ class ApplyBasisOPD(eqx.Module):
     def get_total_opd(self):
         """
         A convinience function to calculate the phase shift from the
-        coefficients and the basis. 
+        coefficients and the basis vectors. 
 
         Returns
         -------
@@ -393,32 +388,28 @@ class AddPhase(eqx.Module):
     Takes in an array of phase values and adds them to the phase term of the 
     input wavefront. ie wavelength independent
     
-    This would represent a geometric phase optic like the TinyTol Pupil
+    This would represent a geometric phase optic like the TinyTol liquid crystal Pupil.
     
     Parameters
     ----------
     npix : int
         The number of pixels along the edge of the wavefront. This 
         is not a differentiable parameter.
-    phase_array: jax.numpy.ndarray, equinox.static_field
-        Array of phase values to be applied to the input wavefront in
-        units of Radians. This is a differentiable parameter.
+    phase: float, radians
+        Array of phase values to be applied to the input wavefront.
     """
     npix: int = eqx.static_field()
-    phase_array: np.ndarray
+    phase: float
     
 
     def __init__(self, phase_array):
         """
         Parameters
         ----------
-        phase_array : Array[float]
-            An array representing the per pixel phase shift caused 
-            by this optic. The units of the phases are Radians.
-            The array must have the same leading dimension as the 
-            wavefront.  
+        phase : float, radians
+            Array of phase values to be applied to the input wavefront.  
         """
-        self.phase_array = np.array(phase_array)
+        self.phase_array = np.array(phase_array).astype(float)
         self.npix = int(phase_array.shape[0])
     
     
@@ -459,7 +450,7 @@ class ApplyOPD(eqx.Module):
     
     Parameters
     ----------
-    opd_array : jax.numpy.ndarray, equinox.static_field
+    opd_array : float
         Array of OPD values to be applied to the input wavefront in 
         units of meters. This is a differentiable parameter.
     npix : int
@@ -467,18 +458,18 @@ class ApplyOPD(eqx.Module):
         stored for debugging purposes.
     """
     npix: int = eqx.static_field()
-    opd_array: np.ndarray
+    opd_array: float
     
 
     def __init__(self, opd_array):
         """
         Parameters
         ----------
-        opd_array : Array[float]
-            The per pixel optical path differences in units of meters.
+        opd_array : float, meters
+            The per pixel optical path differences.
         """
-        self.opd_array = np.array(opd_array)
-        self.npix = opd_array.shape[0]
+        self.opd_array = np.array(opd_array).astype(float)
+        self.npix = int(opd_array.shape[0])
         
     def __call__(self, params_dict):
         """
@@ -503,11 +494,12 @@ class ApplyOPD(eqx.Module):
         """
         # Get relevant parameters
         wavefront = params_dict["Wavefront"]
-        wavefront = WF.add_opd(self.opd_array)
+        wavefront = wavefront.add_opd(self.opd_array)
         params_dict["Wavefront"] = wavefront
         return params_dict
     
 
+#TODO: Change aperture to tranmission?
 class ApplyAperture(eqx.Module):
     """ 
     Represents an arbitrary aperture in the optical path. 
@@ -516,12 +508,8 @@ class ApplyAperture(eqx.Module):
     ----------
     npix : int, eqx.static_field()
         The number of pixels along the leading edge of the wavefront.
-        This is not a differentiable parameter and is stored for 
-        debugging purposes.
-    aperture : Array[float]
-        A binary array representing the aperture. Non-binary values 
-        can be passed representing translucent surfaces but this is 
-        not recommended. This is a differentiable parameter.
+    aperture : float
+        An array representing the transmission of the aperture. 
     """
     npix: int = eqx.static_field()
     aperture: np.ndarray
@@ -532,9 +520,7 @@ class ApplyAperture(eqx.Module):
         Parameters
         ----------
         aperture : Array[float]
-            The binary array representing the aperture. While values 
-            other than `1.` and `0.` will not cause errors there use 
-            is highly discouraged.
+            The array representing the transmission of the aperture.
         """
         self.aperture = np.array(aperture)
         self.npix = aperture.shape[0]
@@ -562,11 +548,11 @@ class ApplyAperture(eqx.Module):
         """
         # Get relevant parameters
         wavefront = params_dict["Wavefront"]
-        wavefront = WF.multiply_amplitude(self.aperture)
+        wavefront = wavefront.multiply_amplitude(self.aperture)
         params_dict["Wavefront"] = wavefront
         return params_dict
-    
-    
+
+
 class ApplyBasisCLIMB(eqx.Module):
     """
     Adds an array of phase values to the input wavefront calculated 
@@ -574,9 +560,8 @@ class ApplyBasisCLIMB(eqx.Module):
      
     Parameters
     ----------
-    nterms: int, equinox.static_field
-        The number of zernike terms to apply, ignoring the first two radial
-        terms: Piston, Tip, Tilt. This is not a differentiable parameter.
+    npix: int, equinox.static_field
+        The number of pixels of the basis, before downsampling through CLIMB.
     basis: jax.numpy.ndarray, equinox.static_field
         Arrays holding the pre-calculated basis terms. This is a 
         differentiable parameter.
@@ -636,7 +621,7 @@ class ApplyBasisCLIMB(eqx.Module):
         latent = self.get_opd(self.basis, self.coeffs)
         binary_phase = np.pi*self.CLIMB(latent)
         opd = self.phase_to_opd(binary_phase, self.ideal_wavel)
-        wavefront = WF.add_opd(opd)
+        wavefront = wavefront.add_opd(opd)
 
         params_dict["Wavefront"] = wavefront
         return params_dict
