@@ -15,9 +15,14 @@ Layers:
 
 Concrete Classes 
 ----------------
-
-
-
+- CreateWavefront
+- TiltWavefront
+- CircularAperture
+- NormaliseWavefront
+- ApplyBasisOPD
+- AddPhase
+- ApplyAperture
+- ApplyBasisCLIMB
 """
 __author__ = "Louis Desdoigts"
 __date__ = "05/07/2022"
@@ -130,65 +135,155 @@ class CreateWavefront(Layer):
             .set_amplitude(amplitude)\
             .set_pixel_scale(self.pixel_scale)
 
-    
+
+# TODO: Talk to @Louis abot incorporating this into the Wavefronts 
+# because it is not differentiable and only relies on the state of 
+# the wavefront. 
 class TiltWavefront(eqx.Module):
     """ 
     Applies a paraxial tilt by adding a phase slope
     """
-    def _interact()
-        
-    def __call__(self, params_dict):
+    def _interact(self, wavefront):
         """
-        
+        Applies a tile to the phase of the wavefront according to the
+        offset that is stored in the `Wavefront`.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The `Wavefront` (subclass) entity to retrieve the tilt 
+            from.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The `Wavefront` with the phase incurred from the additional
+            optical path. 
         """
-        # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        
-        # Calc phase tilt 
-        xangle, yangle = WF.offset
-        xcoords, ycoords = WF.get_pixel_positions()
-        k = 2*np.pi/WF.wavelength
-        phase = -k * (xcoords*xangle + ycoords*yangle)
-        WF = WF.add_phase(phase)
-        
-        # # Update Wavefront Object
-        params_dict["Wavefront"] = WF
-        return params_dict
+        x_angle, y_angle = wavefront.get_offset()
+        x_positions, y_positions = wavefront.get_pixel_positions()
+        wavenumber = 2 * np.pi / wavefront.get_wavelength()
+        phase = - wavenumber * (x_positions * x_angle + \
+            y_positions * y_angle)
+        return wavefront.add_phase(phase)
+
     
-class CircularAperture(eqx.Module):
+class CircularAperture(Layer):
     """
     Multiplies the input wavefront by a pre calculated circular binary 
     (float) mask that fills the size of the array
     
-    Note there is a known bug where gradients become nan if phase operations
-    are applied after this layer
+    Notes
+    -----
+    - There is a known bug where gradients become `nan` if phase 
+      operation are applied after this layer
+
+    Attributes
+    ----------
+    number_of_pixels : int 
+        The number of pixels along one side of the aperture. This 
+        parameters is not differentiable.
+    array : Array[float]
+        A binary `float` array describing the apertures location.
+        The parameter is differentiable but refers to _Notes_ for 
+        a known bug.
     """
-    npix:  int = eqx.static_field()
-    array: np.ndarray
+    number_of_pixels : int = eqx.static_field()
+    array : np.ndarray
+
     
     def __init__(self, npix, rmin=0., rmax=1., eps=1e-8):
-        self.npix = int(npix)
-        self.array = self.create_aperture(self.npix, rmin=rmin, rmax=rmax) + eps
-    
-    def create_aperture(self, npix, rmin=0., rmax=1.):        
-        c = (npix - 1) / 2.
-        xs = (np.arange(npix) - c) / c
-        XX, YY = np.meshgrid(xs, xs)
-        RR = np.sqrt(XX ** 2 + YY ** 2)
-        aperture = np.logical_and(RR <= rmax, RR > rmin).astype(float)
+        """
+        Parameters
+        ----------
+        number_of_pixels : int
+            The number of pixels along one side of the apperture when 
+            represented as an array.
+        rmin : float = 0.
+            The inner radius of the Annular aperture. Note that the 
+            description `Circular` is a misomer. Additionally notice 
+            that this parameter must satisfy the condition
+            ```py
+            0 <= rmin < rmax
+            ```
+        rmax : float = 1.
+            The outer radius of the Anular apperture. Note that this 
+            must satisfy the condition.
+            ```py
+            rmin < rmax <= 1.
+            ``` 
+        eps : float = 1e-08
+            A small constant that is added to the binary aperture array
+            to stablize autodiff. This parameter should not be changed 
+            very often.
+        """
+        self.number_of_pixels = int(number_of_pixels)
+        self.array = self.create_aperture(self.number_of_pixels, 
+            rmin = rmin, rmax = rmax) + eps
+   
+ 
+    def create_aperture(self, npix, rmin, rmax):     
+        """
+        Produces the aperture array from the parameters; `rmin`, `rmax` 
+        and `number_of_pixels`.
+
+        Parameters
+        ----------
+        npix : int
+            The number of pixels along the side of the array that is 
+            used to represent the aperture. 
+        rmin : float = 0.
+            The inner radius of the annular opening. This is a unitless
+            quantity that must satisfy the following condition:
+            ```py
+            0 <= rmin < rmax
+            ```
+        rmax : float = 1.
+            The outer radius of the annular opening. This is a unitless
+            quantity and must satisfy the condition:
+            ```py
+            rmin < rmax <= 1.
+            ```
+        """   
+        centre = (npix - 1.) / 2.
+        normalised_coordinates = (np.arange(npix) - centre) / centre
+        stacked_grids = np.meshgrid(normalised_coordinates, 
+            normalised_coordinates) 
+        radial_coordinates = np.sqrt(numpy.sum(stacked_grids, axis = 0))
+        aperture = np.logical_and(radial_coordinates <= rmax,   
+            radial_coordinates > rmin).astype(float)
         return aperture.astype(float)
-    
+   
+ 
     def __call__(self, params_dict):
         """
-        
+        Apply the apperture to the wavefront. Note that the name 
+        `CircluarApperture` is a misnomer since because this Module
+        can also represent annular openings.
+
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following condition
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            ```
+
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated. 
         """
         # Get relevant parameters
-        WF = params_dict["Wavefront"]        
-        WF = WF.multiply_amplitude(self.array)
+        wavefront = params_dict["Wavefront"]        
+        wavefront = wavefront.multiply_amplitude(self.array)
 
         # Update Wavefront Object
-        params_dict["Wavefront"] = WF
+        params_dict["Wavefront"] = wavefront
         return params_dict
+
     
 class NormaliseWavefront(eqx.Module):
     """ 
