@@ -238,5 +238,3 @@ class OpticalSystem(eqx.Module):
         psfs *= weights_in
         psfs *= fluxes
         return psfs
-        
-        
