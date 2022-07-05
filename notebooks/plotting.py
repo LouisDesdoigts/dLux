@@ -21,7 +21,7 @@ def plot_batch(batch, filename=None, dpi=96, ncols=4, apply_det=False, rmask=Fal
         opd = model.layers[4].get_binary_phase()
 
         if single:
-            psf = model.propagate_single(model.wavels)
+            psf = model.propagate_single(model.wavels, apply_detector=apply_det)
         else:
             psf = model()
             
