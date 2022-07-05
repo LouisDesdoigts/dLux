@@ -279,7 +279,7 @@ class VariableSamplingPropagator(Propagator):
         The number of pixels in the plane of propagation. 
     """
     pixel_scale_out : float
-    pixels_out : float = eqx.static_field()
+    pixels_out : int
 
 
     def __init__(self : Propagator, pixel_scale_out : float, 
@@ -298,8 +298,8 @@ class VariableSamplingPropagator(Propagator):
             True if the inverse algorithm is to be used else False.
         """
         super().__init__(inverse)
-        self.pixel_scale_out = pixel_scale_out
-        self.pixels_out = pixels_out        
+        self.pixel_scale_out = np.array(pixel_scale_out).astype(float)
+        self.pixels_out = int(pixels_out)        
 
 
     def get_pixel_scale_out(self : Propagator) -> float:
@@ -652,8 +652,8 @@ class PhysicalMFT(VariableSamplingPropagator):
     focal_length : float
 
 
-    def __init__(self : Propagator, focal_length : float, 
-            pixels_out : int, pixel_scale_out : float, 
+    def __init__(self : Propagator, pixels_out : float, 
+            focal_length : int, pixel_scale_out : float, 
             inverse : bool) -> Propagator:
         """
         Parameters
@@ -673,7 +673,7 @@ class PhysicalMFT(VariableSamplingPropagator):
         """
         super().__init__(inverse = inverse, 
             pixel_scale_out = pixel_scale_out, pixels_out = pixels_out) 
-        self.focal_length = focal_length
+        self.focal_length = np.array(focal_length).astype(float)
 
 
 
@@ -808,8 +808,8 @@ class PhysicalFresnel(VariableSamplingPropagator):
     focal_shift : float
 
 
-    def __init__(self : Propagator, focal_length : float, 
-            focal_shift : float, pixels_out : float, 
+    def __init__(self : Propagator, pixels_out : float,
+            focal_length : float, focal_shift : float, 
             pixel_scale_out : float, inverse : bool) -> Propagator:
         """
         Parameters
