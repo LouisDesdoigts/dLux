@@ -36,10 +36,10 @@ jobs:
             - name: propagator tests
               run: pytest --quiet tests/propagators.py
 
-            - name: layer tests
-              run: pytest --quiet tests/layers.py
+#            - name: layer tests
+#              run: pytest --quiet tests/layers.py
 
             # ===== Documentation =====
-            - name: wavefront documentation
-              run: 
+#            - name: wavefront documentation
+#              run: mkdocs gh-deploy 
             
