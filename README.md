@@ -6,6 +6,7 @@
 # ∂Lux
 [![PyPI version](https://badge.fury.io/py/dLux.svg)](https://badge.fury.io/py/dLux)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![integration](https://github.com/LouisDesdoigts/dLux/actions/workflows/automated_tests.yml/badge.svg)](https://github.com/LouisDesdoigts/dLux/actions/workflows/automated_tests.yml)
 
 ∂Lux: Taking derivatives through Light - 'Optical systems as a Neural Network'
 
