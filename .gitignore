@@ -1,2 +1,26 @@
-my_hours.txt
+.gitignore
+.DS_Store
+.ipynb_checkpoints/
+build/
+dLux.egg-info/
+dist/
+docs/.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+#notebooks/Masks.png
+#notebooks/Psfs.png
+notebooks/__pycache__/
+#notebooks/basic_usage.ipynb
+#notebooks/basis.npy
+#notebooks/basis_creation.ipynb
+#notebooks/binary_mask.npy
+#notebooks/errors.png
+#notebooks/gif_figs/
+#notebooks/post_calibration_models.p
+#notebooks/rge.gif
+#notebooks/seeded.gif
+sandbox/
+src/.ipynb_checkpoints/
+src/__pycache__/
+src/deprecated.py
+src/pre_wf/
 
