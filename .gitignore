@@ -1,5 +1,7 @@
 my_hours.txt
 .pytest_cache
 tests/__pycache__
+notebooks/.ipynb_checkpoints
+notebooks/__pycache__
 *.swp
 site
