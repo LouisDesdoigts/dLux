@@ -510,27 +510,55 @@ class ApplyOPD(eqx.Module):
 
 class ApplyAperture(eqx.Module):
     """ 
-    Takes in an array representing the Optical Path Difference (OPD) and 
-    applies the corresponding phase difference to the input wavefront. 
+    Represents an arbitrary aperture in the optical path. 
 
-    This would represent an etched reflective optic, or phase plate
-    
-    Parameters
+    Attributes
     ----------
-    array: jax.numpy.ndarray, equinox.static_field
-        Units: radians
-        Array of OPD values to be applied to the input wavefront
+    npix : int, eqx.static_field()
+        The number of pixels along the leading edge of the wavefront.
+        This is not a differentiable parameter and is stored for 
+        debugging purposes.
+    aperture : Array[float]
+        A binary array representing the aperture. Non-binary values 
+        can be passed representing translucent surfaces but this is 
+        not recommended. This is a differentiable parameter.
     """
     npix: int = eqx.static_field()
     aperture: np.ndarray
     
+
     def __init__(self, aperture):
+        """
+        Parameters
+        ----------
+        aperture : Array[float]
+            The binary array representing the aperture. While values 
+            other than `1.` and `0.` will not cause errors there use 
+            is highly discouraged.
+        """
         self.aperture = np.array(aperture)
         self.npix = aperture.shape[0]
         
+
     def __call__(self, params_dict):
         """
-        
+        Pass the wavefront through the `Aperture`.
+
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following conditions
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            params_dict.get("Wavefront").shape == self.apperture.shape
+            ```
+
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated.
         """
         # Get relevant parameters
         wavefront = params_dict["Wavefront"]
@@ -541,35 +569,60 @@ class ApplyAperture(eqx.Module):
     
 class ApplyBasisCLIMB(eqx.Module):
     """
-    NEW DOCTRING:
-        TO DO
-        
-    OLD DOCSTRING:
-    Adds an array of phase values to the input wavefront calculated from the OPD
+    Adds an array of phase values to the input wavefront calculated 
+    from the OPD
      
     Parameters
     ----------
     nterms: int, equinox.static_field
         The number of zernike terms to apply, ignoring the first two radial
-        terms: Piston, Tip, Tilt
-        
+        terms: Piston, Tip, Tilt. This is not a differentiable parameter.
     basis: jax.numpy.ndarray, equinox.static_field
-        Arrays holding the pre-calculated basis terms
-        
+        Arrays holding the pre-calculated basis terms. This is a 
+        differentiable parameter.
     coefficients: jax.numpy.ndarray
         Array of shape (nterns) of coefficients to be applied to each 
-        Zernike term
+        Zernike term. This is a differentiable parameter.
+    ideal_wavel : float
+        The wavelength 
     """
     npix: int = eqx.static_field()
     basis: np.ndarray
     coeffs: np.ndarray
     ideal_wavel: float
     
+
+    # TODO: This will need to be reviewed by @LouisDesdoigts
     def __init__(self, basis, coeffs, ideal_wavel):
+        """
+        Parameters
+        ----------
+        basis : Array
+            The basis functions of the zernike polynomials precomputed
+            over a square grid. If there is more than one order of the 
+            Zernike polynomials getting used it is assumed that the 
+            results are stored in a 3-dimensional array with the 
+            leading dimension matching the number of polynomial terms
+            to use. That is, the following conditions are met:
+            ```py
+            basis.shape = (n, m, m)
+            coeffs.shape = (n, )
+            ```
+            where, `n` and `m` are integers representianf the number
+            polynomial terms and the wavefront dimensions respectively.
+        coeffs : Array
+            The coefficients of the zernike polynomials defined in 
+            basis. These must satisfy the condition that is described 
+            above. 
+        ideal_wavel : float
+            The wavelength that perfectly CLIMBs.
+        """
+        # TODO: I have no idea what idal_wavel is 
         self.npix = int(basis.shape[-1])
         self.basis = np.array(basis).astype(float)
         self.coeffs = np.array(coeffs).astype(float)
         self.ideal_wavel = np.array(ideal_wavel).astype(float)
+
 
     def __call__(self, params_dict):
         """
@@ -588,32 +641,40 @@ class ApplyBasisCLIMB(eqx.Module):
         params_dict["Wavefront"] = wavefront
         return params_dict
     
+
     def opd_to_phase(self, opd, wavel):
         return 2*np.pi*opd/wavel
     
+
     def phase_to_opd(self, phase, wavel):
         return phase*wavel/(2*np.pi)
     
+
     def get_opd(self, basis, coefficients):
         return np.dot(basis.T, coefficients)
     
+
     def get_total_opd(self):
         return self.get_opd(self.basis, self.coeffs)
     
+
     def get_binary_phase(self):
         latent = self.get_opd(self.basis, self.coeffs)
         binary_phase = np.pi*self.CLIMB(latent)
         return binary_phase
     
+
     def lsq_params(self, img):
         xx, yy = np.meshgrid(np.linspace(0,1,img.shape[0]),np.linspace(0,1,img.shape[1]))
         A = np.vstack([xx.ravel(), yy.ravel(), np.ones_like(xx).ravel()]).T
         matrix = np.linalg.inv(np.dot(A.T,A)).dot(A.T)
         return matrix, xx, yy, A
 
+
     def lsq(self, img):
         matrix, _, _, _ = self.lsq_params(img)
         return np.dot(matrix,img.ravel())
+
 
     def area(self, img, epsilon = 1e-15):
 
