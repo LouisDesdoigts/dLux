@@ -1,39 +1,30 @@
+"""
+layers.py
+---------
+A layer is a mathematical abstraction of an optical interaction. 
+The physical interpretation of most layers is straightforward but 
+some are not obvious. This structure was chosen because of the 
+constrainst of automatic differentiation using `equinox`.
+
+Concrete Classes 
+----------------
+- CreateWavefront
+- TiltWavefront
+- CircularAperture
+- NormaliseWavefront
+- ApplyBasisOPD
+- AddPhase
+- ApplyAperture
+- ApplyBasisCLIMB
+"""
+__author__ = "Louis Desdoigts"
+__date__ = "05/07/2022"
+
+
 import jax
 import jax.numpy as np
 import equinox as eqx
 
-
-"""
-Layer __call__ functions Template:
-
-    def __call__(self, params_dict):
-    
-        # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        wavefront = WF.wavefront
-        wavel = WF.wavelength
-        offset = WF.offset
-        pixel_scale = WF.pixel_scale
-        planetype = WF.planetype
-
-        # Do things
-
-
-        # Update Wavefront Object
-        WF = eqx.tree_at(lambda WF: WF.wavefront,  WF, wavefront_out)
-        WF = eqx.tree_at(lambda WF: WF.offset,     WF, offset)
-        WF = eqx.tree_at(lambda WF: WF.pixel_scale, WF, pixel_scale)
-        WF = eqx.tree_at(lambda WF: WF.planetype,  WF, planetype)
-        params_dict["Wavefront"] = WF
-        return params_dict
-
-"""
-
-
-
-###################################################
-############## Optical Layers #####################
-###################################################
 
 class CreateWavefront(eqx.Module):
     """ 
@@ -41,215 +32,414 @@ class CreateWavefront(eqx.Module):
 
     Parameters
     ----------
-    pixel_scale: float, equinox.static_field
-        Units: meters/pixel
+    npix : int
+        The number of pixels along one side that represent the 
+        wavefront.
+    pixel_scale: float, meters/pixel
         The pixelscae of each array between each layer operation
-        Its value is automatically calculated from the input values
-        
-    wavefront_size: float
-        Units: meters
+        Its value is automatically calculated from the input values 
+    wavefront_size: float, meters
         Width of the array representing the wavefront in physical units
-        
     """
-    npix:           int = eqx.static_field()
-    wavefront_size: float
-    pixel_scale:     float
-    
+    npix : int = eqx.static_field()
+    wavefront_size : float
+    pixel_scale : float
+
+
     def __init__(self, npix, wavefront_size):
+        """
+        Parameters
+        ----------
+        npix : int
+            The number of pixels along one edge of the wavefront.
+        wavefront_size : float, meters
+            The physical dimensions of the wavefront in units of
+            (radians) meters.
+        """
         self.npix = int(npix)
         self.wavefront_size = np.array(wavefront_size).astype(float)
-        self.pixel_scale = np.array(wavefront_size/npix).astype(float)
-    
+        self.pixel_scale = np.array(wavefront_size / npix)\
+            .astype(float)
+
+
     def __call__(self, params_dict):
         """
-        
+        Creates a safe wavefront by populating the amplitude and 
+        phase arrays as well as the pixel_scale. 
+
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following condition
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            ```
+
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated. 
         """
-        # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        ampl = np.ones([self.npix, self.npix])
+        wavefront = params_dict["Wavefront"]
         phase = np.zeros([self.npix, self.npix])
-        pixel_scale = self.pixel_scale
-        
-        # # Update Wavefront Object
-        WF = eqx.tree_at(lambda WF: WF.amplitude,  WF, ampl,  
-                         is_leaf=lambda x: x is None)
-        
-        WF = eqx.tree_at(lambda WF: WF.phase,  WF, phase,  
-                         is_leaf=lambda x: x is None)
-        
-        WF = eqx.tree_at(lambda WF: WF.pixel_scale, WF, pixel_scale, 
-                         is_leaf=lambda x: x is None)
-        params_dict["Wavefront"] = WF
+        amplitude = np.ones([self.npix, self.npix])
+        params_dict["Wavefront"] = wavefront\
+            .set_phase(phase)\
+            .set_amplitude(amplitude)\
+            .set_pixel_scale(self.pixel_scale)
         return params_dict
-    
+
+
+# TODO: Talk to @Louis abot incorporating this into the Wavefronts 
+# because it is not differentiable and only relies on the state of 
+# the wavefront. 
+# I now think it might be a good idea to add this into the wavefront 
+# class and then leave the call function as a simple call to it.
+# This would allow other class to apply arbitrary tilts tracked in 
+# that class.
 class TiltWavefront(eqx.Module):
     """ 
     Applies a paraxial tilt by adding a phase slope
-
-    Parameters
-    ----------
-    pixel_scale: float, equinox.static_field
-        Units: meters/pixel
-        The pixelscae of each array between each layer operation
-        Its value is automatically calculated from the input values
-        
-    wavefront_size: float
-        Units: meters
-        Width of the array representing the wavefront in physical units
-        
     """
-    
-    def __init__(self):
-        pass
-        
     def __call__(self, params_dict):
         """
-        
+        Applies a tilt to the phase of the wavefront according to the
+        offset that is stored in the `Wavefront`.
+
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following condition
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            ```
+
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated. 
         """
-        # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        
-        # Calc phase tilt 
-        xangle, yangle = WF.offset
-        xcoords, ycoords = WF.get_pixel_positions()
-        k = 2*np.pi/WF.wavelength
-        phase = -k * (xcoords*xangle + ycoords*yangle)
-        WF = WF.add_phase(phase)
-        
-        # # Update Wavefront Object
-        params_dict["Wavefront"] = WF
+        wavefront = params_dict["Wavefront"]
+        x_angle, y_angle = wavefront.get_offset()
+        x_positions, y_positions = wavefront.get_pixel_positions()
+        wavenumber = 2 * np.pi / wavefront.get_wavelength()
+        phase = - wavenumber * (x_positions * x_angle + \
+            y_positions * y_angle)
+        params_dict["Wavefront"] = wavefront.add_phase(phase)
         return params_dict
+
     
 class CircularAperture(eqx.Module):
     """
     Multiplies the input wavefront by a pre calculated circular binary 
     (float) mask that fills the size of the array
     
-    Note there is a known bug where gradients become nan if phase operations
-    are applied after this layer
+    Notes
+    -----
+    - There is a known bug where gradients become `nan` if phase 
+      operation are applied after this layer
+
+    Attributes
+    ----------
+    npix : int 
+        The number of pixels along one side of the aperture. This 
+        parameters is not differentiable.
+    array : Array[float]
+        A binary `float` array describing the apertures location.
+        The parameter is differentiable but refers to _Notes_ for 
+        a known bug.
     """
-    npix:  int = eqx.static_field()
-    array: np.ndarray
+    npix : int = eqx.static_field()
+    array : np.ndarray
+
     
     def __init__(self, npix, rmin=0., rmax=1., eps=1e-8):
+        """
+        Parameters
+        ----------
+        npix : int
+            The number of pixels along one side of the apperture when 
+            represented as an array.
+        rmin : float = 0.
+            The inner radius of the Annular aperture. Note that the 
+            description `Circular` is a misnomer. Additionally notice 
+            that this parameter must satisfy the condition
+            ```py
+            0 <= rmin < rmax
+            ```
+        rmax : float = 1.
+            The outer radius of the Anular apperture. Note that this 
+            must satisfy the condition.
+            ```py
+            rmin < rmax <= 1.
+            ``` 
+        eps : float = 1e-08
+            A small constant that is added to the binary aperture array
+            to stablize autodiff. This parameter should not be changed 
+            very often.
+        """
         self.npix = int(npix)
-        self.array = self.create_aperture(self.npix, rmin=rmin, rmax=rmax) + eps
-    
-    def create_aperture(self, npix, rmin=0., rmax=1.):        
-        c = (npix - 1) / 2.
-        xs = (np.arange(npix) - c) / c
-        XX, YY = np.meshgrid(xs, xs)
-        RR = np.sqrt(XX ** 2 + YY ** 2)
-        aperture = np.logical_and(RR <= rmax, RR > rmin).astype(float)
+        self.array = self.create_aperture(self.npix, 
+            rmin = rmin, rmax = rmax) + eps
+   
+ 
+    def create_aperture(self, npix, rmin, rmax):     
+        """
+        Produces the aperture array from the parameters; `rmin`, `rmax` 
+        and `npix`.
+
+        Parameters
+        ----------
+        npix : int
+            The number of pixels along the side of the array that is 
+            used to represent the aperture. 
+        rmin : float = 0.
+            The inner radius of the annular opening. This is a unitless
+            quantity that must satisfy the following condition:
+            ```py
+            0 <= rmin < rmax
+            ```
+        rmax : float = 1.
+            The outer radius of the annular opening. This is a unitless
+            quantity and must satisfy the condition:
+            ```py
+            rmin < rmax <= 1.
+            ```
+        """   
+        centre = (npix - 1.) / 2.
+        normalised_coordinates = (np.arange(npix) - centre) / centre
+        stacked_grids = np.array(np.meshgrid(normalised_coordinates,
+            normalised_coordinates)) 
+        radial_coordinates = np.sqrt(np.sum(stacked_grids ** 2, axis = 0))
+        aperture = np.logical_and(radial_coordinates <= rmax,   
+            radial_coordinates > rmin).astype(float)
         return aperture.astype(float)
-    
+   
+ 
     def __call__(self, params_dict):
         """
-        
+        Apply the apperture to the wavefront. Note that the name 
+        `CircluarApperture` is a misnomer since because this Module
+        can also represent annular openings.
+
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following condition
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            ```
+
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated. 
         """
         # Get relevant parameters
-        WF = params_dict["Wavefront"]        
-        WF = WF.multiply_amplitude(self.array)
+        wavefront = params_dict["Wavefront"]        
+        wavefront = wavefront.multiply_amplitude(self.array)
 
         # Update Wavefront Object
-        params_dict["Wavefront"] = WF
+        params_dict["Wavefront"] = wavefront
         return params_dict
+
     
 class NormaliseWavefront(eqx.Module):
     """ 
-    Normalises the input wavefront
-    """
-    def __init__(self):
-        pass
-                
+    Normalises the input wavefront using the in-built normalisation 
+    algorithm of the wavefront. 
+    """                
     def __call__(self, params_dict):
         """
-        
+        Normalise the wavefront. 
+
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following condition
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            ```
+
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated. 
         """
         # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        WF = WF.normalise()
-        params_dict["Wavefront"] = WF
+        wavefront = params_dict["Wavefront"]
+        wavefront = wavefront.normalise()
+        params_dict["Wavefront"] = wavefront
         return params_dict
     
+
 class ApplyBasisOPD(eqx.Module):
     """
-    NEW DOCTRING:
-        TO DO
-        
-    OLD DOCSTRING:
-    Adds an array of phase values to the input wavefront calculated from the OPD
+    Adds an array of phase values to the input wavefront calculated 
+    from the OPD. The phases are calculated from the basis 
+    arrays, and weighted by the coefficients.
      
     Parameters
     ----------
     nterms: int, equinox.static_field
-        The number of zernike terms to apply, ignoring the first two radial
-        terms: Piston, Tip, Tilt
-        
-    basis: jax.numpy.ndarray, equinox.static_field
-        Arrays holding the pre-calculated basis terms
-        
+        The number of zernike terms to apply, ignoring the first two 
+        radial terms: Piston, Tip, Tilt. This is not a differentiable
+        parameter.
+    basis: jax.numpy.ndarray
+        Arrays holding the pre-calculated basis vectors. This is not a 
+        differentiable parameter.
     coeffs: jax.numpy.ndarray
         Array of shape (nterns) of coefficients to be applied to each 
-        Zernike term
+        basis vector.
     """
     npix: int = eqx.static_field()
     basis: np.ndarray
     coeffs: np.ndarray
     
+
     def __init__(self, basis, coeffs=None):
+        """
+        Parameters
+        ----------
+        basis : Array
+            The basis polynomials (2-dimensional) to use calculating 
+            the phase difference. It is assumed that the polynomials 
+            have been evaluated on a square surface. That is, the 
+            following condition is satisfied:
+            ```py
+            basis.shape[-1] == basis.shape[-2]
+            ```
+            The array should be 3-dimensional unless a single 
+            basis vector is getting used. The leading axes (dimesion)
+            should match the number of coefficients. 
+        coeffs : Array = None
+            The coefficients by which to weight the basis vectors.
+            This is assumed to be one dimensional and have the same 
+            length as the leading dimension of the `basis`. That is,
+            the following conditions are met:
+            ```py
+            coeffs.shape = (n, )
+            basis.shape = (n, m, m)
+            ```
+            If `None`, the default value is passed it is interpretted 
+            as `np.zeros((n, ))`.           
+        """
         self.basis = np.array(basis)
         self.npix = self.basis.shape[-1]
         self.coeffs = np.zeros(len(self.basis)) if coeffs is None \
                  else np.array(coeffs).astype(float)
 
+
     def __call__(self, params_dict):
         """
-        
+        Calculate and apply the appropriate phase shift to the 
+        wavefront.         
+
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following condition
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            ```
+            It is also assumed that `self.basis.shape[-1] == 
+            wavefront.shape[0]` and that both are square. 
+
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated. 
         """
         # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        WF = WF.add_opd(self.get_total_opd())
-        params_dict["Wavefront"] = WF
+        wavefront = params_dict["Wavefront"]
+        wavefront = wavefront.add_opd(self.get_total_opd())
+        params_dict["Wavefront"] = wavefront
         return params_dict
     
+
     def get_total_opd(self):
+        """
+        A convinience function to calculate the phase shift from the
+        coefficients and the basis vectors. 
+
+        Returns
+        -------
+        phase_shift : Array
+            The per-pixel phase shift of the wavefront.
+        """
         return np.dot(self.basis.T, self.coeffs)
     
+
 class AddPhase(eqx.Module):
     """ 
-    
     Takes in an array of phase values and adds them to the phase term of the 
     input wavefront. ie wavelength independent
     
-    This would represent a geometric phase optic like the TinyTol Pupil
+    This would represent a geometric phase optic like the TinyTol liquid crystal Pupil.
     
     Parameters
     ----------
-    array: jax.numpy.ndarray, equinox.static_field
-        Units: radians
-        Array of phase values to be applied to the input wavefront
+    npix : int
+        The number of pixels along the edge of the wavefront. This 
+        is not a differentiable parameter.
+    phase: float, radians
+        Array of phase values to be applied to the input wavefront.
     """
     npix: int = eqx.static_field()
-    phase_array: np.ndarray
+    phase: float
     
+
     def __init__(self, phase_array):
-        self.phase_array = np.array(phase_array)
-        self.npix = phase_array.shape[0]
-        
+        """
+        Parameters
+        ----------
+        phase : float, radians
+            Array of phase values to be applied to the input wavefront.  
+        """
+        self.phase_array = np.array(phase_array).astype(float)
+        self.npix = int(phase_array.shape[0])
+    
+    
     def __call__(self, params_dict):
         """
-        
+        Apply the phase shift represented by this `Layer` to the 
+        wavefront.        
+
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following conditions
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            params_dict.get("Wavefront").shape == self.phase_array.shape
+            ```
+
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated. 
         """
         # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        WF = WF.add_phase(self.phase_array)
-        params_dict["Wavefront"] = WF
+        wavefront = params_dict["Wavefront"]
+        wavefront = wavefront.add_phase(self.phase_array)
+        params_dict["Wavefront"] = wavefront
         return params_dict
     
+
 class ApplyOPD(eqx.Module):
     """ 
-    
     Takes in an array representing the Optical Path Difference (OPD) and 
     applies the corresponding phase difference to the input wavefront. 
 
@@ -257,134 +447,216 @@ class ApplyOPD(eqx.Module):
     
     Parameters
     ----------
-    array: jax.numpy.ndarray, equinox.static_field
-        Units: radians
-        Array of OPD values to be applied to the input wavefront
+    opd_array : float
+        Array of OPD values to be applied to the input wavefront in 
+        units of meters. This is a differentiable parameter.
+    npix : int
+        The number of pixels along the leading edge of the `opd_array`
+        stored for debugging purposes.
     """
     npix: int = eqx.static_field()
-    opd_array: np.ndarray
+    opd_array: float
     
+
     def __init__(self, opd_array):
-        self.opd_array = np.array(opd_array)
-        self.npix = opd_array.shape[0]
+        """
+        Parameters
+        ----------
+        opd_array : float, meters
+            The per pixel optical path differences.
+        """
+        self.opd_array = np.array(opd_array).astype(float)
+        self.npix = int(opd_array.shape[0])
         
     def __call__(self, params_dict):
         """
-        
+        Apply the optical path difference represented by this `Layer`
+        to the `Wavefront`.
+
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following conditions
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            params_dict.get("Wavefront").shape == self.phase_array.shape
+            ```
+
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated.
         """
         # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        WF = WF.add_opd(self.opd_array)
-        params_dict["Wavefront"] = WF
+        wavefront = params_dict["Wavefront"]
+        wavefront = wavefront.add_opd(self.opd_array)
+        params_dict["Wavefront"] = wavefront
         return params_dict
     
+
+#TODO: Change aperture to tranmission?
 class ApplyAperture(eqx.Module):
     """ 
-    
-    Takes in an array representing the Optical Path Difference (OPD) and 
-    applies the corresponding phase difference to the input wavefront. 
+    Represents an arbitrary aperture in the optical path. 
 
-    This would represent an etched reflective optic, or phase plate
-    
-    Parameters
+    Attributes
     ----------
-    array: jax.numpy.ndarray, equinox.static_field
-        Units: radians
-        Array of OPD values to be applied to the input wavefront
+    npix : int, eqx.static_field()
+        The number of pixels along the leading edge of the wavefront.
+    aperture : float
+        An array representing the transmission of the aperture. 
     """
     npix: int = eqx.static_field()
     aperture: np.ndarray
     
+
     def __init__(self, aperture):
+        """
+        Parameters
+        ----------
+        aperture : Array[float]
+            The array representing the transmission of the aperture.
+        """
         self.aperture = np.array(aperture)
         self.npix = aperture.shape[0]
         
+
     def __call__(self, params_dict):
         """
-        
+        Pass the wavefront through the `Aperture`.
+
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following conditions
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            params_dict.get("Wavefront").shape == self.apperture.shape
+            ```
+
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated.
         """
         # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        WF = WF.multiply_amplitude(self.aperture)
-        params_dict["Wavefront"] = WF
+        wavefront = params_dict["Wavefront"]
+        wavefront = wavefront.multiply_amplitude(self.aperture)
+        params_dict["Wavefront"] = wavefront
         return params_dict
-    
-    
+
+
 class ApplyBasisCLIMB(eqx.Module):
     """
-    NEW DOCTRING:
-        TO DO
-        
-    OLD DOCSTRING:
-    Adds an array of phase values to the input wavefront calculated from the OPD
+    Adds an array of phase values to the input wavefront calculated 
+    from the OPD
      
     Parameters
     ----------
-    nterms: int, equinox.static_field
-        The number of zernike terms to apply, ignoring the first two radial
-        terms: Piston, Tip, Tilt
-        
+    npix: int, equinox.static_field
+        The number of pixels of the basis, before downsampling through CLIMB.
     basis: jax.numpy.ndarray, equinox.static_field
-        Arrays holding the pre-calculated basis terms
-        
+        Arrays holding the pre-calculated basis terms. This is a 
+        differentiable parameter.
     coefficients: jax.numpy.ndarray
         Array of shape (nterns) of coefficients to be applied to each 
-        Zernike term
+        Zernike term. This is a differentiable parameter.
+    ideal_wavel : float
+        The wavelength 
     """
     npix: int = eqx.static_field()
     basis: np.ndarray
     coeffs: np.ndarray
     ideal_wavel: float
     
+
+    # TODO: This will need to be reviewed by @LouisDesdoigts
     def __init__(self, basis, coeffs, ideal_wavel):
+        """
+        Parameters
+        ----------
+        basis : Array
+            The basis functions of the zernike polynomials precomputed
+            over a square grid. If there is more than one order of the 
+            Zernike polynomials getting used it is assumed that the 
+            results are stored in a 3-dimensional array with the 
+            leading dimension matching the number of polynomial terms
+            to use. That is, the following conditions are met:
+            ```py
+            basis.shape = (n, m, m)
+            coeffs.shape = (n, )
+            ```
+            where, `n` and `m` are integers representianf the number
+            polynomial terms and the wavefront dimensions respectively.
+        coeffs : Array
+            The coefficients of the zernike polynomials defined in 
+            basis. These must satisfy the condition that is described 
+            above. 
+        ideal_wavel : float
+            The wavelength that perfectly CLIMBs.
+        """
+        # TODO: I have no idea what idal_wavel is 
         self.npix = int(basis.shape[-1])
         self.basis = np.array(basis).astype(float)
         self.coeffs = np.array(coeffs).astype(float)
         self.ideal_wavel = np.array(ideal_wavel).astype(float)
+
 
     def __call__(self, params_dict):
         """
         
         """
         # Get relevant parameters
-        WF = params_dict["Wavefront"]
-        wavel = WF.wavelength
+        wavefront = params_dict["Wavefront"]
+        wavel = wavefront.wavelength
 
         # Get basis phase
         latent = self.get_opd(self.basis, self.coeffs)
         binary_phase = np.pi*self.CLIMB(latent)
         opd = self.phase_to_opd(binary_phase, self.ideal_wavel)
-        WF = WF.add_opd(opd)
+        wavefront = wavefront.add_opd(opd)
 
-        params_dict["Wavefront"] = WF
+        params_dict["Wavefront"] = wavefront
         return params_dict
     
+
     def opd_to_phase(self, opd, wavel):
         return 2*np.pi*opd/wavel
     
+
     def phase_to_opd(self, phase, wavel):
         return phase*wavel/(2*np.pi)
     
+
     def get_opd(self, basis, coefficients):
         return np.dot(basis.T, coefficients)
     
+
     def get_total_opd(self):
         return self.get_opd(self.basis, self.coeffs)
     
+
     def get_binary_phase(self):
         latent = self.get_opd(self.basis, self.coeffs)
         binary_phase = np.pi*self.CLIMB(latent)
         return binary_phase
     
+
     def lsq_params(self, img):
         xx, yy = np.meshgrid(np.linspace(0,1,img.shape[0]),np.linspace(0,1,img.shape[1]))
         A = np.vstack([xx.ravel(), yy.ravel(), np.ones_like(xx).ravel()]).T
         matrix = np.linalg.inv(np.dot(A.T,A)).dot(A.T)
         return matrix, xx, yy, A
 
+
     def lsq(self, img):
         matrix, _, _, _ = self.lsq_params(img)
         return np.dot(matrix,img.ravel())
+
 
     def area(self, img, epsilon = 1e-15):
 
