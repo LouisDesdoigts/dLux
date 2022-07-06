@@ -239,10 +239,13 @@ class Propagator(eqx.Module): # abc.ABC):
         field : Array   
             The electric field of the wavefronts.
         """
-        return jax.lax.cond(self.is_inverse(),
+        field = jax.lax.cond(self.is_inverse(),
             lambda wavefront : self._inverse_fourier_transform(wavefront),
             lambda wavefront : self._fourier_transform(wavefront),
             wavefront)
+
+        field *= self._normalising_factor(wavefront)
+        return field
 
 
     def _normalising_factor(self : Propagator, wavefront : Wavefront) -> float:
@@ -524,8 +527,7 @@ class VariableSamplingPropagator(Propagator):
         """
         wavefront = parameters["Wavefront"]
 
-        new_wavefront = self._normalising_factor(wavefront) * \
-            self._propagate(wavefront)
+        new_wavefront = self._propagate(wavefront)
 
         new_amplitude = np.abs(new_wavefront)
         new_phase = np.angle(new_wavefront)
@@ -584,7 +586,7 @@ class FixedSamplingPropagator(Propagator):
         field : Array[Complex]
             The complex electric field units following propagation.
         """
-        return np.fft.fft2(np.fft.ifftshift(wavefront.get_complex_form()))
+        return np.fft.fftshift(np.fft.ifft2(wavefront.get_complex_form()))
 
 
     def _inverse_fourier_transform(self : Propagator,
@@ -602,7 +604,7 @@ class FixedSamplingPropagator(Propagator):
         field : Array[Complex]
             The complex electric field units following propagation.
         """
-        return np.fft.fftshift(np.fft.ifft2(wavefront.get_complex_form()))
+        return np.fft.fft2(np.fft.ifftshift(wavefront.get_complex_form()))
 
 
     def _normalising_factor(self : Propagator, 
@@ -622,8 +624,8 @@ class FixedSamplingPropagator(Propagator):
             The normalising factor that is appropriate to the 
             method of propagation.
         """
-        return (1 - self.inverse) / wavefront.number_of_pixels() + \
-            self.inverse * wavefront.number_of_pixels()
+        return self.is_inverse() / wavefront.number_of_pixels() + \
+            (1 - self.is_inverse()) * wavefront.number_of_pixels()
 
 
     def get_pixel_scale_out(self : Propagator, 
@@ -663,8 +665,7 @@ class FixedSamplingPropagator(Propagator):
         """
         wavefront = parameters["Wavefront"]
 
-        new_wavefront = self._normalising_factor(wavefront) * \
-            self._propagate(wavefront)
+        new_wavefront = self._propagate(wavefront)
 
         new_amplitude = np.abs(new_wavefront)
         new_phase = np.angle(new_wavefront)
@@ -714,7 +715,8 @@ class PhysicalMFT(VariableSamplingPropagator):
             False.
         """
         super().__init__(inverse = inverse, tilt = tilt,
-            pixel_scale_out = pixel_scale_out, pixels_out = pixels_out) 
+            pixel_scale_out = pixel_scale_out, 
+            pixels_out = pixels_out) 
         self.focal_length = np.array(focal_length).astype(float)
 
 
@@ -927,8 +929,11 @@ class PhysicalFresnel(VariableSamplingPropagator):
         size_out = self.get_pixel_scale_out() * \
             self.get_pixels_out()
         
-        return size_in * size_out / self.get_focal_length() /\
-            wavefront.get_wavelength() * focal_ratio
+        number_of_fringes = size_in * size_out / \
+            self.get_focal_length() / wavefront.get_wavelength() * \
+            focal_ratio
+
+        return number_of_fringes
                
 
     # TODO: Room for optimisation by pasing the radial parameters
@@ -962,29 +967,9 @@ class PhysicalFresnel(VariableSamplingPropagator):
         """
         wavenumber = 2 * np.pi / wavelength
         radial_coordinates = np.hypot(x_coordinates, y_coordinates)
-        return np.exp(-0.5j * wavenumber * radial_coordinates ** 2 \
+        return np.exp(0.5j * wavenumber * radial_coordinates ** 2 \
             / distance)
         
-
-    def thin_lens(self : Propagator, wavefront : Wavefront) -> Array:
-        """
-        A physical usage of the quadratic_phase_factor, that does
-        not have a perfect interpretation.
-
-        Parameters
-        ----------
-        wavefront : Wavefront 
-            The wavefront that is getting focussed.
-
-        Returns
-        -------
-        electric_field : Array
-            The complex electric field. 
-        """
-        field = self.quadratic_phase(*wavefront.get_pixel_positions(),
-            wavefront.get_wavelength(), self.get_focal_length()) 
-        return field
-
 
     def _propagate(self : Propagator, wavefront : Wavefront) -> Array:
         """
@@ -997,35 +982,43 @@ class PhysicalFresnel(VariableSamplingPropagator):
             The wavefront to propagate.
 
         Returns
+        -------
         electric_field : Array
             The complex electric field in the output plane.
         """
         # See gihub issue #52
         offsets = super().get_pixel_offsets(wavefront) 
-        
+    
         input_positions = wavefront.get_pixel_positions()
         output_positions = self._get_pixel_grid(
             offsets, self.get_pixel_scale_out(),
             self.get_pixels_out())
 
-        number_of_fringes = self.number_of_fringes(wavefront)
         propagation_distance = self.get_focal_length() + self.get_focal_shift()
 
         field = wavefront.get_complex_form()
-        field *= self.thin_lens(wavefront)
+        print("initial: ", np.sum(np.abs(field) ** 2))
+        field *= self.quadratic_phase(*input_positions,
+            wavefront.get_wavelength(), -self.get_focal_length())
+        print("thin lens: ", np.sum(np.abs(field) ** 2))
         field *= self.quadratic_phase(*input_positions, 
             wavefront.get_wavelength(), propagation_distance)
-        
+        print("rho_1: ", np.sum(np.abs(field) ** 2))
+
         amplitude = np.abs(field)
         phase = np.angle(field)
         wavefront = wavefront.update_phasor(amplitude, phase)
 
         # Gives the inverse capability
         field = super()._propagate(wavefront) 
+        print("_propagate:", np.sum(np.abs(field) ** 2))
         field *= wavefront.get_pixel_scale() ** 2
+        print("pixel_scale:", np.sum(np.abs(field) ** 2))
         field *= wavefront.transfer_function(propagation_distance)
+        print("transfer_function: ", np.sum(np.abs(field) ** 2))
         field *= self.quadratic_phase(*output_positions, 
             wavefront.get_wavelength(), propagation_distance)
+        print("rho_2: ", np.sum(np.abs(field) ** 2))
 
         return field 
 
