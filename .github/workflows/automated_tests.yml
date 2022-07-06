@@ -28,6 +28,7 @@ jobs:
                 pip install --quiet -r requirements.txt
                 pip install --quiet .
                 pip install --quiet mkdocs
+                pip install --quiet mkdocstrings
 
             # ===== Tests =====
             - name: wavefront tests
