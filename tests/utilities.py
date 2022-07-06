@@ -574,7 +574,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
 
     def construct(self : Utility, /, inverse : bool = None, 
             pixels_out : int = None, 
-            pixel_scale_out : float = None) -> Propagator:
+            pixel_scale_out : float = None, tilt : bool = False) -> Propagator:
         """
         Build a safe `VariableSamplingPropagator` for testing purposes.
 
@@ -596,6 +596,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         # TODO: These should not be accessible in the importable 
         # dLux. need to confer with @LouisDesdoigts.
         return dLux.VariableSamplingPropagator(
+            tilt = tilt,
             inverse = self.is_inverse() if inverse is None else inverse,
             pixels_out = self.pixels_out if pixels_out is None \
                 else pixels_out,
@@ -693,7 +694,7 @@ class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
 
     def construct(self : Utility, inverse : bool = None, 
             pixels_out : int = None, pixel_scale_out : float = None, 
-            focal_length = None) -> Propagator:
+            focal_length = None, tilt : bool = False) -> Propagator:
         """
         Build a safe `PhysicalMFT` for testing purposes.
 
@@ -716,6 +717,7 @@ class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.PhysicalMFT(
+            tilt = tilt,
             inverse = self.is_inverse() if inverse is None else inverse,
             pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
             pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
@@ -830,7 +832,8 @@ class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
 
     def construct(self : Utility, inverse : bool = None, 
             pixels_out : int = None, pixel_scale_out : float = None, 
-            focal_length = None, focal_shift :float = None) -> Propagator:
+            focal_length = None, focal_shift :float = None,
+            tilt = False) -> Propagator:
         """
         Build a safe `PhysicalFresnel` for testing purposes.
 
@@ -856,6 +859,7 @@ class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.PhysicalFresnel(
+            tilt = tilt,
             inverse = self.is_inverse() if inverse is None else inverse,
             pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
             pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
@@ -908,7 +912,8 @@ class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
 
     def construct(self : Utility, inverse : bool = None, 
             pixels_out : int = None, pixel_scale_out : float = None, 
-            focal_length = None, focal_shift :float = None) -> Propagator:
+            focal_length = None, focal_shift :float = None,
+            tilt : bool = False) -> Propagator:
         """
         Build a safe `PhysicalMFT` for testing purposes.
 
@@ -928,6 +933,7 @@ class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.AngularMFT(
+            tilt = tilt,
             inverse = self.is_inverse() if inverse is None else inverse,
             pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
             pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out)
