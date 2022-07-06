@@ -9,6 +9,11 @@ that then need to be manually checked.
 from dLux import *
 from typing import NewType
 from matplotlib import pyplot
+import equinox as eqx
+import jax.numpy as np
+import jax
+
+jax.config.update("jax_enable_x64", True)
 
 Telescope = NewType("Telescope", OpticalSystem)
 
@@ -123,7 +128,7 @@ class Toliman(OpticalSystem):
         detector_pixels : int
             The number of pixels in the ouput layer
         """
-        return self.detector_layers
+        return self.detector_pixels
 
 
     def get_outer_aperture_radius(self : Telescope) -> float:
@@ -191,6 +196,17 @@ class Toliman(OpticalSystem):
         return self.pixel_scale_out
 
 
+    def set_focal_shift(self : Telescope, shift : float) -> Telescope:
+        """
+        Parameters
+        ----------
+        shift : float, meters
+            The focal shift of the detector plane.
+        """
+        return eqx.tree_at(lambda toliman : toliman.focal_shift, 
+            self, shift) 
+
+
     # TODO: This is very shit.
     def set_propagator(self : Telescope, in_focus : bool, fixed : bool) -> None:
         """
@@ -205,38 +221,53 @@ class Toliman(OpticalSystem):
             be used.
         """
         if fixed:
-            layers.append(PhysicalFFT(
-                inverse = False,
+            self.layers.append(PhysicalFFT(
                 focal_length = self.get_focal_length()))
         else:
             if in_focus:
-                layers.append(PhysicalMFT(
+                self.layers.append(PhysicalMFT(
                     pixels_out = self.get_detector_pixels(),
                     focal_length = self.get_focal_length(), 
                     pixel_scale_out = self.get_pixel_scale_out() / \
-                        self.get_pixel_oversample(), 
-                    inverse = False, 
-                    tilt = False))
+                        self.get_pixel_oversample()))
             else:
-                layers.append(PhysicalFresnel(
+                self.layers.append(PhysicalFresnel(
                     pixels_out = self.get_detector_pixels(), 
                     focal_length = self.get_focal_length(), 
                     focal_shift = self.get_focal_shift(),
                     pixel_scale_out = self.get_pixel_scale_out() /\
-                        self.get_pixel_oversample(), 
-                    inverse = False,
-                    tilt = False))
+                        self.get_pixel_oversample()))
 
-mft_toliman = Toliman()
-mft_toliman.set_propagator(in_focus = True, fixed = False)
-fft_toliman = Toliman()
-fft_toliman.set_propagator(in_focus = True, fixed = True)
-fnl_toliman = Toliman()
-fnl_toliman.set_propagator(in_focus = False, fixed = False)
+        return self
 
-mft_image = mft_toliman() ** 0.5
-fft_image = fft_toliman() ** 0.5
-fnl_image = fnl_toliman() ** 0.5
+mft_toliman = Toliman().set_propagator(in_focus = True, fixed = False)
+fft_toliman = Toliman().set_propagator(in_focus = True, fixed = True)
+fnl_toliman = Toliman().set_propagator(in_focus = False, fixed = False)
+
+mft_image, intermediate_wavefronts, layer = fnl_toliman.debug_prop(550e-09)
+print("MFT")
+for i, intermediate_wavefront in enumerate(intermediate_wavefronts):
+    intermediate_wavefront = intermediate_wavefront["Wavefront"]
+    print(f"{layer[i]}: ", np.sum(intermediate_wavefront.get_amplitude() ** 2))
+    
+    pyplot.figure(figsize = (10, 5))
+    pyplot.subplot(1, 2, 1)
+    pyplot.imshow(intermediate_wavefront.get_amplitude())
+    pyplot.colorbar()
+    pyplot.subplot(1, 2, 2) 
+    pyplot.imshow(intermediate_wavefront.get_phase())
+    pyplot.colorbar()
+    pyplot.show()
+
+#fft_image, intermediate_wavefronts, layer = fft_toliman.debug_prop(550e-09)
+#fnl_image, intermediate_wavefronts, layer = fnl_toliman.debug_prop(550e-09)
+
+mft_image = mft_toliman()
+print(np.sum(mft_image))
+fft_image = fft_toliman()
+print(np.sum(fft_image))
+fnl_image = fnl_toliman()
+print(np.sum(fnl_image))
  
 pyplot.figure(figsize = (15, 4))
 pyplot.subplot(1, 3, 1)
@@ -252,3 +283,16 @@ pyplot.title("FNL PSF")
 pyplot.imshow(fnl_image)
 pyplot.colorbar()
 pyplot.show()
+
+#fnl_in_front = Toliman()\
+#    .set_focal_shift(1.32 / 1000)\
+#    .set_propagator(in_focus = False, fixed = False)
+#    
+#fnl_in_front_image = fnl_in_front() ** 0.5
+
+#pyplot.figure(figsize = (5, 5))
+#pyplot.title("Out of Focus")
+#pyplot.imshow(fnl_in_front_image)
+#pyplot.colorbar()
+#pyplot.show()
+
