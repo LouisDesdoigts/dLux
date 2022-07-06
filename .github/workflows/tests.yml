@@ -1,0 +1,38 @@
+# Author : Jordan Dennis
+# Date : 29/06/2022
+# Title : automated_tests.yml
+# Description : Automatically runs tests when branches are merged.
+#   The tests that are run can be found in the tests directory.
+
+name: automated tests
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.10.5
+          architecture: x64
+
+      - name: install environment
+        run: |
+          python -m pip install --upgrade pip
+          pip install --quiet pytest
+          pip install --quiet -r requirements.txt
+          pip install --quiet .
+
+      # ===== Tests =====
+      - name: wavefront tests
+        run: pytest --quiet tests/wavefronts.py
+
+      - name: propagator tests
+        run: pytest --quiet tests/propagators.py
+
+#            - name: layer tests
+#              run: pytest --quiet tests/layers.py
