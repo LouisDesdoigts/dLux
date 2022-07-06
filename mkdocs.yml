@@ -32,6 +32,7 @@ plugins:
             - sys.path.append("src")
           rendering:
             show_source: false
+            show_if_no_docstring: yes
       custom_templates: templates
 
 # ===== Navigation =====
@@ -54,17 +55,17 @@ nav:
             - Physical Wavefront: developer_documentation/wavefronts/physical_wavefront.md
             - Angular Wavefront: developer_documentation/wavefronts/angular_wavefront.md
             - Guassian Wavefront: developer_documentation/wavefronts/gaussian_wavefront.md
-        - Propagators:
-            - Propagator: developer_documentation/propagators/propagator.md
-            - Gaussian Propagator: developer_documentation/propagators/gaussian_propagator.md
-            - Variable Sampling: 
-                - Variable Sampling Propagator: developer_documentation/propagators/variable_sampling/variable_sampling_propagator.md
-                - PhysicalMFT: developer_documentation/propagators/variable_sampling/physical_mft.md
-                - PhysicalFresnel: developer_documentation/propagators/variable_sampling/physical_fresnel.md
-                - AngularMFT: developer_documentation/propagators/variable_sampling/angular_mft.md
-                - AngularFresnel: developer_documentation/propagators/variable_sampling/angular_fresnel.md
-            - Fixed Sampling: 
-                - Fixed Sampling Propagator: developer_documentation/propagators/fixed_sampling/fixed_sampling_propagator.md
-                - PhysicalFFT: developer_documentation/propagators/fixed_sampling/physical_fft.md
-                - AngularFFT: developer_documentation/propagators/fixed_sampling/angular_fft.md
+#        - Propagators:
+            # - Propagator: developer_documentation/propagators/propagator.md
+#            - Gaussian Propagator: developer_documentation/propagators/gaussian_propagator.md
+#            - Variable Sampling: 
+#                - Variable Sampling Propagator: developer_documentation/propagators/variable_sampling/variable_sampling_propagator.md
+#                - PhysicalMFT: developer_documentation/propagators/variable_sampling/physical_mft.md
+#                - PhysicalFresnel: developer_documentation/propagators/variable_sampling/physical_fresnel.md
+#                - AngularMFT: developer_documentation/propagators/variable_sampling/angular_mft.md
+#                - AngularFresnel: developer_documentation/propagators/variable_sampling/angular_fresnel.md
+#            - Fixed Sampling: 
+#                - Fixed Sampling Propagator: developer_documentation/propagators/fixed_sampling/fixed_sampling_propagator.md
+#                - PhysicalFFT: developer_documentation/propagators/fixed_sampling/physical_fft.md
+#                - AngularFFT: developer_documentation/propagators/fixed_sampling/angular_fft.md
 

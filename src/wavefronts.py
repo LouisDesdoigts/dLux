@@ -3,7 +3,7 @@ import jax.numpy as np
 import typing
 
 
-Wavefront = typing.NewType("Wavefront", eqx.Module)
+Wavefront = typing.NewType("Wavefront", object)
 PhysicalWavefront = typing.NewType("PhysicalWavefront", Wavefront)
 AngularWavefront = typing.NewType("AngularWavefront", Wavefront)
 GaussianWavefront = typing.NewType("FresnelWavefront", Wavefront)
