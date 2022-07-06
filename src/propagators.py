@@ -82,11 +82,11 @@ import typing
 from .wavefronts import *
 
 
-Propagator = typing.NewType("Propagator", eqx.Module)
-GaussianPropagator = typing.NewType("GaussianPropagator", eqx.Module)
+Propagator = typing.NewType("Propagator", object)
+GaussianPropagator = typing.NewType("GaussianPropagator", object)
 
 
-class Propagator(eqx.Module): # abc.ABC):
+class Propagator(eqx.Module):     
     """
     An abstract class indicating a spatial transfromation of the
     `Wavefront`. This is a separate class because it allows 
