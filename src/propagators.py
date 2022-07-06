@@ -79,7 +79,7 @@ import jax
 import equinox as eqx
 import typing
 
-
+Array = typing.NewType("Array", object)
 Wavefront = typing.NewType("Wavefront", object)
 GaussianWavefront = typing.NewType("GaussianWavefront", object)
 Propagator = typing.NewType("Propagator", object)
