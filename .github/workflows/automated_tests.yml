@@ -9,7 +9,7 @@ on: [push]
 
 jobs:
     build:
-        name: automated tests
+        name: dLux Tests and Documentation
         runs-on: ubuntu-20.04
         steps:
             - name: checkout
@@ -27,8 +27,22 @@ jobs:
                 pip install --quiet pytest
                 pip install --quiet -r requirements.txt
                 pip install --quiet .
+                pip install --quiet mkdocs
+                pip install --quiet mkdocstrings
+                pip install --quiet mkdocstrings[python]
+                pip install --quiet mkdocs-material
 
-            - name: run tests
-              run: |
-                pytest tests/wavefronts.py
+            # ===== Tests =====
+            - name: wavefront tests
+              run: pytest --quiet tests/wavefronts.py
+
+            - name: propagator tests
+              run: pytest --quiet tests/propagators.py
+
+#            - name: layer tests
+#              run: pytest --quiet tests/layers.py
+
+            # ===== Documentation =====
+#            - name: wavefront documentation
+#              run: mkdocs gh-deploy 
             
