@@ -227,11 +227,28 @@ class Toliman(OpticalSystem):
                     inverse = False,
                     tilt = False))
 
-    
-image = Toliman()() ** 0.5
+mft_toliman = Toliman()
+mft_toliman.set_propagator(in_focus = True, fixed = False)
+fft_toliman = Toliman()
+fft_toliman.set_propagator(in_focus = True, fixed = True)
+fnl_toliman = Toliman()
+fnl_toliman.set_propagator(in_focus = False, fixed = False)
 
-pyplot.figure(figsize = (10, 10))
-pyplot.title("PSF")
-pyplot.imshow(image)
+mft_image = mft_toliman() ** 0.5
+fft_image = fft_toliman() ** 0.5
+fnl_image = fnl_toliman() ** 0.5
+ 
+pyplot.figure(figsize = (15, 4))
+pyplot.subplot(1, 3, 1)
+pyplot.title("MFT PSF")
+pyplot.imshow(mft_image)
+pyplot.colorbar()
+pyplot.subplot(1, 3, 2)
+pyplot.title("FFT PSF")
+pyplot.imshow(fft_image)
+pyplot.colorbar()
+pyplot.subplot(1, 3, 3)
+pyplot.title("FNL PSF")
+pyplot.imshow(fnl_image)
 pyplot.colorbar()
 pyplot.show()
