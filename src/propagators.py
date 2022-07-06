@@ -78,10 +78,10 @@ import jax.numpy as np
 import jax
 import equinox as eqx
 import typing
-# import abc 
-from .wavefronts import *
 
 
+Wavefront = typing.NewType("Wavefront", object)
+GaussianWavefront = typing.NewType("GaussianWavefront", object)
 Propagator = typing.NewType("Propagator", object)
 GaussianPropagator = typing.NewType("GaussianPropagator", object)
 
