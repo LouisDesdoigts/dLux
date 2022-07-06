@@ -308,7 +308,7 @@ class Wavefront(eqx.Module):
         wavefront : Wavefront
             The new `Wavefront` with the updated array of phases. 
         """
-        return self.set_phase(self.get_phase() + phases)
+        return self.set_phase(self.get_phase() + array_like)
 
 
     def update_phasor(self : Wavefront, amplitude : Array, 

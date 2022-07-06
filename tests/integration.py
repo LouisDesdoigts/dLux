@@ -188,7 +188,7 @@ class Toliman(OpticalSystem):
             The side length of a physical pixel in the toliman detector
             plane in meters.
         """
-        returns self.pixel_scale_out
+        return self.pixel_scale_out
 
 
     # TODO: This is very shit.
