@@ -16,17 +16,30 @@
 
 ## Installation
 
-The easiest way to install is from PyPI: just use
+∂Lux is still a new package and so is continuously being developed. For that reason we suggest cloning from source!
 
-`pip install dLux`
 
-To install from source: clone this git repo, enter the directory, and run
+> To install from source: clone this git repo, enter the directory, and run
+>
+>`pip install .`
 
-`pip install .`
+You can also install from PyPI, but this version is updated less often.
+
+> To install from PyPI run
+>
+>`pip install dLux`
+
 
 ## Use
 
-We are currently building examples and [documentation!](https://louisdesdoigts.github.io/dLux/) We currently have two tutrial notebooks, showing the basics of how to optimise simple and more complex models [here](https://github.com/LouisDesdoigts/dLux/tree/main/notebooks). Please note that this software is still under development and so is subject to change!
+Documentation can be found at: https://louisdesdoigts.github.io/dLux/
+> Note the docs are mostly built but the package is continually being developed so they are subject to change!
+
+We are currently building tutorial notebooks to help new users get started! We do have some demonstration notebooks that can be found [here!](https://github.com/LouisDesdoigts/dLux/tree/main/notebooks). These notebooks are designed to get users started with a few different uses cases of ∂Lux and its tool. 
+
+> Note: You must first run the `basis_creation.ipynb` notebook to generate and save files that are used in the other notebooks. Then `GE_optimisation.ipynb` must be run to generate a pupil for use in all of the other notebooks.
+
+<!--
 
 ## History
 
@@ -148,5 +161,5 @@ The OpticalSystem object is the primary object of dLux, so here is a quick overv
  - Returns: [A single monochromatic PSF, intermediate wavefront, intermediate pixelscales]
      
      
-
+ -->
 
