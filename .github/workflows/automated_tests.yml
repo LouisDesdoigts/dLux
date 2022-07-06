@@ -29,6 +29,7 @@ jobs:
                 pip install --quiet .
                 pip install --quiet mkdocs
                 pip install --quiet mkdocstrings
+                pip install --quiet mkdocs-material
 
             # ===== Tests =====
             - name: wavefront tests
