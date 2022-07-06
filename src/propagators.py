@@ -403,7 +403,7 @@ class VariableSamplingPropagator(Propagator):
             The complex un-normalised electric field after the 
             propagation.
         """
-        complex_wavefront = wavefront.get_complex_form()
+        field = wavefront.get_complex_form()
  
         input_scale = 1.0 / wavefront.number_of_pixels()
         output_scale = self.number_of_fringes(wavefront) / \
@@ -421,7 +421,7 @@ class VariableSamplingPropagator(Propagator):
             y_offset, (input_scale, output_scale), 
             (pixels_input, pixels_output), sign).T
         
-        return (y_twiddle_factors @ complex_wavefront) \
+        return (y_twiddle_factors @ field) \
             @ x_twiddle_factors
 
 
@@ -1199,15 +1199,15 @@ class GaussianPropagator(eqx.Module):
         wavefront : GaussianWavefront
             The new `Wavefront` propagated by `distance`. 
         """
-        complex_wavefront = wavefront.get_amplitude() * \
+        field = wavefront.get_amplitude() * \
             np.exp(1j * wavefront.get_phase())
 
-        new_complex_wavefront = np.fft.ifft2(
+        new_field = np.fft.ifft2(
             wavefront.transfer_function(distance) * \
-            np.fft.fft2(complex_wavefront))
+            np.fft.fft2(field))
 
-        new_amplitude = np.abs(new_complex_wavefront)
-        new_phase = np.angle(new_complex_wavefront)
+        new_amplitude = np.abs(new_field)
+        new_phase = np.angle(new_field)
         
         return wavefront\
             .set_position(wavefront.get_position() + distance)\
@@ -1235,21 +1235,21 @@ class GaussianPropagator(eqx.Module):
             `wavefront` propgated by `distance`.
         """
         coefficient = 1 / 1j / wavefront.get_wavelength() / distance
-        complex_wavefront = wavefront.get_amplitude() * \
+        field = wavefront.get_amplitude() * \
             np.exp(1j * wavefront.get_phase())
 
         fourier_transform = jax.lax.cond(np.sign(distance) > 0, 
-            lambda complex_wavefront, distance: \
+            lambda field, distance: \
                 wavefront.quadratic_phase_factor(distance) * \
-                np.fft.fft2(complex_wavefront), 
-            lambda complex_wavefront, distance: \
+                np.fft.fft2(field), 
+            lambda field, distance: \
                 wavefront.quadratic_phase_factor(distance) * \
-                np.fft.ifft2(complex_wavefront),
-            complex_wavefront, distance)
+                np.fft.ifft2(field),
+            field, distance)
 
-        new_complex_wavefront = coefficient * fourier_transform
-        new_phase = np.angle(new_complex_wavefront)
-        new_amplitude = np.abs(new_complex_wavefront)
+        new_field = coefficient * fourier_transform
+        new_phase = np.angle(new_field)
+        new_amplitude = np.abs(new_field)
 
         return wavefront\
             .update_phasor(new_amplitude, new_phase)\
@@ -1277,13 +1277,13 @@ class GaussianPropagator(eqx.Module):
         """
         coefficient = 1 / 1j / wavefront.get_wavelength() / \
             distance * wavefront.quadratic_phase_factor(distance)
-        complex_wavefront = wavefront.get_amplitude() * \
+        field = wavefront.get_amplitude() * \
             np.exp(1j * wavefront.get_phase())
 
         fourier_transform = jax.lax.cond(np.sign(distance) > 0, 
             lambda wavefront: np.fft.fft2(wavefront), 
             lambda wavefront: np.fft.ifft2(wavefront),
-            complex_wavefront)
+            field)
 
         new_wavefront = coefficient * fourier_transform
         new_phase = np.angle(new_wavefront)
