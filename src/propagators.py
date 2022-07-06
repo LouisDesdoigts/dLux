@@ -931,8 +931,11 @@ class PhysicalFresnel(VariableSamplingPropagator):
             wavefront.get_wavelength() * focal_ratio
                
 
+    # TODO: Room for optimisation by pasing the radial parameters
+    # instead.
     def quadratic_phase(self : Propagator, x_coordinates : Array, 
-            y_coordinates : Array, wavelength : float) -> Array:
+            y_coordinates : Array, wavelength : float, 
+            distance : float) -> Array:
         """
         A convinience function for calculating quadratic phase factors
         
@@ -948,6 +951,8 @@ class PhysicalFresnel(VariableSamplingPropagator):
             plane.
         wavelength : float, meters
             The wavelength of the wavefront.
+        distance : float, meters
+            The distance that is to be propagated in meters. 
 
         Returns
         -------
@@ -958,7 +963,7 @@ class PhysicalFresnel(VariableSamplingPropagator):
         wavenumber = 2 * np.pi / wavelength
         radial_coordinates = np.hypot(x_coordinates, y_coordinates)
         return np.exp(-0.5j * wavenumber * radial_coordinates ** 2 \
-            / self.get_focal_length())
+            / distance)
         
 
     def thin_lens(self : Propagator, wavefront : Wavefront) -> Array:
@@ -977,7 +982,7 @@ class PhysicalFresnel(VariableSamplingPropagator):
             The complex electric field. 
         """
         field = self.quadratic_phase(*wavefront.get_pixel_positions(),
-            wavefront.get_wavelength()) 
+            wavefront.get_wavelength(), self.get_focal_length()) 
         return field
 
 
@@ -995,7 +1000,6 @@ class PhysicalFresnel(VariableSamplingPropagator):
         electric_field : Array
             The complex electric field in the output plane.
         """
-        complex_wavefront = self.thin_lens(wavefront)
         # See gihub issue #52
         offsets = super().get_pixel_offsets(wavefront) 
         
@@ -1005,25 +1009,25 @@ class PhysicalFresnel(VariableSamplingPropagator):
             self.get_pixels_out())
 
         number_of_fringes = self.number_of_fringes(wavefront)
+        propagation_distance = self.get_focal_length() + self.get_focal_shift()
 
-        first_quadratic_phase = self.quadratic_phase(
-            *input_positions, wavefront.get_wavelength())
-        transfer = wavefront.transfer_function(
-            self.get_focal_length() + self.get_focal_shift())
-        second_quadratic_phase = self.quadratic_phase(
-            *output_positions, wavefront.get_wavelength())
-
-        complex_wavefront *= first_quadratic_phase
-        amplitude = np.abs(complex_wavefront)
-        phase = np.angle(complex_wavefront)
-
+        field = wavefront.get_complex_form()
+        field *= self.thin_lens(wavefront)
+        field *= self.quadratic_phase(*input_positions, 
+            wavefront.get_wavelength(), propagation_distance)
+        
+        amplitude = np.abs(field)
+        phase = np.angle(field)
         wavefront = wavefront.update_phasor(amplitude, phase)
-        # Gives the inverse capability
-        complex_wavefront = super()._propagate(wavefront) 
-        complex_wavefront *= wavefront.get_pixel_scale() ** 2
-        complex_wavefront *= transfer * second_quadratic_phase
 
-        return complex_wavefront        
+        # Gives the inverse capability
+        field = super()._propagate(wavefront) 
+        field *= wavefront.get_pixel_scale() ** 2
+        field *= wavefront.transfer_function(propagation_distance)
+        field *= self.quadratic_phase(*output_positions, 
+            wavefront.get_wavelength(), propagation_distance)
+
+        return field 
 
 
 class AngularMFT(VariableSamplingPropagator):
