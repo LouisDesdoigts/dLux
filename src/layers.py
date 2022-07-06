@@ -392,18 +392,18 @@ class AddPhase(eqx.Module):
     npix : int
         The number of pixels along the edge of the wavefront. This 
         is not a differentiable parameter.
-    phase: float, radians
+    phase_array: float, radians
         Array of phase values to be applied to the input wavefront.
     """
     npix: int = eqx.static_field()
-    phase: float
+    phase_array : float
     
 
     def __init__(self, phase_array):
         """
         Parameters
         ----------
-        phase : float, radians
+        phase_array : float, radians
             Array of phase values to be applied to the input wavefront.  
         """
         self.phase_array = np.array(phase_array).astype(float)
