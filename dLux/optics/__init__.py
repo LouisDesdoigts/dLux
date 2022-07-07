@@ -1,6 +1,6 @@
 name = "optics"
 
-from .base import *
-from .detectors import *
-from .wavefronts import *
-from .propagators import *
+from .optics.base import *
+from .otpics.detectors import *
+from .optics.wavefronts import *
+from .optics.propagators import *
