@@ -5,6 +5,9 @@ An attempt at generating the hexike polynomials for optimising a
 hexagonal surface for aberations. 
 """
 
+import jax.numpy as np
+
+from matplotlib import pyplot
 from dLux.statistics import zernike_basis
 from typing import TypeVar
 
@@ -59,8 +62,8 @@ def _get_pixel_positions(
         The pixel positions in the square output array with the 
         correct offsets
     """
-    x = _get_pixel_vector(number_of_pixels, x_offset)
-    y = _get_pixel_vector(number_of_pixels, y_offset)
+    x = _get_pixel_vector(number_of_pixels, x_pixel_offset)
+    y = _get_pixel_vector(number_of_pixels, y_pixel_offset)
     return np.meshgrid(x, y)
 
 
@@ -165,7 +168,7 @@ def hexike_basis(
     y_centre = centre + y_pixel_offset
     remainder = number_of_pixels % 2
 
-    offset_zenikes = np.zeros((number_of_hexikes, 
+    offset_zernikes = np.zeros((number_of_hexikes, 
             number_of_pixels, number_of_pixels))\
         .at[:, x_centre - centre : x_centre + centre + remainder,
             y_centre - centre : y_centre + centre + remainder]\
@@ -179,20 +182,62 @@ def hexike_basis(
         intermediate = offset_zernikes[j + 1] * aperture
         for k in np.arange(1, j + 1): # Gram-Schmidt orthonormalisation
             coefficient = -1 / pixel_area * \
-                (offset_zernike * hexike[k] * aperture).sum()
+                (offset_zernikes[j + 1] * offset_hexikes[k] \
+                    * aperture).sum()
             if coefficient != 0:
-                intermediate += coefficient * hexike[k]
+                intermediate += coefficient * offset_hexikes[k]
 
         # Normalisation of the intermediate. Final step in the 
         # Gram-Schmidt orthonormalisation.
-        offset_hexikes[j + 1] = intermediate / \
-            np.sqrt((intermediate ** 2).sum() / pixel_area)
+        offset_hexikes = offset_hexikes\
+            .at[j + 1]\
+            .set(intermediate / \
+                np.sqrt((intermediate ** 2).sum() / pixel_area))
 
     return offset_hexikes
 
 
-#hexikes = hexike_basis(5) 
-#for i in range(5):
+#hexikes = hexike_basis(5)
+aperture = _hexagonal_aperture(number_of_pixels, x_pixel_offset,
+    y_pixel_offset, maximum_radius)
+pixel_area = aperture.sum()
+
+centre = number_of_pixels // 2
+x_centre = centre + x_pixel_offset
+y_centre = centre + y_pixel_offset
+remainder = number_of_pixels % 2
+
+offset_zernikes = np.zeros((number_of_hexikes, 
+        number_of_pixels, number_of_pixels))\
+    .at[:, x_centre - centre : x_centre + centre + remainder,
+        y_centre - centre : y_centre + centre + remainder]\
+    .set(zernike_basis(number_of_hexikes, number_of_pixels))
+
+offset_hexikes = np.zeros((number_of_hexikes, 
+        number_of_pixels, number_of_pixels))\
+    .at[1].set(aperture)
+
+for j in np.arange(1, number_of_hexikes): # Index of the zernike
+    intermediate = offset_zernikes[j + 1] * aperture
+    for k in np.arange(1, j + 1): # Gram-Schmidt orthonormalisation
+        coefficient = -1 / pixel_area * \
+            (offset_zernikes[j + 1] * offset_hexikes[k] \
+                * aperture).sum()
+        if coefficient != 0:
+            intermediate += coefficient * offset_hexikes[k]
+
+    # Normalisation of the intermediate. Final step in the 
+    # Gram-Schmidt orthonormalisation.
+    offset_hexikes = offset_hexikes\
+        .at[j + 1]\
+        .set(intermediate / \
+            np.sqrt((intermediate ** 2).sum() / pixel_area))
+
+
+ 
+print(hexikes[1])
+
+#for i in range(1, 6):
 #    pyplot.figure(figsize=(5, 5))
 #    pyplot.title(f"{i}th Hexike Polynomial")
 #    pyplot.subplot(1, 5, i)
