@@ -4,8 +4,7 @@ __author__ = "Louis Desdoigts"
 __author__ = "Jordan Dennis"
 __author__ = "Benjamin Pope"
 
-from .base import *
-from .layers import *
-from .detector_layers import *
-from .propagators import *
-from .wavefronts import *
+from . import optics  
+from . import graphics
+from . import utilities 
+from . import statistics
