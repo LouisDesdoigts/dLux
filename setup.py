@@ -30,7 +30,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name="dLux",
-    version=find_version("src", "__init__.py"),
+    # version=find_version("dLux", "__init__.py"),
     description="A fully differentiable optical simulator build in Jax",
     long_description=long_description,
     # long_description_content_type="text/markdown",
@@ -43,8 +43,8 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/LouisDesdoigts/dLux/issues",
     },
     
-    package_dir={"dLux": "src"},
-    packages=["dLux"],
+    package_dir={"dLux": "dLux"},
+    # packages=["dLux"],
     
     install_requires=install_requires,
     
@@ -52,4 +52,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
+    packages = ["dLux.optics", "dLux.statistics", "dLux.utilities", 
+        "dLux.dev", "dLux.graphics"]
 )
