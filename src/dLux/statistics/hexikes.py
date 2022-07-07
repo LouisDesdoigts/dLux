@@ -5,8 +5,7 @@ An attempt at generating the hexike polynomials for optimising a
 hexagonal surface for aberations. 
 """
 
-from dLux.statistics import zernikes
-from dLux.layers import HexagonalAperture
+from dLux.statistics import zernike_basis
 from typing import TypeVar
 
 Array = TypeVar("Array")
@@ -32,7 +31,7 @@ def _get_pixel_vector(
         The pixel positions along the edge of the image.
     """
     return np.arange(number_of_pixels) - number_of_pixels / 2. \
-        + 0.5 + x_offset
+        + 0.5 + pixel_offset
     
 
 def _get_pixel_positions(
@@ -192,12 +191,12 @@ def hexike_basis(
     return offset_hexikes
 
 
-hexikes = hexike_basis(5) 
-for i in range(5):
-    pyplot.figure(figsize=(5, 5))
-    pyplot.title(f"{i}th Hexike Polynomial")
-    pyplot.subplot(1, 5, i)
-    pyplot.imshow(hexikes[i])
-
-pyplot.show()
+#hexikes = hexike_basis(5) 
+#for i in range(5):
+#    pyplot.figure(figsize=(5, 5))
+#    pyplot.title(f"{i}th Hexike Polynomial")
+#    pyplot.subplot(1, 5, i)
+#    pyplot.imshow(hexikes[i])
+#
+#pyplot.show()
    
