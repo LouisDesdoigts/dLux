@@ -201,9 +201,41 @@ def hexike_basis(
 number_of_pixels = 256
 x_pixel_offset = 0
 y_pixel_offset = 0
-maximum_radius = 512
+maximum_radius = 1.
 number_of_hexikes = 5
 
+# NOTE: The testing below confirms that the _get_pixel_positions is
+# working properly
+#positions = _get_pixel_positions(number_of_pixels, x_pixel_offset,
+#    y_pixel_offset)
+#positions = np.sqrt(np.sum(np.array(positions) ** 2, axis=0))
+#
+#pyplot.imshow(positions)
+#pyplot.show()
+#exit()
+
+x, y = _get_pixel_positions(number_of_pixels, x_pixel_offset,
+    y_pixel_offset)
+
+x *= 2 / number_of_pixels
+y *= 2 / number_of_pixels
+
+rectangle = (np.abs(x) <= maximum_radius / 2.) \
+    & (np.abs(y) <= maximum_radius * np.sqrt(3) / 2.)
+
+left_triangle = (x <= -0.5) \
+    & (x >= -1) \
+    & (np.abs(y) <= (x + 1) * np.sqrt(3))
+
+right_triangle = (x >= 0.5) \
+    & (x <= 1) \
+    & (np.abs(y) <= (1 - x) * np.sqrt(3))
+
+hexagon = rectangle | left_triangle | right_triangle
+
+pyplot.imshow(hexagon)
+pyplot.show()
+exit()
 
 aperture = _hexagonal_aperture(number_of_pixels, x_pixel_offset,
     y_pixel_offset, maximum_radius)
@@ -214,7 +246,7 @@ pyplot.show()
 pixel_area = aperture.sum()
 print("Pixel Area: ", pixel_area)
 
-exit(-1)
+exit()
 
 centre = number_of_pixels // 2
 x_centre = centre + x_pixel_offset
