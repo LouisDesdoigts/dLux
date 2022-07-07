@@ -198,9 +198,23 @@ def hexike_basis(
 
 
 #hexikes = hexike_basis(5)
+number_of_pixels = 256
+x_pixel_offset = 0
+y_pixel_offset = 0
+maximum_radius = 512
+number_of_hexikes = 5
+
+
 aperture = _hexagonal_aperture(number_of_pixels, x_pixel_offset,
     y_pixel_offset, maximum_radius)
+
+pyplot.imshow(aperture)
+pyplot.show()
+
 pixel_area = aperture.sum()
+print("Pixel Area: ", pixel_area)
+
+exit(-1)
 
 centre = number_of_pixels // 2
 x_centre = centre + x_pixel_offset
