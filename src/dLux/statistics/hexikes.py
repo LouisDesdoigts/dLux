@@ -222,26 +222,33 @@ aperture = _hexagonal_aperture(number_of_pixels, x_pixel_offset,
     y_pixel_offset, maximum_radius)
 
 shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
+center = number_of_pixels // 2
+remainder = number_of_pixels % 2
+x_width = (number_of_pixels - x_pixel_offset) // 2
+y_width = (number_of_pixels - y_pixel_offset) // 2
 
 zernikes = zernike_basis(number_of_hexikes, number_of_pixels)
 
-# NOTE: The assignment script has been fixed. 
-offset_zernikes = np.zeros(shape)\
-    .at[:, y_pixel_offset : y_pixel_offset + number_of_pixels,
-        x_pixel_offset : x_pixel_offset + number_of_pixels]\
-    .set(zernikes\
-        .at[:, y_pixel_offset :, x_pixel_offset :]\
-        .get())
+pyplot.imshow(zernikes[1])
+pyplot.colorbar()
+pyplot.show()
+print("Hello!")
 
-pyplot.imshow(offset_zernikes[0])
-pyplot.colorbar()
-pyplot.show()
-pyplot.imshow(offset_zernikes[1])
-pyplot.colorbar()
-pyplot.show()
-pyplot.imshow(offset_zernikes[2])
-pyplot.colorbar()
-pyplot.show()
+# NOTE: The assignment script has been fixed. 
+# NOTE: Know it has not.
+offset_zernikes = np.zeros(shape)\
+    .at[:, y_pixel_offset :, x_pixel_offset :]\
+    .set(zernikes)
+
+#pyplot.imshow(offset_zernikes[0])
+#pyplot.colorbar()
+#pyplot.show()
+#pyplot.imshow(offset_zernikes[1])
+#pyplot.colorbar()
+#pyplot.show()
+#pyplot.imshow(offset_zernikes[2])
+#pyplot.colorbar()
+#pyplot.show()
 exit()
 
 

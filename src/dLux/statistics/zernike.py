@@ -121,7 +121,7 @@ def noll_indices(j):
         m = row_m[resid] * sign
     return n, m
 
-def zernike(n, m, npix=100, rho=None, theta=None, outside=np.nan,
+def zernike(n, m, npix=100, rho=None, theta=None, outside=0.,
             noll_normalize=True, **kwargs):
     """Return the Zernike polynomial Z[m,n] for a given pupil.
 
