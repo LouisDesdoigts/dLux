@@ -10,50 +10,6 @@ from dLux.layers import HexagonalAperture
 from typing import TypeVar
 
 
-def _pixels_to_proportions(
-        number_of_pixels : int,
-        pixel_offset : int) -> float:
-    """
-    Convinience function for converting between pixels and proportions
-    when dealing with para-axial arrays.
-
-    Parameters
-    ----------
-    number_of_pixels : int
-        The number of pixels in the output image.
-    pixel_offset : int 
-        The number of pixels that the image is offset by.
-    
-    Returns
-    -------
-    proportion : float
-        The offset in normalised units.
-    """
-    return pixel_offset / number_of_pixels
-
-
-def _proportions_to_pixels(
-        number_of_pixels : int,
-        proportion_offset : float) -> int:
-    """
-    Convinience function for converting between pixels and proportions
-    when dealing with para-axial arrays.
-
-    Parameters
-    ----------
-    number_of_pixels : int
-        The number of picels in the output image.
-    proportion_offset : float
-        The proportion offset in the output array.
-
-    Returns
-    -------
-    pixel_offset : int
-        The pixel ofset of the output array.
-    """
-    return int(proportion_offset * number_of_pixels)    
-
-
 # TODO: Work out how to stop this repetition of logic. 
 def _hexagonal_aperture(
         number_of_pixels : int, 
