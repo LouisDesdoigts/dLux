@@ -41,7 +41,6 @@ class Aperture(eqx.Module, ABC):
 
     
     @abstractmethod
-    @classmethod # Just thought I would through this in for fun.
     def _aperture(self : Layer, number_of_pixels : int) -> Array:
         """
         Generate the aperture array as an array. 
