@@ -844,7 +844,8 @@ class AngularWavefront(Wavefront):
     """
     A plane wave extending the abstract `Wavefront` class. 
     Stores phase and amplitude arrays. pixel_scale has units of 
-    radians. Assumes the wavefront is square.
+    meters per pixel in pupil planes and radians per pixel in 
+    focal planes. Assumes the wavefront is square.
     
     Attributes
     ----------
