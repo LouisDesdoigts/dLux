@@ -1,6 +1,12 @@
 name = "optics"
 
-from .base import *
-from .detectors import *
-from .wavefronts import *
-from .propagators import *
+from .base import OpticalSystem
+from .detectors import (ApplySaturation, ApplyPixelResponse, 
+    ApplyJitter)
+from .layers import (AddPhase, ApplyAperture, ApplyBasisCLIMB, 
+    ApplyBasisOPD, ApplyOPD, CircularAperture, CreateWavefront,
+    NormaliseWavefront, TiltWavefront)
+from .wavefronts import (GaussianWavefront, PhysicalWavefront, 
+    AngularWavefront)
+from .propagators import (PhysicalMFT, PhysicalFFT, AngularMFT, 
+    AngularFFT, PhysicalFresnel, GaussianPropagator)
