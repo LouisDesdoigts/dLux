@@ -103,8 +103,11 @@ def _hexagonal_aperture(
     x, y = _get_pixel_positions(number_of_pixels, x_pixel_offset,
         y_pixel_offset)
 
+    x *= 2 / number_of_pixels
+    y *= 2 / number_of_pixels
+
     rectangle = (np.abs(x) <= maximum_radius / 2.) \
-        & (np.abs(y) <= (x + 1) * np.sqrt(3))
+        & (np.abs(y) <= (maximum_radius * np.sqrt(3) / 2.))
 
     left_triangle = (x <= -0.5) \
         & (x >= -1) \
@@ -199,8 +202,8 @@ def hexike_basis(
 
 #hexikes = hexike_basis(5)
 number_of_pixels = 256
-x_pixel_offset = 0
-y_pixel_offset = 0
+x_pixel_offset = 100
+y_pixel_offset = 50
 maximum_radius = 1.
 number_of_hexikes = 5
 
@@ -214,50 +217,33 @@ number_of_hexikes = 5
 #pyplot.show()
 #exit()
 
-x, y = _get_pixel_positions(number_of_pixels, x_pixel_offset,
-    y_pixel_offset)
-
-x *= 2 / number_of_pixels
-y *= 2 / number_of_pixels
-
-rectangle = (np.abs(x) <= maximum_radius / 2.) \
-    & (np.abs(y) <= maximum_radius * np.sqrt(3) / 2.)
-
-left_triangle = (x <= -0.5) \
-    & (x >= -1) \
-    & (np.abs(y) <= (x + 1) * np.sqrt(3))
-
-right_triangle = (x >= 0.5) \
-    & (x <= 1) \
-    & (np.abs(y) <= (1 - x) * np.sqrt(3))
-
-hexagon = rectangle | left_triangle | right_triangle
-
-pyplot.imshow(hexagon)
-pyplot.show()
-exit()
-
+# NOTE: The aperture generation is correct.
 aperture = _hexagonal_aperture(number_of_pixels, x_pixel_offset,
     y_pixel_offset, maximum_radius)
 
-pyplot.imshow(aperture)
+shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
+
+zernikes = zernike_basis(number_of_hexikes, number_of_pixels)
+
+# NOTE: The assignment script has been fixed. 
+offset_zernikes = np.zeros(shape)\
+    .at[:, y_pixel_offset : y_pixel_offset + number_of_pixels,
+        x_pixel_offset : x_pixel_offset + number_of_pixels]\
+    .set(zernikes\
+        .at[:, y_pixel_offset :, x_pixel_offset :]\
+        .get())
+
+pyplot.imshow(offset_zernikes[0])
+pyplot.colorbar()
 pyplot.show()
-
-pixel_area = aperture.sum()
-print("Pixel Area: ", pixel_area)
-
+pyplot.imshow(offset_zernikes[1])
+pyplot.colorbar()
+pyplot.show()
+pyplot.imshow(offset_zernikes[2])
+pyplot.colorbar()
+pyplot.show()
 exit()
 
-centre = number_of_pixels // 2
-x_centre = centre + x_pixel_offset
-y_centre = centre + y_pixel_offset
-remainder = number_of_pixels % 2
-
-offset_zernikes = np.zeros((number_of_hexikes, 
-        number_of_pixels, number_of_pixels))\
-    .at[:, x_centre - centre : x_centre + centre + remainder,
-        y_centre - centre : y_centre + centre + remainder]\
-    .set(zernike_basis(number_of_hexikes, number_of_pixels))
 
 offset_hexikes = np.zeros((number_of_hexikes, 
         number_of_pixels, number_of_pixels))\
