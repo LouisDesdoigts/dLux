@@ -106,13 +106,13 @@ def _hexagonal_aperture(
     rectangle = (np.abs(x) <= maximum_radius / 2.) \
         & (np.abs(y) <= (maximum_radius * np.sqrt(3) / 2.))
 
-    left_triangle = (x <= -0.5) \
-        & (x >= -1) \
-        & (np.abs(y) <= (x + 1) * np.sqrt(3))
+    left_triangle = (x <= - maximum_radius / 2.) \
+        & (x >= - maximum_radius) \
+        & (np.abs(y) <= (x + maximum_radius) * np.sqrt(3))
 
-    right_triangle = (x >= 0.5) \
-        & (x <= 1) \
-        & (np.abs(y) <= (1 - x) * np.sqrt(3))
+    right_triangle = (x >= maximum_radius / 2.) \
+        & (x <= maximum_radius) \
+        & (np.abs(y) <= (maximum_radius - x) * np.sqrt(3))
 
     hexagon = rectangle | left_triangle | right_triangle
     return np.asarray(hexagon).astype(float)
@@ -159,7 +159,6 @@ def hexike_basis(
         hexikes.shape == (number_of_hexikes, number_of_pixels, number_of_pixels)
         ```
     """
-
     aperture = _hexagonal_aperture(number_of_pixels, x_pixel_offset,
         y_pixel_offset, maximum_radius)
 
@@ -167,12 +166,30 @@ def hexike_basis(
     shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
     zernikes = zernike_basis(number_of_hexikes, number_of_pixels)
 
-    # NOTE: The assignment script has been fixed. 
-    # NOTE: Know it has not.
-    offset_zernikes = np.zeros(shape)\
-        .at[:, 0 : number_of_pixels - y_pixel_offset, 
-            0 : number_of_pixels - x_pixel_offset]\
-        .set(zernikes[:, y_pixel_offset :, x_pixel_offset :])
+    # So the issue is currently that I cannot pass a negative offset
+    # The aperture is fine with these it is just that I cannot set 
+    # them properly in the following array.
+    if y_pixel_offset >= 0:
+        if x_pixel_offset >= 0:
+            offset_zernikes = np.zeros(shape)\
+                .at[:, : number_of_pixels - y_pixel_offset, 
+                    : number_of_pixels - x_pixel_offset]\
+                .set(zernikes[:, y_pixel_offset :, x_pixel_offset :])
+        else:
+            offset_zernikes = np.zeros(shape)\
+                .at[:, : number_of_pixels - y_pixel_offset, -x_pixel_offset :]\
+                .set(zernikes[:, y_pixel_offset :, : x_pixel_offset])
+    else:
+        if x_pixel_offset >= 0:
+            offset_zernikes = np.zeros(shape)\
+                .at[:, -y_pixel_offset :, : number_of_pixels - x_pixel_offset]\
+                .set(zernikes[:, : y_pixel_offset, x_pixel_offset :])
+        else:
+            offset_zernikes = np.zeros(shape)\
+                .at[:, -y_pixel_offset :, -x_pixel_offset :]\
+                .set(zernikes[:, : y_pixel_offset, : x_pixel_offset])
+
+
 
     offset_hexikes = np.zeros(shape).at[0].set(aperture)
     
