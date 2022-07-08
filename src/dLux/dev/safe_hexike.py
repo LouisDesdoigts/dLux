@@ -53,7 +53,7 @@ def _get_pixel_positions(
         The y offset of the centre of the coordinate system in the 
         square output array.
 
-    Returns
+    Returns 
     -------
     pixel_positions : Array
         The pixel positions in the square output array with the 
@@ -159,24 +159,22 @@ def hexike_basis(
         hexikes.shape == (number_of_hexikes, number_of_pixels, number_of_pixels)
         ```
     """
+
     aperture = _hexagonal_aperture(number_of_pixels, x_pixel_offset,
         y_pixel_offset, maximum_radius)
+
     pixel_area = aperture.sum()
+    shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
+    zernikes = zernike_basis(number_of_hexikes, number_of_pixels)
 
-    centre = number_of_pixels // 2
-    x_centre = centre + x_pixel_offset
-    y_centre = centre + y_pixel_offset
-    remainder = number_of_pixels % 2
+    # NOTE: The assignment script has been fixed. 
+    # NOTE: Know it has not.
+    offset_zernikes = np.zeros(shape)\
+        .at[:, 0 : number_of_pixels - y_pixel_offset, 
+            0 : number_of_pixels - x_pixel_offset]\
+        .set(zernikes[:, y_pixel_offset :, x_pixel_offset :])
 
-    offset_zernikes = np.zeros((number_of_hexikes, 
-            number_of_pixels, number_of_pixels))\
-        .at[:, x_centre - centre : x_centre + centre + remainder,
-            y_centre - centre : y_centre + centre + remainder]\
-        .set(zernike_basis(number_of_hexikes, number_of_pixels))
-
-    offset_hexikes = np.zeros((number_of_hexikes, 
-            number_of_pixels, number_of_pixels))\
-        .at[1].set(aperture)
+    offset_hexikes = np.zeros(shape).at[0].set(aperture)
 
     for j in np.arange(1, number_of_hexikes): # Index of the zernike
         intermediate = offset_zernikes[j + 1] * aperture
@@ -195,7 +193,6 @@ def hexike_basis(
                 np.sqrt((intermediate ** 2).sum() / pixel_area))
 
     return offset_hexikes
-
 
 number_of_pixels = 256
 x_pixel_offset =0
@@ -223,19 +220,34 @@ offset_hexikes = np.zeros(shape).at[0].set(aperture)
 
 for j in np.arange(1, number_of_hexikes): # Index of the zernike
     intermediate = offset_zernikes[j + 1] * aperture
-    for k in np.arange(1, j + 1): # Gram-Schmidt orthonormalisation
-        coefficient = -1 / pixel_area * \
-            (offset_zernikes[j + 1] * offset_hexikes[k] \
-                * aperture).sum()
-        if coefficient != 0:
-            intermediate += coefficient * offset_hexikes[k]
 
-    # Normalisation of the intermediate. Final step in the 
-    # Gram-Schmidt orthonormalisation.
+    coefficients = -1 / pixel_area * \
+       ((offset_zernikes[j + 1] * offset_hexikes[1 : j + 1]) * aperture)\
+        .sum(axis = 0) 
+
+    intermediate += (coefficients * offset_hexikes[1 : j + 1])\
+        .sum(axis = 0)
+
     offset_hexikes = offset_hexikes\
         .at[j + 1]\
         .set(intermediate / \
             np.sqrt((intermediate ** 2).sum() / pixel_area))
+
+
+#for j in np.arange(1, number_of_hexikes): # Index of the zernike
+#    intermediate = offset_zernikes[j + 1] * aperture
+#    for k in np.arange(1, j + 1): # Gram-Schmidt orthonormalisation
+#        coefficient = -1 / pixel_area * \
+#            (offset_zernikes[j + 1] * offset_hexikes[k] \
+#                * aperture).sum()
+#        intermediate += coefficient * offset_hexikes[k]
+#
+#    # Normalisation of the intermediate. Final step in the 
+#    # Gram-Schmidt orthonormalisation.
+#    offset_hexikes = offset_hexikes\
+#        .at[j + 1]\
+#        .set(intermediate / \
+#            np.sqrt((intermediate ** 2).sum() / pixel_area))
 
 from matplotlib import pyplot
 
