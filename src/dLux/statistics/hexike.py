@@ -175,106 +175,22 @@ def hexike_basis(
         .set(zernikes[:, y_pixel_offset :, x_pixel_offset :])
 
     offset_hexikes = np.zeros(shape).at[0].set(aperture)
-
+    
     for j in np.arange(1, number_of_hexikes): # Index of the zernike
         intermediate = offset_zernikes[j + 1] * aperture
-        for k in np.arange(1, j + 1): # Gram-Schmidt orthonormalisation
-            coefficient = -1 / pixel_area * \
-                (offset_zernikes[j + 1] * offset_hexikes[k] \
-                    * aperture).sum()
-            if coefficient != 0:
-                intermediate += coefficient * offset_hexikes[k]
 
-        # Normalisation of the intermediate. Final step in the 
-        # Gram-Schmidt orthonormalisation.
+        coefficients = -1 / pixel_area * \
+           ((offset_zernikes[j + 1] * offset_hexikes[1 : j + 1]) * aperture)\
+            .sum(axis = 0) 
+
+        intermediate += (coefficients * offset_hexikes[1 : j + 1])\
+            .sum(axis = 0)
+
         offset_hexikes = offset_hexikes\
             .at[j + 1]\
             .set(intermediate / \
                 np.sqrt((intermediate ** 2).sum() / pixel_area))
 
     return offset_hexikes
-
-number_of_pixels = 256
-x_pixel_offset =0
-y_pixel_offset = 0
-maximum_radius = 1.
-number_of_hexikes = 10 
-
-
-# NOTE: The aperture generation is correct.
-aperture = _hexagonal_aperture(number_of_pixels, x_pixel_offset,
-    y_pixel_offset, maximum_radius)
-
-pixel_area = aperture.sum()
-shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
-zernikes = zernike_basis(number_of_hexikes, number_of_pixels)
-
-# NOTE: The assignment script has been fixed. 
-# NOTE: Know it has not.
-offset_zernikes = np.zeros(shape)\
-    .at[:, 0 : number_of_pixels - y_pixel_offset, 
-        0 : number_of_pixels - x_pixel_offset]\
-    .set(zernikes[:, y_pixel_offset :, x_pixel_offset :])
-
-offset_hexikes = np.zeros(shape).at[0].set(aperture)
-
-for j in np.arange(1, number_of_hexikes): # Index of the zernike
-    intermediate = offset_zernikes[j + 1] * aperture
-
-    coefficients = -1 / pixel_area * \
-       ((offset_zernikes[j + 1] * offset_hexikes[1 : j + 1]) * aperture)\
-        .sum(axis = 0) 
-
-    intermediate += (coefficients * offset_hexikes[1 : j + 1])\
-        .sum(axis = 0)
-
-    offset_hexikes = offset_hexikes\
-        .at[j + 1]\
-        .set(intermediate / \
-            np.sqrt((intermediate ** 2).sum() / pixel_area))
-
-
-#for j in np.arange(1, number_of_hexikes): # Index of the zernike
-#    intermediate = offset_zernikes[j + 1] * aperture
-#    for k in np.arange(1, j + 1): # Gram-Schmidt orthonormalisation
-#        coefficient = -1 / pixel_area * \
-#            (offset_zernikes[j + 1] * offset_hexikes[k] \
-#                * aperture).sum()
-#        intermediate += coefficient * offset_hexikes[k]
-#
-#    # Normalisation of the intermediate. Final step in the 
-#    # Gram-Schmidt orthonormalisation.
-#    offset_hexikes = offset_hexikes\
-#        .at[j + 1]\
-#        .set(intermediate / \
-#            np.sqrt((intermediate ** 2).sum() / pixel_area))
-
-from matplotlib import pyplot
-
-pyplot.figure()
-j = 1
-for i in range(10):
-    if i % 2 == 0:
-        pyplot.subplot(1, 5, j)
-        pyplot.imshow(offset_hexikes[i])
-        j += 1
-
-#pyplot.show()
-
-from poppy.zernike import hexike_basis
-
-pop_basis = hexike_basis(10, 256, outside=0.)
-
-pyplot.figure()
-j = 1
-for i in range(10):
-    if i % 2 == 0:
-        pyplot.subplot(1, 5, j)
-        pyplot.imshow(pop_basis[i])
-        j += 1
-
-pyplot.show()
-
-
 
 

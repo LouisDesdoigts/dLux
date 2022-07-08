@@ -1,5 +1,5 @@
 name = "statistics"
 
 from .zernike import *
-#from .hexikes import *
+from .hexike import *
 from .bayes import *
