@@ -1,13 +1,10 @@
 """
-src/statistics/hexikes.py
--------------------------
 An attempt at generating the hexike polynomials for optimising a 
 hexagonal surface for aberations. 
 """
 
 import jax.numpy as np
 
-from matplotlib import pyplot
 from dLux.statistics import zernike_basis
 from typing import TypeVar
 
@@ -200,61 +197,29 @@ def hexike_basis(
     return offset_hexikes
 
 
-#hexikes = hexike_basis(5)
 number_of_pixels = 256
-x_pixel_offset = 100
-y_pixel_offset = 50
+x_pixel_offset =0
+y_pixel_offset = 0
 maximum_radius = 1.
-number_of_hexikes = 5
+number_of_hexikes = 10 
 
-# NOTE: The testing below confirms that the _get_pixel_positions is
-# working properly
-#positions = _get_pixel_positions(number_of_pixels, x_pixel_offset,
-#    y_pixel_offset)
-#positions = np.sqrt(np.sum(np.array(positions) ** 2, axis=0))
-#
-#pyplot.imshow(positions)
-#pyplot.show()
-#exit()
 
 # NOTE: The aperture generation is correct.
 aperture = _hexagonal_aperture(number_of_pixels, x_pixel_offset,
     y_pixel_offset, maximum_radius)
 
+pixel_area = aperture.sum()
 shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
-center = number_of_pixels // 2
-remainder = number_of_pixels % 2
-x_width = (number_of_pixels - x_pixel_offset) // 2
-y_width = (number_of_pixels - y_pixel_offset) // 2
-
 zernikes = zernike_basis(number_of_hexikes, number_of_pixels)
-
-pyplot.imshow(zernikes[1])
-pyplot.colorbar()
-pyplot.show()
-print("Hello!")
 
 # NOTE: The assignment script has been fixed. 
 # NOTE: Know it has not.
 offset_zernikes = np.zeros(shape)\
-    .at[:, y_pixel_offset :, x_pixel_offset :]\
-    .set(zernikes)
+    .at[:, 0 : number_of_pixels - y_pixel_offset, 
+        0 : number_of_pixels - x_pixel_offset]\
+    .set(zernikes[:, y_pixel_offset :, x_pixel_offset :])
 
-#pyplot.imshow(offset_zernikes[0])
-#pyplot.colorbar()
-#pyplot.show()
-#pyplot.imshow(offset_zernikes[1])
-#pyplot.colorbar()
-#pyplot.show()
-#pyplot.imshow(offset_zernikes[2])
-#pyplot.colorbar()
-#pyplot.show()
-exit()
-
-
-offset_hexikes = np.zeros((number_of_hexikes, 
-        number_of_pixels, number_of_pixels))\
-    .at[1].set(aperture)
+offset_hexikes = np.zeros(shape).at[0].set(aperture)
 
 for j in np.arange(1, number_of_hexikes): # Index of the zernike
     intermediate = offset_zernikes[j + 1] * aperture
@@ -272,15 +237,32 @@ for j in np.arange(1, number_of_hexikes): # Index of the zernike
         .set(intermediate / \
             np.sqrt((intermediate ** 2).sum() / pixel_area))
 
+from matplotlib import pyplot
 
- 
-print(hexikes[1])
+pyplot.figure()
+j = 1
+for i in range(10):
+    if i % 2 == 0:
+        pyplot.subplot(1, 5, j)
+        pyplot.imshow(offset_hexikes[i])
+        j += 1
 
-#for i in range(1, 6):
-#    pyplot.figure(figsize=(5, 5))
-#    pyplot.title(f"{i}th Hexike Polynomial")
-#    pyplot.subplot(1, 5, i)
-#    pyplot.imshow(hexikes[i])
-#
 #pyplot.show()
-   
+
+from poppy.zernike import hexike_basis
+
+pop_basis = hexike_basis(10, 256, outside=0.)
+
+pyplot.figure()
+j = 1
+for i in range(10):
+    if i % 2 == 0:
+        pyplot.subplot(1, 5, j)
+        pyplot.imshow(pop_basis[i])
+        j += 1
+
+pyplot.show()
+
+
+
+
