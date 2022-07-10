@@ -16,44 +16,62 @@ Matrix = TypeVar("Matrix")
 Tensor = TypeVar("Tensor")
 
 
-def get_pixel_vector(number_of_pixels : int) -> Vector:
+def get_pixel_vector(
+        number_of_pixels : int,
+        pixel_offset : int = 0) -> Array:
     """
-    Generate the coordinates of the pixels along a para-axial 
-    centered edge. 
+    Generate the coordinates along the edge of the image.
 
     Parameters
     ----------
     number_of_pixels : int
-        The number of pixels along the edge of the array.
+        The number of pixels along the edge of the pixel plane.
+    pixel_offset : int
+        The number of pixels to offset the zero.
 
     Returns
     -------
-    coordinates : Vector
-        The pixel coordinates along the edge.
+    x : Array
+        The pixel positions along the edge of the image.
     """
-    return np.arange(number_of_pixels) - number_of_pixels / 2. + .5
+    return np.arange(number_of_pixels) - number_of_pixels / 2. \
+        + 0.5 + pixel_offset
     
 
-def get_pixel_positions(number_of_pixels : int) -> Tensor:
+def get_pixel_positions(
+        number_of_pixels : int, 
+        x_pixel_offset : int = 0,
+        y_pixel_offset : int = 0) -> Array:
     """
-    Generate the grid of coordinates for the pixels with para-axial
-    centering.
+    Generates offset para-axial coordinates, defining the optical 
+    axis. 
 
     Parameters
     ----------
     number_of_pixels : int
-        The number of pixels along one edge of the image.
+        The number of pixels along the side of the output array.
+    x_pixel_offset : int = 0.
+        The x offset of the centre of the coordinate system in the 
+        square output array.
+    y_pixel_offset : int = 0
+        The y offset of the centre of the coordinate system in the 
+        square output array.
 
-    Returns
+    Returns 
     -------
-    positions : Matrix
-        A grid of pixel coordinates. 
+    pixel_positions : Array
+        The pixel positions in the square output array with the 
+        correct offsets
     """
-    coordinates = self.get_pixel_coordinates
-    return np.array(np.meshgrid(coordinates, coordinates))
+    x = _get_pixel_vector(number_of_pixels, x_pixel_offset)
+    y = _get_pixel_vector(number_of_pixels, y_pixel_offset)
+    return np.meshgrid(x, y)
 
 
-def get_radial_positions(number_of_pixels : int) -> Matrix:
+# TODO:     
+def get_radial_positions(number_of_pixels : int,
+        x_pixel_offset : int,
+        y_pixel_offset : int) -> Matrix:
     """
     Generate the radial coordinates of each pixel. 
 
@@ -61,6 +79,12 @@ def get_radial_positions(number_of_pixels : int) -> Matrix:
     ----------
     number_of_pixels : int
         The number of pixels along one edge of the square array.
+    x_pixel_offset : int = 0.
+        The x offset of the centre of the coordinate system in the 
+        square output array.
+    y_pixel_offset : int = 0
+        The y offset of the centre of the coordinate system in the 
+        square output array.
 
     Returns
     -------
@@ -68,4 +92,5 @@ def get_radial_positions(number_of_pixels : int) -> Matrix:
         A grid of the radial coordinates.
     """
     # NOTE: I think CircularAperture is Broken 
-    return np.sum(self.get_pixel_coordinates(number_of_pixels) ** 2) ** 0.5
+    return np.sum(self.get_pixel_coordinates(number_of_pixels, 
+        x_pixel_offset, y_pixel_offset) ** 2) ** 0.5
