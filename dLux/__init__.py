@@ -1,4 +1,4 @@
-name = "optics"
+name = "dLux"
 
 from .base import OpticalSystem
 from .detectors import (ApplySaturation, ApplyPixelResponse, 

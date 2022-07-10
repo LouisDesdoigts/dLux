@@ -43,7 +43,7 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/LouisDesdoigts/dLux/issues",
     },
     
-    package_dir={"": "src"},
+    # package_dir={"": "src"},
     # packages=["dLux"],
     
     install_requires=install_requires,
@@ -53,5 +53,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
 
-    packages = setuptools.find_namespace_packages(where = "src")
+    # packages = ["src"] + setuptools.find_namespace_packages(where = "src")
+    packages = ["dLux", "dLux/utils"]
 )

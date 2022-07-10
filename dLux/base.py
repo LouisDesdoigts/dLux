@@ -3,7 +3,7 @@ import jax.numpy as np
 from jax import vmap
 import equinox as eqx
 from copy import deepcopy
-import dLux.optics as optics
+import dLux
 
 
 class OpticalSystem(eqx.Module):
@@ -91,7 +91,7 @@ class OpticalSystem(eqx.Module):
         I believe this is diffable but there is no reason to force it to be
         """
         # params_dict = {"Wavefront": Wavefront(wavel, offset)}
-        params_dict = {"Wavefront": optics.PhysicalWavefront(wavel, offset)}
+        params_dict = {"Wavefront": dLux.PhysicalWavefront(wavel, offset)}
         intermeds = []
         layers_applied = []
         for i in range(len(self.layers)):
