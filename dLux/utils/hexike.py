@@ -4,8 +4,7 @@ hexagonal surface for aberations.
 """
 
 import jax.numpy as np
-
-from dLux.statistics import zernike_basis
+import dLux
 from typing import TypeVar
 
 Array = TypeVar("Array")
@@ -164,7 +163,8 @@ def hexike_basis(
 
     pixel_area = aperture.sum()
     shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
-    zernikes = zernike_basis(number_of_hexikes, number_of_pixels)
+    zernikes = dLux.utils.zernike_basis(number_of_hexikes, 
+        number_of_pixels)
 
     # So the issue is currently that I cannot pass a negative offset
     # The aperture is fine with these it is just that I cannot set 
