@@ -158,7 +158,7 @@ class HexagonalAperture(Aperture):
         The proportion of the pixel vector that is taken up by a 
         circle containing the hexagon.
     """
-    rmax : float
+    _rmax : float
 
 
     def __init__(self : Layer, npix : int, rmax : float) -> Layer:
@@ -206,112 +206,6 @@ class HexagonalAperture(Aperture):
 
         hexagon = rectangle | left_triangle | right_triangle
         return np.asarray(hexagon).astype(float)
-
-
-def _get_pixel_vector(
-        number_of_pixels : int,
-        pixel_offset : int = 0) -> Array:
-    """
-    Generate the coordinates along the edge of the image.
-
-    Parameters
-    ----------
-    number_of_pixels : int
-        The number of pixels along the edge of the pixel plane.
-    pixel_offset : int
-        The number of pixels to offset the zero.
-
-    Returns
-    -------
-    x : Array
-        The pixel positions along the edge of the image.
-    """
-    return np.arange(number_of_pixels) - number_of_pixels / 2. \
-        + 0.5 + pixel_offset
-    
-
-def _get_pixel_positions(
-        number_of_pixels : int, 
-        x_pixel_offset : int = 0,
-        y_pixel_offset : int = 0) -> Array:
-    """
-    Generates offset para-axial coordinates, defining the optical 
-    axis. 
-
-    Parameters
-    ----------
-    number_of_pixels : int
-        The number of pixels along the side of the output array.
-    x_pixel_offset : int = 0.
-        The x offset of the centre of the coordinate system in the 
-        square output array.
-    y_pixel_offset : int = 0
-        The y offset of the centre of the coordinate system in the 
-        square output array.
-
-    Returns 
-    -------
-    pixel_positions : Array
-        The pixel positions in the square output array with the 
-        correct offsets
-    """
-    x = _get_pixel_vector(number_of_pixels, x_pixel_offset)
-    y = _get_pixel_vector(number_of_pixels, y_pixel_offset)
-    return np.meshgrid(x, y)
-
-
-
-# TODO: Work out how to stop this repetition of logic. 
-def _hexagonal_aperture(
-        number_of_pixels : int, 
-        x_pixel_offset : int,
-        y_pixel_offset : int,
-        maximum_radius : float = 1.) -> Array:
-    """
-    Generate a binary mask representing the pixels occupied by 
-    the aperture. 
-
-    Parameters
-    ----------
-    number_of_pixels : int
-        The ouput array will have the shape `aperture.shape == 
-        (number_of_pixels, number_of_pixels)`. 
-    x_pixel_offset : int
-        The offset of the aperture in the square output array in the 
-        x direction.
-    y_pixel_offset : int
-        The offset of the aperture in the square output array in the 
-        y direction. 
-    maximum_radius : float 
-        The radius of the smallest circle that can completely contain
-        the entire aperture. 
-
-    Returns
-    -------
-    aperture : Array
-        The bitmask that represents the circular aperture.        
-    """
-    # NOTE: This is where I need to choose generate everything correctly 
-    # I think. 
-    x, y = _get_pixel_positions(number_of_pixels, x_pixel_offset,
-        y_pixel_offset)
-
-    x *= 2 / number_of_pixels
-    y *= 2 / number_of_pixels
-
-    rectangle = (np.abs(x) <= maximum_radius / 2.) \
-        & (np.abs(y) <= (maximum_radius * np.sqrt(3) / 2.))
-
-    left_triangle = (x <= - maximum_radius / 2.) \
-        & (x >= - maximum_radius) \
-        & (np.abs(y) <= (x + maximum_radius) * np.sqrt(3))
-
-    right_triangle = (x >= maximum_radius / 2.) \
-        & (x <= maximum_radius) \
-        & (np.abs(y) <= (maximum_radius - x) * np.sqrt(3))
-
-    hexagon = rectangle | left_triangle | right_triangle
-    return np.asarray(hexagon).astype(float)
 
 
 def hexike_basis(
