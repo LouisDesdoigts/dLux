@@ -723,101 +723,12 @@ class HexagonalBasis(PolygonBasis):
             along the 1st row. The nth column is the x and y coordinates
             of the nth vertice. 
         """
+        theta = np.arange(0, 2 * pi, pi / 3)
+        return np.array([self._rmax * np.cos(theta), 
+            self._rmax * np.sin(theta)])
 
 
-    
-
-
-
-def hexike_basis(
-        number_of_hexikes : int = 15, 
-        number_of_pixels : int = 512,
-        x_pixel_offset : int = 0,
-        y_pixel_offset : int = 0,
-        maximum_radius : float = 1.) -> Tensor:
-    """
-    The hexike polynomials up until `number_of_hexikes` on a square
-    array that `number_of_pixels` by `number_of_pixels`. The 
-    polynomials can be restricted to a smaller subset of the 
-    array by passing an explicit `maximum_radius`. The polynomial
-    will then be defined on the largest hexagon that fits with a 
-    circle of radius `maximum_radius`. 
-    
-    Parameters
-    ----------
-    number_of_hexikes : int = 15
-        The number of basis terms to generate. 
-    number_of_pixels : int = 512
-        The size of the array to compute the hexikes on.
-    x_pixel_offset : int
-        The offset of the aperture in the square output array in the 
-        x direction.
-    y_pixel_offset : int
-        The offset of the aperture in the square output array in the 
-        y direction. 
-    maximum_radius : float = 1.
-        The radius of the the smallest circle that can contain the 
-        hexagonal surface. 
-
-    Returns
-    -------
-    hexikes : Tensor
-        The hexike polynomials evaluated on the square arrays
-        containing the hexagonal apertures until `maximum_radius`.
-        The leading dimension is `number_of_hexikes` long and 
-        each stacked array is a basis term. The final shape is:
-        ```py
-        hexikes.shape == (number_of_hexikes, number_of_pixels, number_of_pixels)
-        ```
-    """
-    aperture = _hexagonal_aperture(number_of_pixels, x_pixel_offset,
-        y_pixel_offset, maximum_radius)
-
-    pixel_area = aperture.sum()
-    shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
-    zernikes = dLux.utils.zernike_basis(number_of_hexikes, 
-        number_of_pixels)
-
-    # So the issue is currently that I cannot pass a negative offset
-    # The aperture is fine with these it is just that I cannot set 
-    # them properly in the following array.
-    if y_pixel_offset >= 0:
-        if x_pixel_offset >= 0:
-            offset_zernikes = np.zeros(shape)\
-                .at[:, : number_of_pixels - y_pixel_offset, 
-                    : number_of_pixels - x_pixel_offset]\
-                .set(zernikes[:, y_pixel_offset :, x_pixel_offset :])
-        else:
-            offset_zernikes = np.zeros(shape)\
-                .at[:, : number_of_pixels - y_pixel_offset, -x_pixel_offset :]\
-                .set(zernikes[:, y_pixel_offset :, : x_pixel_offset])
-    else:
-        if x_pixel_offset >= 0:
-            offset_zernikes = np.zeros(shape)\
-                .at[:, -y_pixel_offset :, : number_of_pixels - x_pixel_offset]\
-                .set(zernikes[:, : y_pixel_offset, x_pixel_offset :])
-        else:
-            offset_zernikes = np.zeros(shape)\
-                .at[:, -y_pixel_offset :, -x_pixel_offset :]\
-                .set(zernikes[:, : y_pixel_offset, : x_pixel_offset])
-
-
-
-    offset_hexikes = np.zeros(shape).at[0].set(aperture)
-    
-    for j in np.arange(1, number_of_hexikes): # Index of the zernike
-        intermediate = offset_zernikes[j + 1] * aperture
-
-        coefficients = -1 / pixel_area * \
-           ((offset_zernikes[j + 1] * offset_hexikes[1 : j + 1]) * aperture)\
-            .sum(axis = 0) 
-
-        intermediate += (coefficients * offset_hexikes[1 : j + 1])\
-            .sum(axis = 0)
-
-        offset_hexikes = offset_hexikes\
-            .at[j + 1]\
-            .set(intermediate / \
-                np.sqrt((intermediate ** 2).sum() / pixel_area))
-
-    return offset_hexikes
+#    def _tilt():
+#    def _rotate():
+#    def _shear()
+#    def _offset():
