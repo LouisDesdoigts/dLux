@@ -503,8 +503,47 @@ class PolygonBasis(PhaseBasis, ABC):
         return int(n), int(m)
 
 
-    def _zernike(self : Layer, n : int, m : int) -> Tensor: 
+    def _zernike(self : Layer, n : int, m : int) -> Matrix: 
+        """
+        Generate the zernike specified by the indexes n and m.
 
+        Parameters
+        ----------
+        n : int
+            The first integer that specifies the zernike polynomial.
+        m : int 
+            The second integer that specifies the zernike polynomial,
+            must be within the range -n < m < n.
+
+        Returns
+        zernike : Matrix
+            The zernike evaluated at the centre of a square matrix.  
+        """
+        positions = get_radial_positions(self._npix)
+        rho = positions[0]
+        theta = positions[1]
+
+        aperture = 2 / self._npix * rho <= 1.
+
+        # In the calculation of the noll coefficient we must define 
+        # between the m == 0 and and the m != 0 case. To determine 
+        # if m == 0 we can use (m >> 1 == m) because 0 represented 
+        # in binary is all 0s and can be translated without destroying 
+        # that information. All other numbers will change under this
+        # transformation. For the math nerds m is a fixed point of 
+        # the left bit shift operation.
+
+        norm_coeff = np.sqrt(2) * ~(int(m >> 1 == m)) * np.sqrt(n + 1)
+        
+        for k in range(int((n - m) / 2) + 1):
+            coefficient = (-1) ** k * factorial(n - k) / \
+                (factorial(k) * factorial(int((n + m) / 2) - k) * \
+                    factorial(int((n - m) / 2) - k))
+            radial_zernike += coefficient * rho ** (n - 2 * k)
+
+        
+
+        
 
     @cached_property
     def _basis(self : Layer):
