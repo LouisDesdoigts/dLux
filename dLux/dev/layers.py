@@ -277,10 +277,11 @@ class BasisPhase(Layer, ABC):
     _y : float
     _r : float
     _npix : int
+    _nterms : int
 
 
     def __init__(self : Layer, x : float, y : float, r : float,
-            npix : int) -> Layer:
+            npix : int, nterms : int) -> Layer:
         """
         Parameters
         ----------
@@ -298,11 +299,15 @@ class BasisPhase(Layer, ABC):
             The number of pixels along one side of the basis arrays.
             That is each term in the basis will be evaluated on a 
             `npix` by `npix` grid.
+        nterms : int
+            The number of basis terms to generate. This determines the
+            length of the leading dimension of the output Tensor. 
         """
         self._x = np.asarray(x).astype(float)
         self._y = np.asarray(y).astype(float)
         self._r = np.asarray(r).astype(float)
         self._npix = int(npix)
+        self._nterms = int(nterms)
 
 
     @abstractmethod
@@ -401,7 +406,7 @@ class PolygonBasis(PhaseBasis, ABC):
     a basis on a polygonal aperture.
     """
     @abstractmethod
-    def _get_vertices(self : Layer) -> Matrix:
+    def _vertices(self : Layer) -> Matrix:
         """
         Returns
         -------
@@ -413,6 +418,123 @@ class PolygonBasis(PhaseBasis, ABC):
         """
 
 
+    def _aperture(self : Layer) -> Matrix:
+        """
+        Returns
+        -------
+        aperture : Matrix 
+            The soft-edged aperture of the given polygonal shape.
+        """
+        positions = get_radial_positions(self._npix)
+        rho = positions[0]
+        theta = positions[1]
+
+        # The non-PEP8 variable names come from the standard 
+        # mathematical form y = mx + c. This can also be expressed
+        # as ay + bx = c. If we use the two point form for the 
+        # standard expression we get:
+        #
+        #           y_2 - y_1
+        # y - y_1 = ---------(x - x_1)
+        #           x_2 - x_1
+        #
+        # This can be rearranged into the form. 
+        #
+        # (x_2 - x_1) y - (y_2 - y_1) x = (x_2 - x_1)y_1 - (y_2 - y_1)x_1
+        # 
+        # More simply the form ay + bx = c, where a, b and c are 
+        # functions of the verticies points; x_1, x_2, y_1 and y_2.
+        # In polar form this gives us:
+        # 
+        #                  c
+        # r = ---------------------------
+        #     a cos(theta) + b sin(theta)
+        #
+        # Polar coordinates are used because we can always use r >
+        # to specify the aperture, avoiding the use of logic.
+
+        i = np.arange(-1, vertices.shape[0])
+        a = (vertices[i + 1, 0] - vertices[i, 0])
+        b = (vertices[i + 1, 1] - vertices[i, 1])
+        c = (vertices[i + 1, 0] - vertices[i, 0]) * vertices[i, 1] -\
+            (vertices[i + 1, 1] - vertices[i, 1]) * vertices[i, 0]
+
+        rho = np.expand_dims(rho, axis=2).tile(rho.shape[0])
+        aperture = np.logical_less(rho, 
+            c / (a * np.sin(theta) + b * np.cos(theta)))
+
+        return aperture
+         
+
+    def _gram_schmidt(self : Layer, zernikes : Tensor,
+            aperture : Matrix) -> Tensor:
+        """
+        Orthormalises the zernike polynomials on the aperture. 
+
+        Parameters
+        ----------
+        zernikes : Tensor
+            The zernike polynomials that are to be used in the
+            orthonormalisation. This Tensor should be number by 
+            pixels by pixels. 
+        aperture : Matrix
+            The aperture. This could be calculated interally but to 
+            save computation time this is passed as an argument.
+
+        Returns
+        -------
+        basis : Tensor
+            The basis polynomials on the aperture. 
+        """
+        pixel_area = aperture.sum()
+        basis = np.zeros(zernikes.shape).at[0].set(aperture)
+        
+        j = np.arange(1, zernikes.shape[0])
+
+        coefficients = -1 / pixel_area * \
+           ((zernikes[j + 1] * basis[1 : j + 1]) * aperture)\
+            .sum(axis = 1) 
+        
+        intermediates = zernikes[j + 1] * aperture
+        intermediate += (coefficients * basis[1 : j + 1]).sum(axis = 1)
+
+        return basis\
+            .at[j + 1]\
+            .set(intermediates / \
+                np.sqrt((intermediates ** 2).sum(axis=(1, 2)) \
+                    / pixel_area))
+
+
+    @cached_property
+    def _basis(self : Layer) -> Tensor:
+        """
+        Generate the basis. Requires a single run after which,
+        the basis is cached and can be used with no computational 
+        cost.  
+
+        Parameters
+        ----------
+        n : int 
+            The number of terms in the basis to generate. 
+
+        Returns
+        -------
+        basis : Tensor
+            The basis polynomials evaluated on the square arrays
+            containing the apertures until `maximum_radius`.
+            The leading dimension is `n` long and 
+            each stacked array is a basis term. The final shape is:
+            ```py
+            basis.shape == (n, npix, npix)
+            ```
+        """
+        aperture = self._aperture()
+        zernikes = self._zernike_basis(self._nterms, self._npix)
+        basis = self._gram_schmidt(zernikes, aperture)
+        return basis
+
+
+    @functools.partial(jax.vmap, in_axis=(None, 0))
     def _noll_index(self : Layer, j : int) -> tuple:
         """
         Decode the jth noll index of the zernike polynomials. This 
@@ -484,6 +606,7 @@ class PolygonBasis(PhaseBasis, ABC):
         # The odd and even cases work differently. I have included the 
         # formula below:
         # odd : p = (j - x_{n - 1}) // 2 
+       
         # even: p = (j - x_{n - 1} + 1) // 2
         # where p represents the number of times 2 needs to be added
         # to the base case. The 1 required for the even case can be 
@@ -503,6 +626,7 @@ class PolygonBasis(PhaseBasis, ABC):
         return int(n), int(m)
 
 
+    @functools.partial(jax.vmap, in_axis=(None, 0, 0))
     def _zernike(self : Layer, n : int, m : int) -> Matrix: 
         """
         Generate the zernike specified by the indexes n and m.
@@ -523,7 +647,7 @@ class PolygonBasis(PhaseBasis, ABC):
         rho = positions[0]
         theta = positions[1]
 
-        aperture = 2 / self._npix * rho <= 1.
+        aperture = (2 / self._npix * rho) <= 1.
 
         # In the calculation of the noll coefficient we must define 
         # between the m == 0 and and the m != 0 case. To determine 
@@ -533,23 +657,73 @@ class PolygonBasis(PhaseBasis, ABC):
         # transformation. For the math nerds m is a fixed point of 
         # the left bit shift operation.
 
-        norm_coeff = np.sqrt(2) * ~(int(m >> 1 == m)) * np.sqrt(n + 1)
+        norm_coeff = np.sqrt(2) * (int(m >> 1 != m)) * np.sqrt(n + 1)
         
+        radial_zernike = np.zeros(rho.shape)
+        # NOTE: This loop really needs to be made scan-able or 
+        # something a vmappable helper function maybe?
+        # This will need to be lifted into the basis calculation and
+        # done there using the largest range. (smallest j in the last 
+        # row will correspond to the correct value.)
+        m, n = abs(m), abs(n)
         for k in range(int((n - m) / 2) + 1):
             coefficient = (-1) ** k * factorial(n - k) / \
                 (factorial(k) * factorial(int((n + m) / 2) - k) * \
                     factorial(int((n - m) / 2) - k))
             radial_zernike += coefficient * rho ** (n - 2 * k)
 
-        
+        # When m < 0 we have the odd zernike polynomials which are 
+        # the radial zernike polynomials multiplied by a sine term.
+        # When m > 0 we have the even sernike polynomials which are 
+        # the radial polynomials multiplies by a cosine term. 
+        # To produce this result without logic we can use the fact
+        # that sine and cosine are separated by a phase of pi / 2
+        # hence by casting int(m < 0) we can add the nessecary phase.
 
-        
-
-    @cached_property
-    def _basis(self : Layer):
+        return norm_coeff * radial_zernike * np.cos(np.abs(m) * theta) \
+            * aperture
 
 
-class HexagonalBasis(PolygonBasis)
+    def _zernike_basis(number : int, pixels : int) -> Tensor:
+        """
+        Calculate the zernike basis on a square pixel grid. 
+
+        Parameters
+        ----------
+        number : int
+            The number of zernike basis terms to calculate.
+            This is a static argument to jit because the array
+            size depends on it.
+        pixels : int
+            The number of pixels along one side of the zernike image
+            for each of the n zernike polynomials. 
+
+        Returns
+        -------
+        zernike : Tensor 
+            The zernike polynomials evaluated until number. The shape
+            of the output tensor is number by pixels by pixels. 
+        """
+        j = np.arange(1, number + 1).astype(int)
+        n, m = self._noll_indices(j)
+        return self._zernike(n, m)
+
+
+class HexagonalBasis(PolygonBasis):
+    """
+    Generates an orthonormal hexagonal basis often called the Hexikes.
+    """
+    def _vertices(self : Layer) -> Matrix:
+        """
+        Returns
+        -------
+        vertices : Matrix
+            A 2 by number of vertices matrix containing the x 
+            x coordinates along the 0th row and the y coordinates
+            along the 1st row. The nth column is the x and y coordinates
+            of the nth vertice. 
+        """
+
 
     
 
