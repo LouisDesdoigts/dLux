@@ -428,7 +428,7 @@ class PolygonBasis(PhaseBasis, ABC):
         (0, 0)
         (1, -1), (1, 1)
         (2, -2), (2, 0), (2, 2)
-        (3, -1), (3, -1), (3, 1), (3, 3)
+        (3, -3), (3, -1), (3, 1), (3, 3)
 
         Noll Indices
         ------------
@@ -436,15 +436,6 @@ class PolygonBasis(PhaseBasis, ABC):
         3, 2
         5, 4, 6
         9, 7, 8, 10
-        15, 13, 11, 12, 14
-
-        Notes
-        -----
-        - The noll indices always start with the largest odd number 
-          in the row on the left. We then "bounce", for want of a 
-          better word from side to side across the triangle 
-          incrementing by +1 or -1 depending on the whether the 
-          largest odd number is the largest number in the row. 
 
         Parameters
         ----------
@@ -456,7 +447,61 @@ class PolygonBasis(PhaseBasis, ABC):
         n, m : tuple
             The n, m parameters of the zernike polynomial.
         """
-                
+        # To retrive the row that we are in we use the formula for 
+        # the sum of the integers:
+        #  
+        #  n      n(n + 1)
+        # sum i = -------- = x_{n}
+        # i=0        2
+        # 
+        # However, `j` is a number between x_{n - 1} and x_{n} to 
+        # retrieve the 0th based index we want the upper bound. 
+        # Applying the quadratic formula:
+        # 
+        # n = -1/2 + sqrt(1 + 8x_{n})/2
+        #
+        # We know that n is an integer and hence of x_{n} -> j where 
+        # j is not an exact solution the row can be found by taking 
+        # the floor of the calculation. 
+        #
+        # n = (-1/2 + sqrt(1 + 8j)/2) // 1
+        #
+        # All the odd noll indices map to negative m integers and also 
+        # 0. The sign can therefore be determined by -(j & 1). 
+        # This works because (j & 1) returns the rightmost bit in 
+        # binary representation of j. This is equivalent to -(j % 2).
+        # 
+        # The m indices range from -n to n in increments of 2. The last 
+        # thing to do is work out how many times to add two to -n. 
+        # This can be done by banding j away from the smallest j in 
+        # the row. 
+        #
+        # The smallest j in the row can be calculated using the sum of
+        # integers formula in the comments above with n = (n - 1) and
+        # then adding one. Let this number be (x_{n - 1} + 1). We can 
+        # then subtract j from it to get r = (j - x_{n - 1} + 1)
+        #
+        # The odd and even cases work differently. I have included the 
+        # formula below:
+        # odd : p = (j - x_{n - 1}) // 2 
+        # even: p = (j - x_{n - 1} + 1) // 2
+        # where p represents the number of times 2 needs to be added
+        # to the base case. The 1 required for the even case can be 
+        # generated in place using ~(j & 1) + 2, which is 1 for all 
+        # even numbers and 0 for all odd numbers.
+        #
+        # For odd n the base case is 1 and for even n it is 0. This 
+        # is the result of the bitwise operation j & 1 or alternatively
+        # (j % 2). The final thing is adding the sign to m which is 
+        # determined by whether j is even or odd hence -(j & 1).
+        n = np.ceil(-1 / 2 + np.sqrt(1 + 8 * j) / 2) - 1
+        smallest_j_in_row = n * (n + 1) / 2 + 1 
+        number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
+        sign_of_shift = -(j & 1) + ~(j & 1) + 2
+        base_case = (n & 1)
+        m = sign_of_shift * (base_case + number_of_shifts * 2)
+        return int(n), int(m)
+
 
     def _zernike(self : Layer, n : int, m : int) -> Tensor: 
 
