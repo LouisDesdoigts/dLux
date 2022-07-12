@@ -23,8 +23,7 @@ Layer = TypeVar("Layer")
 Matrix = TypeVar("Matrix")
 
 
-# @functools.lru_cache
-# @functools.partial(jax.jit, static_argnums=0)
+@functools.lru_cache
 def factorial(n : int) -> int:
     """
     Calculate n! in a jax friendly way. Note that n == 0 is not a 
@@ -39,46 +38,7 @@ def factorial(n : int) -> int:
     n! : int
         The factorial of the integer
     """
-    def body_fun(index_and_factorial : tuple) -> tuple:
-        """
-        Add the index - 1 multiplication to the factorial.
-
-        Parameters
-        ----------
-        index_and_factorial : tuple
-            A tuple of `index, fact` such that `index * fact` is the
-            next step in the factorial computation.
-
-        Returns
-        -------
-        new_index_and_fact : tuple
-            `index - 1, n! / i!`.
-        """
-        index, _factorial = index_and_factorial
-        return index - 1, _factorial * index
-
-
-    def cond_fun(index_and_factorial : tuple) -> tuple:
-        """
-        Has the computation finished?
-
-        Parameters
-        ----------
-        index_and_factorial : tuple
-            A tuple of `index, fact` such that `index * fact` is the
-            next step in the factorial computation.
-
-        Returns
-        -------
-        done : bool
-            True if the factorial is calculated else False
-        """
-        index, _ = index_and_factorial
-        return (index > 1).astype(bool)
-
-    return jax.lax.cond(n == 0, 
-        lambda: 1,
-        lambda: jax.lax.while_loop(cond_fun, body_fun, (n - 1, n))[1])
+    return jax.lax.exp(jax.lax.lgamma(n + 1.))
 
 
 class Aperture(eqx.Module, ABC):
@@ -151,7 +111,7 @@ class Aperture(eqx.Module, ABC):
         """
         wavefront = parameters["Wavefront"]
         wavefront = wavefront.mulitply_amplitude(
-            self._aperture(self.get_npix()))
+           self._aperture(self.get_npix()))
         parameters["Wavefront"] = wavefront
         return parameters
 
@@ -208,7 +168,7 @@ class AnnularAperture(Aperture):
             coefficient of that pixel. 
         """
         centre = (self.get_npix() - 1.) / 2.
-        coords = 2 / self.get_npix() * get_radial_coordinates(self.get_npix())
+        coords = 2 / self.get_npix() * get_radial_positions(self.get_npix())
         return np.logical_and(coords <= rmax, coords > rmin).astype(float)
 
 
@@ -489,7 +449,7 @@ class PolygonBasis(BasisPhase, ABC):
         aperture : Matrix 
             The soft-edged aperture of the given polygonal shape.
         """
-        positions = get_radial_positions(self._npix)
+        positions = get_radial_positions(self._npix, -self._x, -self._y)
         rho = positions[0]
         theta = positions[1]
 
@@ -517,6 +477,8 @@ class PolygonBasis(BasisPhase, ABC):
         # Polar coordinates are used because we can always use r >
         # to specify the aperture, avoiding the use of logic.
 
+        vertices = self._vertices()
+
         i = np.arange(-1, vertices.shape[0])
         a = (vertices[i + 1, 0] - vertices[i, 0])
         b = (vertices[i + 1, 1] - vertices[i, 1])
@@ -524,7 +486,26 @@ class PolygonBasis(BasisPhase, ABC):
             (vertices[i + 1, 1] - vertices[i, 1]) * vertices[i, 0]
 
         rho = np.expand_dims(rho, axis=2).tile(rho.shape[0])
-        aperture = np.logical_less(rho, 
+
+        @jax.vmap
+        def less_than(array : Matrix, comparator : Matrix) -> Matrix:
+            """
+            < comparator for Tensors.
+
+            Parameters
+            ----------
+            array : Matrix
+                The array on the left of the <.
+            comparator : Matrix
+                The array on the right of the <.
+
+            Returns
+            is_less_than : Matrix
+                Elementwise comparison of the arrays. 
+            """
+            return array < comparator
+
+        aperture = less_than(rho, 
             c / (a * np.sin(theta) + b * np.cos(theta)))
 
         return aperture
@@ -761,7 +742,9 @@ class PolygonBasis(BasisPhase, ABC):
         m, n = np.abs(m), np.abs(n)
         upper = ((n - m) / 2).astype(int) + 1
 
-        def body_fun(index_and_term : tuple) -> tuple:
+        # This is for the `lax.while_loop` that is present in the 
+        # `radial_zernike` calculation.
+        def _body_fun(index_and_term : tuple) -> tuple:
             """
             The summation inside the radial polynomial calculation.
 
@@ -783,7 +766,10 @@ class PolygonBasis(BasisPhase, ABC):
                     factorial(((n - m) / 2).astype(int) - k))
             return k + 1, radial + coefficient * rho ** (n - 2 * k)
 
-        def cond_fun(index_and_term : tuple) -> bool:
+
+        # This is for the `lax.while_loop` that is in the `radial_zernike`
+        # calculation.
+        def _cond_fun(index_and_term : tuple) -> bool:
             """
             Is the summation complete?        
 
@@ -798,15 +784,12 @@ class PolygonBasis(BasisPhase, ABC):
             new_index_and_term : tuple
                 Radial but also added to the new index k.
             """
-            k, radial = index_and_term
+            k, _ = index_and_term
             return (k < upper).astype(bool)
 
-        # Need to work out what happens to the zero term.
-        radial = jax.lax.cond(((n - m) & 1).astype(bool),
-            lambda : np.zeros(rho.shape),
-            lambda : jax.lax.while_loop(
-                cond_fun, body_fun, (0, radial))[1])
-        return radial
+        return jax.lax.while_loop(
+            _cond_fun, _body_fun, (0, radial))[1]
+
 
     def _zernike_basis(self : Layer) -> Tensor:
         """
