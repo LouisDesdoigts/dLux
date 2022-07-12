@@ -23,148 +23,23 @@ Layer = TypeVar("Layer")
 Matrix = TypeVar("Matrix")
 
 
-# NOTE: This is the short term version I may actually end up adopting
-# this as the long term version. 
-class HexagonalBasis(eqx.Module):
-    def _zernikes(self : Layer) -> Tensor:
-        """
-        Generate the zernike polynomials over a circle of radius 
-        `self._rmax`.
-        
-        Returns
-        -------
-        zernikes : Tensor
-            A tensor that is `(nterms, npix, npix)` in size. The 
-            leading axis represents the noll indexes of the zernike
-            while the coordinate grid is undistorted. 
-        """
+def cartesian_to_factorial(coordinates : Tensor) -> Tensor:
+    """
+    Change the coordinate system from rectilinear to curvilinear.
+    
+    Parameters
+    ----------
+    coordinates : Tensor
+        The rectilinear coordinates.
 
-
-    def _aperture(self : Layer,
-            coordinates : Tensor,
-            maximum_radius : float = 1.) -> Array:
-        """
-        Generate a binary mask representing the pixels occupied by 
-        the aperture. 
-
-        Parameters
-        ----------
-        coordinates : Tensor
-            The coordinate grid as a stacked array that is 
-            `(2, npix, npix)`, where the leading axis denotes the x and 
-            y coordinate sets. This Tensor must be normalised, if using 
-            the inbuilt `get_pixel_positions` normalisation can be done
-            via `2 / npix`.
-        maximum_radius : float 
-            The radius of the smallest circle that can completely contain
-            the entire aperture. 
-
-        Returns
-        -------
-        aperture : Array
-            The bitmask that represents the circular aperture.        
-        """
-        x, y = coordinates[0], coordinates[1]
-
-        rectangle = (np.abs(x) <= maximum_radius / 2.) \
-            & (np.abs(y) <= (maximum_radius * np.sqrt(3) / 2.))
-
-        left_triangle = (x <= - maximum_radius / 2.) \
-            & (x >= - maximum_radius) \
-            & (np.abs(y) <= (x + maximum_radius) * np.sqrt(3))
-
-        right_triangle = (x >= maximum_radius / 2.) \
-            & (x <= maximum_radius) \
-            & (np.abs(y) <= (maximum_radius - x) * np.sqrt(3))
-
-        hexagon = rectangle | left_triangle | right_triangle
-        return np.asarray(hexagon).astype(float)
-
-
-    def _othonormalise(self : Layer, aperture : Matrix, 
-            zernikes : Tensor) -> Tensor:
-        """
-        The hexike polynomials up until `number_of_hexikes` on a square
-        array that `number_of_pixels` by `number_of_pixels`. The 
-        polynomials can be restricted to a smaller subset of the 
-        array by passing an explicit `maximum_radius`. The polynomial
-        will then be defined on the largest hexagon that fits with a 
-        circle of radius `maximum_radius`. 
-        
-        Parameters
-        ----------
-        aperture : Matrix
-            An array representing the aperture. This should be an 
-            `(npix, npix)` array. 
-        number_of_hexikes : int = 15
-            The number of basis terms to generate. 
-        zernikes : Tensor
-            The zernike polynomials to orthonormalise on the aperture.
-            This tensor should be `(nterms, npix, npix)` in size, where 
-            the first axis represents the noll indexes. 
-
-        Returns
-        -------
-        hexikes : Tensor
-            The hexike polynomials evaluated on the square arrays
-            containing the hexagonal apertures until `maximum_radius`.
-            The leading dimension is `number_of_hexikes` long and 
-            each stacked array is a basis term. The final shape is:
-            ```py
-            hexikes.shape == (number_of_hexikes, number_of_pixels, number_of_pixels)
-            ```
-        """
-        # TODO: Use the other implementation once it is tested. 
-        pixel_area = aperture.sum()
-        shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
-        zernikes = self._zernikes()
-        hexikes = np.zeros(shape).at[0].set(aperture)
-        
-        for j in np.arange(1, number_of_hexikes): # Index of the zernike
-            intermediate = offset_zernikes[j + 1] * aperture
-
-            coefficients = -1 / pixel_area * \
-               ((offset_zernikes[j + 1] * offset_hexikes[1 : j + 1]) * aperture)\
-                .sum(axis = 0) 
-
-            intermediate += (coefficients * offset_hexikes[1 : j + 1])\
-                .sum(axis = 0)
-
-            offset_hexikes = offset_hexikes\
-                .at[j + 1]\
-                .set(intermediate / \
-                    np.sqrt((intermediate ** 2).sum() / pixel_area))
-
-        return offset_hexikes
-
-
-    def _magnify(self : Layer, coordinates : Tensor) -> Tensor:
-        return 1 / self._rmax * coordinates
-
-
-    def _rotate(self : Layer, coordinates : Tensor) -> Tensor:
-        rotation_matrix = np.array([
-            [np.cos(self._theta), -np.sin(self._theta)],
-            [np.sin(self._theta), np.cos(self._theta)]])            
-        return rotation_matrix @ coordinates
-
-
-    def _shear(self : Layer, coordinates : Tensor) -> Tensor:
-        return coordinates\
-            .at[0]\
-            .set(coordinates[0] - coordinates[1] * np.tan(self._phi)) 
-
-
-    def _basis(self : Layer):
-        coordinates = get_pixel_positions(self._npix, -self._x, -self._y)
-        coordinates = self._rotate(coordinates)
-        coordinates = self._magnify(coordinates)
-        coordinates = self._shear(coordinates)
-
-        zernikes = self._zernikes(coordinates)
-        aperture = self._aperture(coordinates)
-
-        return self._orthonormalise(aperture, zernikes)        
+    Returns
+    -------
+    coordinates : Tensor
+        The curvilinear coordinates.
+    """
+    rho = np.hypot(coordinates[0], coordinates[1])
+    theta = np.arctan2(coordinates[1], coordinates[0])
+    return np.array([rho, theta])
 
 
 @functools.lru_cache
@@ -1009,3 +884,449 @@ class HexagonalBasis(PolygonBasis):
 #    def _rotate():
 #    def _shear()
 #    def _offset():
+
+# NOTE: This is the short term version I may actually end up adopting
+# this as the long term version. 
+class HexagonalBasis(eqx.Module):
+    """
+    A basis on hexagonal surfaces. This is based on [this]
+    (https://github.com/spacetelescope/poppy/poppy/zernike.py)
+    code from the _POPPY_ library, but ported into [_JAX_]
+    (https://github.com/google/jax) and allowed to perform 
+    more complicated spatial transformations. 
+
+    Attributes
+    ----------
+    rmax : float
+        The radius of the smallest circle that can fully enclose the 
+        aperture upon which the basis will be orthonormalised. The 
+        coordinates hadnled internally are normalised, but this 
+        quantity can be any number. > 1 is a magnification and < 1
+        makes it smaller. 
+    theta : float, radians
+        This represents the angle of rotation from the positive x 
+        axis. 
+    phi : float, radians
+        This represents the angle of shear measured from the positive 
+        y axis.
+    x : int, pixels
+        The _x_ coordinates of the centre of the aperture.  
+    y : int, pixles
+        The _y_ coordinates of the centre of the aperture. 
+    """
+    rmax : float
+    theta : float
+    phi : float
+    x : float
+    y : float
+
+    
+    @functools.partial(jax.vmap, in_axes=(None, 0))
+    def _noll_index(self : Layer, j : int) -> tuple:
+        """
+        Decode the jth noll index of the zernike polynomials. This 
+        arrises because the zernike polynomials are parametrised by 
+        a pair numbers, e.g. n, m, but we want to impose an order.
+        The noll indices are the standard way to do this see [this]
+        (https://oeis.org/A176988) for more detail. The top of the 
+        mapping between the noll index and the pair of numbers is 
+        shown below:
+
+        n, m Indices
+        ------------
+        (0, 0)
+        (1, -1), (1, 1)
+        (2, -2), (2, 0), (2, 2)
+        (3, -3), (3, -1), (3, 1), (3, 3)
+
+        Noll Indices
+        ------------
+        1
+        3, 2
+        5, 4, 6
+        9, 7, 8, 10
+
+        Parameters
+        ----------
+        j : int
+            The noll index to decode.
+        
+        Returns
+        -------
+        n, m : tuple
+            The n, m parameters of the zernike polynomial.
+        """
+        # To retrive the row that we are in we use the formula for 
+        # the sum of the integers:
+        #  
+        #  n      n(n + 1)
+        # sum i = -------- = x_{n}
+        # i=0        2
+        # 
+        # However, `j` is a number between x_{n - 1} and x_{n} to 
+        # retrieve the 0th based index we want the upper bound. 
+        # Applying the quadratic formula:
+        # 
+        # n = -1/2 + sqrt(1 + 8x_{n})/2
+        #
+        # We know that n is an integer and hence of x_{n} -> j where 
+        # j is not an exact solution the row can be found by taking 
+        # the floor of the calculation. 
+        #
+        # n = (-1/2 + sqrt(1 + 8j)/2) // 1
+        #
+        # All the odd noll indices map to negative m integers and also 
+        # 0. The sign can therefore be determined by -(j & 1). 
+        # This works because (j & 1) returns the rightmost bit in 
+        # binary representation of j. This is equivalent to -(j % 2).
+        # 
+        # The m indices range from -n to n in increments of 2. The last 
+        # thing to do is work out how many times to add two to -n. 
+        # This can be done by banding j away from the smallest j in 
+        # the row. 
+        #
+        # The smallest j in the row can be calculated using the sum of
+        # integers formula in the comments above with n = (n - 1) and
+        # then adding one. Let this number be (x_{n - 1} + 1). We can 
+        # then subtract j from it to get r = (j - x_{n - 1} + 1)
+        #
+        # The odd and even cases work differently. I have included the 
+        # formula below:
+        # odd : p = (j - x_{n - 1}) // 2 
+       
+        # even: p = (j - x_{n - 1} + 1) // 2
+        # where p represents the number of times 2 needs to be added
+        # to the base case. The 1 required for the even case can be 
+        # generated in place using ~(j & 1) + 2, which is 1 for all 
+        # even numbers and 0 for all odd numbers.
+        #
+        # For odd n the base case is 1 and for even n it is 0. This 
+        # is the result of the bitwise operation j & 1 or alternatively
+        # (j % 2). The final thing is adding the sign to m which is 
+        # determined by whether j is even or odd hence -(j & 1).
+        n = (np.ceil(-1 / 2 + np.sqrt(1 + 8 * j) / 2) - 1).astype(int)
+        smallest_j_in_row = n * (n + 1) / 2 + 1 
+        number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
+        sign_of_shift = -(j & 1) + ~(j & 1) + 2
+        base_case = (n & 1)
+        m = (sign_of_shift * (base_case + number_of_shifts * 2)).astype(int)
+        return n, m
+
+
+    @functools.partial(jax.vmap, in_axes=(None, 0, 0, None))
+    def _zernike(self : Layer, n : int, m : int, 
+            coordinates : Tesnor) -> Matrix: 
+        """
+        Generate the zernike specified by the indexes n and m.
+
+        Parameters
+        ----------
+        n : int
+            The first integer that specifies the zernike polynomial.
+        m : int 
+            The second integer that specifies the zernike polynomial,
+            must be within the range -n < m < n.
+        coordinates : Tensor
+            The radial coordinate system. The dimensions of this 
+            system should be `(2, npix, npix)` where the leading
+            axis represents the $r$ and $\\theta$ axis respectively.
+
+        Returns
+        zernike : Matrix
+            The zernike evaluated at the centre of a square matrix.  
+        """
+        rho = coordinates[0]
+        theta = coordinates[1]
+
+        aperture = (rho <= 1.).astype(int)
+
+        # In the calculation of the noll coefficient we must define 
+        # between the m == 0 and and the m != 0 case. I have done 
+        # this in place by casting the logical operation to an int. 
+
+        norm_coeff = (1 + (np.sqrt(2) - 1) * (m != 0).astype(int)) *\
+            np.sqrt(n + 1)
+        radial_zernike = self._radial_zernike(n, m, rho)
+
+        # When m < 0 we have the odd zernike polynomials which are 
+        # the radial zernike polynomials multiplied by a sine term.
+        # When m > 0 we have the even sernike polynomials which are 
+        # the radial polynomials multiplies by a cosine term. 
+        # To produce this result without logic we can use the fact
+        # that sine and cosine are separated by a phase of pi / 2
+        # hence by casting int(m < 0) we can add the nessecary phase.
+
+        return norm_coeff * radial_zernike * aperture *\
+            np.cos(np.abs(m) * theta - (m < 0).astype(int) * np.pi / 2)
+
+
+    def _radial_zernike(self : Layer, n : int, m : int, 
+            rho : Matrix) -> Tensor:
+        """
+        The radial zernike polynomial.
+
+        Parameters
+        ----------
+        n : int
+            The first index number of the zernike polynomial to forge
+        m : int 
+            The second index number of the zernike polynomial to forge.
+        rho : Matrix
+            The radial positions of the aperture. Passed as an argument 
+            for speed.
+
+        Returns
+        -------
+        radial : Tensor
+            An npix by npix stack of radial zernike polynomials.
+        """
+        radial = np.zeros(rho.shape)
+        m, n = np.abs(m), np.abs(n)
+        upper = ((n - m) / 2).astype(int) + 1
+
+        for k in range(upper):
+            coefficient = (-1) ** k * factorial(n - k) / \
+                (factorial(k) * \
+                    factorial(((n + m) / 2).astype(int) - k) * \
+                    factorial(((n - m) / 2).astype(int) - k))
+            radial += coefficient * rho ** (n - 2 * k)
+
+        return radial
+
+
+    def _zernikes(self : Layer, coordinates : Tensor) -> Tensor:
+        """
+        Calculate the zernike basis on a square pixel grid. 
+
+        Parameters
+        ----------
+        number : int
+            The number of zernike basis terms to calculate.
+            This is a static argument to jit because the array
+            size depends on it.
+        pixels : int
+            The number of pixels along one side of the zernike image
+            for each of the n zernike polynomials.
+        coordinates : Tensor
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        zernike : Tensor 
+            The zernike polynomials evaluated until number. The shape
+            of the output tensor is number by pixels by pixels. 
+        """
+        j = np.arange(1, self._nterms + 1).astype(int)
+        n, m = self._noll_index(j)
+        coordinates = cartesian_to_polar(coordinates)
+        return self._zernike(n, m, coordinates)
+
+
+    def _aperture(self : Layer,
+            coordinates : Tensor,
+            maximum_radius : float = 1.) -> Array:
+        """
+        Generate a binary mask representing the pixels occupied by 
+        the aperture. 
+
+        Parameters
+        ----------
+        coordinates : Tensor
+            The coordinate grid as a stacked array that is 
+            `(2, npix, npix)`, where the leading axis denotes the x and 
+            y coordinate sets. This Tensor must be normalised, if using 
+            the inbuilt `get_pixel_positions` normalisation can be done
+            via `2 / npix`.
+        maximum_radius : float 
+            The radius of the smallest circle that can completely contain
+            the entire aperture. 
+
+        Returns
+        -------
+        aperture : Array
+            The bitmask that represents the circular aperture.        
+        """
+        x, y = coordinates[0], coordinates[1]
+
+        rectangle = (np.abs(x) <= maximum_radius / 2.) \
+            & (np.abs(y) <= (maximum_radius * np.sqrt(3) / 2.))
+
+        left_triangle = (x <= - maximum_radius / 2.) \
+            & (x >= - maximum_radius) \
+            & (np.abs(y) <= (x + maximum_radius) * np.sqrt(3))
+
+        right_triangle = (x >= maximum_radius / 2.) \
+            & (x <= maximum_radius) \
+            & (np.abs(y) <= (maximum_radius - x) * np.sqrt(3))
+
+        hexagon = rectangle | left_triangle | right_triangle
+        return np.asarray(hexagon).astype(float)
+
+
+    def _othonormalise(self : Layer, aperture : Matrix, 
+            zernikes : Tensor) -> Tensor:
+        """
+        The hexike polynomials up until `number_of_hexikes` on a square
+        array that `number_of_pixels` by `number_of_pixels`. The 
+        polynomials can be restricted to a smaller subset of the 
+        array by passing an explicit `maximum_radius`. The polynomial
+        will then be defined on the largest hexagon that fits with a 
+        circle of radius `maximum_radius`. 
+        
+        Parameters
+        ----------
+        aperture : Matrix
+            An array representing the aperture. This should be an 
+            `(npix, npix)` array. 
+        number_of_hexikes : int = 15
+            The number of basis terms to generate. 
+        zernikes : Tensor
+            The zernike polynomials to orthonormalise on the aperture.
+            This tensor should be `(nterms, npix, npix)` in size, where 
+            the first axis represents the noll indexes. 
+
+        Returns
+        -------
+        hexikes : Tensor
+            The hexike polynomials evaluated on the square arrays
+            containing the hexagonal apertures until `maximum_radius`.
+            The leading dimension is `number_of_hexikes` long and 
+            each stacked array is a basis term. The final shape is:
+            ```py
+            hexikes.shape == (number_of_hexikes, number_of_pixels, number_of_pixels)
+            ```
+        """
+        pixel_area = aperture.sum()
+        basis = np.zeros(zernikes.shape).at[0].set(aperture)
+        
+        j = np.arange(1, zernikes.shape[0])
+
+        coefficients = -1 / pixel_area * \
+           ((zernikes[j + 1] * basis[1 : j + 1]) * aperture)\
+            .sum(axis = 1) 
+        
+        intermediates = zernikes[j + 1] * aperture
+        intermediate += (coefficients * basis[1 : j + 1]).sum(axis = 1)
+
+        return basis\
+            .at[j + 1]\
+            .set(intermediates / \
+                np.sqrt((intermediates ** 2).sum(axis=(1, 2)) \
+                    / pixel_area))
+
+
+    def _magnify(self : Layer, coordinates : Tensor) -> Tensor:
+        """
+        Enlarge or shrink the coordinate system, by the inbuilt 
+        amount specified by `self._rmax`.
+
+        Parameters
+        ----------
+        coordinates : Tensor
+            A `(2, npix, npix)` representation of the coordinate 
+            system. The leading dimensions specifies the x and then 
+            the y coordinates in that order. 
+
+        Returns
+        -------
+        coordinates : Tensor
+            The enlarged or shrunken coordinate system.
+        """
+        return 1 / self._rmax * coordinates
+
+
+    def _rotate(self : Layer, coordinates : Tensor) -> Tensor:
+        """
+        Rotate the coordinate system by a pre-specified amount,
+        `self._theta`
+
+        Parameters
+        ----------
+        coordinates : Tensor
+            A `(2, npix, npix)` representation of the coordinate 
+            system. The leading dimensions specifies the x and then 
+            the y coordinates in that order. 
+
+        Returns
+        -------
+        coordinates : Tensor
+            The rotated coordinate system. 
+        """
+        rotation_matrix = np.array([
+            [np.cos(self._theta), -np.sin(self._theta)],
+            [np.sin(self._theta), np.cos(self._theta)]])            
+        return rotation_matrix @ coordinates
+
+
+    def _shear(self : Layer, coordinates : Tensor) -> Tensor:
+        """
+        Shear the coordinate system by the inbuilt amount `self._phi`.
+
+        Parameters
+        ----------
+        coordinates : Tensor
+            A `(2, npix, npix)` representation of the coordinate 
+            system. The leading dimensions specifies the x and then 
+            the y coordinates in that order. 
+
+        Returns
+        -------
+        coordinates : Tensor
+            The sheared coordinate system. 
+        """
+        return coordinates\
+            .at[0]\
+            .set(coordinates[0] - coordinates[1] * np.tan(self._phi)) 
+
+
+    def _offset(self : Layer, coordinates : Tensor) -> Tensor:
+        """
+        Offset the coordinate system by prespecified amounts in both
+        the `x` and `y` directions. 
+
+        Parameters
+        ----------
+        coordinates : Tensor
+            A `(2, npix, npix)` representation of the coordinate 
+            system. The leading dimensions specifies the x and then 
+            the y coordinates in that order. 
+
+        Returns
+        -------
+        coordinates : Tensor
+            The translated coordinate system. 
+        """
+        return coordinates\
+            .at[0]\
+            .set(coordinates[0] - self._x)\
+            .at[1]\
+            .set(coordinates[1] - self._y)
+
+
+    def _basis(self : Layer):
+        """
+        Generate the basis. Requires a single run after which,
+        the basis is cached and can be used with no computational 
+        cost.  
+
+        Returns
+        -------
+        basis : Tensor
+            The basis polynomials evaluated on the square arrays
+            containing the apertures until `maximum_radius`.
+            The leading dimension is `n` long and 
+            each stacked array is a basis term. The final shape is:
+            `(n, npix, npix)`
+        """
+        coordinates = get_pixel_positions(self._npix)
+        coordinates = self._offset(coordinates)
+        coordinates = self._rotate(coordinates)
+        coordinates = self._magnify(coordinates)
+        coordinates = self._shear(coordinates)
+
+        zernikes = self._zernikes(coordinates)
+        aperture = self._aperture(coordinates)
+
+        return self._orthonormalise(aperture, zernikes)        
