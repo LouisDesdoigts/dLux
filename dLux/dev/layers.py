@@ -23,6 +23,150 @@ Layer = TypeVar("Layer")
 Matrix = TypeVar("Matrix")
 
 
+# NOTE: This is the short term version I may actually end up adopting
+# this as the long term version. 
+class HexagonalBasis(eqx.Module):
+    def _zernikes(self : Layer) -> Tensor:
+        """
+        Generate the zernike polynomials over a circle of radius 
+        `self._rmax`.
+        
+        Returns
+        -------
+        zernikes : Tensor
+            A tensor that is `(nterms, npix, npix)` in size. The 
+            leading axis represents the noll indexes of the zernike
+            while the coordinate grid is undistorted. 
+        """
+
+
+    def _aperture(self : Layer,
+            coordinates : Tensor,
+            maximum_radius : float = 1.) -> Array:
+        """
+        Generate a binary mask representing the pixels occupied by 
+        the aperture. 
+
+        Parameters
+        ----------
+        coordinates : Tensor
+            The coordinate grid as a stacked array that is 
+            `(2, npix, npix)`, where the leading axis denotes the x and 
+            y coordinate sets. This Tensor must be normalised, if using 
+            the inbuilt `get_pixel_positions` normalisation can be done
+            via `2 / npix`.
+        maximum_radius : float 
+            The radius of the smallest circle that can completely contain
+            the entire aperture. 
+
+        Returns
+        -------
+        aperture : Array
+            The bitmask that represents the circular aperture.        
+        """
+        x, y = coordinates[0], coordinates[1]
+
+        rectangle = (np.abs(x) <= maximum_radius / 2.) \
+            & (np.abs(y) <= (maximum_radius * np.sqrt(3) / 2.))
+
+        left_triangle = (x <= - maximum_radius / 2.) \
+            & (x >= - maximum_radius) \
+            & (np.abs(y) <= (x + maximum_radius) * np.sqrt(3))
+
+        right_triangle = (x >= maximum_radius / 2.) \
+            & (x <= maximum_radius) \
+            & (np.abs(y) <= (maximum_radius - x) * np.sqrt(3))
+
+        hexagon = rectangle | left_triangle | right_triangle
+        return np.asarray(hexagon).astype(float)
+
+
+    def _othonormalise(self : Layer, aperture : Matrix, 
+            zernikes : Tensor) -> Tensor:
+        """
+        The hexike polynomials up until `number_of_hexikes` on a square
+        array that `number_of_pixels` by `number_of_pixels`. The 
+        polynomials can be restricted to a smaller subset of the 
+        array by passing an explicit `maximum_radius`. The polynomial
+        will then be defined on the largest hexagon that fits with a 
+        circle of radius `maximum_radius`. 
+        
+        Parameters
+        ----------
+        aperture : Matrix
+            An array representing the aperture. This should be an 
+            `(npix, npix)` array. 
+        number_of_hexikes : int = 15
+            The number of basis terms to generate. 
+        zernikes : Tensor
+            The zernike polynomials to orthonormalise on the aperture.
+            This tensor should be `(nterms, npix, npix)` in size, where 
+            the first axis represents the noll indexes. 
+
+        Returns
+        -------
+        hexikes : Tensor
+            The hexike polynomials evaluated on the square arrays
+            containing the hexagonal apertures until `maximum_radius`.
+            The leading dimension is `number_of_hexikes` long and 
+            each stacked array is a basis term. The final shape is:
+            ```py
+            hexikes.shape == (number_of_hexikes, number_of_pixels, number_of_pixels)
+            ```
+        """
+        # TODO: Use the other implementation once it is tested. 
+        pixel_area = aperture.sum()
+        shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
+        zernikes = self._zernikes()
+        hexikes = np.zeros(shape).at[0].set(aperture)
+        
+        for j in np.arange(1, number_of_hexikes): # Index of the zernike
+            intermediate = offset_zernikes[j + 1] * aperture
+
+            coefficients = -1 / pixel_area * \
+               ((offset_zernikes[j + 1] * offset_hexikes[1 : j + 1]) * aperture)\
+                .sum(axis = 0) 
+
+            intermediate += (coefficients * offset_hexikes[1 : j + 1])\
+                .sum(axis = 0)
+
+            offset_hexikes = offset_hexikes\
+                .at[j + 1]\
+                .set(intermediate / \
+                    np.sqrt((intermediate ** 2).sum() / pixel_area))
+
+        return offset_hexikes
+
+
+    def _magnify(self : Layer, coordinates : Tensor) -> Tensor:
+        return 1 / self._rmax * coordinates
+
+
+    def _rotate(self : Layer, coordinates : Tensor) -> Tensor:
+        rotation_matrix = np.array([
+            [np.cos(self._theta), -np.sin(self._theta)],
+            [np.sin(self._theta), np.cos(self._theta)]])            
+        return rotation_matrix @ coordinates
+
+
+    def _shear(self : Layer, coordinates : Tensor) -> Tensor:
+        return coordinates\
+            .at[0]\
+            .set(coordinates[0] - coordinates[1] * np.tan(self._phi)) 
+
+
+    def _basis(self : Layer):
+        coordinates = get_pixel_positions(self._npix, -self._x, -self._y)
+        coordinates = self._rotate(coordinates)
+        coordinates = self._magnify(coordinates)
+        coordinates = self._shear(coordinates)
+
+        zernikes = self._zernikes(coordinates)
+        aperture = self._aperture(coordinates)
+
+        return self._orthonormalise(aperture, zernikes)        
+
+
 @functools.lru_cache
 def factorial(n : int) -> int:
     """
