@@ -4,9 +4,15 @@ src/dev/layers.py
 Development script for the new layers structure.
 """
 
-# NOTE: Experimental code by @Jordan-Dennis is below. 
+# NOTE: Experimental code by @Jordan-Dennis is below.
+import equinox as eqx
+import jax.numpy as np
+import jax 
+import functools
+
+
 from typing import TypeVar, Dict
-from dLux.utils import (get_radial_coordinates, get_pixel_vector, 
+from dLux.utils import (get_radial_positions, get_pixel_vector, 
     get_pixel_positions)
 from abc import ABC, abstractmethod 
 
@@ -14,7 +20,65 @@ from abc import ABC, abstractmethod
 Array = TypeVar("Array")
 Tensor = TypeVar("Tensor")
 Layer = TypeVar("Layer")
-Array = TypeVar("Array")
+Matrix = TypeVar("Matrix")
+
+
+# @functools.lru_cache
+# @functools.partial(jax.jit, static_argnums=0)
+def factorial(n : int) -> int:
+    """
+    Calculate n! in a jax friendly way. Note that n == 0 is not a 
+    safe case.  
+
+    Parameters
+    ----------
+    n : int
+        The integer to calculate the factorial of.
+
+    Returns
+    n! : int
+        The factorial of the integer
+    """
+    def body_fun(index_and_factorial : tuple) -> tuple:
+        """
+        Add the index - 1 multiplication to the factorial.
+
+        Parameters
+        ----------
+        index_and_factorial : tuple
+            A tuple of `index, fact` such that `index * fact` is the
+            next step in the factorial computation.
+
+        Returns
+        -------
+        new_index_and_fact : tuple
+            `index - 1, n! / i!`.
+        """
+        index, _factorial = index_and_factorial
+        return index - 1, _factorial * index
+
+
+    def cond_fun(index_and_factorial : tuple) -> tuple:
+        """
+        Has the computation finished?
+
+        Parameters
+        ----------
+        index_and_factorial : tuple
+            A tuple of `index, fact` such that `index * fact` is the
+            next step in the factorial computation.
+
+        Returns
+        -------
+        done : bool
+            True if the factorial is calculated else False
+        """
+        index, _ = index_and_factorial
+        return (index > 1).astype(bool)
+
+    return jax.lax.cond(n == 0, 
+        lambda: 1,
+        lambda: jax.lax.while_loop(cond_fun, body_fun, (n - 1, n))[1])
 
 
 class Aperture(eqx.Module, ABC):
@@ -253,7 +317,7 @@ class HexagonalAperture(Aperture):
         return np.asarray(hexagon).astype(float)
 
 
-class BasisPhase(Layer, ABC):
+class BasisPhase(eqx.Module):
     """
     _Abstract_ class representing a basis fixed over an aperture 
     that is used to optimise and learn aberations in the aperture. 
@@ -326,7 +390,7 @@ class BasisPhase(Layer, ABC):
 
 
     @abstractmethod
-    @cached_property 
+    @functools.cached_property 
     def _basis(self : Layer, n : int) -> Tensor:
         """
         Generate the basis. Requires a single run after which,
@@ -400,7 +464,7 @@ class BasisPhase(Layer, ABC):
         return parameters
         
 
-class PolygonBasis(PhaseBasis, ABC):
+class PolygonBasis(BasisPhase, ABC):
     """
     Orthonormalises the zernike basis over a polygon to provide
     a basis on a polygonal aperture.
@@ -505,7 +569,7 @@ class PolygonBasis(PhaseBasis, ABC):
                     / pixel_area))
 
 
-    @cached_property
+    @functools.cached_property
     def _basis(self : Layer) -> Tensor:
         """
         Generate the basis. Requires a single run after which,
@@ -534,7 +598,7 @@ class PolygonBasis(PhaseBasis, ABC):
         return basis
 
 
-    @functools.partial(jax.vmap, in_axis=(None, 0))
+    @functools.partial(jax.vmap, in_axes=(None, 0))
     def _noll_index(self : Layer, j : int) -> tuple:
         """
         Decode the jth noll index of the zernike polynomials. This 
@@ -617,16 +681,16 @@ class PolygonBasis(PhaseBasis, ABC):
         # is the result of the bitwise operation j & 1 or alternatively
         # (j % 2). The final thing is adding the sign to m which is 
         # determined by whether j is even or odd hence -(j & 1).
-        n = np.ceil(-1 / 2 + np.sqrt(1 + 8 * j) / 2) - 1
+        n = (np.ceil(-1 / 2 + np.sqrt(1 + 8 * j) / 2) - 1).astype(int)
         smallest_j_in_row = n * (n + 1) / 2 + 1 
         number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
         sign_of_shift = -(j & 1) + ~(j & 1) + 2
         base_case = (n & 1)
-        m = sign_of_shift * (base_case + number_of_shifts * 2)
-        return int(n), int(m)
+        m = (sign_of_shift * (base_case + number_of_shifts * 2)).astype(int)
+        return n, m
 
 
-    @functools.partial(jax.vmap, in_axis=(None, 0, 0))
+    @functools.partial(jax.vmap, in_axes=(None, 0, 0))
     def _zernike(self : Layer, n : int, m : int) -> Matrix: 
         """
         Generate the zernike specified by the indexes n and m.
@@ -643,11 +707,11 @@ class PolygonBasis(PhaseBasis, ABC):
         zernike : Matrix
             The zernike evaluated at the centre of a square matrix.  
         """
-        positions = get_radial_positions(self._npix)
-        rho = positions[0]
+        positions = get_radial_positions(self._npix, -self._x, -self._y)
+        rho = positions[0] * 2 / self._npix
         theta = positions[1]
 
-        aperture = (2 / self._npix * rho) <= 1.
+        aperture = (rho <= 1.).astype(int)
 
         # In the calculation of the noll coefficient we must define 
         # between the m == 0 and and the m != 0 case. To determine 
@@ -657,20 +721,9 @@ class PolygonBasis(PhaseBasis, ABC):
         # transformation. For the math nerds m is a fixed point of 
         # the left bit shift operation.
 
-        norm_coeff = np.sqrt(2) * (int(m >> 1 != m)) * np.sqrt(n + 1)
-        
-        radial_zernike = np.zeros(rho.shape)
-        # NOTE: This loop really needs to be made scan-able or 
-        # something a vmappable helper function maybe?
-        # This will need to be lifted into the basis calculation and
-        # done there using the largest range. (smallest j in the last 
-        # row will correspond to the correct value.)
-        m, n = abs(m), abs(n)
-        for k in range(int((n - m) / 2) + 1):
-            coefficient = (-1) ** k * factorial(n - k) / \
-                (factorial(k) * factorial(int((n + m) / 2) - k) * \
-                    factorial(int((n - m) / 2) - k))
-            radial_zernike += coefficient * rho ** (n - 2 * k)
+        norm_coeff = (1 + (np.sqrt(2) - 1) * (m != 0).astype(int)) *\
+            np.sqrt(n + 1)
+        radial_zernike = self._radial_zernike(n, m, rho)
 
         # When m < 0 we have the odd zernike polynomials which are 
         # the radial zernike polynomials multiplied by a sine term.
@@ -680,11 +733,82 @@ class PolygonBasis(PhaseBasis, ABC):
         # that sine and cosine are separated by a phase of pi / 2
         # hence by casting int(m < 0) we can add the nessecary phase.
 
-        return norm_coeff * radial_zernike * np.cos(np.abs(m) * theta) \
-            * aperture
+        return norm_coeff * radial_zernike * aperture *\
+            np.cos(np.abs(m) * theta - (m < 0).astype(int) * np.pi / 2)
 
 
-    def _zernike_basis(number : int, pixels : int) -> Tensor:
+    def _radial_zernike(self : Layer, n : int, m : int, 
+            rho : Matrix) -> Tensor:
+        """
+        The radial zernike polynomial.
+
+        Parameters
+        ----------
+        n : int
+            The first index number of the zernike polynomial to forge
+        m : int 
+            The second index number of the zernike polynomial to forge.
+        rho : Matrix
+            The radial positions of the aperture. Passed as an argument 
+            for speed.
+
+        Returns
+        -------
+        radial : Tensor
+            An npix by npix stack of radial zernike polynomials.
+        """
+        radial = np.zeros(rho.shape)
+        m, n = np.abs(m), np.abs(n)
+        upper = ((n - m) / 2).astype(int) + 1
+
+        def body_fun(index_and_term : tuple) -> tuple:
+            """
+            The summation inside the radial polynomial calculation.
+
+            Parameters
+            ----------
+            index_and_term : tuple
+                The index of the summation and the radial polynomial
+                summed to index - 1 terms.
+
+            Returns
+            -------
+            radial : Matrix
+                Radial but also added to the new index k.
+            """
+            k, radial = index_and_term
+            coefficient = (-1) ** k * factorial(n - k) / \
+                (factorial(k) * \
+                    factorial(((n + m) / 2).astype(int) - k) * \
+                    factorial(((n - m) / 2).astype(int) - k))
+            return k + 1, radial + coefficient * rho ** (n - 2 * k)
+
+        def cond_fun(index_and_term : tuple) -> bool:
+            """
+            Is the summation complete?        
+
+            Parameters
+            ----------
+            index_and_term : tuple
+                The index of the summation and the radial polynomial
+                summed to index - 1 terms.
+
+            Returns
+            -------
+            new_index_and_term : tuple
+                Radial but also added to the new index k.
+            """
+            k, radial = index_and_term
+            return (k < upper).astype(bool)
+
+        # Need to work out what happens to the zero term.
+        radial = jax.lax.cond(((n - m) & 1).astype(bool),
+            lambda : np.zeros(rho.shape),
+            lambda : jax.lax.while_loop(
+                cond_fun, body_fun, (0, radial))[1])
+        return radial
+
+    def _zernike_basis(self : Layer) -> Tensor:
         """
         Calculate the zernike basis on a square pixel grid. 
 
@@ -704,8 +828,8 @@ class PolygonBasis(PhaseBasis, ABC):
             The zernike polynomials evaluated until number. The shape
             of the output tensor is number by pixels by pixels. 
         """
-        j = np.arange(1, number + 1).astype(int)
-        n, m = self._noll_indices(j)
+        j = np.arange(1, self._nterms + 1).astype(int)
+        n, m = self._noll_index(j)
         return self._zernike(n, m)
 
 
@@ -713,6 +837,32 @@ class HexagonalBasis(PolygonBasis):
     """
     Generates an orthonormal hexagonal basis often called the Hexikes.
     """
+    def __init__(self : Layer, x : float, y : float, r : float,
+            npix : int, nterms : int) -> Layer:
+        """
+        Parameters
+        ----------
+        x : float
+            The x coordinate of the centre of the aperture containing 
+            the basis.
+        y : float
+            The y coordinate of the centre of the aperture containing 
+            the basis.
+        r : float
+            The radius of the aperture containing the basis. For 
+            abitrary shapes the radius is belongs to the smallest 
+            circle that can completely contain the aperture. 
+        npix : int
+            The number of pixels along one side of the basis arrays.
+            That is each term in the basis will be evaluated on a 
+            `npix` by `npix` grid.
+        nterms : int
+            The number of basis terms to generate. This determines the
+            length of the leading dimension of the output Tensor. 
+        """
+        super().__init__(x, y, r, npix, nterms)
+
+
     def _vertices(self : Layer) -> Matrix:
         """
         Returns
@@ -723,9 +873,9 @@ class HexagonalBasis(PolygonBasis):
             along the 1st row. The nth column is the x and y coordinates
             of the nth vertice. 
         """
-        theta = np.arange(0, 2 * pi, pi / 3)
-        return np.array([self._rmax * np.cos(theta), 
-            self._rmax * np.sin(theta)])
+        theta = np.arange(0, 2 * np.pi, np.pi / 3)
+        return np.array([self._r * np.cos(theta) - self._x, 
+            self._r * np.sin(theta) - self._y])
 
 
 #    def _tilt():

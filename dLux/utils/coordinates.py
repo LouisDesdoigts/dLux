@@ -8,12 +8,14 @@ __author__ = "Jordan Dennis"
 __date__ = "07/07/2022"
 
 
+import jax.numpy as np
 from typing import TypeVar
 
 
 Vector = TypeVar("Vector")
 Matrix = TypeVar("Matrix")
 Tensor = TypeVar("Tensor")
+Array = TypeVar("Array")
 
 
 def get_pixel_vector(
@@ -63,8 +65,8 @@ def get_pixel_positions(
         The pixel positions in the square output array with the 
         correct offsets
     """
-    x = _get_pixel_vector(number_of_pixels, x_pixel_offset)
-    y = _get_pixel_vector(number_of_pixels, y_pixel_offset)
+    x = get_pixel_vector(number_of_pixels, x_pixel_offset)
+    y = get_pixel_vector(number_of_pixels, y_pixel_offset)
     return np.meshgrid(x, y)
 
 
@@ -92,5 +94,9 @@ def get_radial_positions(number_of_pixels : int,
         A grid of the radial coordinates.
     """
     # NOTE: I think CircularAperture is Broken 
-    return np.sum(self.get_pixel_coordinates(number_of_pixels, 
-        x_pixel_offset, y_pixel_offset) ** 2) ** 0.5
+    positions = get_pixel_positions(number_of_pixels, 
+        x_pixel_offset, y_pixel_offset)
+    x, y = positions[0], positions[1]
+    rho = np.hypot(x, y)
+    theta = np.arctan2(y, x)
+    return np.array([rho, theta])
