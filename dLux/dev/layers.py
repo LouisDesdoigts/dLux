@@ -23,6 +23,9 @@ Layer = TypeVar("Layer")
 Matrix = TypeVar("Matrix")
 
 
+MAX_DIFF = 4
+
+
 def cartesian_to_polar(coordinates : Tensor) -> Tensor:
     """
     Change the coordinate system from rectilinear to curvilinear.
@@ -1063,7 +1066,7 @@ class HexagonalBasis(eqx.Module):
         return n, m
 
 
-    def _radial_zernike(self : Layer, n : int, m : int, upper : int,
+    def _radial_zernike(self : Layer, n : int, m : int,
             rho : Matrix) -> Tensor:
         """
         The radial zernike polynomial.
@@ -1084,6 +1087,7 @@ class HexagonalBasis(eqx.Module):
             An npix by npix stack of radial zernike polynomials.
         """
         m, n = np.abs(m), np.abs(n)
+        upper = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
         rho = np.tile(rho, (upper, 1, 1))
 
         k = np.arange(upper)
@@ -1140,13 +1144,11 @@ class HexagonalBasis(eqx.Module):
             (1 + (np.sqrt(2) - 1) * (m != 0).astype(int)) \
             * np.sqrt(n + 1)
 
-        summation_limits = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
         radial_zernikes = np.zeros((self.nterms,) + rho.shape)
         for i in np.arange(self.nterms):
             radial_zernikes = radial_zernikes\
                 .at[i]\
-                .set(self._radial_zernike(n[i], m[i], 
-                    summation_limits[i], rho))
+                .set(self._radial_zernike(n[i], m[i], rho))
 
         # When m < 0 we have the odd zernike polynomials which are 
         # the radial zernike polynomials multiplied by a sine term.
