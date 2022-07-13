@@ -1088,16 +1088,19 @@ class HexagonalBasis(eqx.Module):
         """
         m, n = np.abs(m), np.abs(n)
         upper = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
-        rho = np.tile(rho, (upper, 1, 1))
+        rho = np.tile(rho, (MAX_DIFF, 1, 1))
 
-        k = np.arange(upper)
+        murder_weapon = (np.arange(MAX_DIFF) < upper)
+
+        k = np.arange(MAX_DIFF) * murder_weapon
         coefficients = (-1) ** k * factorial(n - k) / \
             (factorial(k) * \
                 factorial(((n + m) / 2).astype(int) - k) * \
                 factorial(((n - m) / 2).astype(int) - k))
-        radial = coefficients.reshape(upper, 1, 1) \
-            * rho ** (n - 2 * k).reshape(upper, 1, 1)
-        
+        radial = coefficients.reshape(MAX_DIFF, 1, 1) *\
+            rho ** (n - 2 * k).reshape(MAX_DIFF, 1, 1) *\
+            murder_weapon.reshape(MAX_DIFF, 1, 1)
+         
         return radial.sum(axis=0)
 
 
