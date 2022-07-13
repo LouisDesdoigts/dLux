@@ -743,13 +743,6 @@ class PolygonalBasis(BasisPhase, ABC):
             intermediate += (coefficient * basis[1 : j + 1])\
                 .sum(axis = 0)
             
-#            for k in np.arange(1, j + 1):
-#                coefficient = -1 / pixel_area * \
-#                   (zernikes[j] * basis[k] * aperture)\
-#                    .sum() 
-#
-#                intermediate += (coefficient * basis[k])
-
             basis = basis\
                 .at[j]\
                 .set(intermediate / \
