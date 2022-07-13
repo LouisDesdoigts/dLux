@@ -441,7 +441,7 @@ class BasisPhase(eqx.Module):
         return parameters
         
 
-class PolygonBasis(BasisPhase, ABC):
+class PolygonalBasis(BasisPhase, ABC):
     """
     Orthonormalises the zernike basis over a polygon to provide
     a basis on a polygonal aperture.
@@ -696,7 +696,7 @@ class PolygonBasis(BasisPhase, ABC):
             * aperture * phase 
 
 
-    def _othonormalise(self : Layer, aperture : Matrix, 
+    def _orthonormalise(self : Layer, aperture : Matrix, 
             zernikes : Tensor) -> Tensor:
         """
         The hexike polynomials up until `number_of_hexikes` on a square
@@ -735,12 +735,20 @@ class PolygonBasis(BasisPhase, ABC):
         for j in np.arange(1, self.nterms):
             intermediate = zernikes[j] * aperture
 
-            coefficients = -1 / pixel_area * \
-               ((zernikes[j] * basis[1 : j + 1]) * aperture)\
-                .sum(axis = 0) 
+            coefficient = -1 / pixel_area * \
+                (zernikes[j] * basis[1 : j + 1] * aperture)\
+                .sum(axis = (1, 2))\
+                .reshape(j, 1, 1) 
 
-            intermediate += (coefficients * basis[1 : j + 1])\
+            intermediate += (coefficient * basis[1 : j + 1])\
                 .sum(axis = 0)
+            
+#            for k in np.arange(1, j + 1):
+#                coefficient = -1 / pixel_area * \
+#                   (zernikes[j] * basis[k] * aperture)\
+#                    .sum() 
+#
+#                intermediate += (coefficient * basis[k])
 
             basis = basis\
                 .at[j]\
@@ -858,7 +866,7 @@ class PolygonBasis(BasisPhase, ABC):
         zernikes = self._zernikes(coordinates)
         aperture = self._aperture(coordinates)
 
-        return self._othonormalise(aperture, zernikes)  
+        return self._orthonormalise(aperture, zernikes)  
 
 
     def _coordinates(self : Layer) -> Tensor:
@@ -957,7 +965,7 @@ class PolygonBasis(BasisPhase, ABC):
         return eqx.tree_at(lambda basis : basis.y, self, y)
 
 
-class HexagonalBasis(eqx.Module):
+class HexagonalBasis(PolygonalBasis):
     """
     A basis on hexagonal surfaces. This is based on [this]
     (https://github.com/spacetelescope/poppy/poppy/zernike.py)
@@ -996,13 +1004,7 @@ class HexagonalBasis(eqx.Module):
             occurs following the normalisation so that the type can 
             be given as a `float` for gradient stability.
         """
-        self.nterms = int(nterms)
-        self.npix = int(npix)
-        self.rmax = np.asarray(rmax).astype(float)
-        self.theta = np.asarray(theta).astype(float)
-        self.phi = np.asarray(phi).astype(float)
-        self.x = np.asarray(x).astype(float)
-        self.y = np.asarray(y).astype(float)
+        super().__init__(nterms, npix, rmax, theta, phi, x, y)
 
 
     def _aperture(self : Layer,
