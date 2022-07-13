@@ -1251,20 +1251,22 @@ class HexagonalBasis(eqx.Module):
         pixel_area = aperture.sum()
         basis = np.zeros(zernikes.shape).at[0].set(aperture)
         
-        j = np.arange(1, zernikes.shape[0])
+        for j in np.arange(1, self.nterms):
+            intermediate = zernikes[j] * aperture
 
-        coefficients = -1 / pixel_area * \
-           ((zernikes[j + 1] * basis[1 : j + 1]) * aperture)\
-            .sum(axis = 1) 
+            coefficients = -1 / pixel_area * \
+               ((zernikes[j] * basis[1 : j + 1]) * aperture)\
+                .sum(axis = 0) 
+
+            intermediate += (coefficients * basis[1 : j + 1])\
+                .sum(axis = 0)
+
+            basis = basis\
+                .at[j]\
+                .set(intermediate / \
+                    np.sqrt((intermediate ** 2).sum() / pixel_area))
         
-        intermediates = zernikes[j + 1] * aperture
-        intermediate += (coefficients * basis[1 : j + 1]).sum(axis = 1)
-
-        return basis\
-            .at[j + 1]\
-            .set(intermediates / \
-                np.sqrt((intermediates ** 2).sum(axis=(1, 2)) \
-                    / pixel_area))
+        return basis
 
 
     def _magnify(self : Layer, coordinates : Tensor) -> Tensor:
@@ -1284,7 +1286,7 @@ class HexagonalBasis(eqx.Module):
         coordinates : Tensor
             The enlarged or shrunken coordinate system.
         """
-        return 1 / self._rmax * coordinates
+        return 1 / self.rmax * coordinates
 
 
     def _rotate(self : Layer, coordinates : Tensor) -> Tensor:
@@ -1305,9 +1307,10 @@ class HexagonalBasis(eqx.Module):
             The rotated coordinate system. 
         """
         rotation_matrix = np.array([
-            [np.cos(self._theta), -np.sin(self._theta)],
-            [np.sin(self._theta), np.cos(self._theta)]])            
-        return rotation_matrix @ coordinates
+            [np.cos(self.theta), -np.sin(self.theta)],
+            [np.sin(self.theta), np.cos(self.theta)]])            
+        return np.apply_along_axis(np.matmul, 0, coordinates, 
+            rotation_matrix) 
 
 
     def _shear(self : Layer, coordinates : Tensor) -> Tensor:
@@ -1328,7 +1331,7 @@ class HexagonalBasis(eqx.Module):
         """
         return coordinates\
             .at[0]\
-            .set(coordinates[0] - coordinates[1] * np.tan(self._phi)) 
+            .set(coordinates[0] - coordinates[1] * np.tan(self.phi)) 
 
 
     def _offset(self : Layer, coordinates : Tensor) -> Tensor:
@@ -1350,9 +1353,9 @@ class HexagonalBasis(eqx.Module):
         """
         return coordinates\
             .at[0]\
-            .set(coordinates[0] - self._x)\
+            .set(coordinates[0] - self.x)\
             .at[1]\
-            .set(coordinates[1] - self._y)
+            .set(coordinates[1] - self.y)
 
 
     def _basis(self : Layer):
@@ -1370,13 +1373,106 @@ class HexagonalBasis(eqx.Module):
             each stacked array is a basis term. The final shape is:
             `(n, npix, npix)`
         """
-        coordinates = get_pixel_positions(self._npix)
-        coordinates = self._offset(coordinates)
-        coordinates = self._rotate(coordinates)
-        coordinates = self._magnify(coordinates)
-        coordinates = self._shear(coordinates)
-
+        coordinates = self._coordinates()
         zernikes = self._zernikes(coordinates)
         aperture = self._aperture(coordinates)
 
-        return self._orthonormalise(aperture, zernikes)        
+        return self._othonormalise(aperture, zernikes)  
+
+
+    def _coordinates(self : Layer) -> Tensor:
+        """
+        Generate the transformed coordinate system for the aperture.
+
+        Returns
+        -------
+        coordinates : Tensor
+            The coordinate system in the rectilinear view, with the
+            x and y coordinates stacked above one another.
+        """
+        coordinates = self._shear(
+            self._rotate(
+                self._offset(
+                    self._magnify(
+                        2 / self.npix * get_pixel_positions(self.npix)))))
+        return coordinates
+
+
+    def set_theta(self : Layer, theta : float) -> Layer:
+        """
+        Parameters
+        ----------
+        theta : float
+            The angle of rotation from the positive x-axis.  
+
+        Returns
+        -------
+        basis : HexagonalBasis 
+            The rotated hexagonal basis. 
+        """
+        return eqx.tree_at(lambda basis : basis.theta, self, theta)
+
+
+    def set_magnification(self : Layer, rmax : float) -> Layer:
+        """
+        Parameters
+        ----------
+        rmax : float
+            The radius of the smallest circle that can completely 
+            enclose the aperture.
+
+        Returns
+        -------
+        basis : HexagonalBasis
+            The magnified hexagonal basis.
+        """
+        return eqx.tree_at(lambda basis : basis.rmax, self, rmax)
+
+
+    def set_shear(self : Layer, phi : float) -> Layer:
+        """
+        Parameters
+        ----------
+        phi : float
+            The angle of shear from the positive y-axis.
+
+        Returns
+        -------
+        basis : HexagonalBasis
+            The sheared hexagonal basis.
+        """
+        return eqx.tree_at(lambda basis : basis.phi, self, phi)      
+
+
+    def set_x_offset(self : Layer, x : float) -> Layer:
+        """
+        Parameters
+        ----------
+        x : float
+            The x coordinate of the centre of the hexagonal
+            aperture.
+
+        Returns
+        -------
+        basis : HexagonalBasis
+            The translated hexagonal basis. 
+        """
+        return eqx.tree_at(lambda basis : basis.x, self, x)
+
+
+    def set_y_offset(self : Layer, y : float) -> Layer:
+        """
+        Parameters
+        ----------
+        x : float
+            The y coordinate of the centre of the hexagonal
+            aperture.
+
+        Returns
+        -------
+        basis : HexagonalBasis
+            The translated hexagonal basis. 
+        """
+        return eqx.tree_at(lambda basis : basis.y, self, y)
+
+    
