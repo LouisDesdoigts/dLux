@@ -23,7 +23,7 @@ Layer = TypeVar("Layer")
 Matrix = TypeVar("Matrix")
 
 
-def cartesian_to_factorial(coordinates : Tensor) -> Tensor:
+def cartesian_to_polar(coordinates : Tensor) -> Tensor:
     """
     Change the coordinate system from rectilinear to curvilinear.
     
@@ -42,7 +42,6 @@ def cartesian_to_factorial(coordinates : Tensor) -> Tensor:
     return np.array([rho, theta])
 
 
-@functools.lru_cache
 def factorial(n : int) -> int:
     """
     Calculate n! in a jax friendly way. Note that n == 0 is not a 
@@ -897,6 +896,11 @@ class HexagonalBasis(eqx.Module):
 
     Attributes
     ----------
+    nterm : int 
+        The number of polynomials to generate. This is not a 
+        gradable parameter.
+    npix : int
+        The number of pixels in the image that is to be generated.
     rmax : float
         The radius of the smallest circle that can fully enclose the 
         aperture upon which the basis will be orthonormalised. The 
@@ -909,16 +913,62 @@ class HexagonalBasis(eqx.Module):
     phi : float, radians
         This represents the angle of shear measured from the positive 
         y axis.
-    x : int, pixels
-        The _x_ coordinates of the centre of the aperture.  
-    y : int, pixles
-        The _y_ coordinates of the centre of the aperture. 
+    x : float
+        The _x_ coordinates of the centre of the aperture. This 
+        occurs following the normalisation so that the type can 
+        be given as a `float` for gradient stability.
+    y : float
+        The _y_ coordinates of the centre of the aperture. This 
+        occurs following the normalisation so that the type can 
+        be given as a `float` for gradient stability.
     """
+    nterms : int 
+    npix : int
     rmax : float
     theta : float
     phi : float
     x : float
     y : float
+
+
+    def __init__(self : Layer, nterms : int, npix : int,
+            rmax : float, theta : float,
+            phi : float, x : float, y : float) -> Layer:
+        """
+        Parameters
+        ----------
+        nterms : int
+            The number of terms to generate in the basis. 
+        npix : int
+            The number of pixels in the image that is to be generated.
+        rmax : float
+            The radius of the smallest circle that can fully enclose the 
+            aperture upon which the basis will be orthonormalised. The 
+            coordinates hadnled internally are normalised, but this 
+            quantity can be any number. > 1 is a magnification and < 1
+            makes it smaller. 
+        theta : float, radians
+            This represents the angle of rotation from the positive x 
+            axis. 
+        phi : float, radians
+            This represents the angle of shear measured from the positive 
+            y axis.
+        x : float
+            The _x_ coordinates of the centre of the aperture. This 
+            occurs following the normalisation so that the type can 
+            be given as a `float` for gradient stability.
+        y : float
+            The _y_ coordinates of the centre of the aperture. This 
+            occurs following the normalisation so that the type can 
+            be given as a `float` for gradient stability.
+        """
+        self.nterms = int(nterms)
+        self.npix = int(npix)
+        self.rmax = np.asarray(rmax).astype(float)
+        self.theta = np.asarray(theta).astype(float)
+        self.phi = np.asarray(phi).astype(float)
+        self.x = np.asarray(x).astype(float)
+        self.y = np.asarray(y).astype(float)
 
     
     @functools.partial(jax.vmap, in_axes=(None, 0))
@@ -1013,54 +1063,7 @@ class HexagonalBasis(eqx.Module):
         return n, m
 
 
-    @functools.partial(jax.vmap, in_axes=(None, 0, 0, None))
-    def _zernike(self : Layer, n : int, m : int, 
-            coordinates : Tesnor) -> Matrix: 
-        """
-        Generate the zernike specified by the indexes n and m.
-
-        Parameters
-        ----------
-        n : int
-            The first integer that specifies the zernike polynomial.
-        m : int 
-            The second integer that specifies the zernike polynomial,
-            must be within the range -n < m < n.
-        coordinates : Tensor
-            The radial coordinate system. The dimensions of this 
-            system should be `(2, npix, npix)` where the leading
-            axis represents the $r$ and $\\theta$ axis respectively.
-
-        Returns
-        zernike : Matrix
-            The zernike evaluated at the centre of a square matrix.  
-        """
-        rho = coordinates[0]
-        theta = coordinates[1]
-
-        aperture = (rho <= 1.).astype(int)
-
-        # In the calculation of the noll coefficient we must define 
-        # between the m == 0 and and the m != 0 case. I have done 
-        # this in place by casting the logical operation to an int. 
-
-        norm_coeff = (1 + (np.sqrt(2) - 1) * (m != 0).astype(int)) *\
-            np.sqrt(n + 1)
-        radial_zernike = self._radial_zernike(n, m, rho)
-
-        # When m < 0 we have the odd zernike polynomials which are 
-        # the radial zernike polynomials multiplied by a sine term.
-        # When m > 0 we have the even sernike polynomials which are 
-        # the radial polynomials multiplies by a cosine term. 
-        # To produce this result without logic we can use the fact
-        # that sine and cosine are separated by a phase of pi / 2
-        # hence by casting int(m < 0) we can add the nessecary phase.
-
-        return norm_coeff * radial_zernike * aperture *\
-            np.cos(np.abs(m) * theta - (m < 0).astype(int) * np.pi / 2)
-
-
-    def _radial_zernike(self : Layer, n : int, m : int, 
+    def _radial_zernike(self : Layer, n : int, m : int, upper : int,
             rho : Matrix) -> Tensor:
         """
         The radial zernike polynomial.
@@ -1080,18 +1083,18 @@ class HexagonalBasis(eqx.Module):
         radial : Tensor
             An npix by npix stack of radial zernike polynomials.
         """
-        radial = np.zeros(rho.shape)
         m, n = np.abs(m), np.abs(n)
-        upper = ((n - m) / 2).astype(int) + 1
+        rho = np.tile(rho, (upper, 1, 1))
 
-        for k in range(upper):
-            coefficient = (-1) ** k * factorial(n - k) / \
-                (factorial(k) * \
-                    factorial(((n + m) / 2).astype(int) - k) * \
-                    factorial(((n - m) / 2).astype(int) - k))
-            radial += coefficient * rho ** (n - 2 * k)
-
-        return radial
+        k = np.arange(upper)
+        coefficients = (-1) ** k * factorial(n - k) / \
+            (factorial(k) * \
+                factorial(((n + m) / 2).astype(int) - k) * \
+                factorial(((n - m) / 2).astype(int) - k))
+        radial = coefficients.reshape(upper, 1, 1) \
+            * rho ** (n - 2 * k).reshape(upper, 1, 1)
+        
+        return radial.sum(axis=0)
 
 
     def _zernikes(self : Layer, coordinates : Tensor) -> Tensor:
@@ -1118,10 +1121,52 @@ class HexagonalBasis(eqx.Module):
             The zernike polynomials evaluated until number. The shape
             of the output tensor is number by pixels by pixels. 
         """
-        j = np.arange(1, self._nterms + 1).astype(int)
+        j = np.arange(1, self.nterms + 1).astype(int)
         n, m = self._noll_index(j)
         coordinates = cartesian_to_polar(coordinates)
-        return self._zernike(n, m, coordinates)
+
+        # NOTE: The idea is to generate them here at the higher level 
+        # where things will not change and we will be done. 
+        rho = coordinates[0]
+        theta = coordinates[1]
+
+        aperture = (rho <= 1.).astype(int)
+
+        # In the calculation of the noll coefficient we must define 
+        # between the m == 0 and and the m != 0 case. I have done 
+        # this in place by casting the logical operation to an int. 
+
+        normalisation_coefficients = \
+            (1 + (np.sqrt(2) - 1) * (m != 0).astype(int)) \
+            * np.sqrt(n + 1)
+
+        summation_limits = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
+        radial_zernikes = np.zeros((self.nterms,) + rho.shape)
+        for i in np.arange(self.nterms):
+            radial_zernikes = radial_zernikes\
+                .at[i]\
+                .set(self._radial_zernike(n[i], m[i], 
+                    summation_limits[i], rho))
+
+        # When m < 0 we have the odd zernike polynomials which are 
+        # the radial zernike polynomials multiplied by a sine term.
+        # When m > 0 we have the even sernike polynomials which are 
+        # the radial polynomials multiplies by a cosine term. 
+        # To produce this result without logic we can use the fact
+        # that sine and cosine are separated by a phase of pi / 2
+        # hence by casting int(m < 0) we can add the nessecary phase.
+        out_shape = (self.nterms, 1, 1)
+
+        theta = np.tile(theta, out_shape)
+        m = m.reshape(out_shape)
+        phase_mod = (m < 0).astype(int) * np.pi / 2
+        phase = np.cos(np.abs(m) * theta - phase_mod)
+
+        normalisation_coefficients = \
+            normalisation_coefficients.reshape(out_shape)
+        
+        return normalisation_coefficients * radial_zernikes \
+            * aperture * phase 
 
 
     def _aperture(self : Layer,
