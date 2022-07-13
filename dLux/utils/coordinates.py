@@ -67,7 +67,7 @@ def get_pixel_positions(
     """
     x = get_pixel_vector(number_of_pixels, x_pixel_offset)
     y = get_pixel_vector(number_of_pixels, y_pixel_offset)
-    return np.meshgrid(x, y)
+    return np.array(np.meshgrid(x, y))
 
 
 # TODO:     
