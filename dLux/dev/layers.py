@@ -318,11 +318,11 @@ class BasisPhase(eqx.Module):
         The number of pixels along the edge of the square array 
         representing each term in the basis.
     """
-    _x : float
-    _y : float
-    _r : float
-    _npix : int
-    _nterms : int
+    x : float
+    y : float
+    rmax : float
+    npix : int
+    nterms : int
 
 
     def __init__(self : Layer, x : float, y : float, r : float,
@@ -348,11 +348,11 @@ class BasisPhase(eqx.Module):
             The number of basis terms to generate. This determines the
             length of the leading dimension of the output Tensor. 
         """
-        self._x = np.asarray(x).astype(float)
-        self._y = np.asarray(y).astype(float)
-        self._r = np.asarray(r).astype(float)
-        self._npix = int(npix)
-        self._nterms = int(nterms)
+        self.x = np.asarray(x).astype(float)
+        self.y = np.asarray(y).astype(float)
+        self.rmax = np.asarray(r).astype(float)
+        self.npix = int(npix)
+        self.nterms = int(nterms)
 
 
     @abstractmethod
@@ -410,8 +410,6 @@ class BasisPhase(eqx.Module):
         basis = self._basis
         with open(file_name, "w") as save:
             save.write(basis)
-        # TODO: Implement either a LoadedBasis abstract class 
-        # or add conditional logic for a load method. 
 
 
     def __call__(self : Layer, parameters : dict) -> dict:
@@ -447,92 +445,29 @@ class PolygonBasis(BasisPhase, ABC):
     """
     Orthonormalises the zernike basis over a polygon to provide
     a basis on a polygonal aperture.
-    """
-    @functools.cached_property
-    def _basis(self : Layer) -> Tensor:
-        """
-        Generate the basis. Requires a single run after which,
-        the basis is cached and can be used with no computational 
-        cost.  
-
-        Parameters
-        ----------
-        n : int 
-            The number of terms in the basis to generate. 
-
-        Returns
-        -------
-        basis : Tensor
-            The basis polynomials evaluated on the square arrays
-            containing the apertures until `maximum_radius`.
-            The leading dimension is `n` long and 
-            each stacked array is a basis term. The final shape is:
-            ```py
-            basis.shape == (n, npix, npix)
-            ```
-        """
-        aperture = self._aperture()
-        zernikes = self._zernike_basis(self._nterms, self._npix)
-        basis = self._gram_schmidt(zernikes, aperture)
-        return basis
-
-
-
-# NOTE: This is the short term version I may actually end up adopting
-# this as the long term version. 
-class HexagonalBasis(eqx.Module):
-    """
-    A basis on hexagonal surfaces. This is based on [this]
-    (https://github.com/spacetelescope/poppy/poppy/zernike.py)
-    code from the _POPPY_ library, but ported into [_JAX_]
-    (https://github.com/google/jax) and allowed to perform 
-    more complicated spatial transformations. 
 
     Attributes
     ----------
-    nterm : int 
-        The number of polynomials to generate. This is not a 
-        gradable parameter.
-    npix : int
-        The number of pixels in the image that is to be generated.
-    rmax : float
-        The radius of the smallest circle that can fully enclose the 
-        aperture upon which the basis will be orthonormalised. The 
-        coordinates hadnled internally are normalised, but this 
-        quantity can be any number. > 1 is a magnification and < 1
-        makes it smaller. 
     theta : float, radians
         This represents the angle of rotation from the positive x 
         axis. 
     phi : float, radians
         This represents the angle of shear measured from the positive 
         y axis.
-    x : float
-        The _x_ coordinates of the centre of the aperture. This 
-        occurs following the normalisation so that the type can 
-        be given as a `float` for gradient stability.
-    y : float
-        The _y_ coordinates of the centre of the aperture. This 
-        occurs following the normalisation so that the type can 
-        be given as a `float` for gradient stability.
     """
-    nterms : int 
-    npix : int
-    rmax : float
     theta : float
     phi : float
-    x : float
-    y : float
 
 
-    def __init__(self : Layer, nterms : int, npix : int,
-            rmax : float, theta : float,
-            phi : float, x : float, y : float) -> Layer:
+    def __init__(self : Layer, nterms : int, npix : int, 
+            rmax : float, theta : float, phi : float, x : float,
+            y : float) -> Layer:
         """
         Parameters
-        ----------
-        nterms : int
-            The number of terms to generate in the basis. 
+        ---------- 
+        nterm : int 
+            The number of polynomials to generate. This is not a 
+            gradable parameter.
         npix : int
             The number of pixels in the image that is to be generated.
         rmax : float
@@ -556,15 +491,11 @@ class HexagonalBasis(eqx.Module):
             occurs following the normalisation so that the type can 
             be given as a `float` for gradient stability.
         """
-        self.nterms = int(nterms)
-        self.npix = int(npix)
-        self.rmax = np.asarray(rmax).astype(float)
+        super().__init__(x, y, rmax, npix, nterms)
         self.theta = np.asarray(theta).astype(float)
         self.phi = np.asarray(phi).astype(float)
-        self.x = np.asarray(x).astype(float)
-        self.y = np.asarray(y).astype(float)
 
-    
+
     @functools.partial(jax.vmap, in_axes=(None, 0))
     def _noll_index(self : Layer, j : int) -> tuple:
         """
@@ -763,47 +694,6 @@ class HexagonalBasis(eqx.Module):
         
         return normalisation_coefficients * radial_zernikes \
             * aperture * phase 
-
-
-    def _aperture(self : Layer,
-            coordinates : Tensor,
-            maximum_radius : float = 1.) -> Array:
-        """
-        Generate a binary mask representing the pixels occupied by 
-        the aperture. 
-
-        Parameters
-        ----------
-        coordinates : Tensor
-            The coordinate grid as a stacked array that is 
-            `(2, npix, npix)`, where the leading axis denotes the x and 
-            y coordinate sets. This Tensor must be normalised, if using 
-            the inbuilt `get_pixel_positions` normalisation can be done
-            via `2 / npix`.
-        maximum_radius : float 
-            The radius of the smallest circle that can completely contain
-            the entire aperture. 
-
-        Returns
-        -------
-        aperture : Array
-            The bitmask that represents the circular aperture.        
-        """
-        x, y = coordinates[0], coordinates[1]
-
-        rectangle = (np.abs(x) <= maximum_radius / 2.) \
-            & (np.abs(y) <= (maximum_radius * np.sqrt(3) / 2.))
-
-        left_triangle = (x <= - maximum_radius / 2.) \
-            & (x >= - maximum_radius) \
-            & (np.abs(y) <= (x + maximum_radius) * np.sqrt(3))
-
-        right_triangle = (x >= maximum_radius / 2.) \
-            & (x <= maximum_radius) \
-            & (np.abs(y) <= (maximum_radius - x) * np.sqrt(3))
-
-        hexagon = rectangle | left_triangle | right_triangle
-        return np.asarray(hexagon).astype(float)
 
 
     def _othonormalise(self : Layer, aperture : Matrix, 
@@ -1066,4 +956,91 @@ class HexagonalBasis(eqx.Module):
         """
         return eqx.tree_at(lambda basis : basis.y, self, y)
 
-    
+
+class HexagonalBasis(eqx.Module):
+    """
+    A basis on hexagonal surfaces. This is based on [this]
+    (https://github.com/spacetelescope/poppy/poppy/zernike.py)
+    code from the _POPPY_ library, but ported into [_JAX_]
+    (https://github.com/google/jax) and allowed to perform 
+    more complicated spatial transformations. 
+    """
+    def __init__(self : Layer, nterms : int, npix : int,
+            rmax : float, theta : float,
+            phi : float, x : float, y : float) -> Layer:
+        """
+        Parameters
+        ----------
+        nterms : int
+            The number of terms to generate in the basis. 
+        npix : int
+            The number of pixels in the image that is to be generated.
+        rmax : float
+            The radius of the smallest circle that can fully enclose the 
+            aperture upon which the basis will be orthonormalised. The 
+            coordinates hadnled internally are normalised, but this 
+            quantity can be any number. > 1 is a magnification and < 1
+            makes it smaller. 
+        theta : float, radians
+            This represents the angle of rotation from the positive x 
+            axis. 
+        phi : float, radians
+            This represents the angle of shear measured from the positive 
+            y axis.
+        x : float
+            The _x_ coordinates of the centre of the aperture. This 
+            occurs following the normalisation so that the type can 
+            be given as a `float` for gradient stability.
+        y : float
+            The _y_ coordinates of the centre of the aperture. This 
+            occurs following the normalisation so that the type can 
+            be given as a `float` for gradient stability.
+        """
+        self.nterms = int(nterms)
+        self.npix = int(npix)
+        self.rmax = np.asarray(rmax).astype(float)
+        self.theta = np.asarray(theta).astype(float)
+        self.phi = np.asarray(phi).astype(float)
+        self.x = np.asarray(x).astype(float)
+        self.y = np.asarray(y).astype(float)
+
+
+    def _aperture(self : Layer,
+            coordinates : Tensor,
+            maximum_radius : float = 1.) -> Array:
+        """
+        Generate a binary mask representing the pixels occupied by 
+        the aperture. 
+
+        Parameters
+        ----------
+        coordinates : Tensor
+            The coordinate grid as a stacked array that is 
+            `(2, npix, npix)`, where the leading axis denotes the x and 
+            y coordinate sets. This Tensor must be normalised, if using 
+            the inbuilt `get_pixel_positions` normalisation can be done
+            via `2 / npix`.
+        maximum_radius : float 
+            The radius of the smallest circle that can completely contain
+            the entire aperture. 
+
+        Returns
+        -------
+        aperture : Array
+            The bitmask that represents the circular aperture.        
+        """
+        x, y = coordinates[0], coordinates[1]
+
+        rectangle = (np.abs(x) <= maximum_radius / 2.) \
+            & (np.abs(y) <= (maximum_radius * np.sqrt(3) / 2.))
+
+        left_triangle = (x <= - maximum_radius / 2.) \
+            & (x >= - maximum_radius) \
+            & (np.abs(y) <= (x + maximum_radius) * np.sqrt(3))
+
+        right_triangle = (x >= maximum_radius / 2.) \
+            & (x <= maximum_radius) \
+            & (np.abs(y) <= (maximum_radius - x) * np.sqrt(3))
+
+        hexagon = rectangle | left_triangle | right_triangle
+        return np.asarray(hexagon).astype(float)
