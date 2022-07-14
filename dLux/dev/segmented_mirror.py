@@ -11,38 +11,28 @@ angles += (angles < 0.) * (2 * np.pi + angles)
 
 radial = np.hypot(vertices[0], vertices[1])
 
-# NOTE: Trying to get back to it working for the simple hexagonal 
-# case. 
-vertices = np.array([np.cos(np.arange(0, 2 * np.pi, np.pi / 3)),
-    np.sin(np.arange(0, 2 * np.pi, np.pi / 3))]).reshape(6, 2)
+# NOTE: Simple hexagonal case. 
+angles = np.linspace(0, 2 * np.pi, 7, endpoint=True).reshape(7, 1, 1)
+vertices = np.array([np.cos(angles), np.sin(angles)]).reshape(7, 2, 1)
 
-i = np.arange(-1, vertices.shape[0])
-a = (vertices[i + 1, 0] - vertices[i, 0]).reshape(7, 1, 1)
-b = (vertices[i + 1, 1] - vertices[i, 1]).reshape(7, 1, 1)
-c = ((vertices[i + 1, 0] - vertices[i, 0]) * vertices[i, 1] -\
-    (vertices[i + 1, 1] - vertices[i, 1]) * vertices[i, 0])\
-    .reshape(7, 1, 1)
+a = (vertices[1:, 0] - vertices[:-1, 0]).reshape(6, 1, 1)
+b = (vertices[1:, 1] - vertices[:-1, 1]).reshape(6, 1, 1)
+c = ((vertices[1:, 0] - vertices[:-1, 0]) * vertices[:-1, 1] -\
+    (vertices[1:, 1] - vertices[:-1, 1]) * vertices[:-1, 0])\
+    .reshape(6, 1, 1)
 
-positions = get_radial_positions(256, 0, 0) * 2 / 256
-rho = positions[0]
-theta = positions[1]
-rho = np.tile(rho, (7, 1, 1))
-theta = np.tile(theta, (7, 1, 1))
-
-print(rho.shape)
-print(theta.shape)
-print(a.shape)
+positions = get_radial_positions(256, 0, 0)
+rho = positions[0] * 2 / 256
+theta = (positions[1] + np.pi)[:, ::-1]
+rho = np.tile(rho, (6, 1, 1))
+theta = np.tile(theta, (6, 1, 1))
 
 linear = (c / (a * np.sin(theta) + b * np.cos(theta)))
+angular = ((angles[:-1] < theta) & (theta < angles[1:])) 
+test = (rho < linear) & (angular)
 
-test = rho < linear
+print(angular.shape)
  
-print(test.shape)
-
-pyplot.imshow(linear[0])
+pyplot.imshow(theta[0])
 pyplot.colorbar()
 pyplot.show()
-#aperture = less_than(rho, 
-#    c / (a * np.sin(theta) + b * np.cos(theta)))
-
-
