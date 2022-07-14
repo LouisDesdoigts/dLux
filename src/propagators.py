@@ -1026,7 +1026,7 @@ class PhysicalFresnel(VariableSamplingPropagator):
 class AngularMFT(VariableSamplingPropagator):
     """
     Propagation of an AngularWavefront by a paraxial matrix fourier
-    transform.  
+    transform.
     """
     def __init__(self : Propagator, pixel_scale_out : float, 
             pixels_out : int, inverse : bool = False,
@@ -1034,9 +1034,10 @@ class AngularMFT(VariableSamplingPropagator):
         """
         Parameters
         ----------
-        pixel_scale_out : float, radians/pixel
+        pixel_scale_out : float, radians/pixel or meters/pixel
             The scale of the pixels in the output plane in radians 
-            per pixel.
+            per pixel. Pixel scales have units of meters/pixel in pupil
+            planes and units of radians/pixel in focal planes.
         pixels_out : int
             The number of pixels in the output plane.
         inverse : bool = False
@@ -1066,11 +1067,13 @@ class AngularMFT(VariableSamplingPropagator):
             The floating point number of diffraction fringes in the 
             plane of propagation.
         """
-        size_in = wavefront.get_pixel_scale() * \
-            wavefront.number_of_pixels()        
-        size_out = self.get_pixel_scale_out() * \
-            self.get_pixels_out()
-        return size_in * size_out / wavefront.get_wavelength()
+        diameter = wavefront.number_of_pixels() * wavefront.get_pixel_scale()
+        fringe_size = wavefront.get_wavelength() / diameter
+        detector_size = self.pixels_out * self.pixel_scale_out 
+        num_fringe = detector_size / fringe_size
+        return num_fringe
+        
+        
 
 
     def get_pixel_offsets(self : Propagator, 
