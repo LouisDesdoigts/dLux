@@ -1,6 +1,11 @@
 from constants import *
 from dLux.utils import get_radial_positions
 from matplotlib import pyplot
+from typing import TypeVar
+
+Vector = TypeVar("Vector")
+Matrix = TypeVar("Matrix")
+Tensor = TypeVar("Tensor")
 
 config.update("jax_enable_x64", True)
 
@@ -40,19 +45,19 @@ def _wrap(array : Vector, order : Vector) -> tuple:
     return _array.at[-1].set(_array[0])
     
 
-def _vertices(vertices : Array) -> tuple:
+def _vertices(vertices : Matrix) -> tuple:
     """
     Generates the vertices that are compatible with the rest of 
     the transformations from the raw data vertices.
 
     Parameters
     ----------
-    vertices : Array, meters
+    vertices : Matrix, meters
         The vertices loaded from the WebbPSF module. 
 
     Returns
     -------
-    x, y, angles : Array
+    x, y, angles : tuple 
         The vertices in normalised positions and wrapped so that 
         they can be used in the generation of the compound aperture.
         The `x` is the x coordinates of the vertices, the `y` is the 
@@ -85,13 +90,13 @@ def _vertices(vertices : Array) -> tuple:
     return x, y, angles
 
 
-def _offset(vertices : Array, pixel_scale : float) -> tuple:
+def _offset(vertices : Matrix, pixel_scale : float) -> tuple:
     """
     Get the offsets of the coordinate system.
 
     Parameters
     ----------
-    vertices : Array
+    vertices : Matrix 
         The unprocessed vertices loaded from the JWST data file.
         The correct shape for this array is `vertices.shape == 
         (2, number_of_vertices)`. 
@@ -108,13 +113,13 @@ def _offset(vertices : Array, pixel_scale : float) -> tuple:
     return x_offset, y_offset
 
 
-def _pixel_scale(vertices : Array, pixels : int) -> float
+def _pixel_scale(vertices : Matrix, pixels : int) -> float:
     """
     The physical dimesnions of a pixel along one edge. 
 
     Parameters
     ----------
-    vertices : Array
+    vertices : Matrix
         The vertices of the aperture in a two dimensional array.
         The pixel scale is assumed to be the same in each dimension
         so only the first row of the vertices is used.
@@ -130,7 +135,7 @@ def _pixel_scale(vertices : Array, pixels : int) -> float
     return vertices[:, 0].ptp() / pixels
 
 
-def _coordinates(number_of_pixels : int, vertices : Array,
+def _coordinates(number_of_pixels : int, vertices : Matrix,
         aperture_pixels : int, phi_naught : float) -> tuple:
     """
     Generates the vectorised coordinate system associated with the 
@@ -165,10 +170,10 @@ def _coordinates(number_of_pixels : int, vertices : Array,
 
     theta = positions[1] 
     theta += 2 * np.pi * (positions[1] < 0.)
-    theta += 2 * np.pi * (theta < angles[0])
+    theta += 2 * np.pi * (theta < phi_naught)
 
-    rho = np.tile(rho, (vertices.shape[1], 1, 1))
-    theta = np.tile(theta, (vertices.shape[1], 1, 1))
+    rho = np.tile(rho, (vertices.shape[0], 1, 1))
+    theta = np.tile(theta, (vertices.shape[0], 1, 1))
     return rho, theta
 
 
@@ -245,19 +250,25 @@ def _wedges(phi : Vector, theta : Tensor) -> Tensor:
     """
     # A wedge simply represents the angular bounds of the aperture
     # I have demonstrated below with a hexagon but understand that
-    # these bounds are _purely_ angular
+    # these bounds are _purely_ angular (see fig 1.)
     #
-    #       +--------+
-    #      /        /^*
-    #     /        /^^^*
-    #    /        /^^^^^*
-    #   +        +^^^^^^^+
-    #    *              /
-    #     *            /
-    #      *          /
-    #       +--------+
-    #  
-    return (angles[:-1] < theta) & (theta < angles[1:])
+    #               +-------------------------+
+    #               |                ^^^^^^^^^|
+    #               |     +--------+^^^^^^^^^^|
+    #               |    /        /^*^^^^^^^^^|
+    #               |   /        /^^^*^^^^^^^^|
+    #               |  /        /^^^^^*^^^^^^^|
+    #               | +        +^^^^^^^+^^^^^^|
+    #               |  *              /       |
+    #               |   *            /        |
+    #               |    *          /         |
+    #               |     +--------+          |
+    #               +-------------------------+
+    #               figure 1: The angular bounds 
+    #                   between the zeroth and the 
+    #                   first vertices. 
+    #
+    return (phi[:-1] < theta) & (theta < phi[1:])
 
 
 def _segments(x : Vector, y : Vector, phi : Vector, 
@@ -291,7 +302,7 @@ def _segments(x : Vector, y : Vector, phi : Vector,
     return edges & wedges
     
 
-def _aperture(vertices : Array, number_of_pixels : int, 
+def _aperture(vertices : Matrix, number_of_pixels : int, 
         aperture_pixels : int) -> Matrix:
     """
     Generate the BitMap representing the aperture described by the 
@@ -299,7 +310,7 @@ def _aperture(vertices : Array, number_of_pixels : int,
 
     Parameters
     ----------
-    vertices : Array
+    vertices : Matrix 
         The vertices describing the approximately hexagonal aperture. 
     number_of_pixels : int
         The number of pixels that represent the compound aperture.
@@ -312,7 +323,8 @@ def _aperture(vertices : Array, number_of_pixels : int,
         The Bit-Map that represents the aperture. 
     """
     x, y, phi = _vertices(vertices)
-    rho, theta = _coordinates(vertices, number_of_pixels, aperture_pixels)
+    rho, theta = _coordinates(number_of_pixels, vertices, 
+        aperture_pixels, phi[0])
     segments = _segments(x, y, phi, theta, rho)
     return segments.sum(axis=0)
 
