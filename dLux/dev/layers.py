@@ -371,7 +371,6 @@ class BasisPhase(eqx.Module):
 
 
     @abstractmethod
-    @functools.cached_property 
     def _basis(self : Layer, n : int) -> Tensor:
         """
         Generate the basis. Requires a single run after which,
