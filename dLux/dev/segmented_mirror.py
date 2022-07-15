@@ -6,16 +6,14 @@ config.update("jax_enable_x64", True)
 
 vertices = JWST_PRIMARY_SEGMENTS[0][1]
 
-# So I guess that I must sort the vertices to go in ascending angular 
-# order that way the method I have devised will work. 
-
 number_of_pixels = 256
 number_of_vertices = 6
 
-# These are wrong with the duplication. 
 _x = (vertices[:, 0] - np.mean(vertices[:, 0]))
 _y = (vertices[:, 1] - np.mean(vertices[:, 1]))
-_angles = (np.arctan2(_y, _x) + np.pi)
+
+# Here is the start of the problem. 
+_angles = np.arctan2(_y, _x) + 2 * np.pi * (np.arctan2(_y, _x) < 0.)
 
 pixel_scale = (np.max(_x) - np.min(_x)) / number_of_pixels
 x_offset = np.mean(vertices[:, 0]) / pixel_scale
@@ -55,17 +53,42 @@ a = (x[1:] - x[:-1])
 b = (y[1:] - y[:-1])
 c = (a * y[:-1] - b * x[:-1])
 
-positions = get_radial_positions(2 * number_of_pixels, 0., 0.) 
-#     x_offset, y_offset)
-rho = (positions[0] * 1 / 256)
-theta = (positions[1] + np.pi)[:, ::-1]
+positions = get_radial_positions(2 * number_of_pixels, #0, 0)
+    -x_offset, -y_offset)
+
+rho = positions[0] * pixel_scale
+
+theta = positions[1] 
+
+pyplot.imshow(theta)
+pyplot.colorbar()
+pyplot.show()
+
+theta += 2 * np.pi * (positions[1] < 0.)
+
+pyplot.imshow(theta)
+pyplot.colorbar()
+pyplot.show()
+
+theta += 2 * np.pi * (theta < angles[0])
+
+pyplot.imshow(theta)
+pyplot.colorbar()
+pyplot.show()
+
 rho = np.tile(rho, (number_of_vertices, 1, 1))
 theta = np.tile(theta, (number_of_vertices, 1, 1))
 
 linear = c / (a * np.sin(theta) - b * np.cos(theta))
-angular = ((angles[:-1] < theta) & (theta < angles[1:]))[:, ::-1, ::-1] 
-test = (rho < linear) & angular
+angular = ((angles[:-1] < theta) & (theta < angles[1:])) 
+segments = (rho < linear)
 
-pyplot.imshow(test.sum(axis = 0))
+pyplot.imshow((segments & angular).sum(axis = 0))
 pyplot.colorbar()
 pyplot.show()
+for i in range(number_of_vertices):
+    pyplot.subplot(1, 2, 1)
+    pyplot.imshow(linear[i])
+    pyplot.subplot(1, 2, 2)
+    pyplot.imshow(rho[i])
+    pyplot.show()
