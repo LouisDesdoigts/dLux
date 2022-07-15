@@ -59,36 +59,16 @@ positions = get_radial_positions(2 * number_of_pixels, #0, 0)
 rho = positions[0] * pixel_scale
 
 theta = positions[1] 
-
-pyplot.imshow(theta)
-pyplot.colorbar()
-pyplot.show()
-
 theta += 2 * np.pi * (positions[1] < 0.)
-
-pyplot.imshow(theta)
-pyplot.colorbar()
-pyplot.show()
-
 theta += 2 * np.pi * (theta < angles[0])
-
-pyplot.imshow(theta)
-pyplot.colorbar()
-pyplot.show()
 
 rho = np.tile(rho, (number_of_vertices, 1, 1))
 theta = np.tile(theta, (number_of_vertices, 1, 1))
 
 linear = c / (a * np.sin(theta) - b * np.cos(theta))
 angular = ((angles[:-1] < theta) & (theta < angles[1:])) 
-segments = (rho < linear)
+segments = (rho < linear) & angular
 
-pyplot.imshow((segments & angular).sum(axis = 0))
+pyplot.imshow((segments).sum(axis = 0))
 pyplot.colorbar()
 pyplot.show()
-for i in range(number_of_vertices):
-    pyplot.subplot(1, 2, 1)
-    pyplot.imshow(linear[i])
-    pyplot.subplot(1, 2, 2)
-    pyplot.imshow(rho[i])
-    pyplot.show()
