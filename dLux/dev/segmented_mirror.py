@@ -2,6 +2,8 @@ from constants import *
 from dLux.utils import get_radial_positions
 from matplotlib import pyplot
 from typing import TypeVar
+from jax import tree_util
+from jax import vmap
 
 Vector = TypeVar("Vector")
 Matrix = TypeVar("Matrix")
@@ -9,8 +11,8 @@ Tensor = TypeVar("Tensor")
 
 config.update("jax_enable_x64", True)
 
-vertices = JWST_PRIMARY_SEGMENTS[1][1]
 
+class JWSTPrimaryAperture(PolygonalAperture):
 def _wrap(array : Vector, order : Vector) -> tuple:
     """
     Re-order an array and duplicate the first element as an additional
@@ -328,6 +330,17 @@ def _aperture(vertices : Matrix, number_of_pixels : int,
     segments = _segments(x, y, phi, theta, rho)
     return segments.sum(axis=0)
 
-aperture = _aperture(vertices, 512, 128)
-pyplot.imshow(aperture)
+
+def _load(self : Layer):
+    """
+    """
+
+
+vertices = np.stack(tree_util.tree_map(
+    lambda leaf : leaf[1], 
+    JWST_PRIMARY_SEGMENTS,
+    is_leaf = lambda leaf : isinstance(leaf[0], str)))
+
+aperture = vmap(_aperture, in_axes=(0, None, None))(vertices, 1008, 200)
+pyplot.imshow(aperture.sum(axis=0))
 pyplot.show()
