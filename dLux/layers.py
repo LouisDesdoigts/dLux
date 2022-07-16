@@ -700,3 +700,4 @@ class ApplyBasisCLIMB(eqx.Module):
         soft_bin = vmap_mask(flat).reshape(ppsz, ppsz)
 
         return soft_bin
+
