@@ -1096,8 +1096,60 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
     ...     rotation : float = 0.1,
     ...     shear : float = 0.1,
     ...     magnification = 1.001)
-    >>> basis = Basis(C1(), nterms)()    
+    >>> basis = Basis(C1(), nterms)()   
+
+    The generation of zernike polynomials and there orthonormalisation
+    is an archilies heal of the project, currently runnig much slower 
+    than equivalent implementations and there is ongoing work into 
+    optimising this but for now you are unfortunate.  
+
+    Attributes
+    ----------
+    segement : str
+        The string code for the segment that is getting modelled. 
+        The format for the string is the "Ln" where "L" is the 
+        letter code and "n" is the number. The format "Ln-m" will 
+        also work where m is an integer mapping of "Ln" to the 
+        integers. The way it works is A1, A2, A3, A4, A5 and A6 map 
+        to 1, 2, 3, 4, 5 and 6. B1, B2, B3, B4, B5 and B6 map to 
+        7, 9, 11, 13, 15, 17 and Cn map to the remaining numbers.
+    theta : float, Radians
+        The angle of rotation from the positive x axis.
+    phi : float
+        The angle of shear. If the initial shape of the aperture is
+        as shown in fig. 1, then the sheered aperture is as shown 
+        in fig. 2.
+                                  |
+                                +---+
+                               *  |  *
+                          <---+---+---+--->
+                               *  |  *
+                                +---+                       
+                                  |
+                    fig 1. The unsheered aperture.
+
+                                  | | 
+                                  +---+
+                                * ||  *
+                          <---+---+---+--->
+                                * ||  *
+                                  +---+                       
+                                  | |
+                    fig 2. The sheered aperture. 
+
+    magnification : float
+        The multiplicative factor indicating the size of the aperture
+        from the initial.                      
     """
+    segement : str 
+    theta : float
+    phi : float
+    magnification : float    
+
+    def __init__(self : Layer, ) -> Layer:
+        #TODO: Implement this. 
+        #
+        #
 
 
                
@@ -1250,20 +1302,22 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
             The stacked coordinate systems that are typically passed to 
             `_segments` to generate the segments.
         """
-        pixel_scale = _pixel_scale(vertices, aperture_pixels)
-        x_offset, y_offset = _offset(vertices, pixel_scale)
-
-        positions = get_radial_positions(number_of_pixels,
-            -x_offset, -y_offset)
-
-        rho = positions[0] * pixel_scale
-
-        theta = positions[1] 
-        theta += 2 * np.pi * (positions[1] < 0.)
-        theta += 2 * np.pi * (theta < phi_naught)
-
-        rho = np.tile(rho, (vertices.shape[0], 1, 1))
-        theta = np.tile(theta, (vertices.shape[0], 1, 1))
+        # This needs to be implemented in terms of the super class 
+        # functionality. 
+#        pixel_scale = _pixel_scale(vertices, aperture_pixels)
+#        x_offset, y_offset = _offset(vertices, pixel_scale)
+#
+#        positions = get_radial_positions(number_of_pixels,
+#            -x_offset, -y_offset)
+#
+#        rho = positions[0] * pixel_scale
+#
+#        theta = positions[1] 
+#        theta += 2 * np.pi * (positions[1] < 0.)
+#        theta += 2 * np.pi * (theta < phi_naught)
+#
+#        rho = np.tile(rho, (vertices.shape[0], 1, 1))
+#        theta = np.tile(theta, (vertices.shape[0], 1, 1))
         return rho, theta
 
 
@@ -1421,13 +1475,23 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
 
     def _load(self : Layer):
         """
-        
+        Load the desired segment from the WebbPSF data. 
+
+        Returns
+        -------
+        vertices : Matrix, meters
+            The vertice information in any order with the shape
+            (2, 6).
         """
+        return jax.tree_util.tree_map(
+            lambda leaf : leaf[1], 
+            jwst_primary_segments,
+            is_leaf = lambda leaf : leaf[0].startswith(self.segment))
 
 
 vertices = np.stack(jax.tree_util.tree_map(
     lambda leaf : leaf[1], 
-    JWST_PRIMARY_SEGMENTS,
+    jwst_primary_segments,
     is_leaf = lambda leaf : isinstance(leaf[0], str)))
 
 aperture = jax.vmap(_aperture, in_axes=(0, None, None))(vertices, 1008, 200)
