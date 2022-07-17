@@ -1071,8 +1071,34 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
     The data for the vertices is retrieved from WebbPSF and the 
     syntax for using the class is as follows:
 
-    >>> C1 = JWSTPrimaryApertureSegment("C1-1")
+    >>> npix = 1008 # Total number of pixels for the entire primary
+    >>> appix = 200 # Pixels for this specific aperture. 
+    >>> C1 = JWSTPrimaryApertureSegment("C1-1", npix, appix)
     >>> aperture = C1()
+
+    If you want to only model one mirror then appix and npix can be 
+    set to the same. The assumption is that the entire aperture is 
+    going to be modelled. 
+
+    To use the aperture to generate an orthonormal basis on the not 
+    quite a hexagon we use the following code. 
+
+    >>> basis = Basis(C1(), nterms)()
+
+    To learn the rotation, shear and other parameters of the mirror 
+    we can provide this functionality to the constructor of the 
+    aperture. For example:
+    
+    >>> C1 = JWSTPrimaryApertureSegment(
+    ...     segement : str = "C1-1",
+    ...     number_of_pixels : int = npix,
+    ...     aperture_pixels : int = appix,
+    ...     rotation : float = 0.1,
+    ...     shear : float = 0.1,
+    ...     magnification = 1.001)
+    >>> basis = Basis(C1(), nterms)()    
+    """
+
 
                
     def _wrap(array : Vector, order : Vector) -> tuple:
