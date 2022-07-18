@@ -363,7 +363,7 @@ class Aperture(eqx.Module, ABC):
         basis : HexagonalBasis
             The magnified hexagonal basis.
         """
-        return eqx.tree_at(lambda basis : basis.rmax, self, rmax)
+        return eqx.tree_at(lambda basis : basis.magnification, self, rmax)
 
 
     def set_shear(self : Layer, phi : float) -> Layer:
@@ -394,7 +394,7 @@ class Aperture(eqx.Module, ABC):
         basis : HexagonalBasis
             The translated hexagonal basis. 
         """
-        return eqx.tree_at(lambda basis : basis.x, self, x)
+        return eqx.tree_at(lambda basis : basis.x_offset, self, x)
 
 
     def set_y_offset(self : Layer, y : float) -> Layer:
@@ -410,7 +410,7 @@ class Aperture(eqx.Module, ABC):
         basis : HexagonalBasis
             The translated hexagonal basis. 
         """
-        return eqx.tree_at(lambda basis : basis.y, self, y)
+        return eqx.tree_at(lambda basis : basis.y_offset, self, y)
 
 
     def __call__(self : Layer, parameters : dict) -> dict:
@@ -716,12 +716,24 @@ class JWSTPrimaryApertureSegment(Aperture):
         from the initial.
     pixel_scale : float, meters per pixel
         The is automatically calculated. DO NOT MODIFY THIS VALUE.  
-    phi_offset : float, radians
-        The offset of the first vertice in pixels. This value is stored
-        for convinience only.                    
+    x : Vector[float], meters
+        The x coordinates of the vertices. It is not recomended that 
+        gradients be taken with respect to these. Also note that these
+        are measured with respect to the centre of the coordinate 
+        system with the origin at `x_offset`, `y_offset`.
+    y : Vector[float]
+        The y coordinates of the vertices. It is not recommended that
+        gradients be take with respect to these. As with `x` these 
+        are centred on the coordinate system with the origin at 
+        `x_offset`, `y_offset`.
+    alpha : Vector[float], radians.   
+        The angular position of each vertex counterclockwise around
+        the shape.            
     """
     segment : str 
-    phi_offset : float
+    x : float
+    y : float
+    alpha : float
 
 
     def __init__(self : Layer, segment : str, pixels : int,
@@ -749,10 +761,13 @@ class JWSTPrimaryApertureSegment(Aperture):
             A factor by which to enlarge or shrink the aperture. 
             Should only be very small amounts in typical use cases.
         """
-        self.segment = str(segment)
         vertices = self._load(segment)
-        x_offset, y_offset, phi_offset = self._offset(vertices)
-        self.phi_offset = float(phi_offset)
+        x, y, alpha = self._vertices(vertices)
+        x_offset, y_offset = self._offset(vertices)
+        self.segment = str(segment)
+        self.x = np.asarray(x).astype(float)
+        self.y = np.asarray(y).astype(float)
+        self.alpha = np.asarray(alpha).astype(float)
         super().__init__(pixels, x_offset, y_offset, theta, phi,
             magnification, pixel_scale)
 
@@ -858,12 +873,11 @@ class JWSTPrimaryApertureSegment(Aperture):
         """
         x_offset = np.mean(vertices[:, 0])
         y_offset = np.mean(vertices[:, 1])
-        phi_offset = np.arctan2(vertices[0, 1], vertices[0, 0])
-        return x_offset, y_offset, phi_offset
+        return x_offset, y_offset
 
 
     # TODO: number_of_pixels can be moved out as a parameter
-    def _coordinates(self : Layer) -> tuple:
+    def _rad_coordinates(self : Layer) -> tuple:
         """
         Generates the vectorised coordinate system associated with the 
         aperture.
@@ -879,31 +893,27 @@ class JWSTPrimaryApertureSegment(Aperture):
             The stacked coordinate systems that are typically passed to 
             `_segments` to generate the segments.
         """
-        cartesian = super()._coordinates()
+        cartesian = self._coordinates()
         positions = cartesian_to_polar(cartesian)
 
-        rho = positions[0] * self.get_pixel_scale()
+        # rho = positions[0] * self.get_pixel_scale()
+        rho = positions[0]        
 
         theta = positions[1] 
         theta += 2 * np.pi * (positions[1] < 0.)
-        theta += 2 * np.pi * (theta < self.phi_offset)
+        theta += 2 * np.pi * (theta < self.alpha[0])
 
         rho = np.tile(rho, (6, 1, 1))
         theta = np.tile(theta, (6, 1, 1))
         return rho, theta
 
 
-    def _edges(self : Layer, x : Vector, y : Vector, rho : Tensor, 
-            theta : Tensor) -> Tensor:
+    def _edges(self : Layer, rho : Tensor, theta : Tensor) -> Tensor:
         """
         Generate lines connecting adjacent vertices.
 
         Parameters
         ----------
-        x : Vector
-            The x positions of the vertices.
-        y : Vector
-            The y positions of the vertices.
         rho : Tensor, meters
             Represents the radial distance of every point from the 
             centre of __this__ aperture. 
@@ -936,22 +946,21 @@ class JWSTPrimaryApertureSegment(Aperture):
         # r = ---------------------------
         #     a sin(theta) - b cos(theta) 
         #
-        a = (x[1:] - x[:-1])
-        b = (y[1:] - y[:-1])
-        c = (a * y[:-1] - b * x[:-1])
+        a = (self.x[1:] - self.x[:-1])
+        b = (self.y[1:] - self.y[:-1])
+        c = (a * self.y[:-1] - b * self.x[:-1])
 
         linear = c / (a * np.sin(theta) - b * np.cos(theta))
-        return rho < (linear * self.get_pixel_scale())
-        
+        #return rho < (linear * self.get_pixel_scale())
+        return rho < linear
 
-    def _wedges(self : Layer, phi : Vector, theta : Tensor) -> Tensor:
+
+    def _wedges(self : Layer, theta : Tensor) -> Tensor:
         """
         The angular bounds of each segment of an individual hexagon.
 
         Parameters
         ----------
-        phi : Vector
-            The angles corresponding to each vertex in order.
         theta : Tensor, Radians
             The angle away from the positive x-axis of the coordinate
             system associated with this aperture. Please note that `theta`
@@ -984,22 +993,15 @@ class JWSTPrimaryApertureSegment(Aperture):
         #                   between the zeroth and the 
         #                   first vertices. 
         #
-        return (phi[:-1] < theta) & (theta < phi[1:])
+        return (self.alpha[:-1] < theta) & (theta < self.alpha[1:])
 
 
-    def _segments(self : Layer, x : Vector, y : Vector, phi : Vector, 
-            theta : Tensor, rho : Tensor) -> Tensor:
+    def _segments(self : Layer, theta : Tensor, rho : Tensor) -> Tensor:
         """
         Generate the segments as a stacked tensor. 
 
         Parameters
         ----------
-        x : Vector
-            The x coordinates of the vertices.
-        y : Vector
-            The y coordinates of the vertices.
-        phi : Vector
-            The angles associated with each of the vertices in the order. 
         theta : Tensor
             The angle of every pixel associated with the coordinate system 
             of this aperture. 
@@ -1013,8 +1015,8 @@ class JWSTPrimaryApertureSegment(Aperture):
             The bitmaps corresponding to each vertex pair in the vertices.
             The leading dimension contains the unique segments. 
         """
-        edges = self._edges(x, y, rho, theta)
-        wedges = self._wedges(phi, theta)
+        edges = self._edges(rho, theta)
+        wedges = self._wedges(theta)
         return (edges & wedges).astype(float)
         
 
@@ -1030,10 +1032,8 @@ class JWSTPrimaryApertureSegment(Aperture):
         """
         # TODO: consider storing the vertices as a parameter to 
         # avoid reloading them every time. 
-        vertices = self._load(self.segment)
-        x, y, phi = self._vertices(vertices)
-        rho, theta = self._coordinates()
-        segments = self._segments(x, y, phi, theta, rho)
+        rho, theta = self._rad_coordinates()
+        segments = self._segments(theta, rho)
         return segments.sum(axis=0)
 
 
@@ -1125,6 +1125,20 @@ class CompoundAperture(eqx.Module):
             string for more information.
         """
         return self.apertures[key]
+
+
+    def __setitem__(self : Layer, key : str, value : Layer) -> None:
+        """
+        Assign a new value to one of the aperture mirrors.
+
+        Parameters
+        ----------
+        key : str
+            The name of the segement to replace for example "B1-7".
+        value : Layer
+            The new value to assign to that segement.
+        """
+        self.apertures[key] = value
 
 
     def _aperture(self : Layer) -> Matrix:
@@ -1227,15 +1241,11 @@ class Basis(eqx.Module):
     aperture : Layer
 
 
-    def __init__(self : Layer, npix : int, nterms : int,
+    def __init__(self : Layer, nterms : int,
             aperture : Layer) -> Layer:
         """
         Parameters
         ----------
-        npix : int
-            The number of pixels along one side of the basis arrays.
-            That is each term in the basis will be evaluated on a 
-            `npix` by `npix` grid.
         nterms : int
             The number of basis terms to generate. This determines the
             length of the leading dimension of the output Tensor.
@@ -1243,7 +1253,7 @@ class Basis(eqx.Module):
             The aperture to generate the basis over. This must be 
             an implementation of the abstract subclass `Aperture`. 
         """
-        self.npix = int(npix)
+        self.npix = int(aperture.get_npix())
         self.nterms = int(nterms)
         self.aperture = aperture
 
@@ -1545,3 +1555,44 @@ class Basis(eqx.Module):
         aperture = self.aperture._aperture()
         zernikes = self._zernikes(coordinates)
         return self._orthonormalise(aperture, zernikes)
+
+
+class CompoundBasis(eqx.Module):
+    """
+    Interfaces with compound apertures to generate basis over them.
+    """
+    bases : list
+
+ 
+    def __init__(self : Layer, nterms : int, 
+            compound_aperture : Layer) -> Layer:
+        """
+        Parameters
+        ----------
+        nterms : int
+            The number of basis terms to generate over each mirror.
+            pass a list of integers in the order that the apertures
+            appear in compound_aperture.
+        compound_aperture : Layer
+            The compound aperture to generate a basis over. 
+        """
+        apertures = compound_aperture.apertures.values()
+        if isinstance(nterms, list):
+            bases = [Basis(nterm, aperture) \
+                for nterm, aperture in zip(nterms, apertures)]
+        else:
+            bases = [Basis(nterms, aperture) for aperture in apertures]
+        self.bases = bases
+
+
+    def basis(self : Layer) -> Tensor:
+        """
+        Generate a basis over a compound aperture.
+
+        Returns 
+        -------
+        basis : Tensor
+            The basis represented as `(napp, nterms, npix, npix)`
+            array
+        """
+        return np.stack([basis.basis() for basis in self.bases])
