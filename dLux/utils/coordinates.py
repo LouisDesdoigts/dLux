@@ -98,5 +98,5 @@ def get_radial_positions(number_of_pixels : int,
         x_pixel_offset, y_pixel_offset)
     x, y = positions[0], positions[1]
     rho = np.hypot(x, y)
-    theta = np.arctan2(y[::-1, :], x)[::-1, :]
+    theta = np.arctan2(-y, x)
     return np.array([rho, theta])
