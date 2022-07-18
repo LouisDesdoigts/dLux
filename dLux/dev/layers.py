@@ -854,10 +854,9 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
         return x_offset, y_offset
 
 
-
-
-    def _coordinates(number_of_pixels : int, vertices : Matrix,
-            aperture_pixels : int, phi_naught : float) -> tuple:
+    # TODO: number_of_pixels can be moved out as a parameter
+    def _coordinates(self : Layer, number_of_pixels : int, 
+            vertices : Matrix, phi_naught : float) -> tuple:
         """
         Generates the vectorised coordinate system associated with the 
         aperture.
@@ -870,8 +869,6 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
             of the array for the generation of compound apertures.
         vertices : Matrix, meters
             The vertices loaded from the file.
-        aperture_pixels : int
-            The number of pixels across that the individual aperture.
         phi_naught : float 
             The angle substending the first vertex. 
 
@@ -881,15 +878,10 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
             The stacked coordinate systems that are typically passed to 
             `_segments` to generate the segments.
         """
-        # This needs to be implemented in terms of the super class 
-        # functionality. 
-        pixel_scale = _pixel_scale(vertices, aperture_pixels)
-        x_offset, y_offset = _offset(vertices, pixel_scale)
+        cartesian = super()._coordinates()
+        positions = cartesian_to_polar(cartesian)
 
-        positions = get_radial_positions(number_of_pixels,
-            -x_offset, -y_offset)
-
-        rho = positions[0] * pixel_scale
+        rho = positions[0] * self.pixel_scale()
 
         theta = positions[1] 
         theta += 2 * np.pi * (positions[1] < 0.)
@@ -900,7 +892,7 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
         return rho, theta
 
 
-    def _edges(x : Vector, y : Vector, rho : Tensor, 
+    def _edges(self : Layer, x : Vector, y : Vector, rho : Tensor, 
             theta : Tensor) -> Tensor:
         """
         Generate lines connecting adjacent vertices.
@@ -951,7 +943,7 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
         return rho < linear 
         
 
-    def _wedges(phi : Vector, theta : Tensor) -> Tensor:
+    def _wedges(self : Layer, phi : Vector, theta : Tensor) -> Tensor:
         """
         The angular bounds of each segment of an individual hexagon.
 
@@ -994,7 +986,7 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
         return (phi[:-1] < theta) & (theta < phi[1:])
 
 
-    def _segments(x : Vector, y : Vector, phi : Vector, 
+    def _segments(self : Layer, x : Vector, y : Vector, phi : Vector, 
             theta : Tensor, rho : Tensor) -> Tensor:
         """
         Generate the segments as a stacked tensor. 
@@ -1022,32 +1014,24 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
         """
         edges = _edges(x, y, rho, theta)
         wedges = _wedges(phi, theta)
-        return edges & wedges
+        return (edges & wedges).astype(float)
         
 
-    def _aperture(vertices : Matrix, number_of_pixels : int, 
-            aperture_pixels : int) -> Matrix:
+    def _aperture(self : Layers, number_of_pixels : int) -> Matrix:
         """
         Generate the BitMap representing the aperture described by the 
         vertices. 
-
-        Parameters
-        ----------
-        vertices : Matrix 
-            The vertices describing the approximately hexagonal aperture. 
-        number_of_pixels : int
-            The number of pixels that represent the compound aperture.
-        aperture_pixels : int
-            The number of pixels that represent the single aperture. 
 
         Returns
         -------
         aperture : Matrix 
             The Bit-Map that represents the aperture. 
         """
-        x, y, phi = _vertices(vertices)
-        rho, theta = _coordinates(number_of_pixels, vertices, 
-            aperture_pixels, phi[0])
+        # TODO: consider storing the vertices as a parameter to 
+        # avoid reloading them every time. 
+        vertices = self._load(self.segment)
+        x, y, phi = self._vertices(vertices)
+        rho, theta = _coordinates(self.get_npix(), vertices, phi[0])
         segments = _segments(x, y, phi, theta, rho)
         return segments.sum(axis=0)
 
@@ -1075,12 +1059,65 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
 
 
 class CompoundAperture(eqx.Module):
+    """
+    Represents an aperture that contains more than one single 
+    aperture. The smaller sub-apertures are stored in a dictionary
+    pytree and are so acessible by user defined name. For example:
+
+    >>> x_sep = 0.1
+    >>> width = 0.005
+    >>> height = 0.2
+    >>> first_slit = RectangularAperture(
+    ...     npix=1008, width=width, height=height, 
+    ...     x_offset = -x_sep/2, y_offset=0.,
+    ...     theta=0., phi=0., magnification=0.)
+    >>> second_slit = RectangularAperture(
+    ...     npix=1008, width=width, height=height, 
+    ...     x_offset = x_sep/2, y_offset=0.,
+    ...     theta=0., phi=0., magnification=0.)
+    >>> apertures = {"Right": first_slit, "Left": second_slit}
+    >>> double_slit = CompoundAperture(apertures)
+    >>> double_slit["Right"]
+    """
+    def __init__(self : Layer, apertures : dict) -> Layer:
+        self.apertures = apertures
+
+             
+
+
     # TODO: So this will just define useful methods for traversing 
     # the PyTree structure as well as a few bits and bobs like the 
     # Aperture generation itself and some other things. 
 
 
 class JWSTPrimaryAperture(CompoundAperture):
+    def __init__(self : Layer, number_of_pixels : int) -> Layer:
+        """
+        Generate the full primary aperture of the James Webb space 
+        telescope. This constructor initialises default values for 
+        the segements. This means that they are not rotated magnified
+        or sheared. 
+
+        Parameters
+        ----------
+        number_of_pixels : int
+            The number of pixels to display the the entire aperture
+            over.
+        """
+        self.pixel_scale = self._pixel_scale()
+
+        SEGMENTS = [
+            "A1", "A2", "A3", "A4", "A5", "A6", 
+            "B1", "B2", "B3", "B4", "B5", "B6", 
+            "C1", "C2", "C3", "C4", "C5", "C6"]
+
+        apertures = dict()
+        for segment in segments:
+            apertures[segment] = JWSTPrimaryApertureSegment(segement, 
+                    number_of_pixels, pixel_scale)
+        
+        super().__init__(number_of_pixels, pixel_scale, apertures)
+        
     def _pixel_scale(vertices : Matrix, pixels : int) -> float:
         """
         The physical dimesnions of a pixel along one edge. 
@@ -1434,7 +1471,11 @@ class Basis(eqx.Module):
         return basis
 
 
-    def _basis(self : Layer):
+    def _basis(self : Layer, aperture : Matrix, 
+            zernikes : Tensor) -> 
+
+
+    def basis(self : Layer):
         """
         Generate the basis. Requires a single run after which,
         the basis is cached and can be used with no computational 
