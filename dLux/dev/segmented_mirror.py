@@ -12,7 +12,6 @@ Tensor = TypeVar("Tensor")
 config.update("jax_enable_x64", True)
 
 
-class JWSTPrimaryAperture(PolygonalAperture):
 def _wrap(array : Vector, order : Vector) -> tuple:
     """
     Re-order an array and duplicate the first element as an additional
@@ -329,11 +328,6 @@ def _aperture(vertices : Matrix, number_of_pixels : int,
         aperture_pixels, phi[0])
     segments = _segments(x, y, phi, theta, rho)
     return segments.sum(axis=0)
-
-
-def _load(self : Layer):
-    """
-    """
 
 
 vertices = np.stack(tree_util.tree_map(

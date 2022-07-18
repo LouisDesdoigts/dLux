@@ -27,6 +27,9 @@ Vector = TypeVar("Vector")
 MAX_DIFF = 4
 
 
+# TODO: CLIMB 
+
+
 def cartesian_to_polar(coordinates : Tensor) -> Tensor:
     """
     Change the coordinate system from rectilinear to curvilinear.
@@ -42,7 +45,7 @@ def cartesian_to_polar(coordinates : Tensor) -> Tensor:
         The curvilinear coordinates.
     """
     rho = np.hypot(coordinates[0], coordinates[1])
-    theta = np.arctan2(coordinates[1], coordinates[0])
+    theta = np.arctan2(coordinates[1][::-1, :], coordinates[0])[::-1, :]
     return np.array([rho, theta])
 
 
@@ -157,7 +160,7 @@ class Aperture(eqx.Module, ABC):
         """
 
 
-    def pixel_scale(self: Layer) -> float:
+    def get_pixel_scale(self: Layer) -> float:
         """
         Returns
         -------
@@ -241,7 +244,7 @@ class Aperture(eqx.Module, ABC):
         coordinates : Tensor
             The enlarged or shrunken coordinate system.
         """
-        return 1 / self.rmax * coordinates
+        return 1 / self.get_magnification() * coordinates
 
 
     def _rotate(self : Layer, coordinates : Tensor) -> Tensor:
@@ -308,9 +311,9 @@ class Aperture(eqx.Module, ABC):
         """
         return coordinates\
             .at[0]\
-            .set(coordinates[0] - self.x)\
+            .set(coordinates[0] - self.x_offset)\
             .at[1]\
-            .set(coordinates[1] - self.y)
+            .set(coordinates[1] - self.y_offset)
 
 
     def _coordinates(self : Layer) -> Tensor:
@@ -327,8 +330,8 @@ class Aperture(eqx.Module, ABC):
             self._rotate(
                 self._translate(
                     self._magnify(
-                        self.pixel_scale() * \
-                            get_pixel_positions(self.npix)))))
+                        self.get_pixel_scale() * \
+                            get_pixel_positions(self.get_npix())))))
         return coordinates
 
 
@@ -714,7 +717,7 @@ class JWSTPrimaryApertureSegment(Aperture):
     pixel_scale : float, meters per pixel
         The is automatically calculated. DO NOT MODIFY THIS VALUE.                      
     """
-    segement : str 
+    segment : str 
 
 
     def __init__(self : Layer, segment : str, pixels : int,
@@ -744,7 +747,7 @@ class JWSTPrimaryApertureSegment(Aperture):
         """
         self.segment = str(segment)
         vertices = self._load(segment)
-        x_offset, y_offset = self._offset(vertices, pixel_scale)
+        x_offset, y_offset = self._offset(vertices)
         super().__init__(pixels, x_offset, y_offset, theta, phi,
             magnification, pixel_scale)
 
@@ -816,9 +819,9 @@ class JWSTPrimaryApertureSegment(Aperture):
 
         order = np.argsort(_angles)
 
-        x = _wrap(_x, order)
-        y = _wrap(_y, order)
-        angles = _wrap(_angles, order).at[-1].add(2 * np.pi)
+        x = self._wrap(_x, order)
+        y = self._wrap(_y, order)
+        angles = self._wrap(_angles, order).at[-1].add(2 * np.pi)
 
         # The final `2 * np.pi` is designed to make sure that the wrap
         # of the first angle is within the angular coordinate system 
@@ -830,8 +833,7 @@ class JWSTPrimaryApertureSegment(Aperture):
         return x, y, angles
 
 
-    def _offset(self : Layer, vertices : Matrix, 
-            pixel_scale : float) -> tuple:
+    def _offset(self : Layer, vertices : Matrix) -> tuple:
         """
         Get the offsets of the coordinate system.
 
@@ -849,26 +851,19 @@ class JWSTPrimaryApertureSegment(Aperture):
         x_offset, y_offset : float, meters
             The x and y offsets in physical units. 
         """
-        x_offset = np.mean(vertices[:, 0]) / pixel_scale
-        y_offset = np.mean(vertices[:, 1]) / pixel_scale
+        x_offset = np.mean(vertices[:, 0])
+        y_offset = np.mean(vertices[:, 1])
         return x_offset, y_offset
 
 
     # TODO: number_of_pixels can be moved out as a parameter
-    def _coordinates(self : Layer, number_of_pixels : int, 
-            vertices : Matrix, phi_naught : float) -> tuple:
+    def _coordinates(self : Layer, phi_naught : float) -> tuple:
         """
         Generates the vectorised coordinate system associated with the 
         aperture.
 
         Parameters
         ----------
-        number_of_pixels : int
-            The total number of pixels to generate. This is typically 
-            more than `aperture_pixels` as this is used in the padding 
-            of the array for the generation of compound apertures.
-        vertices : Matrix, meters
-            The vertices loaded from the file.
         phi_naught : float 
             The angle substending the first vertex. 
 
@@ -881,14 +876,14 @@ class JWSTPrimaryApertureSegment(Aperture):
         cartesian = super()._coordinates()
         positions = cartesian_to_polar(cartesian)
 
-        rho = positions[0] * self.pixel_scale()
+        rho = positions[0] * self.get_pixel_scale()
 
         theta = positions[1] 
         theta += 2 * np.pi * (positions[1] < 0.)
         theta += 2 * np.pi * (theta < phi_naught)
 
-        rho = np.tile(rho, (vertices.shape[0], 1, 1))
-        theta = np.tile(theta, (vertices.shape[0], 1, 1))
+        rho = np.tile(rho, (6, 1, 1))
+        theta = np.tile(theta, (6, 1, 1))
         return rho, theta
 
 
@@ -1012,8 +1007,8 @@ class JWSTPrimaryApertureSegment(Aperture):
             The bitmaps corresponding to each vertex pair in the vertices.
             The leading dimension contains the unique segments. 
         """
-        edges = _edges(x, y, rho, theta)
-        wedges = _wedges(phi, theta)
+        edges = self._edges(x, y, rho, theta)
+        wedges = self._wedges(phi, theta)
         return (edges & wedges).astype(float)
         
 
@@ -1031,8 +1026,7 @@ class JWSTPrimaryApertureSegment(Aperture):
         # avoid reloading them every time. 
         vertices = self._load(self.segment)
         x, y, phi = self._vertices(vertices)
-        rho, theta = self._coordinates(
-            self.get_npix(), vertices, phi[0])
+        rho, theta = self._coordinates(phi[0])
         segments = self._segments(x, y, phi, theta, rho)
         return segments.sum(axis=0)
 
@@ -1053,10 +1047,7 @@ class JWSTPrimaryApertureSegment(Aperture):
             The vertice information in any order with the shape
             (2, 6).
         """
-        return jax.tree_util.tree_map(
-            lambda leaf : leaf[1], 
-            JWST_PRIMARY_SEGMENTS,
-            is_leaf = lambda leaf : leaf[0].startswith(segment))
+        return dict(JWST_PRIMARY_SEGMENTS)[segment]
 
 
 class CompoundAperture(eqx.Module):
@@ -1112,6 +1103,7 @@ class CompoundAperture(eqx.Module):
             Aperture.
         """
         self.npix = int(number_of_pixels)
+        self.pixel_scale = float(pixel_scale)
         self.apertures = apertures
 
 
@@ -1171,37 +1163,39 @@ class JWSTPrimaryAperture(CompoundAperture):
             The number of pixels to display the the entire aperture
             over.
         """
-        self.pixel_scale = self._pixel_scale()
+        pixel_scale = self._pixel_scale(number_of_pixels)
 
         SEGMENTS = [
-            "A1", "A2", "A3", "A4", "A5", "A6", 
-            "B1", "B2", "B3", "B4", "B5", "B6", 
-            "C1", "C2", "C3", "C4", "C5", "C6"]
+            "A1-1", "A2-2", "A3-3", "A4-4", "A5-5", "A6-6", 
+            "B1-7", "B2-9", "B3-11", "B4-13", "B5-15", "B6-17", 
+            "C1-8", "C2-10", "C3-12", "C4-14", "C5-16", "C6-18"]
 
         apertures = dict()
-        for segment in segments:
-            apertures[segment] = JWSTPrimaryApertureSegment(segement, 
+        for segment in SEGMENTS:
+            apertures[segment] = JWSTPrimaryApertureSegment(segment, 
                     number_of_pixels, pixel_scale)
         
         super().__init__(number_of_pixels, pixel_scale, apertures)
         
 
-    def _pixel_scale(self : Layer) -> float:
+    def _pixel_scale(self : Layer, npix : int) -> float:
         """
         The physical dimesnions of a pixel along one edge. 
+
+        Parameters
+        ----------
+        npix : int
+            The number of pixels along one edge of the output image 
 
         Returns
         -------
         pixel_scale : float, meters
             The physical length along one edge of a pixel. 
         """
-        B1_and_B4 = np.stack(jax.tree_util.tree_map(
-            lambda leaf : leaf[1], 
-            list(JWST_PRIMARY_SEGMENTS),
-            is_leaf = lambda leaf : \
-                leaf[0].startswith("B1") or leaf[0].startswith("B4")))
+        B1 = JWST_PRIMARY_SEGMENTS[6][1]
+        B4 = JWST_PRIMARY_SEGMENTS[9][1]
         height = B1[:, 1].max() - B4[:, 1].min()
-        return height / self.get_pixels()
+        return height / npix
 
 
 class Basis(eqx.Module):
