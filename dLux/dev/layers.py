@@ -872,10 +872,10 @@ class PolygonalBasis(BasisPhase, ABC):
             The coordinate system in the rectilinear view, with the
             x and y coordinates stacked above one another.
         """
-        coordinates = self._shear(
-            self._rotate(
-                self._offset(
-                    self._magnify(
+        coordinates = self._magnify(
+            self._shear(
+                self._rotate(
+                    self._offset(
                         2 / self.npix * get_pixel_positions(self.npix)))))
         return coordinates
 
