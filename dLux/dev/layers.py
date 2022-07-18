@@ -45,7 +45,7 @@ def cartesian_to_polar(coordinates : Tensor) -> Tensor:
         The curvilinear coordinates.
     """
     rho = np.hypot(coordinates[0], coordinates[1])
-    theta = np.arctan2(coordinates[1][::-1, :], coordinates[0])[::-1, :]
+    theta = np.arctan2(-coordinates[1], coordinates[0])
     return np.array([rho, theta])
 
 
@@ -311,9 +311,9 @@ class Aperture(eqx.Module, ABC):
         """
         return coordinates\
             .at[0]\
-            .set(coordinates[0] - self.x_offset)\
+            .set(coordinates[0] + self.x_offset)\
             .at[1]\
-            .set(coordinates[1] - self.y_offset)
+            .set(coordinates[1] + self.y_offset)
 
 
     def _coordinates(self : Layer) -> Tensor:
@@ -715,9 +715,13 @@ class JWSTPrimaryApertureSegment(Aperture):
         The multiplicative factor indicating the size of the aperture
         from the initial.
     pixel_scale : float, meters per pixel
-        The is automatically calculated. DO NOT MODIFY THIS VALUE.                      
+        The is automatically calculated. DO NOT MODIFY THIS VALUE.  
+    phi_offset : float, radians
+        The offset of the first vertice in pixels. This value is stored
+        for convinience only.                    
     """
     segment : str 
+    phi_offset : float
 
 
     def __init__(self : Layer, segment : str, pixels : int,
@@ -747,7 +751,8 @@ class JWSTPrimaryApertureSegment(Aperture):
         """
         self.segment = str(segment)
         vertices = self._load(segment)
-        x_offset, y_offset = self._offset(vertices)
+        x_offset, y_offset, phi_offset = self._offset(vertices)
+        self.phi_offset = float(phi_offset)
         super().__init__(pixels, x_offset, y_offset, theta, phi,
             magnification, pixel_scale)
 
@@ -853,11 +858,12 @@ class JWSTPrimaryApertureSegment(Aperture):
         """
         x_offset = np.mean(vertices[:, 0])
         y_offset = np.mean(vertices[:, 1])
-        return x_offset, y_offset
+        phi_offset = np.arctan2(vertices[0, 1], vertices[0, 0])
+        return x_offset, y_offset, phi_offset
 
 
     # TODO: number_of_pixels can be moved out as a parameter
-    def _coordinates(self : Layer, phi_naught : float) -> tuple:
+    def _coordinates(self : Layer) -> tuple:
         """
         Generates the vectorised coordinate system associated with the 
         aperture.
@@ -880,7 +886,7 @@ class JWSTPrimaryApertureSegment(Aperture):
 
         theta = positions[1] 
         theta += 2 * np.pi * (positions[1] < 0.)
-        theta += 2 * np.pi * (theta < phi_naught)
+        theta += 2 * np.pi * (theta < self.phi_offset)
 
         rho = np.tile(rho, (6, 1, 1))
         theta = np.tile(theta, (6, 1, 1))
@@ -935,7 +941,7 @@ class JWSTPrimaryApertureSegment(Aperture):
         c = (a * y[:-1] - b * x[:-1])
 
         linear = c / (a * np.sin(theta) - b * np.cos(theta))
-        return rho < linear 
+        return rho < (linear * self.get_pixel_scale())
         
 
     def _wedges(self : Layer, phi : Vector, theta : Tensor) -> Tensor:
@@ -1026,7 +1032,7 @@ class JWSTPrimaryApertureSegment(Aperture):
         # avoid reloading them every time. 
         vertices = self._load(self.segment)
         x, y, phi = self._vertices(vertices)
-        rho, theta = self._coordinates(phi[0])
+        rho, theta = self._coordinates()
         segments = self._segments(x, y, phi, theta, rho)
         return segments.sum(axis=0)
 
@@ -1212,12 +1218,17 @@ class Basis(eqx.Module):
         The number of basis vectors to generate. This is determined
         by passing along the noll indices until the number is 
         reached (inclusive).
+    aperture : Layer
+        The aperture over which to generate the basis. This should 
+        be an implementation of the abstract base class `Aperture`.
     """
     npix : int
     nterms : int    
+    aperture : Layer
 
 
-    def __init__(self : Layer, npix : int, nterms : int) -> Layer:
+    def __init__(self : Layer, npix : int, nterms : int,
+            aperture : Layer) -> Layer:
         """
         Parameters
         ----------
@@ -1227,10 +1238,14 @@ class Basis(eqx.Module):
             `npix` by `npix` grid.
         nterms : int
             The number of basis terms to generate. This determines the
-            length of the leading dimension of the output Tensor. 
+            length of the leading dimension of the output Tensor.
+        aperture : Layer
+            The aperture to generate the basis over. This must be 
+            an implementation of the abstract subclass `Aperture`. 
         """
         self.npix = int(npix)
         self.nterms = int(nterms)
+        self.aperture = aperture
 
 
     def save(self : Layer, file_name : str, n : int) -> None:
@@ -1504,8 +1519,7 @@ class Basis(eqx.Module):
         return basis
 
 
-    def basis(self : Layer, aperture : Matrix, 
-            coordinates : Matrix) -> Tensor:
+    def basis(self : Layer) -> Tensor:
         """
         Generate the basis. Requires a single run after which,
         the basis is cached and can be used with no computational 
@@ -1527,5 +1541,7 @@ class Basis(eqx.Module):
             each stacked array is a basis term. The final shape is:
             `(n, npix, npix)`
         """
+        coordinates = self.aperture._coordinates()
+        aperture = self.aperture._aperture()
         zernikes = self._zernikes(coordinates)
-        return self._orthonormalise(aperture, zernikes) 
+        return self._orthonormalise(aperture, zernikes)
