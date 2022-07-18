@@ -606,7 +606,7 @@ class HexagonalAperture(Aperture):
         return np.asarray(hexagon).astype(float)
 
 
-class JWSTPrimaryApertureSegment(PolygonalAperture):
+class JWSTPrimaryApertureSegment(Aperture):
     """
     A dLux implementation of the JWST primary aperture segment.
     The segments are sketched and drawn below:
@@ -1017,7 +1017,7 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
         return (edges & wedges).astype(float)
         
 
-    def _aperture(self : Layers) -> Matrix:
+    def _aperture(self : Layer) -> Matrix:
         """
         Generate the BitMap representing the aperture described by the 
         vertices. 
@@ -1055,7 +1055,7 @@ class JWSTPrimaryApertureSegment(PolygonalAperture):
         """
         return jax.tree_util.tree_map(
             lambda leaf : leaf[1], 
-            jwst_primary_segments,
+            JWST_PRIMARY_SEGMENTS,
             is_leaf = lambda leaf : leaf[0].startswith(segment))
 
 
@@ -1197,15 +1197,12 @@ class JWSTPrimaryAperture(CompoundAperture):
         """
         B1_and_B4 = np.stack(jax.tree_util.tree_map(
             lambda leaf : leaf[1], 
-            jwst_primary_segments,
+            list(JWST_PRIMARY_SEGMENTS),
             is_leaf = lambda leaf : \
-                leaf.startswith("B1") or leaf.startswith("B4")))
+                leaf[0].startswith("B1") or leaf[0].startswith("B4")))
         height = B1[:, 1].max() - B4[:, 1].min()
         return height / self.get_pixels()
 
-aperture = jax.vmap(_aperture, in_axes=(0, None, None))(vertices, 1008, 200)
-pyplot.imshow(aperture.sum(axis=0))
-pyplot.show()
 
 class Basis(eqx.Module):
     """
