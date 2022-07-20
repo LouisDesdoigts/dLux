@@ -8,19 +8,19 @@
       
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
     
     
       
-        <title>∂Lux - Differentiable Optical Simulation</title>
+        <title>The `OpticalSystem()` object! - ∂Lux - Differentiable Optical Simulation</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.1d29e8d0.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.1d29e8d0.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.cbb835fc.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
         
       
       
@@ -36,9 +36,9 @@
       
     
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL(".",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -62,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#lux" class="md-skip">
+        <a href="#the-opticalsystem-object" class="md-skip">
           Skip to content
         </a>
       
@@ -76,7 +76,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="∂Lux - Differentiable Optical Simulation" class="md-header__button md-logo" aria-label="∂Lux - Differentiable Optical Simulation" data-md-component="logo">
+    <a href=".." title="∂Lux - Differentiable Optical Simulation" class="md-header__button md-logo" aria-label="∂Lux - Differentiable Optical Simulation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -95,7 +95,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              The `OpticalSystem()` object!
             
           </span>
         </div>
@@ -174,7 +174,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="∂Lux - Differentiable Optical Simulation" class="md-nav__button md-logo" aria-label="∂Lux - Differentiable Optical Simulation" data-md-component="logo">
+    <a href=".." title="∂Lux - Differentiable Optical Simulation" class="md-nav__button md-logo" aria-label="∂Lux - Differentiable Optical Simulation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -203,80 +203,11 @@
 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Home
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
         Home
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#contributors" class="md-nav__link">
-    Contributors
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#use" class="md-nav__link">
-    Use
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-is-lux" class="md-nav__link">
-    What is ∂Lux?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#package-overview" class="md-nav__link">
-    Package Overview
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -315,7 +246,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user_documentation/optical_system/" class="md-nav__link">
+      <a href="../user_documentation/optical_system/" class="md-nav__link">
         Optical System
       </a>
     </li>
@@ -355,7 +286,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user_documentation/layers/create_wavefront/" class="md-nav__link">
+      <a href="../user_documentation/layers/create_wavefront/" class="md-nav__link">
         Create Wavefront
       </a>
     </li>
@@ -369,7 +300,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user_documentation/layers/tilt_wavefront/" class="md-nav__link">
+      <a href="../user_documentation/layers/tilt_wavefront/" class="md-nav__link">
         Tilt Wavefront
       </a>
     </li>
@@ -383,7 +314,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user_documentation/layers/circular_wavefront.md" class="md-nav__link">
+      <a href="../user_documentation/layers/circular_wavefront.md" class="md-nav__link">
         Circular Wavefront
       </a>
     </li>
@@ -397,7 +328,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user_documentation/layers/normalise_wavefront/" class="md-nav__link">
+      <a href="../user_documentation/layers/normalise_wavefront/" class="md-nav__link">
         Normalise Wavefront
       </a>
     </li>
@@ -411,7 +342,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user_documentation/layers/apply_basis_opd/" class="md-nav__link">
+      <a href="../user_documentation/layers/apply_basis_opd/" class="md-nav__link">
         Apply Basis OPD
       </a>
     </li>
@@ -425,7 +356,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user_documentation/layers/add_phase/" class="md-nav__link">
+      <a href="../user_documentation/layers/add_phase/" class="md-nav__link">
         Add Phase
       </a>
     </li>
@@ -439,7 +370,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user_documentation/layers/apply_opd/" class="md-nav__link">
+      <a href="../user_documentation/layers/apply_opd/" class="md-nav__link">
         Apply OPD
       </a>
     </li>
@@ -453,7 +384,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user_documentation/layers/apply_aperture/" class="md-nav__link">
+      <a href="../user_documentation/layers/apply_aperture/" class="md-nav__link">
         Apply Aperture
       </a>
     </li>
@@ -534,7 +465,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/wavefronts/wavefront/" class="md-nav__link">
+      <a href="../developer_documentation/wavefronts/wavefront/" class="md-nav__link">
         Wavefront
       </a>
     </li>
@@ -548,7 +479,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/wavefronts/physical_wavefront/" class="md-nav__link">
+      <a href="../developer_documentation/wavefronts/physical_wavefront/" class="md-nav__link">
         Physical Wavefront
       </a>
     </li>
@@ -562,7 +493,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/wavefronts/angular_wavefront/" class="md-nav__link">
+      <a href="../developer_documentation/wavefronts/angular_wavefront/" class="md-nav__link">
         Angular Wavefront
       </a>
     </li>
@@ -576,7 +507,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/wavefronts/gaussian_wavefront/" class="md-nav__link">
+      <a href="../developer_documentation/wavefronts/gaussian_wavefront/" class="md-nav__link">
         Guassian Wavefront
       </a>
     </li>
@@ -623,7 +554,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/propagators/propagator/" class="md-nav__link">
+      <a href="../developer_documentation/propagators/propagator/" class="md-nav__link">
         Propagator
       </a>
     </li>
@@ -637,7 +568,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/propagators/gaussian_propagator.md" class="md-nav__link">
+      <a href="../developer_documentation/propagators/gaussian_propagator.md" class="md-nav__link">
         Gaussian Propagator
       </a>
     </li>
@@ -677,7 +608,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/propagators/variable_sampling/variable_sampling_propagator/" class="md-nav__link">
+      <a href="../developer_documentation/propagators/variable_sampling/variable_sampling_propagator/" class="md-nav__link">
         Variable Sampling Propagator
       </a>
     </li>
@@ -691,7 +622,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/propagators/variable_sampling/physical_mft/" class="md-nav__link">
+      <a href="../developer_documentation/propagators/variable_sampling/physical_mft/" class="md-nav__link">
         PhysicalMFT
       </a>
     </li>
@@ -705,7 +636,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/propagators/variable_sampling/physical_fresnel/" class="md-nav__link">
+      <a href="../developer_documentation/propagators/variable_sampling/physical_fresnel/" class="md-nav__link">
         PhysicalFresnel
       </a>
     </li>
@@ -719,7 +650,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/propagators/variable_sampling/angular_mft/" class="md-nav__link">
+      <a href="../developer_documentation/propagators/variable_sampling/angular_mft/" class="md-nav__link">
         AngularMFT
       </a>
     </li>
@@ -733,7 +664,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/propagators/variable_sampling/angular_fresnel/" class="md-nav__link">
+      <a href="../developer_documentation/propagators/variable_sampling/angular_fresnel/" class="md-nav__link">
         AngularFresnel
       </a>
     </li>
@@ -780,7 +711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/propagators/fixed_sampling/fixed_sampling_propagator/" class="md-nav__link">
+      <a href="../developer_documentation/propagators/fixed_sampling/fixed_sampling_propagator/" class="md-nav__link">
         Fixed Sampling Propagator
       </a>
     </li>
@@ -794,7 +725,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/propagators/fixed_sampling/physical_fft/" class="md-nav__link">
+      <a href="../developer_documentation/propagators/fixed_sampling/physical_fft/" class="md-nav__link">
         PhysicalFFT
       </a>
     </li>
@@ -808,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer_documentation/propagators/fixed_sampling/angular_fft/" class="md-nav__link">
+      <a href="../developer_documentation/propagators/fixed_sampling/angular_fft/" class="md-nav__link">
         AngularFFT
       </a>
     </li>
@@ -863,37 +794,64 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#contributors" class="md-nav__link">
-    Contributors
+  <a href="#inputs" class="md-nav__link">
+    Inputs:
+  </a>
+  
+    <nav class="md-nav" aria-label="Inputs:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layers-list-required" class="md-nav__link">
+    layers: list, required
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
+        
+          <li class="md-nav__item">
+  <a href="#wavels-ndarray-optional" class="md-nav__link">
+    wavels: ndarray, optional
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#use" class="md-nav__link">
-    Use
+        
+          <li class="md-nav__item">
+  <a href="#positions-ndarray-optional" class="md-nav__link">
+    positions: ndarray, optional
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#what-is-lux" class="md-nav__link">
-    What is ∂Lux?
+        
+          <li class="md-nav__item">
+  <a href="#fluxes-ndarray-optional" class="md-nav__link">
+    fluxes: ndarray, optional
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#package-overview" class="md-nav__link">
-    Package Overview
+        
+          <li class="md-nav__item">
+  <a href="#weights-ndarray-optional" class="md-nav__link">
+    weights: ndarray, optional
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dithers-ndarray-optional" class="md-nav__link">
+    dithers: ndarray, optional
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detector_layers-list-optional" class="md-nav__link">
+    detector_layers: list, optional
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -909,43 +867,63 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/index.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/opsys.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<p><span class="arithmatex">\(\partial\)</span>Lux  Docs</p>
-<hr />
-<h1 id="lux">∂Lux</h1>
-<p><a href="https://badge.fury.io/py/dLux"><img alt="PyPI version" src="https://badge.fury.io/py/dLux.svg" /></a>
-<a href="https://opensource.org/licenses/BSD-3-Clause"><img alt="License" src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a></p>
-<p>∂Lux: Taking derivatives through Light - 'Optical systems as a Neural Network'</p>
-<h2 id="contributors">Contributors</h2>
-<p><a href="https://github.com/LouisDesdoigts">Louis Desdoigts</a>, <a href="https://github.com/benjaminpope">Benjamin Pope</a>, <a href="https://github.com/Jordan-Dennis">Jordan Dennis</a></p>
-<h2 id="installation">Installation</h2>
-<p>The easiest way to install is from PyPI: just use</p>
-<p><code>pip install dLux</code></p>
-<p>To install from source: clone this git repo, enter the directory, and run</p>
-<p><code>pip install .</code></p>
-<h2 id="use">Use</h2>
-<p>We are currently building examples and documentation! We currently have two tutorial notebooks, showing the basics of how to optimise simple and more complex models <a href="https://github.com/LouisDesdoigts/dLux/tree/main/notebooks">here</a>. Please note that this software is still under development and so is subject to change.</p>
-<h2 id="what-is-lux">What is ∂Lux?</h2>
-<p>∂Lux is a full from-scratch rewrite of the ideas <a href="https://github.com/benjaminpope/morphine">morphine</a>, which is a fork of the popular optical simulation package '<a href="https://github.com/mperrin/poppy">poppy</a>' using the autodiff library <a href="https://github.com/google/jax">Google Jax</a> to do <em>derivatives</em>. We have built it from the ground up in <a href="https://github.com/patrick-kidger/equinox">equinox</a>, a powerful object-oriented library in Jax, to best take advantage of GPU acceleration and multi-device parallelization, and permit easy development and integration with neural networks.</p>
-<p>The goal of <span class="arithmatex">\(\partial\)</span>Lux is to revolutionise the way in which optical modelling is approached. The mathematical equivalence betweeen neural networks and optical systems means that optical systems can be efficiently modelled and optimized with the same automatic differentiation libraries that power deep learning. Using autodiff, we can infer <em>many</em> parameters at once - millions in the case of neural networks - whether by gradient descent, or with a Bayesian treatment using Hamiltonian Monte Carlo. Autodiff means that directly optimising physics-based forwards models with millions of parameters is not only possible, but practical without requiring vast computation power. </p>
-<hr />
-<h2 id="package-overview">Package Overview</h2>
-<p><span class="arithmatex">\(\partial\)</span>Lux has been built to be as simple and easy as possible for end-users, without abstracting them away from the underlying computations. </p>
-<p>There are two main types of classes that form the foundation of <span class="arithmatex">\(\partial\)</span>Lux, the <code>OpticalSystem()</code> and the layers. In order to construct a model of an optical system one simply defines the series of operations/transforms that is performed on the input wavefront in a list, which is passed as an argument to the <code>OpticalSystem()</code> class. Each transformation or operation is a single 'layer' in that list. For a very simple optical a typical list of layers would look something like this:</p>
-<pre><code>layers = [
-  CreateWavefront(wf_npix, wf_size),
-  TiltWavefront(),
-  CircularrAperture(wf_npix),
-  NormaliseWavefront(),
-  MFT(det_npix, fl, det_pixsize)
-]
-</code></pre>
-<p>This list of layers can then be turned into an optical system -&gt; <code>OpticalSystem(layers)</code>. We now have a fully differentiable optical model!</p>
+<h1 id="the-opticalsystem-object">The <code>OpticalSystem()</code> object!</h1>
+<p>The OpticalSystem object is the primary object of dLux, so here is a quick overview.</p>
+<blockquote>
+<p>dLux curently does not check that inputs are correctly shaped/formatted in order to making things work appropriately (under development)</p>
+</blockquote>
+<h2 id="inputs">Inputs:</h2>
+<h3 id="layers-list-required">layers: list, required</h3>
+<ul>
+<li>A list of layers that defines the tranformaitons and operations of the system (typically optical)</li>
+</ul>
+<h3 id="wavels-ndarray-optional">wavels: ndarray, optional</h3>
+<ul>
+<li>An array of wavelengths in meters to simulate</li>
+<li>The shape must be 1d - stellar spectrums are controlled through the weights parameter</li>
+<li>No default value is set if not provided and this will throw an error if you try to call functions that depend on this parameter</li>
+<li>It is left as optional so that functions that allow wavelength input can be called on objects without having to pre-input wavelengths</li>
+</ul>
+<h3 id="positions-ndarray-optional">positions: ndarray, optional</h3>
+<ul>
+<li>An array of (x,y) stellar positions in units of radians, measured as deivation of the optical axis. </li>
+<li>Its input shape should be (Nstars, 2), defining an x, y position for each star. </li>
+<li>If not provided, the value defaults to (0, 0) - on axis</li>
+</ul>
+<h3 id="fluxes-ndarray-optional">fluxes: ndarray, optional</h3>
+<ul>
+<li>An array of stellar fluxes, its length must match the positions inputs size to work properly</li>
+<li>Theoretically this has arbitrary units, but we think of it as photons</li>
+<li>Defaults to 1 (ie, returning a unitary flux psf if not specified)</li>
+</ul>
+<h3 id="weights-ndarray-optional">weights: ndarray, optional</h3>
+<ul>
+<li>An array of stellar spectral weights (arb units)</li>
+<li>This can take multiple shapes<ul>
+<li>Default is to weight all wavelengths equally (top-hat)</li>
+<li>If a 1d array is provided this is applied to all stars, shape (Nwavels)</li>
+<li>if a 2d array is provided each is applied to each individual star, shape (Nstars, Nwavels)</li>
+</ul>
+</li>
+<li>Note the inputs values are always normalised and will not directly change total output flux (inderectly it can change it by weighting more flux to wavelengths with more aperture losses, for example)</li>
+</ul>
+<h3 id="dithers-ndarray-optional">dithers: ndarray, optional</h3>
+<ul>
+<li>An arary of (x, y) positional dithers in units of radians</li>
+<li>Its input shape should be (Nims, 2), defining the (x,y) dither for each image</li>
+<li>if not provided, defualts to no-dither</li>
+</ul>
+<h3 id="detector_layers-list-optional">detector_layers: list, optional</h3>
+<ul>
+<li>A second list of layer objects designed to allow processing of psfs, rather than wavefronts</li>
+<li>It is applied to each image after psfs have been approraitely weighted and summed</li>
+</ul>
 
               
             </article>
@@ -956,27 +934,6 @@
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-      
-        
-        <a href="user_documentation/optical_system/" class="md-footer__link md-footer__link--next" aria-label="Next: Optical System" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Optical System
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -998,12 +955,12 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      <script src="../assets/javascripts/bundle.6c7ad80a.min.js"></script>
       
-        <script src="javascripts/mathjax.js"></script>
+        <script src="../javascripts/mathjax.js"></script>
       
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
       
