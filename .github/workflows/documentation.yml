@@ -25,6 +25,7 @@ jobs:
           pip install mkdocstrings
           pip install mkdocstrings[python]
           pip install mkdocs-material 
+          pip install mkdocs-jupyter
 
       - name: generate documentation
         run: mkdocs gh-deploy -d https://louisdesdoigts.github.io/dLux
