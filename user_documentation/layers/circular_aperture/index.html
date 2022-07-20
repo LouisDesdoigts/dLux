@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.7">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.3.9">
     
     
       
@@ -17,7 +17,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.4a0965b7.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.1d29e8d0.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.cbb835fc.min.css">
@@ -62,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#src.layers.CircularAperture" class="md-skip">
+        <a href="#dLux.layers.CircularAperture" class="md-skip">
           Skip to content
         </a>
       
@@ -384,7 +384,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../apply_aperture.md" class="md-nav__link">
+      <a href="../apply_aperture/" class="md-nav__link">
         Apply Aperture
       </a>
     </li>
@@ -422,14 +422,14 @@
       
       
         <label class="md-nav__link" for="__nav_3">
-          Developer Documetation
+          Developer Documentation
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Developer Documetation" data-md-level="1">
+      <nav class="md-nav" aria-label="Developer Documentation" data-md-level="1">
         <label class="md-nav__title" for="__nav_3">
           <span class="md-nav__icon md-icon"></span>
-          Developer Documetation
+          Developer Documentation
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -792,15 +792,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#src.layers.CircularAperture" class="md-nav__link">
-    src.layers.CircularAperture
+  <a href="#dLux.layers.CircularAperture" class="md-nav__link">
+    dLux.layers.CircularAperture
   </a>
   
-    <nav class="md-nav" aria-label="src.layers.CircularAperture">
+    <nav class="md-nav" aria-label="dLux.layers.CircularAperture">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#src.layers.CircularAperture--notes" class="md-nav__link">
+  <a href="#dLux.layers.CircularAperture--notes" class="md-nav__link">
     Notes
   </a>
   
@@ -812,35 +812,35 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#src.layers.CircularAperture.array" class="md-nav__link">
+  <a href="#dLux.layers.CircularAperture.array" class="md-nav__link">
     array
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#src.layers.CircularAperture.npix" class="md-nav__link">
+  <a href="#dLux.layers.CircularAperture.npix" class="md-nav__link">
     npix
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#src.layers.CircularAperture.__call__" class="md-nav__link">
+  <a href="#dLux.layers.CircularAperture.__call__" class="md-nav__link">
     __call__()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#src.layers.CircularAperture.__init__" class="md-nav__link">
+  <a href="#dLux.layers.CircularAperture.__init__" class="md-nav__link">
     __init__()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#src.layers.CircularAperture.create_aperture" class="md-nav__link">
+  <a href="#dLux.layers.CircularAperture.create_aperture" class="md-nav__link">
     create_aperture()
   </a>
   
@@ -869,7 +869,7 @@
 <div class="doc doc-object doc-class">
 
 
-<a id="src.layers.CircularAperture"></a>
+<a id="dLux.layers.CircularAperture"></a>
   <div class="doc doc-contents first">
       <p class="doc doc-class-bases">
         Bases: <code><span title="equinox">eqx</span>.<span title="equinox.Module">Module</span></code></p>
@@ -877,7 +877,7 @@
   
       <p>Multiplies the input wavefront by a pre calculated circular binary 
 (float) mask that fills the size of the array</p>
-<h3 id="src.layers.CircularAperture--notes">Notes</h3>
+<h3 id="dLux.layers.CircularAperture--notes">Notes</h3>
 <ul>
 <li>There is a known bug where gradients become <code>nan</code> if phase 
   operation are applied after this layer</li>
@@ -904,7 +904,7 @@ parameters is not differentiable.</p></td>
         <tr>
           <td><code>array</code></td>
           <td>
-                <code><span title="src.wavefronts.Array">Array</span>[float]</code>
+                <code>Array[float]</code>
           </td>
           <td><p>A binary <code>float</code> array describing the apertures location.
 The parameter is differentiable but refers to <em>Notes</em> for 
@@ -929,7 +929,7 @@ a known bug.</p></td>
 
 
 
-<h2 id="src.layers.CircularAperture.array" class="doc doc-heading">
+<h2 id="dLux.layers.CircularAperture.array" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_aperture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npix</span><span class="p">,</span> <span class="n">rmin</span><span class="o">=</span><span class="n">rmin</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="n">rmax</span><span class="p">)</span> <span class="o">+</span> <span class="n">eps</span></code>
   
   <span class="doc doc-labels">
@@ -948,7 +948,7 @@ a known bug.</p></td>
 
 
 
-<h2 id="src.layers.CircularAperture.npix" class="doc doc-heading">
+<h2 id="dLux.layers.CircularAperture.npix" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">npix</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">npix</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
@@ -969,7 +969,7 @@ a known bug.</p></td>
 
 
 
-<h2 id="src.layers.CircularAperture.__call__" class="doc doc-heading">
+<h2 id="dLux.layers.CircularAperture.__call__" class="doc doc-heading">
 <code class="highlight language-python"><span class="fm">__call__</span><span class="p">(</span><span class="n">params_dict</span><span class="p">)</span></code>
 
 </h2>
@@ -1035,7 +1035,7 @@ updated.</p></td>
 
 
 
-<h2 id="src.layers.CircularAperture.__init__" class="doc doc-heading">
+<h2 id="dLux.layers.CircularAperture.__init__" class="doc doc-heading">
 <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="n">rmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">)</span></code>
 
 </h2>
@@ -1116,7 +1116,7 @@ very often.</p></td>
 
 
 
-<h2 id="src.layers.CircularAperture.create_aperture" class="doc doc-heading">
+<h2 id="dLux.layers.CircularAperture.create_aperture" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">create_aperture</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="n">rmin</span><span class="p">,</span> <span class="n">rmax</span><span class="p">)</span></code>
 
 </h2>
@@ -1223,7 +1223,7 @@ quantity and must satisfy the condition:</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.0238f547.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
       
         <script src="../../../javascripts/mathjax.js"></script>
       
