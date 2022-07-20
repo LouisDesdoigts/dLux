@@ -21,6 +21,7 @@ theme:
 # ===== Plugins =====
 plugins:
   - search 
+  - mkdocs-jupyter
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -49,7 +50,7 @@ nav:
             - Add Phase: user_documentation/layers/add_phase.md
             - Apply OPD: user_documentation/layers/apply_opd.md
             - Apply Aperture: user_documentation/layers/apply_aperture.md 
-    - Developer Documetation:
+    - Developer Documentation:
         - Wavefronts:
             - Wavefront: developer_documentation/wavefronts/wavefront.md
             - Physical Wavefront: developer_documentation/wavefronts/physical_wavefront.md

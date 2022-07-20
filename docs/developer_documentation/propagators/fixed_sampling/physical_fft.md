@@ -1,1 +1,1 @@
-:::src.propagators.PhysicalFFT
+::: dLux.propagators.PhysicalFFT
