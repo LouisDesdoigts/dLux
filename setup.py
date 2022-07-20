@@ -30,7 +30,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name="dLux",
-    # version=find_version("dLux", "__init__.py"),
+    version=find_version("dLux", "__init__.py"),
     description="A fully differentiable optical simulator build in Jax",
     long_description=long_description,
     # long_description_content_type="text/markdown",

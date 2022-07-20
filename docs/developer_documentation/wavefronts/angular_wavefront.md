@@ -1,1 +1,1 @@
-:::src.wavefronts.AngularWavefront
+::: dLux.wavefronts.AngularWavefront
