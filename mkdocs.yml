@@ -29,7 +29,7 @@ plugins:
             docstring_style: "numpy"
           setup_commands:
             - import sys
-            - sys.path.append("src")
+            - sys.path.append("dLux")
           rendering:
             show_source: false
             show_if_no_docstring: yes
