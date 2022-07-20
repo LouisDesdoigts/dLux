@@ -18,10 +18,6 @@ To install from source: clone this git repo, enter the directory, and run
 
 `pip install .`
 
-## Use
-
-We are currently building examples and documentation! We currently have two tutorial notebooks, showing the basics of how to optimise simple and more complex models [here](https://github.com/LouisDesdoigts/dLux/tree/main/notebooks). Please note that this software is still under development and so is subject to change.
-
 ## What is ∂Lux?
 
 ∂Lux is a full from-scratch rewrite of the ideas [morphine](https://github.com/benjaminpope/morphine), which is a fork of the popular optical simulation package '[poppy](https://github.com/mperrin/poppy)' using the autodiff library [Google Jax](https://github.com/google/jax) to do _derivatives_. We have built it from the ground up in [equinox](https://github.com/patrick-kidger/equinox), a powerful object-oriented library in Jax, to best take advantage of GPU acceleration and multi-device parallelization, and permit easy development and integration with neural networks.
@@ -34,7 +30,9 @@ The goal of ∂Lux is to revolutionise the way in which optical modelling is app
 
 ∂Lux has been built to be as simple and easy as possible for end-users, without abstracting them away from the underlying computations. 
 
-There are two main types of classes that form the foundation of ∂Lux, the `OpticalSystem()` and the layers. In order to construct a model of an optical system, you define the series of operations/transforms that is performed on the input wavefront in a list, which is passed as an argument to the `OpticalSystem()` class. Each transformation or operation is a single 'layer' in that list. For a very simple optical a typical list of layers would look something like this:
+We are currently building examples and documentation! We currently have two tutorial notebooks, showing the basics of how to optimise simple and more complex models [here](https://github.com/LouisDesdoigts/dLux/tree/main/notebooks). Please note that this software is still under development and so is subject to change.
+
+∂Lux is based on two main classes: the `OpticalSystem` and the layers. A ∂Lux optical model consists of a list of operations/transforms performed on the input wavefront, which is passed as an argument to the `OpticalSystem` class. Each transformation or operation is a single 'layer' in that list. For a very simple optical a typical list of layers would look something like this:
 
 ```
 layers = [
@@ -46,4 +44,4 @@ layers = [
 ]
 ```
 
-This list of layers can then be turned into an optical system -> `OpticalSystem(layers)`. We now have a fully differentiable optical model!
+This list of layers can then be turned into an optical system by calling `OpticalSystem(layers)`. We now have a fully differentiable optical model!
