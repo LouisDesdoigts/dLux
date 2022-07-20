@@ -26,15 +26,15 @@ We are currently building examples and documentation! We currently have two tuto
 
 ∂Lux is a full from-scratch rewrite of the ideas [morphine](https://github.com/benjaminpope/morphine), which is a fork of the popular optical simulation package '[poppy](https://github.com/mperrin/poppy)' using the autodiff library [Google Jax](https://github.com/google/jax) to do _derivatives_. We have built it from the ground up in [equinox](https://github.com/patrick-kidger/equinox), a powerful object-oriented library in Jax, to best take advantage of GPU acceleration and multi-device parallelization, and permit easy development and integration with neural networks.
 
-The goal of $\partial$Lux is to revolutionise the way in which optical modelling is approached. The mathematical equivalence betweeen neural networks and optical systems means that optical systems can be efficiently modelled and optimized with the same automatic differentiation libraries that power deep learning. Using autodiff, we can infer *many* parameters at once - millions in the case of neural networks - whether by gradient descent, or with a Bayesian treatment using Hamiltonian Monte Carlo. Autodiff means that directly optimising physics-based forwards models with millions of parameters is not only possible, but practical without requiring vast computation power. 
+The goal of ∂Lux is to revolutionise the way in which optical modelling is approached. The mathematical equivalence betweeen neural networks and optical systems means that optical systems can be efficiently modelled and optimized with the same automatic differentiation libraries that power deep learning. Using autodiff, we can infer *many* parameters at once - millions in the case of neural networks - whether by gradient descent, or with a Bayesian treatment using Hamiltonian Monte Carlo. Autodiff means that directly optimising physics-based forwards models with millions of parameters is not only possible, but practical without requiring vast computation power. 
 
 ---
 
 ## Package Overview
 
-$\partial$Lux has been built to be as simple and easy as possible for end-users, without abstracting them away from the underlying computations. 
+∂Lux has been built to be as simple and easy as possible for end-users, without abstracting them away from the underlying computations. 
 
-There are two main types of classes that form the foundation of $\partial$Lux, the `OpticalSystem()` and the layers. In order to construct a model of an optical system one simply defines the series of operations/transforms that is performed on the input wavefront in a list, which is passed as an argument to the `OpticalSystem()` class. Each transformation or operation is a single 'layer' in that list. For a very simple optical a typical list of layers would look something like this:
+There are two main types of classes that form the foundation of ∂Lux, the `OpticalSystem()` and the layers. In order to construct a model of an optical system, you define the series of operations/transforms that is performed on the input wavefront in a list, which is passed as an argument to the `OpticalSystem()` class. Each transformation or operation is a single 'layer' in that list. For a very simple optical a typical list of layers would look something like this:
 
 ```
 layers = [
