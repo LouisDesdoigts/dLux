@@ -1,1 +1,1 @@
-:::src.propagators.VariableSamplingPropagator
+::: dLux.propagators.VariableSamplingPropagator
