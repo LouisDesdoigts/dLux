@@ -1,6 +1,6 @@
 # Author : Jordan Dennis
 # Date : 29/06/2022
-# Title : automated_tests.yml
+# Title : tests.yml
 # Description : Automatically runs tests when branches are merged.
 #   The tests that are run can be found in the tests directory.
 
