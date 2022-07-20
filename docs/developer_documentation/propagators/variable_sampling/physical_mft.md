@@ -1,1 +1,1 @@
-:::src.propagators.PhysicalMFT
+::: dLux.propagators.PhysicalMFT

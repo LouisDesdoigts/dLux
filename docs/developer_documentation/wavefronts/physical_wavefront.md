@@ -1,1 +1,1 @@
-:::src.wavefronts.PhysicalWavefront
+::: dLux.wavefronts.PhysicalWavefront
