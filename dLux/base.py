@@ -12,26 +12,62 @@ class OpticalSystem(eqx.Module):
     DOCSTRING NOT COMPLETE
     
     A Class to store and apply properties external to the optical system
-    Ie: stellar positions and specturms
+    Ie: stellar positions and spectra
     
     positions: (Nstars, 2) array
     wavels: (Nwavels) array
     weights: (Nwavel)/(Nwavels, Nstars) array
     
-    
+    dLux currently does not check that inputs are correctly shaped/formatted!
+
     Notes:
      - Take in layers in order to re-intialise the model every call?
     
-    
     General images output shape: (Nimages, Nstars, Nwavels, Npix, Npix)
     
-     - Currently doesnt allow temporal variation in specturm becuase im lazy
-     - Currently doesnt allow temporal variation in flux becuase im lazy
+     - Currently doesnt allow temporal variation in spectrum because I'm lazy
+     - Currently doesnt allow temporal variation in flux because I'm lazy
     
     ToDo: Add getter methods for acessing weights and fluxes attributes that
     use np.squeeze to remove empy axes
+
+    
+    Attributes
+    ----------
+    layers: list, required
+        - A list of layers that defines the tranformaitons and operations of the system (typically optical)
+     
+    wavels: ndarray, optional
+        - An array of wavelengths in meters to simulate
+        - The shape must be 1d - stellar spectrums are controlled through the weights parameter
+        - No default value is set if not provided and this will throw an error if you try to call functions that depend on this parameter
+        - It is left as optional so that functions that allow wavelength input can be called on objects without having to pre-input wavelengths
+    positions: ndarray, optional
+        - An array of (x,y) stellar positions in units of radians, measured as deviation of the optical axis. 
+        - Its input shape should be (Nstars, 2), defining an x, y position for each star. 
+        - If not provided, the value defaults to (0, 0) - on axis
+    fluxes: ndarray, optional
+        - An array of stellar fluxes, its length must match the positions inputs size to work properly
+        - Theoretically this has arbitrary units, but we think of it as photons
+        - Defaults to 1 (ie, returning a unitary flux psf if not specified)
+    weights: ndarray, optional
+        - An array of stellar spectral weights (arb units)
+        - This can take multiple shapes
+        - Default is to weight all wavelengths equally (top-hat)
+        - If a 1d array is provided this is applied to all stars, shape (Nwavels)
+        - if a 2d array is provided each is applied to each individual star, shape (Nstars, Nwavels)
+        - Note the inputs values are always normalised and will not directly change total output flux (inderectly it can change it by weighting more flux to wavelengths with more aperture losses, for example)
+    dithers: ndarray, optional
+        - An arary of (x, y) positional dithers in units of radians
+        - Its input shape should be (Nims, 2), defining the (x,y) dither for each image
+        - if not provided, defualts to no-dither
+    detector_layers: list, optional
+        - A second list of layer objects designed to allow processing of psfs, rather than wavefronts
+        - It is applied to each image after psfs have been approraitely weighted and summed
+    
     
     """
+
     # Helpers, Determined from inputs, not real params
     Nstars:  int
     Nwavels: int
