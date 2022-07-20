@@ -1,1 +1,1 @@
-::: src.layers.ApplyAperture
+::: dLux.layers.ApplyAperture

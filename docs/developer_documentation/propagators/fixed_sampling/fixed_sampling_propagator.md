@@ -1,1 +1,1 @@
-:::src.propagators.FixedSamplingPropagator
+::: dLux.propagators.FixedSamplingPropagator

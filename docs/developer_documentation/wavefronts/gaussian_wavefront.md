@@ -1,1 +1,1 @@
-:::src.wavefronts.GaussianWavefront
+::: dLux.wavefronts.GaussianWavefront
