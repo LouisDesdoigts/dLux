@@ -1,1 +1,1 @@
-:::src.propagators.AngularFFT
+::: dLux.propagators.AngularFFT

@@ -1,1 +1,1 @@
-:::src.propagators.AngularMFT
+::: dLux.propagators.AngularMFT
