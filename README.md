@@ -8,7 +8,8 @@
 
 ## Contributors 
 
-[Louis Desdoigts](https://github.com/LouisDesdoigts), [Benjamin Pope](https://github.com/benjaminpope), [Jordan Dennis](https://github.com/Jordan-Dennis)
+[Louis Desdoigts](https://github.com/LouisDesdoigts), [Benjamin Pope](https://github.com/benjaminpope), [Jordan 
+Dennis](https://github.com/Jordan-Dennis), [Peter Tuthill](https://github.com/petertuthill)
 
 ## Installation
 
