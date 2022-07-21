@@ -69,4 +69,9 @@ nav:
                 - Fixed Sampling Propagator: developer_documentation/propagators/fixed_sampling/fixed_sampling_propagator.md
                 - PhysicalFFT: developer_documentation/propagators/fixed_sampling/physical_fft.md
                 - AngularFFT: developer_documentation/propagators/fixed_sampling/angular_fft.md
-
+    - Examples:
+        - Getting Started: notebooks/basic_usage.ipynb
+        - Phase Retrieval: notebooks/Phase_retrieval.ipynb
+        - Instrumental Calibration: notebooks/Instrumental_calibration.ipynb
+        - Single Parameter: notebooks/single_param_example.ipynb
+        - Multiple Parameters: notebooks/multi_param_example.ipynb
