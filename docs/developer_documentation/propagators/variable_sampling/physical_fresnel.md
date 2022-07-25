@@ -1,1 +1,1 @@
-:::src.propagators.PhysicalFresnel
+::: dLux.propagators.PhysicalFresnel
