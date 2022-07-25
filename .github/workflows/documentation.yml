@@ -1,11 +1,10 @@
 # Author: Jordan Dennis 
 # Date: 07/07/2022
-# Title: automated_documentation.yml
+# Title: documentation.yml
 # Description: Automatically generates the docs on a merge.
 
 name: Documentation
 on: [push] 
-    
 
 jobs:
   documentation:
@@ -26,6 +25,7 @@ jobs:
           pip install mkdocstrings
           pip install mkdocstrings[python]
           pip install mkdocs-material 
+          pip install mkdocs-jupyter
 
       - name: generate documentation
         run: mkdocs gh-deploy -d https://louisdesdoigts.github.io/dLux

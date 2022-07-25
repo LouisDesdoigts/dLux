@@ -1,1 +1,1 @@
-:::src.propagators.Propagator
+::: dLux.propagators.Propagator

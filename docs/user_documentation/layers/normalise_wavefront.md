@@ -1,1 +1,1 @@
-::: src.layers.NormaliseWavefront
+::: dLux.layers.NormaliseWavefront
