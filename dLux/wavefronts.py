@@ -12,7 +12,7 @@ Array = typing.NewType("Array", np.ndarray)
 
 class Wavefront(eqx.Module):
     """
-    An abstract module that should never be directly substantiated.
+    An abstract module that should never be directly instantiated.
     This class represents a general optical wavefront although the 
     exact implementation must go through a subclass. Wavefront
     objects are assumed to be square.
@@ -358,7 +358,7 @@ class Wavefront(eqx.Module):
     def add_opd(self: Wavefront, 
             path_difference : typing.Union[float, Array]) -> Wavefront:
         """
-        Applies the wavelength dependent phase based on the supplied 
+        Applies the wavelength-dependent phase based on the supplied 
         optical path difference.
 
         Throws
