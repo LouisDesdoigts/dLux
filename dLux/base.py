@@ -25,10 +25,10 @@ class OpticalSystem(eqx.Module):
     
     General images output shape: (Nimages, Nstars, Nwavels, Npix, Npix)
     
-     - Currently doesnt allow temporal variation in spectrum because I'm lazy
-     - Currently doesnt allow temporal variation in flux because I'm lazy
+     - Currently doesnt allow temporal variation in spectrum 
+     - Currently doesnt allow temporal variation in flux
     
-    ToDo: Add getter methods for acessing weights and fluxes attributes that
+    ToDo: Add getter methods for accessing weights and fluxes attributes that
     use np.squeeze to remove empy axes
 
     

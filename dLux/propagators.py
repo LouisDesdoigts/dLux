@@ -565,7 +565,7 @@ class FixedSamplingPropagator(Propagator):
     """
     A propagator that samples the electric field in the output plane
     at the rate of one fringe per pixel where a fringe is a wavelength 
-    divided by the apperture diameter. 
+    divided by the aperture diameter. 
 
 
     These propagators are implemented using the numpy.fft sub-sub-package
