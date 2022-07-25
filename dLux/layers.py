@@ -162,7 +162,7 @@ class CircularAperture(eqx.Module):
         Parameters
         ----------
         npix : int
-            The number of pixels along one side of the apperture when 
+            The number of pixels along one side of the aperture when 
             represented as an array.
         rmin : float = 0.
             The inner radius of the Annular aperture. Note that the 
@@ -172,7 +172,7 @@ class CircularAperture(eqx.Module):
             0 <= rmin < rmax
             ```
         rmax : float = 1.
-            The outer radius of the Anular apperture. Note that this 
+            The outer radius of the Anular aperture. Note that this 
             must satisfy the condition.
             ```py
             rmin < rmax <= 1.
@@ -222,8 +222,8 @@ class CircularAperture(eqx.Module):
  
     def __call__(self, params_dict):
         """
-        Apply the apperture to the wavefront. Note that the name 
-        `CircluarApperture` is a misnomer since because this Module
+        Apply the aperture to the wavefront. Note that the name 
+        `CircluarAperture` is a misnomer since because this Module
         can also represent annular openings.
 
         Parameters
@@ -534,7 +534,7 @@ class ApplyAperture(eqx.Module):
             must be satisfied:
             ```py
             params_dict.get("Wavefront") != None
-            params_dict.get("Wavefront").shape == self.apperture.shape
+            params_dict.get("Wavefront").shape == self.aperture.shape
             ```
 
         Returns
