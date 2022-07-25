@@ -4,7 +4,7 @@
 # Description: Automatically generates the docs on a merge.
 
 name: Documentation
-on: [push]
+on: [push] 
 
 jobs:
   documentation:
