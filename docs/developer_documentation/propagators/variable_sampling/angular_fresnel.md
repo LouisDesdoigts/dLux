@@ -1,1 +1,1 @@
-:::src.propagators.AngularFresnel
+::: dLux.propagators.AngularFresnel

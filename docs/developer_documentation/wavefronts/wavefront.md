@@ -1,2 +1,2 @@
-:::src.wavefronts.Wavefront
+::: dLux.wavefronts.Wavefront
     
