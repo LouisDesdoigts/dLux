@@ -14,7 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - name: checkout main
-        uses: actions/checkout@main
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
 
       - name: python install 
         uses: actions/setup-python@v1
