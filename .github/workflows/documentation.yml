@@ -4,16 +4,19 @@
 # Description: Automatically generates the docs on a merge.
 
 name: Documentation
-on: [push] 
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   documentation:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps: 
-      - name: checkout
-        uses: actions/checkout@master
+      - name: checkout main
+        uses: actions/checkout@main
 
-      - name: python
+      - name: python install 
         uses: actions/setup-python@v1
         with:
           python-version: 3.10.5
