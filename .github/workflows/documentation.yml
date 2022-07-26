@@ -13,7 +13,7 @@ jobs:
   documentation:
     runs-on: ubuntu-latest
     steps: 
-      - name: checkout main
+      - name: checkout all
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -33,6 +33,6 @@ jobs:
           pip install mkdocs-material 
           pip install mkdocs-jupyter
 
-      - name: generate documentation
+      - name: generate and deploy documentation
         run: mkdocs gh-deploy -d https://louisdesdoigts.github.io/dLux
 
