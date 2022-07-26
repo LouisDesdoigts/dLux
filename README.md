@@ -13,19 +13,20 @@ Dennis](https://github.com/Jordan-Dennis), [Peter Tuthill](https://github.com/pe
 
 ## Installation
 
-∂Lux is continuously being developed. For that reason we suggest cloning from source:
+∂Lux is continuously being developed. For that reason we suggest cloning the development version from source:
 
 To install from source: clone this git repo, enter the directory, and run
 
->
->`pip install .`
-
-You can also install from PyPI, but this version is updated less often.
+```
+pip install .
+```
+You can also install from PyPI, but this version will be subject to change.
 
 To install from PyPI run
 
->
->`pip install dLux`
+```
+pip install dLux
+```
 
 
 ## Use
