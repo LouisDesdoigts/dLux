@@ -223,7 +223,7 @@ class CircularAperture(eqx.Module):
     def __call__(self, params_dict):
         """
         Apply the aperture to the wavefront. Note that the name 
-        `CircluarAperture` is a misnomer since because this Module
+        `CircularAperture` is a misnomer since because this Module
         can also represent annular openings.
 
         Parameters
