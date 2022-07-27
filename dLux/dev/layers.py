@@ -641,15 +641,15 @@ class PolygonalAperture(Aperture):
             A factor by which to enlarge or shrink the aperture. 
             Should only be very small amounts in typical use cases.
         """
-        vertices = self._load(segment)
         x, y, alpha = self._vertices(vertices)
         x_offset, y_offset = self._offset(vertices)
-        self.segment = str(segment)
         self.x = np.asarray(x).astype(float)
         self.y = np.asarray(y).astype(float)
         self.alpha = np.asarray(alpha).astype(float)
         super().__init__(pixels, x_offset, y_offset, theta, phi,
             magnification, pixel_scale)
+
+
     def _wrap(self : Layer, array : Vector, order : Vector) -> tuple:
         """
         Re-order an array and duplicate the first element as an additional
@@ -891,7 +891,7 @@ class PolygonalAperture(Aperture):
         return segments.sum(axis=0)
 
 
-class JWSTPrimaryApertureSegment(PolygonalAperture):
+class JWSTPrimaryApertureSegment(Aperture):
     """
     A dLux implementation of the JWST primary aperture segment.
     The segments are sketched and drawn below:
