@@ -528,7 +528,7 @@ class HexagonalAperture(Aperture):
     def __init__(self : Layer, npix : int, x_offset : float, 
             y_offset : float, theta : float, phi : float, 
             magnification : float, pixel_scale : float,
-            rmax : float, rmin : float) -> Layer:
+            rmax : float) -> Layer:
         """
         Parameters
         ----------
