@@ -18,7 +18,7 @@ repo_url: https://github.com/LouisDesdoigts/dLux
 theme:
   name: material
   icon:
-    logo: material/telescope 
+    logo: material/telescope
 
 # ===== Plugins =====
 plugins:
@@ -43,6 +43,7 @@ nav:
     - Home: index.md
     - Tutorials:
         - Phase Retrieval: notebooks/phase_retrieval_demo.ipynb
+        - Phase Mask Design: notebooks/designing_a_mask.ipynb
     - User Documentation:
         - Optical System: user_documentation/optical_system.md
         - Layers:
