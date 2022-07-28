@@ -24,7 +24,7 @@ def toliman_layers(extra_layers=[],
         NormaliseWavefront()]
     [layers.append(layer) for layer in extra_layers]
     if in_focus:
-        layers.append(MFT(det_npix, fl, det_pixsize))
+        layers.append(PhysicalMFT(det_npix, fl, det_pixsize))
     else:
         layers.append(FresnelProp(det_npix, fl, fl_shift, det_pixsize))
     
