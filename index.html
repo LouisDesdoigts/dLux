@@ -259,13 +259,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#package-overview" class="md-nav__link">
-    Package Overview
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -952,13 +945,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#package-overview" class="md-nav__link">
-    Package Overview
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -992,21 +978,15 @@
 <p><code>pip install .</code></p>
 <h2 id="what-is-lux">What is ∂Lux?</h2>
 <p>∂Lux is a full from-scratch rewrite of the ideas <a href="https://github.com/benjaminpope/morphine">morphine</a>, which is a fork of the popular optical simulation package '<a href="https://github.com/mperrin/poppy">poppy</a>' using the autodiff library <a href="https://github.com/google/jax">Google Jax</a> to do <em>derivatives</em>. We have built it from the ground up in <a href="https://github.com/patrick-kidger/equinox">equinox</a>, a powerful object-oriented library in Jax, to best take advantage of GPU acceleration and multi-device parallelization, and permit easy development and integration with neural networks.</p>
-<p>The goal of ∂Lux is to revolutionise the way in which optical modelling is approached. The mathematical equivalence betweeen neural networks and optical systems means that optical systems can be efficiently modelled and optimized with the same automatic differentiation libraries that power deep learning. Using autodiff, we can infer <em>many</em> parameters at once - millions in the case of neural networks - whether by gradient descent, or with a Bayesian treatment using Hamiltonian Monte Carlo. Autodiff means that directly optimising physics-based forwards models with millions of parameters is not only possible, but practical without requiring vast computation power.</p>
-<hr />
-<h2 id="package-overview">Package Overview</h2>
+<p>The mathematical equivalence betweeen neural networks and optical systems means that optical systems can be efficiently modelled and optimized with the same automatic differentiation libraries that power deep learning. Using autodiff, we can infer <em>many</em> parameters at once - millions in the case of neural networks - whether by gradient descent, or with a Bayesian treatment using Hamiltonian Monte Carlo. Autodiff means that directly optimising physics-based forwards models with millions of parameters is not only possible, but practical without requiring vast computation power.</p>
 <p>∂Lux has been built to be as simple and easy as possible for end-users, without abstracting them away from the underlying computations.</p>
-<p>We are currently building examples and documentation! We currently have two tutorial notebooks, showing the basics of how to optimise simple and more complex models <a href="https://github.com/LouisDesdoigts/dLux/tree/main/notebooks">here</a>. Please note that this software is still under development and so is subject to change.</p>
-<p>∂Lux is based on two main classes: the <code>OpticalSystem</code> and the layers. A ∂Lux optical model consists of a list of operations/transforms performed on the input wavefront, which is passed as an argument to the <code>OpticalSystem</code> class. Each transformation or operation is a single 'layer' in that list. For a very simple optical a typical list of layers would look something like this:</p>
-<pre><code>layers = [
-  CreateWavefront(wf_npix, wf_size),
-  TiltWavefront(),
-  CircularrAperture(wf_npix),
-  NormaliseWavefront(),
-  MFT(det_npix, fl, det_pixsize)
-]
-</code></pre>
-<p>This list of layers can then be turned into an optical system by calling <code>OpticalSystem(layers)</code>. We now have a fully differentiable optical model!</p>
+<p>We are currently building examples and documentation! We currently have three tutorial notebooks, showing examples of </p>
+<ul>
+<li><a href="notebooks/phase_retrieval_demo/">Phase Retrieval</a>, inferring Zernike coefficients of aberrations in a simple asymmetric pupil</li>
+<li><a href="notebooks/designing_a_mask/">Phase Mask Design</a>, to optimize the gradient energy of a pupil for astrometry</li>
+<li><a href="notebooks/flatfield_calibration/">Pixel Level Calibration</a> of the interpixel sensitivity variations (flat field), simultaneously with phase retrieval and positions of stars</li>
+</ul>
+<p>Please note that this software is still under development and so is subject to change.g</p>
 
               
             </article>
