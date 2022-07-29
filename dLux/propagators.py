@@ -534,8 +534,7 @@ class VariableSamplingPropagator(Propagator):
 
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
-            .set_pixel_scale(self.get_pixel_scale_out())\
-            .set_plane_type("Pupil")
+            .set_pixel_scale(self.get_pixel_scale_out())
 
         parameters["Wavefront"] = new_wavefront
         return parameters           
@@ -672,8 +671,7 @@ class FixedSamplingPropagator(Propagator):
 
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
-            .set_pixel_scale(self.get_pixel_scale_out(wavefront))\
-            .set_plane_type("Pupil")
+            .set_pixel_scale(self.get_pixel_scale_out(wavefront))
 
         parameters["Wavefront"] = new_wavefront
         return parameters
