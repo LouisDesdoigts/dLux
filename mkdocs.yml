@@ -44,6 +44,7 @@ nav:
     - Tutorials:
         - Phase Retrieval: notebooks/phase_retrieval_demo.ipynb
         - Phase Mask Design: notebooks/designing_a_mask.ipynb
+        - Pixel Level Calibration: notebooks/flatfield_calibration.ipynb
     - User Documentation:
         - Optical System: user_documentation/optical_system.md
         - Layers:
