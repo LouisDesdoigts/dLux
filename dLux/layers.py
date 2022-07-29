@@ -154,7 +154,7 @@ class CircularAperture(eqx.Module):
         a known bug.
     """
     npix : int = eqx.static_field()
-    array : np.ndarray
+    array : float
 
     
     def __init__(self, npix, rmin=0., rmax=1., eps=1e-8):
@@ -301,8 +301,8 @@ class ApplyBasisOPD(eqx.Module):
         basis vector.
     """
     npix: int = eqx.static_field()
-    basis: np.ndarray
-    coeffs: np.ndarray
+    basis: float
+    coeffs: float
     
 
     def __init__(self, basis, coeffs=None):
@@ -332,7 +332,7 @@ class ApplyBasisOPD(eqx.Module):
             If `None`, the default value is passed it is interpretted 
             as `np.zeros((n, ))`.           
         """
-        self.basis = np.array(basis)
+        self.basis = np.array(basis).astype(float)
         self.npix = self.basis.shape[-1]
         self.coeffs = np.zeros(len(self.basis)) if coeffs is None \
                  else np.array(coeffs).astype(float)
@@ -509,7 +509,7 @@ class ApplyAperture(eqx.Module):
         An array representing the transmission of the aperture. 
     """
     npix: int = eqx.static_field()
-    aperture: np.ndarray
+    aperture: float
     
 
     def __init__(self, aperture):
@@ -519,7 +519,7 @@ class ApplyAperture(eqx.Module):
         aperture : Array[float]
             The array representing the transmission of the aperture.
         """
-        self.aperture = np.array(aperture)
+        self.aperture = np.array(aperture).astype(float)
         self.npix = aperture.shape[0]
         
 
@@ -569,8 +569,8 @@ class ApplyBasisCLIMB(eqx.Module):
         The wavelength 
     """
     npix: int = eqx.static_field()
-    basis: np.ndarray
-    coeffs: np.ndarray
+    basis: float
+    coeffs: float
     ideal_wavel: float
     
 
