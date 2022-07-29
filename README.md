@@ -4,7 +4,9 @@
 [![integration](https://github.com/LouisDesdoigts/dLux/actions/workflows/tests.yml/badge.svg)](https://github.com/LouisDesdoigts/dLux/actions/workflows/tests.yml)
 [![Documentation](https://github.com/LouisDesdoigts/dLux/actions/workflows/documentation.yml/badge.svg)](https://louisdesdoigts.github.io/dLux/)
 
-∂Lux: Taking derivatives through Light - 'Optical systems as a Neural Network'
+∂Lux: differentiating light 
+
+_Optical systems as a neural networks_
 
 ## Contributors
 
