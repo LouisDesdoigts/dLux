@@ -93,8 +93,6 @@ class GaussianWavefront(dLux.Wavefront):
         """
         Convinience function that simplifies many of the diffraction
         equations. Caclulates a quadratic phase factor associated with 
-        the beam. 
-
         Parameters
         ----------
         distance : float
@@ -112,8 +110,6 @@ class GaussianWavefront(dLux.Wavefront):
             self.wavelength)
 
 
-    # NOTE: This is plane_to_plane transfer function. I should give it
-    # a better name like fraunhofer_phase_after()
     def transfer(self : Wavefront, distance : float) -> Matrix:
         """
         The optical transfer function (OTF) for the gaussian beam.
@@ -158,26 +154,54 @@ class GaussianWavefront(dLux.Wavefront):
     # NOTE: The pixel scale cannot be set when self.angular == True
     # NOTE: This has the correct units always/
     def get_pixel_scale(self : Wavefront):
+        """
+        Returns
+        -------
+        pixel_scale : The width of a single pixel in the array
+            representing the `Wavefront`. Note that this differs
+            from `poppy` because it includes the oversample. 
+        """
         return jax.lax.cond(self.angular,
             lambda : self.pixel_scale / self.focal_length,
             lambda : self.pixel_scale)
 
 
-    # NOTE: Should only be called when self.angular == True
-    def field_of_view(self):
-        return self.number_of_pixels() * self.get_pixel_scale()
-
-
-    # NOTE: naming convention. ..._at indicates absolute position
-    # ..._after indicates a distance from current position. 
-    # either should make all the same or be clear. 
     def curvature_at(self : Wavefront, position : float) -> float:
+        """
+        Calculate the radius of curvature of the `Wavefront` phase
+        at the absolute position: `position`.
+
+        Parameters
+        ----------
+        position : float, meters
+            The absolute position of the wave along the optical axis 
+            from spawn.
+
+        Returns
+        -------
+        radius_of_curvature : float, radians
+            The radius of phase curvature for the wavefront. 
+        """
         relative_position = position - self.waist_position
         return relative_position + \
             self.rayleigh_distance() ** 2 / relative_position
 
 
     def radius_at(self : Wavefront, position : float) -> float:
+        """
+        Calculate the radius of the `Wavefront` at an absolute
+        position.
+
+        Parameters
+        ----------
+        position : float, meters
+            The absolute position of the `Wavefront` since spawn.
+        
+        Returns
+        -------
+        radius : float, meters
+            The radius of the beam. 
+        """
         relative_position = position - self.waist_position
         return self.waist_radius * \
             np.sqrt(1.0 + \
@@ -204,18 +228,50 @@ class GaussianWavefront(dLux.Wavefront):
         return np.abs(self.waist_position - position) \
             < self.rayleigh_distance()
 
+
     # NOTE: Also updates, so I want better names for these rather than 
     # after. 
     # NOTE: This is only for transitions from planar to spherical 
     # or vice versa so it needs a much better name than current. 
     def pixel_scale_after(self : Wavefront, distance : float) -> Wavefront:
+        """
+        Calculate and assign the pixel scale of the `Wavefront` after
+        travelling distance. Note that this transformation is dependent
+        on the mode of propagation and is only correct for
+        `_spherical_to_waist` and `_waist_to_spherical` but not for 
+        `_plane_to_plane`. 
+
+        Parameters
+        ----------
+        distance : float, meters
+            The distance of propagation from the current position.
+        
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront but the pixel_scale has been updated.
+        """
         pixel_scale = self.get_wavelength() * np.abs(distance) /\
             (self.number_of_pixels() * self.get_pixel_scale())
         return eqx.tree_at(lambda wave : wave.pixel_scale,
             self, pixel_scale, is_leaf = lambda leaf : leaf is None)
 
 
-    def position_after(self : Wavefront, distance : float) -> Wavefront:
+    def position_after(self : Wavefront, 
+            distance : float) -> Wavefront:
+        """
+        Move the wavefront forward by `distance`.
+
+        Parameters
+        ----------
+        distance : float, meters
+            The distance of propagation.
+        
+        Returns
+        -------
+        wavefront : Wavefront 
+            The `Wavefront` with the `position` leaf updated.
+        """
         position = self.position + distance
         return eqx.tree_at(lambda wave : wave.position, self, position)
 
@@ -225,32 +281,86 @@ class GaussianWavefront(dLux.Wavefront):
     # NOTE: naming conventself._outside_to_outsideion: position -> absolute place on optical
     # axis and distance -> movement.
     def set_waist_position(self : Wavefront, waist_position : float) -> Wavefront:
+        """
+        Parameters
+        ----------
+        waist_position : float, meters 
+            The absolute position of the waist of the wavefront.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The `Wavefront` with the updated parameters.  
+        """
         return eqx.tree_at(lambda wave : wave.waist_position,
             self, waist_position)    
     
 
     def set_waist_radius(self : Wavefront, waist_radius : float) -> Wavefront:
+        """
+        Parameters
+        ----------
+        beam_radius : float
+            The new beam_radius in meters.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            A modified `Wavefront` with the new `beam_radius`.
+        """
         return eqx.tree_at(lambda wave : wave.waist_radius,
             self, waist_radius)
 
 
     def set_spherical(self : Wavefront, spherical : bool) -> Wavefront:
+        """
+        Parameters
+        ----------
+        spherical : bool
+            Toggle the state of the `Wavefront` to and from `spherical`.
+        
+        Returns
+        -------
+        wavefront : Wavefront 
+            The `Wavefront` with the parameters modified. 
+        """
         return eqx.tree_at(lambda wave : wave.spherical, self, spherical)
-    #def set_angular(self : Wavefront, angular : bool) -> Wavefront:
-    # NOTE: focal_length will probably not stay as an attribute of the 
-    # wavefront but will be upgraded to an optical element attribute.
+    
+
+    # TODO: Do I even want to include this functionality as it is 
+    # only for the translation between the angular and the physical
+    # coordinates. I'm not sure that we need this. 
     def set_focal_length(self : Wavefront, focal_length : float) -> Wavefront:
+        """
+        Parameters
+        ----------
+        focal_length : float, meters
+            The `focal_length` of the `Wavefront`.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The `Wavefront` with the parameters modified. 
+        """
         return eqx.tree_at(lambda wave : wave.focal_length,
             self, focal_length)
 
 
     def get_pixel_positions(self : Wavefront) -> Tensor:
+        """
+        Returns
+        -------
+        positions : Tensor, meters
+            The position of each pixel aligned according to the `fft` 
+            algorithm that is implemented by `numpy`.
+        """
         pixels = self.phase.shape[0]
         positions = np.array(np.indices((pixels, pixels)) - pixels / 2.)
         return self.pixel_scale * positions
 
 
 class GaussianPropagator(eqx.Module):
+
     distance : float
 
     
@@ -259,12 +369,10 @@ class GaussianPropagator(eqx.Module):
 
 
     def _fourier_transform(self : Propagator, field : Matrix) -> Matrix:
-        # return np.fft.ifft2(field)
         return 1 / field.shape[0] * np.fft.fft2(field)
 
 
     def _inverse_fourier_transform(self : Propagator, field : Matrix) -> Matrix:
-        # return np.fft.fft2(field)
         return field.shape[0] * np.fft.ifft2(field)
 
 
@@ -272,10 +380,6 @@ class GaussianPropagator(eqx.Module):
     # as in the propagator. 
     def _propagate(self : Propagator, field : Matrix, 
             distance : float) -> Matrix:
-        # NOTE: is this diagnosable directly from the stored parameter
-        # would be nice if the "transfer" function could be automatically
-        # chosen from the "spherical" and one other thing. 
-        # should probably avoid logic overcrowding
         return jax.lax.cond(distance > 0,
             lambda : self._inverse_fourier_transform(field),
             lambda : self._fourier_transform(field))
