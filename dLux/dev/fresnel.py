@@ -367,8 +367,8 @@ class GaussianPropagator(eqx.Module):
         end = wave.position + self.distance
         wave = self._spherical_to_waist(wave, wave.waist_position - start)
         wave = self._plane_to_plane(wave, end - wave.waist_position)
-        field = np.fft.fftshift(wave.get_complex_form())
-        wave = wave.update_phasor(np.abs(field), np.angle(field))
+#        field = np.fft.fftshift(wave.get_complex_form())
+#        wave = wave.update_phasor(np.abs(field), np.angle(field))
         return wave
 
 
@@ -387,8 +387,8 @@ class GaussianPropagator(eqx.Module):
     # Coordiantes must be in meters for the propagator
     def __call__(self : Propagator, wave : Wavefront) -> Wavefront:
         # NOTE: need to understand this mystery. 
-#        field = np.fft.fftshift(wave.get_complex_form())
-#        wave = wave.update_phasor(np.abs(field), np.angle(field))
+        field = np.fft.fftshift(wave.get_complex_form())
+        wave = wave.update_phasor(np.abs(field), np.angle(field))
         position = wave.position + self.distance
         decision = 2 * wave.spherical + wave.is_planar_at(position)
     
@@ -397,8 +397,8 @@ class GaussianPropagator(eqx.Module):
             [self._inside_to_outside, self._inside_to_inside, 
             self._outside_to_outside, self._outside_to_inside], wave) 
 
-#        field = np.fft.fftshift(wave.get_complex_form())
-#        wave = wave.update_phasor(np.abs(field), np.angle(field))
+        field = np.fft.fftshift(wave.get_complex_form())
+        wave = wave.update_phasor(np.abs(field), np.angle(field))
         return wave
 
 
