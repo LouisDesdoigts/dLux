@@ -89,6 +89,7 @@ class OpticalSystem(eqx.Module):
         # Required Inputs
         self.layers = layers
         self.wavels = np.array(wavels).astype(float)
+        self.Nwavels = len(self.wavels)
         
         # Set to default values
         self.positions = np.zeros([1, 2]) if positions is None else np.array(positions)
