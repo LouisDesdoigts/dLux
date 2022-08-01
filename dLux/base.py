@@ -37,7 +37,7 @@ class OpticalSystem(eqx.Module):
     layers: list, required
         - A list of layers that defines the tranformaitons and operations of the system (typically optical)
      
-    wavels: ndarray, optional
+    wavels: ndarray
         - An array of wavelengths in meters to simulate
         - The shape must be 1d - stellar spectrums are controlled through the weights parameter
         - No default value is set if not provided and this will throw an error if you try to call functions that depend on this parameter
@@ -83,7 +83,7 @@ class OpticalSystem(eqx.Module):
     
     # To Do - add asset conditions to ensure that everything is formatted correctly 
     # To Do - pass in positions for multiple images, ignoring dither (ie multi image)
-    def __init__(self, layers, wavels=None, positions=None, fluxes=None, 
+    def __init__(self, layers, wavels, positions=None, fluxes=None, 
                        weights=None, dithers=None, detector_layers=None):
         
         # Required Inputs
@@ -103,7 +103,6 @@ class OpticalSystem(eqx.Module):
         # Determined from inputs - treated as static
         self.Nstars =  len(self.positions)
         self.Nims =    len(self.dithers)
-        self.Nwavels = 0 if wavels is None else len(self.wavels)
         
         # Check Input shapes
         assert self.positions.shape[-1] == 2, """Input positions must be 
