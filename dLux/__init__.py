@@ -1,5 +1,5 @@
 name = "dLux"
-__version__ = "0.1.2.1"
+__version__ = "0.1.2.2"
 
 from .base import OpticalSystem
 from .detectors import (ApplySaturation, ApplyPixelResponse, 
