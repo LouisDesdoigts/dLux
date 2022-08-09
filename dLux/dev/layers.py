@@ -140,7 +140,7 @@ class Aperture(eqx.Module, ABC):
 
     
     @abstractmethod
-    def _aperture(self : Layer, coordinates : int) -> Array:
+    def _aperture(self : Layer) -> Array:
         """
         Generate the aperture array as an array. 
         
