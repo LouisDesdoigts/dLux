@@ -181,7 +181,7 @@ class OpticalSystem(eqx.Module):
         
         """
         # params_dict = {"Wavefront": Wavefront(wavel, offset)}
-        params_dict = {"Wavefront": dLux.PhysicalWavefront(wavel, offset), 
+        params_dict = {"Wavefront": dLux.CartesianWavefront(wavel, offset), 
                        "Optical System":self}
         
         for i in range(len(self.layers)):

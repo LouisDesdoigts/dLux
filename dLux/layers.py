@@ -14,7 +14,7 @@ Concrete Classes
 - NormaliseWavefront
 - ApplyBasisOPD
 - AddPhase
-- ApplyAperture
+- TransmissiveOptic
 - ApplyBasisCLIMB
 """
 __author__ = "Louis Desdoigts"
@@ -497,31 +497,34 @@ class ApplyOPD(eqx.Module):
         return params_dict
     
 
-#TODO: Change aperture to tranmission?
-class ApplyAperture(eqx.Module):
+class TransmissiveOptic(eqx.Module):
     """ 
-    Represents an arbitrary aperture in the optical path. 
+    Represents an arbitrary transmissive optic in the optical path. 
+    
+    Note this class does not normalise the 'transmission' between 
+    0 and 1, but simply multiplies the wavefront amplitude by the 
+    TransmissiveOptic.transmision array.
 
     Attributes
     ----------
     npix : int, eqx.static_field()
         The number of pixels along the leading edge of the wavefront.
-    aperture : float
+    transmission : float
         An array representing the transmission of the aperture. 
     """
     npix: int = eqx.static_field()
-    aperture: float
+    transmission: float
     
 
-    def __init__(self, aperture):
+    def __init__(self, transmission):
         """
         Parameters
         ----------
-        aperture : Array[float]
+        transmission : Array[float]
             The array representing the transmission of the aperture.
         """
-        self.aperture = np.array(aperture).astype(float)
-        self.npix = aperture.shape[0]
+        self.transmission = np.array(transmission).astype(float)
+        self.npix = transmission.shape[0]
         
 
     def __call__(self, params_dict):
@@ -546,7 +549,7 @@ class ApplyAperture(eqx.Module):
         """
         # Get relevant parameters
         wavefront = params_dict["Wavefront"]
-        wavefront = wavefront.multiply_amplitude(self.aperture)
+        wavefront = wavefront.multiply_amplitude(self.transmission)
         params_dict["Wavefront"] = wavefront
         return params_dict
 
