@@ -242,7 +242,27 @@ class Wavefront(eqx.Module):
             The number of pixels that represent the `Wavefront` along 
             one side.
         """
-        return self.get_amplitude().shape[0]        
+        return self.get_amplitude().shape[0]
+    
+    
+    def get_diameter(self : Wavefront) -> float:
+        """
+        Returns the current Wavefront diameter
+        
+        TODO: Add tests for this function
+        
+        Throws
+        ------
+        : TypeError
+            If self.amplitude or self.phase have not been initialised
+            externally. 
+
+        Returns
+        -------
+        diameter : float
+           The current diameter of the wavefront
+        """
+        return self.number_of_pixels() * self.get_pixel_scale()
 
 
     def multiply_amplitude(self : Wavefront, 
