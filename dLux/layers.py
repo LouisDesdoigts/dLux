@@ -85,6 +85,7 @@ class CreateWavefront(eqx.Module):
         wavefront = params_dict["Wavefront"]
         phase = np.zeros([self.npix, self.npix])
         amplitude = np.ones([self.npix, self.npix])
+        amplitude /= np.linalg.norm(amplitude)
         params_dict["Wavefront"] = wavefront\
             .set_phase(phase)\
             .set_amplitude(amplitude)\
