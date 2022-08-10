@@ -22,5 +22,6 @@ def calc_cov(loglike_fn, *args):
 def calc_ent(loglike_fn, *args):
     """Calcautes the entropy of the covariance matrix"""
     cov = calc_cov(loglike_fn, *args)
-    ent = 0.5 * np.log(2 * np.pi * np.e * np.linalg.det(cov))
+    sign, logdet = np.linalg.slogdet(cov)
+    ent = 0.5 * (np.log(2 * np.pi * np.e) + (sign * logdet))
     return ent
