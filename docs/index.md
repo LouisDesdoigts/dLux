@@ -35,5 +35,6 @@ We are currently building examples and documentation! We currently have three tu
 - [Phase Retrieval](notebooks/phase_retrieval_demo.ipynb), inferring Zernike coefficients of aberrations in a simple asymmetric pupil
 - [Phase Mask Design](notebooks/designing_a_mask.ipynb), to optimize the gradient energy of a pupil for astrometry
 - [Pixel Level Calibration](notebooks/flatfield_calibration.ipynb) of the interpixel sensitivity variations (flat field), simultaneously with phase retrieval and positions of stars
+- [Fisher Information](notebooks/fisher_information.ipynb) matrix entropy optimisation of a pupil
 
 Please note that this software is still under development and so is subject to change.
