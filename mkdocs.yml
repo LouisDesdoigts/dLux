@@ -56,11 +56,11 @@ nav:
             - Apply Basis OPD: user_documentation/layers/apply_basis_opd.md
             - Add Phase: user_documentation/layers/add_phase.md
             - Apply OPD: user_documentation/layers/apply_opd.md
-            - Apply Aperture: user_documentation/layers/apply_aperture.md
+            - Transmissive Optic: user_documentation/layers/transmissive_optic.md
     - Developer Documentation:
         - Wavefronts:
             - Wavefront: developer_documentation/wavefronts/wavefront.md
-            - Physical Wavefront: developer_documentation/wavefronts/physical_wavefront.md
+            - Cartesian Wavefront: developer_documentation/wavefronts/cartesian_wavefront.md
             - Angular Wavefront: developer_documentation/wavefronts/angular_wavefront.md
             - Gaussian Wavefront: developer_documentation/wavefronts/gaussian_wavefront.md
         - Propagators:
