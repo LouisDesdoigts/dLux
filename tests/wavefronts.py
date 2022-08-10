@@ -4,12 +4,12 @@ import jax.random as random
 import typing
 
 from dLux import Wavefront
-from dLux import PhysicalWavefront
+from dLux import CartesianWavefront
 from dLux import AngularWavefront
 from dLux import GaussianWavefront
 
 from utilities import WavefrontUtility
-from utilities import PhysicalWavefrontUtility
+from utilities import CartesianWavefrontUtility
 from utilities import GaussianWavefrontUtility
 from utilities import AngularWavefrontUtility
 from utilities import UtilityUser
@@ -18,7 +18,7 @@ from utilities import UtilityUser
 Array = typing.NewType("Array", numpy.ndarray)
 
 TestWavefront = typing.NewType("TestWavefront", UtilityUser)
-TestPhysicalWavefront = typing.NewType("TestPhysicalWavefront", UtilityUser)
+TestCartesianWavefront = typing.NewType("TestCartesianWavefront", UtilityUser)
 TestAngularWavefront = typing.NewType("TestAngularWavefront", UtilityUser)
 TestGaussianWavefront = typing.NewType("TestGaussianWavefront", UtilityUser)
 
@@ -417,26 +417,26 @@ class TestWavefront(UtilityUser):
         assert (wavefront.get_amplitude() == amplitude).all() 
 
 
-class TestPhysicalWavefront(UtilityUser):
+class TestCartesianWavefront(UtilityUser):
     """
-    Tests the dLux.PhysicalWavefront class. 
+    Tests the dLux.CartesianWavefront class. 
 
     Attributes
     ----------
-    utility : PhysicalWavefrontUtility
+    utility : CartesianWavefrontUtility
         A helper object for generating safe test cases.
     """
-    utility : PhysicalWavefrontUtility = PhysicalWavefrontUtility()
+    utility : CartesianWavefrontUtility = CartesianWavefrontUtility()
 
 
-    def test_constructor(self : TestPhysicalWavefront) -> None:
+    def test_constructor(self : TestCartesianWavefront) -> None:
         """
-        Tests the `PhysicaleWavefront` constructor.
+        Tests the `CartesianeWavefront` constructor.
         """
         WAVELENGTH = self.get_utility().get_wavelength()
         OFFSET = self.get_utility().get_offset()
 
-        wavefront = PhysicalWavefront(WAVELENGTH, OFFSET)
+        wavefront = CartesianWavefront(WAVELENGTH, OFFSET)
         
         assert wavefront.get_wavelength() == WAVELENGTH
         assert (wavefront.get_offset() == OFFSET).all()
@@ -447,7 +447,7 @@ class TestPhysicalWavefront(UtilityUser):
 
 class TestAngularWavefront(UtilityUser):
     """
-    Tests the `AngularWavefront` class. As `PhysicalWavefront` is 
+    Tests the `AngularWavefront` class. As `CartesianWavefront` is 
     just a type ecosystem extension this only tests the constructor. 
 
     Attributes 
