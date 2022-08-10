@@ -4,7 +4,7 @@ import typing
 
 
 Wavefront = typing.NewType("Wavefront", object)
-PhysicalWavefront = typing.NewType("PhysicalWavefront", Wavefront)
+CartesianWavefront = typing.NewType("CartesianWavefront", Wavefront)
 AngularWavefront = typing.NewType("AngularWavefront", Wavefront)
 GaussianWavefront = typing.NewType("FresnelWavefront", Wavefront)
 Array = typing.NewType("Array", np.ndarray)
@@ -636,7 +636,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        wavefront : PhysicalWavefront
+        wavefront : Wavefront
             The new wavefront with the updated optical disturbance. 
         """
         # Get coords arrays
@@ -701,7 +701,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        wavefront : PhysicalWavefront
+        wavefront : Wavefront
             The new `Wavefront` with the optical disturbance zero 
             padded to the new dimensions.
         """
@@ -751,7 +751,7 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        wavefront : PhysicalWavefront
+        wavefront : Wavefront
             The new `Wavefront` with the optical disturbance zero 
             cropped to the new dimensions.
         """
@@ -773,7 +773,7 @@ class Wavefront(eqx.Module):
         return self.update_phasor(new_amplitude, new_phase)
 
 
-class PhysicalWavefront(Wavefront):
+class CartesianWavefront(Wavefront):
     """
     A plane wave extending the abstract `Wavefront` class. 
     Stores phase and amplitude arrays. pixel_scale has units of 
@@ -788,10 +788,10 @@ class PhysicalWavefront(Wavefront):
     plane_type : str
 
     
-    def __init__(self : PhysicalWavefront, wavelength : float, 
-            offset : Array) -> PhysicalWavefront:
+    def __init__(self : CartesianWavefront, wavelength : float, 
+            offset : Array) -> CartesianWavefront:
         """
-        Constructor for a `PhysicalWavefront`.
+        Constructor for a `CartesianWavefront`.
 
         Parameters
         ----------
@@ -803,7 +803,7 @@ class PhysicalWavefront(Wavefront):
             
         Returns
         -------
-        wavefront : PhysicalWavefront
+        wavefront : CartesianWavefront
             The new wavefront with `None` at the extra leaves. 
         """
         super().__init__(wavelength, offset)
@@ -839,7 +839,7 @@ class PhysicalWavefront(Wavefront):
             is_leaf = lambda leaf : leaf is None)
 
 
-    def transfer_function(self : PhysicalWavefront, 
+    def transfer_function(self : CartesianWavefront, 
             distance : float) -> float:
         """
         The Optical Transfer Function corresponding to the 
