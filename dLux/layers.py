@@ -21,6 +21,7 @@ __author__ = "Louis Desdoigts"
 __date__ = "05/07/2022"
 
 
+import dLux
 import jax
 import jax.numpy as np
 import equinox as eqx
@@ -40,13 +41,17 @@ class CreateWavefront(eqx.Module):
         Its value is automatically calculated from the input values 
     wavefront_size: float, meters
         Width of the array representing the wavefront in physical units
+    wavefront_type: string
+        Determines the type of wavefront class to create. Currently
+        supports 'Cartesian' and 'Angular'
     """
     npix : int = eqx.static_field()
     wavefront_size : float
     pixel_scale : float
+    wavefront_type : str = eqx.static_field()
 
 
-    def __init__(self, npix, wavefront_size):
+    def __init__(self, npix, wavefront_size, wavefront_type='Cartesian'):
         """
         Parameters
         ----------
@@ -60,6 +65,9 @@ class CreateWavefront(eqx.Module):
         self.wavefront_size = np.array(wavefront_size).astype(float)
         self.pixel_scale = np.array(wavefront_size / npix)\
             .astype(float)
+        assert wavefront_type in ['Cartesian', 'Angular'], "wavefront_type \
+        must be either 'Cartesian' or 'Angular'"
+        self.wavefront_type = str(wavefront_type)
 
 
     def __call__(self, params_dict):
@@ -82,10 +90,21 @@ class CreateWavefront(eqx.Module):
             The `params_dict` parameter with the `Wavefront` entry 
             updated. 
         """
-        wavefront = params_dict["Wavefront"]
+        # wavefront = params_dict["Wavefront"]
+        
+        wavel = params_dict["wavelength"]
+        offset = params_dict["offset"]
+        
         phase = np.zeros([self.npix, self.npix])
         amplitude = np.ones([self.npix, self.npix])
         amplitude /= np.linalg.norm(amplitude)
+        
+        # TODO: Make jax safe
+        if self.wavefront_type is 'Cartesian':
+            wavefront = dLux.CartesianWavefront(wavel, offset)
+        elif self.wavefront_type is 'Angular':
+            wavefront = dLux.AngularWavefront(wavel, offset)
+
         params_dict["Wavefront"] = wavefront\
             .set_phase(phase)\
             .set_amplitude(amplitude)\
