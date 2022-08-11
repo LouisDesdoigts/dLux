@@ -259,6 +259,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#windowsgoogle-colab-quickstart" class="md-nav__link">
+    Windows/Google Colab Quickstart
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -945,6 +952,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#windowsgoogle-colab-quickstart" class="md-nav__link">
+    Windows/Google Colab Quickstart
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -988,6 +1002,22 @@
 <li><a href="notebooks/fisher_information/">Fisher Information</a> matrix entropy optimisation of a pupil</li>
 </ul>
 <p>Please note that this software is still under development and so is subject to change.</p>
+<h2 id="windowsgoogle-colab-quickstart">Windows/Google Colab Quickstart</h2>
+<p><code>jaxlib</code> can be problematic on windows so we suggest users run our software on <a href="https://research.google.com/colaboratory/">Google Colab</a>.
+There are a few extra steps to get setup
+1. At the top of each colab file you will need </p>
+<pre><code>!git clone https://github.com/LouisDesdoigts/dLux.git # Download latest version
+!cd dLux; pip install . -q # Navigate to ∂Lux and install from source
+</code></pre>
+<p><strong>Tips and Tricks</strong>
+- You can read/write data from your own drive using</p>
+<pre><code>from google.colab import drive
+drive.mount('/content/drive')
+</code></pre>
+<ul>
+<li>View the files using the left sidebar to navigate</li>
+<li>Colab GPU works with the notebooks as is, you just have to change the Runtime mode</li>
+</ul>
 
               
             </article>
