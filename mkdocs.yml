@@ -51,7 +51,7 @@ nav:
         - Layers:
             - Create Wavefront: user_documentation/layers/create_wavefront.md
             - Tilt Wavefront: user_documentation/layers/tilt_wavefront.md
-            - Circular Wavefront: user_documentation/layers/circular_wavefront.md
+            - Circular Aperture: user_documentation/layers/circular_aperture.md
             - Normalise Wavefront: user_documentation/layers/normalise_wavefront.md
             - Apply Basis OPD: user_documentation/layers/apply_basis_opd.md
             - Add Phase: user_documentation/layers/add_phase.md
@@ -65,7 +65,7 @@ nav:
             - Gaussian Wavefront: developer_documentation/wavefronts/gaussian_wavefront.md
         - Propagators:
             - Propagator: developer_documentation/propagators/propagator.md
-            - Gaussian Propagator: developer_documentation/propagators/gaussian_propagator.md
+            # - Gaussian Propagator: developer_documentation/propagators/gaussian_propagator.md
             - Variable Sampling:
                 - Variable Sampling Propagator: developer_documentation/propagators/variable_sampling/variable_sampling_propagator.md
                 - PhysicalMFT: developer_documentation/propagators/variable_sampling/physical_mft.md
