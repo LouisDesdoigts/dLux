@@ -89,14 +89,12 @@ class CreateWavefront(eqx.Module):
         params_dict : dict
             The `params_dict` parameter with the `Wavefront` entry 
             updated. 
-        """
-        # wavefront = params_dict["Wavefront"]
-        
+        """        
         wavel = params_dict["wavelength"]
         offset = params_dict["offset"]
         
-        phase = np.zeros([self.npix, self.npix])
-        amplitude = np.ones([self.npix, self.npix])
+        phase = np.zeros([1, self.npix, self.npix])
+        amplitude = np.ones([1, self.npix, self.npix])
         amplitude /= np.linalg.norm(amplitude)
         
         # TODO: Make jax safe
@@ -622,7 +620,7 @@ class ApplyBasisCLIMB(eqx.Module):
         ideal_wavel : float
             The wavelength that perfectly CLIMBs.
         """
-        # TODO: I have no idea what idal_wavel is 
+        # TODO: I have no idea what ideal_wavel is 
         self.npix = int(basis.shape[-1])
         self.basis = np.array(basis).astype(float)
         self.coeffs = np.array(coeffs).astype(float)
