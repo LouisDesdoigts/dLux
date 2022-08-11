@@ -33,6 +33,16 @@ pip install dLux
 ```
 
 
+## Windows/Google Colab Quickstart
+`jaxlib` can be problematic on windows so we suggest users run our software on [Google Colab](https://research.google.com/colaboratory/).
+There are a few extra steps to get setup
+1. At the top of each colab file you will need 
+``` 
+!git clone https://github.com/LouisDesdoigts/dLux.git # Download latest version
+!cd dLux; pip install . -q # Navigate to ∂Lux and install from source
+``` 
+
+
 ## Use
 
 Documentation can be found at [louisdesdoigts.github.io/dLux](https://louisdesdoigts.github.io/dLux/), and is under continuous development.
