@@ -1,13 +1,24 @@
 import equinox as eqx 
 import jax.numpy as np
 import typing
+import enum
 
 
 Wavefront = typing.NewType("Wavefront", object)
 CartesianWavefront = typing.NewType("CartesianWavefront", Wavefront)
 AngularWavefront = typing.NewType("AngularWavefront", Wavefront)
 GaussianWavefront = typing.NewType("FresnelWavefront", Wavefront)
+PlaneType = typing.NewType("PlaneType", object)
 Array = typing.NewType("Array", np.ndarray)
+
+class PlaneType(enum.Enum):
+    """
+    Enumeration object to keep track of plane types, and have 
+    jax-safe logic based of wavefront location
+    """
+    Pupil = 0
+    Focal = 1
+    Intermediate = 2
 
 
 class Wavefront(eqx.Module):
@@ -39,12 +50,16 @@ class Wavefront(eqx.Module):
         The electric field phase of the `Wavefront`.
     pixel_scale : float, meters/pixel
         The physical dimensions of each square pixel.
+    plane_type : enum
+        The current plane of wavefront, can be Pupil, Focal
+        or Intermediate
     """
     wavelength : float
     offset : Array
     amplitude : Array
     phase : Array
     pixel_scale : float
+    plane_type : PlaneType
 
 
     def __init__(self : Wavefront, wavelength : float, 
@@ -66,6 +81,7 @@ class Wavefront(eqx.Module):
         self.amplitude = None   # To be instantiated by CreateWavefront
         self.phase = None       # To be instantiated by CreateWavefront
         self.pixel_scale = None # To be instantiated by CreateWavefront
+        self.plane_type = None   # To be instantiated by CreateWavefront
 
 
     def get_pixel_scale(self : GaussianWavefront) -> float:
@@ -506,6 +522,37 @@ class Wavefront(eqx.Module):
             self.amplitude.shape`.
         """
         return self.get_pixel_scale() * self.get_pixel_grid()
+    
+
+    def get_plane_type(self : Wavefront) -> str:
+        """
+        Returns
+        -------
+        plane : str
+            The plane that the `Wavefront` is currently in. The 
+            options are currently "Pupil", "Focal" and "None".
+        """
+        return self.plane_type
+
+
+    def set_plane_type(self : Wavefront, plane : int) -> Wavefront:
+        """
+        Parameters
+        ----------
+        plane : str
+            A string describing the plane that the `Wavefront` is 
+            currently in.
+
+        Returns 
+        -------
+        wavefront : Wavefront 
+            The new `Wavefront` with the update plane information.
+        """
+        return eqx.tree_at(
+            # lambda wavefront : wavefront.plane_type, self, plane,
+            # is_leaf = lambda leaf : leaf is None)
+            lambda wavefront : wavefront.plane_type, self, PlaneType(plane),
+            is_leaf = lambda leaf : leaf is None)
 
 
     def invert_x_and_y(self : Wavefront) -> Wavefront:
@@ -777,16 +824,9 @@ class CartesianWavefront(Wavefront):
     """
     A plane wave extending the abstract `Wavefront` class. 
     Stores phase and amplitude arrays. pixel_scale has units of 
-    meters/pixel. Assumes the wavefront is square. This is Physical 
+    meters/pixel. Assumes the wavefront is square. This is Cartesian 
     as opposed to Angular, because there are no infinite distances.  
-
-    Attributes
-    ----------
-    plane_type : str
-        The type of plane occupied by the wavefront. 
     """
-    plane_type : str
-
     
     def __init__(self : CartesianWavefront, wavelength : float, 
             offset : Array) -> CartesianWavefront:
@@ -809,36 +849,8 @@ class CartesianWavefront(Wavefront):
         super().__init__(wavelength, offset)
         self.plane_type = None
 
-
-    def get_plane_type(self : Wavefront) -> str:
-        """
-        Returns
-        -------
-        plane : str
-            The plane that the `Wavefront` is currently in. The 
-            options are currently "Pupil", "Focal" and "None".
-        """
-        return self.plane_type
-
-
-    def set_plane_type(self : Wavefront, plane : str) -> Wavefront:
-        """
-        Parameters
-        ----------
-        plane : str
-            A string describing the plane that the `Wavefront` is 
-            currently in.
-
-        Returns 
-        -------
-        wavefront : Wavefront 
-            The new `Wavefront` with the update plane information.
-        """
-        return eqx.tree_at(
-            lambda wavefront : wavefront.plane_type, self, plane,
-            is_leaf = lambda leaf : leaf is None)
-
-
+    
+    # TODO: Ask Jordan what this is used for
     def transfer_function(self : CartesianWavefront, 
             distance : float) -> float:
         """
@@ -866,16 +878,7 @@ class AngularWavefront(Wavefront):
     Stores phase and amplitude arrays. pixel_scale has units of 
     meters per pixel in pupil planes and radians per pixel in 
     focal planes. Assumes the wavefront is square.
-    
-    Attributes
-    ----------
-    plane_type : str
-        The type of plane occupied by the wavefront. 
     """ 
-    # TODO: Convince @LouisDesdoigts that this should be in a 
-    # separate debugging class.
-    plane_type : str
-
 
     def __init__(self : AngularWavefront, wavelength : float, 
             offset : Array) -> AngularWavefront:
@@ -896,36 +899,6 @@ class AngularWavefront(Wavefront):
             The new wavefront with `None` at the extra leaves. 
         """
         super().__init__(wavelength, offset)
-        self.plane_type = None        
-
-
-    def get_plane_type(self : Wavefront) -> str:
-        """
-        Returns
-        -------
-        plane : str
-            The plane that the `Wavefront` is currently in. The 
-            options are currently "Pupil", "Focal" and "None".
-        """
-        return self.plane_type
-
-
-    def set_plane_type(self : Wavefront, plane : str) -> Wavefront:
-        """
-        Parameters
-        ----------
-        plane : str
-            A string describing the plane that the `Wavefront` is 
-            currently in.
-
-        Returns 
-        -------
-        wavefront : Wavefront 
-            The new `Wavefront` with the update plane information.
-        """
-        return eqx.tree_at(
-            lambda wavefront : wavefront.plane_type, self, plane,
-            is_leaf = lambda leaf : leaf is None)
 
 
 class GaussianWavefront(Wavefront):
