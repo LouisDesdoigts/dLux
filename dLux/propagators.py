@@ -78,6 +78,7 @@ import jax.numpy as np
 import jax
 import equinox as eqx
 import typing
+from dLux.wavefronts import PlaneType
 
 Array = typing.NewType("Array", object)
 Wavefront = typing.NewType("Wavefront", object)
@@ -532,9 +533,13 @@ class VariableSamplingPropagator(Propagator):
 
         new_amplitude = np.abs(new_wavefront)
         new_phase = np.angle(new_wavefront)
+        new_plane_type = jax.lax.cond(self.is_inverse(),
+                                     lambda : 0,
+                                     lambda : 1)
 
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
+            .set_plane_type(new_plane_type)\
             .set_pixel_scale(self.get_pixel_scale_out())
 
         parameters["Wavefront"] = new_wavefront
@@ -669,10 +674,14 @@ class FixedSamplingPropagator(Propagator):
 
         new_amplitude = np.abs(new_wavefront)
         new_phase = np.angle(new_wavefront)
+        new_plane_type = jax.lax.cond(self.is_inverse(),
+                                     lambda : 0,
+                                     lambda : 1)
 
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
-            .set_pixel_scale(self.get_pixel_scale_out(wavefront))
+            .set_plane_type(new_plane_type)\
+            .set_pixel_scale(self.get_pixel_scale_out())
 
         parameters["Wavefront"] = new_wavefront
         return parameters
