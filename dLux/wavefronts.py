@@ -242,7 +242,7 @@ class Wavefront(eqx.Module):
             The number of pixels that represent the `Wavefront` along 
             one side.
         """
-        return self.get_amplitude().shape[0]
+        return self.get_amplitude().shape[-1]
     
     
     def get_diameter(self : Wavefront) -> float:
@@ -372,7 +372,7 @@ class Wavefront(eqx.Module):
         psf : Array
             The PSF of the wavefront.
         """
-        return self.get_amplitude() ** 2
+        return np.sum(self.get_amplitude() ** 2, axis=0)
 
 
     def add_opd(self: Wavefront, 
@@ -481,7 +481,7 @@ class Wavefront(eqx.Module):
             Guarantees `self.get_pixel_grid().shape == 
             self.amplitude.shape`
         """
-        pixel_positions = self.get_pixel_coordinates(self.amplitude.shape[0])
+        pixel_positions = self.get_pixel_coordinates(self.number_of_pixels())
         x_positions, y_positions = \
             np.meshgrid(pixel_positions, pixel_positions)
         return np.array([x_positions, y_positions])
@@ -640,7 +640,7 @@ class Wavefront(eqx.Module):
             The new wavefront with the updated optical disturbance. 
         """
         # Get coords arrays
-        number_of_pixels_in = self.amplitude.shape[0]
+        number_of_pixels_in = self.number_of_pixels()
         ratio = pixel_scale_out / self.pixel_scale
         
         centre = (number_of_pixels_in - 1) / 2
@@ -682,7 +682,7 @@ class Wavefront(eqx.Module):
     def pad_to(self : Wavefront, number_of_pixels_out : int) -> Wavefront:
         """
         Pads the `Wavefront` with zeros. Assumes that 
-        `number_of_pixels_out > self.amplitude.shape[0]`. 
+        `number_of_pixels_out > self.amplitude.shape[-1]`. 
         Note that `Wavefronts` with even pixel dimensions can 
         only be padded (without interpolation) to even pixel 
         dimensions and vice-versa. 
@@ -690,7 +690,7 @@ class Wavefront(eqx.Module):
         Throws
         ------
         error : ValueError
-            If `number_of_pixels_out%2 != self.amplitude.shape[0]%2`
+            If `number_of_pixels_out%2 != self.amplitude.shape[-1]%2`
             i.e. padding an even (odd) `Wavefront` to odd (even).
 
         Parameters
@@ -705,7 +705,7 @@ class Wavefront(eqx.Module):
             The new `Wavefront` with the optical disturbance zero 
             padded to the new dimensions.
         """
-        number_of_pixels_in = self.amplitude.shape[0]
+        number_of_pixels_in = self.number_of_pixels()
 
         if number_of_pixels_in % 2 != number_of_pixels_out % 2:
             raise ValueError("Only supports even -> even or odd -> odd padding")
@@ -731,7 +731,7 @@ class Wavefront(eqx.Module):
     def crop_to(self : Wavefront, number_of_pixels_out : int) -> Wavefront:
         """
         Crops the `Wavefront`. Assumes that 
-        `number_of_pixels_out < self.amplitude.shape[0]`. 
+        `number_of_pixels_out < self.amplitude.shape[-1]`. 
         `Wavefront`s with an even number of pixels can only 
         be cropped to an even number of pixels without interpolation
         and vice-versa.    
@@ -739,7 +739,7 @@ class Wavefront(eqx.Module):
         Throws
         ------
         error : ValueError
-            If `number_of_pixels_out%2 != self.amplitude.shape[0]%2`
+            If `number_of_pixels_out%2 != self.amplitude.shape[-1]%2`
             i.e. padding an even (odd) `Wavefront` to odd (even).
 
         Parameters
@@ -755,7 +755,7 @@ class Wavefront(eqx.Module):
             The new `Wavefront` with the optical disturbance zero 
             cropped to the new dimensions.
         """
-        number_of_pixels_in = self.amplitude.shape[0]
+        number_of_pixels_in = self.number_of_pixels()
         
         if number_of_pixels_in%2 != number_of_pixels_out%2:
             raise ValueError("Only supports even -> even or 0dd -> odd cropping")
@@ -1159,7 +1159,7 @@ class GaussianWavefront(Wavefront):
             in metres.
         """
         # TODO: get_number_of_pixels() Used frequenctly not a function
-        number_of_pixels = self.amplitude.shape[0]
+        number_of_pixels = self.number_of_pixels()
         new_pixel_scale = self.get_wavelength() * np.abs(position) / \
             number_of_pixels / self.get_pixel_scale()  
         return new_pixel_scale 
