@@ -2347,13 +2347,13 @@ wavefront.</p></td>
   <div class="doc doc-contents ">
   
       <p>Crops the <code>Wavefront</code>. Assumes that 
-<code>number_of_pixels_out &lt; self.amplitude.shape[0]</code>. 
+<code>number_of_pixels_out &lt; self.amplitude.shape[-1]</code>. 
 <code>Wavefront</code>s with an even number of pixels can only 
 be cropped to an even number of pixels without interpolation
 and vice-versa.    </p>
 <h4 id="dLux.wavefronts.Wavefront.crop_to--throws">Throws</h4>
 <p>error : ValueError
-    If <code>number_of_pixels_out%2 != self.amplitude.shape[0]%2</code>
+    If <code>number_of_pixels_out%2 != self.amplitude.shape[-1]%2</code>
     i.e. padding an even (odd) <code>Wavefront</code> to odd (even).</p>
 
   <p><strong>Parameters:</strong></p>
@@ -3216,13 +3216,13 @@ value from the shape of the amplitude array.</p>
   <div class="doc doc-contents ">
   
       <p>Pads the <code>Wavefront</code> with zeros. Assumes that 
-<code>number_of_pixels_out &gt; self.amplitude.shape[0]</code>. 
+<code>number_of_pixels_out &gt; self.amplitude.shape[-1]</code>. 
 Note that <code>Wavefronts</code> with even pixel dimensions can 
 only be padded (without interpolation) to even pixel 
 dimensions and vice-versa. </p>
 <h4 id="dLux.wavefronts.Wavefront.pad_to--throws">Throws</h4>
 <p>error : ValueError
-    If <code>number_of_pixels_out%2 != self.amplitude.shape[0]%2</code>
+    If <code>number_of_pixels_out%2 != self.amplitude.shape[-1]%2</code>
     i.e. padding an even (odd) <code>Wavefront</code> to odd (even).</p>
 
   <p><strong>Parameters:</strong></p>
