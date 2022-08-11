@@ -173,16 +173,16 @@ class WavefrontUtility(Utility):
         self.offset = numpy.array([0., 0.]).astype(float) if not \
             offset else numpy.array(offset).astype(float)           
         self.size = 128 if not size else size
-        self.amplitude = numpy.ones((self.size, self.size)) if not \
+        self.amplitude = numpy.ones((1, self.size, self.size)) if not \
             amplitude else amplitude
-        self.phase = numpy.zeros((self.size, self.size)) if not \
+        self.phase = numpy.zeros((1, self.size, self.size)) if not \
             phase else phase
         self.pixel_scale = 1. if not pixel_scale else pixel_scale
 
-        assert self.size == self.amplitude.shape[0]
-        assert self.size == self.amplitude.shape[1]
-        assert self.size == self.phase.shape[0]
-        assert self.size == self.phase.shape[1]          
+        assert self.size == self.amplitude.shape[-1]
+        assert self.size == self.amplitude.shape[-2]
+        assert self.size == self.phase.shape[-1]
+        assert self.size == self.phase.shape[-2]          
  
 
     def construct(self : Utility) -> Wavefront:
