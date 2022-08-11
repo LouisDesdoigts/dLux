@@ -25,6 +25,7 @@ import dLux
 import jax
 import jax.numpy as np
 import equinox as eqx
+from dLux.wavefronts import PlaneType
 
 
 class CreateWavefront(eqx.Module):
@@ -106,6 +107,7 @@ class CreateWavefront(eqx.Module):
         params_dict["Wavefront"] = wavefront\
             .set_phase(phase)\
             .set_amplitude(amplitude)\
+            .set_plane_type(0)\
             .set_pixel_scale(self.pixel_scale)
         return params_dict
 
