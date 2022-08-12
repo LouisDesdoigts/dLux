@@ -8,7 +8,7 @@ from .layers import (AddPhase, TransmissiveOptic, ApplyBasisCLIMB,
     ApplyBasisOPD, ApplyOPD, CircularAperture, CreateWavefront,
     NormaliseWavefront, TiltWavefront)
 from .wavefronts import (Wavefront, GaussianWavefront, 
-    CartesianWavefront, AngularWavefront)
+    CartesianWavefront, AngularWavefront, PlaneType)
 from .propagators import (PhysicalMFT, PhysicalFFT, AngularMFT, 
     AngularFFT, PhysicalFresnel, GaussianPropagator,
     VariableSamplingPropagator, FixedSamplingPropagator,
