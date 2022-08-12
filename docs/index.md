@@ -1,3 +1,5 @@
+![alt text](assets/logo.jpg?raw=true)
+
 # ∂Lux Docs
 [![PyPI version](https://badge.fury.io/py/dLux.svg)](https://badge.fury.io/py/dLux)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
