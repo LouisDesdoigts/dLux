@@ -692,7 +692,7 @@ class PhysicalMFT(VariableSamplingPropagator):
 
 
     def __init__(self : Propagator, pixels_out : float, 
-            focal_length : int, pixel_scale_out : float, 
+            focal_length : float, pixel_scale_out : float, 
             inverse : bool = False, tilt : bool = False) -> Propagator:
         """
         Parameters
