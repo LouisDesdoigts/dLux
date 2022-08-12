@@ -537,6 +537,11 @@ class VariableSamplingPropagator(Propagator):
                                      lambda : PlaneType.Pupil,
                                      lambda : PlaneType.Focal)
 
+        # new_wavefront = wavefront\
+        #     .update_phasor(new_amplitude, new_phase)\
+        #     .set_plane_type(new_plane_type)\
+        #     .set_pixel_scale(self.get_pixel_scale_out(wavefront))
+        
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
             .set_plane_type(new_plane_type)\
@@ -677,11 +682,11 @@ class FixedSamplingPropagator(Propagator):
         new_plane_type = jax.lax.cond(self.is_inverse(),
                                      lambda : PlaneType.Pupil,
                                      lambda : PlaneType.Focal)
-
+    
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
             .set_plane_type(new_plane_type)\
-            .set_pixel_scale(self.get_pixel_scale_out())
+            .set_pixel_scale(self.get_pixel_scale_out(wavefront))
 
         parameters["Wavefront"] = new_wavefront
         return parameters
