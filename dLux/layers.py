@@ -21,6 +21,11 @@ __author__ = "Louis Desdoigts"
 __date__ = "05/07/2022"
 
 
+__all__ = ["AddPhase", "TransmissiveOptic", "ApplyBasisCLIMB", 
+    "ApplyBasisOPD", "ApplyOPD", "CircularAperture", "CreateWavefront",
+    "NormaliseWavefront", "TiltWavefront"]
+
+
 import dLux
 import jax
 import jax.numpy as np

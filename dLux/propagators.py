@@ -74,11 +74,19 @@ __author__ = "Louis Desdoigts"
 __author__ = "Jordan Dennis"
 __date__ = "01/07/2022"
 
+
+__all__ = ["PhysicalMFT", "PhysicalFFT", "AngularMFT", 
+    "AngularFFT", "PhysicalFresnel", "GaussianPropagator",
+    "VariableSamplingPropagator", "FixedSamplingPropagator",
+    "Propagator"]
+
+
 import jax.numpy as np
 import jax
 import equinox as eqx
 import typing
 from dLux.wavefronts import PlaneType
+
 
 Array = typing.NewType("Array", object)
 Wavefront = typing.NewType("Wavefront", object)
