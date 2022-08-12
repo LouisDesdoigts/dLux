@@ -6,6 +6,9 @@ from copy import deepcopy
 import dLux
 
 
+__all__ = ["OpticalSystem"]
+
+
 class OpticalSystem(eqx.Module):
     """ Optical System class, Equinox Modle
     
