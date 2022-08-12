@@ -624,6 +624,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.plane_type" class="md-nav__link">
+    plane_type
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dLux.wavefronts.Wavefront.wavelength" class="md-nav__link">
     wavelength
   </a>
@@ -842,6 +849,13 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_plane_type" class="md-nav__link">
+    get_plane_type()
+  </a>
   
 </li>
       
@@ -1065,6 +1079,26 @@
   <a href="#dLux.wavefronts.Wavefront.set_pixel_scale" class="md-nav__link">
     set_pixel_scale()
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_plane_type" class="md-nav__link">
+    set_plane_type()
+  </a>
+  
+    <nav class="md-nav" aria-label="set_plane_type()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_plane_type--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1451,6 +1485,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.plane_type" class="md-nav__link">
+    plane_type
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dLux.wavefronts.Wavefront.wavelength" class="md-nav__link">
     wavelength
   </a>
@@ -1669,6 +1710,13 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_plane_type" class="md-nav__link">
+    get_plane_type()
+  </a>
   
 </li>
       
@@ -1896,6 +1944,26 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_plane_type" class="md-nav__link">
+    set_plane_type()
+  </a>
+  
+    <nav class="md-nav" aria-label="set_plane_type()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_plane_type--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dLux.wavefronts.Wavefront.set_wavelength" class="md-nav__link">
     set_wavelength()
   </a>
@@ -2015,6 +2083,14 @@ the optical axis.</p></td>
           </td>
           <td><p>The physical dimensions of each square pixel.</p></td>
         </tr>
+        <tr>
+          <td><code>plane_type</code></td>
+          <td>
+                <code>enum</code>
+          </td>
+          <td><p>The current plane of wavefront, can be Pupil, Focal
+or Intermediate</p></td>
+        </tr>
     </tbody>
   </table>
 
@@ -2093,6 +2169,25 @@ the optical axis.</p></td>
 
 <h2 id="dLux.wavefronts.Wavefront.pixel_scale" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">pixel_scale</span> <span class="o">=</span> <span class="kc">None</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.plane_type" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">plane_type</span> <span class="o">=</span> <span class="kc">None</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -2780,6 +2875,42 @@ self.amplitude.shape</code>.</p></td>
       <h4 id="dLux.wavefronts.Wavefront.get_pixel_scale--returns">Returns</h4>
 <p>pixel_scale : float, meters/pixel
     The current pixel_scale associated with the wavefront.</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_plane_type" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_plane_type</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>plane</code></td>          <td>
+                <code>str</code>
+          </td>
+          <td><p>The plane that the <code>Wavefront</code> is currently in. The 
+options are currently "Pupil", "Focal" and "None".</p></td>
+        </tr>
+    </tbody>
+  </table>
 
   </div>
 
@@ -3578,6 +3709,51 @@ axis.</p></td>
         </tr>
     </tbody>
   </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.set_plane_type" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_plane_type</span><span class="p">(</span><span class="n">plane</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>plane</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>A string describing the plane that the <code>Wavefront</code> is 
+currently in.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+      <h4 id="dLux.wavefronts.Wavefront.set_plane_type--returns">Returns</h4>
+<p>wavefront : Wavefront 
+    The new <code>Wavefront</code> with the update plane information.</p>
 
   </div>
 
