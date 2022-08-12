@@ -16,6 +16,8 @@ site_name: ∂Lux - Differentiable Optical Simulation
 repo_url: https://github.com/LouisDesdoigts/dLux
 
 theme:
+  palette:
+    scheme: default
   name: material
   icon:
     logo: material/telescope
