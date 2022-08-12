@@ -11,14 +11,14 @@ GaussianWavefront = typing.NewType("FresnelWavefront", Wavefront)
 PlaneType = typing.NewType("PlaneType", object)
 Array = typing.NewType("Array", np.ndarray)
 
-class PlaneType(enum.Enum):
+class PlaneType(enum.IntEnum):
     """
     Enumeration object to keep track of plane types, and have 
     jax-safe logic based of wavefront location
     """
-    Pupil = 0
-    Focal = 1
-    Intermediate = 2
+    Pupil = 1
+    Focal = 2
+    Intermediate = 3
 
 
 class Wavefront(eqx.Module):
@@ -535,7 +535,7 @@ class Wavefront(eqx.Module):
         return self.plane_type
 
 
-    def set_plane_type(self : Wavefront, plane : int) -> Wavefront:
+    def set_plane_type(self : Wavefront, plane : PlaneType) -> Wavefront:
         """
         Parameters
         ----------
@@ -549,9 +549,7 @@ class Wavefront(eqx.Module):
             The new `Wavefront` with the update plane information.
         """
         return eqx.tree_at(
-            # lambda wavefront : wavefront.plane_type, self, plane,
-            # is_leaf = lambda leaf : leaf is None)
-            lambda wavefront : wavefront.plane_type, self, PlaneType(plane),
+            lambda wavefront : wavefront.plane_type, self, plane,
             is_leaf = lambda leaf : leaf is None)
 
 
