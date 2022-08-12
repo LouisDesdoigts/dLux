@@ -734,6 +734,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dLux.propagators.VariableSamplingPropagator.pixel_tilt" class="md-nav__link">
+    pixel_tilt
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dLux.propagators.VariableSamplingPropagator.pixels_out" class="md-nav__link">
     pixels_out
   </a>
@@ -775,6 +782,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dLux.propagators.VariableSamplingPropagator.get_offset_value" class="md-nav__link">
+    get_offset_value()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dLux.propagators.VariableSamplingPropagator.get_pixel_offsets" class="md-nav__link">
     get_pixel_offsets()
   </a>
@@ -791,6 +805,13 @@
         <li class="md-nav__item">
   <a href="#dLux.propagators.VariableSamplingPropagator.get_pixels_out" class="md-nav__link">
     get_pixels_out()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.propagators.VariableSamplingPropagator.is_pixel_tilted" class="md-nav__link">
+    is_pixel_tilted()
   </a>
   
 </li>
@@ -1008,6 +1029,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dLux.propagators.VariableSamplingPropagator.pixel_tilt" class="md-nav__link">
+    pixel_tilt
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dLux.propagators.VariableSamplingPropagator.pixels_out" class="md-nav__link">
     pixels_out
   </a>
@@ -1049,6 +1077,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dLux.propagators.VariableSamplingPropagator.get_offset_value" class="md-nav__link">
+    get_offset_value()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dLux.propagators.VariableSamplingPropagator.get_pixel_offsets" class="md-nav__link">
     get_pixel_offsets()
   </a>
@@ -1065,6 +1100,13 @@
         <li class="md-nav__item">
   <a href="#dLux.propagators.VariableSamplingPropagator.get_pixels_out" class="md-nav__link">
     get_pixels_out()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.propagators.VariableSamplingPropagator.is_pixel_tilted" class="md-nav__link">
+    is_pixel_tilted()
   </a>
   
 </li>
@@ -1181,6 +1223,25 @@ meters (radians) per pixel.</p></td>
 
 
 
+<h2 id="dLux.propagators.VariableSamplingPropagator.pixel_tilt" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">pixel_tilt</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pixels</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h2 id="dLux.propagators.VariableSamplingPropagator.pixels_out" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">pixels_out</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pixels_out</span><span class="p">)</span></code>
   
@@ -1268,7 +1329,7 @@ mirror.</p>
 
 
 <h2 id="dLux.propagators.VariableSamplingPropagator.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">pixel_scale_out</span><span class="p">,</span> <span class="n">pixels_out</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tilt</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">pixel_scale_out</span><span class="p">,</span> <span class="n">pixels_out</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tilt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pixels</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1329,6 +1390,82 @@ else False.</p></td>
           <td>
                 <code>False</code>
           </td>
+        </tr>
+        <tr>
+          <td><code>pixel_tilt</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>True if the tilt of the wavefront is to be considered in 
+units of pixel, else the shift is considered in units of
+radians. Redundant is tilt is False</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.propagators.VariableSamplingPropagator.get_offset_value" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_offset_value</span><span class="p">(</span><span class="n">wavefront</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the offset value either as-is or scaled by
+the physical focal length and pixel scale, depending
+on the boolean value of pixel_tilt. Used to handle cases
+where the offset value is given in either units of pixels
+or radians</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wavefront</code></td>
+          <td>
+                <code><span title="dLux.propagators.Wavefront">Wavefront</span></code>
+          </td>
+          <td><p>The wavefront to propagate.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>offset</code></td>          <td>
+                <code><span title="dLux.propagators.Array">Array</span></code>
+          </td>
+          <td><p>The offset from the x and y plane in units of pixels</p></td>
         </tr>
     </tbody>
   </table>
@@ -1461,6 +1598,42 @@ else False.</p></td>
                 <code>int</code>
           </td>
           <td><p>The number of pixels in the plane of propagation.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.propagators.VariableSamplingPropagator.is_pixel_tilted" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">is_pixel_tilted</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>pixel_tilt</code></td>          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Whether or not the tilt of the <code>Wavefront</code> is to be 
+considered in units of pixels or radians.</p></td>
         </tr>
     </tbody>
   </table>
