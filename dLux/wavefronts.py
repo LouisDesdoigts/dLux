@@ -4,7 +4,7 @@ import typing
 
 
 Wavefront = typing.NewType("Wavefront", object)
-PhysicalWavefront = typing.NewType("PhysicalWavefront", Wavefront)
+CartesianWavefront = typing.NewType("CartesianWavefront", Wavefront)
 AngularWavefront = typing.NewType("AngularWavefront", Wavefront)
 GaussianWavefront = typing.NewType("FresnelWavefront", Wavefront)
 Array = typing.NewType("Array", np.ndarray)
@@ -242,7 +242,27 @@ class Wavefront(eqx.Module):
             The number of pixels that represent the `Wavefront` along 
             one side.
         """
-        return self.get_amplitude().shape[0]        
+        return self.get_amplitude().shape[-1]
+    
+    
+    def get_diameter(self : Wavefront) -> float:
+        """
+        Returns the current Wavefront diameter
+        
+        TODO: Add tests for this function
+        
+        Throws
+        ------
+        : TypeError
+            If self.amplitude or self.phase have not been initialised
+            externally. 
+
+        Returns
+        -------
+        diameter : float
+           The current diameter of the wavefront
+        """
+        return self.number_of_pixels() * self.get_pixel_scale()
 
 
     def multiply_amplitude(self : Wavefront, 
@@ -352,7 +372,7 @@ class Wavefront(eqx.Module):
         psf : Array
             The PSF of the wavefront.
         """
-        return self.get_amplitude() ** 2
+        return np.sum(self.get_amplitude() ** 2, axis=0)
 
 
     def add_opd(self: Wavefront, 
@@ -461,7 +481,7 @@ class Wavefront(eqx.Module):
             Guarantees `self.get_pixel_grid().shape == 
             self.amplitude.shape`
         """
-        pixel_positions = self.get_pixel_coordinates(self.amplitude.shape[0])
+        pixel_positions = self.get_pixel_coordinates(self.number_of_pixels())
         x_positions, y_positions = \
             np.meshgrid(pixel_positions, pixel_positions)
         return np.array([x_positions, y_positions])
@@ -616,11 +636,11 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        wavefront : PhysicalWavefront
+        wavefront : Wavefront
             The new wavefront with the updated optical disturbance. 
         """
         # Get coords arrays
-        number_of_pixels_in = self.amplitude.shape[0]
+        number_of_pixels_in = self.number_of_pixels()
         ratio = pixel_scale_out / self.pixel_scale
         
         centre = (number_of_pixels_in - 1) / 2
@@ -662,7 +682,7 @@ class Wavefront(eqx.Module):
     def pad_to(self : Wavefront, number_of_pixels_out : int) -> Wavefront:
         """
         Pads the `Wavefront` with zeros. Assumes that 
-        `number_of_pixels_out > self.amplitude.shape[0]`. 
+        `number_of_pixels_out > self.amplitude.shape[-1]`. 
         Note that `Wavefronts` with even pixel dimensions can 
         only be padded (without interpolation) to even pixel 
         dimensions and vice-versa. 
@@ -670,7 +690,7 @@ class Wavefront(eqx.Module):
         Throws
         ------
         error : ValueError
-            If `number_of_pixels_out%2 != self.amplitude.shape[0]%2`
+            If `number_of_pixels_out%2 != self.amplitude.shape[-1]%2`
             i.e. padding an even (odd) `Wavefront` to odd (even).
 
         Parameters
@@ -681,11 +701,11 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        wavefront : PhysicalWavefront
+        wavefront : Wavefront
             The new `Wavefront` with the optical disturbance zero 
             padded to the new dimensions.
         """
-        number_of_pixels_in = self.amplitude.shape[0]
+        number_of_pixels_in = self.number_of_pixels()
 
         if number_of_pixels_in % 2 != number_of_pixels_out % 2:
             raise ValueError("Only supports even -> even or odd -> odd padding")
@@ -711,7 +731,7 @@ class Wavefront(eqx.Module):
     def crop_to(self : Wavefront, number_of_pixels_out : int) -> Wavefront:
         """
         Crops the `Wavefront`. Assumes that 
-        `number_of_pixels_out < self.amplitude.shape[0]`. 
+        `number_of_pixels_out < self.amplitude.shape[-1]`. 
         `Wavefront`s with an even number of pixels can only 
         be cropped to an even number of pixels without interpolation
         and vice-versa.    
@@ -719,7 +739,7 @@ class Wavefront(eqx.Module):
         Throws
         ------
         error : ValueError
-            If `number_of_pixels_out%2 != self.amplitude.shape[0]%2`
+            If `number_of_pixels_out%2 != self.amplitude.shape[-1]%2`
             i.e. padding an even (odd) `Wavefront` to odd (even).
 
         Parameters
@@ -731,11 +751,11 @@ class Wavefront(eqx.Module):
 
         Returns
         -------
-        wavefront : PhysicalWavefront
+        wavefront : Wavefront
             The new `Wavefront` with the optical disturbance zero 
             cropped to the new dimensions.
         """
-        number_of_pixels_in = self.amplitude.shape[0]
+        number_of_pixels_in = self.number_of_pixels()
         
         if number_of_pixels_in%2 != number_of_pixels_out%2:
             raise ValueError("Only supports even -> even or 0dd -> odd cropping")
@@ -753,7 +773,7 @@ class Wavefront(eqx.Module):
         return self.update_phasor(new_amplitude, new_phase)
 
 
-class PhysicalWavefront(Wavefront):
+class CartesianWavefront(Wavefront):
     """
     A plane wave extending the abstract `Wavefront` class. 
     Stores phase and amplitude arrays. pixel_scale has units of 
@@ -768,10 +788,10 @@ class PhysicalWavefront(Wavefront):
     plane_type : str
 
     
-    def __init__(self : PhysicalWavefront, wavelength : float, 
-            offset : Array) -> PhysicalWavefront:
+    def __init__(self : CartesianWavefront, wavelength : float, 
+            offset : Array) -> CartesianWavefront:
         """
-        Constructor for a `PhysicalWavefront`.
+        Constructor for a `CartesianWavefront`.
 
         Parameters
         ----------
@@ -783,7 +803,7 @@ class PhysicalWavefront(Wavefront):
             
         Returns
         -------
-        wavefront : PhysicalWavefront
+        wavefront : CartesianWavefront
             The new wavefront with `None` at the extra leaves. 
         """
         super().__init__(wavelength, offset)
@@ -819,7 +839,7 @@ class PhysicalWavefront(Wavefront):
             is_leaf = lambda leaf : leaf is None)
 
 
-    def transfer_function(self : PhysicalWavefront, 
+    def transfer_function(self : CartesianWavefront, 
             distance : float) -> float:
         """
         The Optical Transfer Function corresponding to the 
@@ -1139,7 +1159,7 @@ class GaussianWavefront(Wavefront):
             in metres.
         """
         # TODO: get_number_of_pixels() Used frequenctly not a function
-        number_of_pixels = self.amplitude.shape[0]
+        number_of_pixels = self.number_of_pixels()
         new_pixel_scale = self.get_wavelength() * np.abs(position) / \
             number_of_pixels / self.get_pixel_scale()  
         return new_pixel_scale 
