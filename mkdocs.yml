@@ -19,6 +19,7 @@ theme:
   palette:
     scheme: slate
   logo: assets/logo.jpg
+  favicon: assets/logo.jpg
   name: material
   icon:
     logo: material/telescope
