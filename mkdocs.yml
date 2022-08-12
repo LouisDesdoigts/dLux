@@ -18,6 +18,7 @@ repo_url: https://github.com/LouisDesdoigts/dLux
 theme:
   palette:
     scheme: slate
+  logo: assets/logo.jpg
   name: material
   icon:
     logo: material/telescope
