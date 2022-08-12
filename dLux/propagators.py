@@ -78,6 +78,7 @@ import jax.numpy as np
 import jax
 import equinox as eqx
 import typing
+from dLux.wavefronts import PlaneType
 
 Array = typing.NewType("Array", object)
 Wavefront = typing.NewType("Wavefront", object)
@@ -532,9 +533,18 @@ class VariableSamplingPropagator(Propagator):
 
         new_amplitude = np.abs(new_wavefront)
         new_phase = np.angle(new_wavefront)
+        new_plane_type = jax.lax.cond(self.is_inverse(),
+                                     lambda : PlaneType.Pupil,
+                                     lambda : PlaneType.Focal)
 
+        # new_wavefront = wavefront\
+        #     .update_phasor(new_amplitude, new_phase)\
+        #     .set_plane_type(new_plane_type)\
+        #     .set_pixel_scale(self.get_pixel_scale_out(wavefront))
+        
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
+            .set_plane_type(new_plane_type)\
             .set_pixel_scale(self.get_pixel_scale_out())
 
         parameters["Wavefront"] = new_wavefront
@@ -669,9 +679,13 @@ class FixedSamplingPropagator(Propagator):
 
         new_amplitude = np.abs(new_wavefront)
         new_phase = np.angle(new_wavefront)
-
+        new_plane_type = jax.lax.cond(self.is_inverse(),
+                                     lambda : PlaneType.Pupil,
+                                     lambda : PlaneType.Focal)
+    
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
+            .set_plane_type(new_plane_type)\
             .set_pixel_scale(self.get_pixel_scale_out(wavefront))
 
         parameters["Wavefront"] = new_wavefront
@@ -692,7 +706,7 @@ class PhysicalMFT(VariableSamplingPropagator):
 
 
     def __init__(self : Propagator, pixels_out : float, 
-            focal_length : int, pixel_scale_out : float, 
+            focal_length : float, pixel_scale_out : float, 
             inverse : bool = False, tilt : bool = False) -> Propagator:
         """
         Parameters
