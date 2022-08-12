@@ -521,23 +521,35 @@ class VariableSamplingPropagator(Propagator):
         pixel_offset : Array, pixels
             The offset from the x and y plane.
         """
-        # return jax.lax.cond(self.is_tilted(),     
-        #     lambda wavefront : wavefront.get_offset() * \
-        #         self.get_focal_length() / self.get_pixel_scale_out(),        
-        #     lambda _ : np.array([0., 0.]).astype(float),
-        #     wavefront)
-        
         return jax.lax.cond(self.is_tilted(),     
-            jax.lax.cond(self.is_pixel_tilted(),
-                        lambda wavefront : wavefront.get_offset(),
-                        lambda wavefront : wavefront.get_offset() * \
-                        self.get_focal_length() / self.get_pixel_scale_out(),
-                        wavefront),       
+            lambda wavefront : self.get_offset_value(wavefront),
             lambda _ : np.array([0., 0.]).astype(float),
             wavefront)
     
-    
+    def get_offset_value(self : Propagator,
+                        wavefront : Wavefront) -> Array:
+        """
+        Returns the offset value either as-is or scaled by
+        the physical focal length and pixel scale, depending
+        on the boolean value of pixel_tilt. Used to handle cases
+        where the offset value is given in either units of pixels
+        or radians
+        
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to propagate.
 
+        Returns
+        -------
+        offset : Array
+            The offset from the x and y plane in units of pixels
+        """
+        return jax.lax.cond(self.is_pixel_tilted(),
+                        lambda wavefront : wavefront.get_offset(),
+                        lambda wavefront : wavefront.get_offset() * \
+                        self.get_focal_length() / self.get_pixel_scale_out(),
+                        wavefront)
 
     def __call__(self : Propagator, parameters : dict) -> dict:
         """
@@ -728,7 +740,7 @@ class PhysicalMFT(VariableSamplingPropagator):
 
 
     def __init__(self : Propagator, pixels_out : float, 
-            focal_length : float, pixel_scale_out : float, 
+            focal_length : int, pixel_scale_out : float, 
             inverse : bool = False, tilt : bool = False) -> Propagator:
         """
         Parameters
