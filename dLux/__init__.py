@@ -1,15 +1,17 @@
 name = "dLux"
 __version__ = "0.1.2.2"
 
-from .base import OpticalSystem
-from .detectors import (ApplySaturation, ApplyPixelResponse, 
-    ApplyJitter)
-from .layers import (AddPhase, TransmissiveOptic, ApplyBasisCLIMB, 
-    ApplyBasisOPD, ApplyOPD, CircularAperture, CreateWavefront,
-    NormaliseWavefront, TiltWavefront)
-from .wavefronts import (Wavefront, GaussianWavefront, 
-    CartesianWavefront, AngularWavefront, PlaneType)
-from .propagators import (PhysicalMFT, PhysicalFFT, AngularMFT, 
-    AngularFFT, PhysicalFresnel, GaussianPropagator,
-    VariableSamplingPropagator, FixedSamplingPropagator,
-    Propagator)
+from . import base
+from . import detectors
+from . import layers
+from . import wavefronts
+from . import propagators
+
+from .base import *
+from .detectors import *
+from .layers import *
+from .wavefronts import *
+from .propagators import *
+
+
+__all__ = base.__all__ + detectors.__all__ + layers.__all__ + wavefronts.__all__ + propagators.__all__

@@ -4,12 +4,17 @@ import typing
 import enum
 
 
+__all__ = ["Wavefront", "GaussianWavefront", 
+    "CartesianWavefront", "AngularWavefront", "PlaneType"]
+
+
 Wavefront = typing.NewType("Wavefront", object)
 CartesianWavefront = typing.NewType("CartesianWavefront", Wavefront)
 AngularWavefront = typing.NewType("AngularWavefront", Wavefront)
 GaussianWavefront = typing.NewType("FresnelWavefront", Wavefront)
 PlaneType = typing.NewType("PlaneType", object)
 Array = typing.NewType("Array", np.ndarray)
+
 
 class PlaneType(enum.IntEnum):
     """
