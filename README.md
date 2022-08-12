@@ -8,10 +8,12 @@
 
 _Optical systems as a neural networks_
 
+
 ## Contributors
 
 [Louis Desdoigts](https://github.com/LouisDesdoigts), [Benjamin Pope](https://github.com/benjaminpope), [Jordan
 Dennis](https://github.com/Jordan-Dennis), [Peter Tuthill](https://github.com/petertuthill)
+
 
 ## Installation
 
@@ -31,6 +33,21 @@ pip install dLux
 ```
 
 
+## Windows/Google Colab Quickstart
+`jaxlib` can be problematic on windows so we suggest users run our software on [Google Colab](https://research.google.com/colaboratory/).
+There are a few extra steps to get setup
+1. At the top of each colab file you will need 
+``` 
+!git clone https://github.com/LouisDesdoigts/dLux.git # Download latest version
+!cd dLux; pip install . -q # Navigate to ∂Lux and install from source
+``` 
+
+
 ## Use
 
 Documentation can be found at [louisdesdoigts.github.io/dLux](https://louisdesdoigts.github.io/dLux/), and is under continuous development.
+
+
+## Collaboration & Development
+
+We are always looking to collaborate and further develop this software! We have focused on flexibility and ease of development, so if you have a project you want to use ∂Lux for, but it currently does not have the required capabilities, don't hesitate to email me and we can discuss how to implement and merge it! louis.desdoigts@sydney.edu.au

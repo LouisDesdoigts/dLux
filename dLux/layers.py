@@ -14,13 +14,14 @@ Concrete Classes
 - NormaliseWavefront
 - ApplyBasisOPD
 - AddPhase
-- ApplyAperture
+- TransmissiveOptic
 - ApplyBasisCLIMB
 """
 __author__ = "Louis Desdoigts"
 __date__ = "05/07/2022"
 
 
+import dLux
 import jax
 import jax.numpy as np
 import equinox as eqx
@@ -40,13 +41,17 @@ class CreateWavefront(eqx.Module):
         Its value is automatically calculated from the input values 
     wavefront_size: float, meters
         Width of the array representing the wavefront in physical units
+    wavefront_type: string
+        Determines the type of wavefront class to create. Currently
+        supports 'Cartesian' and 'Angular'
     """
     npix : int = eqx.static_field()
     wavefront_size : float
     pixel_scale : float
+    wavefront_type : str = eqx.static_field()
 
 
-    def __init__(self, npix, wavefront_size):
+    def __init__(self, npix, wavefront_size, wavefront_type='Cartesian'):
         """
         Parameters
         ----------
@@ -60,6 +65,9 @@ class CreateWavefront(eqx.Module):
         self.wavefront_size = np.array(wavefront_size).astype(float)
         self.pixel_scale = np.array(wavefront_size / npix)\
             .astype(float)
+        assert wavefront_type in ['Cartesian', 'Angular'], "wavefront_type \
+        must be either 'Cartesian' or 'Angular'"
+        self.wavefront_type = str(wavefront_type)
 
 
     def __call__(self, params_dict):
@@ -81,10 +89,20 @@ class CreateWavefront(eqx.Module):
         params_dict : dict
             The `params_dict` parameter with the `Wavefront` entry 
             updated. 
-        """
-        wavefront = params_dict["Wavefront"]
-        phase = np.zeros([self.npix, self.npix])
-        amplitude = np.ones([self.npix, self.npix])
+        """        
+        wavel = params_dict["wavelength"]
+        offset = params_dict["offset"]
+        
+        phase = np.zeros([1, self.npix, self.npix])
+        amplitude = np.ones([1, self.npix, self.npix])
+        amplitude /= np.linalg.norm(amplitude)
+        
+        # TODO: Make jax safe
+        if self.wavefront_type is 'Cartesian':
+            wavefront = dLux.CartesianWavefront(wavel, offset)
+        elif self.wavefront_type is 'Angular':
+            wavefront = dLux.AngularWavefront(wavel, offset)
+
         params_dict["Wavefront"] = wavefront\
             .set_phase(phase)\
             .set_amplitude(amplitude)\
@@ -496,31 +514,34 @@ class ApplyOPD(eqx.Module):
         return params_dict
     
 
-#TODO: Change aperture to tranmission?
-class ApplyAperture(eqx.Module):
+class TransmissiveOptic(eqx.Module):
     """ 
-    Represents an arbitrary aperture in the optical path. 
+    Represents an arbitrary transmissive optic in the optical path. 
+    
+    Note this class does not normalise the 'transmission' between 
+    0 and 1, but simply multiplies the wavefront amplitude by the 
+    TransmissiveOptic.transmision array.
 
     Attributes
     ----------
     npix : int, eqx.static_field()
         The number of pixels along the leading edge of the wavefront.
-    aperture : float
+    transmission : float
         An array representing the transmission of the aperture. 
     """
     npix: int = eqx.static_field()
-    aperture: float
+    transmission: float
     
 
-    def __init__(self, aperture):
+    def __init__(self, transmission):
         """
         Parameters
         ----------
-        aperture : Array[float]
+        transmission : Array[float]
             The array representing the transmission of the aperture.
         """
-        self.aperture = np.array(aperture).astype(float)
-        self.npix = aperture.shape[0]
+        self.transmission = np.array(transmission).astype(float)
+        self.npix = transmission.shape[0]
         
 
     def __call__(self, params_dict):
@@ -545,7 +566,7 @@ class ApplyAperture(eqx.Module):
         """
         # Get relevant parameters
         wavefront = params_dict["Wavefront"]
-        wavefront = wavefront.multiply_amplitude(self.aperture)
+        wavefront = wavefront.multiply_amplitude(self.transmission)
         params_dict["Wavefront"] = wavefront
         return params_dict
 
@@ -599,7 +620,7 @@ class ApplyBasisCLIMB(eqx.Module):
         ideal_wavel : float
             The wavelength that perfectly CLIMBs.
         """
-        # TODO: I have no idea what idal_wavel is 
+        # TODO: I have no idea what ideal_wavel is 
         self.npix = int(basis.shape[-1])
         self.basis = np.array(basis).astype(float)
         self.coeffs = np.array(coeffs).astype(float)
