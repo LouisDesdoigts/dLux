@@ -173,16 +173,16 @@ class WavefrontUtility(Utility):
         self.offset = numpy.array([0., 0.]).astype(float) if not \
             offset else numpy.array(offset).astype(float)           
         self.size = 128 if not size else size
-        self.amplitude = numpy.ones((self.size, self.size)) if not \
+        self.amplitude = numpy.ones((1, self.size, self.size)) if not \
             amplitude else amplitude
-        self.phase = numpy.zeros((self.size, self.size)) if not \
+        self.phase = numpy.zeros((1, self.size, self.size)) if not \
             phase else phase
         self.pixel_scale = 1. if not pixel_scale else pixel_scale
 
-        assert self.size == self.amplitude.shape[0]
-        assert self.size == self.amplitude.shape[1]
-        assert self.size == self.phase.shape[0]
-        assert self.size == self.phase.shape[1]          
+        assert self.size == self.amplitude.shape[-1]
+        assert self.size == self.amplitude.shape[-2]
+        assert self.size == self.phase.shape[-1]
+        assert self.size == self.phase.shape[-2]          
  
 
     def construct(self : Utility) -> Wavefront:
@@ -275,10 +275,10 @@ class WavefrontUtility(Utility):
         return self.pixel_scale
 
 
-class PhysicalWavefrontUtility(WavefrontUtility):
+class CartesianWavefrontUtility(WavefrontUtility):
     """
     Defines useful safes state constants as well as a basic 
-    constructor for a safe `PhysicalWavefront`.
+    constructor for a safe `CartesianWavefront`.
     """
     def __init__(self : Utility, /,
             wavelength : float = None, 
@@ -307,7 +307,7 @@ class PhysicalWavefrontUtility(WavefrontUtility):
 
         Returns
         -------
-        utility : PhysicalWavefrontUtility 
+        utility : CartesianWavefrontUtility 
             A helpful class for implementing the tests. 
         """
         super().__init__(wavelength, offset, size, amplitude, phase, 
@@ -320,11 +320,11 @@ class PhysicalWavefrontUtility(WavefrontUtility):
 
         Returns 
         -------
-        wavefront : PhysicalWavefront
+        wavefront : CartesianWavefront
             The safe testing wavefront.
         """
         wavefront = dLux\
-            .PhysicalWavefront(self.wavelength, self.offset)\
+            .CartesianWavefront(self.wavelength, self.offset)\
             .update_phasor(self.amplitude, self.phase)\
             .set_pixel_scale(self.pixel_scale)
 
@@ -334,7 +334,7 @@ class PhysicalWavefrontUtility(WavefrontUtility):
 class AngularWavefrontUtility(WavefrontUtility):
     """
     Defines useful safes state constants as well as a basic 
-    constructor for a safe `PhysicalWavefront`.
+    constructor for a safe `CartesianWavefront`.
     """
     def __init__(self : Utility, /,
             wavelength : float = None, 
@@ -376,7 +376,7 @@ class AngularWavefrontUtility(WavefrontUtility):
 
         Returns 
         -------
-        wavefront : PhysicalWavefront
+        wavefront : CartesianWavefront
             The safe testing wavefront.
         """
         wavefront = dLux\
@@ -387,7 +387,7 @@ class AngularWavefrontUtility(WavefrontUtility):
         return wavefront
 
 
-class GaussianWavefrontUtility(PhysicalWavefrontUtility):
+class GaussianWavefrontUtility(CartesianWavefrontUtility):
     """
     Defines safe state constants and a simple constructor for a 
     safe state `GaussianWavefront` object. 
@@ -484,7 +484,7 @@ class GaussianWavefrontUtility(PhysicalWavefrontUtility):
 
         Returns 
         -------
-        wavefront : PhysicalWavefront
+        wavefront : CartesianWavefront
             The safe testing wavefront.
         """
         wavefront = dLux\
@@ -679,7 +679,7 @@ class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
         The safe focal length of the lens or mirror associated with 
         the porpagation.
     """
-    utility : Utility = PhysicalWavefrontUtility()
+    utility : Utility = CartesianWavefrontUtility()
     focal_length : float
 
 
@@ -750,7 +750,7 @@ class PhysicalFFTUtility(FixedSamplingUtility, UtilityUser):
         the porpagation.
     """
 
-    utility : Utility = PhysicalWavefrontUtility()
+    utility : Utility = CartesianWavefrontUtility()
     focal_length : float
 
 
@@ -815,7 +815,7 @@ class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
         The shift away from focus that the Fresnel approximation is
         to be applied to.
     """
-    utility : Utility = PhysicalWavefrontUtility()
+    utility : Utility = CartesianWavefrontUtility()
     focal_length : float
     focal_shift : float
 

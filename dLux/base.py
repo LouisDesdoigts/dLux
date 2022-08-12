@@ -126,8 +126,9 @@ class OpticalSystem(eqx.Module):
         """
         I believe this is diffable but there is no reason to force it to be
         """
-        # params_dict = {"Wavefront": Wavefront(wavel, offset)}
-        params_dict = {"Wavefront": dLux.PhysicalWavefront(wavel, offset)}
+        params_dict = {"wavelength" : wavel, 
+                       "offset" : offset,
+                       "Optical System" : self}
         intermeds = []
         layers_applied = []
         for i in range(len(self.layers)):
@@ -180,9 +181,9 @@ class OpticalSystem(eqx.Module):
         """
         
         """
-        # params_dict = {"Wavefront": Wavefront(wavel, offset)}
-        params_dict = {"Wavefront": dLux.PhysicalWavefront(wavel, offset), 
-                       "Optical System":self}
+        params_dict = {"wavelength" : wavel, 
+                       "offset" : offset,
+                       "Optical System" : self}
         
         for i in range(len(self.layers)):
             params_dict = self.layers[i](params_dict)
