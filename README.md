@@ -1,6 +1,7 @@
 ![alt text](docs/assets/logo.jpg?raw=true)
 
-# ∂Lux: Differentiable Light - _Optical systems as a neural networks_
+# ∂Lux
+## Differentiable Light - _Optical systems as a neural network_
 [![PyPI version](https://badge.fury.io/py/dLux.svg)](https://badge.fury.io/py/dLux)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![integration](https://github.com/LouisDesdoigts/dLux/actions/workflows/tests.yml/badge.svg)](https://github.com/LouisDesdoigts/dLux/actions/workflows/tests.yml)
