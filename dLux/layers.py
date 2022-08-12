@@ -107,8 +107,9 @@ class CreateWavefront(eqx.Module):
         params_dict["Wavefront"] = wavefront\
             .set_phase(phase)\
             .set_amplitude(amplitude)\
-            .set_plane_type(0)\
+            .set_plane_type(PlaneType.Pupil)\
             .set_pixel_scale(self.pixel_scale)
+        
         return params_dict
 
 
