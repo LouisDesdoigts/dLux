@@ -35,5 +35,25 @@ We are currently building examples and documentation! We currently have three tu
 - [Phase Retrieval](notebooks/phase_retrieval_demo.ipynb), inferring Zernike coefficients of aberrations in a simple asymmetric pupil
 - [Phase Mask Design](notebooks/designing_a_mask.ipynb), to optimize the gradient energy of a pupil for astrometry
 - [Pixel Level Calibration](notebooks/flatfield_calibration.ipynb) of the interpixel sensitivity variations (flat field), simultaneously with phase retrieval and positions of stars
+- [Fisher Information](notebooks/fisher_information.ipynb) matrix entropy optimisation of a pupil
 
 Please note that this software is still under development and so is subject to change.
+
+## Windows/Google Colab Quickstart
+`jaxlib` can be problematic on windows so we suggest users run our software on [Google Colab](https://research.google.com/colaboratory/).
+There are a few extra steps to get setup
+1. At the top of each colab file you will need 
+``` 
+!git clone https://github.com/LouisDesdoigts/dLux.git # Download latest version
+!cd dLux; pip install . -q # Navigate to ∂Lux and install from source
+``` 
+
+**Tips and Tricks**
+- You can read/write data from your own drive using
+```
+from google.colab import drive
+drive.mount('/content/drive')
+```
+- View the files using the left sidebar to navigate
+- Colab GPU works with the notebooks as is, you just have to change the Runtime mode
+

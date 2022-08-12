@@ -407,6 +407,7 @@ class VariableSamplingPropagator(Propagator):
             propagation.
         """
         field = wavefront.get_complex_form()
+        nfields = field.shape[0]
  
         input_scale = 1.0 / wavefront.number_of_pixels()
         output_scale = self.number_of_fringes(wavefront) / \
@@ -415,14 +416,14 @@ class VariableSamplingPropagator(Propagator):
         pixels_output = self.get_pixels_out()
         
         x_offset, y_offset = self.get_pixel_offsets(wavefront)
-        
-        x_twiddle_factors = self._generate_twiddle_factors(
-            x_offset, (input_scale, output_scale), 
-            (pixels_input, pixels_output), sign)
 
-        y_twiddle_factors = self._generate_twiddle_factors(
+        x_twiddle_factors = np.tile(self._generate_twiddle_factors(
+            x_offset, (input_scale, output_scale), 
+            (pixels_input, pixels_output), sign), (nfields, 1, 1))
+
+        y_twiddle_factors = np.tile(self._generate_twiddle_factors(
             y_offset, (input_scale, output_scale), 
-            (pixels_input, pixels_output), sign).T
+            (pixels_input, pixels_output), sign).T, (nfields, 1, 1))
         
         return (y_twiddle_factors @ field) \
             @ x_twiddle_factors
