@@ -45,7 +45,7 @@ class CreateWavefront(eqx.Module):
         Determines the type of wavefront class to create. Currently
         supports 'Cartesian' and 'Angular'
     """
-    npix : int = eqx.static_field()
+    npix : int
     wavefront_size : float
     pixel_scale : float
     wavefront_type : str = eqx.static_field()
@@ -171,7 +171,7 @@ class CircularAperture(eqx.Module):
         The parameter is differentiable but refers to _Notes_ for 
         a known bug.
     """
-    npix : int = eqx.static_field()
+    npix : int
     array : float
 
     
@@ -318,7 +318,7 @@ class ApplyBasisOPD(eqx.Module):
         Array of shape (nterns) of coefficients to be applied to each 
         basis vector.
     """
-    npix: int = eqx.static_field()
+    npix: int
     basis: float
     coeffs: float
     
@@ -413,7 +413,7 @@ class AddPhase(eqx.Module):
     phase_array: float, radians
         Array of phase values to be applied to the input wavefront.
     """
-    npix: int = eqx.static_field()
+    npix: int
     phase_array : float
     
 
@@ -472,7 +472,7 @@ class ApplyOPD(eqx.Module):
         The number of pixels along the leading edge of the `opd_array`
         stored for debugging purposes.
     """
-    npix: int = eqx.static_field()
+    npix: int
     opd_array: float
     
 
@@ -529,7 +529,7 @@ class TransmissiveOptic(eqx.Module):
     transmission : float
         An array representing the transmission of the aperture. 
     """
-    npix: int = eqx.static_field()
+    npix: int
     transmission: float
     
 
@@ -589,7 +589,7 @@ class ApplyBasisCLIMB(eqx.Module):
     ideal_wavel : float
         The wavelength 
     """
-    npix: int = eqx.static_field()
+    npix: int
     basis: float
     coeffs: float
     ideal_wavel: float
