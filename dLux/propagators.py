@@ -288,11 +288,12 @@ class VariableSamplingPropagator(Propagator):
     pixel_scale_out : float
     pixels_out : int
     tilt : bool 
+    pixel_tilt : bool
 
 
     def __init__(self : Propagator, pixel_scale_out : float, 
             pixels_out : int, inverse : bool = False,
-            tilt : bool = False) -> Propagator:
+            tilt : bool = False, pixels : bool = False) -> Propagator:
         """
         Constructor for VariableSampling propagators.
 
@@ -308,11 +309,16 @@ class VariableSamplingPropagator(Propagator):
         tilt : bool 
             True if the tilt of the `Wavefront` is to be considered 
             else False. 
+        pixel_tilt : bool
+            True if the tilt of the wavefront is to be considered in 
+            units of pixel, else the shift is considered in units of
+            radians. Redundant is tilt is False
         """
         super().__init__(inverse)
-        self.tilt = bool(tilt)
         self.pixel_scale_out = np.array(pixel_scale_out).astype(float)
-        self.pixels_out = int(pixels_out)        
+        self.pixels_out = int(pixels_out)
+        self.tilt = bool(tilt)
+        self.pixel_tilt = bool(pixels)
 
 
     def is_tilted(self : Propagator) -> bool:
@@ -322,6 +328,16 @@ class VariableSamplingPropagator(Propagator):
         tilt : bool
             Whether or not the tilt of the `Wavefront` is to be 
             considered. 
+        """
+        return self.tilt
+    
+    def is_pixel_tilted(self : Propagator) -> bool:
+        """
+        Returns
+        -------
+        pixel_tilt : bool
+            Whether or not the tilt of the `Wavefront` is to be 
+            considered in units of pixels or radians.
         """
         return self.tilt
 
@@ -505,11 +521,22 @@ class VariableSamplingPropagator(Propagator):
         pixel_offset : Array, pixels
             The offset from the x and y plane.
         """
-        return jax.lax.cond(self.is_tilted(),
-            lambda wavefront : wavefront.get_offset() * \
-                self.get_focal_length() / self.get_pixel_scale_out(),
+        # return jax.lax.cond(self.is_tilted(),     
+        #     lambda wavefront : wavefront.get_offset() * \
+        #         self.get_focal_length() / self.get_pixel_scale_out(),        
+        #     lambda _ : np.array([0., 0.]).astype(float),
+        #     wavefront)
+        
+        return jax.lax.cond(self.is_tilted(),     
+            jax.lax.cond(self.is_pixel_tilted(),
+                        lambda wavefront : wavefront.get_offset(),
+                        lambda wavefront : wavefront.get_offset() * \
+                        self.get_focal_length() / self.get_pixel_scale_out(),
+                        wavefront),       
             lambda _ : np.array([0., 0.]).astype(float),
             wavefront)
+    
+    
 
 
     def __call__(self : Propagator, parameters : dict) -> dict:
@@ -536,11 +563,6 @@ class VariableSamplingPropagator(Propagator):
         new_plane_type = jax.lax.cond(self.is_inverse(),
                                      lambda : PlaneType.Pupil,
                                      lambda : PlaneType.Focal)
-
-        # new_wavefront = wavefront\
-        #     .update_phasor(new_amplitude, new_phase)\
-        #     .set_plane_type(new_plane_type)\
-        #     .set_pixel_scale(self.get_pixel_scale_out(wavefront))
         
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
@@ -682,7 +704,7 @@ class FixedSamplingPropagator(Propagator):
         new_plane_type = jax.lax.cond(self.is_inverse(),
                                      lambda : PlaneType.Pupil,
                                      lambda : PlaneType.Focal)
-    
+        
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
             .set_plane_type(new_plane_type)\
