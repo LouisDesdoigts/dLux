@@ -23,7 +23,7 @@ __date__ = "05/07/2022"
 
 __all__ = ["AddPhase", "TransmissiveOptic", "ApplyBasisCLIMB", 
     "ApplyBasisOPD", "ApplyOPD", "CircularAperture", "CreateWavefront",
-    "NormaliseWavefront", "TiltWavefront"]
+    "NormaliseWavefront", "TiltWavefront", "CompoundAperture"]
 
 
 import dLux
@@ -576,6 +576,145 @@ class TransmissiveOptic(eqx.Module):
         wavefront = params_dict["Wavefront"]
         wavefront = wavefront.multiply_amplitude(self.transmission)
         params_dict["Wavefront"] = wavefront
+        return params_dict
+    
+class CompoundAperture(eqx.Module):
+    """
+    Applies a series of soft-edged, circular aperture and occulters, 
+    defined by their physical (x, y) positions and radii.
+    Coordinates are defined paraxilly with physical units.
+    All parameters are differentiable.
+    
+    NOTE: Needs unit testing
+    """
+    aperture_radii: float
+    aperture_coords: float
+    
+    occulter_radii: float
+    occulter_coords: float
+    
+    def __init__(self, aperture_radii, aperture_coords=None, occulter_radii=None, occulter_coords=None):
+        """
+        Parameters
+        ----------
+        aperture_radii : Array[float], meters
+            The radii of the apertures
+        aperture_coords : Array[float], meters
+            The (x, y) coordinates of the centers of the apertures
+
+        occulter_radii : Array[float], meters
+            The radii of the occulters
+        occulter_coords : Array[float], meters
+            The (x, y) coordinates of the centers of the occulters
+        """
+        self.aperture_radii = np.zeros(1)  if aperture_radii is None else np.array(aperture_radii).astype(float)
+        self.occulter_radii = np.array([]) if occulter_radii is None else np.array(occulter_radii).astype(float)
+        
+        if self.aperture_radii.shape == ():
+            self.aperture_coords = np.zeros([1, 2])
+        else:
+            self.aperture_coords = np.zeros([len(self.aperture_radii), 2]) if aperture_coords is None else np.array(aperture_coords).astype(float)
+        
+        if self.occulter_radii.shape == ():
+            self.occulter_coords = np.zeros([1, 2])
+        else:
+            self.occulter_coords = np.zeros([len(self.occulter_radii), 2]) if occulter_coords is None else np.array(occulter_coords).astype(float)
+
+    def get_aper(self, radius, center, xycoords, aper, vmin=0, vmax=1):
+        """
+        Constructs a soft-edged aperture or occulter 
+        This function is general and probably be moved into utils 
+        since it is very general
+        
+        Parameters
+        ----------
+        radius : float, meters
+            The radius of the aperture/occulter
+        center : Array[float], meters
+            The (x, y) center of the aperture/occulter, as measured
+            from the optical axis
+        xycoords : Array[float], meters
+            The ((x, y), npix, npix) coordinate arrays to calculate the
+            apertures/occulters within
+        aper : bool
+            Determines whether an aperture (True) or occulter (False)
+            is calculated
+        """
+        
+        # Shift coordinates
+        xycoords -= center.reshape(2, 1, 1)
+        rcoords = np.hypot(xycoords[0], xycoords[1])
+        thetacoords = np.arctan2(xycoords[1], xycoords[0])
+
+        # Wrap theta values around circle
+        thetas_mapped = (thetacoords + np.pi/4)%(np.pi/2) - np.pi/4
+        
+        # Calculate projected pixel size
+        pixel_scale = (np.max(xycoords) - np.min(xycoords))/(npix-1)
+        alpha = (pixel_scale/2)*np.hypot(1, np.tan(thetas_mapped))
+        
+        # Get projected radial distance
+        distance = radius - rcoords
+        if not aper:
+            distance *= -1
+        
+        # Fit linear slop slong projected pixel sizes/radial distances
+        m = (vmax-vmin)/(2*alpha)
+        b = (vmax-vmin)/2
+        grey = m * distance + b
+        
+        # Clip to desired range
+        grey_out = np.clip(grey, a_min=vmin, a_max=vmax)
+        return grey_out
+    
+    def construct_aper(self, xycoords):
+        """
+        Constructs the various apertures and occulters from the and 
+        combines them into a single transmission array
+        """
+        # Map aperture function
+        mapped_aper = jax.vmap(self.get_aper, 
+                               in_axes=(0, 0, None, None))
+        
+        # Generate aperture/occulters
+        outer_apers = mapped_aper(self.aperture_radii, self.aperture_coords, 
+                                  xycoords, True)
+        inner_apers = mapped_aper(self.occulter_radii, self.occulter_coords, 
+                                  xycoords, False)
+        
+        # Bound values 
+        outer_comb = np.clip(outer_apers.sum(0), a_min=0., a_max=1.)
+        inner_comb = np.prod(inner_apers, axis=0)
+        
+        # Combine
+        return outer_comb * inner_comb
+    
+    
+    def __call__(self, params_dict):
+        """
+        Generates and applies the output transmission array to the Wavefront
+        
+        Parameters
+        ----------
+        params_dict : dict
+            A dictionary of the parameters. The following conditions
+            must be satisfied:
+            ```py
+            params_dict.get("Wavefront") != None
+            ```
+        Returns
+        -------
+        params_dict : dict
+            The `params_dict` parameter with the `Wavefront` entry 
+            updated.
+        """
+        WF = params_dict["Wavefront"]
+        xycoords = WF.get_pixel_positions()
+        aper = self.construct_aper(xycoords)
+        WF = WF.multiply_amplitude(aper)
+
+        # Update Wavefront Object
+        params_dict["Wavefront"] = WF
         return params_dict
 
 
