@@ -21,6 +21,7 @@ def toliman_layers(extra_layers=[],
         CreateWavefront(wf_npix, aperture),
         TiltWavefront(),
         CircularAperture(wf_npix, rmin=m2/aperture, eps=1e-7),
+        # CompoundAperture([aperture/2], occulter_radii=[m2/2]),
         NormaliseWavefront()]
     [layers.append(layer) for layer in extra_layers]
     if in_focus:
