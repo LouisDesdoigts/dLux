@@ -1,7 +1,9 @@
+
+__all__ = ["plot_batch"]
+
 import jax.numpy as np
 import matplotlib.pyplot as plt
 import equinox as eqx
-import numpy as onp
 from matplotlib.patches import Circle
 
 def plot_batch(batch, filename=None, dpi=96, ncols=4, apply_det=False, rmask=False, rmin=None, rmax=None, s=None, single=False):
@@ -9,8 +11,8 @@ def plot_batch(batch, filename=None, dpi=96, ncols=4, apply_det=False, rmask=Fal
     scale = 3
     
     indxs = np.arange(len(batch))
-    indxs1 = onp.arange(1, 2*len(indxs)+1, 2)
-    indxs2 = onp.arange(2, 2*len(indxs)+2, 2)
+    indxs1 = np.arange(1, 2*len(indxs)+1, 2)
+    indxs2 = np.arange(2, 2*len(indxs)+2, 2)
     
     plt.figure(figsize=(scale*ncols, scale*nrows))
     for i in range(len(batch)):
@@ -46,7 +48,6 @@ def plot_batch(batch, filename=None, dpi=96, ncols=4, apply_det=False, rmask=Fal
     plt.tight_layout()
     if filename is not None:
         filename = '{}'.format(filename)
-        # plt.savefig(filename, dpi=dpi, facecolor='k')
         plt.savefig(filename, dpi=dpi, facecolor='None')
         plt.close()
         return

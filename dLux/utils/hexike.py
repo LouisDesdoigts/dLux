@@ -3,9 +3,14 @@ An attempt at generating the hexike polynomials for optimising a
 hexagonal surface for aberations. 
 """
 
-import jax.numpy as np
+
+__all__ = ["hexike_basis"]
+
+
 import dLux
+import jax.numpy as np
 from typing import TypeVar
+
 
 Array = TypeVar("Array")
 Tensor = TypeVar("Tensor")
@@ -163,7 +168,7 @@ def hexike_basis(
 
     pixel_area = aperture.sum()
     shape = (number_of_hexikes, number_of_pixels, number_of_pixels)
-    zernikes = dLux.utils.zernike_basis(number_of_hexikes, 
+    zernikes = dLux.zernike.zernike_basis(number_of_hexikes, 
         number_of_pixels)
 
     # So the issue is currently that I cannot pass a negative offset

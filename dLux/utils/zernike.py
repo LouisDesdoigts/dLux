@@ -1,6 +1,9 @@
 """
 This code has been ported from the poppy zernike.py file to work with jax
 """
+
+__all__ = ["zernike_basis"]
+
 import jax.numpy as np
 from math import factorial
 
