@@ -501,6 +501,156 @@
 
             
           
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" type="checkbox" id="__nav_3_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_3">
+          Utils
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Utils" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          Utils
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_1" type="checkbox" id="__nav_3_3_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_3_1">
+          Coordinates
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Coordinates" data-md-level="3">
+        <label class="md-nav__title" for="__nav_3_3_1">
+          <span class="md-nav__icon md-icon"></span>
+          Coordinates
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_coordinates_vector.md" class="md-nav__link">
+        get coordinates vector
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_positions_vector.md" class="md-nav__link">
+        get positions vector
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_pixel_positions.md" class="md-nav__link">
+        get pixel positions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_pixel_coordinates.md" class="md-nav__link">
+        get pixel coordinates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_polar_positions.md" class="md-nav__link">
+        get polar positions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_polar_coordinates.md" class="md-nav__link">
+        get polar coordinates
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -651,20 +801,6 @@
 
             
           
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../gaussian_wavefront/" class="md-nav__link">
-        Gaussian Wavefront
-      </a>
-    </li>
-  
-
-            
-          
         </ul>
       </nav>
     </li>
@@ -772,36 +908,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../propagators/variable_sampling/physical_fresnel/" class="md-nav__link">
-        PhysicalFresnel
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../propagators/variable_sampling/angular_mft/" class="md-nav__link">
         AngularMFT
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../propagators/variable_sampling/angular_fresnel/" class="md-nav__link">
-        AngularFresnel
       </a>
     </li>
   
@@ -1001,21 +1109,60 @@ focal planes. Assumes the wavefront is square.</p>
 
   <div class="doc doc-contents ">
   
-      <pre><code>Constructor for `AngularWavefront`.
+      <p>Constructor for <code>AngularWavefront</code>.</p>
 
-Parameters
-----------
-</code></pre>
-<p>wavelength : float, meters
-    The wavelength of the <code>Wavefront</code>.
-offset : Array, radians
-    The (x, y) angular offset of the <code>Wavefront</code> from 
-    the optical axis.</p>
-<pre><code>Returns
--------
-wavefront : AngularWavefront
-    The new wavefront with `None` at the extra leaves.
-</code></pre>
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wavelength</code></td>
+          <td>
+                <code>float, meters</code>
+          </td>
+          <td><p>The wavelength of the <code>Wavefront</code>.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>offset</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Vector">Vector</span>, radians</code>
+          </td>
+          <td><p>The (x, y) angular offset of the <code>Wavefront</code> from 
+the optical axis.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.AngularWavefront" href="#dLux.wavefronts.AngularWavefront">AngularWavefront</a></code>
+          </td>
+          <td><p>The new wavefront with <code>None</code> at the extra leaves.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
   </div>
 
@@ -1062,13 +1209,13 @@ wavefront : AngularWavefront
       
       
         
-        <a href="../gaussian_wavefront/" class="md-footer__link md-footer__link--next" aria-label="Next: Gaussian Wavefront" rel="next">
+        <a href="../../propagators/propagator/" class="md-footer__link md-footer__link--next" aria-label="Next: Propagator" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Gaussian Wavefront
+              Propagator
             </div>
           </div>
           <div class="md-footer__button md-icon">

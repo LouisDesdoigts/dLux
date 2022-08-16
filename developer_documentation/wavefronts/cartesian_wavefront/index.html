@@ -501,6 +501,156 @@
 
             
           
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" type="checkbox" id="__nav_3_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_3">
+          Utils
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Utils" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          Utils
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3_1" type="checkbox" id="__nav_3_3_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_3_1">
+          Coordinates
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Coordinates" data-md-level="3">
+        <label class="md-nav__title" for="__nav_3_3_1">
+          <span class="md-nav__icon md-icon"></span>
+          Coordinates
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_coordinates_vector.md" class="md-nav__link">
+        get coordinates vector
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_positions_vector.md" class="md-nav__link">
+        get positions vector
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_pixel_positions.md" class="md-nav__link">
+        get pixel positions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_pixel_coordinates.md" class="md-nav__link">
+        get pixel coordinates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_polar_positions.md" class="md-nav__link">
+        get polar positions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_documentation/utils/coordinates/get_polar_coordinates.md" class="md-nav__link">
+        get polar coordinates
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -635,13 +785,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#dLux.wavefronts.CartesianWavefront.transfer_function" class="md-nav__link">
-    transfer_function()
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -659,20 +802,6 @@
     <li class="md-nav__item">
       <a href="../angular_wavefront/" class="md-nav__link">
         Angular Wavefront
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../gaussian_wavefront/" class="md-nav__link">
-        Gaussian Wavefront
       </a>
     </li>
   
@@ -786,36 +915,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../propagators/variable_sampling/physical_fresnel/" class="md-nav__link">
-        PhysicalFresnel
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../propagators/variable_sampling/angular_mft/" class="md-nav__link">
         AngularMFT
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../propagators/variable_sampling/angular_fresnel/" class="md-nav__link">
-        AngularFresnel
       </a>
     </li>
   
@@ -962,13 +1063,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#dLux.wavefronts.CartesianWavefront.transfer_function" class="md-nav__link">
-    transfer_function()
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -1074,7 +1168,7 @@ as opposed to Angular, because there are no infinite distances.</p>
         <tr>
           <td><code>offset</code></td>
           <td>
-                <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
+                <code><span title="dLux.wavefronts.Vector">Vector</span>, radians</code>
           </td>
           <td><p>The (x, y) angular offset of the <code>Wavefront</code> from 
 the optical axis.</p></td>
@@ -1100,67 +1194,6 @@ the optical axis.</p></td>
           <td>
               <em>required</em>
           </td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.wavefronts.CartesianWavefront.transfer_function" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">transfer_function</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>The Optical Transfer Function corresponding to the 
-evolution of the wavefront when propagating a distance.</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>distance</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td><p>The distance that is getting propagated in meters.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-<th>Name</th>        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-<td><code>phase</code></td>          <td>
-                <code><span title="dLux.wavefronts.Array">Array</span></code>
-          </td>
-          <td><p>The phase that represents the optical transfer.</p></td>
         </tr>
     </tbody>
   </table>
