@@ -1,4 +1,6 @@
-from dLux import *
+__all__ = ["toliman_layers"]
+
+import dLux
 
 def toliman_layers(extra_layers=[],
                    in_focus = True,
@@ -18,15 +20,15 @@ def toliman_layers(extra_layers=[],
     det_pixsize /= osamp
         
     layers = [
-        CreateWavefront(wf_npix, aperture),
-        TiltWavefront(),
-        CircularAperture(wf_npix, rmin=m2/aperture, eps=1e-7),
-        # CompoundAperture([aperture/2], occulter_radii=[m2/2]),
-        NormaliseWavefront()]
+        dLux.CreateWavefront(wf_npix, aperture),
+        dLux.TiltWavefront(),
+        dLux.CircularAperture(wf_npix, rmin=m2/aperture, eps=1e-7),
+        # dLux.CompoundAperture([aperture/2], occulter_radii=[m2/2]),
+        dLux.NormaliseWavefront()]
     [layers.append(layer) for layer in extra_layers]
     if in_focus:
-        layers.append(PhysicalMFT(det_npix, fl, det_pixsize))
+        layers.append(dLux.PhysicalMFT(det_npix, fl, det_pixsize))
     else:
-        layers.append(FresnelProp(det_npix, fl, fl_shift, det_pixsize))
+        layers.append(dLux.FresnelProp(det_npix, fl, fl_shift, det_pixsize))
     
     return layers
