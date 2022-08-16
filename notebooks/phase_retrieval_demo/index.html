@@ -1979,6 +1979,7 @@ Licensed under the Apache License, Version 2.0.
             </clipboard-copy>
         </div>
             <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># jax core code</span>
+<span class="kn">import</span> <span class="nn">jax</span>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="c1"># jax third party packages</span>
@@ -2012,6 +2013,7 @@ Licensed under the Apache License, Version 2.0.
 <span class="n">onp</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 <div id="cell-1" class="clipboard-copy-txt"># jax core code
+import jax
 import jax.numpy as np
 
 # jax third party packages
@@ -2582,7 +2584,7 @@ loss, initial_grads = loss_func(model, psf) # Compile</div>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>28.5 ms ± 495 µs per loop (mean ± std. dev. of 7 runs, 1 loop each)
+<pre>28.9 ms ± 279 µs per loop (mean ± std. dev. of 7 runs, 1 loop each)
 </pre>
 </div>
 </div>
