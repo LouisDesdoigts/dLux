@@ -650,6 +650,7 @@ class CompoundAperture(eqx.Module):
         thetas_mapped = (thetacoords + np.pi/4)%(np.pi/2) - np.pi/4
         
         # Calculate projected pixel size
+        npix = xycoords.shape[-1]
         pixel_scale = (np.max(xycoords) - np.min(xycoords))/(npix-1)
         alpha = (pixel_scale/2)*np.hypot(1, np.tan(thetas_mapped))
         
