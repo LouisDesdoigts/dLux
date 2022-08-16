@@ -151,7 +151,8 @@ class TiltWavefront(eqx.Module):
         """
         wavefront = params_dict["Wavefront"]
         x_angle, y_angle = wavefront.get_offset()
-        x_positions, y_positions = wavefront.get_pixel_positions()
+        # x_positions, y_positions = wavefront.get_pixel_positions()
+        x_positions, y_positions = wavefront.get_pixel_coordinates()
         wavenumber = 2 * np.pi / wavefront.get_wavelength()
         phase = - wavenumber * (x_positions * x_angle + \
             y_positions * y_angle)
