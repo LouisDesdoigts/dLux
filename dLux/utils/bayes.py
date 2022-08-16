@@ -1,6 +1,8 @@
 import jax.numpy as np
-from jax.scipy.stats import poisson
 from jax import hessian, grad
+from jax.scipy.stats import poisson
+
+__all__ = ["poiss_logpri", "chi2_logpri", "calc_cov", "calc_ent"]
 
 def poiss_logpri(X, data, model, update_fn):
     """Poissonian log-prior"""

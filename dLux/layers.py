@@ -26,11 +26,11 @@ __all__ = ["AddPhase", "TransmissiveOptic", "ApplyBasisCLIMB",
     "NormaliseWavefront", "TiltWavefront", "CompoundAperture"]
 
 
-import dLux
+# import dLux
 import jax
 import jax.numpy as np
 import equinox as eqx
-from dLux.wavefronts import PlaneType
+import dLux
 
 
 class CreateWavefront(eqx.Module):
@@ -112,7 +112,7 @@ class CreateWavefront(eqx.Module):
         params_dict["Wavefront"] = wavefront\
             .set_phase(phase)\
             .set_amplitude(amplitude)\
-            .set_plane_type(PlaneType.Pupil)\
+            .set_plane_type(dLux.PlaneType.Pupil)\
             .set_pixel_scale(self.pixel_scale)
         
         return params_dict
@@ -578,10 +578,7 @@ class TransmissiveOptic(eqx.Module):
         params_dict["Wavefront"] = wavefront
         return params_dict
 
-    
-# Annoying import becuase utils doesnt import properly
-# To bo fixed soon, hopefully I remeber to remmove this
-from dLux.utils.coordinates import get_pixel_positions   
+
 class CompoundAperture(eqx.Module):
     """
     Applies a series of soft-edged, circular aperture and occulters, 
@@ -699,7 +696,7 @@ class CompoundAperture(eqx.Module):
         
         # Generate coordinate grid
         pixel_scale = diameter/npixels
-        xycoords = get_pixel_positions(npixels, pixel_scale)
+        xycoords = dLux.utils.get_pixel_positions(npixels, pixel_scale)
         
         # Generate aperture/occulters
         outer_apers = mapped_aperture(self.aperture_radii, \
