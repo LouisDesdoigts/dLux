@@ -577,7 +577,11 @@ class TransmissiveOptic(eqx.Module):
         wavefront = wavefront.multiply_amplitude(self.transmission)
         params_dict["Wavefront"] = wavefront
         return params_dict
+
     
+# Annoying import becuase utils doesnt import properly
+# To bo fixed soon, hopefully I remeber to remmove this
+from dLux.utils.coordinates import get_pixel_positions   
 class CompoundAperture(eqx.Module):
     """
     Applies a series of soft-edged, circular aperture and occulters, 
@@ -626,8 +630,9 @@ class CompoundAperture(eqx.Module):
             self.occulter_coords = np.zeros([len(self.occulter_radii), 2]) \
             if occulter_coords is None \
             else np.array(occulter_coords).astype(float)
+            
 
-    def get_aper(self, radius, center, xycoords, aper, vmin=0, vmax=1):
+    def get_aperture(self, radius, center, xycoords, aper, vmin=0, vmax=1):
         """
         Constructs a soft-edged aperture or occulter 
         This function is general and probably be moved into utils 
@@ -675,20 +680,32 @@ class CompoundAperture(eqx.Module):
         grey_out = np.clip(grey, a_min=vmin, a_max=vmax)
         return grey_out
     
-    def construct_aper(self, xycoords):
+    def construct_aperture(self, diameter, npixels):
         """
         Constructs the various apertures and occulters from the and 
         combines them into a single transmission array
+        
+        Parameters
+        ----------
+        diameter : float, meters
+            The diameter of the wavefront to calculate the aperture on
+        npixels : int
+            The linear size of the array to calculate the aperture on
         """
+        
         # Map aperture function
-        mapped_aper = jax.vmap(self.get_aper, 
+        mapped_aperture = jax.vmap(self.get_aperture, 
                                in_axes=(0, 0, None, None))
         
+        # Generate coordinate grid
+        pixel_scale = diameter/npixels
+        xycoords = get_pixel_positions(npixels, pixel_scale)
+        
         # Generate aperture/occulters
-        outer_apers = mapped_aper(self.aperture_radii, self.aperture_coords, 
-                                  xycoords, True)
-        inner_apers = mapped_aper(self.occulter_radii, self.occulter_coords, 
-                                  xycoords, False)
+        outer_apers = mapped_aperture(self.aperture_radii, \
+                                      self.aperture_coords, xycoords, True)
+        inner_apers = mapped_aperture(self.occulter_radii, \
+                                      self.occulter_coords, xycoords, False)
         
         # Bound values 
         outer_comb = np.clip(outer_apers.sum(0), a_min=0., a_max=1.)
@@ -717,8 +734,9 @@ class CompoundAperture(eqx.Module):
             updated.
         """
         WF = params_dict["Wavefront"]
-        xycoords = WF.get_pixel_positions()
-        aper = self.construct_aper(xycoords)
+        wavefront_diameter = WF.get_diameter()
+        wavefront_npixels = WF.number_of_pixels()
+        aper = self.construct_aperture(wavefront_diameter, wavefront_npixels)
         WF = WF.multiply_amplitude(aper)
 
         # Update Wavefront Object
