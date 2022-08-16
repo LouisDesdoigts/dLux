@@ -593,7 +593,8 @@ class CompoundAperture(eqx.Module):
     occulter_radii: float
     occulter_coords: float
     
-    def __init__(self, aperture_radii, aperture_coords=None, occulter_radii=None, occulter_coords=None):
+    def __init__(self, aperture_radii, aperture_coords=None, 
+                 occulter_radii=None, occulter_coords=None):
         """
         Parameters
         ----------
@@ -607,18 +608,24 @@ class CompoundAperture(eqx.Module):
         occulter_coords : Array[float], meters
             The (x, y) coordinates of the centers of the occulters
         """
-        self.aperture_radii = np.zeros(1)  if aperture_radii is None else np.array(aperture_radii).astype(float)
-        self.occulter_radii = np.array([]) if occulter_radii is None else np.array(occulter_radii).astype(float)
+        self.aperture_radii = np.zeros(1)  if aperture_radii is None else \
+                                np.array(aperture_radii).astype(float)
+        self.occulter_radii = np.array([]) if occulter_radii is None else \
+                                np.array(occulter_radii).astype(float)
         
         if self.aperture_radii.shape == ():
             self.aperture_coords = np.zeros([1, 2])
         else:
-            self.aperture_coords = np.zeros([len(self.aperture_radii), 2]) if aperture_coords is None else np.array(aperture_coords).astype(float)
+            self.aperture_coords = np.zeros([len(self.aperture_radii), 2]) \
+            if aperture_coords is None \
+            else np.array(aperture_coords).astype(float)
         
         if self.occulter_radii.shape == ():
             self.occulter_coords = np.zeros([1, 2])
         else:
-            self.occulter_coords = np.zeros([len(self.occulter_radii), 2]) if occulter_coords is None else np.array(occulter_coords).astype(float)
+            self.occulter_coords = np.zeros([len(self.occulter_radii), 2]) \
+            if occulter_coords is None \
+            else np.array(occulter_coords).astype(float)
 
     def get_aper(self, radius, center, xycoords, aper, vmin=0, vmax=1):
         """
