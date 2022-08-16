@@ -387,116 +387,116 @@ class AngularWavefrontUtility(WavefrontUtility):
         return wavefront
 
 
-class GaussianWavefrontUtility(CartesianWavefrontUtility):
-    """
-    Defines safe state constants and a simple constructor for a 
-    safe state `GaussianWavefront` object. 
+# class GaussianWavefrontUtility(CartesianWavefrontUtility):
+#     """
+#     Defines safe state constants and a simple constructor for a 
+#     safe state `GaussianWavefront` object. 
 
-    Attributes
-    ----------
-    beam_radius : float
-        A safe radius for the GaussianWavefront in meters.
-    phase_radius : float
-        A safe phase radius for the GaussianWavefront in radians.
-    position : float
-        A safe position for the GaussianWavefront in meters.
-    """
-    beam_radius : float 
-    phase_radius : float
-    position : float
-
-
-    def __init__(self : Utility, 
-            wavelength : float = None,
-            offset : Array = None,
-            size : int = None,
-            amplitude : Array = None,
-            phase : Array = None,
-            beam_radius : float = None,
-            phase_radius : float = None,
-            position : float = None) -> Utility:
-        """
-        Parameters
-        ----------
-        wavelength : float 
-            The safe wavelength to use for the constructor in meters.
-        offset : Array[float]
-            The safe offset to use for the constructor in radians.
-        size : int
-            The static size of the pixel arrays.
-        amplitude : Array[float]
-            The electric field amplitudes in SI units for electric
-            field.
-        phase : Array[float]
-            The phases of each pixel in radians.
-        beam_radius : float 
-            The radius of the gaussian beam in meters.
-        phase_radius : float
-            The phase radius of the gaussian beam in radians.
-        position : float
-            The position of the gaussian beam in meters.
-
-        Returns
-        -------
-        utility : GaussianWavefrontUtility 
-            A helpful class for implementing the tests. 
-        """
-        super().__init__(wavelength, offset, size, amplitude, phase)
-        self.beam_radius = 1. if not beam_radius else beam_radius
-        self.phase_radius = numpy.inf if not phase_radius else phase_radius
-        self.position = 0. if not position else position
+#     Attributes
+#     ----------
+#     beam_radius : float
+#         A safe radius for the GaussianWavefront in meters.
+#     phase_radius : float
+#         A safe phase radius for the GaussianWavefront in radians.
+#     position : float
+#         A safe position for the GaussianWavefront in meters.
+#     """
+#     beam_radius : float 
+#     phase_radius : float
+#     position : float
 
 
-    # TODO: get_beam_radius and get_position
-    def get_phase_radius(self : Utility) -> float:
-        """
-        Returns
-        -------
-        phase_radius : float
-            The phase radius safe state.
-        """
-        return self.phase_radius
+#     def __init__(self : Utility, 
+#             wavelength : float = None,
+#             offset : Array = None,
+#             size : int = None,
+#             amplitude : Array = None,
+#             phase : Array = None,
+#             beam_radius : float = None,
+#             phase_radius : float = None,
+#             position : float = None) -> Utility:
+#         """
+#         Parameters
+#         ----------
+#         wavelength : float 
+#             The safe wavelength to use for the constructor in meters.
+#         offset : Array[float]
+#             The safe offset to use for the constructor in radians.
+#         size : int
+#             The static size of the pixel arrays.
+#         amplitude : Array[float]
+#             The electric field amplitudes in SI units for electric
+#             field.
+#         phase : Array[float]
+#             The phases of each pixel in radians.
+#         beam_radius : float 
+#             The radius of the gaussian beam in meters.
+#         phase_radius : float
+#             The phase radius of the gaussian beam in radians.
+#         position : float
+#             The position of the gaussian beam in meters.
+
+#         Returns
+#         -------
+#         utility : GaussianWavefrontUtility 
+#             A helpful class for implementing the tests. 
+#         """
+#         super().__init__(wavelength, offset, size, amplitude, phase)
+#         self.beam_radius = 1. if not beam_radius else beam_radius
+#         self.phase_radius = numpy.inf if not phase_radius else phase_radius
+#         self.position = 0. if not position else position
 
 
-    def get_beam_radius(self : Utility) -> float:
-        """
-        Returns
-        -------
-        beam_radius : float
-            The safe beam radius in meters.
-        """
-        return self.beam_radius
+#     # TODO: get_beam_radius and get_position
+#     def get_phase_radius(self : Utility) -> float:
+#         """
+#         Returns
+#         -------
+#         phase_radius : float
+#             The phase radius safe state.
+#         """
+#         return self.phase_radius
 
 
-    def get_position(self : Utility) -> float:
-        """
-        Returns
-        -------
-        position : float
-            The safe position in meters
-        """
-        return self.position
+#     def get_beam_radius(self : Utility) -> float:
+#         """
+#         Returns
+#         -------
+#         beam_radius : float
+#             The safe beam radius in meters.
+#         """
+#         return self.beam_radius
 
 
-    def construct(self : Utility) -> Wavefront:
-        """
-        Build a safe wavefront for testing.
+#     def get_position(self : Utility) -> float:
+#         """
+#         Returns
+#         -------
+#         position : float
+#             The safe position in meters
+#         """
+#         return self.position
 
-        Returns 
-        -------
-        wavefront : CartesianWavefront
-            The safe testing wavefront.
-        """
-        wavefront = dLux\
-            .GaussianWavefront(self.offset,
-               self.wavelength)\
-            .update_phasor(self.amplitude, self.phase)\
-            .set_pixel_scale(self.pixel_scale)\
-            .set_position(self.position)\
-            .set_phase_radius(numpy.inf)\
-            .set_beam_radius(self.beam_radius)
 
-        return wavefront
+#     def construct(self : Utility) -> Wavefront:
+#         """
+#         Build a safe wavefront for testing.
+
+#         Returns 
+#         -------
+#         wavefront : CartesianWavefront
+#             The safe testing wavefront.
+#         """
+#         wavefront = dLux\
+#             .GaussianWavefront(self.offset,
+#                self.wavelength)\
+#             .update_phasor(self.amplitude, self.phase)\
+#             .set_pixel_scale(self.pixel_scale)\
+#             .set_position(self.position)\
+#             .set_phase_radius(numpy.inf)\
+#             .set_beam_radius(self.beam_radius)
+
+#         return wavefront
 
 
 class PropagatorUtility(Utility):
@@ -798,94 +798,94 @@ class PhysicalFFTUtility(FixedSamplingUtility, UtilityUser):
         return self.focal_length
 
 
-class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
-    """
-    Container of useful functions and constructors for testing the 
-    PhysicalFresnel class.
+# class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
+#     """
+#     Container of useful functions and constructors for testing the 
+#     PhysicalFresnel class.
 
-    Attributes
-    ----------
-    utility : Utility 
-        A utility for building `Wavefront` objects that interact 
-        with the `PhysicalFresnel`.
-    focal_length : float
-        The safe focal length of the lens or mirror associated with 
-        the porpagation.
-    focal_shift : float
-        The shift away from focus that the Fresnel approximation is
-        to be applied to.
-    """
-    utility : Utility = CartesianWavefrontUtility()
-    focal_length : float
-    focal_shift : float
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Initialises a safe state for the Propagator attributes 
-        stored as attributes in this Utility.
-        """
-        super().__init__()
-        self.focal_length = 1.
-        self.focal_shift = -.01
+#     Attributes
+#     ----------
+#     utility : Utility 
+#         A utility for building `Wavefront` objects that interact 
+#         with the `PhysicalFresnel`.
+#     focal_length : float
+#         The safe focal length of the lens or mirror associated with 
+#         the porpagation.
+#     focal_shift : float
+#         The shift away from focus that the Fresnel approximation is
+#         to be applied to.
+#     """
+#     utility : Utility = CartesianWavefrontUtility()
+#     focal_length : float
+#     focal_shift : float
 
 
-    def construct(self : Utility, inverse : bool = None, 
-            pixels_out : int = None, pixel_scale_out : float = None, 
-            focal_length = None, focal_shift :float = None,
-            tilt = False) -> Propagator:
-        """
-        Build a safe `PhysicalFresnel` for testing purposes.
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Initialises a safe state for the Propagator attributes 
+#         stored as attributes in this Utility.
+#         """
+#         super().__init__()
+#         self.focal_length = 1.
+#         self.focal_shift = -.01
 
-        Parameters
-        ----------
-        inverse : bool
-            True if the inverse `Propagtor` is to be set.
-        pixels_out : int
-            The number of pixels in the output plane.
-        pixel_scale_out : float
-            The pixel scale in the output plane in units of (radians)
-            meters per pixel.
-        focal_length : float
-            The focal length associated with the mirror or lens 
-            associated with the propagation.
-        focal_shift : float
-            The disparity from the focal length to which the Fresnel
-            approximation is to be applied.
+
+#     def construct(self : Utility, inverse : bool = None, 
+#             pixels_out : int = None, pixel_scale_out : float = None, 
+#             focal_length = None, focal_shift :float = None,
+#             tilt = False) -> Propagator:
+#         """
+#         Build a safe `PhysicalFresnel` for testing purposes.
+
+#         Parameters
+#         ----------
+#         inverse : bool
+#             True if the inverse `Propagtor` is to be set.
+#         pixels_out : int
+#             The number of pixels in the output plane.
+#         pixel_scale_out : float
+#             The pixel scale in the output plane in units of (radians)
+#             meters per pixel.
+#         focal_length : float
+#             The focal length associated with the mirror or lens 
+#             associated with the propagation.
+#         focal_shift : float
+#             The disparity from the focal length to which the Fresnel
+#             approximation is to be applied.
         
-        Returns
-        -------
-        propagator : Propagator
-            The safe testing `Propagator`
-        """
-        return dLux.PhysicalFresnel(
-            tilt = tilt,
-            inverse = self.is_inverse() if inverse is None else inverse,
-            pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
-            pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
-            focal_length = self.get_focal_length() if focal_length is None else focal_length,
-            focal_shift = self.get_focal_shift() if focal_shift is None else focal_shift)
+#         Returns
+#         -------
+#         propagator : Propagator
+#             The safe testing `Propagator`
+#         """
+#         return dLux.PhysicalFresnel(
+#             tilt = tilt,
+#             inverse = self.is_inverse() if inverse is None else inverse,
+#             pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
+#             pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
+#             focal_length = self.get_focal_length() if focal_length is None else focal_length,
+#             focal_shift = self.get_focal_shift() if focal_shift is None else focal_shift)
 
 
-    def get_focal_length(self : Utility) -> float:
-        """
-        Returns
-        -------
-        focal_length : float
-            The focal length in meters of the mirror or lens associated
-            with the propagation.
-        """
-        return self.focal_length
+#     def get_focal_length(self : Utility) -> float:
+#         """
+#         Returns
+#         -------
+#         focal_length : float
+#             The focal length in meters of the mirror or lens associated
+#             with the propagation.
+#         """
+#         return self.focal_length
 
 
-    def get_focal_shift(self : Utility) -> float:
-        """
-        Returns
-        -------
-        focal_shift : float
-            The shift from the focal plane of the detector in meters.
-        """
-        return self.focal_shift
+#     def get_focal_shift(self : Utility) -> float:
+#         """
+#         Returns
+#         -------
+#         focal_shift : float
+#             The shift from the focal plane of the detector in meters.
+#         """
+#         return self.focal_shift
 
 
 class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
@@ -979,41 +979,41 @@ class AngularFFTUtility(FixedSamplingUtility, UtilityUser):
             inverse = self.is_inverse() if inverse is None else inverse)
 
 
-class GaussianPropagatorUtility(Utility, UtilityUser):
-    """
-    Container of useful functions and constructors for testing the 
-     `GaussianPropagator` class.
+# class GaussianPropagatorUtility(Utility, UtilityUser):
+#     """
+#     Container of useful functions and constructors for testing the 
+#      `GaussianPropagator` class.
 
-    Attributes
-    ----------
-    utility : Utility 
-        A utility for building `Wavefront` objects that interact 
-        with the `GaussianPropagator`.
-    """
-    utility : Utility = GaussianWavefrontUtility()
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Initialises a safe state for the Propagator attributes 
-        stored as attributes in this Utility.
-        """
-        pass         
+#     Attributes
+#     ----------
+#     utility : Utility 
+#         A utility for building `Wavefront` objects that interact 
+#         with the `GaussianPropagator`.
+#     """
+#     utility : Utility = GaussianWavefrontUtility()
 
 
-    def construct(self : Utility, distance : float) -> Propagator:
-        """
-        Build a safe `GaussianPropagator` for testing purposes.
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Initialises a safe state for the Propagator attributes 
+#         stored as attributes in this Utility.
+#         """
+#         pass         
 
-        Parameters
-        ----------
-        distance : float
-            The distance of the propagation in meters.        
+
+#     def construct(self : Utility, distance : float) -> Propagator:
+#         """
+#         Build a safe `GaussianPropagator` for testing purposes.
+
+#         Parameters
+#         ----------
+#         distance : float
+#             The distance of the propagation in meters.        
         
-        Returns
-        -------
-        propagator : Propagator
-            The safe testing `Propagator`
-        """
-        return dLux.GaussianPropagator(distance)
+#         Returns
+#         -------
+#         propagator : Propagator
+#             The safe testing `Propagator`
+#         """
+#         return dLux.GaussianPropagator(distance)
 

@@ -75,44 +75,44 @@ class TestPropagator(UtilityUser):
         assert false_propagator.is_inverse() == False
 
 
-    def test_get_pixel_grid(self : Tester) -> None:
-        """
-        Checks that the pixel grid is generated correctly in the 
-        output plane. The implementation is considered correct if
-        it has the correct maximum and minimum values and is the 
-        correct shape.
-        """
-        utility = self.get_utility()
-        OFFSET = numpy.array([0., 0.])
-        PIXEL_SCALE = 1.
-        PIXELS = 10.
+#     def test_get_pixel_grid(self : Tester) -> None:
+#         """
+#         Checks that the pixel grid is generated correctly in the 
+#         output plane. The implementation is considered correct if
+#         it has the correct maximum and minimum values and is the 
+#         correct shape.
+#         """
+#         utility = self.get_utility()
+#         OFFSET = numpy.array([0., 0.])
+#         PIXEL_SCALE = 1.
+#         PIXELS = 10.
 
-        pixel_grid = utility\
-            .construct()\
-            ._get_pixel_grid(OFFSET, PIXEL_SCALE, PIXELS)
+#         pixel_grid = utility\
+#             .construct()\
+#             ._get_pixel_grid(OFFSET, PIXEL_SCALE, PIXELS)
 
-        assert pixel_grid[0].max() == (PIXELS - 1) / 2 * PIXEL_SCALE
-        assert pixel_grid[0].min() == (- PIXELS + 1) / 2 * PIXEL_SCALE
-        assert pixel_grid[0].shape == (PIXELS, PIXELS)        
+#         assert pixel_grid[0].max() == (PIXELS - 1) / 2 * PIXEL_SCALE
+#         assert pixel_grid[0].min() == (- PIXELS + 1) / 2 * PIXEL_SCALE
+#         assert pixel_grid[0].shape == (PIXELS, PIXELS)        
 
 
-    def test_get_pixel_positions(self : Tester) -> None:
-        """
-        Checks that the pixel positions are correctly generated.
-        The pixel positions are considered correct if they have 
-        the correct maximum, minimum and shape.
-        """    
-        utility = self.get_utility()
-        OFFSET = 0.
-        PIXEL_SCALE = 1.
-        PIXELS = 10.
+#     def test_get_pixel_positions(self : Tester) -> None:
+#         """
+#         Checks that the pixel positions are correctly generated.
+#         The pixel positions are considered correct if they have 
+#         the correct maximum, minimum and shape.
+#         """    
+#         utility = self.get_utility()
+#         OFFSET = 0.
+#         PIXEL_SCALE = 1.
+#         PIXELS = 10.
 
-        pixel_positions = utility\
-            .construct()\
-            ._get_pixel_positions(OFFSET, PIXEL_SCALE, PIXELS)    
+#         pixel_positions = utility\
+#             .construct()\
+#             ._get_pixel_positions(OFFSET, PIXEL_SCALE, PIXELS)    
 
-        assert pixel_positions.max() == (PIXELS - 1) / 2 * PIXEL_SCALE
-        assert pixel_positions.min() == (- PIXELS + 1) / 2 * PIXEL_SCALE
+#         assert pixel_positions.max() == (PIXELS - 1) / 2 * PIXEL_SCALE
+#         assert pixel_positions.min() == (- PIXELS + 1) / 2 * PIXEL_SCALE
 
 class TestVariableSamplingPropagator(UtilityUser):
     """
@@ -592,155 +592,155 @@ class TestPhysicalFFT(UtilityUser):
         assert is_correct
 
 
-class TestPhysicalFresnel(UtilityUser):
-    """
-    Tests the concrete methods of the `PhysicalFresnel` propagator.
-    The concrete methods tested are.
-    - __init__
-    - __call__
-    - _propagate()
-    - get_focal_length()
-    - get_focal_shift()
-    - number_of_fringes()
+# class TestPhysicalFresnel(UtilityUser):
+#     """
+#     Tests the concrete methods of the `PhysicalFresnel` propagator.
+#     The concrete methods tested are.
+#     - __init__
+#     - __call__
+#     - _propagate()
+#     - get_focal_length()
+#     - get_focal_shift()
+#     - number_of_fringes()
 
-    Some methods are not tested due to faith in the mathematical 
-    process. These methods are:
-    - quadratic_phase()
-    - thin_lens()
+#     Some methods are not tested due to faith in the mathematical 
+#     process. These methods are:
+#     - quadratic_phase()
+#     - thin_lens()
 
-    Attributes
-    ----------
-    utility : PhysicalFresnelUtility
-        A utility that provides access to safe testing constructors
-        and other helpful functionalty.
-    """
-    utility : PhysicalFresnelUtility = PhysicalFresnelUtility()
+#     Attributes
+#     ----------
+#     utility : PhysicalFresnelUtility
+#         A utility that provides access to safe testing constructors
+#         and other helpful functionalty.
+#     """
+#     utility : PhysicalFresnelUtility = PhysicalFresnelUtility()
 
 
-    def test_constructor(self : Tester) -> None:
-        """
-        Checks that the constructor correctly initialises all of the
-        relevant fields. The relevant fields are:
-        - inverse : bool
-        - focal_length : float
-        - focal_shift : float
-        - pixels_out : int
-        - pixel_scale_out : float
-        """
-        propagator = self.get_utility().construct()
+#     def test_constructor(self : Tester) -> None:
+#         """
+#         Checks that the constructor correctly initialises all of the
+#         relevant fields. The relevant fields are:
+#         - inverse : bool
+#         - focal_length : float
+#         - focal_shift : float
+#         - pixels_out : int
+#         - pixel_scale_out : float
+#         """
+#         propagator = self.get_utility().construct()
         
-        assert propagator.is_inverse() == \
-            self.get_utility().is_inverse()
-        assert propagator.get_focal_length() == \
-            self.get_utility().get_focal_length()
-        assert propagator.get_focal_shift() == \
-            self.get_utility().get_focal_shift() 
-        assert propagator.get_pixels_out() == \
-            self.get_utility().get_pixels_out() 
-        assert propagator.get_pixel_scale_out() == \
-            self.get_utility().get_pixel_scale_out()
+#         assert propagator.is_inverse() == \
+#             self.get_utility().is_inverse()
+#         assert propagator.get_focal_length() == \
+#             self.get_utility().get_focal_length()
+#         assert propagator.get_focal_shift() == \
+#             self.get_utility().get_focal_shift() 
+#         assert propagator.get_pixels_out() == \
+#             self.get_utility().get_pixels_out() 
+#         assert propagator.get_pixel_scale_out() == \
+#             self.get_utility().get_pixel_scale_out()
 
 
-    def test_get_focal_length(self : Tester) -> None:
-        """
-        Tests that the `get_focal_length` method correctly tracks 
-        the state of the class.
-        """
-        SHORT = 0.01
-        LONG = 1.0
+#     def test_get_focal_length(self : Tester) -> None:
+#         """
+#         Tests that the `get_focal_length` method correctly tracks 
+#         the state of the class.
+#         """
+#         SHORT = 0.01
+#         LONG = 1.0
 
-        short_focal_length = self\
-            .get_utility()\
-            .construct(focal_length = SHORT)
+#         short_focal_length = self\
+#             .get_utility()\
+#             .construct(focal_length = SHORT)
 
-        long_focal_length = self\
-            .get_utility()\
-            .construct(focal_length = LONG)
+#         long_focal_length = self\
+#             .get_utility()\
+#             .construct(focal_length = LONG)
 
-        assert short_focal_length.get_focal_length() == SHORT
-        assert long_focal_length.get_focal_length() == LONG
+#         assert short_focal_length.get_focal_length() == SHORT
+#         assert long_focal_length.get_focal_length() == LONG
 
 
-    def test_get_focal_shift(self : Tester) -> None:
-        """
-        Tests that the `get_focal_shift` method is correctly 
-        reporting the state of the object.
-        """
-        POSITIVE = .1
-        NEGATIVE = -.1
+#     def test_get_focal_shift(self : Tester) -> None:
+#         """
+#         Tests that the `get_focal_shift` method is correctly 
+#         reporting the state of the object.
+#         """
+#         POSITIVE = .1
+#         NEGATIVE = -.1
         
-        positive = self.get_utility().construct(focal_shift = POSITIVE)
-        negative = self.get_utility().construct(focal_shift = NEGATIVE)
+#         positive = self.get_utility().construct(focal_shift = POSITIVE)
+#         negative = self.get_utility().construct(focal_shift = NEGATIVE)
 
-        assert positive.get_focal_shift() == POSITIVE
-        assert negative.get_focal_shift() == NEGATIVE
-
-
-    def test_number_of_fringes(self : Tester) -> None:
-        """
-        Implements the full calculation in a single scope to check
-        for correctness. This is nessecary because the implementation
-        makes use of super.
-        """
-        propagator = self.get_utility().construct() 
-        wavefront = self.get_utility().get_utility().construct()
-
-        size_in = wavefront.number_of_pixels() * \
-            wavefront.get_pixel_scale()
-        size_out = propagator.get_pixels_out() * \
-            propagator.get_pixel_scale_out()
-        propagation_distance = propagator.get_focal_length() + \
-            propagator.get_focal_shift()
-        focal_ratio = propagator.get_focal_length() / \
-            propagation_distance
-
-        NUMBER_OF_FRINGES = focal_ratio * size_in * size_out / \
-            propagator.get_focal_length() / wavefront.get_wavelength()
-
-        is_correct = self\
-            .get_utility()\
-            .approx(1., propagator\
-                .number_of_fringes(wavefront) / NUMBER_OF_FRINGES)
-
-        assert is_correct  
+#         assert positive.get_focal_shift() == POSITIVE
+#         assert negative.get_focal_shift() == NEGATIVE
 
 
-    # TODO: Forwards propagation is the only supported direction.
-    # TODO: Change heirachy have the fresnel in its own maybe.
-    def test_propagate(self : Tester) -> None:
-        """
-        Passes some simple inputs and checks for `numpy.nan` 
-        `numpy.inf`. 
-        """
-        propagator = self.get_utility().construct()
-        wavefront = self.get_utility().get_utility().construct()
+#     def test_number_of_fringes(self : Tester) -> None:
+#         """
+#         Implements the full calculation in a single scope to check
+#         for correctness. This is nessecary because the implementation
+#         makes use of super.
+#         """
+#         propagator = self.get_utility().construct() 
+#         wavefront = self.get_utility().get_utility().construct()
 
-        electric_field = propagator._propagate(wavefront)
+#         size_in = wavefront.number_of_pixels() * \
+#             wavefront.get_pixel_scale()
+#         size_out = propagator.get_pixels_out() * \
+#             propagator.get_pixel_scale_out()
+#         propagation_distance = propagator.get_focal_length() + \
+#             propagator.get_focal_shift()
+#         focal_ratio = propagator.get_focal_length() / \
+#             propagation_distance
 
-        assert not numpy.isnan(electric_field).any()
-        assert not numpy.isnan(electric_field).any()
+#         NUMBER_OF_FRINGES = focal_ratio * size_in * size_out / \
+#             propagator.get_focal_length() / wavefront.get_wavelength()
+
+#         is_correct = self\
+#             .get_utility()\
+#             .approx(1., propagator\
+#                 .number_of_fringes(wavefront) / NUMBER_OF_FRINGES)
+
+#         assert is_correct  
 
 
-    def test_physical_fresnel(self : Tester) -> None:
-        """
-        tests that the `__call__` method is correctly activated and
-        makes sure that the output is instantiated in terms of
-        the correct operations.
-        """
-        propagator = self.get_utility().construct()
-        wavefront = self.get_utility().get_utility().construct()
+#     # TODO: Forwards propagation is the only supported direction.
+#     # TODO: Change heirachy have the fresnel in its own maybe.
+#     def test_propagate(self : Tester) -> None:
+#         """
+#         Passes some simple inputs and checks for `numpy.nan` 
+#         `numpy.inf`. 
+#         """
+#         propagator = self.get_utility().construct()
+#         wavefront = self.get_utility().get_utility().construct()
 
-        OUTPUT = propagator._propagate(wavefront)
+#         electric_field = propagator._propagate(wavefront)
 
-        output = propagator({"Wavefront": wavefront})["Wavefront"]\
-            .get_complex_form()
+#         assert not numpy.isnan(electric_field).any()
+#         assert not numpy.isnan(electric_field).any()
 
-        is_correct = self\
-            .get_utility()\
-            .approx(1., output / OUTPUT)\
-            .all()         
 
-        assert is_correct
+#     def test_physical_fresnel(self : Tester) -> None:
+#         """
+#         tests that the `__call__` method is correctly activated and
+#         makes sure that the output is instantiated in terms of
+#         the correct operations.
+#         """
+#         propagator = self.get_utility().construct()
+#         wavefront = self.get_utility().get_utility().construct()
+
+#         OUTPUT = propagator._propagate(wavefront)
+
+#         output = propagator({"Wavefront": wavefront})["Wavefront"]\
+#             .get_complex_form()
+
+#         is_correct = self\
+#             .get_utility()\
+#             .approx(1., output / OUTPUT)\
+#             .all()         
+
+#         assert is_correct
 
 
 class TestAngularMFT(UtilityUser):
@@ -914,230 +914,230 @@ class TestAngularFFT(UtilityUser):
         assert is_correct  
 
 
-class TestAngularFresnel(UtilityUser):
-    """
-    This class will hold tests for the concrete methods of the 
-    AngularFresnel wavefront when the class is written. For now 
-    this is a stub.
-    """
-    pass
+# class TestAngularFresnel(UtilityUser):
+#     """
+#     This class will hold tests for the concrete methods of the 
+#     AngularFresnel wavefront when the class is written. For now 
+#     this is a stub.
+#     """
+#     pass
 
 
-class TestGaussianPropagator(UtilityUser):
-    """
-    Holds tests for the concrete methods of the GaussianPropagator 
-    class. These methods are:
-    - __init__()
-    - __call__()
-    - _propagate()
-    - _outside_to_outside()
-    - _outside_to_inside()
-    - _inside_to_outside()
-    - _inside_to_inside()
+# class TestGaussianPropagator(UtilityUser):
+#     """
+#     Holds tests for the concrete methods of the GaussianPropagator 
+#     class. These methods are:
+#     - __init__()
+#     - __call__()
+#     - _propagate()
+#     - _outside_to_outside()
+#     - _outside_to_inside()
+#     - _inside_to_outside()
+#     - _inside_to_inside()
 
-    Some methods have not been tested out of mathematical faith. These 
-    methods are:
-    - _waist_to_spherical()
-    - _spherical_to_waist()
-    - _planar_to_planar()
+#     Some methods have not been tested out of mathematical faith. These 
+#     methods are:
+#     - _waist_to_spherical()
+#     - _spherical_to_waist()
+#     - _planar_to_planar()
 
-    Due to the increased complexity of many of these methods they
-    are only checked for `numpy.nan` and `numpy.inf` values. With
-    correctness testing relegated to the end to end tests.
+#     Due to the increased complexity of many of these methods they
+#     are only checked for `numpy.nan` and `numpy.inf` values. With
+#     correctness testing relegated to the end to end tests.
 
-    Attributes
-    ----------
-    utility : GaussianProapagatorUtility
-        A collection of helpful constructors and functions for testing.
-    """
-    utility : GaussianPropagatorUtility = GaussianPropagatorUtility()
+#     Attributes
+#     ----------
+#     utility : GaussianProapagatorUtility
+#         A collection of helpful constructors and functions for testing.
+#     """
+#     utility : GaussianPropagatorUtility = GaussianPropagatorUtility()
 
 
-    def test_propagate(self : Tester) -> None:
-        """
-        Tests full branch coverage and then the boundary cases 
-        distance == -numpy.inf, distance == numpy.inf and distance 
-        == 0. The branches covered are:
+#     def test_propagate(self : Tester) -> None:
+#         """
+#         Tests full branch coverage and then the boundary cases 
+#         distance == -numpy.inf, distance == numpy.inf and distance 
+#         == 0. The branches covered are:
         
-        inside_to_inside
-        inside_to_outside
-        outside_to_inside
-        outside_to_outside
-        """
-        wavefront = self\
-            .get_utility()\
-            .get_utility()\
-            .construct()
+#         inside_to_inside
+#         inside_to_outside
+#         outside_to_inside
+#         outside_to_outside
+#         """
+#         wavefront = self\
+#             .get_utility()\
+#             .get_utility()\
+#             .construct()
 
-        rayleigh_distance = wavefront.rayleigh_distance()
+#         rayleigh_distance = wavefront.rayleigh_distance()
 
-        inside_to_inside = self\
-            .get_utility()\
-            .construct(distance = rayleigh_distance / 2.)\
-                ({"Wavefront": wavefront})["Wavefront"]\
-            .get_complex_form()
+#         inside_to_inside = self\
+#             .get_utility()\
+#             .construct(distance = rayleigh_distance / 2.)\
+#                 ({"Wavefront": wavefront})["Wavefront"]\
+#             .get_complex_form()
 
-        inside_to_outside = self\
-            .get_utility()\
-            .construct(distance = rayleigh_distance + 1.)\
-                ({"Wavefront": wavefront})["Wavefront"]\
-            .get_complex_form()
+#         inside_to_outside = self\
+#             .get_utility()\
+#             .construct(distance = rayleigh_distance + 1.)\
+#                 ({"Wavefront": wavefront})["Wavefront"]\
+#             .get_complex_form()
 
-        outside_to_inside = self\
-            .get_utility()\
-            .construct(rayleigh_distance)({"Wavefront": wavefront\
-                .set_position(-rayleigh_distance - 1.)})["Wavefront"]\
-            .get_complex_form()
+#         outside_to_inside = self\
+#             .get_utility()\
+#             .construct(rayleigh_distance)({"Wavefront": wavefront\
+#                 .set_position(-rayleigh_distance - 1.)})["Wavefront"]\
+#             .get_complex_form()
 
-        outside_to_outside = self\
-            .get_utility()\
-            .construct(2 * (rayleigh_distance + 1.))({"Wavefront": wavefront\
-                .set_position(-rayleigh_distance - 1.)})["Wavefront"]\
-            .get_complex_form()
+#         outside_to_outside = self\
+#             .get_utility()\
+#             .construct(2 * (rayleigh_distance + 1.))({"Wavefront": wavefront\
+#                 .set_position(-rayleigh_distance - 1.)})["Wavefront"]\
+#             .get_complex_form()
 
-        assert not numpy.isnan(inside_to_inside).any()
-        assert not numpy.isnan(inside_to_outside).any()
-        assert not numpy.isnan(outside_to_inside).any()
-        assert not numpy.isnan(outside_to_outside).any()
+#         assert not numpy.isnan(inside_to_inside).any()
+#         assert not numpy.isnan(inside_to_outside).any()
+#         assert not numpy.isnan(outside_to_inside).any()
+#         assert not numpy.isnan(outside_to_outside).any()
 
-        assert not numpy.isinf(inside_to_inside).any()
-        assert not numpy.isinf(inside_to_outside).any()
-        assert not numpy.isinf(outside_to_inside).any()
-        assert not numpy.isinf(outside_to_outside).any()
-
-
-    def test_outside_to_outside(self : Tester) -> None:
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        wavefront = self\
-            .get_utility()\
-            .get_utility()\
-            .construct()\
-            .set_phase_radius(1.)
-
-        rayleigh_distance = wavefront.rayleigh_distance()
-
-        negative = self\
-            .get_utility()\
-            .construct(- 2. * rayleigh_distance - 1.)\
-            .outside_to_outside(wavefront\
-                .set_position(rayleigh_distance + .5),
-                - 2. * rayleigh_distance - 1.)\
-            .get_complex_form()
-
-        positive = self\
-            .get_utility()\
-            .construct(2. * rayleigh_distance + 1.)\
-            .outside_to_outside(wavefront\
-                .set_position(- rayleigh_distance - .5), 
-                2. * rayleigh_distance + 1.)\
-            .get_complex_form()
-
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
-
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
+#         assert not numpy.isinf(inside_to_inside).any()
+#         assert not numpy.isinf(inside_to_outside).any()
+#         assert not numpy.isinf(outside_to_inside).any()
+#         assert not numpy.isinf(outside_to_outside).any()
 
 
-    def test_outside_to_inside(self : Tester) -> None:
-        """
-        Tests negative and a positive valid input.
-        """
-        # TODO: Work out if I need to be moving the wavefront
-        # back by the rayleigh_distance in the outside tests
-        wavefront = self\
-            .get_utility()\
-            .get_utility()\
-            .construct()\
-            .set_phase_radius(1.)
+#     def test_outside_to_outside(self : Tester) -> None:
+#         """
+#         Tests the three boundary cases -numpy.inf, and numpy.inf as
+#         well as a negative and a positive valid input.
+#         """
+#         wavefront = self\
+#             .get_utility()\
+#             .get_utility()\
+#             .construct()\
+#             .set_phase_radius(1.)
 
-        rayleigh_distance = wavefront.rayleigh_distance()
+#         rayleigh_distance = wavefront.rayleigh_distance()
 
-        negative = self\
-            .get_utility()\
-            .construct(- rayleigh_distance - 0.01)\
-            .outside_to_outside(wavefront\
-                .set_position(rayleigh_distance + 0.01),
-                - rayleigh_distance - 0.01)\
-            .get_complex_form()
+#         negative = self\
+#             .get_utility()\
+#             .construct(- 2. * rayleigh_distance - 1.)\
+#             .outside_to_outside(wavefront\
+#                 .set_position(rayleigh_distance + .5),
+#                 - 2. * rayleigh_distance - 1.)\
+#             .get_complex_form()
 
-        positive = self\
-            .get_utility()\
-            .construct(rayleigh_distance + 0.01)\
-            .outside_to_outside(wavefront\
-                .set_position(- rayleigh_distance - 0.01),
-                rayleigh_distance + 0.01)\
-            .get_complex_form()
+#         positive = self\
+#             .get_utility()\
+#             .construct(2. * rayleigh_distance + 1.)\
+#             .outside_to_outside(wavefront\
+#                 .set_position(- rayleigh_distance - .5), 
+#                 2. * rayleigh_distance + 1.)\
+#             .get_complex_form()
+
+#         assert not numpy.isnan(negative).any()
+#         assert not numpy.isnan(positive).any()
+
+#         assert not numpy.isinf(negative).any()
+#         assert not numpy.isinf(positive).any()
+
+
+#     def test_outside_to_inside(self : Tester) -> None:
+#         """
+#         Tests negative and a positive valid input.
+#         """
+#         # TODO: Work out if I need to be moving the wavefront
+#         # back by the rayleigh_distance in the outside tests
+#         wavefront = self\
+#             .get_utility()\
+#             .get_utility()\
+#             .construct()\
+#             .set_phase_radius(1.)
+
+#         rayleigh_distance = wavefront.rayleigh_distance()
+
+#         negative = self\
+#             .get_utility()\
+#             .construct(- rayleigh_distance - 0.01)\
+#             .outside_to_outside(wavefront\
+#                 .set_position(rayleigh_distance + 0.01),
+#                 - rayleigh_distance - 0.01)\
+#             .get_complex_form()
+
+#         positive = self\
+#             .get_utility()\
+#             .construct(rayleigh_distance + 0.01)\
+#             .outside_to_outside(wavefront\
+#                 .set_position(- rayleigh_distance - 0.01),
+#                 rayleigh_distance + 0.01)\
+#             .get_complex_form()
         
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
+#         assert not numpy.isnan(negative).any()
+#         assert not numpy.isnan(positive).any()
 
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
+#         assert not numpy.isinf(negative).any()
+#         assert not numpy.isinf(positive).any()
     
 
-    def test_inside_to_outside(self : Tester) -> None:
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        wavefront = self\
-            .get_utility()\
-            .get_utility()\
-            .construct()\
-            .set_phase_radius(1.)
+#     def test_inside_to_outside(self : Tester) -> None:
+#         """
+#         Tests the three boundary cases -numpy.inf, and numpy.inf as
+#         well as a negative and a positive valid input.
+#         """
+#         wavefront = self\
+#             .get_utility()\
+#             .get_utility()\
+#             .construct()\
+#             .set_phase_radius(1.)
 
-        rayleigh_distance = wavefront.rayleigh_distance()
+#         rayleigh_distance = wavefront.rayleigh_distance()
 
-        negative = self\
-            .get_utility()\
-            .construct(- rayleigh_distance - 0.01)\
-            .outside_to_outside(wavefront, - rayleigh_distance - 0.01)\
-            .get_complex_form()
+#         negative = self\
+#             .get_utility()\
+#             .construct(- rayleigh_distance - 0.01)\
+#             .outside_to_outside(wavefront, - rayleigh_distance - 0.01)\
+#             .get_complex_form()
 
-        positive = self\
-            .get_utility()\
-            .construct(rayleigh_distance + 0.01)\
-            .outside_to_outside(wavefront, rayleigh_distance + 0.01)\
-            .get_complex_form()
+#         positive = self\
+#             .get_utility()\
+#             .construct(rayleigh_distance + 0.01)\
+#             .outside_to_outside(wavefront, rayleigh_distance + 0.01)\
+#             .get_complex_form()
 
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
+#         assert not numpy.isnan(negative).any()
+#         assert not numpy.isnan(positive).any()
         
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
+#         assert not numpy.isinf(negative).any()
+#         assert not numpy.isinf(positive).any()
 
 
-    def test_inside_to_inside(self : Tester) -> None:
-        """
-        Tests the three boundary cases -numpy.inf, and numpy.inf as
-        well as a negative and a positive valid input.
-        """
-        wavefront = self\
-            .get_utility()\
-            .get_utility()\
-            .construct()\
-            .set_phase_radius(1.)
+#     def test_inside_to_inside(self : Tester) -> None:
+#         """
+#         Tests the three boundary cases -numpy.inf, and numpy.inf as
+#         well as a negative and a positive valid input.
+#         """
+#         wavefront = self\
+#             .get_utility()\
+#             .get_utility()\
+#             .construct()\
+#             .set_phase_radius(1.)
 
-        rayleigh_distance = wavefront.rayleigh_distance()
+#         rayleigh_distance = wavefront.rayleigh_distance()
 
-        negative = self\
-            .get_utility()\
-            .construct(- rayleigh_distance + 0.01)\
-            .outside_to_outside(wavefront, - rayleigh_distance + 0.01)\
-            .get_complex_form()
+#         negative = self\
+#             .get_utility()\
+#             .construct(- rayleigh_distance + 0.01)\
+#             .outside_to_outside(wavefront, - rayleigh_distance + 0.01)\
+#             .get_complex_form()
 
-        positive = self\
-            .get_utility()\
-            .construct(rayleigh_distance - 0.01)\
-            .outside_to_outside(wavefront, rayleigh_distance - 0.01)\
-            .get_complex_form()
+#         positive = self\
+#             .get_utility()\
+#             .construct(rayleigh_distance - 0.01)\
+#             .outside_to_outside(wavefront, rayleigh_distance - 0.01)\
+#             .get_complex_form()
                 
-        assert not numpy.isnan(negative).any()
-        assert not numpy.isnan(positive).any()
+#         assert not numpy.isnan(negative).any()
+#         assert not numpy.isnan(positive).any()
         
-        assert not numpy.isinf(negative).any()
-        assert not numpy.isinf(positive).any()
+#         assert not numpy.isinf(negative).any()
+#         assert not numpy.isinf(positive).any()
