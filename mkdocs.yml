@@ -62,21 +62,29 @@ nav:
             - Add Phase: user_documentation/layers/add_phase.md
             - Apply OPD: user_documentation/layers/apply_opd.md
             - Transmissive Optic: user_documentation/layers/transmissive_optic.md
+        - Utils:
+            - Coordinates:
+                - get coordinates vector: user_documentation/utils/coordinates/get_coordinates_vector.md
+                - get positions vector: user_documentation/utils/coordinates/get_positions_vector.md
+                - get pixel positions: user_documentation/utils/coordinates/get_pixel_positions.md
+                - get pixel coordinates: user_documentation/utils/coordinates/get_pixel_coordinates.md
+                - get polar positions: user_documentation/utils/coordinates/get_polar_positions.md
+                - get polar coordinates: user_documentation/utils/coordinates/get_polar_coordinates.md
     - Developer Documentation:
         - Wavefronts:
             - Wavefront: developer_documentation/wavefronts/wavefront.md
             - Cartesian Wavefront: developer_documentation/wavefronts/cartesian_wavefront.md
             - Angular Wavefront: developer_documentation/wavefronts/angular_wavefront.md
-            - Gaussian Wavefront: developer_documentation/wavefronts/gaussian_wavefront.md
+            # - Gaussian Wavefront: developer_documentation/wavefronts/gaussian_wavefront.md
         - Propagators:
             - Propagator: developer_documentation/propagators/propagator.md
             # - Gaussian Propagator: developer_documentation/propagators/gaussian_propagator.md
             - Variable Sampling:
                 - Variable Sampling Propagator: developer_documentation/propagators/variable_sampling/variable_sampling_propagator.md
                 - PhysicalMFT: developer_documentation/propagators/variable_sampling/physical_mft.md
-                - PhysicalFresnel: developer_documentation/propagators/variable_sampling/physical_fresnel.md
+                # - PhysicalFresnel: developer_documentation/propagators/variable_sampling/physical_fresnel.md
                 - AngularMFT: developer_documentation/propagators/variable_sampling/angular_mft.md
-                - AngularFresnel: developer_documentation/propagators/variable_sampling/angular_fresnel.md
+                # - AngularFresnel: developer_documentation/propagators/variable_sampling/angular_fresnel.md
             - Fixed Sampling:
                 - Fixed Sampling Propagator: developer_documentation/propagators/fixed_sampling/fixed_sampling_propagator.md
                 - PhysicalFFT: developer_documentation/propagators/fixed_sampling/physical_fft.md
