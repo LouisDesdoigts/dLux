@@ -40,35 +40,66 @@ def get_pixel_vector(
         + 0.5 + pixel_offset
     
 
-def get_pixel_positions(
+def get_pixel_grid(
         number_of_pixels : int, 
         x_pixel_offset : int = 0,
         y_pixel_offset : int = 0) -> Array:
     """
-    Generates offset para-axial coordinates, defining the optical 
-    axis. 
+    Returns a pixel grid relative to the (central) optical axis.
 
     Parameters
     ----------
     number_of_pixels : int
         The number of pixels along the side of the output array.
-    x_pixel_offset : int = 0.
+    x_pixel_offset : int = 0, pixels
         The x offset of the centre of the coordinate system in the 
         square output array.
-    y_pixel_offset : int = 0
+    y_pixel_offset : int = 0, pixels
         The y offset of the centre of the coordinate system in the 
         square output array.
 
     Returns 
     -------
     pixel_positions : Array
-        The pixel positions in the square output array with the 
+        The pixel grid in the square output array with the 
         correct offsets
     """
     x = get_pixel_vector(number_of_pixels, x_pixel_offset)
     y = get_pixel_vector(number_of_pixels, y_pixel_offset)
     return np.array(np.meshgrid(x, y))
 
+
+def get_pixel_positions(
+        number_of_pixels : int,
+        pixel_scale : float,
+        x_offset : int = 0,
+        y_offset : int = 0) -> Array:
+    """
+    Returns pixel positions relative to the (central) optical axis.
+
+    Parameters
+    ----------
+    number_of_pixels : int
+        The number of pixels along the side of the output array.
+    pixel_scale : float, meters
+        The physical size of each pixel
+    x_offset : int = 0, meters
+        The x offset of the centre of the coordinate system in the 
+        square output array.
+    y_offset : int = 0, meters
+        The y offset of the centre of the coordinate system in the 
+        square output array.
+
+    Returns 
+    -------
+    pixel_positions : Array
+        The pixel grid in the square output array with the 
+        correct offsets
+    """
+    
+    return pixel_scale * get_pixel_grid(number_of_pixels,
+                                        pixel_scale * x_offset,
+                                        pixel_scale * y_offset)
 
 # TODO:     
 def get_radial_positions(number_of_pixels : int,
