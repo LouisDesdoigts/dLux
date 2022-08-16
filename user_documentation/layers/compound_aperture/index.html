@@ -499,15 +499,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.CompoundAperture.construct_aper" class="md-nav__link">
-    construct_aper()
+  <a href="#dLux.layers.CompoundAperture.construct_aperture" class="md-nav__link">
+    construct_aperture()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.CompoundAperture.get_aper" class="md-nav__link">
-    get_aper()
+  <a href="#dLux.layers.CompoundAperture.get_aperture" class="md-nav__link">
+    get_aperture()
   </a>
   
 </li>
@@ -1026,15 +1026,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.CompoundAperture.construct_aper" class="md-nav__link">
-    construct_aper()
+  <a href="#dLux.layers.CompoundAperture.construct_aperture" class="md-nav__link">
+    construct_aperture()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.CompoundAperture.get_aper" class="md-nav__link">
-    get_aper()
+  <a href="#dLux.layers.CompoundAperture.get_aperture" class="md-nav__link">
+    get_aperture()
   </a>
   
 </li>
@@ -1288,8 +1288,8 @@ occulter_coords : Array[float], meters
 
 
 
-<h2 id="dLux.layers.CompoundAperture.construct_aper" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">construct_aper</span><span class="p">(</span><span class="n">xycoords</span><span class="p">)</span></code>
+<h2 id="dLux.layers.CompoundAperture.construct_aperture" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">construct_aperture</span><span class="p">(</span><span class="n">diameter</span><span class="p">,</span> <span class="n">npixels</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1299,6 +1299,40 @@ occulter_coords : Array[float], meters
       <p>Constructs the various apertures and occulters from the and 
 combines them into a single transmission array</p>
 
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>diameter</code></td>
+          <td>
+                <code>float, meters</code>
+          </td>
+          <td><p>The diameter of the wavefront to calculate the aperture on</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>npixels</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The linear size of the array to calculate the aperture on</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
   </div>
 
 </div>
@@ -1307,8 +1341,8 @@ combines them into a single transmission array</p>
 
 
 
-<h2 id="dLux.layers.CompoundAperture.get_aper" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get_aper</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">xycoords</span><span class="p">,</span> <span class="n">aper</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+<h2 id="dLux.layers.CompoundAperture.get_aperture" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_aperture</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">xycoords</span><span class="p">,</span> <span class="n">aper</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
 
 </h2>
 
