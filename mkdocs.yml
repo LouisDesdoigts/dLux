@@ -56,6 +56,7 @@ nav:
             - Create Wavefront: user_documentation/layers/create_wavefront.md
             - Tilt Wavefront: user_documentation/layers/tilt_wavefront.md
             - Circular Aperture: user_documentation/layers/circular_aperture.md
+            - Compound Aperture: user_documentation/layers/compound_aperture.md
             - Normalise Wavefront: user_documentation/layers/normalise_wavefront.md
             - Apply Basis OPD: user_documentation/layers/apply_basis_opd.md
             - Add Phase: user_documentation/layers/add_phase.md
