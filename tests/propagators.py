@@ -73,46 +73,7 @@ class TestPropagator(UtilityUser):
 
         assert true_propagator.is_inverse() == True
         assert false_propagator.is_inverse() == False
-
-
-#     def test_get_pixel_grid(self : Tester) -> None:
-#         """
-#         Checks that the pixel grid is generated correctly in the 
-#         output plane. The implementation is considered correct if
-#         it has the correct maximum and minimum values and is the 
-#         correct shape.
-#         """
-#         utility = self.get_utility()
-#         OFFSET = numpy.array([0., 0.])
-#         PIXEL_SCALE = 1.
-#         PIXELS = 10.
-
-#         pixel_grid = utility\
-#             .construct()\
-#             ._get_pixel_grid(OFFSET, PIXEL_SCALE, PIXELS)
-
-#         assert pixel_grid[0].max() == (PIXELS - 1) / 2 * PIXEL_SCALE
-#         assert pixel_grid[0].min() == (- PIXELS + 1) / 2 * PIXEL_SCALE
-#         assert pixel_grid[0].shape == (PIXELS, PIXELS)        
-
-
-#     def test_get_pixel_positions(self : Tester) -> None:
-#         """
-#         Checks that the pixel positions are correctly generated.
-#         The pixel positions are considered correct if they have 
-#         the correct maximum, minimum and shape.
-#         """    
-#         utility = self.get_utility()
-#         OFFSET = 0.
-#         PIXEL_SCALE = 1.
-#         PIXELS = 10.
-
-#         pixel_positions = utility\
-#             .construct()\
-#             ._get_pixel_positions(OFFSET, PIXEL_SCALE, PIXELS)    
-
-#         assert pixel_positions.max() == (PIXELS - 1) / 2 * PIXEL_SCALE
-#         assert pixel_positions.min() == (- PIXELS + 1) / 2 * PIXEL_SCALE
+        
 
 class TestVariableSamplingPropagator(UtilityUser):
     """
