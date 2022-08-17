@@ -17,6 +17,7 @@ __all__ = ["get_positions_vector",  "get_pixel_positions",
            "get_pixel_coordinates", "get_polar_coordinates"]
 
 
+import dLux
 import jax.numpy as np
 import typing
 
@@ -46,7 +47,7 @@ def get_positions_vector(
         The vector of pixel positions
     """
     return np.arange(number_of_pixels) - \
-            (number_of_pixels + 1) / 2. - pixel_offset
+            (number_of_pixels - 1) / 2. - pixel_offset
 
 
 def get_pixel_positions(
