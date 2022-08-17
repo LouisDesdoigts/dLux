@@ -51,23 +51,23 @@ class Wavefront(eqx.Module):
         The electric field amplitude of the `Wavefront`. 
     phase : Array, radians
         The electric field phase of the `Wavefront`.
-    pixel_scale : float, meters/pixel
-        The physical dimensions of each square pixel.
+    diameter : float, meters
+        The physical dimensions of the total wavefront.
     plane_type : enum.IntEnum.PlaneType
         The current plane of wavefront, can be Pupil, Focal
     """
     wavelength  : Scalar
     offset      : Vector
+    diameter    : Scalar
+    plane_type  : PlaneType
     amplitude   : Array
     phase       : Array
-    pixel_scale : Scalar
-    plane_type  : PlaneType
 
 
     def __init__(self        : Wavefront, 
                  wavelength  : Scalar, 
                  offset      : Vector,
-                 pixel_scale : Scalar,
+                 diameter    : Scalar,
                  plane_type  : PlaneType,
                  amplitude   : Array, 
                  phase       : Array) -> Wavefront:
@@ -86,14 +86,14 @@ class Wavefront(eqx.Module):
             The electric field amplitude of the `Wavefront`. 
         phase : Array, radians
             The electric field phase of the `Wavefront`.
-        pixel_scale : float, meters/pixel
+        diameter : float, meters
             The physical dimensions of each square pixel.
         plane_type : enum.IntEnum.PlaneType
             The current plane of wavefront, can be Pupil, Focal
         """
         self.wavelength = np.asarray(wavelength, dtype=float)
         self.offset = np.asarray(offset, dtype=float)
-        self.pixel_scale = np.asarray(pixel_scale, dtype=float)
+        self.diameter = np.asarray(diameter, dtype=float)
         self.plane_type = plane_type
         self.amplitude = np.asarray(amplitude, dtype=float)
         self.phase = np.asarray(phase, dtype=float)
@@ -146,16 +146,20 @@ class Wavefront(eqx.Module):
             The phases of each pixel on the `Wavefront`.
         """
         return self.phase
+    
 
-
-    def get_pixel_scale(self : Wavefront) -> Scalar:
+    def get_diameter(self : Wavefront) -> Scalar:
         """
-         Returns
+        Returns the current Wavefront diameter
+        TODO: Add unit-tests for this function
+
+        Returns
         -------
-        pixel_scale : float, meters/pixel
-            The current pixel_scale associated with the wavefront.
+        diameter : float
+           The current diameter of the wavefront
         """
-        return self.pixel_scale
+        return self.diameter
+        # return self.number_of_pixels() * self.get_pixel_scale()
 
 
     def get_plane_type(self : Wavefront) -> PlaneType:
@@ -184,17 +188,14 @@ class Wavefront(eqx.Module):
         return self.get_amplitude().shape[-1]
 
 
-    def get_diameter(self : Wavefront) -> Scalar:
+    def get_pixel_scale(self : Wavefront) -> Scalar:
         """
-        Returns the current Wavefront diameter
-        TODO: Add unit-tests for this function
-
-        Returns
+         Returns
         -------
-        diameter : float
-           The current diameter of the wavefront
+        pixel scale : float, meters/pixel
+            The current pixel scale associated with the wavefront.
         """
-        return self.number_of_pixels() * self.get_pixel_scale()
+        return self.get_diameter()/self.number_of_pixels()
 
 
     def get_real(self : Wavefront) -> Array:
@@ -303,24 +304,24 @@ class Wavefront(eqx.Module):
         return eqx.tree_at(
             lambda wavefront : wavefront.phase, self, phase,
             is_leaf = lambda leaf : leaf is None) 
+    
 
-
-    def set_pixel_scale(self : Wavefront, pixel_scale : float) -> Wavefront:
+    def set_diameter(self : Wavefront, diameter : Scalar) -> Wavefront:
         """
-        Mutator for the pixel_scale.
+        Mutator for the diameter.
 
         Parameters
         ----------
-        pixel_scale : float
-            The new pixel_scale associated with the wavefront.
+        diameter : Scalar
+            The new diameter associated with the wavefront.
 
         Returns
         -------
         wavefront : Wavefront
-            The new Wavefront object with the updated pixel_scale
+            The new Wavefront object with the updated diameter
         """
         return eqx.tree_at(
-            lambda wavefront : wavefront.pixel_scale, self, pixel_scale,
+            lambda wavefront : wavefront.diameter, self, diameter,
             is_leaf = lambda leaf : leaf is None)
 
 
@@ -640,7 +641,7 @@ class Wavefront(eqx.Module):
         """
         # Get coords arrays
         number_of_pixels_in = self.number_of_pixels()
-        ratio = pixel_scale_out / self.pixel_scale
+        ratio = pixel_scale_out / self.get_pixel_scale()
         
         centre = (number_of_pixels_in - 1) / 2
         new_centre = (number_of_pixels_out - 1) / 2
@@ -656,7 +657,7 @@ class Wavefront(eqx.Module):
         # Conserve energy
         self = self.multiply_amplitude(ratio)
         
-        return self.set_pixel_scale(pixel_scale_out)
+        return self.set_diameter(pixel_scale_out * self.number_of_pixels())
 
 
     ### Padding / Cropping Functions ###
@@ -745,7 +746,7 @@ class Wavefront(eqx.Module):
 class CartesianWavefront(Wavefront):
     """
     A plane wave extending the abstract `Wavefront` class. 
-    Stores phase and amplitude arrays. pixel_scale has units of 
+    Stores phase and amplitude arrays. pixel scale has units of 
     meters/pixel. Assumes the wavefront is square. This is Cartesian 
     as opposed to Angular, because there are no infinite distances.  
     """
@@ -753,7 +754,7 @@ class CartesianWavefront(Wavefront):
     def __init__(self        : Wavefront, 
                  wavelength  : Scalar, 
                  offset      : Vector,
-                 pixel_scale : Scalar,
+                 diameter    : Scalar,
                  plane_type  : PlaneType,
                  amplitude   : Array, 
                  phase       : Array) -> Wavefront:
@@ -772,19 +773,19 @@ class CartesianWavefront(Wavefront):
             The electric field amplitude of the `Wavefront`. 
         phase : Array, radians
             The electric field phase of the `Wavefront`.
-        pixel_scale : float, meters/pixel
+        diameter : float, meters
             The physical dimensions of each square pixel.
         plane_type : enum.IntEnum.PlaneType
             The current plane of wavefront, can be Pupil, Focal
         """
-        super().__init__(wavelength, offset, pixel_scale, 
+        super().__init__(wavelength, offset, diameter, 
                          plane_type, amplitude, phase)
 
 
 class AngularWavefront(Wavefront):
     """
     A plane wave extending the abstract `Wavefront` class. 
-    Stores phase and amplitude arrays. pixel_scale has units of 
+    Stores phase and amplitude arrays. pixel scale has units of 
     meters per pixel in pupil planes and radians per pixel in 
     focal planes. Assumes the wavefront is square.
     """ 
@@ -792,7 +793,7 @@ class AngularWavefront(Wavefront):
     def __init__(self        : Wavefront, 
                  wavelength  : Scalar, 
                  offset      : Vector,
-                 pixel_scale : Scalar,
+                 diameter    : Scalar,
                  plane_type  : PlaneType,
                  amplitude   : Array, 
                  phase       : Array) -> Wavefront:
@@ -811,311 +812,15 @@ class AngularWavefront(Wavefront):
             The electric field amplitude of the `Wavefront`. 
         phase : Array, radians
             The electric field phase of the `Wavefront`.
-        pixel_scale : float, meters/pixel or radians/pixel
+        diameter : float, meters or radians
             The physical dimensions of each square pixel. Units 
-            are meters/pixel in Pupil planes and radians/pixel
+            are meters in Pupil planes and radians
             in Focal planes.
         plane_type : enum.IntEnum.PlaneType
             The current plane of wavefront, can be Pupil, Focal
         """
-        super().__init__(wavelength, offset, pixel_scale, 
+        super().__init__(wavelength, offset, diameter, 
                          plane_type, amplitude, phase)
 
 
 
-
-# class GaussianWavefront(Wavefront):
-#     """
-#     Expresses the behaviour and state of a wavefront propagating in 
-#     an optical system under the fresnel assumptions. This 
-#     implementation is based on the same class from the `poppy` 
-#     library [poppy](https://github.com/spacetelescope/poppy/fresnel.py)
-#     and Chapter 3 from _Applied Optics and Optical Engineering_
-#     by Lawrence G. N.
-
-
-#     Approximates the wavefront as a Gaussian Beam parameterised by the 
-#     radius of the beam, the phase radius, the phase factor and the 
-#     Rayleigh distance. Propagation is based on two different regimes 
-#     for a total of four different opertations. 
-    
-#     Attributes
-#     ----------
-#     position : float, meters
-#         The position of the wavefront in the optical system.
-#     beam_radius : float, meters
-#         The radius of the beam. 
-#     phase_radius : float, unitless
-#         The phase radius of the gaussian beam.
-#     """
-#     position : float 
-#     beam_radius : float
-#     phase_radius : float
-
-
-#     def __init__(self : GaussianWavefront, 
-#             offset : Array,
-#             wavelength : float) -> GaussianWavefront:
-#         """
-#         Creates a wavefront with an empty amplitude and phase 
-#         arrays but of a given wavelength and phase offset. 
-
-#         Parameters
-#         ----------
-#         beam_radius : float
-#             Radius of the beam at the initial optical plane.
-#         wavelength : float, meters
-#             The wavelength of the `Wavefront`.
-#         offset : Array, radians
-#             The (x, y) angular offset of the `Wavefront` from 
-#             the optical axis.
-#         phase_radius :  float
-#             The phase radius of the GuasianWavefront. This is a unitless
-#             quantity. 
-#         """
-#         super().__init__(wavelength, offset)
-#         self.beam_radius = None
-#         self.phase_radius = np.inf
-#         self.position = None 
-
-
-#     def get_position(self : GaussianWavefront) -> float:
-#         """
-#         Accessor for the position of the wavefront. 
-
-#         Returns 
-#         -------
-#         position : float 
-#             The position of the `Wavefront` from its starting point 
-#             in meters.
-#         """
-#         return self.position
-
-
-#     def set_position(self : GaussianWavefront, 
-#             position : float) -> GaussianWavefront:
-#         """
-#         Mutator for the position of the wavefront. Changes the 
-#         pixel_scale which is a function of the position.  
-
-#         Parameters
-#         ----------
-#         position : float
-#             The new position of the wavefront from its starting point 
-#             assumed to be in meters. 
-        
-#         Returns
-#         -------
-#         wavefront : GaussianWavefront
-#             This wavefront at the new position. 
-#         """
-#         return eqx.tree_at(
-#             lambda wavefront : wavefront.position, self, position,
-#             is_leaf = lambda leaf : leaf is None)
-
-
-#     def get_beam_radius(self : GaussianWavefront) -> float:
-#         """
-#         Accessor for the radius of the wavefront.
-
-#         Returns
-#         -------
-#         beam_radius : float
-#             The radius of the `GaussianWavefront` in meters.
-#         """
-#         return self.beam_radius
-
-
-#     def get_phase_radius(self : GaussianWavefront) -> float:
-#         """
-#         Accessor for the phase radius of the wavefront.
-
-#         Returns
-#         -------
-#         phase_radius : float 
-#             The phase radius of the wavefront. This is a unitless 
-#             quantity.
-#         """
-#         return self.phase_radius
-
-
-#     def rayleigh_distance(self: GaussianWavefront) -> float:
-#         """
-#         Calculates the rayleigh distance of the Gaussian beam.
-        
-#         Returns
-#         -------
-#         rayleigh_distance : float
-#             The Rayleigh distance of the wavefront in metres.
-#         """
-#         return np.pi * self.get_beam_radius() ** 2\
-#             / self.get_wavelength()
-
-
-#     def transfer_function(self: GaussianWavefront, distance: float) -> Array:
-#         """
-#         The optical transfer function (OTF) for the gaussian beam.
-#         Assumes propagation is along the axis. 
-
-#         Parameters
-#         ----------
-#         distance : float
-#             The distance to propagate the wavefront along the beam 
-#             via the optical transfer function in metres.
-
-#         Returns
-#         -------
-#         phase : float 
-#             A phase representing the evolution of the wavefront over 
-#             the distance. 
-
-#         References
-#         ----------
-#         Wikipedia contributors. (2022, January 3). Direction cosine. 
-#         In Wikipedia, The Free Encyclopedia. June 23, 2022, from 
-#         https://en.wikipedia.org/wiki/Direction_cosine
-
-#         Wikipedia contributors. (2022, January 3). Spatial frequecy.
-#         In Wikipedia, The Free Encyclopedia. June 23, 2022, from 
-#         https://en.wikipedia.org/wiki/Spatial_frequency
-#         """
-#         coordinates = self.get_pixel_positions()
-#         radius = np.sqrt((coordinates ** 2).sum(axis=0))
-#         xi = coordinates[0, :, :] / radius / self.get_wavelength()
-#         eta = coordinates[1, :, :] / radius / self.get_wavelength()
-#         return np.exp(1j * np.pi * self.get_wavelength() \
-#             * distance * (xi ** 2 + eta ** 2))
-
-
-#     def quadratic_phase_factor(self: GaussianWavefront, 
-#             distance: float) -> float:
-#         """
-#         Convinience function that simplifies many of the diffraction
-#         equations. Caclulates a quadratic phase factor associated with 
-#         the beam. 
-
-#         Parameters
-#         ----------
-#         distance : float
-#             The distance of the propagation measured in metres. 
-
-#         Returns
-#         -------
-#         phase : float
-#             The near-field quadratic phase accumulated by the beam
-#             from a propagation of distance.
-#         """      
-#         return np.exp(1j * np.pi * \
-#             (self.get_pixel_positions() ** 2).sum(axis=0) \
-#             / self.get_wavelength() / distance)
-
-
-#     def location_of_waist(self: GaussianWavefront) -> float:
-#         """
-#         Calculates the position of the waist along the direction of 
-#         propagation based of the current state of the wave.
-
-#         Returns
-#         -------
-#         waist : float
-#             The position of the waist in metres.
-#         """
-#         return - self.get_phase_radius() / \
-#             (1 + (self.get_phase_radius() / \
-#             self.rayleigh_distance()) ** 2)
-
-
-#     def waist_radius(self: GaussianWavefront) -> float:
-#         """
-#         The radius of the beam at the waist.
-
-#         Returns
-#         -------
-#         waist_radius : float
-#             The radius of the beam at the waist in metres.
-#         """
-#         return self.get_beam_radius() / \
-#             np.sqrt(1 + (self.rayleigh_distance() \
-#                 / self.get_beam_radius()) ** 2) 
-
-
-#     def calculate_pixel_scale(self: GaussianWavefront, position: float) -> None:
-#         """
-#         The pixel scale at the position along the axis of propagation.
-#         Assumes that the wavefront is square. That is:
-#         ```
-#         x, y = self.amplitude.shape
-#         (x == y) == True
-#         ```
-
-#         Parameters
-#         ----------
-#         position : float
-#             The position of the wavefront aling the axis of propagation
-#             in metres.
-#         """
-#         # TODO: get_number_of_pixels() Used frequenctly not a function
-#         number_of_pixels = self.number_of_pixels()
-#         new_pixel_scale = self.get_wavelength() * np.abs(position) / \
-#             number_of_pixels / self.get_pixel_scale()  
-#         return new_pixel_scale 
-        
-
-#     def is_inside(self: GaussianWavefront, distance: float) -> bool:
-#         """ 
-#         Determines whether a point at along the axis of propagation 
-#         at distance away from the current position is inside the 
-#         rayleigh distance. 
-
-#         Parameters
-#         ----------
-#         distance : float
-#             The distance to test in metres.
-
-#         Returns
-#         -------
-#         inside : bool
-#             true if the point is within the rayleigh distance false 
-#             otherwise.
-#         """
-#         return np.abs(self.get_position() + distance - \
-#             self.location_of_waist()) <= self.rayleigh_distance()
-
-
-#     def set_phase_radius(self : GaussianWavefront, 
-#             phase_radius : float) -> GaussianWavefront:
-#         """
-#         Mutator for the phase_radius.
-
-#         Parameters
-#         ----------
-#         phase_radius : float
-#             The new phase_radius in meters.
-
-#         Returns
-#         -------
-#         wavefront : GaussianWavefront
-#             A modified GaussianWavefront with the new phase_radius.
-#         """
-#         return eqx.tree_at(lambda wavefront : wavefront.phase_radius, 
-#             self, phase_radius, is_leaf = lambda leaf : leaf is None)
-
-
-#     def set_beam_radius(self : GaussianWavefront, 
-#             beam_radius : float) -> GaussianWavefront:
-#         """
-#         Mutator for the `beam_radius`.
-
-#         Parameters
-#         ----------
-#         beam_radius : float
-#             The new beam_radius in meters.
-
-#         Returns
-#         -------
-#         wavefront : GaussianWavefront
-#             A modified GaussianWavefront with the new beam_radius.
-#         """
-#         return eqx.tree_at(
-#             lambda wavefront : wavefront.beam_radius, self, beam_radius,
-#             is_leaf = lambda leaf : leaf is None)

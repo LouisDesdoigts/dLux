@@ -520,7 +520,7 @@ class VariableSamplingPropagator(Propagator):
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
             .set_plane_type(new_plane_type)\
-            .set_pixel_scale(self.get_pixel_scale_out())
+            .set_diameter(self.get_pixel_scale_out() * self.pixels_out)
 
         parameters["Wavefront"] = new_wavefront
         return parameters           
@@ -661,7 +661,8 @@ class FixedSamplingPropagator(Propagator):
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
             .set_plane_type(new_plane_type)\
-            .set_pixel_scale(self.get_pixel_scale_out(wavefront))
+            .set_diameter(self.get_pixel_scale_out(wavefront) * \
+                          wavefront.number_of_pixels())
 
         parameters["Wavefront"] = new_wavefront
         return parameters
@@ -928,8 +929,10 @@ class AngularFFT(FixedSamplingPropagator):
             The pixel scale in the ouptut plane in units of radians 
             per pixel. 
         """
-        return wavefront.get_wavelength() / \
-            (wavefront.get_pixel_scale() * wavefront.number_of_pixels())
+        # return wavefront.get_wavelength() / \
+        #     (wavefront.get_pixel_scale() * wavefront.number_of_pixels())
+        return wavefront.get_wavelength() / wavefront.get_diameter()
+            # (wavefront.get_pixel_scale() * wavefront.number_of_pixelss())
 
     
 ### Temporarily Deprecated ###
