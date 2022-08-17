@@ -197,10 +197,3 @@ def get_polar_coordinates(
                                         pixel_scale * y_offset)
 
 
-
-def invert_x(array : Array):
-    """
-    Inverts the input array 
-    """
-
-
