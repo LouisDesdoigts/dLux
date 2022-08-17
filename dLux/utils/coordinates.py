@@ -42,7 +42,7 @@ def get_positions_vector(
 
     Returns
     -------
-    x : Array
+    x : Vector
         The vector of pixel positions
     """
     return np.arange(number_of_pixels) - \
@@ -125,7 +125,7 @@ def get_coordinates_vector(
 
     Returns
     -------
-    x : Array
+    x : Vector
         The vector of pixel coordinates
     """
     return pixel_scale * get_positions_vector(number_of_pixels, 
