@@ -53,7 +53,7 @@ class CreateWavefront(eqx.Module):
     """
     npix : int
     wavefront_size : float
-    pixel_scale : float
+    # pixel_scale : float
     wavefront_type : str = eqx.static_field()
 
 
@@ -69,8 +69,8 @@ class CreateWavefront(eqx.Module):
         """
         self.npix = int(npix)
         self.wavefront_size = np.array(wavefront_size).astype(float)
-        self.pixel_scale = np.array(wavefront_size / npix)\
-            .astype(float)
+        # self.pixel_scale = np.array(wavefront_size / npix)\
+        #     .astype(float)
         assert wavefront_type in ['Cartesian', 'Angular'], "wavefront_type \
         must be either 'Cartesian' or 'Angular'"
         self.wavefront_type = str(wavefront_type)
@@ -108,7 +108,7 @@ class CreateWavefront(eqx.Module):
             wavefront = dLux.CartesianWavefront(
                                         wavel, 
                                         offset,
-                                        self.pixel_scale,
+                                        self.wavefront_size,
                                         dLux.PlaneType.Pupil,
                                         amplitude, 
                                         phase)
@@ -117,7 +117,7 @@ class CreateWavefront(eqx.Module):
             wavefront = dLux.AngularWavefront(
                                         wavel, 
                                         offset,
-                                        self.pixel_scale,
+                                        self.wavefront_size,
                                         dLux.PlaneType.Pupil,
                                         amplitude, 
                                         phase)
