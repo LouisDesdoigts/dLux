@@ -53,9 +53,8 @@ class Wavefront(eqx.Module):
         The electric field phase of the `Wavefront`.
     pixel_scale : float, meters/pixel
         The physical dimensions of each square pixel.
-    plane_type : enum
+    plane_type : enum.IntEnum.PlaneType
         The current plane of wavefront, can be Pupil, Focal
-        or Intermediate
     """
     wavelength  : Scalar
     offset      : Vector
@@ -65,8 +64,13 @@ class Wavefront(eqx.Module):
     plane_type  : PlaneType
 
 
-    def __init__(self : Wavefront, wavelength : Scalar, 
-            offset : Vector) -> Wavefront:
+    def __init__(self        : Wavefront, 
+                 wavelength  : Scalar, 
+                 offset      : Vector,
+                 pixel_scale : Scalar,
+                 plane_type  : PlaneType,
+                 amplitude   : Array, 
+                 phase       : Array) -> Wavefront:
         """
         Initialises a minimal `Wavefront` specified only by the 
         wavelength and offset.
@@ -74,17 +78,31 @@ class Wavefront(eqx.Module):
         Parameters
         ----------
         wavelength : float, meters
-            The wavelength of the `Wavefront` in meters. 
+            The wavelength of the `Wavefront`.
         offset : Array, radians
-            The (x, y) angular offset of the wavefront from 
+            The (x, y) angular offset of the `Wavefront` from 
             the optical axis.
+        amplitude : Array, power
+            The electric field amplitude of the `Wavefront`. 
+        phase : Array, radians
+            The electric field phase of the `Wavefront`.
+        pixel_scale : float, meters/pixel
+            The physical dimensions of each square pixel.
+        plane_type : enum.IntEnum.PlaneType
+            The current plane of wavefront, can be Pupil, Focal
         """
-        self.wavelength = np.array(wavelength).astype(float)
-        self.offset = np.array(offset).astype(float) 
-        self.amplitude = None   # To be instantiated by CreateWavefront
-        self.phase = None       # To be instantiated by CreateWavefront
-        self.pixel_scale = None # To be instantiated by CreateWavefront
-        self.plane_type = None  # To be instantiated by CreateWavefront
+        self.wavelength = np.asarray(wavelength, dtype=float)
+        self.offset = np.asarray(offset, dtype=float)
+        self.pixel_scale = np.asarray(pixel_scale, dtype=float)
+        self.plane_type = plane_type
+        self.amplitude = np.asarray(amplitude, dtype=float)
+        self.phase = np.asarray(phase, dtype=float)
+        
+        # Basic checks
+        assert self.amplitude.shape == self.phase.shape, "Amplitude and \
+        phase arrays must have the same shape"
+        assert isinstance(plane_type, PlaneType), "plane_type must a PlaneType \
+        object"
 
 
     ### Getter / Accessors Functions ###
@@ -732,26 +750,35 @@ class CartesianWavefront(Wavefront):
     as opposed to Angular, because there are no infinite distances.  
     """
     
-    def __init__(self : Wavefront, wavelength : float, 
-            offset : Vector) -> Wavefront:
+    def __init__(self        : Wavefront, 
+                 wavelength  : Scalar, 
+                 offset      : Vector,
+                 pixel_scale : Scalar,
+                 plane_type  : PlaneType,
+                 amplitude   : Array, 
+                 phase       : Array) -> Wavefront:
         """
-        Constructor for a `CartesianWavefront`.
+        Initialises a minimal `Wavefront` specified only by the 
+        wavelength and offset.
 
         Parameters
         ----------
         wavelength : float, meters
             The wavelength of the `Wavefront`.
-        offset : Vector, radians
+        offset : Array, radians
             The (x, y) angular offset of the `Wavefront` from 
             the optical axis.
-            
-        Returns
-        -------
-        wavefront : CartesianWavefront
-            The new wavefront with `None` at the extra leaves. 
+        amplitude : Array, power
+            The electric field amplitude of the `Wavefront`. 
+        phase : Array, radians
+            The electric field phase of the `Wavefront`.
+        pixel_scale : float, meters/pixel
+            The physical dimensions of each square pixel.
+        plane_type : enum.IntEnum.PlaneType
+            The current plane of wavefront, can be Pupil, Focal
         """
-        super().__init__(wavelength, offset)
-        self.plane_type = None
+        super().__init__(wavelength, offset, pixel_scale, 
+                         plane_type, amplitude, phase)
 
 
 class AngularWavefront(Wavefront):
@@ -762,25 +789,37 @@ class AngularWavefront(Wavefront):
     focal planes. Assumes the wavefront is square.
     """ 
 
-    def __init__(self : Wavefront, wavelength : float, 
-            offset : Vector) -> Wavefront:
+    def __init__(self        : Wavefront, 
+                 wavelength  : Scalar, 
+                 offset      : Vector,
+                 pixel_scale : Scalar,
+                 plane_type  : PlaneType,
+                 amplitude   : Array, 
+                 phase       : Array) -> Wavefront:
         """
-        Constructor for `AngularWavefront`.
+        Initialises a minimal `Wavefront` specified only by the 
+        wavelength and offset.
 
         Parameters
         ----------
         wavelength : float, meters
             The wavelength of the `Wavefront`.
-        offset : Vector, radians
+        offset : Array, radians
             The (x, y) angular offset of the `Wavefront` from 
             the optical axis.
-
-        Returns
-        -------
-        wavefront : AngularWavefront
-            The new wavefront with `None` at the extra leaves. 
+        amplitude : Array, power
+            The electric field amplitude of the `Wavefront`. 
+        phase : Array, radians
+            The electric field phase of the `Wavefront`.
+        pixel_scale : float, meters/pixel or radians/pixel
+            The physical dimensions of each square pixel. Units 
+            are meters/pixel in Pupil planes and radians/pixel
+            in Focal planes.
+        plane_type : enum.IntEnum.PlaneType
+            The current plane of wavefront, can be Pupil, Focal
         """
-        super().__init__(wavelength, offset)
+        super().__init__(wavelength, offset, pixel_scale, 
+                         plane_type, amplitude, phase)
 
 
 

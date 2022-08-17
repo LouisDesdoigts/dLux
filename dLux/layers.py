@@ -105,15 +105,28 @@ class CreateWavefront(eqx.Module):
         
         # TODO: Make jax safe
         if self.wavefront_type is 'Cartesian':
-            wavefront = dLux.CartesianWavefront(wavel, offset)
+            wavefront = dLux.CartesianWavefront(
+                                        wavel, 
+                                        offset,
+                                        self.pixel_scale,
+                                        dLux.PlaneType.Pupil,
+                                        amplitude, 
+                                        phase)
+            
         elif self.wavefront_type is 'Angular':
-            wavefront = dLux.AngularWavefront(wavel, offset)
+            wavefront = dLux.AngularWavefront(
+                                        wavel, 
+                                        offset,
+                                        self.pixel_scale,
+                                        dLux.PlaneType.Pupil,
+                                        amplitude, 
+                                        phase)
 
-        params_dict["Wavefront"] = wavefront\
-            .set_phase(phase)\
-            .set_amplitude(amplitude)\
-            .set_plane_type(dLux.PlaneType.Pupil)\
-            .set_pixel_scale(self.pixel_scale)
+        params_dict["Wavefront"] = wavefront
+#             .set_phase(phase)\
+#             .set_amplitude(amplitude)\
+#             .set_plane_type(dLux.PlaneType.Pupil)\
+#             .set_pixel_scale(self.pixel_scale)
         
         return params_dict
 
