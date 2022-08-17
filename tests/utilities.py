@@ -603,7 +603,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
             The pixel scale in the output plane for the safe `Propagator`
         """
         return self.pixel_scale_out
- 
+
 
 class FixedSamplingUtility(PropagatorUtility, UtilityUser):
     """
