@@ -37,6 +37,7 @@ import abc
 
 
 Array = typing.NewType("Array", numpy.ndarray)
+PlaneType = typing.NewType("PlaneType", dLux.PlaneType)
 Wavefront = typing.NewType("Wavefront", object)
 Propagator = typing.NewType("Propagator", object)
 Utility = typing.NewType("Utility", object)
@@ -67,7 +68,6 @@ class UtilityUser(object):
 class Utility(object):
     """
     """
-    # @abc.abstractmethod
     def __init__(self : Utility) -> Utility:
         """
         Construct a new Utility.
@@ -79,7 +79,6 @@ class Utility(object):
         pass
 
     
-    # @abc.abstractmethod
     def construct(self : Utility) -> object:
         """
         Safe constructor for the dLuxModule, associated with 
@@ -135,6 +134,7 @@ class WavefrontUtility(Utility):
     amplitude : Array 
     phase : Array
     pixel_scale : float
+    plane_type : PlaneType
 
 
     def __init__(self : Utility, /, 
@@ -143,11 +143,12 @@ class WavefrontUtility(Utility):
             size : int = None,
             amplitude : Array = None,
             phase : Array = None,
-            pixel_scale : float = None) -> Utility:
+            pixel_scale : float = None,
+            plane_type : PlaneType = None) -> Utility:
         """
         Parameters
         ----------
-        wavelength : float = 550.e-09
+        wavelength : float = 550e-09
             The safe wavelength for the utility in meters.
         offset : Array = [0., 0.]
             The safe offset for the utility in meters.
@@ -169,7 +170,7 @@ class WavefrontUtility(Utility):
         utility : Utility 
             The new utility for generating test cases.
         """
-        self.wavelength = 550.e-09 if not wavelength else wavelength
+        self.wavelength = 550e-09 if not wavelength else wavelength
         self.offset = numpy.array([0., 0.]).astype(float) if not \
             offset else numpy.array(offset).astype(float)           
         self.size = 128 if not size else size
@@ -178,6 +179,8 @@ class WavefrontUtility(Utility):
         self.phase = numpy.zeros((1, self.size, self.size)) if not \
             phase else phase
         self.pixel_scale = 1. if not pixel_scale else pixel_scale
+        self.plane_type = dLux.PlaneType.Pupil if not \
+            plane_type else pixel_scale
 
         assert self.size == self.amplitude.shape[-1]
         assert self.size == self.amplitude.shape[-2]
@@ -194,10 +197,8 @@ class WavefrontUtility(Utility):
         wavefront : Wavefront
             The safe testing wavefront.
         """
-        return dLux\
-            .Wavefront(self.wavelength, self.offset)\
-            .update_phasor(self.amplitude, self.phase)\
-            .set_pixel_scale(self.pixel_scale)
+        return dLux.Wavefront(self.wavelength, self.offset, \
+              self.pixel_scale, self.plane_type, self.amplitude, self.phase)
 
 
     def get_wavelength(self : Utility) -> float:
@@ -273,6 +274,17 @@ class WavefrontUtility(Utility):
             The `pixel_scale` associated with the wavefront.
         """
         return self.pixel_scale
+    
+    def get_plane_type(self : Utility) -> PlaneType:
+        """
+        Accessor for the `plane_type` attribute.
+
+        Returns
+        -------
+        plane_type : Array
+            The `plane_type` associated with the wavefront.
+        """
+        return self.plane_type
 
 
 class CartesianWavefrontUtility(WavefrontUtility):
@@ -286,7 +298,8 @@ class CartesianWavefrontUtility(WavefrontUtility):
             size : int = None, 
             amplitude : Array = None, 
             phase : Array = None,
-            pixel_scale : float = None) -> Utility:
+            pixel_scale : float = None,
+            plane_type : PlaneType = None) -> Utility:
         """
         Parameters
         ----------
@@ -311,24 +324,7 @@ class CartesianWavefrontUtility(WavefrontUtility):
             A helpful class for implementing the tests. 
         """
         super().__init__(wavelength, offset, size, amplitude, phase, 
-            pixel_scale)
-
-
-    def construct(self : Utility) -> Wavefront:
-        """
-        Build a safe wavefront for testing.
-
-        Returns 
-        -------
-        wavefront : CartesianWavefront
-            The safe testing wavefront.
-        """
-        wavefront = dLux\
-            .CartesianWavefront(self.wavelength, self.offset)\
-            .update_phasor(self.amplitude, self.phase)\
-            .set_pixel_scale(self.pixel_scale)
-
-        return wavefront
+            pixel_scale, plane_type)
 
 
 class AngularWavefrontUtility(WavefrontUtility):
@@ -342,7 +338,8 @@ class AngularWavefrontUtility(WavefrontUtility):
             size : int = None, 
             amplitude : Array = None, 
             phase : Array = None,
-            pixel_scale : float = None) -> Utility:
+            pixel_scale : float = None,
+            plane_type : PlaneType = None) -> Utility:
         """
         Parameters
         ----------
@@ -367,24 +364,7 @@ class AngularWavefrontUtility(WavefrontUtility):
             A helpful class for implementing the tests. 
         """
         super().__init__(wavelength, offset, size, amplitude, phase,
-            pixel_scale)
-
-
-    def construct(self : Utility) -> Wavefront:
-        """
-        Build a safe wavefront for testing.
-
-        Returns 
-        -------
-        wavefront : CartesianWavefront
-            The safe testing wavefront.
-        """
-        wavefront = dLux\
-            .AngularWavefront(self.wavelength, self.offset)\
-            .update_phasor(self.amplitude, self.phase)\
-            .set_pixel_scale(self.pixel_scale)
-            
-        return wavefront
+            pixel_scale, plane_type)
 
 
 # class GaussianWavefrontUtility(CartesianWavefrontUtility):

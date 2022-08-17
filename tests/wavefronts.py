@@ -316,48 +316,8 @@ class TestWavefront(UtilityUser):
             .all()
 
         assert is_correct 
-        
-
-#     def test_get_pixel_position_vector(
-#             self : TestWavefront) -> None:
-#         """
-#         The get_xs_vec() function is consider correct if the 
-#         minimum value -(npix - 1) / 2 and the maximum value is
-#         (npix - 1) / 2
-#         """
-#         size = self\
-#             .get_utility()\
-#             .get_size()
-
-#         pixel_coordinates = self\
-#             .get_utility()\
-#             .construct()\
-#             .get_pixel_coordinates(size)
-        
-#         assert (pixel_coordinates.max() == (size - 1) / 2).all()
-#         assert (pixel_coordinates.min() == -(size - 1) / 2).all()
 
 
-#     def test_get_pixel_grid(self : TestWavefront) -> None:
-#         """
-#         The get_XXYY function is considered correct if it produces 
-#         an array that is of dimensions (2, self.SIZE, self.SIZE)
-#         as it uses the get_xs_vec() function under the hood.
-#         """
-#         size = self\
-#             .get_utility()\
-#             .get_size()
-
-#         pixel_grid = self\
-#             .get_utility()\
-#             .construct()\
-#             .get_pixel_grid()
-        
-#         assert pixel_grid.shape == (2, size, size)
-
-
-    # TODO: Update the docstrings to match the new implementations
-    # def test_get_pixel_positions(self : TestWavefront) -> None:
     def get_pixel_coordinates(self : TestWavefront) -> None:
         """
         The get_xycoords() function is considered correct if it 
@@ -436,13 +396,19 @@ class TestCartesianWavefront(UtilityUser):
         """
         WAVELENGTH = self.get_utility().get_wavelength()
         OFFSET = self.get_utility().get_offset()
+        SIZE = self.get_utility().get_size()
+        AMPLITUDE = self.get_utility().get_amplitude()
+        PHASE = self.get_utility().get_phase()
+        PIXEL_SCALE = self.get_utility().get_pixel_scale()
+        PLANE_TYPE = self.get_utility().get_plane_type()
 
-        wavefront = CartesianWavefront(WAVELENGTH, OFFSET)
+        wavefront = CartesianWavefront(WAVELENGTH, OFFSET, PIXEL_SCALE, 
+                                       PLANE_TYPE, AMPLITUDE, PHASE)
         
         assert wavefront.get_wavelength() == WAVELENGTH
         assert (wavefront.get_offset() == OFFSET).all()
-        assert wavefront.get_amplitude() == None
-        assert wavefront.get_phase() == None
+        assert (wavefront.get_amplitude() == AMPLITUDE).all()
+        assert (wavefront.get_phase() == PHASE).all()
         
 
 
@@ -466,13 +432,19 @@ class TestAngularWavefront(UtilityUser):
         """
         WAVELENGTH = self.get_utility().get_wavelength()
         OFFSET = self.get_utility().get_offset()
+        SIZE = self.get_utility().get_size()
+        AMPLITUDE = self.get_utility().get_amplitude()
+        PHASE = self.get_utility().get_phase()
+        PIXEL_SCALE = self.get_utility().get_pixel_scale()
+        PLANE_TYPE = self.get_utility().get_plane_type()
 
-        wavefront = AngularWavefront(WAVELENGTH, OFFSET)
+        wavefront = AngularWavefront(WAVELENGTH, OFFSET, PIXEL_SCALE, 
+                                       PLANE_TYPE, AMPLITUDE, PHASE)
         
         assert wavefront.get_wavelength() == WAVELENGTH
         assert (wavefront.get_offset() == OFFSET).all()
-        assert wavefront.get_amplitude() == None
-        assert wavefront.get_phase() == None
+        assert (wavefront.get_amplitude() == AMPLITUDE).all()
+        assert (wavefront.get_phase() == PHASE).all()
 
 
 # class TestGaussianWavefront(UtilityUser):
