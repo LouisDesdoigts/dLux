@@ -549,8 +549,8 @@ class Wavefront(eqx.Module):
             The new `Wavefront` with the phase and the amplitude arrays
             reversed along the x axis. 
         """
-        new_amplitude = self.amplitude[:, ::-1]
-        new_phase = self.phase[:, ::-1]
+        new_amplitude = np.flip(self.amplitude, axis=-1)
+        new_phase = np.flip(self.phase, axis=-1)
         return self.update_phasor(new_amplitude, new_phase)
 
 
@@ -564,8 +564,8 @@ class Wavefront(eqx.Module):
             The new wavefront with the phase and the amplitude arrays 
             reversed along the y axis.
         """
-        new_amplitude = self.amplitude[::-1, :]
-        new_phase = self.phase[::-1, :]
+        new_amplitude = np.flip(self.amplitude, axis=-2)
+        new_phase = np.flip(self.phase, axis=-2)
         return self.update_phasor(new_amplitude, new_phase)
 
 
