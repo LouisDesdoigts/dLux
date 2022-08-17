@@ -9,9 +9,9 @@ Notes:
  - Coordinates are defined with pixel sizes equal to the inputs
    pixel scale, ie physical units 
 """
-__author__ = "Jordan Dennis", "Louis Desdoigts"
+__author__ = "Jordan Dennis"
+__author__ = "Louis Desdoigts"
 __date__ = "16/08/2022"
-
 __all__ = ["get_positions_vector",  "get_pixel_positions",
            "get_polar_positions",   "get_coordinates_vector", 
            "get_pixel_coordinates", "get_polar_coordinates"]
@@ -80,8 +80,8 @@ def get_pixel_positions(
 
 def get_polar_positions(
         number_of_pixels : int,
-        x_pixel_offset   : float,
-        y_pixel_offset   : float) -> Array:
+        x_pixel_offset   : float = 0,
+        y_pixel_offset   : float = 0) -> Array:
     """
     Generate the polar positions of each pixel. 
 
@@ -167,8 +167,8 @@ def get_pixel_coordinates(
 def get_polar_coordinates(
         number_of_pixels : int,
         pixel_scale      : float,
-        x_offset         : float,
-        y_offset         : float) -> Array:
+        x_offset         : float = 0,
+        y_offset         : float = 0) -> Array:
     """
     Generate the (r, phi) polar coordinates of each pixel. 
 
@@ -178,10 +178,10 @@ def get_polar_coordinates(
         The number of pixels along one edge of the square array.
     pixel_scale : float, meters
         The physical size of each pixel
-    x_pixel_offset : float = 0.
+    x_pixel : float = 0.
         The x offset of the centre of the coordinate system in the 
         square output array.
-    y_pixel_offset : float = 0
+    y_pixel : float = 0
         The y offset of the centre of the coordinate system in the 
         square output array.
 
@@ -197,5 +197,9 @@ def get_polar_coordinates(
 
 
 
+def invert_x(array : Array):
+    """
+    Inverts the input array 
+    """
 
 
