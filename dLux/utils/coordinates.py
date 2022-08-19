@@ -20,6 +20,7 @@ __all__ = ["get_positions_vector",  "get_pixel_positions",
 import dLux
 import jax.numpy as np
 import typing
+from dLux.utils.helpers import cart2polar
 
 Scalar = typing.NewType("Scalar", np.ndarray) # 0d
 Vector = typing.NewType("Vector", np.ndarray) # 1d
@@ -104,7 +105,7 @@ def get_polar_positions(
     """
     positions = get_pixel_positions(number_of_pixels, 
         x_pixel_offset, y_pixel_offset)
-    return dLux.utils.helpers.cart2polar(positions[0], positions[1])
+    return cart2polar(positions[0], positions[1])
 
 
 
