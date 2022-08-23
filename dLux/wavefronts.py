@@ -1,10 +1,12 @@
 import dLux
+import jax
 import equinox as eqx 
 import jax.numpy as np
 import typing
 import enum
 
-__all__ = ["PlaneType", "Wavefront", "CartesianWavefront", "AngularWavefront"]
+__all__ = ["PlaneType", "Wavefront", "CartesianWavefront", 
+           "AngularWavefront", 'FarFieldFresnelWavefront']
 
 
 Scalar = typing.NewType("Scalar", np.ndarray) # 0 dim
@@ -17,7 +19,11 @@ Propagator = typing.NewType("Propagator", object)
 class PlaneType(enum.IntEnum):
     """
     Enumeration object to keep track of plane types, and have 
-    jax-safe logic based of wavefront location
+    jax-safe logic based of wavefront location.
+    
+    NOTE: Propagtors are not currently set up to ever set PlaneType
+    to Intermediate, and requires a small structural change to do
+    so. This will be done with the Near-Field Fresnel implementation.
     """
     Pupil = 1
     Focal = 2
@@ -50,15 +56,15 @@ class Wavefront(eqx.Module):
     amplitude : Array, power
         The electric field amplitude of the `Wavefront`. 
     phase : Array, radians
-        The electric field phase of the `Wavefront`.
-    diameter : float, meters
-        The physical dimensions of the total wavefront.
+        The electric field phase of the `Wavefront`.        
+    pixel_scale : float, meters
+        The physical dimensions of the pixels representing the wavefront.
     plane_type : enum.IntEnum.PlaneType
         The current plane of wavefront, can be Pupil, Focal
     """
     wavelength  : Scalar
     offset      : Vector
-    diameter    : Scalar
+    pixel_scale : Scalar
     plane_type  : PlaneType
     amplitude   : Array
     phase       : Array
@@ -67,7 +73,7 @@ class Wavefront(eqx.Module):
     def __init__(self        : Wavefront, 
                  wavelength  : Scalar, 
                  offset      : Vector,
-                 diameter    : Scalar,
+                 pixel_scale : Scalar,
                  plane_type  : PlaneType,
                  amplitude   : Array, 
                  phase       : Array) -> Wavefront:
@@ -86,14 +92,14 @@ class Wavefront(eqx.Module):
             The electric field amplitude of the `Wavefront`. 
         phase : Array, radians
             The electric field phase of the `Wavefront`.
-        diameter : float, meters
+        pixel_scale : float, meters/pixel
             The physical dimensions of each square pixel.
         plane_type : enum.IntEnum.PlaneType
             The current plane of wavefront, can be Pupil, Focal
         """
         self.wavelength = np.asarray(wavelength, dtype=float)
         self.offset = np.asarray(offset, dtype=float)
-        self.diameter = np.asarray(diameter, dtype=float)
+        self.pixel_scale = np.asarray(pixel_scale, dtype=float)
         self.plane_type = plane_type
         self.amplitude = np.asarray(amplitude, dtype=float)
         self.phase = np.asarray(phase, dtype=float)
@@ -158,8 +164,7 @@ class Wavefront(eqx.Module):
         diameter : float
            The current diameter of the wavefront
         """
-        return self.diameter
-        # return self.number_of_pixels() * self.get_pixel_scale()
+        return self.number_of_pixels() * self.get_pixel_scale()
 
 
     def get_plane_type(self : Wavefront) -> PlaneType:
@@ -195,7 +200,7 @@ class Wavefront(eqx.Module):
         pixel scale : float, meters/pixel
             The current pixel scale associated with the wavefront.
         """
-        return self.get_diameter()/self.number_of_pixels()
+        return self.pixel_scale
 
 
     def get_real(self : Wavefront) -> Array:
@@ -304,24 +309,24 @@ class Wavefront(eqx.Module):
         return eqx.tree_at(
             lambda wavefront : wavefront.phase, self, phase,
             is_leaf = lambda leaf : leaf is None) 
-    
 
-    def set_diameter(self : Wavefront, diameter : Scalar) -> Wavefront:
+
+    def set_pixel_scale(self : Wavefront, diameter : Scalar) -> Wavefront:
         """
-        Mutator for the diameter.
+        Mutator for the pixel scale.
 
         Parameters
         ----------
         diameter : Scalar
-            The new diameter associated with the wavefront.
+            The new pixel scale associated with the wavefront.
 
         Returns
         -------
         wavefront : Wavefront
-            The new Wavefront object with the updated diameter
+            The new Wavefront object with the updated pixel scale.
         """
         return eqx.tree_at(
-            lambda wavefront : wavefront.diameter, self, diameter,
+            lambda wavefront : wavefront.pixel_scale, self, diameter,
             is_leaf = lambda leaf : leaf is None)
 
 
@@ -490,10 +495,17 @@ class Wavefront(eqx.Module):
         return self.multiply_amplitude(1 / total_intensity)
 
 
-    def wavefront_to_psf(self : Wavefront) -> Array:
+    def wavefront_to_psf(self : Wavefront, 
+                         return_polarised : bool = False) -> Array:
         """
         Calculates the Point Spread Function (PSF), ie the squared modulus
         of the complex wavefront.
+        
+        Parameters
+        ----------
+        return_polarised : bool = False
+            returns the raw polarisation matrix if True, else sums the
+            polaristaion matrix into a single psf
 
         Throws
         ------
@@ -505,6 +517,17 @@ class Wavefront(eqx.Module):
         psf : Array
             The PSF of the wavefront.
         """
+        # TODO: Make this work properly for polarisation matrices
+        # and allows for the returning of the individual polarised wavefront
+        # Note this might need to wait until OpticalSystem is divorced from 
+        # Optics, since telescope detector do not respond to polarisation
+        # effects, and this currently breaks the array formatting.
+        # Also note we may not be able to pass a boolean value to return 
+        # different array shapes, as a limitation within jax.lax.cond()
+        # The solution MAY be add a CombinePolarisation layer, or 
+        # some other layer to deal with this
+        
+        # Sums the first axis for empty polarisation array
         return np.sum(self.get_amplitude() ** 2, axis=0)
     
     
@@ -780,6 +803,7 @@ class CartesianWavefront(Wavefront):
         """
         super().__init__(wavelength, offset, diameter, 
                          plane_type, amplitude, phase)
+        
 
 
 class AngularWavefront(Wavefront):
@@ -823,4 +847,58 @@ class AngularWavefront(Wavefront):
                          plane_type, amplitude, phase)
 
 
+class FarFieldFresnelWavefront(Wavefront):
+    """
+    A plane wave extending the abstract `Wavefront` class. 
+    Stores phase and amplitude arrays. pixel scale has units of 
+    meters/pixel. Assumes the wavefront is square. This is FarFieldFresnel 
+    as it is can be only represented in the far-field Fresnel approximation.
+    """
+    
+    def __init__(self        : Wavefront, 
+                 wavelength  : Scalar, 
+                 offset      : Vector,
+                 diameter    : Scalar,
+                 plane_type  : PlaneType,
+                 amplitude   : Array, 
+                 phase       : Array) -> Wavefront:
+        """
+        Initialises a minimal `Wavefront` specified only by the 
+        wavelength and offset.
 
+        Parameters
+        ----------
+        wavelength : float, meters
+            The wavelength of the `Wavefront`.
+        offset : Array, radians
+            The (x, y) angular offset of the `Wavefront` from 
+            the optical axis.
+        amplitude : Array, power
+            The electric field amplitude of the `Wavefront`. 
+        phase : Array, radians
+            The electric field phase of the `Wavefront`.
+        diameter : float, meters
+            The physical dimensions of each square pixel.
+        plane_type : enum.IntEnum.PlaneType
+            The current plane of wavefront, can be Pupil, Focal
+        """
+        super().__init__(wavelength, offset, diameter, 
+                         plane_type, amplitude, phase)
+
+    def transfer_function(self : Wavefront, 
+            distance : float) -> float:
+        """
+        The Optical Transfer Function corresponding to the 
+        evolution of the wavefront when propagating a distance.
+        
+        Parameters
+        ----------
+        distance : float
+            The distance that is getting propagated in meters.
+        Returns
+        -------
+        phase : Array
+            The phase that represents the optical transfer. 
+        """
+        wavenumber = 2. * np.pi / self.get_wavelength()
+        return np.exp(1.0j * wavenumber * distance)

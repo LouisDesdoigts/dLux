@@ -65,7 +65,7 @@ __author__ = "Louis Desdoigts"
 __author__ = "Jordan Dennis"
 __date__ = "17/08/2022"
 __all__ = ["Propagator", "VariableSamplingPropagator", "FixedSamplingPropagator",
-           "PhysicalMFT", "AngularMFT", "PhysicalFFT", "AngularFFT",]
+           "PhysicalMFT", "AngularMFT", "PhysicalFFT", "AngularFFT", "PhysicalFresnel"]
 
 
 import jax.numpy as np
@@ -520,7 +520,7 @@ class VariableSamplingPropagator(Propagator):
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
             .set_plane_type(new_plane_type)\
-            .set_diameter(self.get_pixel_scale_out() * self.pixels_out)
+            .set_pixel_scale(self.get_pixel_scale_out())
 
         parameters["Wavefront"] = new_wavefront
         return parameters           
@@ -661,8 +661,7 @@ class FixedSamplingPropagator(Propagator):
         new_wavefront = wavefront\
             .update_phasor(new_amplitude, new_phase)\
             .set_plane_type(new_plane_type)\
-            .set_diameter(self.get_pixel_scale_out(wavefront) * \
-                          wavefront.number_of_pixels())
+            .set_pixel_scale(self.get_pixel_scale_out(wavefront))
 
         parameters["Wavefront"] = new_wavefront
         return parameters
@@ -777,7 +776,7 @@ class AngularMFT(VariableSamplingPropagator):
 
 
     def number_of_fringes(self : Propagator, 
-            wavefront : Wavefront) -> float:
+                          wavefront : Wavefront) -> float:
         """
         Determines the number of diffraction fringes in the plane of 
         propagation.
@@ -929,212 +928,193 @@ class AngularFFT(FixedSamplingPropagator):
             The pixel scale in the ouptut plane in units of radians 
             per pixel. 
         """
-        # return wavefront.get_wavelength() / \
-        #     (wavefront.get_pixel_scale() * wavefront.number_of_pixels())
         return wavefront.get_wavelength() / wavefront.get_diameter()
-            # (wavefront.get_pixel_scale() * wavefront.number_of_pixelss())
-
-    
-### Temporarily Deprecated ###
-
-# class PhysicalFresnel(VariableSamplingPropagator):
-#     """
-#     far-field diffraction based on the Frensel approximation.
-#     This implementation approximately conserves flux because the 
-#     normalisation is based on focal plane MFT normalisation.
-
-#     Attributes
-#     ----------
-#     focal_length : float, meters
-#         The focal length of the lens or mirror in meters. This 
-#         is a differentiable parameter.
-#     focal_shift : float, meters
-#         The displacement of the plane of propagation from the 
-#         the focal_length in meters. This is a differentiable
-#         parameter. The focal shift is positive if the plane of 
-#         propagation is beyond the focal length and negative 
-#         if the plane of propagation is inside the focal length.
-#     """
-#     focal_length : float
-#     focal_shift : float
 
 
-#     def __init__(self : Propagator, pixels_out : float,
-#             focal_length : float, focal_shift : float, 
-#             pixel_scale_out : float, inverse : bool = False,
-#             tilt : bool = False) -> Propagator:
-#         """
-#         Parameters
-#         ----------
-#         focal_length : float, meters
-#             The focal length of the mirror or the lens.
-#         focal_shift : float, meters
-#             The distance away from the focal plane to be propagated
-#             to.
-#         pixels_out : int
-#             The number if pixels in the plane of propagation.
-#         pixel_scale_out : float, meters/pixel
-#             The scale of a pixel in the plane of propagation in 
-#             units of meters per pixel. 
-#         inverse : bool
-#             True if propagating from the plane of propagation and
-#             False if propagating to the plane of propagation. 
-#         tilt : bool 
-#             True if the tilt of the `Wavefront` is to be considered.
-#             False if the tilt is to be discarded.
-#         """
-#         self.focal_shift = np.asarray(focal_shift).astype(float)
-#         self.focal_length = np.asarray(focal_length).astype(float)
-#         super().__init__(inverse = inverse, tilt = tilt,
-#             pixel_scale_out = pixel_scale_out, pixels_out = pixels_out)       
+class PhysicalFresnel(VariableSamplingPropagator):
+    """
+    far-field diffraction based on the Frensel approximation.
+    This implementation approximately conserves flux because the 
+    normalisation is based on focal plane MFT normalisation.
+
+    Attributes
+    ----------
+    focal_length : float, meters
+        The focal length of the lens or mirror in meters. This 
+        is a differentiable parameter.
+    focal_shift : float, meters
+        The displacement of the plane of propagation from the 
+        the focal_length in meters. This is a differentiable
+        parameter. The focal shift is positive if the plane of 
+        propagation is beyond the focal length and negative 
+        if the plane of propagation is inside the focal length.
+    """
+    focal_length : float
+    focal_shift : float
 
 
-#     def get_focal_length(self : Propagator) -> float:
-#         """
-#         Returns
-#         -------
-#         focal_length : float, meters
-#             The focal length of the mirror or lens.
-#         """
-#         return self.focal_length
+    def __init__(self : Propagator, pixels_out : float,
+            focal_length : float, focal_shift : float, 
+            pixel_scale_out : float, inverse : bool = False,
+            tilt : bool = False) -> Propagator:
+        """
+        Parameters
+        ----------
+        focal_length : float, meters
+            The focal length of the mirror or the lens.
+        focal_shift : float, meters
+            The distance away from the focal plane to be propagated
+            to.
+        pixels_out : int
+            The number if pixels in the plane of propagation.
+        pixel_scale_out : float, meters/pixel
+            The scale of a pixel in the plane of propagation in 
+            units of meters per pixel. 
+        inverse : bool
+            True if propagating from the plane of propagation and
+            False if propagating to the plane of propagation. 
+        tilt : bool 
+            True if the tilt of the `Wavefront` is to be considered.
+            False if the tilt is to be discarded.
+        """
+        self.focal_shift = np.asarray(focal_shift).astype(float)
+        self.focal_length = np.asarray(focal_length).astype(float)
+        super().__init__(inverse = inverse, tilt = tilt,
+            pixel_scale_out = pixel_scale_out, pixels_out = pixels_out)       
 
 
-#     def get_focal_shift(self : Propagator) -> float:
-#         """
-#         Returns 
-#         -------
-#         shift : float, meters
-#             The shift away from focus of the detector.
-#         """
-#         return self.focal_shift
+    def get_focal_length(self : Propagator) -> float:
+        """
+        Returns
+        -------
+        focal_length : float, meters
+            The focal length of the mirror or lens.
+        """
+        return self.focal_length
 
 
-#     def number_of_fringes(self : Propagator, 
-#             wavefront : Wavefront) -> float:
-#         """
-#         The number of diffraction fringes in the plane of propagation.
+    def get_focal_shift(self : Propagator) -> float:
+        """
+        Returns 
+        -------
+        shift : float, meters
+            The shift away from focus of the detector.
+        """
+        return self.focal_shift
 
-#         Overrides
-#         ---------
-#         VariableSamplingPropagator : number_of_fringes()
-#             Adds somplexity to deal with the near field. 
 
-#         Parameters
-#         ----------
-#         wavefront : Wavefront
-#             The wavefront that is getting propagated. 
+    def number_of_fringes(self : Propagator, 
+            wavefront : Wavefront) -> float:
+        """
+        The number of diffraction fringes in the plane of propagation.
 
-#         Returns
-#         -------
-#         fringes : float
-#             The number of diffraction fringes visible in the plane of 
-#             propagation.
-#         """
-#         propagation_distance = self.get_focal_length() + self.get_focal_shift()
-#         focal_ratio = self.get_focal_length() / propagation_distance
+        Overrides
+        ---------
+        VariableSamplingPropagator : number_of_fringes()
+            Adds somplexity to deal with the near field. 
 
-#         size_in = wavefront.get_pixel_scale() * \
-#             wavefront.number_of_pixels()        
-#         size_out = self.get_pixel_scale_out() * \
-#             self.get_pixels_out()
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront that is getting propagated. 
+
+        Returns
+        -------
+        fringes : float
+            The number of diffraction fringes visible in the plane of 
+            propagation.
+        """
+        propagation_distance = self.get_focal_length() + self.get_focal_shift()
+        focal_ratio = self.get_focal_length() / propagation_distance
+
+        size_in = wavefront.get_pixel_scale() * \
+            wavefront.number_of_pixels()        
+        size_out = self.get_pixel_scale_out() * \
+            self.get_pixels_out()
         
-#         number_of_fringes = size_in * size_out / \
-#             self.get_focal_length() / wavefront.get_wavelength() * \
-#             focal_ratio
+        number_of_fringes = size_in * size_out / \
+            self.get_focal_length() / wavefront.get_wavelength() * \
+            focal_ratio
 
-#         return number_of_fringes
+        return number_of_fringes
                
 
-#     # TODO: Room for optimisation by pasing the radial parameters
-#     # instead.
-#     def quadratic_phase(self : Propagator, x_coordinates : Array, 
-#             y_coordinates : Array, wavelength : float, 
-#             distance : float) -> Array:
-#         """
-#         A convinience function for calculating quadratic phase factors
+    # TODO: Room for optimisation by pasing the radial parameters
+    # instead.
+    def quadratic_phase(self : Propagator, x_coordinates : Array, 
+            y_coordinates : Array, wavelength : float, 
+            distance : float) -> Array:
+        """
+        A convinience function for calculating quadratic phase factors
         
-#         Parameters
-#         ----------
-#         x_coordinates : Array 
-#             The x coordinates of the pixels in meters. This will be 
-#             different in the plane of propagation and the initial 
-#             plane.
-#         y_coordinates : Array
-#             The y coordinates of the pixels in meters. This will be 
-#             different in the plane of propagation and the initial 
-#             plane.
-#         wavelength : float, meters
-#             The wavelength of the wavefront.
-#         distance : float, meters
-#             The distance that is to be propagated in meters. 
+        Parameters
+        ----------
+        x_coordinates : Array 
+            The x coordinates of the pixels in meters. This will be 
+            different in the plane of propagation and the initial 
+            plane.
+        y_coordinates : Array
+            The y coordinates of the pixels in meters. This will be 
+            different in the plane of propagation and the initial 
+            plane.
+        wavelength : float, meters
+            The wavelength of the wavefront.
+        distance : float, meters
+            The distance that is to be propagated in meters. 
 
-#         Returns
-#         -------
-#         quadratic_phase : Array
-#             A set of phase factors that are useful in optical 
-#             calculations.
-#         """
-#         wavenumber = 2 * np.pi / wavelength
-#         radial_coordinates = np.hypot(x_coordinates, y_coordinates)
-#         return np.exp(0.5j * wavenumber * radial_coordinates ** 2 \
-#             / distance)
+        Returns
+        -------
+        quadratic_phase : Array
+            A set of phase factors that are useful in optical 
+            calculations.
+        """
+        wavenumber = 2 * np.pi / wavelength
+        radial_coordinates = np.hypot(x_coordinates, y_coordinates)
+        return np.exp(0.5j * wavenumber * radial_coordinates ** 2 \
+            / distance)
         
 
-#     def _propagate(self : Propagator, wavefront : Wavefront) -> Array:
-#         """
-#         Propagte the wavefront to the point specified by the pair 
-#         of parameters self._focal_length and self._focal_shift.
+    def _propagate(self : Propagator, wavefront : Wavefront) -> Array:
+        """
+        Propagte the wavefront to the point specified by the pair 
+        of parameters self._focal_length and self._focal_shift.
         
-#         Parameters
-#         ----------
-#         wavefront : Wavefront 
-#             The wavefront to propagate.
+        Parameters
+        ----------
+        wavefront : Wavefront 
+            The wavefront to propagate.
 
-#         Returns
-#         -------
-#         electric_field : Array
-#             The complex electric field in the output plane.
-#         """
-#         # See gihub issue #52
-#         offsets = super().get_pixel_offsets(wavefront)
+        Returns
+        -------
+        electric_field : Array
+            The complex electric field in the output plane.
+        """
+        # See gihub issue #52
+        offsets = self.get_pixel_offsets(wavefront)
     
-#         input_positions = wavefront.get_pixel_coordinates()
-#         # output_positions = self._get_pixel_grid(
-#         #     offsets, self.get_pixel_scale_out(),
-#         #     self.get_pixels_out())
-#         output_positions = dLux.utils.coordinates.get_pixel_coordinates(
-#                                 self.get_pixels_out(),
-#                                 self.get_pixel_scale_out(),
-#                                 )
+        input_positions = wavefront.get_pixel_coordinates()
+        output_positions = dLux.utils.coordinates.get_pixel_coordinates(
+                                self.get_pixels_out(),
+                                self.get_pixel_scale_out())
 
-#         propagation_distance = self.get_focal_length() + self.get_focal_shift()
+        propagation_distance = self.get_focal_length() + self.get_focal_shift()
 
-#         field = wavefront.get_complex_form()
-#         print("initial: ", np.sum(np.abs(field) ** 2))
-#         field *= self.quadratic_phase(*input_positions,
-#             wavefront.get_wavelength(), -self.get_focal_length())
-#         print("thin lens: ", np.sum(np.abs(field) ** 2))
-#         field *= self.quadratic_phase(*input_positions, 
-#             wavefront.get_wavelength(), propagation_distance)
-#         print("rho_1: ", np.sum(np.abs(field) ** 2))
+        field = wavefront.get_complex_form()
+        field *= self.quadratic_phase(*input_positions,
+            wavefront.get_wavelength(), -self.get_focal_length())
+        field *= self.quadratic_phase(*input_positions, 
+            wavefront.get_wavelength(), propagation_distance)
 
-#         amplitude = np.abs(field)
-#         phase = np.angle(field)
-#         wavefront = wavefront.update_phasor(amplitude, phase)
-
-#         # Gives the inverse capability
-#         field = super()._propagate(wavefront) 
-#         print("_propagate:", np.sum(np.abs(field) ** 2))
-#         field *= wavefront.get_pixel_scale() ** 2
-#         print("pixel_scale:", np.sum(np.abs(field) ** 2))
-#         field *= wavefront.transfer_function(propagation_distance)
-#         print("transfer_function: ", np.sum(np.abs(field) ** 2))
-#         field *= self.quadratic_phase(*output_positions, 
-#             wavefront.get_wavelength(), propagation_distance)
-#         print("rho_2: ", np.sum(np.abs(field) ** 2))
-
-#         return field 
-
+        wavefront = wavefront.update_phasor(np.abs(field), np.angle(field))
+        
+        field = super()._propagate(wavefront) 
+        field *= wavefront.transfer_function(propagation_distance)
+        field *= self.quadratic_phase(*output_positions, 
+            wavefront.get_wavelength(), propagation_distance)
+        return field 
+    
+    
+# TODO: Implement eventually
 
 # class AngularFresnel(Propagator):
 #     """
