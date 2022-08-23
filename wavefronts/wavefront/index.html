@@ -1,0 +1,3707 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../../assets/logo.jpg">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.1">
+    
+    
+      
+        <title>Wavefront - ∂Lux - Differentiable Optical Simulation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.69437709.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dLux.wavefronts.Wavefront" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="∂Lux - Differentiable Optical Simulation" class="md-header__button md-logo" aria-label="∂Lux - Differentiable Optical Simulation" data-md-component="logo">
+      
+  <img src="../../assets/logo.jpg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ∂Lux - Differentiable Optical Simulation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Wavefront
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/LouisDesdoigts/dLux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="∂Lux - Differentiable Optical Simulation" class="md-nav__button md-logo" aria-label="∂Lux - Differentiable Optical Simulation" data-md-component="logo">
+      
+  <img src="../../assets/logo.jpg" alt="logo">
+
+    </a>
+    ∂Lux - Differentiable Optical Simulation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/LouisDesdoigts/dLux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/phase_retrieval_demo/" class="md-nav__link">
+        Phase Retrieval in dLux
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/designing_a_mask/" class="md-nav__link">
+        Phase Mask Design
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/flatfield_calibration/" class="md-nav__link">
+        Pixel Level Calibration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notebooks/fisher_information/" class="md-nav__link">
+        Fisher Information
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../optical_system/" class="md-nav__link">
+        Optical System
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Layers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Layers" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Layers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../layers/create_wavefront/" class="md-nav__link">
+        Create Wavefront
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../layers/tilt_wavefront/" class="md-nav__link">
+        Tilt Wavefront
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../layers/circular_aperture/" class="md-nav__link">
+        Circular Aperture
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../layers/compound_aperture/" class="md-nav__link">
+        Compound Aperture
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../layers/normalise_wavefront/" class="md-nav__link">
+        Normalise Wavefront
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../layers/apply_basis_opd/" class="md-nav__link">
+        Apply Basis OPD
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../layers/add_phase/" class="md-nav__link">
+        Add Phase
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../layers/apply_opd/" class="md-nav__link">
+        Apply OPD
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../layers/transmissive_optic/" class="md-nav__link">
+        Transmissive Optic
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Propagators
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Propagators" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Propagators
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../propagators/propagator/" class="md-nav__link">
+        Propagator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" type="checkbox" id="__nav_5_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_2">
+          Variable Sampling
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Variable Sampling" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_2">
+          <span class="md-nav__icon md-icon"></span>
+          Variable Sampling
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../propagators/variable_sampling/variable_sampling_propagator/" class="md-nav__link">
+        Variable Sampling Propagator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../propagators/variable_sampling/physical_mft/" class="md-nav__link">
+        PhysicalMFT
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../propagators/variable_sampling/physical_fresnel/" class="md-nav__link">
+        Physical Fresnel
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../propagators/variable_sampling/angular_mft/" class="md-nav__link">
+        AngularMFT
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Fixed Sampling
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Fixed Sampling" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Fixed Sampling
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../propagators/fixed_sampling/fixed_sampling_propagator/" class="md-nav__link">
+        Fixed Sampling Propagator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../propagators/fixed_sampling/physical_fft/" class="md-nav__link">
+        PhysicalFFT
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../propagators/fixed_sampling/angular_fft/" class="md-nav__link">
+        AngularFFT
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Wavefronts
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Wavefronts" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Wavefronts
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Wavefront
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Wavefront
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront" class="md-nav__link">
+    dLux.wavefronts.Wavefront
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.amplitude" class="md-nav__link">
+    amplitude
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.offset" class="md-nav__link">
+    offset
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.phase" class="md-nav__link">
+    phase
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.pixel_scale" class="md-nav__link">
+    pixel_scale
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.plane_type" class="md-nav__link">
+    plane_type
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.wavelength" class="md-nav__link">
+    wavelength
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.add_opd" class="md-nav__link">
+    add_opd()
+  </a>
+  
+    <nav class="md-nav" aria-label="add_opd()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.add_opd--throws" class="md-nav__link">
+    Throws
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.add_phase" class="md-nav__link">
+    add_phase()
+  </a>
+  
+    <nav class="md-nav" aria-label="add_phase()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.add_phase--throws" class="md-nav__link">
+    Throws
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.crop_to" class="md-nav__link">
+    crop_to()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_amplitude" class="md-nav__link">
+    get_amplitude()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_complex_form" class="md-nav__link">
+    get_complex_form()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_diameter" class="md-nav__link">
+    get_diameter()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_imaginary" class="md-nav__link">
+    get_imaginary()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_offset" class="md-nav__link">
+    get_offset()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_phase" class="md-nav__link">
+    get_phase()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_pixel_coordinates" class="md-nav__link">
+    get_pixel_coordinates()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_pixel_scale" class="md-nav__link">
+    get_pixel_scale()
+  </a>
+  
+    <nav class="md-nav" aria-label="get_pixel_scale()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_pixel_scale--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_plane_type" class="md-nav__link">
+    get_plane_type()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_real" class="md-nav__link">
+    get_real()
+  </a>
+  
+    <nav class="md-nav" aria-label="get_real()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_real--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_wavelength" class="md-nav__link">
+    get_wavelength()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.interpolate" class="md-nav__link">
+    interpolate()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.invert_x" class="md-nav__link">
+    invert_x()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.invert_x_and_y" class="md-nav__link">
+    invert_x_and_y()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.invert_y" class="md-nav__link">
+    invert_y()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.multiply_amplitude" class="md-nav__link">
+    multiply_amplitude()
+  </a>
+  
+    <nav class="md-nav" aria-label="multiply_amplitude()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.multiply_amplitude--throws" class="md-nav__link">
+    Throws
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.normalise" class="md-nav__link">
+    normalise()
+  </a>
+  
+    <nav class="md-nav" aria-label="normalise()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.normalise--throws" class="md-nav__link">
+    Throws
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.number_of_pixels" class="md-nav__link">
+    number_of_pixels()
+  </a>
+  
+    <nav class="md-nav" aria-label="number_of_pixels()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.number_of_pixels--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.pad_to" class="md-nav__link">
+    pad_to()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.paraxial_interpolate" class="md-nav__link">
+    paraxial_interpolate()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_amplitude" class="md-nav__link">
+    set_amplitude()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_offset" class="md-nav__link">
+    set_offset()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_phase" class="md-nav__link">
+    set_phase()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_pixel_scale" class="md-nav__link">
+    set_pixel_scale()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_plane_type" class="md-nav__link">
+    set_plane_type()
+  </a>
+  
+    <nav class="md-nav" aria-label="set_plane_type()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_plane_type--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_wavelength" class="md-nav__link">
+    set_wavelength()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.update_phasor" class="md-nav__link">
+    update_phasor()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.wavefront_to_psf" class="md-nav__link">
+    wavefront_to_psf()
+  </a>
+  
+    <nav class="md-nav" aria-label="wavefront_to_psf()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.wavefront_to_psf--throws" class="md-nav__link">
+    Throws
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cartesian_wavefront/" class="md-nav__link">
+        Cartesian Wavefront
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../angular_wavefront/" class="md-nav__link">
+        Angular Wavefront
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../far_field_fresnel_wavefront/" class="md-nav__link">
+        Far Field Fresnel Wavefront
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7">
+          Utils
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Utils" data-md-level="1">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Utils
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_1" type="checkbox" id="__nav_7_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7_1">
+          Coordinates
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Coordinates" data-md-level="2">
+        <label class="md-nav__title" for="__nav_7_1">
+          <span class="md-nav__icon md-icon"></span>
+          Coordinates
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utils/coordinates/get_coordinates_vector/" class="md-nav__link">
+        get coordinates vector
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utils/coordinates/get_positions_vector/" class="md-nav__link">
+        get positions vector
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utils/coordinates/get_pixel_positions/" class="md-nav__link">
+        get pixel positions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utils/coordinates/get_pixel_coordinates/" class="md-nav__link">
+        get pixel coordinates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utils/coordinates/get_polar_positions/" class="md-nav__link">
+        get polar positions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utils/coordinates/get_polar_coordinates/" class="md-nav__link">
+        get polar coordinates
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront" class="md-nav__link">
+    dLux.wavefronts.Wavefront
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.amplitude" class="md-nav__link">
+    amplitude
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.offset" class="md-nav__link">
+    offset
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.phase" class="md-nav__link">
+    phase
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.pixel_scale" class="md-nav__link">
+    pixel_scale
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.plane_type" class="md-nav__link">
+    plane_type
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.wavelength" class="md-nav__link">
+    wavelength
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.add_opd" class="md-nav__link">
+    add_opd()
+  </a>
+  
+    <nav class="md-nav" aria-label="add_opd()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.add_opd--throws" class="md-nav__link">
+    Throws
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.add_phase" class="md-nav__link">
+    add_phase()
+  </a>
+  
+    <nav class="md-nav" aria-label="add_phase()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.add_phase--throws" class="md-nav__link">
+    Throws
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.crop_to" class="md-nav__link">
+    crop_to()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_amplitude" class="md-nav__link">
+    get_amplitude()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_complex_form" class="md-nav__link">
+    get_complex_form()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_diameter" class="md-nav__link">
+    get_diameter()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_imaginary" class="md-nav__link">
+    get_imaginary()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_offset" class="md-nav__link">
+    get_offset()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_phase" class="md-nav__link">
+    get_phase()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_pixel_coordinates" class="md-nav__link">
+    get_pixel_coordinates()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_pixel_scale" class="md-nav__link">
+    get_pixel_scale()
+  </a>
+  
+    <nav class="md-nav" aria-label="get_pixel_scale()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_pixel_scale--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_plane_type" class="md-nav__link">
+    get_plane_type()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_real" class="md-nav__link">
+    get_real()
+  </a>
+  
+    <nav class="md-nav" aria-label="get_real()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_real--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.get_wavelength" class="md-nav__link">
+    get_wavelength()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.interpolate" class="md-nav__link">
+    interpolate()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.invert_x" class="md-nav__link">
+    invert_x()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.invert_x_and_y" class="md-nav__link">
+    invert_x_and_y()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.invert_y" class="md-nav__link">
+    invert_y()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.multiply_amplitude" class="md-nav__link">
+    multiply_amplitude()
+  </a>
+  
+    <nav class="md-nav" aria-label="multiply_amplitude()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.multiply_amplitude--throws" class="md-nav__link">
+    Throws
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.normalise" class="md-nav__link">
+    normalise()
+  </a>
+  
+    <nav class="md-nav" aria-label="normalise()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.normalise--throws" class="md-nav__link">
+    Throws
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.number_of_pixels" class="md-nav__link">
+    number_of_pixels()
+  </a>
+  
+    <nav class="md-nav" aria-label="number_of_pixels()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.number_of_pixels--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.pad_to" class="md-nav__link">
+    pad_to()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.paraxial_interpolate" class="md-nav__link">
+    paraxial_interpolate()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_amplitude" class="md-nav__link">
+    set_amplitude()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_offset" class="md-nav__link">
+    set_offset()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_phase" class="md-nav__link">
+    set_phase()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_pixel_scale" class="md-nav__link">
+    set_pixel_scale()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_plane_type" class="md-nav__link">
+    set_plane_type()
+  </a>
+  
+    <nav class="md-nav" aria-label="set_plane_type()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_plane_type--returns" class="md-nav__link">
+    Returns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.set_wavelength" class="md-nav__link">
+    set_wavelength()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.update_phasor" class="md-nav__link">
+    update_phasor()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.wavefront_to_psf" class="md-nav__link">
+    wavefront_to_psf()
+  </a>
+  
+    <nav class="md-nav" aria-label="wavefront_to_psf()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dLux.wavefronts.Wavefront.wavefront_to_psf--throws" class="md-nav__link">
+    Throws
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/wavefronts/wavefront.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+  <h1>Wavefront</h1>
+
+<div class="doc doc-object doc-class">
+
+
+<a id="dLux.wavefronts.Wavefront"></a>
+  <div class="doc doc-contents first">
+      <p class="doc doc-class-bases">
+        Bases: <code><span title="equinox">eqx</span>.<span title="equinox.Module">Module</span></code></p>
+
+  
+      <p>An abstract module that should never be directly instantiated.
+This class represents a general optical wavefront although the 
+exact implementation must go through a subclass. Wavefront
+objects are assumed to be square.</p>
+<p>The Wavefront and its contents are not intended to be public 
+functionality. The object is initialised using in a vectorised 
+manner using jax.vmap over both wavelength and offset. These 
+values are initialised within the OpticalSystem class by the 
+CreateWavefront layer which represents the source of the input
+wavefront. </p>
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wavelength</code></td>
+          <td>
+                <code>float, meters</code>
+          </td>
+          <td><p>The wavelength of the <code>Wavefront</code>.</p></td>
+        </tr>
+        <tr>
+          <td><code>offset</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
+          </td>
+          <td><p>The (x, y) angular offset of the <code>Wavefront</code> from 
+the optical axis.</p></td>
+        </tr>
+        <tr>
+          <td><code>amplitude</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, power</code>
+          </td>
+          <td><p>The electric field amplitude of the <code>Wavefront</code>. </p></td>
+        </tr>
+        <tr>
+          <td><code>phase</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
+          </td>
+          <td><p>The electric field phase of the <code>Wavefront</code>.        </p></td>
+        </tr>
+        <tr>
+          <td><code>pixel_scale</code></td>
+          <td>
+                <code>float, meters</code>
+          </td>
+          <td><p>The physical dimensions of the pixels representing the wavefront.</p></td>
+        </tr>
+        <tr>
+          <td><code>plane_type</code></td>
+          <td>
+                <code>enum.<span title="enum.IntEnum">IntEnum</span>.<span title="enum.IntEnum.PlaneType">PlaneType</span></code>
+          </td>
+          <td><p>The current plane of wavefront, can be Pupil, Focal</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.amplitude" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">amplitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">amplitude</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.offset" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.phase" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.pixel_scale" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.plane_type" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">plane_type</span> <span class="o">=</span> <span class="n">plane_type</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.wavelength" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">wavelength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">plane_type</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initialises a minimal <code>Wavefront</code> specified only by the 
+wavelength and offset.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wavelength</code></td>
+          <td>
+                <code>float, meters</code>
+          </td>
+          <td><p>The wavelength of the <code>Wavefront</code>.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>offset</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
+          </td>
+          <td><p>The (x, y) angular offset of the <code>Wavefront</code> from 
+the optical axis.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>amplitude</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, power</code>
+          </td>
+          <td><p>The electric field amplitude of the <code>Wavefront</code>.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>phase</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
+          </td>
+          <td><p>The electric field phase of the <code>Wavefront</code>.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>pixel_scale</code></td>
+          <td>
+                <code>float, meters</code>
+          </td>
+          <td><p>The physical dimensions of each square pixel.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>plane_type</code></td>
+          <td>
+                <code>enum.<span title="enum.IntEnum">IntEnum</span>.<span title="enum.IntEnum.PlaneType">PlaneType</span></code>
+          </td>
+          <td><p>The current plane of wavefront, can be Pupil, Focal</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.add_opd" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">add_opd</span><span class="p">(</span><span class="n">path_difference</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Applies the wavelength-dependent phase based on the supplied 
+optical path difference.</p>
+<h4 id="dLux.wavefronts.Wavefront.add_opd--throws">Throws</h4>
+<p>error : TypeError
+    If <code>self.phase</code> has not been externally initialised
+error : ValueError
+    If <code>path_difference.shape != self.phase.shape</code> or 
+    If <code>path_difference.shape != (1,)</code></p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>path_difference</code></td>
+          <td>
+                <code>Union[float, <span title="dLux.wavefronts.Array">Array</span>], meters</code>
+          </td>
+          <td><p>The physical optical path difference of either the 
+entire wavefront or each pixel individually.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new wavefront with the phases updated according to 
+<code>path_difference</code></p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.add_phase" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">add_phase</span><span class="p">(</span><span class="n">array_like</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Add either a float or array of phase to <code>Wavefront</code>.</p>
+<h4 id="dLux.wavefronts.Wavefront.add_phase--throws">Throws</h4>
+<p>error : TypeError
+    If self.phase has not been initialised externally.
+error : ValueError
+    If <code>amounts</code> is not of the same dimensions as <code>self.phases</code>
+    or <code>amounts</code>. i.e. 
+    <code>py
+    ((weights.shape == (1,))                 | (weights.shape == self.amplitude.shape) == True</code></p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>array_like</code></td>
+          <td>
+                <code>Union[float, array]</code>
+          </td>
+          <td><p>The amount of phase to add to the current phase value of 
+each pixel. A scalar modifies the global phase of the 
+wavefront.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> with the updated array of phases.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.crop_to" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">crop_to</span><span class="p">(</span><span class="n">number_of_pixels_out</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Crops the <code>Wavefront</code>. Assumes that 
+<code>number_of_pixels_out &lt; self.amplitude.shape[-1]</code>. 
+<code>Wavefront</code>s with an even number of pixels can only 
+be cropped to an even number of pixels without interpolation
+and vice-versa.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>number_of_pixels_out</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The square side length of the array after it has been 
+zero padded.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> with the optical disturbance zero 
+cropped to the new dimensions.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_amplitude" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_amplitude</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>amplitude</code></td>          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, power</code>
+          </td>
+          <td><p>The electric field amplitude of the <code>Wavefront</code>.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_complex_form" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_complex_form</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>The electric field described by this Wavefront in complex 
+form.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>field</code></td>          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>[complex]</code>
+          </td>
+          <td><p>The complex electric field of the wavefront.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_diameter" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_diameter</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the current Wavefront diameter
+TODO: Add unit-tests for this function</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>diameter</code></td>          <td>
+                <code>float</code>
+          </td>
+          <td><p>The current diameter of the wavefront</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_imaginary" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_imaginary</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>The imaginary component of the <code>Wavefront</code></p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span></code>
+          </td>
+          <td><p>The imaginary component of the complex <code>Wavefront</code>.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_offset" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_offset</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>offset</code></td>          <td>
+                <code><span title="dLux.wavefronts.Vector">Vector</span>, radians</code>
+          </td>
+          <td><p>The (x, y) angular offset of the wavefront from the optical 
+axis.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_phase" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_phase</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>phase</code></td>          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
+          </td>
+          <td><p>The phases of each pixel on the <code>Wavefront</code>.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_pixel_coordinates" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_pixel_coordinates</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the physical positions of the wavefront pixels in meters</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>pixel_positions</code></td>          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span></code>
+          </td>
+          <td><p>The physical positions of the optical disturbance. 
+Guarantees that <code>self.get_coordinates().shape == 
+self.amplitude.shape</code>.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_pixel_scale" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_pixel_scale</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <h4 id="dLux.wavefronts.Wavefront.get_pixel_scale--returns">Returns</h4>
+<p>pixel scale : float, meters/pixel
+    The current pixel scale associated with the wavefront.</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_plane_type" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_plane_type</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>plane</code></td>          <td>
+                <code>str</code>
+          </td>
+          <td><p>The plane that the <code>Wavefront</code> is currently in. The 
+options are currently "Pupil", "Focal" and "None".</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_real" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_real</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>The real component of the <code>Wavefront</code>. </p>
+<h4 id="dLux.wavefronts.Wavefront.get_real--returns">Returns</h4>
+<p>wavefront : Array
+    The real component of the complex <code>Wavefront</code>.</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.get_wavelength" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_wavelength</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavelength</code></td>          <td>
+                <code>float, meters</code>
+          </td>
+          <td><p>The wavelength of the <code>Wavefront</code>.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.interpolate" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">interpolate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">real_imaginary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Interpolates the <code>Wavefront</code> at the points specified by 
+coordinates. The default interpolation uses the amplitude 
+and phase, however by passing <code>real_imgainary=True</code> 
+the interpolation can be based on the real and imaginary 
+information. The main use of this function is as a helper 
+method to <code>self.paraxial_interpolate</code>.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>coordinates</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span></code>
+          </td>
+          <td><p>The coordinates to interpolate the optical disturbance
+at. Assumed to have the units meters.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>real_imaginary</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Whether to use the amplitude-phase or real-imaginary
+representation for the interpolation.</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>field</code></td>          <td>
+                <code>tuple[<span title="dLux.wavefronts.Array">Array</span>, <span title="dLux.wavefronts.Array">Array</span>]</code>
+          </td>
+          <td><p>The amplitude and phase of the wavefront at <code>coordinates</code>
+based on a linear interpolation.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.invert_x" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">invert_x</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Reflects the wavefront about the x axis.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> with the phase and the amplitude arrays
+reversed along the x axis.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.invert_x_and_y" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">invert_x_and_y</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Reflects the wavefront about both axes. </p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> with the phase and amplitude arrays
+reversed along both axes.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.invert_y" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">invert_y</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Reflects the wavefront about the y axis.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new wavefront with the phase and the amplitude arrays 
+reversed along the y axis.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.multiply_amplitude" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">multiply_amplitude</span><span class="p">(</span><span class="n">array_like</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Multiply the amplitude of the <code>Wavefront</code> by either a float or
+array. </p>
+<h4 id="dLux.wavefronts.Wavefront.multiply_amplitude--throws">Throws</h4>
+<p>error : TypeError
+    If <code>self.amplitude</code> has not initialised externally.
+error : ValueError
+    If <code>weights</code> is not a scalar, or an array of the same 
+    dimensions. i.e.
+    <code>py
+    ((weights.shape == (1,))                 | (weights.shape == self.amplitude.shape) == True</code></p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>array_like</code></td>
+          <td>
+                <code>Union[float, array]</code>
+          </td>
+          <td><p>An array that has the same dimensions as self.amplitude 
+by which elementwise multiply each pixel. 
+A float to apply to the entire array at once.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> with the applied changes to the 
+amplitude array.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.normalise" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">normalise</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Normalises the total power of the wavefront to 1.</p>
+<h4 id="dLux.wavefronts.Wavefront.normalise--throws">Throws</h4>
+<p>error : TypeError
+    If <code>self.amplitude</code> has not been externally instantiated.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new wavefront with the normalised electric field 
+amplitudes.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.number_of_pixels" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">number_of_pixels</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>The side length of the pixel array that represents the 
+electric field of the <code>Wavefront</code>. Calcualtes the <code>pixels</code>
+value from the shape of the amplitude array.</p>
+<h4 id="dLux.wavefronts.Wavefront.number_of_pixels--returns">Returns</h4>
+<p>pixels : int
+    The number of pixels that represent the <code>Wavefront</code> along 
+    one side.</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.pad_to" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">pad_to</span><span class="p">(</span><span class="n">number_of_pixels_out</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Pads the <code>Wavefront</code> with zeros. Assumes that 
+<code>number_of_pixels_out &gt; self.amplitude.shape[-1]</code>. 
+Note that <code>Wavefronts</code> with even pixel dimensions can 
+only be padded (without interpolation) to even pixel 
+dimensions and vice-versa. </p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>number_of_pixels_out</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The square side length of the array after it has been 
+zero padded.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> with the optical disturbance zero 
+padded to the new dimensions.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.paraxial_interpolate" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">paraxial_interpolate</span><span class="p">(</span><span class="n">pixel_scale_out</span><span class="p">,</span> <span class="n">number_of_pixels_out</span><span class="p">,</span> <span class="n">real_imaginary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Interpolates the <code>Wavefront</code> so that it remains centered on 
+the optical axis. Calculation can be performed using 
+either the real-imaginary or amplitude-phase representations 
+of the wavefront. The default is amplitude-phase. </p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>pixel_scale_out</code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td><p>The dimensions of a single square pixel after the 
+interpolation.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>number_of_pixels_out</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The number of pixels along one side of the square
+<code>Wavefront</code> after the interpolation.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>real_imaginary</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Whether to use the real-imaginary representation of the 
+wavefront for the interpolation.</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new wavefront with the updated optical disturbance.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.set_amplitude" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_amplitude</span><span class="p">(</span><span class="n">amplitude</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>amplitude</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, power</code>
+          </td>
+          <td><p>The electric field amplitude of the <code>Wavefront</code>.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> with the updated amplitude.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.set_offset" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_offset</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>offset</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Vector">Vector</span>, radians</code>
+          </td>
+          <td><p>The (x, y) angular offset of the wavefront from the optical 
+axis.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> with the updated offset.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.set_phase" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_phase</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>phase</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
+          </td>
+          <td><p>The phases of each pixel on the <code>Wavefront</code>.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> with the updated phase.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.set_pixel_scale" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_pixel_scale</span><span class="p">(</span><span class="n">diameter</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Mutator for the pixel scale.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>diameter</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Scalar">Scalar</span></code>
+          </td>
+          <td><p>The new pixel scale associated with the wavefront.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new Wavefront object with the updated pixel scale.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.set_plane_type" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_plane_type</span><span class="p">(</span><span class="n">plane</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>plane</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>A string describing the plane that the <code>Wavefront</code> is 
+currently in.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+      <h4 id="dLux.wavefronts.Wavefront.set_plane_type--returns">Returns</h4>
+<p>wavefront : Wavefront 
+    The new <code>Wavefront</code> with the update plane information.</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.set_wavelength" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_wavelength</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wavelength</code></td>
+          <td>
+                <code>float, meters</code>
+          </td>
+          <td><p>The wavelength of the <code>Wavefront</code>.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> with the updated wavelength.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.update_phasor" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">update_phasor</span><span class="p">(</span><span class="n">amplitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Used to update the state of the wavefront. This should typically
+only be called from within a propagator layers in order to ensure
+that values such as pixelscale are updates appropriately. It is 
+assumed that <code>amplitude</code> and <code>phase</code> have the same shape 
+i.e. <code>amplitude.shape == phase.shape</code>. It is not assumed that the 
+shape of the wavefront is  maintained 
+i.e. <code>self.amplitude.shape == amplitude.shape</code> is <strong>not</strong> required. </p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>amplitude</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, power</code>
+          </td>
+          <td><p>The electric field amplitudes of the wavefront.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>phase</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
+          </td>
+          <td><p>The phases of each pixel in the new wavefront.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavefront</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
+          </td>
+          <td><p>The new <code>Wavefront</code> specified by <code>amplitude</code> and <code>phase</code></p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.wavefronts.Wavefront.wavefront_to_psf" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">wavefront_to_psf</span><span class="p">(</span><span class="n">return_polarised</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Calculates the Point Spread Function (PSF), ie the squared modulus
+of the complex wavefront.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>return_polarised</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>returns the raw polarisation matrix if True, else sums the
+polaristaion matrix into a single psf</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+      <h4 id="dLux.wavefronts.Wavefront.wavefront_to_psf--throws">Throws</h4>
+<p>error : TypeError
+    If <code>self.amplitude</code> has not been externally initialised.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>psf</code></td>          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span></code>
+          </td>
+          <td><p>The PSF of the wavefront.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../../propagators/fixed_sampling/angular_fft/" class="md-footer__link md-footer__link--prev" aria-label="Previous: AngularFFT" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              AngularFFT
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../cartesian_wavefront/" class="md-footer__link md-footer__link--next" aria-label="Next: Cartesian Wavefront" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Cartesian Wavefront
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.9c69f0bc.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
