@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../../assets/logo.jpg">
-      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.0">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.1">
     
     
       
@@ -1878,22 +1878,21 @@ the optical axis.</p></td>
           <td>
                 <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
           </td>
-          <td><p>The electric field phase of the <code>Wavefront</code>.</p></td>
+          <td><p>The electric field phase of the <code>Wavefront</code>.        </p></td>
         </tr>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>float, meters/pixel</code>
+                <code>float, meters</code>
           </td>
-          <td><p>The physical dimensions of each square pixel.</p></td>
+          <td><p>The physical dimensions of the pixels representing the wavefront.</p></td>
         </tr>
         <tr>
           <td><code>plane_type</code></td>
           <td>
-                <code>enum</code>
+                <code>enum.<span title="enum.IntEnum">IntEnum</span>.<span title="enum.IntEnum.PlaneType">PlaneType</span></code>
           </td>
-          <td><p>The current plane of wavefront, can be Pupil, Focal
-or Intermediate</p></td>
+          <td><p>The current plane of wavefront, can be Pupil, Focal</p></td>
         </tr>
     </tbody>
   </table>
@@ -1915,7 +1914,7 @@ or Intermediate</p></td>
 
 
 <h2 id="dLux.wavefronts.Wavefront.amplitude" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">amplitude</span> <span class="o">=</span> <span class="kc">None</span></code>
+<code class="highlight language-python"><span class="n">amplitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">amplitude</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -1934,7 +1933,7 @@ or Intermediate</p></td>
 
 
 <h2 id="dLux.wavefronts.Wavefront.offset" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -1953,7 +1952,7 @@ or Intermediate</p></td>
 
 
 <h2 id="dLux.wavefronts.Wavefront.phase" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">phase</span> <span class="o">=</span> <span class="kc">None</span></code>
+<code class="highlight language-python"><span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -1972,7 +1971,7 @@ or Intermediate</p></td>
 
 
 <h2 id="dLux.wavefronts.Wavefront.pixel_scale" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">pixel_scale</span> <span class="o">=</span> <span class="kc">None</span></code>
+<code class="highlight language-python"><span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -1991,7 +1990,7 @@ or Intermediate</p></td>
 
 
 <h2 id="dLux.wavefronts.Wavefront.plane_type" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">plane_type</span> <span class="o">=</span> <span class="kc">None</span></code>
+<code class="highlight language-python"><span class="n">plane_type</span> <span class="o">=</span> <span class="n">plane_type</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -2010,7 +2009,7 @@ or Intermediate</p></td>
 
 
 <h2 id="dLux.wavefronts.Wavefront.wavelength" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">wavelength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">wavelength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -2031,7 +2030,7 @@ or Intermediate</p></td>
 
 
 <h2 id="dLux.wavefronts.Wavefront.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">plane_type</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2057,7 +2056,7 @@ wavelength and offset.</p>
           <td>
                 <code>float, meters</code>
           </td>
-          <td><p>The wavelength of the <code>Wavefront</code> in meters.</p></td>
+          <td><p>The wavelength of the <code>Wavefront</code>.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -2067,8 +2066,48 @@ wavelength and offset.</p>
           <td>
                 <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
           </td>
-          <td><p>The (x, y) angular offset of the wavefront from 
+          <td><p>The (x, y) angular offset of the <code>Wavefront</code> from 
 the optical axis.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>amplitude</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, power</code>
+          </td>
+          <td><p>The electric field amplitude of the <code>Wavefront</code>.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>phase</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
+          </td>
+          <td><p>The electric field phase of the <code>Wavefront</code>.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>pixel_scale</code></td>
+          <td>
+                <code>float, meters</code>
+          </td>
+          <td><p>The physical dimensions of each square pixel.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>plane_type</code></td>
+          <td>
+                <code>enum.<span title="enum.IntEnum">IntEnum</span>.<span title="enum.IntEnum.PlaneType">PlaneType</span></code>
+          </td>
+          <td><p>The current plane of wavefront, can be Pupil, Focal</p></td>
           <td>
               <em>required</em>
           </td>
@@ -2552,8 +2591,8 @@ self.amplitude.shape</code>.</p></td>
   <div class="doc doc-contents ">
   
       <h4 id="dLux.wavefronts.Wavefront.get_pixel_scale--returns">Returns</h4>
-<p>pixel_scale : float, meters/pixel
-    The current pixel_scale associated with the wavefront.</p>
+<p>pixel scale : float, meters/pixel
+    The current pixel scale associated with the wavefront.</p>
 
   </div>
 
@@ -3311,14 +3350,14 @@ axis.</p></td>
 
 
 <h2 id="dLux.wavefronts.Wavefront.set_pixel_scale" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">set_pixel_scale</span><span class="p">(</span><span class="n">pixel_scale</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">set_pixel_scale</span><span class="p">(</span><span class="n">diameter</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      <p>Mutator for the pixel_scale.</p>
+      <p>Mutator for the pixel scale.</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3332,11 +3371,11 @@ axis.</p></td>
     </thead>
     <tbody>
         <tr>
-          <td><code>pixel_scale</code></td>
+          <td><code>diameter</code></td>
           <td>
-                <code>float</code>
+                <code><span title="dLux.wavefronts.Scalar">Scalar</span></code>
           </td>
-          <td><p>The new pixel_scale associated with the wavefront.</p></td>
+          <td><p>The new pixel scale associated with the wavefront.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -3357,7 +3396,7 @@ axis.</p></td>
 <td><code>wavefront</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The new Wavefront object with the updated pixel_scale</p></td>
+          <td><p>The new Wavefront object with the updated pixel scale.</p></td>
         </tr>
     </tbody>
   </table>
@@ -3551,7 +3590,7 @@ i.e. <code>self.amplitude.shape == amplitude.shape</code> is <strong>not</strong
 
 
 <h2 id="dLux.wavefronts.Wavefront.wavefront_to_psf" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">wavefront_to_psf</span><span class="p">()</span></code>
+<code class="highlight language-python"><span class="n">wavefront_to_psf</span><span class="p">(</span><span class="n">return_polarised</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 </h2>
 
@@ -3560,7 +3599,32 @@ i.e. <code>self.amplitude.shape == amplitude.shape</code> is <strong>not</strong
   
       <p>Calculates the Point Spread Function (PSF), ie the squared modulus
 of the complex wavefront.</p>
-<h4 id="dLux.wavefronts.Wavefront.wavefront_to_psf--throws">Throws</h4>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>return_polarised</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>returns the raw polarisation matrix if True, else sums the
+polaristaion matrix into a single psf</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+      <h4 id="dLux.wavefronts.Wavefront.wavefront_to_psf--throws">Throws</h4>
 <p>error : TypeError
     If <code>self.amplitude</code> has not been externally initialised.</p>
 
