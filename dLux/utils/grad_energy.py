@@ -7,7 +7,8 @@ def get_GE(array):
     return np.hypot(grads_vec[0], grads_vec[1])
 
 def get_RGE(array):
-    Rvec = get_Rvec(array.shape[0])
+    Rvec = get_Rvec(array.shape[0]) 
+    Rvec += 1e-8 # extra added for gradient stability
     grads_vec = np.array(np.gradient(array))
     
     xnorm = Rvec[1]*grads_vec[0]
@@ -29,7 +30,7 @@ def get_Rvec(npix):
     c = npix//2
     xs = np.arange(-c, c)
     Rvec = np.array(np.meshgrid(xs, xs))
-    return Rvec
+    return Rvec + 1e-12
 
 def get_Rmask(npix, rmin, rmax, shift=0.5):
     c = npix//2
