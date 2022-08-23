@@ -76,7 +76,11 @@ def nyquist_pix_airy(Nyq_rate, wavel, optic_size, focal_length):
     return det_pixelsize
 
 def nyquist_pix(Nyq_rate, wavel, optic_size, focal_length):
-    """ Calcualtes based on linear aperture size """
+    """ 
+    Calcualtes the pixel physical linear pixel size required 
+    to sample at Nyq_rate x Nyquist sampling for the optical 
+    system based on linear aperture size. Ie Nyq_rate = 1 would
+    sample at *exactly* the nyquist rate, 2 pixels per fringe"""
     fringe = focal_length * wavel / optic_size
     det_pixelsize = 1/Nyq_rate * 0.5 * fringe
     return det_pixelsize
