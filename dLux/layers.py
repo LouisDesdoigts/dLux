@@ -49,11 +49,10 @@ class CreateWavefront(eqx.Module):
         Width of the array representing the wavefront in physical units
     wavefront_type: string
         Determines the type of wavefront class to create. Currently
-        supports 'Cartesian' and 'Angular'
+        supports 'Cartesian', 'Angular', 'FarFieldFresnel'
     """
     npix : int
     wavefront_size : float
-    # pixel_scale : float
     wavefront_type : str = eqx.static_field()
 
 
@@ -69,10 +68,8 @@ class CreateWavefront(eqx.Module):
         """
         self.npix = int(npix)
         self.wavefront_size = np.array(wavefront_size).astype(float)
-        # self.pixel_scale = np.array(wavefront_size / npix)\
-        #     .astype(float)
-        assert wavefront_type in ['Cartesian', 'Angular'], "wavefront_type \
-        must be either 'Cartesian' or 'Angular'"
+        assert wavefront_type in ['Cartesian', 'Angular', 'FarFieldFresnel'], \
+        "wavefront_type must be either 'Cartesian', 'Angular' or 'FarFieldFresnel'"
         self.wavefront_type = str(wavefront_type)
 
 
@@ -99,6 +96,8 @@ class CreateWavefront(eqx.Module):
         wavel = params_dict["wavelength"]
         offset = params_dict["offset"]
         
+        pixel_scale = self.wavefront_size/self.npix
+        plane_type = dLux.PlaneType.Pupil
         phase = np.zeros([1, self.npix, self.npix])
         amplitude = np.ones([1, self.npix, self.npix])
         amplitude /= np.linalg.norm(amplitude)
@@ -108,8 +107,8 @@ class CreateWavefront(eqx.Module):
             wavefront = dLux.CartesianWavefront(
                                         wavel, 
                                         offset,
-                                        self.wavefront_size,
-                                        dLux.PlaneType.Pupil,
+                                        pixel_scale,
+                                        plane_type,
                                         amplitude, 
                                         phase)
             
@@ -117,17 +116,21 @@ class CreateWavefront(eqx.Module):
             wavefront = dLux.AngularWavefront(
                                         wavel, 
                                         offset,
-                                        self.wavefront_size,
-                                        dLux.PlaneType.Pupil,
+                                        pixel_scale,
+                                        plane_type,
+                                        amplitude, 
+                                        phase)
+            
+        elif self.wavefront_type is 'FarFieldFresnel':
+            wavefront = dLux.FarFieldFresnelWavefront(
+                                        wavel, 
+                                        offset,
+                                        pixel_scale,
+                                        plane_type,
                                         amplitude, 
                                         phase)
 
         params_dict["Wavefront"] = wavefront
-#             .set_phase(phase)\
-#             .set_amplitude(amplitude)\
-#             .set_plane_type(dLux.PlaneType.Pupil)\
-#             .set_pixel_scale(self.pixel_scale)
-        
         return params_dict
 
 
@@ -164,7 +167,6 @@ class TiltWavefront(eqx.Module):
         """
         wavefront = params_dict["Wavefront"]
         x_angle, y_angle = wavefront.get_offset()
-        # x_positions, y_positions = wavefront.get_pixel_positions()
         x_positions, y_positions = wavefront.get_pixel_coordinates()
         wavenumber = 2 * np.pi / wavefront.get_wavelength()
         phase = - wavenumber * (x_positions * x_angle + \
@@ -710,7 +712,7 @@ class CompoundAperture(eqx.Module):
         
         # Generate coordinate grid
         pixel_scale = diameter/npixels
-        xycoords = dLux.utils.get_pixel_positions(npixels, pixel_scale)
+        xycoords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
         
         # Generate aperture/occulters
         outer_apers = mapped_aperture(self.aperture_radii, \
@@ -802,9 +804,9 @@ class ApplyBasisCLIMB(eqx.Module):
             basis. These must satisfy the condition that is described 
             above. 
         ideal_wavel : float
-            The wavelength that perfectly CLIMBs.
+            The target wavelength that results in a perfect half-wave
+            step. Ie the output OPD will be ideal_wavel/2
         """
-        # TODO: I have no idea what ideal_wavel is 
         self.npix = int(basis.shape[-1])
         self.basis = np.array(basis).astype(float)
         self.coeffs = np.array(coeffs).astype(float)
