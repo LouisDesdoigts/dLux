@@ -20,6 +20,7 @@ __all__ = ["get_positions_vector",  "get_pixel_positions",
 import dLux
 import jax.numpy as np
 import typing
+import dLux
 
 Scalar = typing.NewType("Scalar", np.ndarray) # 0d
 Vector = typing.NewType("Vector", np.ndarray) # 1d
