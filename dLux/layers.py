@@ -645,7 +645,7 @@ class CompoundAperture(eqx.Module):
             else np.array(occulter_coords).astype(float)
             
 
-    def get_aperture(self, radius, center, xycoords, aper, vmin=0, vmax=1):
+    def get_aperture(self, radius, center, xycoords, aper, vmin=1e-8, vmax=1):
         """
         Constructs a soft-edged aperture or occulter 
         This function is general and probably be moved into utils 
