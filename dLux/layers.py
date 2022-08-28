@@ -518,6 +518,7 @@ class AddPhase(eqx.Module):
         """
         self.phase_array = np.array(phase_array).astype(float)
         self.npix = int(phase_array.shape[0])
+        self.name = name
     
     
     def __call__(self, params_dict):
@@ -745,6 +746,8 @@ class CompoundAperture(eqx.Module):
             self.occulter_coords = np.zeros([len(self.occulter_radii), 2]) \
             if occulter_coords is None \
             else np.array(occulter_coords).astype(float)
+        
+        self.name = name
             
 
     def get_aperture(self, radius, center, xycoords, aper, vmin=1e-8, vmax=1):
