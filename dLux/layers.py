@@ -37,7 +37,7 @@ class CreateWavefront(eqx.Module):
     """ 
     Initialises an on-axis input wavefront
 
-    Parameters
+    Attributes
     ----------
     npix : int
         The number of pixels along one side that represent the 
@@ -50,13 +50,17 @@ class CreateWavefront(eqx.Module):
     wavefront_type: string
         Determines the type of wavefront class to create. Currently
         supports 'Cartesian', 'Angular', 'FarFieldFresnel'
+    name : string
+        The name of the layer, which is used to index the layers
+        dictionary. Default is 'Wavefront Creation'
     """
     npix : int
     wavefront_size : float
     wavefront_type : str = eqx.static_field()
+    name : str = eqx.static_field()
 
 
-    def __init__(self, npix, wavefront_size, wavefront_type='Cartesian'):
+    def __init__(self, npix, wavefront_size, wavefront_type='Cartesian', name='Wavefront Creation'):
         """
         Parameters
         ----------
@@ -65,12 +69,19 @@ class CreateWavefront(eqx.Module):
         wavefront_size : float, meters
             The physical dimensions of the wavefront in units of
             (radians) meters.
+        wavefront_type: string
+            Determines the type of wavefront class to create. Currently
+            supports 'Cartesian', 'Angular', 'FarFieldFresnel'
+        name : string
+            The name of the layer, which is used to index the layers
+            dictionary. Default is 'Wavefront Creation'
         """
         self.npix = int(npix)
         self.wavefront_size = np.array(wavefront_size).astype(float)
         assert wavefront_type in ['Cartesian', 'Angular', 'FarFieldFresnel'], \
         "wavefront_type must be either 'Cartesian', 'Angular' or 'FarFieldFresnel'"
         self.wavefront_type = str(wavefront_type)
+        self.name = name
 
 
     def __call__(self, params_dict):
@@ -144,7 +155,25 @@ class CreateWavefront(eqx.Module):
 class TiltWavefront(eqx.Module):
     """ 
     Applies a paraxial tilt by adding a phase slope
+    
+    Attributes
+    ----------
+    name : string
+        The name of the layer, which is used to index the layers
+        dictionary. Default is 'Wavefront Tilt'
     """
+    name : str = eqx.static_field()
+        
+    def __init__(self, name='Wavefront Tilt'):
+        """
+        Parameters
+        ----------
+        name : string
+            The name of the layer, which is used to index the layers
+            dictionary. Default is 'Wavefront Tilt'
+        """
+        self.name = name
+    
     def __call__(self, params_dict):
         """
         Applies a tilt to the phase of the wavefront according to the
@@ -179,11 +208,6 @@ class CircularAperture(eqx.Module):
     """
     Multiplies the input wavefront by a pre calculated circular binary 
     (float) mask that fills the size of the array
-    
-    Notes
-    -----
-    - There is a known bug where gradients become `nan` if phase 
-      operation are applied after this layer
 
     Attributes
     ----------
@@ -194,12 +218,17 @@ class CircularAperture(eqx.Module):
         A binary `float` array describing the apertures location.
         The parameter is differentiable but refers to _Notes_ for 
         a known bug.
+    name : string
+        The name of the layer, which is used to index the layers
+        dictionary. Default is 'Circular Aperture'
     """
     npix : int
     array : float
+    name : str = eqx.static_field()
 
     
-    def __init__(self, npix, rmin=0., rmax=1., eps=1e-8):
+    def __init__(self, npix, rmin=0., rmax=1., eps=1e-8, 
+                                 name='Circular Aperture'):
         """
         Parameters
         ----------
@@ -223,10 +252,14 @@ class CircularAperture(eqx.Module):
             A small constant that is added to the binary aperture array
             to stablize autodiff. This parameter should not be changed 
             very often.
+        name : string
+            The name of the layer, which is used to index the layers
+            dictionary. Default is 'Circular Aperture'
         """
         self.npix = int(npix)
         self.array = self.create_aperture(self.npix, 
             rmin = rmin, rmax = rmax) + eps
+        self.name = name
    
  
     def create_aperture(self, npix, rmin, rmax):     
@@ -295,8 +328,26 @@ class CircularAperture(eqx.Module):
 class NormaliseWavefront(eqx.Module):
     """ 
     Normalises the input wavefront using the in-built normalisation 
-    algorithm of the wavefront. 
-    """                
+    
+    Attributes
+    ----------
+    name : string
+        The name of the layer, which is used to index the layers
+        dictionary. Default is 'Wavefront Tilt'
+    """
+    name : str = eqx.static_field()
+        
+    def __init__(self, name='Wavefront Normalisation'):
+        """
+        Parameters
+        ----------
+        name : string
+            The name of the layer, which is used to index the layers
+            dictionary. Default is 'Wavefront Normalisation'
+        """
+        self.name = name
+    
+    
     def __call__(self, params_dict):
         """
         Normalise the wavefront. 
@@ -341,13 +392,18 @@ class ApplyBasisOPD(eqx.Module):
     coeffs: jax.numpy.ndarray
         Array of shape (nterns) of coefficients to be applied to each 
         basis vector.
+    name : string
+        The name of the layer, which is used to index the layers
+        dictionary. Default is 'Apply Basis OPD'
     """
     npix: int
     basis: float
     coeffs: float
+    name : str = eqx.static_field()
+    
     
 
-    def __init__(self, basis, coeffs=None):
+    def __init__(self, basis, coeffs=None, name='Apply Basis OPD'):
         """
         Parameters
         ----------
@@ -372,12 +428,16 @@ class ApplyBasisOPD(eqx.Module):
             basis.shape = (n, m, m)
             ```
             If `None`, the default value is passed it is interpretted 
-            as `np.zeros((n, ))`.           
+            as `np.zeros((n, ))`.
+        name : string
+            The name of the layer, which is used to index the layers
+            dictionary. Default is 'Apply Basis OPD'
         """
         self.basis = np.array(basis).astype(float)
         self.npix = self.basis.shape[-1]
         self.coeffs = np.zeros(len(self.basis)) if coeffs is None \
                  else np.array(coeffs).astype(float)
+        self.name = name
 
 
     def __call__(self, params_dict):
@@ -436,17 +496,25 @@ class AddPhase(eqx.Module):
         is not a differentiable parameter.
     phase_array: float, radians
         Array of phase values to be applied to the input wavefront.
+    name : string
+        The name of the layer, which is used to index the layers
+        dictionary. Default is 'Add Phase'
     """
     npix: int
     phase_array : float
+    name : str = eqx.static_field()
+    
     
 
-    def __init__(self, phase_array):
+    def __init__(self, phase_array, name='Add Phase'):
         """
         Parameters
         ----------
         phase_array : float, radians
-            Array of phase values to be applied to the input wavefront.  
+            Array of phase values to be applied to the input wavefront.
+        name : string
+            The name of the layer, which is used to index the layers
+            dictionary. Default is 'Add Phase'
         """
         self.phase_array = np.array(phase_array).astype(float)
         self.npix = int(phase_array.shape[0])
@@ -495,20 +563,28 @@ class ApplyOPD(eqx.Module):
     npix : int
         The number of pixels along the leading edge of the `opd_array`
         stored for debugging purposes.
+    name : string
+        The name of the layer, which is used to index the layers
+        dictionary. Default is 'Apply OPD'
     """
     npix: int
     opd_array: float
+    name : str = eqx.static_field()
     
 
-    def __init__(self, opd_array):
+    def __init__(self, opd_array, name='Apply OPD'):
         """
         Parameters
         ----------
         opd_array : float, meters
             The per pixel optical path differences.
+        name : string
+            The name of the layer, which is used to index the layers
+            dictionary. Default is 'Apply OPD'
         """
         self.opd_array = np.array(opd_array).astype(float)
         self.npix = int(opd_array.shape[0])
+        self.name = name
         
     def __call__(self, params_dict):
         """
@@ -551,21 +627,29 @@ class TransmissiveOptic(eqx.Module):
     npix : int, eqx.static_field()
         The number of pixels along the leading edge of the wavefront.
     transmission : float
-        An array representing the transmission of the aperture. 
+        An array representing the transmission of the aperture.
+    name : string
+        The name of the layer, which is used to index the layers
+        dictionary. Default is 'Transmissive Optic'
     """
     npix: int
     transmission: float
+    name : str = eqx.static_field()
     
 
-    def __init__(self, transmission):
+    def __init__(self, transmission, name='Transmissive Optic'):
         """
         Parameters
         ----------
         transmission : Array[float]
             The array representing the transmission of the aperture.
+        name : string
+            The name of the layer, which is used to index the layers
+            dictionary. Default is 'Transmissive Optic'
         """
         self.transmission = np.array(transmission).astype(float)
         self.npix = transmission.shape[0]
+        self.name = name
         
 
     def __call__(self, params_dict):
@@ -603,15 +687,31 @@ class CompoundAperture(eqx.Module):
     All parameters are differentiable.
     
     NOTE: Needs unit testing
+    
+    Attributes
+    ----------
+    aperture_radii : Array[float], meters
+        The radii of the apertures
+    aperture_coords : Array[float], meters
+        The (x, y) coordinates of the centers of the apertures
+    occulter_radii : Array[float], meters
+        The radii of the occulters
+    occulter_coords : Array[float], meters
+        The (x, y) coordinates of the centers of the occulters
+    name : string
+        The name of the layer, which is used to index the layers
+        dictionary. Default is 'Compound Aperture'
     """
     aperture_radii: float
     aperture_coords: float
-    
     occulter_radii: float
     occulter_coords: float
+    name : str = eqx.static_field()
+    
     
     def __init__(self, aperture_radii, aperture_coords=None, 
-                 occulter_radii=None, occulter_coords=None):
+                 occulter_radii=None, occulter_coords=None,
+                 name='Compound Aperture'):
         """
         Parameters
         ----------
@@ -619,11 +719,13 @@ class CompoundAperture(eqx.Module):
             The radii of the apertures
         aperture_coords : Array[float], meters
             The (x, y) coordinates of the centers of the apertures
-
         occulter_radii : Array[float], meters
             The radii of the occulters
         occulter_coords : Array[float], meters
             The (x, y) coordinates of the centers of the occulters
+        name : string
+            The name of the layer, which is used to index the layers
+            dictionary. Default is 'Compound Aperture'
         """
         self.aperture_radii = np.zeros(1)  if aperture_radii is None else \
                                 np.array(aperture_radii).astype(float)
@@ -774,15 +876,19 @@ class ApplyBasisCLIMB(eqx.Module):
         Zernike term. This is a differentiable parameter.
     ideal_wavel : float
         The wavelength 
+    name : string
+        The name of the layer, which is used to index the layers
+        dictionary. Default is 'CLIMB'
     """
     npix: int
     basis: float
     coeffs: float
     ideal_wavel: float
+    name : str = eqx.static_field()
     
 
     # TODO: This will need to be reviewed by @LouisDesdoigts
-    def __init__(self, basis, coeffs, ideal_wavel):
+    def __init__(self, basis, coeffs, ideal_wavel, name='CLIMB'):
         """
         Parameters
         ----------
@@ -806,11 +912,15 @@ class ApplyBasisCLIMB(eqx.Module):
         ideal_wavel : float
             The target wavelength that results in a perfect half-wave
             step. Ie the output OPD will be ideal_wavel/2
+        name : string
+            The name of the layer, which is used to index the layers
+            dictionary. Default is 'CLIMB'
         """
         self.npix = int(basis.shape[-1])
         self.basis = np.array(basis).astype(float)
         self.coeffs = np.array(coeffs).astype(float)
         self.ideal_wavel = np.array(ideal_wavel).astype(float)
+        self.name = name
 
 
     def __call__(self, params_dict):
