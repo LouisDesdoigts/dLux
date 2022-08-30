@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../assets/logo.jpg">
-      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.1">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.2">
     
     
       
@@ -467,6 +467,13 @@
         <li class="md-nav__item">
   <a href="#dLux.layers.ApplyBasisOPD.coeffs" class="md-nav__link">
     coeffs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.layers.ApplyBasisOPD.name" class="md-nav__link">
+    name
   </a>
   
 </li>
@@ -1055,6 +1062,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dLux.layers.ApplyBasisOPD.name" class="md-nav__link">
+    name
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dLux.layers.ApplyBasisOPD.npix" class="md-nav__link">
     npix
   </a>
@@ -1157,6 +1171,17 @@ basis vector.</p></td>
                 <code>None</code>
           </td>
         </tr>
+        <tr>
+          <td><code>name</code></td>
+          <td>
+                <code>string</code>
+          </td>
+          <td><p>The name of the layer, which is used to index the layers
+dictionary. Default is 'Apply Basis OPD'</p></td>
+          <td>
+                <code>&#39;Apply Basis OPD&#39;</code>
+          </td>
+        </tr>
     </tbody>
   </table>
 
@@ -1197,6 +1222,25 @@ basis vector.</p></td>
 
 <h2 id="dLux.layers.ApplyBasisOPD.coeffs" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">))</span> <span class="k">if</span> <span class="n">coeffs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coeffs</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.layers.ApplyBasisOPD.name" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">name</span> <span class="o">=</span> <span class="n">name</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -1303,7 +1347,7 @@ updated.</p></td>
 
 
 <h2 id="dLux.layers.ApplyBasisOPD.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">coeffs</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">coeffs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Apply Basis OPD&#39;</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1356,6 +1400,17 @@ basis.shape = (n, m, m)
 as <code>np.zeros((n, ))</code>.</p></td>
           <td>
                 <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
+          <td>
+                <code>string</code>
+          </td>
+          <td><p>The name of the layer, which is used to index the layers
+dictionary. Default is 'Apply Basis OPD'</p></td>
+          <td>
+                <code>&#39;Apply Basis OPD&#39;</code>
           </td>
         </tr>
     </tbody>
