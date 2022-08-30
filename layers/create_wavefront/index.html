@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../assets/logo.jpg">
-      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.1">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.2">
     
     
       
@@ -383,6 +383,13 @@
         <li class="md-nav__item">
   <a href="#dLux.layers.CreateWavefront" class="md-nav__link">
     dLux.layers.CreateWavefront
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.layers.CreateWavefront.name" class="md-nav__link">
+    name
   </a>
   
 </li>
@@ -1034,6 +1041,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dLux.layers.CreateWavefront.name" class="md-nav__link">
+    name
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dLux.layers.CreateWavefront.npix" class="md-nav__link">
     npix
   </a>
@@ -1099,14 +1113,13 @@
   
       <p>Initialises an on-axis input wavefront</p>
 
-  <p><strong>Parameters:</strong></p>
+  <p><strong>Attributes:</strong></p>
   <table>
     <thead>
       <tr>
         <th>Name</th>
         <th>Type</th>
         <th>Description</th>
-        <th>Default</th>
       </tr>
     </thead>
     <tbody>
@@ -1117,38 +1130,37 @@
           </td>
           <td><p>The number of pixels along one side that represent the 
 wavefront.</p></td>
-          <td>
-              <em>required</em>
-          </td>
         </tr>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
+                <code>float, meters/pixel</code>
           </td>
           <td><p>The pixelscae of each array between each layer operation
-Its value is automatically calculated from the input values</p></td>
-          <td>
-              <em>required</em>
-          </td>
+Its value is automatically calculated from the input values </p></td>
         </tr>
         <tr>
           <td><code>wavefront_size</code></td>
           <td>
+                <code>float, meters</code>
           </td>
           <td><p>Width of the array representing the wavefront in physical units</p></td>
-          <td>
-              <em>required</em>
-          </td>
         </tr>
         <tr>
           <td><code>wavefront_type</code></td>
           <td>
+                <code>string</code>
           </td>
           <td><p>Determines the type of wavefront class to create. Currently
 supports 'Cartesian', 'Angular', 'FarFieldFresnel'</p></td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
           <td>
-                <code>&#39;Cartesian&#39;</code>
+                <code>string</code>
           </td>
+          <td><p>The name of the layer, which is used to index the layers
+dictionary. Default is 'Wavefront Creation'</p></td>
         </tr>
     </tbody>
   </table>
@@ -1164,6 +1176,25 @@ supports 'Cartesian', 'Angular', 'FarFieldFresnel'</p></td>
 
 
 
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.layers.CreateWavefront.name" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">name</span> <span class="o">=</span> <span class="n">name</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
 
 <div class="doc doc-object doc-attribute">
 
@@ -1294,7 +1325,7 @@ updated.</p></td>
 
 
 <h2 id="dLux.layers.CreateWavefront.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="n">wavefront_size</span><span class="p">,</span> <span class="n">wavefront_type</span><span class="o">=</span><span class="s1">&#39;Cartesian&#39;</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="n">wavefront_size</span><span class="p">,</span> <span class="n">wavefront_type</span><span class="o">=</span><span class="s1">&#39;Cartesian&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Wavefront Creation&#39;</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1332,6 +1363,27 @@ updated.</p></td>
 (radians) meters.</p></td>
           <td>
               <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>wavefront_type</code></td>
+          <td>
+          </td>
+          <td><p>Determines the type of wavefront class to create. Currently
+supports 'Cartesian', 'Angular', 'FarFieldFresnel'</p></td>
+          <td>
+                <code>&#39;Cartesian&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
+          <td>
+                <code>string</code>
+          </td>
+          <td><p>The name of the layer, which is used to index the layers
+dictionary. Default is 'Wavefront Creation'</p></td>
+          <td>
+                <code>&#39;Wavefront Creation&#39;</code>
           </td>
         </tr>
     </tbody>

@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../assets/logo.jpg">
-      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.1">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.2">
     
     
       
@@ -413,24 +413,18 @@
     dLux.layers.CircularAperture
   </a>
   
-    <nav class="md-nav" aria-label="dLux.layers.CircularAperture">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#dLux.layers.CircularAperture--notes" class="md-nav__link">
-    Notes
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
   <a href="#dLux.layers.CircularAperture.array" class="md-nav__link">
     array
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.layers.CircularAperture.name" class="md-nav__link">
+    name
   </a>
   
 </li>
@@ -1044,24 +1038,18 @@
     dLux.layers.CircularAperture
   </a>
   
-    <nav class="md-nav" aria-label="dLux.layers.CircularAperture">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#dLux.layers.CircularAperture--notes" class="md-nav__link">
-    Notes
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
   <a href="#dLux.layers.CircularAperture.array" class="md-nav__link">
     array
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.layers.CircularAperture.name" class="md-nav__link">
+    name
   </a>
   
 </li>
@@ -1125,11 +1113,6 @@
   
       <p>Multiplies the input wavefront by a pre calculated circular binary 
 (float) mask that fills the size of the array</p>
-<h3 id="dLux.layers.CircularAperture--notes">Notes</h3>
-<ul>
-<li>There is a known bug where gradients become <code>nan</code> if phase 
-  operation are applied after this layer</li>
-</ul>
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1158,6 +1141,14 @@ parameters is not differentiable.</p></td>
 The parameter is differentiable but refers to <em>Notes</em> for 
 a known bug.</p></td>
         </tr>
+        <tr>
+          <td><code>name</code></td>
+          <td>
+                <code>string</code>
+          </td>
+          <td><p>The name of the layer, which is used to index the layers
+dictionary. Default is 'Circular Aperture'</p></td>
+        </tr>
     </tbody>
   </table>
 
@@ -1179,6 +1170,25 @@ a known bug.</p></td>
 
 <h2 id="dLux.layers.CircularAperture.array" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_aperture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npix</span><span class="p">,</span> <span class="n">rmin</span><span class="o">=</span><span class="n">rmin</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="n">rmax</span><span class="p">)</span> <span class="o">+</span> <span class="n">eps</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.layers.CircularAperture.name" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">name</span> <span class="o">=</span> <span class="n">name</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -1284,7 +1294,7 @@ updated.</p></td>
 
 
 <h2 id="dLux.layers.CircularAperture.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="n">rmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="n">rmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Circular Aperture&#39;</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1351,6 +1361,17 @@ to stablize autodiff. This parameter should not be changed
 very often.</p></td>
           <td>
                 <code>1e-08</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
+          <td>
+                <code>string</code>
+          </td>
+          <td><p>The name of the layer, which is used to index the layers
+dictionary. Default is 'Circular Aperture'</p></td>
+          <td>
+                <code>&#39;Circular Aperture&#39;</code>
           </td>
         </tr>
     </tbody>
