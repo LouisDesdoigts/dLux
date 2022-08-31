@@ -211,3 +211,20 @@ class CombinedSpectrum(ArraySpectrum):
         total_power = weights.sum(1).reshape((len(weights), 1))
         norm_weights = weights/total_power
         return self.set_weights(norm_weights)
+
+    ### Formatted Output Methods ###
+    def _get_wavelengths(self : Spectrum) -> Vector:
+        """
+        Concrete method for returning wavelength Vector for sources, 
+        correctly formatted for stacking
+        """
+        return self.get_wavelengths()
+    
+    
+    ### Formatted Output Methods ###
+    def _get_weights(self : Spectrum) -> Array:
+        """
+        Abstract method for returning weight Vector for sources,
+        correctly formatted for stacking
+        """
+        return self.get_weights()
