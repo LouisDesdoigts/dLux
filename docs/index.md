@@ -59,3 +59,7 @@ drive.mount('/content/drive')
 - View the files using the left sidebar to navigate
 - Colab GPU works with the notebooks as is, you just have to change the Runtime mode
 
+## Publications
+
+We have a multitude of publications in the pipeline using dLux, however we do have a poster about this software available to view [here!](https://spie.org/astronomical-telescopes-instrumentation/presentation/Optical-design-analysis-and-calibration-using-Lux/12180-160)
+
