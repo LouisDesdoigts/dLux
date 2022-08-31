@@ -191,7 +191,7 @@ class CombinedSpectrum(ArraySpectrum):
                  wavelengths : Array,
                  weights     : Array) -> Spectrum:
         
-        super().__init__(None)
+        super().__init__(wavelengths)
         
         # TODO: Check what convention we want to use with 'typing'
         # and enforcing data types in constructors
