@@ -160,8 +160,9 @@ class PolynomialSpectrum(Spectrum):
         generate_polynomial = jax.vmap(lambda wavelength : 
                                 np.array([self.coefficients[i] * wavelength**i 
                                 for i in range(len(self.coefficients))]).sum())
-        return generate_polynomial(self.wavelengths)
-    
+        weights = generate_polynomial(self.wavelengths)
+        return weights/weights.sum()
+
     
     ### Formatted Output Methods ###
     def _get_weights(self : Spectrum) -> Array:
@@ -169,22 +170,17 @@ class PolynomialSpectrum(Spectrum):
         Gets the relative spectral weights by evalutating the polynomial
         function at the loaded wavelengths, correctly formatted for stacking
         """
-        # TODO: test this a bit more rigorously - at first pass seems fine
-        generate_polynomial = jax.vmap(lambda wavelength : 
-                                np.array([self.coefficients[i] * wavelength**i 
-                                for i in range(len(self.coefficients))]).sum())
-        return np.array([generate_polynomial(self.wavelengths)])
-    
+        return np.array([self.get_weights()])
     
     def normalise(self : Spectrum) -> Spectrum:
         """
-        TODO: Figure out how to normalise an arbitrary polynomial by its
-        coefficients...
+        Returns self as i'm not sure how to normalise a general polynomial,
+        however the get_weights class always returns a normalised spectrum
         """
-        raise NotImplementedError("Pretty self explanitory tbh")
+        return self
         
         
-class CombinedSpectrum(Spectrum):
+class CombinedSpectrum(ArraySpectrum):
     """
     Test overwriting of class attribute types
     """
@@ -205,20 +201,6 @@ class CombinedSpectrum(Spectrum):
         
         self.wavelengths = np.asarray(wavelengths, dtype=float)
         self.weights     = np.asarray(weights, dtype=float)
-        
-    
-    def get_weights(self : Spectrum) -> Vector:
-        """
-        Concrete method for returning weight Vector for sources
-        """
-        return self.weights
-    
-    def set_weights(self : Spectrum, weights : Vector) -> Spectrum:
-        """
-        Setter method
-        """
-        return eqx.tree_at(
-            lambda spectrum : spectrum.weights, self, weights)
     
     
     def normalise(self : Spectrum) -> Spectrum:
@@ -229,19 +211,3 @@ class CombinedSpectrum(Spectrum):
         total_power = weights.sum(1).reshape((len(weights), 1))
         norm_weights = weights/total_power
         return self.set_weights(norm_weights)
-
-    
-    ### Correctly Formatted Outputs ###
-    def _get_weights(self : Spectrum) -> Array:
-        """
-        Abstract method for returning weight Vector for sources,
-        correctly formatted for stacking
-        """
-        return self.get_weights()
-    
-    def _get_wavelengths(self : Spectrum) -> Array:
-        """
-        Abstract method for returning weight Vector for sources,
-        correctly formatted for stacking
-        """
-        return self.get_wavelengths()
