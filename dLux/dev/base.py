@@ -3,7 +3,6 @@ import jax.numpy as np
 import equinox as eqx
 import abc
 import typing
-from collections import OrderedDict
 import dLux
 
 __author__ = "Louis Desdoigts"
@@ -133,37 +132,40 @@ class Optics(eqx.Module):
 
     def __init__(self, layers):
         
-        # TODO: Make this into a function like in scene
-        # also maybe make into a utils function since its
-        # used in Scene, Optics, and Detector
-        # Construct names list and identify repeats
-        names, repeats = [], []
-        for i in range(len(layers)):
+#         # TODO: Make this into a function like in scene
+#         # also maybe make into a utils function since its
+#         # used in Scene, Optics, and Detector
+#         # Construct names list and identify repeats
+#         names, repeats = [], []
+#         for i in range(len(layers)):
             
-            if hasattr(layers[i], 'name') and layers[i].name is not None:
-                name = layers[i].name
-            else:
-                name = str(layers[i]).split('(')[0]
+#             if hasattr(layers[i], 'name') and layers[i].name is not None:
+#                 name = layers[i].name
+#             else:
+#                 name = str(layers[i]).split('(')[0]
                 
-            # Check for Repeats
-            if name in names:
-                repeats.append(name)
-            names.append(name)
+#             # Check for Repeats
+#             if name in names:
+#                 repeats.append(name)
+#             names.append(name)
 
-        # Add indexes to repeats
-        repeats = list(set(repeats))
-        for i in range(len(repeats)):
-            idx = 0
-            for j in range(len(names)):
-                if repeats[i] == names[j]:
-                    names[j] = names[j] + '_{}'.format(idx)
-                    idx += 1
+#         # Add indexes to repeats
+#         repeats = list(set(repeats))
+#         for i in range(len(repeats)):
+#             idx = 0
+#             for j in range(len(names)):
+#                 if repeats[i] == names[j]:
+#                     names[j] = names[j] + '_{}'.format(idx)
+#                     idx += 1
         
-        # Turn list into Dictionary
-        layers_dict = OrderedDict()
-        for i in range(len(names)):
-            layers_dict[names[i]] = layers[i]
-        self.layers = layers_dict
+#         # Turn list into Dictionary
+#         layers_dict = OrderedDict()
+#         for i in range(len(names)):
+#             layers_dict[names[i]] = layers[i]
+            
+        self.layers = dLux.utils.list_to_dict(layers)
+            
+        # self.layers = layers_dict
             
         # Register layers as DotMap object
         # self.layers = DotMap(layers_dict)
@@ -244,42 +246,7 @@ class Scene(eqx.Module):
         """
         
         """
-        self.sources = self._list_to_dict(sources)
-        
-    def _list_to_dict(self, list_in):
-        """
-        
-        """
-        # Construct names list and identify repeats
-        names, repeats = [], []
-        for i in range(len(list_in)):
-            
-            if hasattr(list_in[i], 'name') and list_in[i].name is not None:
-                name = list_in[i].name
-            else:
-                name = str(list_in[i]).split('(')[0]
-                
-            # Check for Repeats
-            if name in names:
-                repeats.append(name)
-            names.append(name)
-
-        # Add indexes to repeats
-        repeats = list(set(repeats))
-        for i in range(len(repeats)):
-            idx = 0
-            for j in range(len(names)):
-                if repeats[i] == names[j]:
-                    names[j] = names[j] + '_{}'.format(idx)
-                    idx += 1
-        
-        # Turn list into Dictionary
-        dict_out = OrderedDict()
-        for i in range(len(names)):
-            dict_out[names[i]] = list_in[i]
-        
-        return dict_out
-        
+        self.sources = dLux.utils.list_to_dict(sources)
         
     def get_positions(self : Scene) -> Array:
         """
@@ -418,22 +385,23 @@ class Detector(eqx.Module):
     flexibility
     """
     
-    layers: list # To be made into a dict
+    layers: dict
     
     def __init__(self: Detector, layers : list = []):
         """
         
         """
-        self.layers = layers
+        self.layers = dLux.utils.list_to_dict(layers)
+        
     
     def apply_detector_layers(self, image):
         """
         
         """
-        for i in range(len(self.detector_layers)):
-            image = self.detector_layers[i](image)
-        return image
 
+        for key, layer in self.layers.items():
+            image = layer(image)
+        return image
     
     
 class Observation(eqx.Module):
