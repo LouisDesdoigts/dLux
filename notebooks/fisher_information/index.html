@@ -2021,6 +2021,9 @@ Licensed under the Apache License, Version 2.0.
 <li>optimal design, as the <a href="https://en.wikipedia.org/wiki/Cram%C3%A9r%E2%80%93Rao_bound">Cramér-Rao lower bound</a> on the precision of an experiment is the inverse of the Fisher information matrix - so you want to make this as tight as possible!</li>
 </ul>
 <p>Because <code>jax</code> lets us compute the Hessian of our loss function, we can use the Fisher matrix for variational inference without MCMC, and also more powerfully <em>as an objective function</em> to optimize a telescope design: why bother engineering a PSF for a particular goal, when you could model the system <em>end to end</em> and optimize the precision of the Fisher forecast of the parameter of interest?</p>
+<ul>
+<li>This is the topic of a Desdoigts et al paper in prep. It wasn't quite that easy to build and we're pretty happy about it.</li>
+</ul>
 <p>This notebook follows on from <a href="designing_a_mask.ipynb">Phase Mask Design</a> and will reuse some of the same code without repeating explanations.</p>
 
 </div>
