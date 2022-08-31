@@ -1,11 +1,12 @@
 import jax.numpy as np
 from numpy.random import rand, normal
 from jax.scipy.ndimage import map_coordinates
+from collections import OrderedDict
 
 
 __all__ = ["unif_rand", "norm_rand", "opd2phase", "phase2opd",
     "get_ppf", "rad2arcsec", "arcsec2rad", "cart2polar", "polar2cart",
-    "scale_mask", "nyquist_pix_airy", "nyquist_pix"]
+    "scale_mask", "nyquist_pix_airy", "nyquist_pix", "list_to_dict"]
 
 
 # Random Functions
@@ -85,3 +86,47 @@ def nyquist_pix(Nyq_rate, wavel, optic_size, focal_length):
     det_pixelsize = 1/Nyq_rate * 0.5 * fringe
     return det_pixelsize
 
+
+# List to dictionary function
+
+def list_to_dict(list_in):
+    """
+    Converts some input list of dLux layers and converts them into
+    an OrderedDict with the correct structure.
+    """
+    # Construct names list and identify repeats
+    names, repeats = [], []
+    for i in range(len(list_in)):
+        
+        # Check for name attribute
+        if hasattr(list_in[i], 'name') and list_in[i].name is not None:
+            name = list_in[i].name
+            
+        # Else take name from object
+        else:
+            name = str(list_in[i]).split('(')[0]
+
+        # Check for Repeats
+        if name in names:
+            repeats.append(name)
+        names.append(name)
+
+    # Get list of unique repeats
+    repeats = list(set(repeats))
+    
+    # Iterate over repeat names
+    for i in range(len(repeats)):
+        
+        idx = 0
+        # Iterate over names list and append index value to name
+        for j in range(len(names)):
+            if repeats[i] == names[j]:
+                names[j] = names[j] + '_{}'.format(idx)
+                idx += 1
+
+    # Turn list into Dictionary
+    dict_out = OrderedDict()
+    for i in range(len(names)):
+        dict_out[names[i]] = list_in[i]
+
+    return dict_out
