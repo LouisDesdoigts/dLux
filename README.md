@@ -41,3 +41,8 @@ There are a few extra steps to get setup. At the top of each colab file you will
 ```
 
 From here everything should work! You can also run the code on GPU to take full advantage of Jax, simply by switch to a GPU runtime environment, no extra steps necessary!
+
+
+## Publications
+
+We have a multitude of publications in the pipeline using dLux, however we do have a poster about this software available to view [here!](https://spie.org/astronomical-telescopes-instrumentation/presentation/Optical-design-analysis-and-calibration-using-Lux/12180-160)
