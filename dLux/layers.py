@@ -140,6 +140,15 @@ class CreateWavefront(eqx.Module):
                                         plane_type,
                                         amplitude, 
                                         phase)
+            
+        # Kill PlaneType Gradients
+        is_leaf = lambda x: isinstance(x, dLux.PlaneType)
+        def kill_gradient(x):
+            if is_leaf(x):
+                return jax.lax.stop_gradient(x.value)
+            else:
+                return x
+        wavefront = jax.tree_map(kill_gradient, wavefront, is_leaf=is_leaf)
 
         params_dict["Wavefront"] = wavefront
         return params_dict
