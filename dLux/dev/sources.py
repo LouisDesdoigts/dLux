@@ -397,7 +397,8 @@ class BinarySource(Source):
         Concrete method for returning the flux of the source object,
         correctly formatted for stacking
         """
-        return self.get_flux()
+        # return self.get_flux()
+        return np.expand_dims(self.get_flux(), -1)
     
     def _get_position(self : Source) -> Array:
         """
