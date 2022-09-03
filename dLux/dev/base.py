@@ -23,7 +23,6 @@ Detector    = typing.NewType("Detector",    object)
 Observation = typing.NewType("Observation", object)
 
 
-
 class Telescope(eqx.Module):
     """
     A high level class to store the various compoennets needed to model a 
@@ -131,44 +130,7 @@ class Optics(eqx.Module):
     layers : dict
 
     def __init__(self, layers):
-        
-#         # TODO: Make this into a function like in scene
-#         # also maybe make into a utils function since its
-#         # used in Scene, Optics, and Detector
-#         # Construct names list and identify repeats
-#         names, repeats = [], []
-#         for i in range(len(layers)):
-            
-#             if hasattr(layers[i], 'name') and layers[i].name is not None:
-#                 name = layers[i].name
-#             else:
-#                 name = str(layers[i]).split('(')[0]
-                
-#             # Check for Repeats
-#             if name in names:
-#                 repeats.append(name)
-#             names.append(name)
-
-#         # Add indexes to repeats
-#         repeats = list(set(repeats))
-#         for i in range(len(repeats)):
-#             idx = 0
-#             for j in range(len(names)):
-#                 if repeats[i] == names[j]:
-#                     names[j] = names[j] + '_{}'.format(idx)
-#                     idx += 1
-        
-#         # Turn list into Dictionary
-#         layers_dict = OrderedDict()
-#         for i in range(len(names)):
-#             layers_dict[names[i]] = layers[i]
-            
         self.layers = dLux.utils.list_to_dict(layers)
-            
-        # self.layers = layers_dict
-            
-        # Register layers as DotMap object
-        # self.layers = DotMap(layers_dict)
         
     def debug_prop(self, wavel, offset=np.zeros(2)):        
         """
