@@ -3,7 +3,8 @@ import jax.numpy as np
 import equinox as eqx
 
 
-__all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation"]
+__all__ = ["ApplyPixelResponse", "ApplyJitter", 
+           "ApplySaturation", "AddConstant"]
 
 
 class ApplyPixelResponse(eqx.Module):
