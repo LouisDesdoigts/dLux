@@ -88,7 +88,6 @@ def nyquist_pix(Nyq_rate, wavel, optic_size, focal_length):
 
 
 # List to dictionary function
-
 def list_to_dict(list_in):
     """
     Converts some input list of dLux layers and converts them into
@@ -97,11 +96,11 @@ def list_to_dict(list_in):
     # Construct names list and identify repeats
     names, repeats = [], []
     for i in range(len(list_in)):
-        
+
         # Check for name attribute
         if hasattr(list_in[i], 'name') and list_in[i].name is not None:
             name = list_in[i].name
-            
+
         # Else take name from object
         else:
             name = str(list_in[i]).split('(')[0]
@@ -113,10 +112,10 @@ def list_to_dict(list_in):
 
     # Get list of unique repeats
     repeats = list(set(repeats))
-    
+
     # Iterate over repeat names
     for i in range(len(repeats)):
-        
+
         idx = 0
         # Iterate over names list and append index value to name
         for j in range(len(names)):
