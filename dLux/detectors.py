@@ -69,3 +69,18 @@ class ApplySaturation(eqx.Module):
         image_out = np.minimum(image, self.saturation)
         return image_out
     
+class AddConstant(eqx.Module):
+    """
+    Add a constant to the output image.
+    Typically used as the mean of the detector noise
+    """
+    value: float
+    
+    def __init__(self, value):
+        self.value = np.array(value).astype(float)
+        
+    def __call__(self, image):
+        """
+        
+        """
+        return image + self.value
