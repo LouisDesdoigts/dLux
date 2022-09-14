@@ -1032,31 +1032,75 @@ class ApplyBasisCLIMB(eqx.Module):
         return soft_bin
 
 
-def conserve_information_and_rotate(
-        image: float, 
-        alpha: float, 
-        pad: int = 4) -> float:
+class InformationConservingRotation(eqx.Module):
     """
-    A rotation code that conserbes the information in the image. 
+    Imagine the following scenario: you rotate and image, under the hood the 
+    code interpolates into the image. You rotate the same image again and the 
+    image is re-interpolated based on the old interpolations. Repeating this 
+    the image will become increasingly distorted even once it is rotated back 
+    into the initial coordinate system. This code aims to combat this by 
+    reducing the information loss in rotations. The cost is computational 
+    efficiency so this should be used with caution. 
 
     Parameters
     ----------
-    image: matrix
-        
+    alpha: float, radians
+        The amount by which to rotate the wavefront. 
+    padding: int 
+        A factor by which to pad the array in the Fourier Space Representation.
+        This defaults to 4 but for more efficient less accurate code use a 
+        smaller number.
     """
-    # We need to add some extra rows since np.rot90 has a different definition of the centre
+    alpha: float
+    padding: int
+
+
+    def __init__(self, alpha: float, padding: int):
+        """
+        Parameters
+        ----------
+        alpha: float, radians 
+            The amount by which to rotate the image.
+        padding: int
+            This parameter cannot be differentiated and will default to 4.
+            Change the parameter to 2 for a performance boost but it may 
+            not result in lower accuracy.
+        """
+        self.alpha = np.asarray(alpha).astype(float)
+        self.padding = int(padding)
+
+
+    def _rotate(image: float, alpha: float, pad: int = 4) -> float:
+    """
+    Rotates the image by some amount. In the process the image is padded,
+    when entering the fourier space so that FFTs can be used. 
+
+    Parameters
+    ----------
+    image: Matrix
+        The image to rotate. Notice that the Fourier methods we have used do 
+        not cope so well with had edges in the image. 
+    alpha: float, radians
+        The amount by which to rotate the image. 
+    pad: int = 4
+        A padding factor. This is required to prevent aliasing of the image 
+        in Fouier space, but significantly slows calculations. 
+
+    Returns
+    -------
+    image: Matrix
+        The input image rotated and resampled onto the intial grid. This often 
+        leads to cropping of the corners in the rotated plane.         
+    """
     in_shape = image.shape
     image_shape = np.array(in_shape, dtype=int) + 3 
     image = np.full(image_shape, np.nan, dtype=float)\
         .at[1 : in_shape[0] + 1, 1 : in_shape[1] + 1]\
         .set(image)
 
-    # NOTE: Correct until here. 
-    # pyplot.imshow(image)
-    # pyplot.show()
-
     # FFT rotation only work in the -45:+45 range
-    # So I need to work out how to determine the quadrant that alpha is in and hence the 
+    # So I need to work out how to determine the quadrant that 
+    # alpha is in and hence the 
     # number of required pi/2 rotations and angle in radians. 
     half_pi_to_1st_quadrant = alpha // (np.pi / 2)
     angle_in_1st_quadrant = - alpha + (half_pi_to_1st_quadrant * np.pi / 2)
@@ -1066,8 +1110,6 @@ def conserve_information_and_rotate(
         .get()  
 
     width, height = image.shape
-    # Calculate the position that the input array will be in the padded array to simplify
-    #  some lines of code later 
     left_corner = int(((pad - 1) / 2.) * width)
     right_corner = int(((pad + 1) / 2.) * width)
     top_corner = int(((pad - 1) / 2.) * height)
@@ -1086,23 +1128,15 @@ def conserve_information_and_rotate(
     # Rotate the mask, to know what part is actually the image
     padded_mask = rotate(padded_mask, -angle_in_1st_quadrant)
 
-    # Replace part outside the image which are NaN by 0, and go into Fourier space.
+    # Replace part outside the image which are NaN by 0, and go into 
+    # Fourier space.
     padded_image = np.where(np.isnan(padded_image), 0. , padded_image)
-
-    # NOTE: Correct Unitl here. 
-    # pyplot.imshow(padded_image)
-    # pyplot.show()
 
     uncentered_angular_displacement = np.tan(angle_in_1st_quadrant / 2.)
     centered_angular_displacement = -np.sin(angle_in_1st_quadrant)
 
     uncentered_frequencies = np.fft.fftfreq(out_shape[0])
     centered_frequencies = np.arange(-out_shape[0] / 2., out_shape[0] / 2.)
-
-    # a = uncentered_angular_displacement
-    # b = centered_angular_displacement
-    # N = uncentered_frequencies
-    # X = centered_frequencies
 
     pi_factor = -2.j * np.pi * np.ones(out_shape, dtype=float)
 
@@ -1115,9 +1149,6 @@ def conserve_information_and_rotate(
         centered_angular_displacement *\
         (pi_factor * centered_frequencies).T *\
         uncentered_frequencies)
-
-    # NOTE: To be honest the stuff above also looked alright. 
-    # I need to double check but it seemed fine. 
 
     f1 = np.fft.ifft(
         (np.fft.fft(padded_image, axis=0).T * uncentered_phase).T, axis=0)
@@ -1134,3 +1165,28 @@ def conserve_information_and_rotate(
         .at[left_corner + 1 : right_corner - 1, 
             top_corner + 1 : bottom_corner - 1]\
         .get()).copy()
+
+
+    def __call__(self, params: dict) -> dict:
+        """
+        Applying the information preserving rotation to a wavefront. 
+
+        Parameters
+        ----------
+        params: dict
+            A dictionary that must contain a "Wavefront" entry.
+
+        Returns 
+        -------
+        params: dict
+            The same dictionary but the "Wavefront" entry has been updated.
+        """
+        wavefront = params["Wavefront"]
+        field = wavefront.get_complex_form()
+        rotated_field = self._rotate(field, self.alpha, self.padding)
+        rotated_wavefront = wavefront\
+            .set_phase(np.angle(rotated_field))\
+            .set_amplitude(np.abs(rotated_field))
+        params["Wavefront"] = rotated_wavefront
+        return params
+        
