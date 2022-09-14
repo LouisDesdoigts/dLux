@@ -1184,6 +1184,7 @@ class InformationConservingRotation(eqx.Module):
         wavefront = params["Wavefront"]
         field = wavefront.get_complex_form()
         rotated_field = self._rotate(field, self.alpha, self.padding)
+        # TODO: Fix updates
         rotated_wavefront = wavefront\
             .set_phase(np.angle(rotated_field))\
             .set_amplitude(np.abs(rotated_field))
