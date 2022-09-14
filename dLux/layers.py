@@ -31,6 +31,7 @@ import jax
 import jax.numpy as np
 import equinox as eqx
 import dLux
+from dLux.utils import polar2cart, cart2polar, get_pixel_positions
 
 
 class CreateWavefront(eqx.Module):
@@ -1030,48 +1031,11 @@ class ApplyBasisCLIMB(eqx.Module):
 
         return soft_bin
 
-import jax.numpy as np
-from scipy import fftpack
-from jax.scipy.ndimage import map_coordinates
-from dLux.utils import polar2cart, cart2polar, get_pixel_positions
-from typing import TypeVar
-
-matrix = TypeVar("matrix")
-
-
-def rotate(
-        image: matrix, 
-        rotation: float):
-    """
-    Rotate an image by some amount.
-
-    Parameters
-    ----------
-    image: matrix
-        The image to rotate.
-    rotation: float, radians
-        The amount to rotate clockwise from the positive x axis. 
-
-    Returns 
-    -------
-    image: matrix
-        The rotated image. 
-    """
-    npix = image.shape[0]
-    centre = (npix - 1) / 2
-    x_pixels, y_pixels = get_pixel_positions(npix)
-    rs, phis = cart2polar(x_pixels, y_pixels)
-    phis += rotation
-    coordinates_rot = np.roll(polar2cart(rs, phis) + centre, 
-        shift=1, axis=0)
-    rotated = map_coordinates(image, coordinates_rot, order=1)
-    return rotated
-
 
 def conserve_information_and_rotate(
-        image: matrix, 
+        image: float, 
         alpha: float, 
-        pad: int = 4) -> matrix:
+        pad: int = 4) -> float:
     """
     A rotation code that conserbes the information in the image. 
 
