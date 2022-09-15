@@ -511,6 +511,12 @@ class AnnularAperture(Aperture):
             & (coordinates > self.rmin)).astype(float)
 
 
+# TODO: This is the current site of development. 
+# TODO: I need to add soft edging to these apertures. 
+class SquareAperture(Aperture):
+    def __init__() -> Array:
+    def _aperture(self: Layer) -> Array
+
 class HexagonalAperture(Aperture):
     """
     Generate a hexagonal aperture, parametrised by rmax. 
