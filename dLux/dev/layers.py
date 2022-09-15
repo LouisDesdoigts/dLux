@@ -513,9 +513,45 @@ class AnnularAperture(Aperture):
 
 # TODO: This is the current site of development. 
 # TODO: I need to add soft edging to these apertures. 
+class RectangularAperture(Aperture):
+    length: float
+    width: float
+
+
+    def __init__(self: Layer, pixels: int, x_offset: float, y_offset: float,
+            theta: float, phi: float, magnification: float,
+            pixel_scale: float, length: float, width: float) -> Array:
+        super().__init__(pixels, x_offset, y_offsetm theta, phi, magnification,
+            pixel_scale)
+        self.length = np.asarray(length).astype(float)
+        self.width = np.asarray(width).astype(float)
+
+
+    def _aperture(self: Layer) -> Array:
+        coordinates = self._coordinates()
+        x_mask = np.abs(coordinates[0]) < (self.length / 2.)
+        y_mask = np.abs(coordinates[1]) < (self.width / 2.)    
+        return y_mask * x_mask        
+
+
 class SquareAperture(Aperture):
-    def __init__() -> Array:
-    def _aperture(self: Layer) -> Array
+    width: float
+   
+ 
+    def __init__(self: Layer, pixels: float, x_offset: float, y_offset: float,
+            theta: float, phi: float, magnification: float, 
+            pixel_scale: float, width: float) -> Array:
+        super().__init__(pixels, x_offset, y_offsetm theta, phi, magnification,
+            pixel_scale)
+        self.width = np.asarray(width).astype(float)
+    
+
+    def _aperture(self: Layer) -> Array:
+        coordinates = self._coordinates()
+        x_mask = np.abs(coordinates[0]) < (self.width / 2.)
+        y_mask = np.abs(coordinates[1] < (self.width / 2.)
+        return x_mask * y_mask
+
 
 class HexagonalAperture(Aperture):
     """
