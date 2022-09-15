@@ -292,30 +292,6 @@ class Aperture(eqx.Module, ABC):
             .set(coordinates[0] - coordinates[1] * np.tan(self.phi)) 
 
 
-    def _translate(self : Layer, coordinates : Tensor) -> Tensor:
-        """
-        Offset the coordinate system by prespecified amounts in both
-        the `x` and `y` directions. 
-
-        Parameters
-        ----------
-        coordinates : Tensor
-            A `(2, npix, npix)` representation of the coordinate 
-            system. The leading dimensions specifies the x and then 
-            the y coordinates in that order. 
-
-        Returns
-        -------
-        coordinates : Tensor
-            The translated coordinate system. 
-        """
-        return coordinates\
-            .at[0]\
-            .set(coordinates[0] + self.x_offset)\
-            .at[1]\
-            .set(coordinates[1] + self.y_offset)
-
-
     def _coordinates(self : Layer) -> Tensor:
         """
         Generate the transformed coordinate system for the aperture.
@@ -326,12 +302,14 @@ class Aperture(eqx.Module, ABC):
             The coordinate system in the rectilinear view, with the
             x and y coordinates stacked above one another.
         """
+        x_pixel_offset = self.x_offset / self.pixel_scale
+        y_pixel_offset = self.y_offset / self.pixel_scale
         coordinates = self._shear(
             self._rotate(
-                self._translate(
-                    self._magnify(
-                        self.get_pixel_scale() * \
-                            get_pixel_positions(self.get_npix())))))
+                self._magnify(
+                    self.get_pixel_scale() * \
+                        get_pixel_positions(self.pixels, 
+                            x_pixel_offset, y_pixel_offset)))
         return coordinates
 
 
@@ -431,10 +409,22 @@ class Aperture(eqx.Module, ABC):
             value updated. 
         """
         wavefront = parameters["Wavefront"]
-        wavefront = wavefront.mulitply_amplitude(
-           self._aperture(self.get_npix()))
+        # TODO: There should probably be a multiplication of the phase 
+        # as well. 
+        wavefront = wavefront.mulitply_amplitude(self._aperture())
         parameters["Wavefront"] = wavefront
         return parameters
+
+
+class SoftEdgedAperture(Aperture, abc.ABC):
+    @abc.abstractmethod 
+    def _distance(self: Layer, image: Array) -> Array:
+        return
+
+
+    def _soft_edge(self: Layer, image: Array) -> Array:
+        steepness = self.pixels
+        return (np.tanh(steepness * distance) + 1.) / 2.
 
 
 class AnnularAperture(Aperture):
