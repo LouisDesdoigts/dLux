@@ -594,6 +594,16 @@ class SoftEdgedAnnularAperture(SoftEdgedAperture):
 # TODO: This is the current site of development. 
 # TODO: I need to add soft edging to these apertures. 
 class RectangularAperture(Aperture):
+    """
+    A rectangular aperture.
+
+    Parameters
+    ----------
+    length: float, meters
+        The length of the aperture in the y-direction. 
+    width: float, meters
+        The length of the aperture in the x-direction. 
+    """
     length: float
     width: float
 
@@ -601,6 +611,34 @@ class RectangularAperture(Aperture):
     def __init__(self: Layer, pixels: int, x_offset: float, y_offset: float,
             theta: float, phi: float, magnification: float,
             pixel_scale: float, length: float, width: float) -> Array:
+        """
+        Parameters
+        ----------
+        npix : int
+            The number of layers along one edge of the array that 
+            represents this aperture.
+        x_offset : float, meters
+            The centre of the coordinate system along the x-axis.
+        y_offset : float, meters
+            The centre of the coordinate system along the y-axis. 
+        theta : float, radians
+            The rotation of the coordinate system of the aperture 
+            away from the positive x-axis. Due to the symmetry of 
+            ring shaped apertures this will not change the final 
+            shape and it is recomended that it is just set to zero.
+        phi : float, radians
+            The rotation of the y-axis away from the vertical and 
+            torward the negative x-axis measured from the vertical.
+        magnification : float
+            The scaling of the aperture. 
+        pixel_scale : float, meters per pixel
+            The length of one side of a square pixel. Defines the 
+            physical size of the array representing the aperture.
+        length: float, meters 
+            The length of the aperture in the y-direction.
+        width: float, meters
+            The length of the aperture in the x-direction.
+        """
         super().__init__(pixels, x_offset, y_offsetm theta, phi, magnification,
             pixel_scale)
         self.length = np.asarray(length).astype(float)
@@ -608,6 +646,12 @@ class RectangularAperture(Aperture):
 
 
     def _aperture(self: Layer) -> Array:
+        """
+        Returns
+        -------
+        aperture: Array
+            The array representation of the aperture. 
+        """
         coordinates = self._coordinates()
         x_mask = np.abs(coordinates[0]) < (self.length / 2.)
         y_mask = np.abs(coordinates[1]) < (self.width / 2.)    
