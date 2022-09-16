@@ -417,7 +417,32 @@ class Aperture(eqx.Module, ABC):
 
 
 class SoftEdgedAperture(Aperture, abc.ABC):
+    """
+    Apertures that have hard edges can result in undefined gradients. 
+    To combat this annoying behaviour we have added the soft edged apertures
+    which run add a few non-binary pixels at the border. 
+    """
+
+
     def _soft_edge(self: Layer, image: Array) -> Array:
+        """
+        Softens an image so that the hard boundaries are not present. 
+
+        Parameters
+        ----------
+        image: Array, meters
+            The name I gave this is a misnomer. The image should be an 
+            array representing distances from a particular point or line. 
+            Typically it is easiest to apply this to each edge separately 
+            and then multiply the result. This has the added benifit of 
+            curving points slightly. 
+
+        Returns
+        -------
+        smooth_image: Array
+            The image represented as an approximately binary mask, but with 
+            the prozed soft edges.
+        """
         steepness = self.pixels
         return (np.tanh(steepness * distance) + 1.) / 2.
 
