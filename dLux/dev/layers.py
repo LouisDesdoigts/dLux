@@ -417,11 +417,6 @@ class Aperture(eqx.Module, ABC):
 
 
 class SoftEdgedAperture(Aperture, abc.ABC):
-    @abc.abstractmethod 
-    def _distance(self: Layer, image: Array) -> Array:
-        return
-
-
     def _soft_edge(self: Layer, image: Array) -> Array:
         steepness = self.pixels
         return (np.tanh(steepness * distance) + 1.) / 2.
@@ -524,6 +519,27 @@ class RectangularAperture(Aperture):
         return y_mask * x_mask        
 
 
+class SoftEdgedRectangularAperture(SoftEdgedAperture):
+    length: float
+    width: float 
+
+
+    def __init__(self: Layer, pixels: int, x_offset: float, y_offset: float,
+            theta: float, phi: float, magnification: float, 
+            pixel_scale: float, length: float, width: float) -> Array:
+        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
+            pixel_scale)
+        self.length = np.asarray(length).astype(float) 
+        self.width = np.asarray(width).astype(float)
+
+
+    def _aperture(self: Layer) -> Array:
+        coordinates = self._coordinates()
+        x_mask = self._soft_edged(np.abs(coordinates[0]) - self.width / 2.) 
+        y_mask = self._soft_edged(np.abs(coordinates[1]) - self.width / 2.)    
+        return y_mask * x_mask        
+    
+
 class SquareAperture(Aperture):
     width: float
    
@@ -540,6 +556,25 @@ class SquareAperture(Aperture):
         coordinates = self._coordinates()
         x_mask = np.abs(coordinates[0]) < (self.width / 2.)
         y_mask = np.abs(coordinates[1] < (self.width / 2.)
+        return x_mask * y_mask
+
+
+class SoftEdgedSquareAperture(Aperture):
+    width: float
+
+
+    def __init__(self: Layer, pixels: float, x_offset: float, y_offset: float,
+            theta: float, phi: float, magnification: float, pixel_scale: float,
+            width: float) -> Array:
+        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification, 
+            pixel_scale)
+        self.width = np.asarray(width).astype(float)
+
+
+    def _aperture(self: Layer) -> Array:
+        coordinates = self._coordinates()
+        x_mask = self._soft_edge(np.abs(coordinates[0]) - self.width / 2.)
+        y_mask = self._soft_edge(np.abs(coordinates[1]) - self.width / 2.)
         return x_mask * y_mask
 
 
