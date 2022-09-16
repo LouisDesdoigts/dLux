@@ -497,9 +497,53 @@ class AnnularAperture(Aperture):
 
 
 class SoftEdgedAnnularAperture(SoftEdgedAperture):
+    """
+    An annular aperture (see dLux.AnnularAperture) however, the edges have 
+    several soft pixels (i.e. between 1. and 0.). The goal is to improve the 
+    stability of gradients taken through the aperture. 
+
+    Parameters
+    ----------
+    rmin: float, meters
+        The radius of the inner edge of the annular opening. 
+    rmax: float, meters
+        The radius of the outer edge of the annular opening. 
+    """
+    rmin: float
+    rmax: float
+
+
     def __init__(self: Layer, pixels: int, x_offset: float, y_offset: float, 
             theta: float, phi: float, magnification: float, pixel_scale: float,
             rmin: float, rmax: float) -> Array:
+        """
+        Parameters
+        ----------
+        npix : int
+            The number of layers along one edge of the array that 
+            represents this aperture.
+        x_offset : float, meters
+            The centre of the coordinate system along the x-axis.
+        y_offset : float, meters
+            The centre of the coordinate system along the y-axis. 
+        theta : float, radians
+            The rotation of the coordinate system of the aperture 
+            away from the positive x-axis. Due to the symmetry of 
+            ring shaped apertures this will not change the final 
+            shape and it is recomended that it is just set to zero.
+        phi : float, radians
+            The rotation of the y-axis away from the vertical and 
+            torward the negative x-axis measured from the vertical.
+        magnification : float
+            The scaling of the aperture. 
+        pixel_scale : float, meters per pixel
+            The length of one side of a square pixel. Defines the 
+            physical size of the array representing the aperture.
+        rmax : float, meters
+            The outer radius of the annular aperture. 
+        rmin : float, meters
+            The inner radius of the annular aperture. 
+        """
         super().__init__(pixels, x_offset, y_offsetm theta, phi, magnification,
             pixel_scale)
         self.rmin = np.asarray(rmin).astype(float)
@@ -507,6 +551,15 @@ class SoftEdgedAnnularAperture(SoftEdgedAperture):
 
 
     def _aperture(self: Layer) -> Array:
+        """
+        Generates the aperture. There should be around three (depends on the
+        scale), non-binary pixels at the edges.
+
+        Returns
+        -------
+        aperture: Array
+            The array representation of the aperture. 
+        """
         coordinates = cartesian_to_polar(self._coordiantes())
         inner = self._soft_edge(coordinates - self.rmin)
         outer = self._soft_edge(coordinates - self.rmax)
