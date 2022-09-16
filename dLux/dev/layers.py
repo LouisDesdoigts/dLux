@@ -475,8 +475,8 @@ class AnnularAperture(Aperture):
         """
         super().__init__(npix, x_offset, y_offset, theta, phi, 
             magnification, pixel_scale)
-        self.rmax = rmax
-        self.rmin = rmin
+        self.rmax = np.asarray(rmax).astype(float)
+        self.rmin = np.asarray(rmin).astype(float)
 
 
     def _aperture(self : Layer) -> Array:
@@ -494,6 +494,23 @@ class AnnularAperture(Aperture):
         coordinates = cartesian_to_polar(self._coordinates())
         return ((coordinates <= self.rmax) \
             & (coordinates > self.rmin)).astype(float)
+
+
+class SoftEdgedAnnularAperture(SoftEdgedAperture):
+    def __init__(self: Layer, pixels: int, x_offset: float, y_offset: float, 
+            theta: float, phi: float, magnification: float, pixel_scale: float,
+            rmin: float, rmax: float) -> Array:
+        super().__init__(pixels, x_offset, y_offsetm theta, phi, magnification,
+            pixel_scale)
+        self.rmin = np.asarray(rmin).astype(float)
+        self.rmax = np.asarray(rmax).astype(float)
+
+
+    def _aperture(self: Layer) -> Array:
+        coordinates = cartesian_to_polar(self._coordiantes())
+        inner = self._soft_edge(coordinates - self.rmin)
+        outer = self._soft_edge(coordinates - self.rmax)
+        return inner * outer
 
 
 # TODO: This is the current site of development. 
