@@ -728,18 +728,62 @@ class SoftEdgedRectangularAperture(SoftEdgedAperture):
     
 
 class SquareAperture(Aperture):
+    """
+    A square aperture. Note: this can also be created from the rectangular 
+    aperture class, but this obe tracks less parameters.
+
+    Parameters
+    ----------
+    width: float, meters
+        The side length of the square. 
+    """
     width: float
    
  
     def __init__(self: Layer, pixels: float, x_offset: float, y_offset: float,
             theta: float, phi: float, magnification: float, 
             pixel_scale: float, width: float) -> Array:
+        """
+        Parameters
+        ----------
+        npix : int
+            The number of layers along one edge of the array that 
+            represents this aperture.
+        x_offset : float, meters
+            The centre of the coordinate system along the x-axis.
+        y_offset : float, meters
+            The centre of the coordinate system along the y-axis. 
+        theta : float, radians
+            The rotation of the coordinate system of the aperture 
+            away from the positive x-axis. Due to the symmetry of 
+            ring shaped apertures this will not change the final 
+            shape and it is recomended that it is just set to zero.
+        phi : float, radians
+            The rotation of the y-axis away from the vertical and 
+            torward the negative x-axis measured from the vertical.
+        magnification : float
+            The scaling of the aperture. 
+        pixel_scale : float, meters per pixel
+            The length of one side of a square pixel. Defines the 
+            physical size of the array representing the aperture.
+        width: float, meters
+            The side length of the square. 
+        """
         super().__init__(pixels, x_offset, y_offsetm theta, phi, magnification,
             pixel_scale)
         self.width = np.asarray(width).astype(float)
     
 
     def _aperture(self: Layer) -> Array:
+        """
+        Generates the aperture. There should be around three (depends on the
+        scale), non-binary pixels at the edges.
+
+        Returns
+        -------
+        aperture: Array
+            The array representation of the aperture. 
+        """
         coordinates = self._coordinates()
         x_mask = np.abs(coordinates[0]) < (self.width / 2.)
         y_mask = np.abs(coordinates[1] < (self.width / 2.)
