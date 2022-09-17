@@ -6,7 +6,7 @@ import jax.numpy as np
 import jax 
 import functools
 
-config.update("jax_enable_x64", True)
+jax.config.update("jax_enable_x64", True)
 
 Array = TypeVar("Array")
 Layer = TypeVar("Layer")
@@ -18,7 +18,7 @@ Vector = TypeVar("Vector")
 __all__ = ["Aperture", "CompoundAperture", "SoftEdgedAperture", 
     "SquareAperture", "SoftEdgedSquareAperture", "RectangularAperture",
     "SoftEdgedRectangularAperture", "CircularAperture", 
-    "SofteEdgedCircularAperture", "AnnularAperture", 
+    "SoftEdgedCircularAperture", "AnnularAperture", 
     "SoftEdgedAnnularAperture"]
 
 
