@@ -14,6 +14,14 @@ Tensor = TypeVar("Tensor")
 Matrix = TypeVar("Matrix")
 Vector = TypeVar("Vector")
 
+
+__all__ = ["Aperture", "CompoundAperture", "SoftEdgedAperture", 
+    "SquareAperture", "SoftEdgedSquareAperture", "RectangularAperture",
+    "SoftEdgedRectangularAperture", "CircularAperture", 
+    "SofteEdgedCircularAperture", "AnnularAperture", 
+    "SoftEdgedAnnularAperture"]
+
+
 def cartesian_to_polar(coordinates : Tensor) -> Tensor:
     """
     Change the coordinate system from rectilinear to curvilinear.

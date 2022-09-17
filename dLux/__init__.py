@@ -8,6 +8,7 @@ from . import layers
 from . import wavefronts
 from . import propagators
 from . import utils
+from . import apertures
 
 # Import core functions from modules
 from .base        import *
@@ -15,6 +16,7 @@ from .detectors   import *
 from .layers      import *
 from .wavefronts  import *
 from .propagators import *
+from .apertures   import *
 
 # Add to __all__
 __all__ = base.__all__ + detectors.__all__ + layers.__all__ + \
