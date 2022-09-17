@@ -7,8 +7,7 @@ Development script for the new layers structure.
 from constants import *
 from matplotlib import pyplot
 from typing import TypeVar
-from dLux.utils import (get_radial_positions, get_pixel_vector, 
-    get_pixel_positions)
+from dLux.utils import (get_positions_vector, get_pixel_positions)
 from abc import ABC, abstractmethod 
 import equinox as eqx
 import jax.numpy as np
@@ -309,7 +308,7 @@ class Aperture(eqx.Module, ABC):
                 self._magnify(
                     self.get_pixel_scale() * \
                         get_pixel_positions(self.pixels, 
-                            x_pixel_offset, y_pixel_offset)))
+                            x_pixel_offset, y_pixel_offset))))
         return coordinates
 
 
@@ -416,7 +415,7 @@ class Aperture(eqx.Module, ABC):
         return parameters
 
 
-class SoftEdgedAperture(Aperture, abc.ABC):
+class SoftEdgedAperture(Aperture, ABC):
     """
     Apertures that have hard edges can result in undefined gradients. 
     To combat this annoying behaviour we have added the soft edged apertures
@@ -444,7 +443,7 @@ class SoftEdgedAperture(Aperture, abc.ABC):
             the prozed soft edges.
         """
         steepness = self.pixels
-        return (np.tanh(steepness * distance) + 1.) / 2.
+        return (np.tanh(steepness * image) + 1.) / 2.
 
 
 class AnnularAperture(Aperture):
@@ -569,7 +568,7 @@ class SoftEdgedAnnularAperture(SoftEdgedAperture):
         rmin : float, meters
             The inner radius of the annular aperture. 
         """
-        super().__init__(pixels, x_offset, y_offsetm theta, phi, magnification,
+        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
             pixel_scale)
         self.rmin = np.asarray(rmin).astype(float)
         self.rmax = np.asarray(rmax).astype(float)
@@ -585,8 +584,8 @@ class SoftEdgedAnnularAperture(SoftEdgedAperture):
         aperture: Array
             The array representation of the aperture. 
         """
-        coordinates = cartesian_to_polar(self._coordiantes())
-        inner = self._soft_edge(coordinates - self.rmin)
+        coordinates = cartesian_to_polar(self._coordinates())[0]
+        inner = self._soft_edge(- coordinates + self.rmin)
         outer = self._soft_edge(coordinates - self.rmax)
         return inner * outer
 
@@ -639,7 +638,7 @@ class RectangularAperture(Aperture):
         width: float, meters
             The length of the aperture in the x-direction.
         """
-        super().__init__(pixels, x_offset, y_offsetm theta, phi, magnification,
+        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
             pixel_scale)
         self.length = np.asarray(length).astype(float)
         self.width = np.asarray(width).astype(float)
@@ -722,8 +721,8 @@ class SoftEdgedRectangularAperture(SoftEdgedAperture):
             The array representation of the aperture. 
         """
         coordinates = self._coordinates()
-        x_mask = self._soft_edged(np.abs(coordinates[0]) - self.width / 2.) 
-        y_mask = self._soft_edged(np.abs(coordinates[1]) - self.width / 2.)    
+        x_mask = self._soft_edge(- np.abs(coordinates[0]) + self.length / 2.) 
+        y_mask = self._soft_edge(- np.abs(coordinates[1]) + self.width / 2.)    
         return y_mask * x_mask        
     
 
@@ -769,7 +768,7 @@ class SquareAperture(Aperture):
         width: float, meters
             The side length of the square. 
         """
-        super().__init__(pixels, x_offset, y_offsetm theta, phi, magnification,
+        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
             pixel_scale)
         self.width = np.asarray(width).astype(float)
     
@@ -783,11 +782,11 @@ class SquareAperture(Aperture):
         """
         coordinates = self._coordinates()
         x_mask = np.abs(coordinates[0]) < (self.width / 2.)
-        y_mask = np.abs(coordinates[1] < (self.width / 2.)
+        y_mask = np.abs(coordinates[1]) < (self.width / 2.)
         return x_mask * y_mask
 
 
-class SoftEdgedSquareAperture(Aperture):
+class SoftEdgedSquareAperture(SoftEdgedAperture):
     """
     A square aperture with non-binary pixels near the edges to improve the 
     differential stability of the program. 
@@ -796,7 +795,8 @@ class SoftEdgedSquareAperture(Aperture):
     ----------
     width: float, meters
         The side length of the square. 
-    """   width: float
+    """   
+    width: float
 
 
     def __init__(self: Layer, pixels: float, x_offset: float, y_offset: float,
@@ -844,8 +844,8 @@ class SoftEdgedSquareAperture(Aperture):
             The array representation of the aperture. 
         """
         coordinates = self._coordinates()
-        x_mask = self._soft_edge(np.abs(coordinates[0]) - self.width / 2.)
-        y_mask = self._soft_edge(np.abs(coordinates[1]) - self.width / 2.)
+        x_mask = self._soft_edge(- np.abs(coordinates[0]) + self.width / 2.)
+        y_mask = self._soft_edge(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
 
