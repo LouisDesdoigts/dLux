@@ -644,10 +644,10 @@ class CircularAperture(Aperture):
             The aperture represented as a pixel array.
         """
         coordinates = cartesian_to_polar(self._coordinates())[0]
-        return coordinates < radius
+        return coordinates < self.radius
 
 
-def SoftEdgedCircularAperture(SoftEdgedAperture):
+class SoftEdgedCircularAperture(SoftEdgedAperture):
     """
     A circular aperture that is stabalised against numerical gradient 
     calculations. 
@@ -660,8 +660,8 @@ def SoftEdgedCircularAperture(SoftEdgedAperture):
     radius: float
 
 
-    def __init__(self: Layers, pixels: int, x_offset: float, y_offset: float,
-            theta: float, phi: float, magnitude: float, pixel_scale: float,
+    def __init__(self: Layer, pixels: int, x_offset: float, y_offset: float, 
+            theta: float, phi: float, magnification: float, pixel_scale: float,
             radius: float) -> Layer:
         """
         Parameters
@@ -708,9 +708,6 @@ def SoftEdgedCircularAperture(SoftEdgedAperture):
         return self._soft_edge(self.radius - coordinates)
 
 
-
-# TODO: This is the current site of development. 
-# TODO: I need to add soft edging to these apertures. 
 class RectangularAperture(Aperture):
     """
     A rectangular aperture.
