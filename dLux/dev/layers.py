@@ -590,6 +590,125 @@ class SoftEdgedAnnularAperture(SoftEdgedAperture):
         return inner * outer
 
 
+class CircularAperture(Aperture):
+    """
+    A circular aperture represented as a binary array.
+
+    Parameters
+    ----------
+    radius: float, meters
+        The radius of the opening. 
+    """
+    radius: float
+   
+ 
+    def __init__(self: Layer, pixels: int, x_offset: float, y_offset: float, 
+            theta: float, phi: float, magnification: float, pixel_scale: float,
+            radius: float) -> Array:
+        """
+        Parameters
+        ----------
+        npix : int
+            The number of layers along one edge of the array that 
+            represents this aperture.
+        x_offset : float, meters
+            The centre of the coordinate system along the x-axis.
+        y_offset : float, meters
+            The centre of the coordinate system along the y-axis. 
+        theta : float, radians
+            The rotation of the coordinate system of the aperture 
+            away from the positive x-axis. Due to the symmetry of 
+            ring shaped apertures this will not change the final 
+            shape and it is recomended that it is just set to zero.
+        phi : float, radians
+            The rotation of the y-axis away from the vertical and 
+            torward the negative x-axis measured from the vertical.
+        magnification : float
+            The scaling of the aperture. 
+        pixel_scale : float, meters per pixel
+            The length of one side of a square pixel. Defines the 
+            physical size of the array representing the aperture.
+        radius: float, meters 
+            The radius of the aperture.
+        """
+        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
+            pixel_scale)
+        self.radius = np.asarray(radius).astype(float)
+
+
+    def _aperture(self: Layer) -> Array:
+        """
+        Returns
+        -------
+        aperture: Array
+            The aperture represented as a pixel array.
+        """
+        coordinates = cartesian_to_polar(self._coordinates())[0]
+        return coordinates < radius
+
+
+def SoftEdgedCircularAperture(SoftEdgedAperture):
+    """
+    A circular aperture that is stabalised against numerical gradient 
+    calculations. 
+
+    Parameters
+    ----------
+    radius: float, meters 
+        The radius of the opening. 
+    """
+    radius: float
+
+
+    def __init__(self: Layers, pixels: int, x_offset: float, y_offset: float,
+            theta: float, phi: float, magnitude: float, pixel_scale: float,
+            radius: float) -> Layer:
+        """
+        Parameters
+        ----------
+        npix : int
+            The number of layers along one edge of the array that 
+            represents this aperture.
+        x_offset : float, meters
+            The centre of the coordinate system along the x-axis.
+        y_offset : float, meters
+            The centre of the coordinate system along the y-axis. 
+        theta : float, radians
+            The rotation of the coordinate system of the aperture 
+            away from the positive x-axis. Due to the symmetry of 
+            ring shaped apertures this will not change the final 
+            shape and it is recomended that it is just set to zero.
+        phi : float, radians
+            The rotation of the y-axis away from the vertical and 
+            torward the negative x-axis measured from the vertical.
+        magnification : float
+            The scaling of the aperture. 
+        pixel_scale : float, meters per pixel
+            The length of one side of a square pixel. Defines the 
+            physical size of the array representing the aperture.
+        radius: float, meters 
+            The radius of the aperture.
+        """
+        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
+            pixel_scale)
+        self.radius = np.asarray(radius).astype(float)
+
+
+    def _aperture(self: Layer) -> Array:        
+        """
+        Generates the apperature as a square array. Note: there is a layer of 
+        non-binary pixels near the edge to stabalise the numerical gradients. 
+
+        Returns
+        -------
+        aperture: Array
+            The aperture.
+        """
+        coordinates = cartesian_to_polar(self._coordinates())[0]
+        return self._soft_edge(self.radius - coordinates)
+
+
+
 # TODO: This is the current site of development. 
 # TODO: I need to add soft edging to these apertures. 
 class RectangularAperture(Aperture):
