@@ -491,7 +491,7 @@ class AnnularAperture(Aperture):
             then the physical interpretation is the transmission 
             coefficient of that pixel. 
         """
-        coordinates = cartesian_to_polar(self._coordinates())
+        coordinates = cartesian_to_polar(self._coordinates())[0]
         return ((coordinates <= self.rmax) \
             & (coordinates > self.rmin)).astype(float)
 
