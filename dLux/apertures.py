@@ -62,27 +62,22 @@ class Aperture(eqx.Module, ABC):
     phi : float, radians
         The rotation of the y-axis away from the vertical and torward 
         the negative x-axis. 
-    magnification : float
-        The radius of the aperture. The radius belongs to the smallest
-        circle that completely contains the aperture. For the math
-        nerds the infimum of the set of circles whose union with the
-        aperture is the aperture. 
-    pixel_scale : float, meters per pixel 
-        The length along one side of a square pixel. 
     """
     pixels : int
+    width_of_image: float 
+    occulting: bool 
+    softening: bool
+    coordinates: Tensor
     x_offset : float
     y_offset : float
     theta : float
     phi : float
-    magnification : float
-    pixel_scale : float # Not gradable
     
 
     def __init__(self : Layer, number_of_pixels : int,
             x_offset : float, y_offset : float, theta : float,
-            phi : float, magnification : float,
-            pixel_scale : float) -> Layer:
+            phi : float, width_of_image: float, occulting: bool,
+            softening: bool) -> Layer:
         """
         Parameters
         ----------
@@ -99,19 +94,29 @@ class Aperture(eqx.Module, ABC):
         phi : float, radians
             The rotation of the y-axis away from the vertical and 
             torward the negative x-axis measured from the vertical.
-        magnification : float
-            The scaling of the aperture. 
-        pixel_scale : float, meters per pixel
-            The dimension along one edge of the pixel. At present 
-            only square (meter) pixels are supported. 
+        width_of_image: float, meters
+            How wide is the entire image. 
         """
         self.pixels = int(number_of_pixels)
         self.x_offset = np.asarray(x_offset).astype(float)
         self.y_offset = np.asarray(y_offset).astype(float)
         self.theta = np.asarray(theta).astype(float)
         self.phi = np.asarray(phi).astype(float)
-        self.magnification = np.asarray(magnification).astype(float)
-        self.pixel_scale = float(pixel_scale)
+        self.width_of_image = float(width_of_image)
+        self.occulting = bool(occulting)
+        self.softening = bool(softening)
+        self.coordinates = self._coordinates()
+
+
+    def _distance_from_line(self, gradient: float, intercept: float) -> Matrixi:
+        x, y = self.coordinates[0], self.coordinates[1]
+        return np.abs(y - gradient * x - intercept) / np.sqrt(1 + gradient ** 2)
+
+
+    def _distance_from_circle(self, radius: float, centre: Vector) -> Matrix:
+        translated_coordinates = self.coordinates + centre.reshape((2, 1, 1))
+        radial_coordinates = dLux.polar2cart(translated_coordinates)[0]
+        return radial_coordinates - radius
 
     
     @abstractmethod
@@ -191,38 +196,7 @@ class Aperture(eqx.Module, ABC):
         return self.shear
 
 
-    def get_magnification(self : Layer) -> float:
-        """
-        Returns
-        -------
-        magnification : float
-            A proportionality factor indicating the magnification 
-            of the aperture. 
-        """
-        return self.magnification
-
-
-    def _magnify(self : Layer, coordinates : Tensor) -> Tensor:
-        """
-        Enlarge or shrink the coordinate system, by the inbuilt 
-        amount specified by `self._rmax`.
-
-        Parameters
-        ----------
-        coordinates : Tensor
-            A `(2, npix, npix)` representation of the coordinate 
-            system. The leading dimensions specifies the x and then 
-            the y coordinates in that order. 
-
-        Returns
-        -------
-        coordinates : Tensor
-            The enlarged or shrunken coordinate system.
-        """
-        return 1 / self.get_magnification() * coordinates
-
-
-    def _rotate(self : Layer, coordinates : Tensor) -> Tensor:
+    def rotate(self : Layer, coordinates : Tensor) -> Tensor:
         """
         Rotate the coordinate system by a pre-specified amount,
         `self._theta`
@@ -239,14 +213,15 @@ class Aperture(eqx.Module, ABC):
         coordinates : Tensor
             The rotated coordinate system. 
         """
-        rotation_matrix = np.array([
-            [np.cos(self.theta), -np.sin(self.theta)],
-            [np.sin(self.theta), np.cos(self.theta)]])            
-        return np.apply_along_axis(np.matmul, 0, coordinates, 
-            rotation_matrix) 
+        x_coordinates, y_coordinates = coordinates[0], coordinates[1]
+        new_x_coordinates = np.cos(self.theta) * x_coordinates + \
+            np.sin(self.theta) * y_coordinates
+        new_y_coordinates = -np.sin(self.theta) * x_coordinates + \
+            np.cos(self.theta) * y_coordinates
+        return np.array([new_x_coordinates, new_y_coordinates])
 
 
-    def _shear(self : Layer, coordinates : Tensor) -> Tensor:
+    def shear(self : Layer, coordinates : Tensor) -> Tensor:
         """
         Shear the coordinate system by the inbuilt amount `self._phi`.
 
