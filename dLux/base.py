@@ -6,6 +6,7 @@ from copy import deepcopy
 import dLux
 import typing
 import optax
+import abc
 
 __all__ = ["Base", "OpticalSystem"]
 
@@ -604,7 +605,7 @@ class OpticalSystem(Base):
     
     
     
-    def __call__(self):
+    def propagate(self):
         """
         Maps the wavelength and position calcualtions across multiple dimesions
         
