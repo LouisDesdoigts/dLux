@@ -54,48 +54,25 @@ class Aperture(eqx.Module, ABC):
     softening: bool
     x_offset : float
     y_offset : float
-    theta : float
     
 
-    def __init__(self : Layer, x_offset : float, y_offset : float, 
-            theta : float, phi : float, occulting: bool, 
-            softening: bool) -> Layer:
+    def __init__(self, x_offset : float, y_offset : float, 
+            occulting: bool, softening: bool) -> Layer:
         """
         Parameters
         ----------
-        number_of_pixels : int
-            The number of pixels along one side of the array that 
-            represents this aperture.
         x_offset : float, meters
             The centre of the coordinate system along the x-axis.
         y_offset : float, meters
             The centre of the coordinate system along the y-axis. 
-        theta : float, radians
-            The rotation of the coordinate system of the aperture 
-            away from the positive x-axis.
-        phi : float, radians
-            The rotation of the y-axis away from the vertical and 
-            torward the negative x-axis measured from the vertical.
-        width_of_image: float, meters
-            How wide is the entire image. 
         """
         self.x_offset = np.asarray(x_offset).astype(float)
         self.y_offset = np.asarray(y_offset).astype(float)
         self.occulting = bool(occulting)
         self.softening = bool(softening)
 
-    
-    def get_npix(self : Layer) -> int:
-        """
-        Returns
-        -------
-        pixels : int
-            The number of pixels that parametrise this aperture.
-        """
-        return self.pixels
 
-
-    def get_centre(self : Layer) -> tuple:
+    def get_centre(self) -> tuple:
         """
         Returns 
         -------
@@ -107,18 +84,7 @@ class Aperture(eqx.Module, ABC):
         return self.x_offset, self.y_offset
 
 
-    def get_rotation(self : Layer) -> float:
-        """
-        Returns 
-        -------
-        theta : float, radians 
-            The angle of rotation of the aperture away from the 
-            positive x-axis. 
-        """
-        return self.theta
-
-
-    def rotate(self : Layer, coordinates : Tensor) -> Tensor:
+    def _rotate(self, coordinates: Tensor, angle: float) -> Tensor:
         """
         Rotate the coordinate system by a pre-specified amount,
         `self._theta`
@@ -136,10 +102,10 @@ class Aperture(eqx.Module, ABC):
             The rotated coordinate system. 
         """
         x_coordinates, y_coordinates = coordinates[0], coordinates[1]
-        new_x_coordinates = np.cos(self.theta) * x_coordinates + \
-            np.sin(self.theta) * y_coordinates
-        new_y_coordinates = -np.sin(self.theta) * x_coordinates + \
-            np.cos(self.theta) * y_coordinates
+        new_x_coordinates = np.cos(angle) * x_coordinates + \
+            np.sin(angle) * y_coordinates
+        new_y_coordinates = -np.sin(angle) * x_coordinates + \
+            np.cos(angle) * y_coordinates
         return np.array([new_x_coordinates, new_y_coordinates])
 
 
@@ -192,54 +158,30 @@ class Aperture(eqx.Module, ABC):
         return aperture
 
 
-    def set_theta(self : Layer, theta : float) -> Layer:
-        """
-        Parameters
-        ----------
-        theta : float
-            The angle of rotation from the positive x-axis.  
-
-        Returns
-        -------
-        basis : HexagonalBasis 
-            The rotated hexagonal basis. 
-        """
-        return eqx.tree_at(lambda basis : basis.theta, self, theta)
-
-
-    def set_x_offset(self : Layer, x : float) -> Layer:
+    # TODO: Remove the basis naming convention. 
+    def set_x_offset(self, x : float) -> Layer:
         """
         Parameters
         ----------
         x : float
             The x coordinate of the centre of the hexagonal
             aperture.
-
-        Returns
-        -------
-        basis : HexagonalBasis
-            The translated hexagonal basis. 
         """
         return eqx.tree_at(lambda basis : basis.x_offset, self, x)
 
 
-    def set_y_offset(self : Layer, y : float) -> Layer:
+    def set_y_offset(self, y : float) -> Layer:
         """
         Parameters
         ----------
         x : float
             The y coordinate of the centre of the hexagonal
             aperture.
-
-        Returns
-        -------
-        basis : HexagonalBasis
-            The translated hexagonal basis. 
         """
         return eqx.tree_at(lambda basis : basis.y_offset, self, y)
 
 
-    def __call__(self : Layer, parameters : dict) -> dict:
+    def __call__(self, parameters : dict) -> dict:
         """
         Apply the aperture to an incoming wavefront.
 
@@ -259,7 +201,7 @@ class Aperture(eqx.Module, ABC):
         wavefront = parameters["Wavefront"]
         wavefront = wavefront.mulitply_amplitude(
             self._aperture(
-                wavefront.get_pixel_positions()))
+                wavefront.get_pixel_coordinates()))
         parameters["Wavefront"] = wavefront
         return parameters
 
@@ -283,8 +225,7 @@ class AnnularAperture(Aperture):
     rmax : float
 
 
-    def __init__(self : Layer, x_offset : float, 
-            y_offset : float, theta : float, phi : float, 
+    def __init__(self, x_offset : float,  y_offset : float, 
             rmax : float, rmin : float) -> Layer:
         """
         Parameters
@@ -293,15 +234,7 @@ class AnnularAperture(Aperture):
             The centre of the coordinate system along the x-axis.
         y_offset : float, meters
             The centre of the coordinate system along the y-axis. 
-        theta : float, radians
-            The rotation of the coordinate system of the aperture 
-            away from the positive x-axis. Due to the symmetry of 
-            ring shaped apertures this will not change the final 
-            shape and it is recomended that it is just set to zero.
-        phi : float, radians
-            The rotation of the y-axis away from the vertical and 
-            torward the negative x-axis measured from the vertical.
-        rmax : float, meters
+       rmax : float, meters
             The outer radius of the annular aperture. 
         rmin : float, meters
             The inner radius of the annular aperture. 
@@ -333,6 +266,7 @@ class AnnularAperture(Aperture):
         return self._soften(coordinates - self.rmin) + \
             self._soften(coordinates - self.rmax)
        
+
 
  
 
