@@ -1,4 +1,5 @@
 from typing import TypeVar
+import matplotlib.pyplot as pyplot 
 import equinox as eqx
 import jax.numpy as np
 import jax 
@@ -250,31 +251,6 @@ class AnnularAperture(Aperture):
             self._soften(- coordinates + self.rmax)
       
 
-import matplotlib.pyplot as pyplot 
-
-#coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
-#
-#aperture = AnnularAperture(0.2, 0.1, 1., .5, False, False)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = AnnularAperture(0.2, 0.1, 1., .5, False, True)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = AnnularAperture(0.2, 0.1, 1., .5, True, False)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = AnnularAperture(0.2, 0.1, 1., .5, True, True)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-
-
 class CircularAperture(Aperture):
     """
     A circular aperture represented as a binary array.
@@ -324,29 +300,6 @@ class CircularAperture(Aperture):
         coordinates = self._translate(coordinates)
         coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
         return self._soften(- coordinates + self.radius)
-
-
-#coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
-#
-#aperture = CircularAperture(0.2, 0.1, .5, False, False)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = CircularAperture(0.2, 0.1, .5, False, True)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = CircularAperture(0.2, 0.1, .5, True, False)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = CircularAperture(0.2, 0.1, .5, True, True)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
 
 
 class RotatableAperture(Aperture):
@@ -441,28 +394,6 @@ class RectangularAperture(RotatableAperture):
         return x_mask * y_mask
 
 
-#coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
-#
-#aperture = RectangularAperture(0.2, 0.1, np.pi /4, .5, .2, False, False)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, False, True)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, True, False)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, True, True)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-
 class SquareAperture(RotatableAperture):
     """
     A square aperture. Note: this can also be created from the rectangular 
@@ -518,63 +449,18 @@ class SquareAperture(RotatableAperture):
         return x_mask * y_mask
 
 
-#coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
-#
-#aperture = SquareAperture(0.2, 0.1, np.pi /4, .5, False, False)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = SquareAperture(0.2, 0.1, np.pi / 4, .5, False, True)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = SquareAperture(0.2, 0.1, np.pi / 4, .5, True, False)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-#aperture = SquareAperture(0.2, 0.1, np.pi / 4, .5, True, True)
-#pyplot.imshow(aperture._aperture(coordinates))
-#pyplot.colorbar()
-#pyplot.show()
-#
-
-
 class CompoundAperture(eqx.Module):
     """
     Represents an aperture that contains more than one single 
     aperture. The smaller sub-apertures are stored in a dictionary
     pytree and are so acessible by user defined name. For example:
 
-    >>> x_sep = 0.1
-    >>> width = 0.005
-    >>> height = 0.2
-    >>> first_slit = RectangularAperture(
-    ...     npix=1008, width=width, height=height, 
-    ...     x_offset = -x_sep/2, y_offset=0.,
-    ...     theta=0., phi=0., magnification=0.)
-    >>> second_slit = RectangularAperture(
-    ...     npix=1008, width=width, height=height, 
-    ...     x_offset = x_sep/2, y_offset=0.,
-    ...     theta=0., phi=0., magnification=0.)
-    >>> apertures = {"Right": first_slit, "Left": second_slit}
-    >>> double_slit = CompoundAperture(apertures)
-    >>> double_slit["Right"]
 
     Attributes
     ----------
-    npix : int
-        The number of pixels to be used to represent the entire 
-        set of apertures.
-    pixel_scale : float, meters per pixel
-        The length of the side of one pixel in the image. 
     apertures : dict(str, Layer)
         The apertures that make up the compound aperture. 
     """
-    npix : int
-    pixel_scale : float
     apertures : dict    
 
 
