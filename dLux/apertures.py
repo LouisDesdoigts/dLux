@@ -597,82 +597,12 @@ import matplotlib.pyplot as pyplot
 
 coordinates = dLux.utils.get_pixel_coordinates(1024, 0.001, 0., 0.)
 
-aperture = CircularAperture(0., 0., .5, False, True)
+aperture = EvenUniformSpider(0., 0., 4, .05, np.pi / 4,  True)
 pyplot.imshow(aperture._aperture(coordinates))
 pyplot.colorbar()
 pyplot.show()
 
-aperture = CircularAperture(0., 0., .5, False, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = CircularAperture(0., 0., .5, True, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = CircularAperture(0., 0., .5, True, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = SquareAperture(0., 0., np.pi / 4, .5, False, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = SquareAperture(0., 0., np.pi / 4, .5, False, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = SquareAperture(0., 0., np.pi / 4, .5, True, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = SquareAperture(0., 0., np.pi / 4, .5, True, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = RectangularAperture(0., 0., np.pi / 4, .5, .2,  False, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = RectangularAperture(0., 0., np.pi / 4, .5, .2,  False, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = RectangularAperture(0., 0., np.pi / 4, .5, .2, True, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = RectangularAperture(0., 0., np.pi / 4, .5, .2, True, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = AnnularAperture(0., 0., .5, .2,  False, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = AnnularAperture(0., 0., .5, .2,  False, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = AnnularAperture(0., 0., .5, .2, True, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = AnnularAperture(0., 0., .5, .2, True, False)
+aperture = EvenUniformSpider(0., 0., 4, .05, np.pi / 4,  False)
 pyplot.imshow(aperture._aperture(coordinates))
 pyplot.colorbar()
 pyplot.show()
