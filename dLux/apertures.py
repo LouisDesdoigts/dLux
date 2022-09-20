@@ -288,6 +288,17 @@ pyplot.imshow(aperture._aperture(coordinates))
 pyplot.colorbar()
 pyplot.show()
 
+aperture = AnnularAperture(0., 0., 1., .5, True, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = AnnularAperture(0., 0., 1., .5, True, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+
  
 
 
