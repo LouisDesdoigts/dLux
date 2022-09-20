@@ -465,7 +465,7 @@ class Base(abc.ABC, eqx.Module):
                 model_fn)(*args, **kwargs)
 
 
-class OpticalSystem(eqx.Module):
+class OpticalSystem(Base):
     """ Optical System class, Equinox Modle
     
     DOCSTRING NOT COMPLETE
