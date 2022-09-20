@@ -24,253 +24,8 @@ Filter      = typing.NewType("Filter",      object)
 Detector    = typing.NewType("Detector",    object)
 Observation = typing.NewType("Observation", object)
 
-# class Base(abc.ABC, eqx.Module):
-#     def get_leaf(self, pytree, path):
-#         """
-#         Recuses down the path of the pytree
-#         """
-#         key = path[0]
-#         pytree = pytree.__dict__[key] if isinstance(pytree, eqx.Module) else \
-#                  pytree[key]
 
-#         # Return param if at the end of path, else recurse
-#         return pytree if len(path) == 1 else self.get_leaf(pytree, path[1:])
-    
-#     def update_pytree(self, paths, values):
-#         """
-#         Updates the `pytree` leaves specificied by params_paths with values
-#         """
-#         # Returns a tuple of leaves specified by paths
-#         get_leaves = lambda pytree : tuple([self.get_leaf(pytree, paths[i]) \
-#                                             for i in range(len(paths))])
-
-#         # Updates the leaf if passed a function
-#         update_leaf = lambda leaf, leaf_update: leaf_update(leaf)\
-#                 if isinstance(leaf_update, typing.Callable) else leaf_update
-
-#         # Updates the leaves specified by paths
-#         update_values = tuple([update_leaf(self.get_leaf(self, paths[i]), \
-#                                 values[i]) for i in range(len(paths))])
-
-#         return eqx.tree_at(get_leaves, self, update_values)
-    
-#     def update_params(self, update_fn, **kwargs):
-#         """
-#         Update the paramaters with the given input value
-#         """
-#         params, param_paths = update_fn(**kwargs)
-        
-#         # Get value & paths to be updated
-#         update_values = tuple([params[i] for i in range(len(params)) \
-#                               if params[i] is not None])
-        
-#         # Get paths to be parameters to be updated
-#         update_paths = tuple([param_paths[i] for i in range(len(params)) \
-#                               if params[i] is not None])
-        
-#         # Return updated pytree
-#         return self.update_pytree(update_paths, update_values)
-    
-#     def update_and_model(self, update_fn, model_fn, **kwargs):
-#         """
-#         Updates the given input parameters, and then models the psf
-#         """
-#         return getattr(self.update_params(update_fn, **kwargs), model_fn)()
-    
-    
-class Base(abc.ABC, eqx.Module):
-    
-    ######################
-    ### Hidden methods ###
-    ######################
-    def _get_leaf(self, pytree, path):
-        """
-        Recuses down the path of the pytree
-        pytree must be passed in as an input in order to be able to recurse 
-        properly
-        """
-        key = path[0]
-        pytree = pytree.__dict__[key] if isinstance(pytree, eqx.Module) else \
-                 pytree[key]
-        
-        # Return param if at the end of path, else recurse
-        return pytree if len(path) == 1 else self._get_leaf(pytree, path[1:])
-    
-    def _unwrap_paths(self, paths, values=None, path_dict=None):
-        """
-        Helper function to unwrap nested paths and approriately format
-        different inputs
-        """
-        new_paths = []
-        keys = list(path_dict.keys()) if path_dict is not None else []
-        
-        # Only unwrap paths
-        if values is None:
-            for path in paths:
-                # Check if path has sub-paths
-                if isinstance(path[0], typing.Union[list, tuple]) or path[0] in keys:
-                    for sub_path in path:
-                        if sub_path in keys:
-                            new_paths.append(path_dict[sub_path])
-                        else:
-                            new_paths.append(sub_path)
-                else:
-                    if path in keys:
-                        new_paths.append(path_dict[path])
-                    else:
-                        new_paths.append(path)
-                    
-        # Unwrap paths and values
-        else:
-            new_values = []
-            for path, value in zip(paths, values):
-                # Check if path has sub-paths
-                if isinstance(path[0], typing.Union[list, tuple]) or path[0] in keys:
-                    for sub_path in path:
-                        if sub_path in keys:
-                            new_paths.append(path_dict[sub_path])
-                        else:
-                            new_paths.append(sub_path)
-                        new_values.append(value)
-                else:
-                    if path in keys:
-                        new_paths.append(path_dict[path])
-                    else:
-                        new_paths.append(path)
-                    new_values.append(value)
-                    
-        # Wrap non-list path objects in list
-        new_paths = [[path] if not isinstance(path, typing.Union[list, tuple]) \
-                 else path for path in new_paths]
-        
-        # Return values
-        if values is None:
-            return new_paths
-        else:
-            return new_paths, new_values
-
-        
-    ########################
-    ### Accessor methods ###
-    ########################
-    def get_leaf(self, path, path_dict=None):
-        """
-        Used to get a single leaf
-        Kinda useless, but why not have the functionality
-        """
-        # Check if path dict exists
-        if path_dict is not None:
-            # Allow for string and single entry list inputs
-            if isinstance(path, str):
-                path = path_dict[path]
-            else:
-                path = path_dict[path[0]]
-        
-        # Get the leaf
-        return self._get_leaf(self, path)
-    
-    def get_leaves(self, paths, path_dict=None):
-        """
-        Used to get multiple leaves from a list of paths
-        
-        self._unrwap_paths automatically applies the path_dict, hence it is 
-        not passed to self.get_leaf
-        """
-        # Unwrap paths
-        new_paths = self._unwrap_paths(paths, path_dict=path_dict)
-        return tuple([self.get_leaf(path) for path in new_paths])
-    
-    
-    #######################
-    ### Updater methods ###
-    #######################
-    def update_pytree(self, paths, values, path_dict=None):
-        """
-        Updates the `pytree` leaves specificied by params_paths with values
-        """
-        # Unwrap paths
-        new_paths, new_values = self._unwrap_paths(paths, values=values, path_dict=path_dict)
-        
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
-        return eqx.tree_at(get_leaves_fn, self, list(new_values))
-    
-    def apply_fns(self, paths, fns, path_dict=None):
-        """
-        Updates the `pytree` leaves specificied by params_paths with values
-        """
-        # Unwrap paths
-        new_paths, new_fns = self._unwrap_paths(paths, values=fns, path_dict=path_dict)
-        
-        # Call using the get_leaves function in order to properly apply path dictionary
-        new_values = [fn(leaf) for fn, leaf in zip(new_fns, self.get_leaves(new_paths))]                
-                
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
-        return eqx.tree_at(get_leaves_fn, self, list(new_values))
-    
-    
-    #######################
-    ### Optax functions ###
-    #######################
-    def get_filter_spec(self, paths, path_dict=None):
-        """
-        Returns a filter_spec 
-        """
-        filter_spec = jax.tree_map(lambda _: False, self)
-        values = len(paths) * [True]
-        return filter_spec.update_pytree(paths, values, path_dict=path_dict)
-    
-    def get_param_spec(self, paths, groups, get_filter_spec=False, path_dict=None):
-        """
-        Returns a params_spec
-        """
-        param_spec = jax.tree_map(lambda _: 'null', self)
-        param_spec = param_spec.update_pytree(paths, groups, path_dict=path_dict)
-        
-        # For some weird ass reason this works correctly but single liner doesnt
-        if not get_filter_spec:
-            return param_spec
-        else:
-            return param_spec, self.get_filter_spec(paths, path_dict=path_dict)
-
-    def get_pytree_optimiser(self, paths, optimisers, get_filter_spec=False, path_dict=None):
-        """
-        Colates optimisers for each leaf into a coherent optax pytree optimiser
-        """
-        # Construct groups and get param_spec
-        groups = [str(i) for i in range(len(paths))]
-        param_spec = self.get_param_spec(paths, groups, path_dict=path_dict)
-            
-        # Generate optimiser dictionary
-        opt_dict = dict([(groups[i], optimisers[i]) \
-                         for i in range(len(groups))])
-        
-        # Assign the null group
-        opt_dict['null'] = optax.adam(0.)
-
-        # Get optimiser object
-        optim = optax.multi_transform(opt_dict, param_spec)
-    
-        # For some weird ass reason this works correctly but single liner doesnt
-        if not get_filter_spec:
-            return optim
-        else:
-            return optim, self.get_filter_spec(paths, path_dict=path_dict)
-    
-    
-    #########################
-    ### Numpyro functions ###
-    #########################
-    def update_and_model(self, model_fn, paths, values, path_dict=None, *args, **kwargs):
-        """
-        Updates the given input parameters, and then models the psf
-        """
-        return getattr(self.update_pytree(paths, values, path_dict=path_dict), model_fn)(*args, **kwargs)
-
-
-
-class Telescope(Base):
+class Telescope(dLux.Base):
     """
     A high level class to store the various compoennets needed to model a 
     real astrophysical scene with a telescope.
@@ -379,7 +134,7 @@ class Telescope(Base):
     #     return self.model_image().flatten()
     
     
-class Optics(Base):
+class Optics(dLux.Base):
     """ Optical System class, Equinox Modle
     
     Attributes
@@ -443,7 +198,7 @@ class Optics(Base):
         return image
     
     
-class Scene(Base):
+class Scene(dLux.Base):
     """
     Contains a list (dictionary?) of sources and a set of functions needed to 
     interface the parameterised sources with the Optics
@@ -531,7 +286,7 @@ class Scene(Base):
         return source_dict
     
     
-class Filter(Base):
+class Filter(dLux.Base):
     """
     
     """
@@ -592,7 +347,7 @@ class Filter(Base):
 
 
 
-class Detector(Base):
+class Detector(dLux.Base):
     """
     Contains a list (dictionary?) of detector 'layers'
 
@@ -627,7 +382,7 @@ class Detector(Base):
         return image
 
 
-class Observation(eqx.Module):
+class Observation(dLux.Base):
     """
 
     """
