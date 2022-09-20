@@ -204,7 +204,8 @@ def zernike(n, m, npix=100, rho=None, theta=None, outside=0.,
     else:
         norm_coeff = np.sqrt(2) * np.sqrt(n + 1) if noll_normalize else 1
         zernike_result = norm_coeff * R(n, m, rho) * np.sin(np.abs(m) * theta) * aperture
-    zernike_result = zernike_result.at[(rho > 1)].set(outside)
+    zernike_result = zernike_result.astype(float)
+    zernike_result = zernike_result.at[np.where(rho > 1.)].set(outside)
     
     return zernike_result
 
