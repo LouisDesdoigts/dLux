@@ -517,3 +517,24 @@ class CompoundAperture(eqx.Module):
             apertures.append(aperture._aperture(coordinates))
         return np.stack(apertures).prod(axis=0)
 
+
+coordinates = dLux.utils.get_pixel_coordinates(1024, 0.001, 0., 0.)
+apertures = {
+    "1": CircularAperture(0., 0., .2, False, True),
+    "2": SquareAperture(0., 0.2, np.pi / 4, .4, False, True)}
+
+aperture = CompoundAperture(apertures)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = CircularAperture(0., 0., .2, False, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = SquareAperture(0., 0.2, np.pi / 4, .4, False, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+        
