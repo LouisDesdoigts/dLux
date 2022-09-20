@@ -517,4 +517,29 @@ class CompoundAperture(eqx.Module):
             apertures.append(aperture._aperture(coordinates))
         return np.stack(apertures).prod(axis=0)
 
-        
+
+    def __call__(self, params: dict) -> dict:
+        """
+        Apply the aperture to an incoming wavefront.
+
+        Parameters
+        ----------
+        parameters : dict
+            A dictionary containing the parameters of the model. 
+            The dictionary must satisfy `parameters.get("Wavefront")
+            != None`. 
+
+        Returns
+        -------
+        parameters : dict
+            The parameter, parameters, with the "Wavefront"; key
+            value updated. 
+        """
+        wavefront = parameters["Wavefront"]
+        wavefront = wavefront.mulitply_amplitude(
+            self._aperture(
+                wavefront.get_pixel_coordinates()))
+        parameters["Wavefront"] = wavefront
+        return parameters
+
+
