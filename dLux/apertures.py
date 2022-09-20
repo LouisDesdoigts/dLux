@@ -421,7 +421,6 @@ class RectangularAperture(RotatableAperture):
         self.length = np.asarray(length).astype(float)
         self.width = np.asarray(width).astype(float)
 
-
     def _hardened_metric(self, coordinates: Array) -> Array:
         """
         Returns
@@ -432,15 +431,37 @@ class RectangularAperture(RotatableAperture):
         coordinates = self._translate(self._rotate(coordinates))
         x_mask = np.abs(coordinates[0]) < (self.length / 2.)
         y_mask = np.abs(coordinates[1]) < (self.width / 2.)    
-        return y_mask * x_mask      
+        return (y_mask * x_mask).astype(float)     
 
 
     def _softened_metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(self._rotate(coordinates))  
-        x_mask = self._soften(np.abs(coordinates[0]) - self.length)
-        y_mask = self._soften(np.abs(coordinates[1]) - self.width)
+        x_mask = self._soften(- np.abs(coordinates[0]) + self.length / 2.)
+        y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
+
+coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
+
+aperture = RectangularAperture(0.2, 0.1, np.pi /4, .5, .2, False, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, False, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, True, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, True, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
 
 class SquareAperture(Aperture):
     """
@@ -491,6 +512,8 @@ class SquareAperture(Aperture):
         x_mask = np.abs(coordinates[0]) < (self.width / 2.)
         y_mask = np.abs(coordinates[1]) < (self.width / 2.)
         return x_mask * y_mask
+
+
 
 
 class HexagonalAperture(Aperture):
