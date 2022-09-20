@@ -31,16 +31,11 @@ class Aperture(eqx.Module, abc.ABC):
         The x coordinate of the centre of the aperture.
     y_offset : float, meters
         The y coordinate of the centre of the aperture.
-    theta : float, radians
-        The angle of rotation from the positive x-axis. 
-    phi : float, radians
-        The rotation of the y-axis away from the vertical and torward 
-        the negative x-axis. 
     """
     occulting: bool 
-    softening: bool
-    x_offset : float
-    y_offset : float
+    softening: float 
+    x_offset: float
+    y_offset: float
     
 
     def __init__(self, x_offset : float, y_offset : float, 
@@ -55,8 +50,8 @@ class Aperture(eqx.Module, abc.ABC):
         """
         self.x_offset = np.asarray(x_offset).astype(float)
         self.y_offset = np.asarray(y_offset).astype(float)
+        self.softening = jax.lax.cond(softening, lambda: 1., lambda: np.inf)
         self.occulting = bool(occulting)
-        self.softening = bool(softening)
 
 
     def get_centre(self) -> tuple:
@@ -95,32 +90,21 @@ class Aperture(eqx.Module, abc.ABC):
             The image represented as an approximately binary mask, but with 
             the prozed soft edges.
         """
-        steepness = distances.shape[-1]
+        steepness = self.softening * distances.shape[-1]
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
     @abc.abstractmethod
-    def _hardened_metric(self, distances: Array) -> Array:
-        """
-        """
-
-
-    @abc.abstractmethod
-    def _softened_metric(self, distances: Array) -> Array:
+    def _metric(self, distances: Array) -> Array:
         """
         """
 
 
     def _aperture(self, coordinates: Array) -> Array:
-        aperture = jax.lax.cond(self.softening,
-            self._softened_metric,
-            self._hardened_metric,
-            coordinates)
-
         aperture = jax.lax.cond(self.occulting,
             lambda aperture: 1 - aperture,
             lambda aperture: aperture,
-            aperture)
+            self._metric(coordinates))
 
         return aperture
 
@@ -212,25 +196,7 @@ class AnnularAperture(Aperture):
         self.rmin = np.asarray(rmin).astype(float)
 
 
-    def _hardened_metric(self, coordinates: Array) -> Array:
-        """
-        Generates an array representing a hard edged circular aperture.
-        All the values are 0. except for the outer edge. The t
- 
-        Returns
-        -------
-        aperture : Array[Float]
-            The aperture. If these values are confined between 0. and 1.
-            then the physical interpretation is the transmission 
-            coefficient of that pixel. 
-        """
-        coordinates = self._translate(coordinates)
-        coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
-        return ((coordinates <= self.rmax) \
-            & (coordinates > self.rmin)).astype(float)
-
-
-    def _softened_metric(self, coordinates: Array) -> Array:
+    def _metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(coordinates)
         coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
         return self._soften(coordinates - self.rmin) * \
@@ -265,24 +231,7 @@ class CircularAperture(Aperture):
         self.radius = np.asarray(radius).astype(float)
 
 
-    def _hardened_metric(self, coordinates: Array) -> Array:
-        """
-        Generates an array representing a hard edged circular aperture.
-        All the values are 0. except for the outer edge. The t
- 
-        Returns
-        -------
-        aperture : Array[Float]
-            The aperture. If these values are confined between 0. and 1.
-            then the physical interpretation is the transmission 
-            coefficient of that pixel. 
-        """
-        coordinates = self._translate(coordinates)
-        coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
-        return (coordinates <= self.radius).astype(float)
-
-
-    def _softened_metric(self, coordinates: Array) -> Array:
+    def _metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(coordinates)
         coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
         return self._soften(- coordinates + self.radius)
@@ -360,20 +309,8 @@ class RectangularAperture(RotatableAperture):
         self.length = np.asarray(length).astype(float)
         self.width = np.asarray(width).astype(float)
 
-    def _hardened_metric(self, coordinates: Array) -> Array:
-        """
-        Returns
-        -------
-        aperture: Array
-            The array representation of the aperture. 
-        """
-        coordinates = self._translate(self._rotate(coordinates))
-        x_mask = np.abs(coordinates[0]) < (self.length / 2.)
-        y_mask = np.abs(coordinates[1]) < (self.width / 2.)    
-        return (y_mask * x_mask).astype(float)     
 
-
-    def _softened_metric(self, coordinates: Array) -> Array:
+    def _metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(self._rotate(coordinates))  
         x_mask = self._soften(- np.abs(coordinates[0]) + self.length / 2.)
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
@@ -413,22 +350,9 @@ class SquareAperture(RotatableAperture):
         """
         super().__init__(x_offset, y_offset, theta, occulting, softening)
         self.width = np.asarray(width).astype(float)
-    
-
-    def _hardened_metric(self, coordinates: Array) -> Array:
-        """
-        Returns
-        -------
-        aperture: Array
-            The array representation of the aperture. 
-        """
-        coordinates = self._translate(self._rotate(coordinates))
-        x_mask = np.abs(coordinates[0]) < (self.width / 2.)
-        y_mask = np.abs(coordinates[1]) < (self.width / 2.)
-        return (x_mask * y_mask).astype(float)
 
 
-    def _softened_metric(self, coordinates: Array) -> Array:
+    def _metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(self._rotate(coordinates))
         x_mask = self._soften(- np.abs(coordinates[0]) + self.width / 2.)
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
@@ -636,27 +560,7 @@ class EvenUniformSpider(Spider):
         return super()._strut(angle, coordinates)
 
 
-    def _hardened_metric(self, coordinates: Array) -> float:
-        """
-        Represents the spider in a square array. Each strut is placed equally 
-        around the circumference like a wll cut pizza. All the struts have the
-        same width and a global rotation.
-    
-        Returns
-        -------
-        spider: float
-            The array representation of the spider. 
-        """
-        coordinates = self._translate(coordinates)
-        angles = np.linspace(0, 2 * np.pi, self.number_of_struts, 
-            endpoint=False)
-        angles += self.rotation
-
-        struts = self._strut(angles, coordinates) > self.width_of_struts / 2.
-        return struts.prod(axis=0).astype(float)
-
-
-    def _softened_metric(self, coordinates: Array) -> Array:
+    def _metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(coordinates)
         angles = np.linspace(0, 2 * np.pi, self.number_of_struts, 
             endpoint=False)
@@ -688,3 +592,17 @@ class EvenUniformSpider(Spider):
         params["Wavefront"] = wavefront
         return params
 
+
+import matplotlib.pyplot as pyplot
+
+coordinates = dLux.utils.get_pixel_coordinates(1024, 0.001, 0., 0.)
+
+aperture = CircularAperture(0., 0., .5, False, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = CircularAperture(0., 0., .5, False, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
