@@ -312,7 +312,7 @@ class RectangularAperture(RotatableAperture):
 
 
     def _metric(self, coordinates: Array) -> Array:
-        coordinates = self._translate(self._rotate(coordinates))  
+        coordinates = self._rotate(self._translate(coordinates))  
         x_mask = self._soften(- np.abs(coordinates[0]) + self.length / 2.)
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
@@ -354,7 +354,7 @@ class SquareAperture(RotatableAperture):
 
 
     def _metric(self, coordinates: Array) -> Array:
-        coordinates = self._translate(self._rotate(coordinates))
+        coordinates = self._rotate(self._translate(coordinates))
         x_mask = self._soften(- np.abs(coordinates[0]) + self.width / 2.)
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
