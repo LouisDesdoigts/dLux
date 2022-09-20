@@ -64,7 +64,7 @@ class Aperture(eqx.Module, abc.ABC):
             element of the tuple is the x coordinate and the second 
             is the y coordinate.
         """
-        return np.array([self.x_offset, self.y_offset])
+        return np.array([self.x_offset, -self.y_offset])
 
 
     def _translate(self, coordinates: Tensor) -> Tensor:
@@ -151,7 +151,7 @@ class Aperture(eqx.Module, abc.ABC):
             value updated. 
         """
         wavefront = parameters["Wavefront"]
-        wavefront = wavefront.mulitply_amplitude(
+        wavefront = wavefront.multiply_amplitude(
             self._aperture(
                 wavefront.get_pixel_coordinates()))
         parameters["Wavefront"] = wavefront
@@ -429,7 +429,7 @@ class CompoundAperture(eqx.Module):
         return np.stack(apertures).prod(axis=0)
 
 
-    def __call__(self, params: dict) -> dict:
+    def __call__(self, parameters: dict) -> dict:
         """
         Apply the aperture to an incoming wavefront.
 
@@ -447,7 +447,7 @@ class CompoundAperture(eqx.Module):
             value updated. 
         """
         wavefront = parameters["Wavefront"]
-        wavefront = wavefront.mulitply_amplitude(
+        wavefront = wavefront.multiply_amplitude(
             self._aperture(
                 wavefront.get_pixel_coordinates()))
         parameters["Wavefront"] = wavefront
