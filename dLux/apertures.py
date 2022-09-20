@@ -278,28 +278,25 @@ import matplotlib.pyplot as pyplot
 
 coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
 
-aperture = AnnularAperture(0., 0., 1., .5, False, False)
+aperture = AnnularAperture(0.2, 0.1, 1., .5, False, False)
 pyplot.imshow(aperture._aperture(coordinates))
 pyplot.colorbar()
 pyplot.show()
 
-aperture = AnnularAperture(0., 0., 1., .5, False, True)
+aperture = AnnularAperture(0.2, 0.1, 1., .5, False, True)
 pyplot.imshow(aperture._aperture(coordinates))
 pyplot.colorbar()
 pyplot.show()
 
-aperture = AnnularAperture(0., 0., 1., .5, True, False)
+aperture = AnnularAperture(0.2, 0.1, 1., .5, True, False)
 pyplot.imshow(aperture._aperture(coordinates))
 pyplot.colorbar()
 pyplot.show()
 
-aperture = AnnularAperture(0., 0., 1., .5, True, True)
+aperture = AnnularAperture(0.2, 0.1, 1., .5, True, True)
 pyplot.imshow(aperture._aperture(coordinates))
 pyplot.colorbar()
 pyplot.show()
-
-
- 
 
 
 class CircularAperture(Aperture):
@@ -314,8 +311,8 @@ class CircularAperture(Aperture):
     radius: float
    
  
-    def __init__(self: Layer, x_offset: float, y_offset: float, 
-            theta: float, phi: float, radius: float) -> Array:
+    def __init__(self, x_offset: float, y_offset: float,
+            radius: float, occulting: bool, softening: float) -> Array:
         """
         Parameters
         ----------
@@ -323,32 +320,34 @@ class CircularAperture(Aperture):
             The centre of the coordinate system along the x-axis.
         y_offset : float, meters
             The centre of the coordinate system along the y-axis. 
-        theta : float, radians
-            The rotation of the coordinate system of the aperture 
-            away from the positive x-axis. Due to the symmetry of 
-            ring shaped apertures this will not change the final 
-            shape and it is recomended that it is just set to zero.
-        phi : float, radians
-            The rotation of the y-axis away from the vertical and 
-            torward the negative x-axis measured from the vertical.
         radius: float, meters 
             The radius of the aperture.
         """
-        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
-            pixel_scale)
+        super().__init__(x_offset, y_offset, occulting, softening)
         self.radius = np.asarray(radius).astype(float)
 
 
-    def _aperture(self: Layer) -> Array:
+    def _hardened_metric(self, coordinates: Array) -> Array:
         """
+        Generates an array representing a hard edged circular aperture.
+        All the values are 0. except for the outer edge. The t
+ 
         Returns
         -------
-        aperture: Array
-            The aperture represented as a pixel array.
+        aperture : Array[Float]
+            The aperture. If these values are confined between 0. and 1.
+            then the physical interpretation is the transmission 
+            coefficient of that pixel. 
         """
-        coordinates = cartesian_to_polar(self._coordinates())[0]
-        return coordinates < self.radius
+        coordinates = self._translate(coordinates)
+        coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
+        return (coordinates <= self.radius).astype(float)
 
+
+    def _softened_metric(self, coordinates: Array) -> Array:
+        coordinates = self._translate(coordinates)
+        coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
+        return self._soften(coordinates - self.radius)
 
 class RectangularAperture(Aperture):
     """
