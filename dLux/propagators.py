@@ -82,7 +82,7 @@ Wavefront =  typing.NewType("Wavefront",  object)
 Propagator = typing.NewType("Propagator", object)
 
 
-class Propagator(eqx.Module):     
+class Propagator(dLux.Base):     
     """
     An abstract class indicating a spatial transfromation of the
     `Wavefront`. This is a separate class because it allows 
