@@ -1,11 +1,11 @@
-from typing import TypeVar
-import matplotlib.pyplot as pyplot 
 import equinox as eqx
 import jax.numpy as np
 import jax 
 import dLux
 import abc
 import functools
+from typing import TypeVar
+
 
 Array = TypeVar("Array")
 Layer = TypeVar("Layer")
@@ -14,11 +14,8 @@ Matrix = TypeVar("Matrix")
 Vector = TypeVar("Vector")
 
 
-__all__ = ["Aperture", "CompoundAperture", "SoftEdgedAperture", 
-    "SquareAperture", "SoftEdgedSquareAperture", "RectangularAperture",
-    "SoftEdgedRectangularAperture", "CircularAperture", 
-    "SoftEdgedCircularAperture", "AnnularAperture", 
-    "SoftEdgedAnnularAperture"]
+__all__ = ["Aperture", "CompoundAperture", "SquareAperture", 
+    "RectangularAperture", "CircularAperture", "AnnularAperture"]
 
 
 class Aperture(eqx.Module, abc.ABC):
