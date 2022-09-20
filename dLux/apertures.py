@@ -592,17 +592,3 @@ class EvenUniformSpider(Spider):
         params["Wavefront"] = wavefront
         return params
 
-
-import matplotlib.pyplot as pyplot
-
-coordinates = dLux.utils.get_pixel_coordinates(1024, 0.001, 0., 0.)
-
-aperture = EvenUniformSpider(0., 0., 4, .05, np.pi / 4,  True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = EvenUniformSpider(0., 0., 4, .05, np.pi / 4,  False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
