@@ -52,11 +52,9 @@ class Aperture(eqx.Module, ABC):
     """
     occulting: bool 
     softening: bool
-    coordinates: Tensor
     x_offset : float
     y_offset : float
     theta : float
-    phi : float
     
 
     def __init__(self : Layer, x_offset : float, y_offset : float, 
@@ -83,33 +81,10 @@ class Aperture(eqx.Module, ABC):
         """
         self.x_offset = np.asarray(x_offset).astype(float)
         self.y_offset = np.asarray(y_offset).astype(float)
-        self.theta = np.asarray(theta).astype(float)
-        self.phi = np.asarray(phi).astype(float)
         self.occulting = bool(occulting)
         self.softening = bool(softening)
-        self.coordinates = self._coordinates()
 
     
-    def _aperture(self : Layer, distances: Array) -> Array:
-        """
-        Generate the aperture array as an array. 
-        
-        Parameters
-        ----------
-        coordinates : Tensor
-            The coordinate system over which to generate the aperture 
-            The leading dimesnion of the tensor should be the x and y
-            coordinates in that order. 
-
-        Returns
-        -------
-        aperture : Array[Float]
-            The aperture. If these values are confined between 0. and 1.
-            then the physical interpretation is the transmission 
-            coefficient of that pixel. 
-        """
-
-
     def get_npix(self : Layer) -> int:
         """
         Returns
@@ -166,23 +141,6 @@ class Aperture(eqx.Module, ABC):
         new_y_coordinates = -np.sin(self.theta) * x_coordinates + \
             np.cos(self.theta) * y_coordinates
         return np.array([new_x_coordinates, new_y_coordinates])
-
-
-    def _coordinates(self : Layer) -> Tensor:
-        """
-        Generate the transformed coordinate system for the aperture.
-
-        Returns
-        -------
-        coordinates : Tensor
-            The coordinate system in the rectilinear view, with the
-            x and y coordinates stacked above one another.
-        """
-        pixel_scale = self.width_of_image / self.pixels
-        x_pixel_offset = self.x_offset / pixel_scale
-        y_pixel_offset = self.y_offset / pixel_scale
-        return pixel_scale * get_pixel_positions(
-            self.pixels, x_pixel_offset, y_pixel_offset)
 
 
     def _soften(self, distances: Array) -> Array:
@@ -374,7 +332,9 @@ class AnnularAperture(Aperture):
         coordinates = cart2polar(self._translate(coordinates))
         return self._soften(coordinates - self.rmin) + \
             self._soften(coordinates - self.rmax)
-        
+       
+
+ 
 
 
 class CircularAperture(Aperture):
