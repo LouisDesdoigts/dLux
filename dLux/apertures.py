@@ -464,28 +464,19 @@ class CompoundAperture(eqx.Module):
     apertures : dict    
 
 
-    def __init__(self : Layer, number_of_pixels : int, 
-            pixel_scale : float, apertures : dict) -> Layer:
+    def __init__(self, apertures: dict) -> Layer:
         """
         Parameters
         ----------
-        number_of_pixels : int
-            The number of pixels used to represent the compound 
-            aperture. 
-        pixel_scale : float, meters per pixel
-            The length of one edge of a pixel in the rendered 
-            aperture.
         apertures : dict
             The aperture objects stored in a dictionary of type
             {str : Layer} where the Layer is a subclass of the 
             Aperture.
         """
-        self.npix = int(number_of_pixels)
-        self.pixel_scale = float(pixel_scale)
         self.apertures = apertures
 
 
-    def __getitem__(self : Layer, key : str) -> Layer:
+    def __getitem__(self, key: str) -> Layer:
         """
         Get one of the apertures from the collection using a name 
         based lookup.
@@ -499,7 +490,7 @@ class CompoundAperture(eqx.Module):
         return self.apertures[key]
 
 
-    def __setitem__(self : Layer, key : str, value : Layer) -> None:
+    def __setitem__(self, key: str, value: Layer) -> None:
         """
         Assign a new value to one of the aperture mirrors.
 
@@ -513,7 +504,7 @@ class CompoundAperture(eqx.Module):
         self.apertures[key] = value
 
 
-    def _aperture(self : Layer) -> Matrix:
+    def _aperture(self, coordinates: Array) -> Array:
         """
         Returns 
         -------
@@ -523,15 +514,6 @@ class CompoundAperture(eqx.Module):
         """
         apertures = []
         for aperture in self.apertures.values():
-            apertures.append(aperture._aperture())
-        return np.stack(apertures).sum(axis=0)
+            apertures.append(aperture._aperture(coordinates))
+        return np.stack(apertures).prod(axis=0)
 
-
-    def get_npix(self : Layer) -> int:
-        """
-        Returns
-        -------
-        pixels : int
-            The number of pixels along one edge of the output image.
-        """
-        return self.npix
