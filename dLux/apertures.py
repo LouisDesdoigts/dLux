@@ -347,7 +347,7 @@ class CircularAperture(Aperture):
     def _softened_metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(coordinates)
         coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
-        return self._soften(coordinates - self.radius)
+        return self._soften(- coordinates + self.radius)
 
 
 coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
