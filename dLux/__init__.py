@@ -20,4 +20,4 @@ from .apertures   import *
 
 # Add to __all__
 __all__ = base.__all__ + detectors.__all__ + layers.__all__ + \
-            wavefronts.__all__ + propagators.__all__ 
+            wavefronts.__all__ + propagators.__all__ + apertures.__all__ 
