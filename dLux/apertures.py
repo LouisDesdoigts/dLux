@@ -88,30 +88,6 @@ class Aperture(eqx.Module, abc.ABC):
         return coordinates - self.get_centre().reshape((2, 1, 1))
 
 
-    def _rotate(self, coordinates: Tensor, angle: float) -> Tensor:
-        """
-        Rotate the coordinate system by a pre-specified amount,
-        `self._theta`
-
-        Parameters
-        ----------
-        coordinates : Tensor
-            A `(2, npix, npix)` representation of the coordinate 
-            system. The leading dimensions specifies the x and then 
-            the y coordinates in that order. 
-
-        Returns
-        -------
-        coordinates : Tensor
-            The rotated coordinate system. 
-        """
-        x_coordinates, y_coordinates = coordinates[0], coordinates[1]
-        new_x_coordinates = np.cos(angle) * x_coordinates + \
-            np.sin(angle) * y_coordinates
-        new_y_coordinates = -np.sin(angle) * x_coordinates + \
-            np.cos(angle) * y_coordinates
-        return np.array([new_x_coordinates, new_y_coordinates])
-
 
     def _soften(self, distances: Array) -> Array:
         """
@@ -350,30 +326,63 @@ class CircularAperture(Aperture):
         return self._soften(- coordinates + self.radius)
 
 
-coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
+#coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
+#
+#aperture = CircularAperture(0.2, 0.1, .5, False, False)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
+#
+#aperture = CircularAperture(0.2, 0.1, .5, False, True)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
+#
+#aperture = CircularAperture(0.2, 0.1, .5, True, False)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
+#
+#aperture = CircularAperture(0.2, 0.1, .5, True, True)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
 
-aperture = CircularAperture(0.2, 0.1, .5, False, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
 
-aperture = CircularAperture(0.2, 0.1, .5, False, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
+class RotatableAperture(Aperture):
+    theta: float
 
-aperture = CircularAperture(0.2, 0.1, .5, True, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = CircularAperture(0.2, 0.1, .5, True, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
+    def __init__(self, x_offset, y_offset, theta, occulting, softening):
+        super().__init__(x_offset, y_offset, occulting, softening)
+        self.theta = np.asarray(theta).astype(float)
 
 
-class RectangularAperture(Aperture):
+    def _rotate(self, coordinates: Tensor) -> Tensor:
+        """
+        Rotate the coordinate system by a pre-specified amount,
+        `self._theta`
+
+        Parameters
+        ----------
+        coordinates : Tensor
+            A `(2, npix, npix)` representation of the coordinate 
+            system. The leading dimensions specifies the x and then 
+            the y coordinates in that order. 
+
+        Returns
+        -------
+        coordinates : Tensor
+            The rotated coordinate system. 
+        """
+        x_coordinates, y_coordinates = coordinates[0], coordinates[1]
+        new_x_coordinates = np.cos(self.theta) * x_coordinates + \
+            np.sin(self.theta) * y_coordinates
+        new_y_coordinates = -np.sin(self.theta) * x_coordinates + \
+            np.cos(self.theta) * y_coordinates
+        return np.array([new_x_coordinates, new_y_coordinates])
+
+
+class RectangularAperture(RotatableAperture):
     """
     A rectangular aperture.
 
@@ -388,8 +397,9 @@ class RectangularAperture(Aperture):
     width: float
 
 
-    def __init__(self: Layer, x_offset: float, y_offset: float,
-            theta: float, phi: float, length: float, width: float) -> Array:
+    def __init__(self, x_offset: float, y_offset: float,
+            theta: float, length: float, width: float, occulting: bool, 
+            softening: bool): 
         """
         Parameters
         ----------
@@ -402,30 +412,34 @@ class RectangularAperture(Aperture):
             away from the positive x-axis. Due to the symmetry of 
             ring shaped apertures this will not change the final 
             shape and it is recomended that it is just set to zero.
-        phi : float, radians
-            The rotation of the y-axis away from the vertical and 
-            torward the negative x-axis measured from the vertical.
         length: float, meters 
             The length of the aperture in the y-direction.
         width: float, meters
             The length of the aperture in the x-direction.
         """
-        super().__init__(x_offset, y_offset, theta, phi)
+        super().__init__(x_offset, y_offset, theta, occulting, softening)
         self.length = np.asarray(length).astype(float)
         self.width = np.asarray(width).astype(float)
 
 
-    def _aperture(self: Layer) -> Array:
+    def _hardened_metric(self, coordinates: Array) -> Array:
         """
         Returns
         -------
         aperture: Array
             The array representation of the aperture. 
         """
-        coordinates = self._coordinates()
+        coordinates = self._translate(self._rotate(coordinates))
         x_mask = np.abs(coordinates[0]) < (self.length / 2.)
         y_mask = np.abs(coordinates[1]) < (self.width / 2.)    
-        return y_mask * x_mask        
+        return y_mask * x_mask      
+
+
+    def _softened_metric(self, coordinates: Array) -> Array:
+        coordinates = self._translate(self._rotate(coordinates))  
+        x_mask = self._soften(np.abs(coordinates[0]) - self.length)
+        y_mask = self._soften(np.abs(coordinates[1]) - self.width)
+        return x_mask * y_mask
 
 
 class SquareAperture(Aperture):
