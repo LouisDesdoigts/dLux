@@ -653,7 +653,7 @@ class UniformSpider(Spider):
             endpoint=False)
         angles += self.rotation
 
-        struts = self._strut(angles, coordinates) > self.width_of_struts
+        struts = self._strut(angles, coordinates) > self.width_of_struts / 2.
         return struts.prod(axis=0).astype(float)
 
 
@@ -662,7 +662,7 @@ class UniformSpider(Spider):
             endpoint=False)
         angles += self.rotation
         
-        struts = self._strut(angles, coordinates) - self.width_of_struts
+        struts = self._strut(angles, coordinates) - self.width_of_struts / 2.
         return self._soften(struts).prod(axis=0)
         
  
@@ -687,16 +687,3 @@ class UniformSpider(Spider):
             .set_phase(wavefront.get_phase() * aperture)
         params["Wavefront"] = wavefront
         return params
-
-
-coordinates = dLux.utils.get_pixel_coordinates(1024, 0.001, 0., 0.)
-
-aperture = UniformSpider(0., 0., 4, 0.01, 0., False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = UniformSpider(0., 0., 4, 0.01, 0., True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
