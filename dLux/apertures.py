@@ -463,7 +463,7 @@ class RectangularAperture(RotatableAperture):
 #pyplot.colorbar()
 #pyplot.show()
 
-class SquareAperture(Aperture):
+class SquareAperture(RotatableAperture):
     """
     A square aperture. Note: this can also be created from the rectangular 
     aperture class, but this obe tracks less parameters.
@@ -518,6 +518,27 @@ class SquareAperture(Aperture):
         return x_mask * y_mask
 
 
+coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
+
+aperture = SquareAperture(0.2, 0.1, np.pi /4, .5, False, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = SquareAperture(0.2, 0.1, np.pi / 4, .5, False, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = SquareAperture(0.2, 0.1, np.pi / 4, .5, True, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = SquareAperture(0.2, 0.1, np.pi / 4, .5, True, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
 
 
 class HexagonalAperture(Aperture):
