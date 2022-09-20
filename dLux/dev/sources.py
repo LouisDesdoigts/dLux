@@ -22,7 +22,7 @@ Source   = typing.NewType("Source",   object)
 TODO Build out resolved sources properly
 """
 
-class Source(eqx.Module, abc.ABC):
+class Source(dLux.Base, abc.ABC):
     """
     Source: Base Class
     
