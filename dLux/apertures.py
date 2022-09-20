@@ -132,7 +132,7 @@ class Aperture(eqx.Module, abc.ABC):
             The image represented as an approximately binary mask, but with 
             the prozed soft edges.
         """
-        steepness = distances.size
+        steepness = distances.shape[0]
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
@@ -230,8 +230,8 @@ class AnnularAperture(Aperture):
 
 
     def __init__(self, x_offset : float,  y_offset : float, 
-            rmax : float, rmin : float, softening: bool, 
-            occulting: bool) -> Layer:
+            rmax : float, rmin : float, occulting: bool, 
+            softening: bool) -> Layer:
         """
         Parameters
         ----------
@@ -244,7 +244,7 @@ class AnnularAperture(Aperture):
         rmin : float, meters
             The inner radius of the annular aperture. 
         """
-        super().__init__(x_offset, y_offset, softening, occulting)
+        super().__init__(x_offset, y_offset, occulting, softening)
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
 
@@ -270,28 +270,20 @@ class AnnularAperture(Aperture):
     def _softened_metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(coordinates)
         coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
-        return self._soften(coordinates - self.rmin) + \
-            self._soften(coordinates - self.rmax)
+        return self._soften(coordinates - self.rmin) * \
+            self._soften(- coordinates + self.rmax)
       
 
 import matplotlib.pyplot as pyplot 
 
-aperture = AnnularAperture(0., 0., 1., .5, False, False)
 coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
-coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
 
-pyplot.imshow(coordinates)
+aperture = AnnularAperture(0., 0., 1., .5, False, False)
+pyplot.imshow(aperture._aperture(coordinates))
 pyplot.colorbar()
 pyplot.show()
 
-test = (coordinates > aperture.rmin).astype(float)
-pyplot.imshow(test)
-pyplot.show()
-
-pyplot.imshow(aperture._hardened_metric(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
+aperture = AnnularAperture(0., 0., 1., .5, False, True)
 pyplot.imshow(aperture._aperture(coordinates))
 pyplot.colorbar()
 pyplot.show()
