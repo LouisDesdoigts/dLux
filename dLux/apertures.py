@@ -441,27 +441,27 @@ class RectangularAperture(RotatableAperture):
         return x_mask * y_mask
 
 
-coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
-
-aperture = RectangularAperture(0.2, 0.1, np.pi /4, .5, .2, False, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, False, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, True, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, True, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
+#coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
+#
+#aperture = RectangularAperture(0.2, 0.1, np.pi /4, .5, .2, False, False)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
+#
+#aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, False, True)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
+#
+#aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, True, False)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
+#
+#aperture = RectangularAperture(0.2, 0.1, np.pi / 4, .5, .2, True, True)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
 
 class SquareAperture(Aperture):
     """
@@ -476,8 +476,9 @@ class SquareAperture(Aperture):
     width: float
    
  
-    def __init__(self: Layer, x_offset: float, y_offset: float,
-            theta: float, phi: float, width: float) -> Array:
+    def __init__(self, x_offset: float, y_offset: float,
+            theta: float, width: float, occulting: bool, 
+            softening: bool):
         """
         Parameters
         ----------
@@ -490,27 +491,30 @@ class SquareAperture(Aperture):
             away from the positive x-axis. Due to the symmetry of 
             ring shaped apertures this will not change the final 
             shape and it is recomended that it is just set to zero.
-        phi : float, radians
-            The rotation of the y-axis away from the vertical and 
-            torward the negative x-axis measured from the vertical.
         width: float, meters
             The side length of the square. 
         """
-        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
-            pixel_scale)
+        super().__init__(x_offset, y_offset, theta, occulting, softening)
         self.width = np.asarray(width).astype(float)
     
 
-    def _aperture(self: Layer) -> Array:
+    def _hardened_metric(self, coordinates: Array) -> Array:
         """
         Returns
         -------
         aperture: Array
             The array representation of the aperture. 
         """
-        coordinates = self._coordinates()
+        coordinates = self._translate(self._rotate(coordinates))
         x_mask = np.abs(coordinates[0]) < (self.width / 2.)
         y_mask = np.abs(coordinates[1]) < (self.width / 2.)
+        return (x_mask * y_mask).astype(float)
+
+
+    def _softened_metric(self, coordinates: Array) -> Array:
+        coordinates = self._translate(self._rotate(coordinates))
+        x_mask = self._soften(- np.abs(coordinates[0]) + self.width / 2.)
+        y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
 
