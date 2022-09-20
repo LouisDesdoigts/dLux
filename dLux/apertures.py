@@ -6,8 +6,6 @@ import jax.numpy as np
 import jax 
 import functools
 
-jax.config.update("jax_enable_x64", True)
-
 Array = TypeVar("Array")
 Layer = TypeVar("Layer")
 Tensor = TypeVar("Tensor")
@@ -50,9 +48,6 @@ class Aperture(eqx.Module, ABC):
 
     Attributes
     ----------
-    pixels : int
-        The number of pixels along one edge of the array which 
-        represents the aperture.
     x_offset : float, meters
         The x coordinate of the centre of the aperture.
     y_offset : float, meters
@@ -63,8 +58,6 @@ class Aperture(eqx.Module, ABC):
         The rotation of the y-axis away from the vertical and torward 
         the negative x-axis. 
     """
-    pixels : int
-    width_of_image: float 
     occulting: bool 
     softening: bool
     coordinates: Tensor
@@ -74,9 +67,8 @@ class Aperture(eqx.Module, ABC):
     phi : float
     
 
-    def __init__(self : Layer, number_of_pixels : int,
-            x_offset : float, y_offset : float, theta : float,
-            phi : float, width_of_image: float, occulting: bool,
+    def __init__(self : Layer, x_offset : float, y_offset : float, 
+            theta : float, phi : float, occulting: bool, 
             softening: bool) -> Layer:
         """
         Parameters
@@ -97,12 +89,10 @@ class Aperture(eqx.Module, ABC):
         width_of_image: float, meters
             How wide is the entire image. 
         """
-        self.pixels = int(number_of_pixels)
         self.x_offset = np.asarray(x_offset).astype(float)
         self.y_offset = np.asarray(y_offset).astype(float)
         self.theta = np.asarray(theta).astype(float)
         self.phi = np.asarray(phi).astype(float)
-        self.width_of_image = float(width_of_image)
         self.occulting = bool(occulting)
         self.softening = bool(softening)
         self.coordinates = self._coordinates()
@@ -119,8 +109,7 @@ class Aperture(eqx.Module, ABC):
         return radial_coordinates - radius
 
     
-    @abstractmethod
-    def _aperture(self : Layer) -> Array:
+    def _aperture(self : Layer, distances: Array) -> Array:
         """
         Generate the aperture array as an array. 
         
@@ -138,17 +127,6 @@ class Aperture(eqx.Module, ABC):
             then the physical interpretation is the transmission 
             coefficient of that pixel. 
         """
-
-
-    def get_pixel_scale(self: Layer) -> float:
-        """
-        Returns
-        -------
-        pixel_scale : float, meters per pixel
-            The length along one side of the a square picel used in
-            the constuction of the aperture.
-        """
-        return self.pixel_scale        
 
 
     def get_npix(self : Layer) -> int:
@@ -184,18 +162,6 @@ class Aperture(eqx.Module, ABC):
         return self.theta
 
 
-    def get_shear(self : Layer) -> float:
-        """
-        Returns 
-        -------
-        phi : float, radians
-            The angle that the y-axis of the coordinate system of 
-            the aperture has been rotated towards the negative
-            x-axis. This corresponds to a shear. 
-        """
-        return self.shear
-
-
     def rotate(self : Layer, coordinates : Tensor) -> Tensor:
         """
         Rotate the coordinate system by a pre-specified amount,
@@ -221,27 +187,6 @@ class Aperture(eqx.Module, ABC):
         return np.array([new_x_coordinates, new_y_coordinates])
 
 
-    def shear(self : Layer, coordinates : Tensor) -> Tensor:
-        """
-        Shear the coordinate system by the inbuilt amount `self._phi`.
-
-        Parameters
-        ----------
-        coordinates : Tensor
-            A `(2, npix, npix)` representation of the coordinate 
-            system. The leading dimensions specifies the x and then 
-            the y coordinates in that order. 
-
-        Returns
-        -------
-        coordinates : Tensor
-            The sheared coordinate system. 
-        """
-        return coordinates\
-            .at[0]\
-            .set(coordinates[0] - coordinates[1] * np.tan(self.phi)) 
-
-
     def _coordinates(self : Layer) -> Tensor:
         """
         Generate the transformed coordinate system for the aperture.
@@ -252,15 +197,54 @@ class Aperture(eqx.Module, ABC):
             The coordinate system in the rectilinear view, with the
             x and y coordinates stacked above one another.
         """
-        x_pixel_offset = self.x_offset / self.pixel_scale
-        y_pixel_offset = self.y_offset / self.pixel_scale
-        coordinates = self._shear(
-            self._rotate(
-                self._magnify(
-                    self.get_pixel_scale() * \
-                        get_pixel_positions(self.pixels, 
-                            x_pixel_offset, y_pixel_offset))))
-        return coordinates
+        pixel_scale = self.width_of_image / self.pixels
+        x_pixel_offset = self.x_offset / pixel_scale
+        y_pixel_offset = self.y_offset / pixel_scale
+        return pixel_scale * get_pixel_positions(
+            self.pixels, x_pixel_offset, y_pixel_offset)
+
+
+    def _softened_metric(self: Layer, distances: Array) -> Array:
+        """
+        Softens an image so that the hard boundaries are not present. 
+
+        Parameters
+        ----------
+        image: Array, meters
+            The name I gave this is a misnomer. The image should be an 
+            array representing distances from a particular point or line. 
+            Typically it is easiest to apply this to each edge separately 
+            and then multiply the result. This has the added benifit of 
+            curving points slightly. 
+
+        Returns
+        -------
+        smooth_image: Array
+            The image represented as an approximately binary mask, but with 
+            the prozed soft edges.
+        """
+        steepness = self.pixels
+        return (np.tanh(steepness * distances) + 1.) / 2.
+
+
+    @abc.abstractmethod
+    def _hardened_metric(self: Layer, distances: Array) -> Array:
+        """
+        """
+
+
+    def _aperture(self, coordinates: Array) -> Array:
+        aperture = jax.lax.cond(self.softening,
+            self._softened_metric,
+            self._hardened_metric,
+            coordinates)
+
+        aperture = jax.lax.cond(self.occulting,
+            lambda aperture: 1 - aperture,
+            lambda aperture: aperture,
+            aperture)
+
+        return aperture
 
 
     def set_theta(self : Layer, theta : float) -> Layer:
@@ -276,37 +260,6 @@ class Aperture(eqx.Module, ABC):
             The rotated hexagonal basis. 
         """
         return eqx.tree_at(lambda basis : basis.theta, self, theta)
-
-
-    def set_magnification(self : Layer, rmax : float) -> Layer:
-        """
-        Parameters
-        ----------
-        rmax : float
-            The radius of the smallest circle that can completely 
-            enclose the aperture.
-
-        Returns
-        -------
-        basis : HexagonalBasis
-            The magnified hexagonal basis.
-        """
-        return eqx.tree_at(lambda basis : basis.magnification, self, rmax)
-
-
-    def set_shear(self : Layer, phi : float) -> Layer:
-        """
-        Parameters
-        ----------
-        phi : float
-            The angle of shear from the positive y-axis.
-
-        Returns
-        -------
-        basis : HexagonalBasis
-            The sheared hexagonal basis.
-        """
-        return eqx.tree_at(lambda basis : basis.phi, self, phi)      
 
 
     def set_x_offset(self : Layer, x : float) -> Layer:
@@ -359,42 +312,9 @@ class Aperture(eqx.Module, ABC):
             value updated. 
         """
         wavefront = parameters["Wavefront"]
-        # TODO: There should probably be a multiplication of the phase 
-        # as well. 
         wavefront = wavefront.mulitply_amplitude(self._aperture())
         parameters["Wavefront"] = wavefront
         return parameters
-
-
-class SoftEdgedAperture(Aperture, ABC):
-    """
-    Apertures that have hard edges can result in undefined gradients. 
-    To combat this annoying behaviour we have added the soft edged apertures
-    which run add a few non-binary pixels at the border. 
-    """
-
-
-    def _soft_edge(self: Layer, image: Array) -> Array:
-        """
-        Softens an image so that the hard boundaries are not present. 
-
-        Parameters
-        ----------
-        image: Array, meters
-            The name I gave this is a misnomer. The image should be an 
-            array representing distances from a particular point or line. 
-            Typically it is easiest to apply this to each edge separately 
-            and then multiply the result. This has the added benifit of 
-            curving points slightly. 
-
-        Returns
-        -------
-        smooth_image: Array
-            The image represented as an approximately binary mask, but with 
-            the prozed soft edges.
-        """
-        steepness = self.pixels
-        return (np.tanh(steepness * image) + 1.) / 2.
 
 
 class AnnularAperture(Aperture):
@@ -416,16 +336,12 @@ class AnnularAperture(Aperture):
     rmax : float
 
 
-    def __init__(self : Layer, npix : int, x_offset : float, 
+    def __init__(self : Layer, x_offset : float, 
             y_offset : float, theta : float, phi : float, 
-            magnification : float, pixel_scale : float,
             rmax : float, rmin : float) -> Layer:
         """
         Parameters
         ----------
-        npix : int
-            The number of layers along one edge of the array that 
-            represents this aperture.
         x_offset : float, meters
             The centre of the coordinate system along the x-axis.
         y_offset : float, meters
@@ -438,18 +354,12 @@ class AnnularAperture(Aperture):
         phi : float, radians
             The rotation of the y-axis away from the vertical and 
             torward the negative x-axis measured from the vertical.
-        magnification : float
-            The scaling of the aperture. 
-        pixel_scale : float, meters per pixel
-            The length of one side of a square pixel. Defines the 
-            physical size of the array representing the aperture.
         rmax : float, meters
             The outer radius of the annular aperture. 
         rmin : float, meters
             The inner radius of the annular aperture. 
         """
-        super().__init__(npix, x_offset, y_offset, theta, phi, 
-            magnification, pixel_scale)
+        super().__init__(x_offset, y_offset, theta, phi)
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
 
@@ -469,76 +379,6 @@ class AnnularAperture(Aperture):
         coordinates = cartesian_to_polar(self._coordinates())[0]
         return ((coordinates <= self.rmax) \
             & (coordinates > self.rmin)).astype(float)
-
-
-class SoftEdgedAnnularAperture(SoftEdgedAperture):
-    """
-    An annular aperture (see dLux.AnnularAperture) however, the edges have 
-    several soft pixels (i.e. between 1. and 0.). The goal is to improve the 
-    stability of gradients taken through the aperture. 
-
-    Parameters
-    ----------
-    rmin: float, meters
-        The radius of the inner edge of the annular opening. 
-    rmax: float, meters
-        The radius of the outer edge of the annular opening. 
-    """
-    rmin: float
-    rmax: float
-
-
-    def __init__(self: Layer, pixels: int, x_offset: float, y_offset: float, 
-            theta: float, phi: float, magnification: float, pixel_scale: float,
-            rmin: float, rmax: float) -> Array:
-        """
-        Parameters
-        ----------
-        npix : int
-            The number of layers along one edge of the array that 
-            represents this aperture.
-        x_offset : float, meters
-            The centre of the coordinate system along the x-axis.
-        y_offset : float, meters
-            The centre of the coordinate system along the y-axis. 
-        theta : float, radians
-            The rotation of the coordinate system of the aperture 
-            away from the positive x-axis. Due to the symmetry of 
-            ring shaped apertures this will not change the final 
-            shape and it is recomended that it is just set to zero.
-        phi : float, radians
-            The rotation of the y-axis away from the vertical and 
-            torward the negative x-axis measured from the vertical.
-        magnification : float
-            The scaling of the aperture. 
-        pixel_scale : float, meters per pixel
-            The length of one side of a square pixel. Defines the 
-            physical size of the array representing the aperture.
-        rmax : float, meters
-            The outer radius of the annular aperture. 
-        rmin : float, meters
-            The inner radius of the annular aperture. 
-        """
-        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
-            pixel_scale)
-        self.rmin = np.asarray(rmin).astype(float)
-        self.rmax = np.asarray(rmax).astype(float)
-
-
-    def _aperture(self: Layer) -> Array:
-        """
-        Generates the aperture. There should be around three (depends on the
-        scale), non-binary pixels at the edges.
-
-        Returns
-        -------
-        aperture: Array
-            The array representation of the aperture. 
-        """
-        coordinates = cartesian_to_polar(self._coordinates())[0]
-        inner = self._soft_edge(- coordinates + self.rmin)
-        outer = self._soft_edge(coordinates - self.rmax)
-        return inner * outer
 
 
 class CircularAperture(Aperture):
@@ -596,67 +436,6 @@ class CircularAperture(Aperture):
         """
         coordinates = cartesian_to_polar(self._coordinates())[0]
         return coordinates < self.radius
-
-
-class SoftEdgedCircularAperture(SoftEdgedAperture):
-    """
-    A circular aperture that is stabalised against numerical gradient 
-    calculations. 
-
-    Parameters
-    ----------
-    radius: float, meters 
-        The radius of the opening. 
-    """
-    radius: float
-
-
-    def __init__(self: Layer, pixels: int, x_offset: float, y_offset: float, 
-            theta: float, phi: float, magnification: float, pixel_scale: float,
-            radius: float) -> Layer:
-        """
-        Parameters
-        ----------
-        npix : int
-            The number of layers along one edge of the array that 
-            represents this aperture.
-        x_offset : float, meters
-            The centre of the coordinate system along the x-axis.
-        y_offset : float, meters
-            The centre of the coordinate system along the y-axis. 
-        theta : float, radians
-            The rotation of the coordinate system of the aperture 
-            away from the positive x-axis. Due to the symmetry of 
-            ring shaped apertures this will not change the final 
-            shape and it is recomended that it is just set to zero.
-        phi : float, radians
-            The rotation of the y-axis away from the vertical and 
-            torward the negative x-axis measured from the vertical.
-        magnification : float
-            The scaling of the aperture. 
-        pixel_scale : float, meters per pixel
-            The length of one side of a square pixel. Defines the 
-            physical size of the array representing the aperture.
-        radius: float, meters 
-            The radius of the aperture.
-        """
-        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
-            pixel_scale)
-        self.radius = np.asarray(radius).astype(float)
-
-
-    def _aperture(self: Layer) -> Array:        
-        """
-        Generates the apperature as a square array. Note: there is a layer of 
-        non-binary pixels near the edge to stabalise the numerical gradients. 
-
-        Returns
-        -------
-        aperture: Array
-            The aperture.
-        """
-        coordinates = cartesian_to_polar(self._coordinates())[0]
-        return self._soft_edge(self.radius - coordinates)
 
 
 class RectangularAperture(Aperture):
@@ -724,75 +503,6 @@ class RectangularAperture(Aperture):
         return y_mask * x_mask        
 
 
-class SoftEdgedRectangularAperture(SoftEdgedAperture):
-    """
-    A rectangular aperture with soft-edges to make it friendly for 
-    sutomatic differentiation. 
-
-    Parameters
-    ----------
-    length: float, meters
-        The length of the aperture in the y-direction. 
-    width: float, meters
-        The length of the aperture in the x-direction. 
-    """
-    length: float
-    width: float 
-
-
-    def __init__(self: Layer, pixels: int, x_offset: float, y_offset: float,
-            theta: float, phi: float, magnification: float, 
-            pixel_scale: float, length: float, width: float) -> Array:
-        """
-        Parameters
-        ----------
-        npix : int
-            The number of layers along one edge of the array that 
-            represents this aperture.
-        x_offset : float, meters
-            The centre of the coordinate system along the x-axis.
-        y_offset : float, meters
-            The centre of the coordinate system along the y-axis. 
-        theta : float, radians
-            The rotation of the coordinate system of the aperture 
-            away from the positive x-axis. Due to the symmetry of 
-            ring shaped apertures this will not change the final 
-            shape and it is recomended that it is just set to zero.
-        phi : float, radians
-            The rotation of the y-axis away from the vertical and 
-            torward the negative x-axis measured from the vertical.
-        magnification : float
-            The scaling of the aperture. 
-        pixel_scale : float, meters per pixel
-            The length of one side of a square pixel. Defines the 
-            physical size of the array representing the aperture.
-        length: float, meters 
-            The length of the aperture in the y-direction.
-        width: float, meters
-            The length of the aperture in the x-direction.
-        """
-        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification,
-            pixel_scale)
-        self.length = np.asarray(length).astype(float) 
-        self.width = np.asarray(width).astype(float)
-
-
-    def _aperture(self: Layer) -> Array:
-        """
-        Generates the aperture. There should be around three (depends on the
-        scale), non-binary pixels at the edges.
-
-        Returns
-        -------
-        aperture: Array
-            The array representation of the aperture. 
-        """
-        coordinates = self._coordinates()
-        x_mask = self._soft_edge(- np.abs(coordinates[0]) + self.length / 2.) 
-        y_mask = self._soft_edge(- np.abs(coordinates[1]) + self.width / 2.)    
-        return y_mask * x_mask        
-    
-
 class SquareAperture(Aperture):
     """
     A square aperture. Note: this can also be created from the rectangular 
@@ -850,69 +560,6 @@ class SquareAperture(Aperture):
         coordinates = self._coordinates()
         x_mask = np.abs(coordinates[0]) < (self.width / 2.)
         y_mask = np.abs(coordinates[1]) < (self.width / 2.)
-        return x_mask * y_mask
-
-
-class SoftEdgedSquareAperture(SoftEdgedAperture):
-    """
-    A square aperture with non-binary pixels near the edges to improve the 
-    differential stability of the program. 
-
-    Parameters
-    ----------
-    width: float, meters
-        The side length of the square. 
-    """   
-    width: float
-
-
-    def __init__(self: Layer, pixels: float, x_offset: float, y_offset: float,
-            theta: float, phi: float, magnification: float, pixel_scale: float,
-            width: float) -> Array:
-        """
-        Parameters
-        ----------
-        npix : int
-            The number of layers along one edge of the array that 
-            represents this aperture.
-        x_offset : float, meters
-            The centre of the coordinate system along the x-axis.
-        y_offset : float, meters
-            The centre of the coordinate system along the y-axis. 
-        theta : float, radians
-            The rotation of the coordinate system of the aperture 
-            away from the positive x-axis. Due to the symmetry of 
-            ring shaped apertures this will not change the final 
-            shape and it is recomended that it is just set to zero.
-        phi : float, radians
-            The rotation of the y-axis away from the vertical and 
-            torward the negative x-axis measured from the vertical.
-        magnification : float
-            The scaling of the aperture. 
-        pixel_scale : float, meters per pixel
-            The length of one side of a square pixel. Defines the 
-            physical size of the array representing the aperture.
-        width: float, meters
-            The side length of the square. 
-        """
-        super().__init__(pixels, x_offset, y_offset, theta, phi, magnification, 
-            pixel_scale)
-        self.width = np.asarray(width).astype(float)
-
-
-    def _aperture(self: Layer) -> Array:
-        """
-        Generates the aperture. There should be around three (depends on the
-        scale), non-binary pixels at the edges.
-
-        Returns
-        -------
-        aperture: Array
-            The array representation of the aperture. 
-        """
-        coordinates = self._coordinates()
-        x_mask = self._soft_edge(- np.abs(coordinates[0]) + self.width / 2.)
-        y_mask = self._soft_edge(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
 
@@ -1403,3 +1050,10 @@ class CompoundAperture(eqx.Module):
             The number of pixels along one edge of the output image.
         """
         return self.npix
+
+
+class Aperture2(Aperture):
+    pass
+
+
+aperture = Aperture2(0., 0., )
