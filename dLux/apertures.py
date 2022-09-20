@@ -20,23 +20,15 @@ __all__ = ["Aperture", "CompoundAperture", "SoftEdgedAperture",
     "SoftEdgedAnnularAperture"]
 
 
-def cartesian_to_polar(coordinates : Tensor) -> Tensor:
-    """
-    Change the coordinate system from rectilinear to curvilinear.
-    
-    Parameters
-    ----------
-    coordinates : Tensor
-        The rectilinear coordinates.
+def _distance_from_line(self, gradient: float, intercept: float) -> Matrix:
+    x, y = self.coordinates[0], self.coordinates[1]
+    return np.abs(y - gradient * x - intercept) / np.sqrt(1 + gradient ** 2)
 
-    Returns
-    -------
-    coordinates : Tensor
-        The curvilinear coordinates.
-    """
-    rho = np.hypot(coordinates[0], coordinates[1])
-    theta = np.arctan2(-coordinates[1], coordinates[0])
-    return np.array([rho, theta])
+
+def _distance_from_circle(self, radius: float, centre: Vector) -> Matrix:
+    translated_coordinates = self.coordinates + centre.reshape((2, 1, 1))
+    radial_coordinates = dLux.polar2cart(translated_coordinates)[0]
+    return radial_coordinates - radius
 
 
 class Aperture(eqx.Module, ABC):
@@ -96,17 +88,6 @@ class Aperture(eqx.Module, ABC):
         self.occulting = bool(occulting)
         self.softening = bool(softening)
         self.coordinates = self._coordinates()
-
-
-    def _distance_from_line(self, gradient: float, intercept: float) -> Matrixi:
-        x, y = self.coordinates[0], self.coordinates[1]
-        return np.abs(y - gradient * x - intercept) / np.sqrt(1 + gradient ** 2)
-
-
-    def _distance_from_circle(self, radius: float, centre: Vector) -> Matrix:
-        translated_coordinates = self.coordinates + centre.reshape((2, 1, 1))
-        radial_coordinates = dLux.polar2cart(translated_coordinates)[0]
-        return radial_coordinates - radius
 
     
     def _aperture(self : Layer, distances: Array) -> Array:
@@ -204,7 +185,7 @@ class Aperture(eqx.Module, ABC):
             self.pixels, x_pixel_offset, y_pixel_offset)
 
 
-    def _softened_metric(self: Layer, distances: Array) -> Array:
+    def _soften(self, distances: Array) -> Array:
         """
         Softens an image so that the hard boundaries are not present. 
 
@@ -228,7 +209,13 @@ class Aperture(eqx.Module, ABC):
 
 
     @abc.abstractmethod
-    def _hardened_metric(self: Layer, distances: Array) -> Array:
+    def _hardened_metric(self, distances: Array) -> Array:
+        """
+        """
+
+
+    @abc.abstractmethod
+    def _softened_metric(self, distances: Array) -> Array:
         """
         """
 
@@ -312,7 +299,9 @@ class Aperture(eqx.Module, ABC):
             value updated. 
         """
         wavefront = parameters["Wavefront"]
-        wavefront = wavefront.mulitply_amplitude(self._aperture())
+        wavefront = wavefront.mulitply_amplitude(
+            self._aperture(
+                wavefront.get_pixel_positions()))
         parameters["Wavefront"] = wavefront
         return parameters
 
@@ -364,7 +353,7 @@ class AnnularAperture(Aperture):
         self.rmin = np.asarray(rmin).astype(float)
 
 
-    def _aperture(self : Layer) -> Array:
+    def _hardened_metric(self, coordinates: Array) -> Array:
         """
         Generates an array representing a hard edged circular aperture.
         All the values are 0. except for the outer edge. The t
@@ -376,9 +365,16 @@ class AnnularAperture(Aperture):
             then the physical interpretation is the transmission 
             coefficient of that pixel. 
         """
-        coordinates = cartesian_to_polar(self._coordinates())[0]
+        coordinates = cart2polar(self._translate(coordinates))
         return ((coordinates <= self.rmax) \
             & (coordinates > self.rmin)).astype(float)
+
+
+    def _softened_metrix(self, coordinates: Array) -> Array:
+        coordinates = cart2polar(self._translate(coordinates))
+        return self._soften(coordinates - self.rmin) + \
+            self._soften(coordinates - self.rmax)
+        
 
 
 class CircularAperture(Aperture):
