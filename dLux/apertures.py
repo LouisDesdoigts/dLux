@@ -559,11 +559,12 @@ class Spider(Aperture, abc.ABC):
             The soft edged strut. 
         """
         x, y = coordinates[0], coordinates[1]
+        perp = np.tan(angle + np.pi / 2.)
         gradient = np.tan(angle)
         return np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)    
 
 
-class UniformSpider(Spider):
+class EvenUniformSpider(Spider):
     """
     A spider with equally-spaced, equal-width struts. This is of course the 
     most common and simplest implementation of a spider. Gradients can be 
@@ -649,6 +650,7 @@ class UniformSpider(Spider):
         spider: float
             The array representation of the spider. 
         """
+        coordinates = self._translate(coordinates)
         angles = np.linspace(0, 2 * np.pi, self.number_of_struts, 
             endpoint=False)
         angles += self.rotation
@@ -658,6 +660,7 @@ class UniformSpider(Spider):
 
 
     def _softened_metric(self, coordinates: Array) -> Array:
+        coordinates = self._translate(coordinates)
         angles = np.linspace(0, 2 * np.pi, self.number_of_struts, 
             endpoint=False)
         angles += self.rotation
@@ -687,3 +690,4 @@ class UniformSpider(Spider):
             .set_phase(wavefront.get_phase() * aperture)
         params["Wavefront"] = wavefront
         return params
+
