@@ -606,3 +606,73 @@ aperture = CircularAperture(0., 0., .5, False, False)
 pyplot.imshow(aperture._aperture(coordinates))
 pyplot.colorbar()
 pyplot.show()
+
+aperture = CircularAperture(0., 0., .5, True, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = CircularAperture(0., 0., .5, True, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = SquareAperture(0., 0., np.pi / 4, .5, False, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = SquareAperture(0., 0., np.pi / 4, .5, False, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = SquareAperture(0., 0., np.pi / 4, .5, True, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = SquareAperture(0., 0., np.pi / 4, .5, True, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = RectangularAperture(0., 0., np.pi / 4, .5, .2,  False, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = RectangularAperture(0., 0., np.pi / 4, .5, .2,  False, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = RectangularAperture(0., 0., np.pi / 4, .5, .2, True, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = RectangularAperture(0., 0., np.pi / 4, .5, .2, True, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = AnnularAperture(0., 0., .5, .2,  False, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = AnnularAperture(0., 0., .5, .2,  False, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = AnnularAperture(0., 0., .5, .2, True, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = AnnularAperture(0., 0., .5, .2, True, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
