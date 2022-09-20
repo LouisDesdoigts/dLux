@@ -276,27 +276,27 @@ class AnnularAperture(Aperture):
 
 import matplotlib.pyplot as pyplot 
 
-coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
-
-aperture = AnnularAperture(0.2, 0.1, 1., .5, False, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = AnnularAperture(0.2, 0.1, 1., .5, False, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = AnnularAperture(0.2, 0.1, 1., .5, True, False)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
-
-aperture = AnnularAperture(0.2, 0.1, 1., .5, True, True)
-pyplot.imshow(aperture._aperture(coordinates))
-pyplot.colorbar()
-pyplot.show()
+#coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
+#
+#aperture = AnnularAperture(0.2, 0.1, 1., .5, False, False)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
+#
+#aperture = AnnularAperture(0.2, 0.1, 1., .5, False, True)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
+#
+#aperture = AnnularAperture(0.2, 0.1, 1., .5, True, False)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
+#
+#aperture = AnnularAperture(0.2, 0.1, 1., .5, True, True)
+#pyplot.imshow(aperture._aperture(coordinates))
+#pyplot.colorbar()
+#pyplot.show()
 
 
 class CircularAperture(Aperture):
@@ -348,6 +348,30 @@ class CircularAperture(Aperture):
         coordinates = self._translate(coordinates)
         coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
         return self._soften(coordinates - self.radius)
+
+
+coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
+
+aperture = CircularAperture(0.2, 0.1, .5, False, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = CircularAperture(0.2, 0.1, .5, False, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = CircularAperture(0.2, 0.1, .5, True, False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = CircularAperture(0.2, 0.1, .5, True, True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
 
 class RectangularAperture(Aperture):
     """
