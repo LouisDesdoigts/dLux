@@ -8,7 +8,7 @@ __all__ = ["ApplyPixelResponse", "ApplyJitter",
            "ApplySaturation", "AddConstant"]
 
 
-class ApplyPixelResponse(dLux.Base):
+class ApplyPixelResponse(dLux.base.Base):
     """
     
     """
@@ -27,7 +27,7 @@ class ApplyPixelResponse(dLux.Base):
         image *= self.pixel_response
         return image
     
-class ApplyJitter(dLux.Base):
+class ApplyJitter(dLux.base.Base):
     """
     Convolves the output image with a gaussian kernal
     """
@@ -54,7 +54,7 @@ class ApplyJitter(dLux.Base):
         image_out = jax.scipy.signal.convolve(image, window, mode='same')
         return image_out
     
-class ApplySaturation(dLux.Base):
+class ApplySaturation(dLux.base.Base):
     """
     Reduces any values above self.saturation to self.saturation
     """
@@ -71,7 +71,7 @@ class ApplySaturation(dLux.Base):
         image_out = np.minimum(image, self.saturation)
         return image_out
     
-class AddConstant(dLux.Base):
+class AddConstant(dLux.base.Base):
     """
     Add a constant to the output image.
     Typically used as the mean of the detector noise

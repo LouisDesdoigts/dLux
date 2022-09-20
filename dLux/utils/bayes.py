@@ -7,13 +7,13 @@ __all__ = ["poiss_logpri", "chi2_logpri", "calc_cov", "calc_ent"]
 def poiss_logpri(X, data, model, update_fn):
     """Poissonian log-prior"""
     model = update_fn(X, model)
-    psf = model()
+    psf = model.propagate()
     return np.sum(poisson.logpmf(data, psf))
 
 def chi2_logpri(X, data, model, update_fn, noise=1):
     """Chi2 log-prior"""
     model = update_fn(X, model)
-    psf = model()
+    psf = model.propagate()
     return np.log(np.sum(np.square((psf-data)/noise)))
 
 def calc_cov(loglike_fn, *args):

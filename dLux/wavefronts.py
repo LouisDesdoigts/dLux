@@ -30,7 +30,7 @@ class PlaneType(enum.IntEnum):
     Intermediate = 3
 
 
-class Wavefront(dLux.Base):
+class Wavefront(dLux.base.Base):
     """
     An abstract module that should never be directly instantiated.
     This class represents a general optical wavefront although the 
