@@ -1,9 +1,9 @@
 from typing import TypeVar
-from dLux.utils import (get_positions_vector, get_pixel_positions)
-from abc import ABC, abstractmethod 
 import equinox as eqx
 import jax.numpy as np
 import jax 
+import dLux
+import abc
 import functools
 
 Array = TypeVar("Array")
@@ -31,7 +31,7 @@ def _distance_from_circle(self, radius: float, centre: Vector) -> Matrix:
     return radial_coordinates - radius
 
 
-class Aperture(eqx.Module, ABC):
+class Aperture(eqx.Module, abc.ABC):
     """
     An abstract class that defines the structure of all the concrete
     apertures. An aperture is represented by an array, usually in the
@@ -81,7 +81,11 @@ class Aperture(eqx.Module, ABC):
             element of the tuple is the x coordinate and the second 
             is the y coordinate.
         """
-        return self.x_offset, self.y_offset
+        return np.array([self.x_offset, self.y_offset])
+
+
+    def _translate(self, coordinates: Tensor) -> Tensor:
+        return coordinates - self.get_centre().reshape((2, 1, 1))
 
 
     def _rotate(self, coordinates: Tensor, angle: float) -> Tensor:
@@ -128,7 +132,7 @@ class Aperture(eqx.Module, ABC):
             The image represented as an approximately binary mask, but with 
             the prozed soft edges.
         """
-        steepness = self.pixels
+        steepness = distances.size
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
@@ -226,7 +230,8 @@ class AnnularAperture(Aperture):
 
 
     def __init__(self, x_offset : float,  y_offset : float, 
-            rmax : float, rmin : float) -> Layer:
+            rmax : float, rmin : float, softening: bool, 
+            occulting: bool) -> Layer:
         """
         Parameters
         ----------
@@ -239,7 +244,7 @@ class AnnularAperture(Aperture):
         rmin : float, meters
             The inner radius of the annular aperture. 
         """
-        super().__init__(x_offset, y_offset, theta, phi)
+        super().__init__(x_offset, y_offset, softening, occulting)
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
 
@@ -256,17 +261,40 @@ class AnnularAperture(Aperture):
             then the physical interpretation is the transmission 
             coefficient of that pixel. 
         """
-        coordinates = cart2polar(self._translate(coordinates))
+        coordinates = self._translate(coordinates)
+        coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
         return ((coordinates <= self.rmax) \
             & (coordinates > self.rmin)).astype(float)
 
 
-    def _softened_metrix(self, coordinates: Array) -> Array:
-        coordinates = cart2polar(self._translate(coordinates))
+    def _softened_metric(self, coordinates: Array) -> Array:
+        coordinates = self._translate(coordinates)
+        coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
         return self._soften(coordinates - self.rmin) + \
             self._soften(coordinates - self.rmax)
-       
+      
 
+import matplotlib.pyplot as pyplot 
+
+aperture = AnnularAperture(0., 0., 1., .5, False, False)
+coordinates = dLux.utils.get_pixel_coordinates(1024, 0.002, 0., 0.)
+coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
+
+pyplot.imshow(coordinates)
+pyplot.colorbar()
+pyplot.show()
+
+test = (coordinates > aperture.rmin).astype(float)
+pyplot.imshow(test)
+pyplot.show()
+
+pyplot.imshow(aperture._hardened_metric(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
 
  
 
@@ -902,10 +930,3 @@ class CompoundAperture(eqx.Module):
             The number of pixels along one edge of the output image.
         """
         return self.npix
-
-
-class Aperture2(Aperture):
-    pass
-
-
-aperture = Aperture2(0., 0., )
