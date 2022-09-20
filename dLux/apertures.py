@@ -21,15 +21,6 @@ __all__ = ["Aperture", "CompoundAperture", "SoftEdgedAperture",
     "SoftEdgedAnnularAperture"]
 
 
-
-
-
-def _distance_from_circle(self, radius: float, centre: Vector) -> Matrix:
-    translated_coordinates = self.coordinates + centre.reshape((2, 1, 1))
-    radial_coordinates = dLux.polar2cart(translated_coordinates)[0]
-    return radial_coordinates - radius
-
-
 class Aperture(eqx.Module, abc.ABC):
     """
     An abstract class that defines the structure of all the concrete
@@ -107,7 +98,7 @@ class Aperture(eqx.Module, abc.ABC):
             The image represented as an approximately binary mask, but with 
             the prozed soft edges.
         """
-        steepness = distances.shape[0]
+        steepness = distances.shape[-1]
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
@@ -550,7 +541,7 @@ class Spider(Aperture, abc.ABC):
         super().__init__(x_offset, y_offset, False, softening)
 
 
-    def _strut_dist(self, angle: float, coordinates: Array) -> Array:
+    def _strut(self, angle: float, coordinates: Array) -> Array:
         """
         Generates a representation of a single strut in the spider. This is 
         more complex than you might imagine since the strut can point in 
@@ -567,7 +558,8 @@ class Spider(Aperture, abc.ABC):
         strut: float
             The soft edged strut. 
         """
-        x, y = self.coordinates[0], self.coordinates[1]
+        x, y = coordinates[0], coordinates[1]
+        gradient = np.tan(angle)
         return np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)    
 
 
@@ -645,11 +637,6 @@ class UniformSpider(Spider):
         """
         return super()._strut(angle, coordinates)
 
-    
-    @jax.vmap
-    def _soften(self, coordinates: Array) -> Array:
-        return super()._soften(coordinates)
-
 
     def _hardened_metric(self, coordinates: Array) -> float:
         """
@@ -666,15 +653,15 @@ class UniformSpider(Spider):
             endpoint=False)
         angles += self.rotation
 
-        struts = self._strut(angles, coordinates) > self.width_of_stuts
-        return struts.prod(axis=0)
+        struts = self._strut(angles, coordinates) > self.width_of_struts
+        return struts.prod(axis=0).astype(float)
 
 
     def _softened_metric(self, coordinates: Array) -> Array:
         angles = np.linspace(0, 2 * np.pi, self.number_of_struts, 
             endpoint=False)
         angles += self.rotation
-
+        
         struts = self._strut(angles, coordinates) - self.width_of_struts
         return self._soften(struts).prod(axis=0)
         
@@ -702,4 +689,14 @@ class UniformSpider(Spider):
         return params
 
 
+coordinates = dLux.utils.get_pixel_coordinates(1024, 0.001, 0., 0.)
 
+aperture = UniformSpider(0., 0., 4, 0.01, 0., False)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
+
+aperture = UniformSpider(0., 0., 4, 0.01, 0., True)
+pyplot.imshow(aperture._aperture(coordinates))
+pyplot.colorbar()
+pyplot.show()
