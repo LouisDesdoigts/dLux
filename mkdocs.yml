@@ -4,6 +4,9 @@
 
 # ===== Setup and Themes =====
 markdown_extensions:
+  # - mkdocs_graphviz
+  # - inline_graphviz
+  # - mdx_inline_graphviz
   - pymdownx.arithmatex:
       generic: true
 
@@ -11,6 +14,7 @@ extra_javascript:
   - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  # - https://cdn.jsdelivr.net/gh/rod2ik/cdn@main/mkdocs/javascripts/mkdocs-graphviz.js
 
 site_name: ∂Lux - Differentiable Optical Simulation
 repo_url: https://github.com/LouisDesdoigts/dLux
@@ -46,12 +50,11 @@ plugins:
 nav:
     - Home: index.md
     - Tutorials:
-        - Interfacing with PyTrees: notebooks/PyTree_interface.ipynb
+        - Interfacing with PyTrees: notebooks/pytree_interface.ipynb
         - Phase Retrieval: notebooks/phase_retrieval_demo.ipynb
         - Phase Mask Design: notebooks/designing_a_mask.ipynb
         - Pixel Level Calibration: notebooks/flatfield_calibration.ipynb
         - Fisher Information: notebooks/fisher_information.ipynb
-    # - User Documentation:
     - Base: base.md
     - Optical System: optical_system.md
     - Layers:
@@ -64,16 +67,13 @@ nav:
         - Add Phase: layers/add_phase.md
         - Apply OPD: layers/apply_opd.md
         - Transmissive Optic: layers/transmissive_optic.md
-    # - Developer Documentation:
     - Propagators:
         - Propagator: propagators/propagator.md
-        # - Gaussian Propagator: propagators/gaussian_propagator.md
         - Variable Sampling:
             - Variable Sampling Propagator: propagators/variable_sampling/variable_sampling_propagator.md
             - PhysicalMFT: propagators/variable_sampling/physical_mft.md
             - Physical Fresnel: propagators/variable_sampling/physical_fresnel.md
             - AngularMFT: propagators/variable_sampling/angular_mft.md
-            # - AngularFresnel: propagators/variable_sampling/angular_fresnel.md
         - Fixed Sampling:
             - Fixed Sampling Propagator: propagators/fixed_sampling/fixed_sampling_propagator.md
             - PhysicalFFT: propagators/fixed_sampling/physical_fft.md
@@ -83,7 +83,6 @@ nav:
         - Cartesian Wavefront: wavefronts/cartesian_wavefront.md
         - Angular Wavefront: wavefronts/angular_wavefront.md
         - Far Field Fresnel Wavefront: wavefronts/far_field_fresnel_wavefront.md
-        # - Gaussian Wavefront: wavefronts/gaussian_wavefront.md
     - Utils:
         - Coordinates:
             - get coordinates vector: utils/coordinates/get_coordinates_vector.md
