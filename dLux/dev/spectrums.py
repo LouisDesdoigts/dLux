@@ -15,7 +15,7 @@ Array =  typing.NewType("Array",  np.ndarray) # 2d +
 
 Spectrum = typing.NewType("Spectrum", object)
 
-class Spectrum(eqx.Module, abc.ABC):
+class Spectrum(dLux.Base, abc.ABC):
     """
     Abstract base class for arbitrary spectral parametrisation
     

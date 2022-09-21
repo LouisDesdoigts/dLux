@@ -46,11 +46,13 @@ plugins:
 nav:
     - Home: index.md
     - Tutorials:
+        - Interfacing with PyTrees: notebooks/PyTree_interface.ipynb
         - Phase Retrieval: notebooks/phase_retrieval_demo.ipynb
         - Phase Mask Design: notebooks/designing_a_mask.ipynb
         - Pixel Level Calibration: notebooks/flatfield_calibration.ipynb
         - Fisher Information: notebooks/fisher_information.ipynb
     # - User Documentation:
+    - Base: base.md
     - Optical System: optical_system.md
     - Layers:
         - Create Wavefront: layers/create_wavefront.md
