@@ -8,7 +8,8 @@ import jax
 import typing
 import equinox
 import functools
-import dLux.utils 
+import dLux
+import dLux.utils
 import jax.numpy as np 
 import matplotlib.pyplot as pyplot
 
@@ -16,7 +17,7 @@ import matplotlib.pyplot as pyplot
 Layer = typing.TypeVar("Layer")
 
 
-class Spider(equinox.Module, abc.ABC):
+class Spider(dLux.base.Base, abc.ABC):
     """
     An abstraction on the concept of an optical spider for a space telescope.
     These are the things that hold up the secondary mirrors. For example,
