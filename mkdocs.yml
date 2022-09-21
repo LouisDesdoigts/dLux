@@ -50,7 +50,7 @@ plugins:
 nav:
     - Home: index.md
     - Tutorials:
-        - Interfacing with PyTrees: notebooks/pytree_interface.ipynb
+        - Interfacing with PyTrees: notebooks/PyTree_interface.ipynb
         - Phase Retrieval: notebooks/phase_retrieval_demo.ipynb
         - Phase Mask Design: notebooks/designing_a_mask.ipynb
         - Pixel Level Calibration: notebooks/flatfield_calibration.ipynb
