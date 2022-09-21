@@ -13,7 +13,7 @@
     
     
       
-        <title>Optical System - ∂Lux - Differentiable Optical Simulation</title>
+        <title>Base - ∂Lux - Differentiable Optical Simulation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dLux.base.OpticalSystem" class="md-skip">
+        <a href="#dLux.base.Base" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Optical System
+              Base
             
           </span>
         </div>
@@ -322,21 +322,6 @@
 
   
   
-  
-    <li class="md-nav__item">
-      <a href="../base/" class="md-nav__link">
-        Base
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
     
   
   
@@ -347,12 +332,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Optical System
+          Base
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Optical System
+        Base
       </a>
       
         
@@ -369,141 +354,64 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem" class="md-nav__link">
-    dLux.base.OpticalSystem
+  <a href="#dLux.base.Base" class="md-nav__link">
+    dLux.base.Base
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.Nims" class="md-nav__link">
-    Nims
+  <a href="#dLux.base.Base.apply_to_leaves" class="md-nav__link">
+    apply_to_leaves()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.Nstars" class="md-nav__link">
-    Nstars
+  <a href="#dLux.base.Base.get_filter_spec" class="md-nav__link">
+    get_filter_spec()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.Nwavels" class="md-nav__link">
-    Nwavels
+  <a href="#dLux.base.Base.get_leaf" class="md-nav__link">
+    get_leaf()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.detector_layers" class="md-nav__link">
-    detector_layers
+  <a href="#dLux.base.Base.get_leaves" class="md-nav__link">
+    get_leaves()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.dithers" class="md-nav__link">
-    dithers
+  <a href="#dLux.base.Base.get_optimiser" class="md-nav__link">
+    get_optimiser()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.fluxes" class="md-nav__link">
-    fluxes
+  <a href="#dLux.base.Base.get_param_spec" class="md-nav__link">
+    get_param_spec()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.layers" class="md-nav__link">
-    layers
+  <a href="#dLux.base.Base.update_and_model" class="md-nav__link">
+    update_and_model()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.positions" class="md-nav__link">
-    positions
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.wavels" class="md-nav__link">
-    wavels
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.weights" class="md-nav__link">
-    weights
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.__init__" class="md-nav__link">
-    __init__()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.apply_detector_layers" class="md-nav__link">
-    apply_detector_layers()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.debug_prop" class="md-nav__link">
-    debug_prop()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.dither_positions" class="md-nav__link">
-    dither_positions()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.propagate" class="md-nav__link">
-    propagate()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.propagate_mono" class="md-nav__link">
-    propagate_mono()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.propagate_single" class="md-nav__link">
-    propagate_single()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.reshape_psfs" class="md-nav__link">
-    reshape_psfs()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.weight_psfs" class="md-nav__link">
-    weight_psfs()
+  <a href="#dLux.base.Base.update_leaves" class="md-nav__link">
+    update_leaves()
   </a>
   
 </li>
@@ -512,6 +420,21 @@
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../optical_system/" class="md-nav__link">
+        Optical System
+      </a>
     </li>
   
 
@@ -1154,141 +1077,64 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem" class="md-nav__link">
-    dLux.base.OpticalSystem
+  <a href="#dLux.base.Base" class="md-nav__link">
+    dLux.base.Base
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.Nims" class="md-nav__link">
-    Nims
+  <a href="#dLux.base.Base.apply_to_leaves" class="md-nav__link">
+    apply_to_leaves()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.Nstars" class="md-nav__link">
-    Nstars
+  <a href="#dLux.base.Base.get_filter_spec" class="md-nav__link">
+    get_filter_spec()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.Nwavels" class="md-nav__link">
-    Nwavels
+  <a href="#dLux.base.Base.get_leaf" class="md-nav__link">
+    get_leaf()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.detector_layers" class="md-nav__link">
-    detector_layers
+  <a href="#dLux.base.Base.get_leaves" class="md-nav__link">
+    get_leaves()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.dithers" class="md-nav__link">
-    dithers
+  <a href="#dLux.base.Base.get_optimiser" class="md-nav__link">
+    get_optimiser()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.fluxes" class="md-nav__link">
-    fluxes
+  <a href="#dLux.base.Base.get_param_spec" class="md-nav__link">
+    get_param_spec()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.layers" class="md-nav__link">
-    layers
+  <a href="#dLux.base.Base.update_and_model" class="md-nav__link">
+    update_and_model()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.positions" class="md-nav__link">
-    positions
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.wavels" class="md-nav__link">
-    wavels
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.weights" class="md-nav__link">
-    weights
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.__init__" class="md-nav__link">
-    __init__()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.apply_detector_layers" class="md-nav__link">
-    apply_detector_layers()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.debug_prop" class="md-nav__link">
-    debug_prop()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.dither_positions" class="md-nav__link">
-    dither_positions()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.propagate" class="md-nav__link">
-    propagate()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.propagate_mono" class="md-nav__link">
-    propagate_mono()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.propagate_single" class="md-nav__link">
-    propagate_single()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.reshape_psfs" class="md-nav__link">
-    reshape_psfs()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.base.OpticalSystem.weight_psfs" class="md-nav__link">
-    weight_psfs()
+  <a href="#dLux.base.Base.update_leaves" class="md-nav__link">
+    update_leaves()
   </a>
   
 </li>
@@ -1307,131 +1153,56 @@
                 
                   
 
-  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/optical_system.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/base.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-  <h1>Optical System</h1>
+  <h1>Base</h1>
 
 <div class="doc doc-object doc-class">
 
 
-<a id="dLux.base.OpticalSystem"></a>
+<a id="dLux.base.Base"></a>
   <div class="doc doc-contents first">
       <p class="doc doc-class-bases">
-        Bases: <code><a class="autorefs autorefs-internal" title="dLux.base.Base" href="../base/#dLux.base.Base">Base</a></code></p>
+        Bases: <code>abc.<span title="abc.ABC">ABC</span></code>, <code><span title="equinox">eqx</span>.<span title="equinox.Module">Module</span></code></p>
 
   
-      <p>Optical System class, Equinox Modle</p>
-<p>DOCSTRING NOT COMPLETE</p>
-<p>A Class to store and apply properties external to the optical system
-Ie: stellar positions and spectra</p>
-<p>positions: (Nstars, 2) array
-wavels: (Nwavels) array
-weights: (Nwavel)/(Nwavels, Nstars) array</p>
-<p>dLux currently does not check that inputs are correctly shaped/formatted!</p>
-<p>Notes:
- - Take in layers in order to re-intialise the model every call?</p>
-<p>General images output shape: (Nimages, Nstars, Nwavels, Npix, Npix)</p>
-<ul>
-<li>Currently doesnt allow temporal variation in spectrum </li>
-<li>Currently doesnt allow temporal variation in flux</li>
-</ul>
-<p>ToDo: Add getter methods for accessing weights and fluxes attributes that
-use np.squeeze to remove empy axes</p>
+      <p>An abstract base class that is used to give a user-friendly API for working
+with PyTrees, specifically using Equniox. This can be thought of as
+extending the equinox.Module class. It also has some methods with a 
+user-friendly interface for some other usefull packages such as optax
+and numpyro.</p>
+<p>If you are unfamiliar with PyTrees, check out this jax tutorial
+and have a look a the equinox docs to see how they can be extending to give
+object-oriented jax:
+ - https://jax.readthedocs.io/en/latest/jax-101/05.1-pytrees.html
+ - https://docs.kidger.site/equinox/</p>
+<p>New concept: Paths
+    In order to make working with PyTrees easier, there is one concept that
+    is introduced, the paths object. a path object is not a unique or new
+    class of object type, just a helpfull way of thinking about navigating
+    PyTrees. We define a 'path' here as list/tuple that contains either
+    strings or integers. Each path object refers to a unique 'leaf' in the
+    PyTree. Since each PyTrees is constructed from nested lists, tuples and
+    dictionaries (and since we're using Equinox, Equinox.Modules too), we 
+    can refer to any unique leaf via a chain of strings and intergers. </p>
+<pre><code>Example path objects:
+    path1 = ['param1', 3, 'nested_param3', 5]
+    path2 = ('p1', 'p2', 'p3')
+    path3 = (1, 4, 6, 3, 6, 2, 'param')
 
-  <p><strong>Attributes:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>layers</code></td>
-          <td>
-                <code>list, required</code>
-          </td>
-          <td><ul>
-<li>A list of layers that defines the tranformaitons and operations of the system (typically optical)</li>
-</ul></td>
-        </tr>
-        <tr>
-          <td><code>wavels</code></td>
-          <td>
-                <code>ndarray</code>
-          </td>
-          <td><ul>
-<li>An array of wavelengths in meters to simulate</li>
-<li>The shape must be 1d - stellar spectrums are controlled through the weights parameter</li>
-<li>No default value is set if not provided and this will throw an error if you try to call functions that depend on this parameter</li>
-<li>It is left as optional so that functions that allow wavelength input can be called on objects without having to pre-input wavelengths</li>
-</ul></td>
-        </tr>
-        <tr>
-          <td><code>positions</code></td>
-          <td>
-                <code>ndarray, optional</code>
-          </td>
-          <td><ul>
-<li>An array of (x,y) stellar positions in units of radians, measured as deviation of the optical axis. </li>
-<li>Its input shape should be (Nstars, 2), defining an x, y position for each star. </li>
-<li>If not provided, the value defaults to (0, 0) - on axis</li>
-</ul></td>
-        </tr>
-        <tr>
-          <td><code>fluxes</code></td>
-          <td>
-                <code>ndarray, optional</code>
-          </td>
-          <td><ul>
-<li>An array of stellar fluxes, its length must match the positions inputs size to work properly</li>
-<li>Theoretically this has arbitrary units, but we think of it as photons</li>
-<li>Defaults to 1 (ie, returning a unitary flux psf if not specified)</li>
-</ul></td>
-        </tr>
-        <tr>
-          <td><code>weights</code></td>
-          <td>
-                <code>ndarray, optional</code>
-          </td>
-          <td><ul>
-<li>An array of stellar spectral weights (arb units)</li>
-<li>This can take multiple shapes</li>
-<li>Default is to weight all wavelengths equally (top-hat)</li>
-<li>If a 1d array is provided this is applied to all stars, shape (Nwavels)</li>
-<li>if a 2d array is provided each is applied to each individual star, shape (Nstars, Nwavels)</li>
-<li>Note the inputs values are always normalised and will not directly change total output flux (inderectly it can change it by weighting more flux to wavelengths with more aperture losses, for example)</li>
-</ul></td>
-        </tr>
-        <tr>
-          <td><code>dithers</code></td>
-          <td>
-                <code>ndarray, optional</code>
-          </td>
-          <td><ul>
-<li>An arary of (x, y) positional dithers in units of radians</li>
-<li>Its input shape should be (Nims, 2), defining the (x,y) dither for each image</li>
-<li>if not provided, defualts to no-dither</li>
-</ul></td>
-        </tr>
-        <tr>
-          <td><code>detector_layers</code></td>
-          <td>
-                <code>list, optional</code>
-          </td>
-          <td><ul>
-<li>A second list of layer objects designed to allow processing of psfs, rather than wavefronts</li>
-<li>It is applied to each image after psfs have been approraitely weighted and summed</li>
-</ul></td>
-        </tr>
-    </tbody>
-  </table>
+These objects are quite simple, but are worth clarifying since they are
+integral to this new PyTree interface.
+</code></pre>
+<p>New concept: Path Dictionary
+    Since PyTrees can have both very deep and wide structures it would be 
+    impractical to always refer to each leaf via its full absolute path. 
+    The path dictionary is simply a dictionary that allows a simple key to 
+    be used to refer to the full path to some leaf. Note the key must be 
+    unique to and and all parameter names within the PyTree structure!</p>
 
 
 
@@ -1445,209 +1216,87 @@ use np.squeeze to remove empy axes</p>
 
 
 
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.base.OpticalSystem.Nims" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">Nims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.base.OpticalSystem.Nstars" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">Nstars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.base.OpticalSystem.Nwavels" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">Nwavels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavels</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.base.OpticalSystem.detector_layers" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">detector_layers</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">detector_layers</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">detector_layers</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.base.OpticalSystem.dithers" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">dithers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="k">if</span> <span class="n">dithers</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dithers</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.base.OpticalSystem.fluxes" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">fluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">))</span> <span class="k">if</span> <span class="n">fluxes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.base.OpticalSystem.layers" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">layers</span> <span class="o">=</span> <span class="n">layers</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.base.OpticalSystem.positions" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="k">if</span> <span class="n">positions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.base.OpticalSystem.wavels" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">wavels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wavels</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.base.OpticalSystem.weights" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavels</span><span class="p">))</span> <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
 
 
 <div class="doc doc-object doc-function">
 
 
 
-<h2 id="dLux.base.OpticalSystem.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="n">wavels</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fluxes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dithers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detector_layers</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<h2 id="dLux.base.Base.apply_to_leaves" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">apply_to_leaves</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">fns</span><span class="p">,</span> <span class="n">path_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
+  
+      <p>Returns an updated version of the pytree with the leaves speficied by 
+paths updated with the values in values.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>paths</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of nested paths. Note path objects can only be 
+nested a single time.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>fns</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of functions to be applied to the leaves specified
+by paths. These can not be nested.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>path_dict</code></td>
+          <td>
+                <code>dict(optional)</code>
+          </td>
+          <td><p>A dictionary of absolute paths.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>Returns</code></td>
+          <td>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>pytree</code></td>
+          <td>
+                <code><span title="dLux.base.Pytree">Pytree</span></code>
+          </td>
+          <td><p>An updated version of the current pytree</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
   </div>
 
@@ -1657,15 +1306,76 @@ use np.squeeze to remove empy axes</p>
 
 
 
-<h2 id="dLux.base.OpticalSystem.apply_detector_layers" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">apply_detector_layers</span><span class="p">(</span><span class="n">image</span><span class="p">)</span></code>
+<h2 id="dLux.base.Base.get_filter_spec" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_filter_spec</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">path_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      
+      <p>Returns 'filter_spec' object, to be used in conjunction with the 
+Equinox filter functions. A 'filter_spec' is a Pytree with a matching
+tree strucutre, but with boolean values at the leaves. This is 
+primarily used by the Equinox.filter_grad() and 
+Equinox.filter_value_and_grad() functions, passed in as the optional 
+'arg' argument. It is used to either turn on or off gradient 
+calculations with respect to each leaf.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>paths</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of nested paths. Note path objects can only be 
+nested a single time.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>path_dict</code></td>
+          <td>
+                <code>dict(optional)</code>
+          </td>
+          <td><p>A dictionary of absolute paths.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>Returns</code></td>
+          <td>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>filter_spec</code></td>
+          <td>
+                <code><span title="dLux.base.Pytree">Pytree</span></code>
+          </td>
+          <td><p>An pytree of matching structre with boolean values at the 
+leaves</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
   </div>
 
@@ -1675,15 +1385,68 @@ use np.squeeze to remove empy axes</p>
 
 
 
-<h2 id="dLux.base.OpticalSystem.debug_prop" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">debug_prop</span><span class="p">(</span><span class="n">wavel</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span></code>
+<h2 id="dLux.base.Base.get_leaf" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_leaf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">path_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      <p>I believe this is diffable but there is no reason to force it to be</p>
+      <p>Returns the leaf specified by path</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>path</code></td>
+          <td>
+                <code><span title="dLux.base.Path">Path</span></code>
+          </td>
+          <td><p>The path to recurse down</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>path_dict</code></td>
+          <td>
+                <code>dict(optional)</code>
+          </td>
+          <td><p>A dictionary of absolute paths</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>Returns</code></td>
+          <td>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>leaf</code></td>
+          <td>
+                <code><span title="dLux.base.Leaf">Leaf</span></code>
+          </td>
+          <td><p>The leaf object specified at the end of the path object</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
   </div>
 
@@ -1693,15 +1456,69 @@ use np.squeeze to remove empy axes</p>
 
 
 
-<h2 id="dLux.base.OpticalSystem.dither_positions" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">dither_positions</span><span class="p">()</span></code>
+<h2 id="dLux.base.Base.get_leaves" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_leaves</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">path_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      <p>Dithers the input positions, returned with shape (Npsfs, 2)</p>
+      <p>Returns a list of leaves specified by the paths</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>paths</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of nested paths. Note path objects can only be 
+nested a single time</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>path_dict</code></td>
+          <td>
+                <code>dict(optional)</code>
+          </td>
+          <td><p>A dictionary of absolute paths</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>Returns</code></td>
+          <td>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>leaves</code></td>
+          <td>
+                <code>list</code>
+          </td>
+          <td><p>The list of leaf objects specified by the paths object</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
   </div>
 
@@ -1711,17 +1528,94 @@ use np.squeeze to remove empy axes</p>
 
 
 
-<h2 id="dLux.base.OpticalSystem.propagate" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">propagate</span><span class="p">()</span></code>
+<h2 id="dLux.base.Base.get_optimiser" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_optimiser</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">optimisers</span><span class="p">,</span> <span class="n">get_filter_spec</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      <p>Maps the wavelength and position calcualtions across multiple dimesions</p>
-<p>To Do: Reformat the vmaps such that we only vmap over wavelengths and
-positions in order to simplify the dimensionality</p>
+      <p>Returns an Optax.GradientTransformion object, with the optimisers 
+specified by optimisers applied to the leaves specified by paths.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>paths</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of nested paths. Note path objects can only be 
+nested a single time.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>optimisers</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of optax.GradientTransformation objects to be 
+applied to the leaves specified by paths.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>get_filter_spec</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Boolean defining whether to return a corresponding filter_spec
+object.</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>path_dict</code></td>
+          <td>
+                <code>dict(optional)</code>
+          </td>
+          <td><p>A dictionary of absolute paths.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>Returns</code></td>
+          <td>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>optimiser</code></td>
+          <td>
+                <code>Optax.<span title="Optax.GradientTransformion">GradientTransformion</span></code>
+          </td>
+          <td><p>An Optax.GradientTransformion object, with the optimisers 
+specified by optimisers applied to the leaves specified 
+by paths.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
   </div>
 
@@ -1731,15 +1625,98 @@ positions in order to simplify the dimensionality</p>
 
 
 
-<h2 id="dLux.base.OpticalSystem.propagate_mono" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">propagate_mono</span><span class="p">(</span><span class="n">wavel</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span></code>
+<h2 id="dLux.base.Base.get_param_spec" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_param_spec</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">get_filter_spec</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      
+      <p>Returns 'param_spec' object, to be used in conjunction with the 
+Optax.multi_transform functions. The param_spec is a pytree of matching
+strucutre that has strings assigned to every node, denoting the group
+that is belongs to. Each of these groups can then have unique optimiser
+objects assigned to them. This is typically used to assign different
+learning rates to different parameters.</p>
+<p>Note this sets the default or non-trainable group to 'null'.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>paths</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of nested paths. Note path objects can only be 
+nested a single time.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>groups</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of strings, denoting which group to assign the 
+corresponding leaves denoted by paths to.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>get_filter_spec</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Boolean defining whether to return a corresponding filter_spec
+object.</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>path_dict</code></td>
+          <td>
+                <code>dict(optional)</code>
+          </td>
+          <td><p>A dictionary of absolute paths.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>Returns</code></td>
+          <td>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>param_spec</code></td>
+          <td>
+                <code><span title="dLux.base.Pytree">Pytree</span></code>
+          </td>
+          <td><p>An pytree of matching structre with string values at the 
+leaves specified by groups.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
   </div>
 
@@ -1749,17 +1726,95 @@ positions in order to simplify the dimensionality</p>
 
 
 
-<h2 id="dLux.base.OpticalSystem.propagate_single" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">propagate_single</span><span class="p">(</span><span class="n">wavels</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">apply_detector</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+<h2 id="dLux.base.Base.update_and_model" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">update_and_model</span><span class="p">(</span><span class="n">model_fn</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">path_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      <p>Only propagates a single star, allowing wavelength input
-sums output to single array</p>
-<p>Wavels must be an array and the same shape as weights if provided</p>
+      <p>Updates the leaves speficied by paths with values, and then calls the
+function specified by the string model_fn, returning whatever is 
+returnd by the model_fn. Any extra positional arguments or key-word 
+arguments are passed through to the modelling function.</p>
+<p>This function is desigend to be used in conjunction with numpyro. 
+Please go through the 'Pytree interface' tutorial to see how this
+is used.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>model_fn</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>A string specifying which model function to call</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>paths</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of nested paths. Note path objects can only be nested
+a single time.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>values</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of new values to be applied to the leaves specified by
+paths. These can not be nested.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>path_dict</code></td>
+          <td>
+                <code>dict(optional)</code>
+          </td>
+          <td><p>A dictionary of absolute paths.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>out</code></td>          <td>
+                <code>object</code>
+          </td>
+          <td><p>Whatever object is returned by model_fn</p></td>
+        </tr>
+    </tbody>
+  </table>
 
   </div>
 
@@ -1769,36 +1824,81 @@ sums output to single array</p>
 
 
 
-<h2 id="dLux.base.OpticalSystem.reshape_psfs" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">reshape_psfs</span><span class="p">(</span><span class="n">psfs</span><span class="p">)</span></code>
+<h2 id="dLux.base.Base.update_leaves" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">update_leaves</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">path_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      
+      <p>Returns an updated version of the pytree with the leaves speficied by 
+paths updated with the values in values.</p>
 
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.base.OpticalSystem.weight_psfs" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">weight_psfs</span><span class="p">(</span><span class="n">psfs</span><span class="p">)</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Normalise Weights, and format weights/fluxes
-Psfs output shape: (Nims, Nstars, Nwavels, npix, npix)
-We want weights shape: (1, 1, Nwavels, 1, 1)
-We want fluxes shape: (1, Nstars, 1, 1, 1)</p>
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>paths</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of nested paths. Note path objects can only be 
+nested a single time.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>values</code></td>
+          <td>
+                <code><span title="dLux.base.list_like">list_like</span></code>
+          </td>
+          <td><p>A list/tuple of new values to be applied to the leaves 
+specified by paths. These can not be nested.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>path_dict</code></td>
+          <td>
+                <code>dict(optional)</code>
+          </td>
+          <td><p>A dictionary of absolute paths .</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>Returns</code></td>
+          <td>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>pytree</code></td>
+          <td>
+                <code><span title="dLux.base.Pytree">Pytree</span></code>
+          </td>
+          <td><p>An updated version of the current pytree</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
   </div>
 
@@ -1831,7 +1931,7 @@ We want fluxes shape: (1, Nstars, 1, 1, 1)</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../base/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Base" rel="prev">
+        <a href="../notebooks/fisher_information/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Fisher Information" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1840,20 +1940,20 @@ We want fluxes shape: (1, Nstars, 1, 1, 1)</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Base
+              Fisher Information
             </div>
           </div>
         </a>
       
       
         
-        <a href="../layers/create_wavefront/" class="md-footer__link md-footer__link--next" aria-label="Next: Create Wavefront" rel="next">
+        <a href="../optical_system/" class="md-footer__link md-footer__link--next" aria-label="Next: Optical System" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Create Wavefront
+              Optical System
             </div>
           </div>
           <div class="md-footer__button md-icon">
