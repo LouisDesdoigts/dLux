@@ -119,7 +119,8 @@ class Aperture(eqx.Module, abc.ABC):
             The x coordinate of the centre of the hexagonal
             aperture.
         """
-        return eqx.tree_at(lambda basis : basis.x_offset, self, x)
+        return eqx.tree_at(lambda basis : basis.x_offset, 
+            self, np.asarray(x).astype(float))
 
 
     def set_y_offset(self, y : float) -> Layer:
@@ -130,7 +131,8 @@ class Aperture(eqx.Module, abc.ABC):
             The y coordinate of the centre of the hexagonal
             aperture.
         """
-        return eqx.tree_at(lambda basis : basis.y_offset, self, y)
+        return eqx.tree_at(lambda basis : basis.y_offset, 
+            self, np.asarray(y).astype(float))
 
 
     def __call__(self, parameters : dict) -> dict:
