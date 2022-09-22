@@ -123,6 +123,10 @@ class Aperture(eqx.Module, abc.ABC):
             self, np.asarray(x).astype(float))
 
 
+    def get_x_offset(self) -> float:
+        return self.x_offset
+
+
     def set_y_offset(self, y : float) -> Layer:
         """
         Parameters
@@ -133,6 +137,10 @@ class Aperture(eqx.Module, abc.ABC):
         """
         return eqx.tree_at(lambda basis : basis.y_offset, 
             self, np.asarray(y).astype(float))
+
+
+    def get_y_offset(self) -> float:
+        return self.y_offset
 
 
     def __call__(self, parameters : dict) -> dict:
