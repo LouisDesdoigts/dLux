@@ -7,14 +7,24 @@ import dLux
 import typing
 import optax
 import abc
+from collections import OrderedDict
 
-__all__ = ["Base", "OpticalSystem"]
+__all__ = ["Base", "OpticalSystem", "Telescope", "Optics", "Scene",
+           "Filter", "Detector"]
 
-
+# Types
+Array =  typing.NewType("Array",  np.ndarray)
 list_like = typing.Union[list, tuple]
 Path = typing.Union[list, tuple]
 Pytree = typing.NewType("Pytree", object)
 Leaf = typing.Any
+
+# Classes
+Telescope   = typing.NewType("Telescope",   object)
+Optics      = typing.NewType("Optics",      object)
+Scene       = typing.NewType("Scene",       object)
+Filter      = typing.NewType("Filter",      object)
+Detector    = typing.NewType("Detector",    object)
 
 class Base(abc.ABC, eqx.Module):
     """
@@ -735,3 +745,506 @@ class OpticalSystem(Base):
         psfs *= weights_in
         psfs *= fluxes
         return psfs
+
+
+
+"""
+High level notes:
+
+These classes are still in early development and are still subject to change
+both at the internals and API. Ideally the API should be relatively stable,
+but no guarantee can be made!
+
+There should be some way to cache psf calculations during observations in order
+to only calculte novel psfs for large observations.
+
+TODO: Build the observation object, open questions here.
+
+Q: Should the modelling_dict object store single dimension arrays, with
+recombinations happening after via some indexing parameter?
+
+Q: For inputs like wavelenght, should the input type be Array or float? Its a
+single valued float 'array' of shape (0,)....
+"""
+
+
+class Telescope(Base):
+    """
+    A high level class desgined to model the behaviour of a telescope. It
+    stores a series different ∂Lux objects, and primarily passes the relevant
+    information between these objects in order to coherently model some
+    telescope observation.
+    
+    Attributes
+    ----------
+    optics : Optics
+        An Optics object that is used to propagate wavefronts through some
+        some optical configuration to generate a psf.
+    scene : Scene
+        A Scene object that stores the various source objects that the
+        telescope is observing.
+    detector : Detector
+        A Detector object that is used to model the various instrumental 
+        effects on a psf.
+    filter : Filter
+        A Filter object that is used to model the effective throughput of each
+        wavelength though the optical system.
+    """
+    scene    : Scene
+    optics   : Optics
+    detector : Detector
+    filter   : Filter
+    # Observation: Observation
+    
+    
+    def __init__(self     : Telescope,
+                 optics   : Optics,
+                 scene    : Scene,
+                 detector : Detector = None,
+                 filter   : Filter   = None,
+                 # Observation :
+                ) -> Telescope:
+        """
+        Parameters
+        ----------
+        optics : Optics, list
+            An Optics object that is used to propagate wavefronts through some
+            some optical configuration to generate a psf.
+        scene : Scene, list
+            A Scene object that stores the various source objects that the
+            telescope is observing.
+        detector : Detector (optional)
+            A Detector object that is used to model the various instrumental
+            effects on a psf.
+        filter : Filter (optional)
+            A Filter object that is used to model the effective throughput of
+            each wavelength though the optical system.
+        """
+        self.scene    = Secene(scene)  if isinstance(scene, list) else scene
+        self.optics   = Optics(optics) if isinstance(optics, list) else optics
+        self.detector = Detector()     if detector is None else detector
+        self.filter   = Filter()       if filter   is None else filter
+        
+        
+    def model_scene(self : Telescope, scene : Scene = None) -> Array:
+        """
+        Models the scene through the telescope optics.
+        
+        Parameters
+        ----------
+        scene : Scene (optional)
+            The scene to observe, defaults to using the internally stored scene
+            if no value is passed.
+        
+        Returns
+        -------
+        psfs : Array
+            The summed psfs of the scene modelled through the telescope.
+        """
+        # Get the scene
+        scene = self.scene if scene is None else scene
+        
+        # vmap the appropriate functions
+        vector_prop = jax.vmap(self.optics.propagate_mono, in_axes=(0, 0))
+        source_prop = jax.vmap(vector_prop, in_axes=(0, 0))
+        throughput_mapped = jax.vmap(self.filter.get_throughput, in_axes=0)
+        
+        # Decompose the scene and format the observation wavelengths
+        modelling_dict = scene.decompose()
+        wavelengths = modelling_dict['wavelengths']
+        offsets = modelling_dict['positions']
+        weights = np.expand_dims(modelling_dict['weights'] * \
+                                 throughput_mapped(wavelengths), (-1, -2))
+
+        # Model and combine the individual psfs
+        out = weights * source_prop(wavelengths, offsets)
+        psfs = out.sum((0, 1))
+        return psfs
+    
+    
+    def model_image(self : Telescope, detector : Detector = None,
+                    scene : Scene = None) -> Array:
+        """
+        Models the scene through the telescope optics and detector.
+        
+        Parameters
+        ----------
+        detector : Detector (optional)
+            The detector to use with the observation, defaults to using the
+            internally stored detector if no value is passed.
+        scene : Scene (optional)
+            The scene to observe, defaults to using the internally stored scene
+            if no value is passed.
+        
+        Returns
+        -------
+        image : Array
+            The image of the scene modelled through the telescope with detector
+            effects applied.
+        """
+        psfs = self.model_scene(scene=scene)
+        detector = self.detector if detector is None else detector
+        image = detector.apply_detector_layers(psfs)
+        return image
+    
+    
+class Optics(Base):
+    """
+    A high level class desgined to model the behaviour of some optical systems
+    response to wavefronts.
+    
+    Attributes
+    ----------
+    layers: dict
+        A collections.OrderedDict of 'layers' that define the transformations
+        and operations upon some input wavefront through an optical system.
+    """
+    layers : dict
+    
+    
+    def __init__(self : Optics, layers : list) -> Optics:
+        """
+        Parameters
+        ----------
+        layers : list
+            A list of ∂Lux 'layers' that define the transformations and
+            operations upon some input wavefront through an optical system.
+        """
+        self.layers = dLux.utils.list_to_dict(layers)
+    
+    
+    def propagate_mono(self : Optics, wavelength : Array,
+                       offset : Array = np.zeros(2)) -> Array:
+        """
+        Propagates a monochromatic point source through the optical layers.
+        
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, (optional)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        
+        Returns
+        -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
+        """
+        params_dict = {"OpticalSystem": self,
+                       "wavelength": wavelength,
+                       "offset": offset}
+        
+        for key, layer in self.layers.items():
+            params_dict = layer(params_dict)
+        return params_dict["Wavefront"].wavefront_to_psf()
+    
+    
+    def propagate_single(self : Optics, wavelenghts : Array,
+                         offset  : Array = np.zeros(2),
+                         weights : Array = np.ones(1),
+                         flux    : Array = np.ones(1)) -> Array:
+        """
+        Propagates a single broadband point source through the optical layers.
+        
+        Parameters
+        ----------
+        wavelengths : Array, meters
+            The wavelengths of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, (optional)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        weights : Array, (optional)
+            The relative weights of each wavelength from the source
+        flux : Array, (optional)
+            The total flux of the source
+        
+        Returns
+        -------
+        psf : Array
+            The point spread function of the point source after being
+            propagated though the optical layers.
+        """
+        # Mapping propagator over wavelengths
+        prop_wf_map = jax.vmap(self.propagate_mono, in_axes=(0, None))
+        
+        # Propagate wavelengths
+        monochromatic_psfs = prop_wf_map(wavelenghts, offset)/len(wavels)
+        
+        # Sum into single psf
+        psf = flux * (weights * monochromatic_psfs).sum(0)
+        return psf
+    
+    
+    def debug_prop(self : Optics, wavelength : Array,
+                   offset : Array = np.zeros(2)) -> Array:
+        """
+        Propagates a monochromatic point source through the optical layers,
+        while also returning the intermediate state of the parameter dictionary
+        and layers after each layer application.
+        
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, (optional)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        
+        Returns
+        -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
+        intermediate_dicts : list
+            The intermediate states of the parameters dictionary.
+        intermediate_layers : list
+            The intermediate states of each layer after being applied to the
+            wavefront.
+        """
+        params_dict = {"OpticalSystem": self,
+                       "wavelength": wavel,
+                       "offset": offset}
+        
+        intermediate_dicts = []
+        intermediate_layers = []
+        for key, layer in self.layers.items():
+            params_dict = layer(params_dict)
+            intermediate_dicts.append(params_dict.copy())
+            intermediate_layers.append(deepcopy(layer))
+        
+        return params_dict["Wavefront"].wavefront_to_psf(), \
+                                intermediate_dicts, intermediate_layers
+    
+    
+class Scene(Base):
+    """
+    A high level class representing some 'astrophysical scene', which is
+    composed of Sources. This class mainly serves as an interface between the
+    individual source objects and the Optics/Telescope classes.
+    
+    Attributes
+    ----------
+    sources : dict
+        A dictionary containing all the of sources that comprise the
+        astrophysical scene.
+    """
+    
+    sources: dict
+    
+    
+    def __init__(self, sources : list) -> Scene:
+        """
+        Parameters
+        ----------
+        sources : list
+            a list of individual source objects that is automatically converted
+            into a dictionary
+        """
+        self.sources = dLux.utils.list_to_dict(sources, ordered=False)
+    
+    
+    def decompose(self : Scene) -> dict:
+        """
+        Decomposes the individual sources into a 'source dictionary' that
+        stores all of the necessary information about the sources needed to
+        model them through the optical system.
+        
+        NOTE: Currently only works with source spectrum of the same length.
+        this should be able to fixed by implementing 1d arrays with indexing or
+        identifiers needed to reconstruct back into individual sources.
+        
+        Returns
+        -------
+        modelling_dict : dict
+            A dictionary containing all of the information about all of the
+            source objects needed to model their psfs.
+        """
+        keys = list(self.sources.keys())
+        source = self.sources[keys[0]].normalise()
+        
+        # Correctly shaped arrays must exist in order to be correctly
+        # appended to, so we must initiliase the source dictionary 
+        # outside of the iterative loop
+        modelling_dict = {"wavelengths": source._get_wavelengths(), 
+                          "weights":     source._get_weights() * \
+                                              source._get_flux(),
+                          "positions":   source._get_position(),
+                          "resolved":    source._is_resolved(),
+                          "source_key":  [keys[0]],
+                         }
+        
+        for i in range(1, len(keys)):
+            key = keys[i]
+            source = self.sources[key].normalise()
+            
+            wavelengths = source._get_wavelengths()
+            modelling_dict['wavelengths'] = np.append(
+                modelling_dict['wavelengths'], wavelengths, axis=0)
+
+            weights = source._get_weights() * source._get_flux()
+            modelling_dict['weights'] = np.append(
+                modelling_dict['weights'], weights, axis=0)
+            
+            positions = source._get_position()
+            modelling_dict['positions'] = np.append(
+                modelling_dict['positions'], positions, axis=0)
+            
+            resolved = source._is_resolved()
+            modelling_dict['resolved'] = np.append(
+                modelling_dict['resolved'], resolved, axis=0)
+            
+            modelling_dict['source_key'] = \
+                modelling_dict['source_key'] + [key]
+
+        return modelling_dict
+    
+    
+class Filter(Base):
+    """
+    A class for modelling optical filters.
+    
+    Attributes
+    ----------
+    wavelengths : Array
+        The wavelengths at which the filter is defined.
+    throughput : Array
+        The throughput of the filter at the corresponding wavelength.
+    filter_name : str
+        A string identifier that can be used to initialise specific filters.
+    """
+    wavelengths : Array
+    throughput  : Array
+    filter_name : str = eqx.static_field()
+    
+    
+    def __init__(self        : Filter,
+                 wavelengths : Array = None,
+                 throughput  : Array = None,
+                 filter_name : str   = None) -> Filter:
+        """
+        Initialises the filter. All inputs are optional and defaults to uniform
+        unitary throughput. If filter_name is specified then wavelengths and
+        weights must not be specified.
+        
+        Parameters
+        ----------
+        wavelengths : Array (optional)
+            The wavelengths at which the filter is defined.
+        throughput : Array (optional)
+            The throughput of the filter at the corresponding wavelength.
+        filter_name : str (optional)
+            A string identifier that can be used to initialise specific filters.
+            Currently no pre-built filters are implemented.
+        """
+        # Take the filter name as the priority input
+        if filter_name is not None:
+            # TODO: Pre load filters
+            raise NotImplementedError("You know what this means")
+            pass
+            
+            # Check that wavelengths and throughput are not specified
+            if wavelengths is not None or throughput is not None:
+                raise ValueError("If filter_name is specified, wavelengths \
+                and throughput can not be specified")
+        
+        # Neither is specified
+        elif wavelengths is None and throughput is None:
+            self.wavelengths = np.array([1.])
+            self.throughput  = np.array([1.])
+            self.filter_name = 'Unitary'
+                
+        # Check that both wavelengths and throughput are specified
+        elif (wavelengths is     None and throughput is not None) or \
+             (wavelengths is not None and throughput is     None):
+            raise ValueError("If either wavelengths or throughput is\
+            specified, then both must be specified")
+                
+        # Both wavelengths and throughput are specified
+        else:
+            assert len(wavelengths) != len(throughput), "wavelengths and \
+            throughput must have the same dimension"
+            self.wavelengths = np.asarray(wavelengths, dtype=float)
+            self.throughput  = np.asarray(throughput,  dtype=float)
+            self.filter_name = 'custom'
+    
+    
+    # TODO: Make an integrated, rather than interpolated filter
+    def get_throughput(self : Filter, wavelengths : Array) -> Array:
+        """
+        Get the correspondning throughput for the filter at the specified
+        wavelengths. Currently uses a linear interpolation method, but is
+        planned to use an integration method in the future. Any wavelengths
+        outside of the defined wavelength range are taken as zero (except for
+        'Unitary' throughput which is uniform)
+        
+        Parameters
+        ----------
+        wavelengths: Array
+            An array of wavelengths to sample the filter at.
+        
+        Returns:
+        throughputs : Array
+            An array of the corresponding throughputs at the given wavlengths.
+        """
+        # Translate input wavelengths to indexes 
+        min_wavelength = self.wavelengths.min()
+        max_wavelength = self.wavelengths.max()
+        num_wavelength = self.wavelengths.shape[0]
+        indxs = num_wavelength * (wavelengths - min_wavelength)/max_wavelength
+        throughputs = jax.scipy.ndimage.map_coordinates(self.throughput, \
+                                        np.array([indxs]), 1, 'nearest')
+        return throughputs
+
+
+class Detector(Base):
+    """
+    A high level class desgined to model the behaviour of some detectors
+    response to some psf.
+    
+    This class is currently very minimal and will be expanded in future for
+    more flexibility
+    
+    Attributes
+    ----------
+    layers: dict
+        A collections.OrderedDict of 'layers' that define the transformations
+        and operations upon some input psf as it interacts with the detector.
+    """
+    layers: dict
+
+    def __init__(self: Detector, layers : list = []) -> Detector:
+        """
+        Parameters
+        ----------
+        layers : list
+            A list of ∂Lux detector 'layers' that define the transformations
+            and operations upon some input psf as it interacts with the
+            detector.
+        """
+        self.layers = dLux.utils.list_to_dict(layers)
+
+
+    def apply_detector_layers(self : Detector, image : Array) -> Array:
+        """
+        Applied the stored detector layers to the input image. Will be extended
+        in the future to take in a modelling dictionary, so that all parameters
+        are accessible to the detector layers.
+        
+        Parameters
+        ----------
+        image : Array
+            The input 'image' to the detector to be transformed.
+        
+        Returns
+        -------
+        image : Array
+            The ouput 'image' after being transformed by the detector layers.
+        """
+        for key, layer in self.layers.items():
+            image = layer(image)
+        return image
