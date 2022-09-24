@@ -30,7 +30,7 @@ class PlaneType(enum.IntEnum):
     Intermediate = 3
 
 
-class Wavefront(eqx.Module):
+class Wavefront(dLux.base.Base):
     """
     An abstract module that should never be directly instantiated.
     This class represents a general optical wavefront although the 
@@ -51,12 +51,12 @@ class Wavefront(eqx.Module):
     wavelength : float, meters
         The wavelength of the `Wavefront`.
     offset : Array, radians
-        The (x, y) angular offset of the `Wavefront` from 
+        The (x, y) angular offset of the `Wavefront` from
         the optical axis.
     amplitude : Array, power
-        The electric field amplitude of the `Wavefront`. 
+        The electric field amplitude of the `Wavefront`.
     phase : Array, radians
-        The electric field phase of the `Wavefront`.        
+        The electric field phase of the `Wavefront`.
     pixel_scale : float, meters
         The physical dimensions of the pixels representing the wavefront.
     plane_type : enum.IntEnum.PlaneType

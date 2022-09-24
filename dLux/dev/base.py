@@ -4,6 +4,7 @@ import equinox as eqx
 import abc
 import typing
 import dLux
+import optax
 from collections import OrderedDict
 
 __author__ = "Louis Desdoigts"
@@ -23,61 +24,8 @@ Filter      = typing.NewType("Filter",      object)
 Detector    = typing.NewType("Detector",    object)
 Observation = typing.NewType("Observation", object)
 
-class Base(abc.ABC, eqx.Module):
-    def get_leaf(self, pytree, path):
-        """
-        Recuses down the path of the pytree
-        """
-        key = path[0]
-        pytree = pytree.__dict__[key] if isinstance(pytree, eqx.Module) else \
-                 pytree[key]
 
-        # Return param if at the end of path, else recurse
-        return pytree if len(path) == 1 else self.get_leaf(pytree, path[1:])
-    
-    def update_pytree(self, paths, values):
-        """
-        Updates the `pytree` leaves specificied by params_paths with values
-        """
-        # Returns a tuple of leaves specified by paths
-        get_leaves = lambda pytree : tuple([self.get_leaf(pytree, paths[i]) \
-                                            for i in range(len(paths))])
-
-        # Updates the leaf if passed a function
-        update_leaf = lambda leaf, leaf_update: leaf_update(leaf)\
-                if isinstance(leaf_update, typing.Callable) else leaf_update
-
-        # Updates the leaves specified by paths
-        update_values = tuple([update_leaf(self.get_leaf(self, paths[i]), \
-                                values[i]) for i in range(len(paths))])
-
-        return eqx.tree_at(get_leaves, self, update_values)
-    
-    def update_params(self, update_fn, **kwargs):
-        """
-        Update the paramaters with the given input value
-        """
-        params, param_paths = update_fn(**kwargs)
-        
-        # Get value & paths to be updated
-        update_values = tuple([params[i] for i in range(len(params)) \
-                              if params[i] is not None])
-        
-        # Get paths to be parameters to be updated
-        update_paths = tuple([param_paths[i] for i in range(len(params)) \
-                              if params[i] is not None])
-        
-        # Return updated pytree
-        return self.update_pytree(update_paths, update_values)
-    
-    def update_and_model(self, update_fn, model_fn, **kwargs):
-        """
-        Updates the given input parameters, and then models the psf
-        """
-        return getattr(self.update_params(update_fn, **kwargs), model_fn)()
-
-
-class Telescope(Base):
+class Telescope(dLux.Base):
     """
     A high level class to store the various compoennets needed to model a 
     real astrophysical scene with a telescope.
@@ -174,14 +122,19 @@ class Telescope(Base):
     def model_scene_flat(self : Telescope) -> Array:
         return self.model_scene().flatten()
     
-    def model_image(self : Telescope) -> Array:
-        return self.detector.apply_detector_layers(self.model_scene())
+    # def model_image(self : Telescope, flatten=False : bool) -> Array:
+    def model_image(self : Telescope, flatten : bool=False) -> Array:
+        if not flatten:
+            return self.detector.apply_detector_layers(self.model_scene())
+        else:
+            return self.detector.apply_detector_layers(self.model_scene()) \
+                    .flatten()
     
-    def model_image_flat(self : Telescope) -> Array:
-        return self.model_image().flatten()
+    # def model_image_flat(self : Telescope) -> Array:
+    #     return self.model_image().flatten()
     
     
-class Optics(Base):
+class Optics(dLux.Base):
     """ Optical System class, Equinox Modle
     
     Attributes
@@ -245,7 +198,7 @@ class Optics(Base):
         return image
     
     
-class Scene(Base):
+class Scene(dLux.Base):
     """
     Contains a list (dictionary?) of sources and a set of functions needed to 
     interface the parameterised sources with the Optics
@@ -333,7 +286,7 @@ class Scene(Base):
         return source_dict
     
     
-class Filter(Base):
+class Filter(dLux.Base):
     """
     
     """
@@ -394,7 +347,7 @@ class Filter(Base):
 
 
 
-class Detector(Base):
+class Detector(dLux.Base):
     """
     Contains a list (dictionary?) of detector 'layers'
 
@@ -429,7 +382,7 @@ class Detector(Base):
         return image
 
 
-class Observation(eqx.Module):
+class Observation(dLux.Base):
     """
 
     """
