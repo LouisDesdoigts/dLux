@@ -1089,12 +1089,13 @@ class InformationConservingRotation(eqx.Module):
         """
         npix = image.shape[0]                                                          
         centre = (npix - 1) / 2                                                        
-        x_pixels, y_pixels = get_pixel_positions(npix)                                 
-        rs, phis = cart2polar(x_pixels, y_pixels)                                      
+        x_pixels, y_pixels = dLux.utils.get_pixel_positions(npix)                                 
+        rs, phis = dLux.utils.cart2polar(x_pixels, y_pixels)                                      
         phis += rotation                                                               
         coordinates_rot = np.roll(polar2cart(rs, phis) + centre,                       
             shift=1, axis=0)                                                           
-        rotated = map_coordinates(image, coordinates_rot, order=1)                     
+        rotated = jax.scipy.ndimage.map_coordinates(
+            image, coordinates_rot, order=1)                     
         return rotated  
 
 
