@@ -23,7 +23,8 @@ __date__ = "05/07/2022"
 
 __all__ = ["AddPhase", "TransmissiveOptic", "ApplyBasisCLIMB", 
     "ApplyBasisOPD", "ApplyOPD", "CircularAperture", "CreateWavefront",
-    "NormaliseWavefront", "TiltWavefront", "CompoundAperture"]
+    "NormaliseWavefront", "TiltWavefront", "CompoundAperture",
+    "InformationConservingRotation"]
 
 
 # import dLux
@@ -33,7 +34,7 @@ import equinox as eqx
 import dLux
 
 
-class CreateWavefront(dLux.base.Base):
+class CreateWavefront(eqx.Module):
     """ 
     Initialises an on-axis input wavefront
 
@@ -161,7 +162,7 @@ class CreateWavefront(dLux.base.Base):
 # class and then leave the call function as a simple call to it.
 # This would allow other class to apply arbitrary tilts tracked in 
 # that class.
-class TiltWavefront(dLux.base.Base):
+class TiltWavefront(eqx.Module):
     """ 
     Applies a paraxial tilt by adding a phase slope
     
@@ -213,7 +214,7 @@ class TiltWavefront(dLux.base.Base):
         return params_dict
 
     
-class CircularAperture(dLux.base.Base):
+class CircularAperture(eqx.Module):
     """
     Multiplies the input wavefront by a pre calculated circular binary 
     (float) mask that fills the size of the array
@@ -334,7 +335,7 @@ class CircularAperture(dLux.base.Base):
         return params_dict
 
     
-class NormaliseWavefront(dLux.base.Base):
+class NormaliseWavefront(eqx.Module):
     """ 
     Normalises the input wavefront using the in-built normalisation 
     
@@ -383,7 +384,7 @@ class NormaliseWavefront(dLux.base.Base):
         return params_dict
     
 
-class ApplyBasisOPD(dLux.base.Base):
+class ApplyBasisOPD(eqx.Module):
     """
     Adds an array of phase values to the input wavefront calculated 
     from the OPD. The phases are calculated from the basis 
@@ -491,7 +492,7 @@ class ApplyBasisOPD(dLux.base.Base):
         return np.dot(self.basis.T, self.coeffs)
     
 
-class AddPhase(dLux.base.Base):
+class AddPhase(eqx.Module):
     """ 
     Takes in an array of phase values and adds them to the phase term of the 
     input wavefront. ie wavelength independent
@@ -558,7 +559,7 @@ class AddPhase(dLux.base.Base):
         return params_dict
     
 
-class ApplyOPD(dLux.base.Base):
+class ApplyOPD(eqx.Module):
     """ 
     Takes in an array representing the Optical Path Difference (OPD) and 
     applies the corresponding phase difference to the input wavefront. 
@@ -624,7 +625,7 @@ class ApplyOPD(dLux.base.Base):
         return params_dict
     
 
-class TransmissiveOptic(dLux.base.Base):
+class TransmissiveOptic(eqx.Module):
     """ 
     Represents an arbitrary transmissive optic in the optical path. 
     
@@ -689,7 +690,7 @@ class TransmissiveOptic(dLux.base.Base):
         return params_dict
 
 
-class CompoundAperture(dLux.base.Base):
+class CompoundAperture(eqx.Module):
     """
     Applies a series of soft-edged, circular aperture and occulters, 
     defined by their physical (x, y) positions and radii.
@@ -871,7 +872,7 @@ class CompoundAperture(dLux.base.Base):
         return params_dict
 
 
-class ApplyBasisCLIMB(dLux.base.Base):
+class ApplyBasisCLIMB(eqx.Module):
     """
     Adds an array of phase values to the input wavefront calculated 
     from the OPD
