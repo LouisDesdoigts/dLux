@@ -14,6 +14,11 @@ Propagator  = typing.NewType("Propagator",  dLux.Propagator)
 PlaneType   = typing.NewType("PlaneType",   dLux.PlaneType)
 Layer       = typing.NewType("Layers",  object)
 
+
+__all__ = ["GaussianWavefront", "GaussianPropagator", "GaussianLens"]
+__author__ = "Jordan Dennis"
+
+
 class GaussianWavefront(dLux.Wavefront):
     """
     Expresses the behaviour and state of a wavefront propagating in 
