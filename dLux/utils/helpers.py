@@ -6,7 +6,8 @@ from collections import OrderedDict
 
 __all__ = ["unif_rand", "norm_rand", "opd2phase", "phase2opd",
     "get_ppf", "rad2arcsec", "arcsec2rad", "cart2polar", "polar2cart",
-    "scale_mask", "nyquist_pix_airy", "nyquist_pix", "list_to_dict"]
+    "scale_mask", "nyquist_pix_airy", "nyquist_pix", "list_to_dict",
+    "rotate"]
 
 
 # Random Functions
@@ -129,3 +130,32 @@ def list_to_dict(list_in):
         dict_out[names[i]] = list_in[i]
 
     return dict_out
+
+
+def rotate(
+        image: float, 
+        rotation: float) -> float:
+    """
+    Rotate an image by some amount.
+
+    Parameters
+    ----------
+    image: matrix
+        The image to rotate.
+    rotation: float, radians
+        The amount to rotate clockwise from the positive x axis. 
+
+    Returns 
+    -------
+    image: matrix
+        The rotated image. 
+    """
+    npix = image.shape[0]
+    centre = (npix - 1) / 2
+    x_pixels, y_pixels = get_pixel_positions(npix)
+    rs, phis = cart2polar(x_pixels, y_pixels)
+    phis += rotation
+    coordinates_rot = np.roll(polar2cart(rs, phis) + centre, 
+        shift=1, axis=0)
+    rotated = map_coordinates(image, coordinates_rot, order=1)
+    return rotated
