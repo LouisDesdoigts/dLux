@@ -1069,7 +1069,8 @@ class InformationConservingRotation(eqx.Module):
         self.padding = int(padding)
 
 
-    def __rotate(                                                                        
+    def __rotate(
+            self,                                                                      
             image: float,                                                             
             rotation: float) -> float:                                                          
         """
@@ -1092,14 +1093,14 @@ class InformationConservingRotation(eqx.Module):
         x_pixels, y_pixels = dLux.utils.get_pixel_positions(npix)                                 
         rs, phis = dLux.utils.cart2polar(x_pixels, y_pixels)                                      
         phis += rotation                                                               
-        coordinates_rot = np.roll(polar2cart(rs, phis) + centre,                       
+        coordinates_rot = np.roll(dLux.utils.polar2cart(rs, phis) + centre,                       
             shift=1, axis=0)                                                           
         rotated = jax.scipy.ndimage.map_coordinates(
             image, coordinates_rot, order=1)                     
         return rotated  
 
 
-    def _rotate(image: float, alpha: float, pad: int) -> float:
+    def _rotate(self, image: float, alpha: float, pad: int) -> float:
         """
         Rotates the image by some amount. In the process the image is padded,
         when entering the fourier space so that FFTs can be used. 
@@ -1219,6 +1220,17 @@ class InformationConservingRotation(eqx.Module):
         params["Wavefront"] = rotated_wavefront
         return params
 
+import matplotlib.pyplot as pyplot
 
+rotation = InformationConservingRotation(np.pi)
+image = np.hstack([
+    np.vstack([1. * np.ones((128, 128)), 2. * np.ones((128, 128))]),
+    np.vstack([3. * np.ones((128, 128)), 4. * np.ones((128, 128))])])
 
-        
+pyplot.imshow(image)
+pyplot.colorbar()
+pyplot.show()
+
+pyplot.imshow(rotation._rotate(image, np.pi, 2))
+pyplot.colorbar()
+pyplot.show()
