@@ -23,7 +23,8 @@ __date__ = "05/07/2022"
 
 __all__ = ["AddPhase", "TransmissiveOptic", "ApplyBasisCLIMB", 
     "ApplyBasisOPD", "ApplyOPD", "CircularAperture", "CreateWavefront",
-    "NormaliseWavefront", "TiltWavefront", "CompoundAperture"]
+    "NormaliseWavefront", "TiltWavefront", "CompoundAperture",
+    "InformationConservingRotation"]
 
 
 # import dLux
