@@ -2,7 +2,7 @@ my_hours.txt
 site/
 https:/
 sandbox/
-notebooks/
+_notebooks/
 .ipynb_checkpoints
 __pycache__
 .DS_Store
