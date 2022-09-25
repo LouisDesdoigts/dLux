@@ -1055,7 +1055,7 @@ class InformationConservingRotation(eqx.Module):
     padding: int
 
 
-    def __init__(self, alpha: float, padding: int):
+    def __init__(self, alpha: float, padding: int = 2):
         """
         Parameters
         ----------
@@ -1070,7 +1070,7 @@ class InformationConservingRotation(eqx.Module):
         self.padding = int(padding)
 
 
-    def _rotate(image: float, alpha: float, pad: int = 4) -> float:
+    def _rotate(image: float, alpha: float, pad: int) -> float:
     """
     Rotates the image by some amount. In the process the image is padded,
     when entering the fourier space so that FFTs can be used. 
@@ -1082,9 +1082,8 @@ class InformationConservingRotation(eqx.Module):
         not cope so well with had edges in the image. 
     alpha: float, radians
         The amount by which to rotate the image. 
-    pad: int = 4
-        A padding factor. This is required to prevent aliasing of the image 
-        in Fouier space, but significantly slows calculations. 
+    pad: int = 2
+        A padding factor. 
 
     Returns
     -------
