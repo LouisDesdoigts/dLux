@@ -1219,18 +1219,3 @@ class InformationConservingRotation(eqx.Module):
             .set_amplitude(np.abs(rotated_field))
         params["Wavefront"] = rotated_wavefront
         return params
-
-import matplotlib.pyplot as pyplot
-
-rotation = InformationConservingRotation(np.pi)
-image = np.hstack([
-    np.vstack([1. * np.ones((128, 128)), 2. * np.ones((128, 128))]),
-    np.vstack([3. * np.ones((128, 128)), 4. * np.ones((128, 128))])])
-
-pyplot.imshow(image)
-pyplot.colorbar()
-pyplot.show()
-
-pyplot.imshow(rotation._rotate(image, np.pi, 2))
-pyplot.colorbar()
-pyplot.show()
