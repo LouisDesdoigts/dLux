@@ -1,13 +1,14 @@
 import jax
 import jax.numpy as np
 import equinox as eqx
+import dLux
 
 
 __all__ = ["ApplyPixelResponse", "ApplyJitter", 
            "ApplySaturation", "AddConstant"]
 
 
-class ApplyPixelResponse(eqx.Module):
+class ApplyPixelResponse(dLux.base.Base):
     """
     
     """
@@ -26,7 +27,7 @@ class ApplyPixelResponse(eqx.Module):
         image *= self.pixel_response
         return image
     
-class ApplyJitter(eqx.Module):
+class ApplyJitter(dLux.base.Base):
     """
     Convolves the output image with a gaussian kernal
     """
@@ -53,7 +54,7 @@ class ApplyJitter(eqx.Module):
         image_out = jax.scipy.signal.convolve(image, window, mode='same')
         return image_out
     
-class ApplySaturation(eqx.Module):
+class ApplySaturation(dLux.base.Base):
     """
     Reduces any values above self.saturation to self.saturation
     """
@@ -70,7 +71,7 @@ class ApplySaturation(eqx.Module):
         image_out = np.minimum(image, self.saturation)
         return image_out
     
-class AddConstant(eqx.Module):
+class AddConstant(dLux.base.Base):
     """
     Add a constant to the output image.
     Typically used as the mean of the detector noise
