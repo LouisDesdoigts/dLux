@@ -500,31 +500,115 @@ class GaussianWavefront(dLux.Wavefront):
 
 
 class GaussianPropagator(eqx.Module):
+    """
+    Represents the propagation of a FarFieldFresnel wavefront some distance.
+
+    Parameters
+    ----------
+    distance: float, meters
+        The propagation distance.
+    """
     distance : float
 
-    def __init__(self            : Propagator, 
-                 distance        : float):
+
+    def __init__(
+            self: Propagator, 
+            distance: float) -> Propagator:
+        """
+        Parameters
+        ----------
+        distance: float, meters
+            The propagation distance. 
+        """
         self.distance = np.asarray(distance).astype(float)
 
-    def _fourier_transform(self : Propagator, field : Array) -> Array:
+
+    def _fourier_transform(
+            self: Propagator, 
+            field: Array) -> Array:
+        """
+        Calculate the normalised fourier transform of an array.
+
+        Parameters
+        ----------
+        field: Array
+            The electric field of the wavefront (complex).
+
+        Returns
+        -------
+        field: Array
+            The fourier transform of the complex electric field. 
+        """
         return 1 / field.shape[0] * np.fft.fft2(field)
 
-    def _inverse_fourier_transform(self : Propagator, field : Array) -> Array:
+
+    def _inverse_fourier_transform(
+            self : Propagator, 
+            field : Array) -> Array:
+        """
+        Calculate the normalised inverse fourier transform. 
+
+        Parameters
+        ----------
+        field: Array
+            The complex electric field of the wavefront. 
+
+        Returns
+        -------
+        field: Array
+            The inverse fourier transform of the electric field. 
+        """
         return field.shape[0] * np.fft.ifft2(field)
+
 
     # NOTE: need to add in the standard FFT normalising factor
     # as in the propagator. 
-    def _propagate(self : Propagator, field : Array, 
+    def _propagate(
+            self : Propagator, 
+            field : Array, 
             distance : float) -> Array:
+        """
+        The name in this case is a misnomer since we are not making the 
+        Fraunhofer approximation. In this case it has just been used for 
+        consistency within the package.
+
+        Parameters
+        ----------
+        field: Array 
+            The complex electric field of the wavefront. 
+        distance: float, meters
+            The distance of propagation. 
+
+        Returns 
+        -------
+        field: Array
+            Either the inverse or fourier transform of the wavefront depending 
+            on the sign of the distance. 
+        """
         return jax.lax.cond(distance > 0,
             lambda : self._inverse_fourier_transform(field),
             lambda : self._fourier_transform(field))
         
-    # NOTE: Wavefront must be planar 
-    # NOTE: Uses eq. 82, 86, 87
-    def _plane_to_plane(self : Propagator, wavefront : Wavefront,
-            distance : float):
-        # NOTE: Seriously need to change the name to get_field()        
+
+    def _plane_to_plane(
+            self : Propagator, 
+            wavefront : Wavefront,
+            distance : float) -> Wavefront:
+        """
+        Propagate from within the planar regime to within the planar regime. 
+        
+        Parameters
+        ----------
+        wavefront: Wavefront
+            The wavefront to propagate.
+        distance: float, meters
+            The distance to propagate the wavefront. 
+
+        Returns 
+        -------
+        wavefront: Wavefront 
+            The wavefront after it has been propagated. 
+        """
         field = self._fourier_transform(wavefront.get_complex_form())
         field *= np.fft.fftshift(wavefront.transfer(distance))  # eq. 6.68
         field = self._inverse_fourier_transform(field)
@@ -533,14 +617,30 @@ class GaussianPropagator(eqx.Module):
             .position_after(distance)\
             .set_phase(np.angle(field))\
             .set_amplitude(np.abs(field))
+
         return wavefront
  
-    # NOTE: I'm thinking that the logic for repacking the wavefront
-    # should occur somewhere else although I guess that it can't really
-    # NOTE: Must start with a planar wavefront
-    def _waist_to_spherical(self : Propagator, wavefront : Wavefront, 
+
+
+    def _waist_to_spherical(
+            self : Propagator, 
+            wavefront : Wavefront, 
             distance : float) -> Wavefront:
+        """
+        Propagate from within the planar regime to within the spherical regime. 
         
+        Parameters
+        ----------
+        wavefront: Wavefront
+            The wavefront to propagate.
+        distance: float, meters
+            The distance to propagate the wavefront. 
+
+        Returns 
+        -------
+        wavefront: Wavefront 
+            The wavefront after it has been propagated. 
+        """ 
         # Lawrence eq. 83,88
         field = wavefront.get_complex_form()
         field *= np.fft.fftshift(wavefront.quadratic_phase(distance)) # Wavelength dependent
@@ -555,8 +655,25 @@ class GaussianPropagator(eqx.Module):
 
 
     # Wavefront.spherical must be True initially
-    def _spherical_to_waist(self : Propagator, wavefront : Wavefront,
+    def _spherical_to_waist(
+            self : Propagator, 
+            wavefront : Wavefront,
             distance : float) -> Wavefront:
+        """
+        Propagate from within the spherical regime to within the planar regime. 
+        
+        Parameters
+        ----------
+        wavefront: Wavefront
+            The wavefront to propagate.
+        distance: float, meters
+            The distance to propagate the wavefront. 
+
+        Returns 
+        -------
+        wavefront: Wavefront 
+            The wavefront after it has been propagated. 
+        """
         # Lawrence eq. 89
         field = wavefront.get_complex_form()
         field = self._propagate(field, distance)
@@ -570,12 +687,43 @@ class GaussianPropagator(eqx.Module):
             .position_after(distance)
         return wavefront
 
-    def _inside_to_inside(self : Propagator, wave : Wavefront) -> Wavefront:        
+
+    def _inside_to_inside(
+            self : Propagator, 
+            wave : Wavefront) -> Wavefront:
+        """
+        Propagate from behind the beam waist to behind the beam waist. 
+
+        Parameters
+        ----------
+        wave: Wavefront
+            The wavefront to propagate.
+        
+        Returns
+        -------
+        wave: Wavefront
+            The propagated wavefront. 
+        """        
         wave = self._plane_to_plane(wave, self.distance)
         return wave
 
 
-    def _inside_to_outside(self : Propagator, wave : Wavefront) -> Wavefront: 
+    def _inside_to_outside(
+            self : Propagator, 
+            wave : Wavefront) -> Wavefront: 
+        """
+        Propagate from behind the beam waist to ahead of the beam waist. 
+
+        Parameters
+        ----------
+        wave: Wavefront
+            The wavefront to propagate.
+        
+        Returns
+        -------
+        wave: Wavefront
+            The propagated wavefront. 
+        """        
         start = wave.position
         end = wave.position + self.distance
         wave = self._plane_to_plane(wave, wave.waist_position - start)
@@ -583,7 +731,22 @@ class GaussianPropagator(eqx.Module):
         return wave
 
 
-    def _outside_to_inside(self : Propagator, wave : Wavefront) -> Wavefront:
+    def _outside_to_inside(
+            self : Propagator, 
+            wave : Wavefront) -> Wavefront:
+        """
+        Propagate from ahead of the beam waist to behind the beam waist. 
+
+        Parameters
+        ----------
+        wave: Wavefront
+            The wavefront to propagate.
+        
+        Returns
+        -------
+        wave: Wavefront
+            The propagated wavefront. 
+        """        
         start = wave.position
         end = wave.position + self.distance
         wave = self._spherical_to_waist(wave, wave.waist_position - start)
@@ -591,7 +754,22 @@ class GaussianPropagator(eqx.Module):
         return wave
 
 
-    def _outside_to_outside(self : Propagator, wave : Wavefront) -> Wavefront:
+    def _outside_to_outside(
+            self : Propagator, 
+            wave : Wavefront) -> Wavefront:
+        """
+        Propagate from behind the beam waist to behind the next beam waist. 
+
+        Parameters
+        ----------
+        wave: Wavefront
+            The wavefront to propagate.
+        
+        Returns
+        -------
+        wave: Wavefront
+            The propagated wavefront. 
+        """        
         start = wave.position
         end = wave.position + self.distance
         wave = self._spherical_to_waist(wave, wave.waist_position - start)
@@ -599,13 +777,23 @@ class GaussianPropagator(eqx.Module):
         return wave
 
 
-    # NOTE: So I could attempt to move all of the functionality into 
-    # the wavefront class and do very little here. Damn, I need to 
-    # fit it into the overall architecture. 
-    # TODO: Implement the oversample in the fixed sampling propagator
-    # Coordiantes must be in meters for the propagator
-    def __call__(self : Propagator, wave : Wavefront) -> Wavefront:
-        # NOTE: need to understand this mystery. 
+    def __call__(
+            self: Propagator, 
+            parameters: dict) -> Wavefront:
+        """
+        Propagate a wavefront in the Fresnel regime.
+
+        Parameters
+        ----------
+        parameters: dict
+            A dictionary of parameters containing a "Wavefront" field. 
+    
+        Returns
+        -------
+        parameters: dict
+            The same dictionary of parameters with the "Wavefront" field
+            updated. 
+        """ 
         field = np.fft.fftshift(wave.get_complex_form())
         wave = wave.update_phasor(np.abs(field), np.angle(field))
         position = wave.position + self.distance
@@ -622,23 +810,75 @@ class GaussianPropagator(eqx.Module):
 
 
 class GaussianLens(eqx.Module):
-    focal_length : float
-    # TODO: Should this store its position in the optical system?
-    # No I don't think that it should. 
+    """
+    This is a special lens that interacts with the GaussianWavefront allowing
+    the internal parameters of the GaussianBeam to be updated. 
 
-    def __init__(self : Layer, focal_length : float) -> Layer:
+    Parameters
+    ----------
+    focal_length: float
+        The focal length of the lens. 
+    """
+    focal_length : float
+
+
+    def __init__(
+            self: Layer, 
+            focal_length: float) -> Layer:
+        """
+        Parameters
+        ----------
+        focal_length: float, meters 
+            The focal length of the lens. 
+        """
         self.focal_length = np.asarray(focal_length).astype(float)
 
 
-    def _phase(self : Layer, wave : Wavefront, 
+    def _phase(
+            self : Layer, 
+            wave : Wavefront, 
             distance : float) -> Array:
+        """
+        Generate the quadratic phase that is associated with the lens. 
+
+        Parameters
+        ----------
+        wave: Wavefront 
+            The wavefront. This is used to generate the pixel coordinates 
+            for consistency. 
+        distance: float, meters
+            I do not know how to effectively describe this. It is the 
+            effective focal length created by the curvature of the wavefront 
+            interacting with the curvature of the lens. 
+
+        Returns 
+        -------
+        phase: Array
+            The phase change of the wavefront from passing through the lens.
+        """
         position = wave.get_pixel_positions()
         rho_squared = (position ** 2).sum(axis = 0)
         return np.exp(1.j / np.pi * rho_squared / distance *\
             wave.wavelength)
 
 
-    def __call__(self : Layer, wave : Wavefront) -> Wavefront:
+    def __call__(
+            self: Layer, 
+            parameters: dict) -> Wavefront:
+        """
+        Interact the lens with the wavefront.  
+
+        Parameters
+        ----------
+        parameters: dict
+            A dictionary of parameters containing a "Wavefront" field. 
+    
+        Returns
+        -------
+        parameters: dict
+            The same dictionary of parameters with the "Wavefront" field
+            updated. 
+        """ 
         from_waist = wave.waist_position - wave.position
         was_spherical = np.abs(from_waist) > wave.rayleigh_factor * \
             wave.rayleigh_distance()
