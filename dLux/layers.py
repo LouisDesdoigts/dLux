@@ -31,7 +31,6 @@ import jax
 import jax.numpy as np
 import equinox as eqx
 import dLux
-from dLux.utils import polar2cart, cart2polar, get_pixel_positions
 
 
 class CreateWavefront(eqx.Module):
@@ -1070,100 +1069,129 @@ class InformationConservingRotation(eqx.Module):
         self.padding = int(padding)
 
 
+    def __rotate(                                                                        
+            image: float,                                                             
+            rotation: float) -> float:                                                          
+        """
+        A simple rotation that is not information preserving. 
+
+        Parameters
+        ----------
+        image: float
+            The image to rotate.
+        rotation: float, radians
+            The amount to rotate the image. 
+
+        Returns 
+        -------
+        image: float
+            The rotated image. 
+        """
+        npix = image.shape[0]                                                          
+        centre = (npix - 1) / 2                                                        
+        x_pixels, y_pixels = get_pixel_positions(npix)                                 
+        rs, phis = cart2polar(x_pixels, y_pixels)                                      
+        phis += rotation                                                               
+        coordinates_rot = np.roll(polar2cart(rs, phis) + centre,                       
+            shift=1, axis=0)                                                           
+        rotated = map_coordinates(image, coordinates_rot, order=1)                     
+        return rotated  
+
+
     def _rotate(image: float, alpha: float, pad: int) -> float:
-    """
-    Rotates the image by some amount. In the process the image is padded,
-    when entering the fourier space so that FFTs can be used. 
+        """
+        Rotates the image by some amount. In the process the image is padded,
+        when entering the fourier space so that FFTs can be used. 
 
-    Parameters
-    ----------
-    image: Matrix
-        The image to rotate. Notice that the Fourier methods we have used do 
-        not cope so well with had edges in the image. 
-    alpha: float, radians
-        The amount by which to rotate the image. 
-    pad: int = 2
-        A padding factor. 
+        Parameters
+        ----------
+        image: Matrix
+            The image to rotate. Notice that the Fourier methods we have used do 
+            not cope so well with had edges in the image. 
+        alpha: float, radians
+            The amount by which to rotate the image. 
+        pad: int = 2
+            A padding factor. 
 
-    Returns
-    -------
-    image: Matrix
-        The input image rotated and resampled onto the intial grid. This often 
-        leads to cropping of the corners in the rotated plane.         
-    """
-    in_shape = image.shape
-    image_shape = np.array(in_shape, dtype=int) + 3 
-    image = np.full(image_shape, np.nan, dtype=float)\
-        .at[1 : in_shape[0] + 1, 1 : in_shape[1] + 1]\
-        .set(image)
+        Returns
+        -------
+        image: Matrix
+            The input image rotated and resampled onto the intial grid. This often 
+            leads to cropping of the corners in the rotated plane.         
+        """
+        in_shape = image.shape
+        image_shape = np.array(in_shape, dtype=int) + 3 
+        image = np.full(image_shape, np.nan, dtype=float)\
+            .at[1 : in_shape[0] + 1, 1 : in_shape[1] + 1]\
+            .set(image)
 
-    # FFT rotation only work in the -45:+45 range
-    # So I need to work out how to determine the quadrant that 
-    # alpha is in and hence the 
-    # number of required pi/2 rotations and angle in radians. 
-    half_pi_to_1st_quadrant = alpha // (np.pi / 2)
-    angle_in_1st_quadrant = - alpha + (half_pi_to_1st_quadrant * np.pi / 2)
+        # FFT rotation only work in the -45:+45 range
+        # So I need to work out how to determine the quadrant that 
+        # alpha is in and hence the 
+        # number of required pi/2 rotations and angle in radians. 
+        half_pi_to_1st_quadrant = alpha // (np.pi / 2)
+        angle_in_1st_quadrant = - alpha + (half_pi_to_1st_quadrant * np.pi / 2)
 
-    image = np.rot90(image, half_pi_to_1st_quadrant)\
-        .at[:-1, :-1]\
-        .get()  
+        image = np.rot90(image, half_pi_to_1st_quadrant)\
+            .at[:-1, :-1]\
+            .get()  
 
-    width, height = image.shape
-    left_corner = int(((pad - 1) / 2.) * width)
-    right_corner = int(((pad + 1) / 2.) * width)
-    top_corner = int(((pad - 1) / 2.) * height)
-    bottom_corner = int(((pad + 1) / 2.) * height)
+        width, height = image.shape
+        left_corner = int(((pad - 1) / 2.) * width)
+        right_corner = int(((pad + 1) / 2.) * width)
+        top_corner = int(((pad - 1) / 2.) * height)
+        bottom_corner = int(((pad + 1) / 2.) * height)
 
-    # Make the padded array 
-    out_shape = (width * pad, height * pad)
-    padded_image = np.full(out_shape, np.nan, dtype=float)\
-        .at[left_corner : right_corner, top_corner : bottom_corner]\
-        .set(image)
+        # Make the padded array 
+        out_shape = (width * pad, height * pad)
+        padded_image = np.full(out_shape, np.nan, dtype=float)\
+            .at[left_corner : right_corner, top_corner : bottom_corner]\
+            .set(image)
 
-    padded_mask = np.ones(out_shape, dtype=bool)\
-        .at[left_corner : right_corner, top_corner : bottom_corner]\
-        .set(np.where(np.isnan(image), True, False))
-    
-    # Rotate the mask, to know what part is actually the image
-    padded_mask = rotate(padded_mask, -angle_in_1st_quadrant)
+        padded_mask = np.ones(out_shape, dtype=bool)\
+            .at[left_corner : right_corner, top_corner : bottom_corner]\
+            .set(np.where(np.isnan(image), True, False))
+        
+        # Rotate the mask, to know what part is actually the image
+        padded_mask = self.__rotate(padded_mask, -angle_in_1st_quadrant)
 
-    # Replace part outside the image which are NaN by 0, and go into 
-    # Fourier space.
-    padded_image = np.where(np.isnan(padded_image), 0. , padded_image)
+        # Replace part outside the image which are NaN by 0, and go into 
+        # Fourier space.
+        padded_image = np.where(np.isnan(padded_image), 0. , padded_image)
 
-    uncentered_angular_displacement = np.tan(angle_in_1st_quadrant / 2.)
-    centered_angular_displacement = -np.sin(angle_in_1st_quadrant)
+        uncentered_angular_displacement = np.tan(angle_in_1st_quadrant / 2.)
+        centered_angular_displacement = -np.sin(angle_in_1st_quadrant)
 
-    uncentered_frequencies = np.fft.fftfreq(out_shape[0])
-    centered_frequencies = np.arange(-out_shape[0] / 2., out_shape[0] / 2.)
+        uncentered_frequencies = np.fft.fftfreq(out_shape[0])
+        centered_frequencies = np.arange(-out_shape[0] / 2., out_shape[0] / 2.)
 
-    pi_factor = -2.j * np.pi * np.ones(out_shape, dtype=float)
+        pi_factor = -2.j * np.pi * np.ones(out_shape, dtype=float)
 
-    uncentered_phase = np.exp(
-        uncentered_angular_displacement *\
-        ((pi_factor * uncentered_frequencies).T *\
-        centered_frequencies).T)
+        uncentered_phase = np.exp(
+            uncentered_angular_displacement *\
+            ((pi_factor * uncentered_frequencies).T *\
+            centered_frequencies).T)
 
-    centered_phase = np.exp(
-        centered_angular_displacement *\
-        (pi_factor * centered_frequencies).T *\
-        uncentered_frequencies)
+        centered_phase = np.exp(
+            centered_angular_displacement *\
+            (pi_factor * centered_frequencies).T *\
+            uncentered_frequencies)
 
-    f1 = np.fft.ifft(
-        (np.fft.fft(padded_image, axis=0).T * uncentered_phase).T, axis=0)
-    
-    f2 = np.fft.ifft(
-        np.fft.fft(f1, axis=1) * centered_phase, axis=1)
+        f1 = np.fft.ifft(
+            (np.fft.fft(padded_image, axis=0).T * uncentered_phase).T, axis=0)
+        
+        f2 = np.fft.ifft(
+            np.fft.fft(f1, axis=1) * centered_phase, axis=1)
 
-    rotated_image = np.fft.ifft(
-        (np.fft.fft(f2, axis=0).T * uncentered_phase).T, axis=0)\
-        .at[padded_mask]\
-        .set(np.nan)
-    
-    return np.real(rotated_image\
-        .at[left_corner + 1 : right_corner - 1, 
-            top_corner + 1 : bottom_corner - 1]\
-        .get()).copy()
+        rotated_image = np.fft.ifft(
+            (np.fft.fft(f2, axis=0).T * uncentered_phase).T, axis=0)\
+            .at[padded_mask]\
+            .set(np.nan)
+        
+        return np.real(rotated_image\
+            .at[left_corner + 1 : right_corner - 1, 
+                top_corner + 1 : bottom_corner - 1]\
+            .get()).copy()
 
 
     def __call__(self, params: dict) -> dict:
@@ -1189,4 +1217,7 @@ class InformationConservingRotation(eqx.Module):
             .set_amplitude(np.abs(rotated_field))
         params["Wavefront"] = rotated_wavefront
         return params
+
+
+
         
