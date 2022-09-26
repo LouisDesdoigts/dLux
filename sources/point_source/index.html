@@ -13,7 +13,7 @@
     
     
       
-        <title>Add Phase - ∂Lux - Differentiable Optical Simulation</title>
+        <title>Point Source - ∂Lux - Differentiable Optical Simulation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dLux.layers.AddPhase" class="md-skip">
+        <a href="#dLux.sources.PointSource" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Add Phase
+              Point Source
             
           </span>
         </div>
@@ -454,14 +454,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
       
       
       
@@ -484,7 +482,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../create_wavefront/" class="md-nav__link">
+      <a href="../../layers/create_wavefront/" class="md-nav__link">
         Create Wavefront
       </a>
     </li>
@@ -498,7 +496,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tilt_wavefront/" class="md-nav__link">
+      <a href="../../layers/tilt_wavefront/" class="md-nav__link">
         Tilt Wavefront
       </a>
     </li>
@@ -512,7 +510,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../circular_aperture/" class="md-nav__link">
+      <a href="../../layers/circular_aperture/" class="md-nav__link">
         Circular Aperture
       </a>
     </li>
@@ -526,7 +524,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../compound_aperture/" class="md-nav__link">
+      <a href="../../layers/compound_aperture/" class="md-nav__link">
         Compound Aperture
       </a>
     </li>
@@ -540,7 +538,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../normalise_wavefront/" class="md-nav__link">
+      <a href="../../layers/normalise_wavefront/" class="md-nav__link">
         Normalise Wavefront
       </a>
     </li>
@@ -554,7 +552,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../apply_basis_opd/" class="md-nav__link">
+      <a href="../../layers/apply_basis_opd/" class="md-nav__link">
         Apply Basis OPD
       </a>
     </li>
@@ -566,83 +564,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Add Phase
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../layers/add_phase/" class="md-nav__link">
         Add Phase
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase" class="md-nav__link">
-    dLux.layers.AddPhase
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.name" class="md-nav__link">
-    name
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.npix" class="md-nav__link">
-    npix
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.phase_array" class="md-nav__link">
-    phase_array
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__call__" class="md-nav__link">
-    __call__()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__init__" class="md-nav__link">
-    __init__()
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -654,7 +580,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../apply_opd/" class="md-nav__link">
+      <a href="../../layers/apply_opd/" class="md-nav__link">
         Apply OPD
       </a>
     </li>
@@ -668,7 +594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../transmissive_optic/" class="md-nav__link">
+      <a href="../../layers/transmissive_optic/" class="md-nav__link">
         Transmissive Optic
       </a>
     </li>
@@ -990,12 +916,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" checked>
       
       
       
@@ -1018,7 +946,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sources/source/" class="md-nav__link">
+      <a href="../source/" class="md-nav__link">
         Source
       </a>
     </li>
@@ -1030,11 +958,55 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../sources/point_source/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Point Source
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Point Source
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.sources.PointSource" class="md-nav__link">
+    dLux.sources.PointSource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.sources.PointSource.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1046,7 +1018,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sources/binary_source/" class="md-nav__link">
+      <a href="../binary_source/" class="md-nav__link">
         Binary Source
       </a>
     </li>
@@ -1312,42 +1284,14 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase" class="md-nav__link">
-    dLux.layers.AddPhase
+  <a href="#dLux.sources.PointSource" class="md-nav__link">
+    dLux.sources.PointSource
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.name" class="md-nav__link">
-    name
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.npix" class="md-nav__link">
-    npix
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.phase_array" class="md-nav__link">
-    phase_array
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__call__" class="md-nav__link">
-    __call__()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__init__" class="md-nav__link">
+  <a href="#dLux.sources.PointSource.__init__" class="md-nav__link">
     __init__()
   </a>
   
@@ -1367,71 +1311,25 @@
                 
                   
 
-  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/layers/add_phase.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/sources/point_source.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-  <h1>Add Phase</h1>
+  <h1>Point Source</h1>
 
 <div class="doc doc-object doc-class">
 
 
-<a id="dLux.layers.AddPhase"></a>
+<a id="dLux.sources.PointSource"></a>
   <div class="doc doc-contents first">
       <p class="doc doc-class-bases">
-        Bases: <code>dLux.<span title="dLux.base">base</span>.<a class="autorefs autorefs-internal" title="dLux.base.Base" href="../../base/base/#dLux.base.Base">Base</a></code></p>
+        Bases: <code><a class="autorefs autorefs-internal" title="dLux.sources.Source" href="../source/#dLux.sources.Source">Source</a></code></p>
 
   
-      <p>Takes in an array of phase values and adds them to the phase term of the 
-input wavefront. ie wavelength independent</p>
-<p>This would represent a geometric phase optic like the TinyTol liquid crystal Pupil.</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>npix</code></td>
-          <td>
-                <code>int</code>
-          </td>
-          <td><p>The number of pixels along the edge of the wavefront. This 
-is not a differentiable parameter.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>phase_array</code></td>
-          <td>
-          </td>
-          <td><p>Array of phase values to be applied to the input wavefront.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>name</code></td>
-          <td>
-                <code>string</code>
-          </td>
-          <td><p>The name of the layer, which is used to index the layers
-dictionary. Default is 'Add Phase'</p></td>
-          <td>
-                <code>&#39;Add Phase&#39;</code>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+      <p>Concrete Class for unresolved point source objects. Essentially just passes
+the resolved boolean value to Source.</p>
 
 
 
@@ -1445,79 +1343,20 @@ dictionary. Default is 'Add Phase'</p></td>
 
 
 
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.layers.AddPhase.name" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">name</span> <span class="o">=</span> <span class="n">name</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.layers.AddPhase.npix" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">npix</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">phase_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.layers.AddPhase.phase_array" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">phase_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">phase_array</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
 
 
 <div class="doc doc-object doc-function">
 
 
 
-<h2 id="dLux.layers.AddPhase.__call__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__call__</span><span class="p">(</span><span class="n">params_dict</span><span class="p">)</span></code>
+<h2 id="dLux.sources.PointSource.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Source&#39;</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      <p>Apply the phase shift represented by this <code>Layer</code> to the 
-wavefront.        </p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1531,75 +1370,32 @@ wavefront.        </p>
     </thead>
     <tbody>
         <tr>
-          <td><code>params_dict</code></td>
+          <td><code>position</code></td>
           <td>
-                <code>dict</code>
+                <code><span title="dLux.sources.Array">Array</span>, radians</code>
           </td>
-          <td><p>A dictionary of the parameters. The following conditions
-must be satisfied:</p>
-<pre><code class="language-py">params_dict.get(&quot;Wavefront&quot;) != None
-params_dict.get(&quot;Wavefront&quot;).shape == self.phase_array.shape
-</code></pre></td>
+          <td><p>The (x, y) on-sky position of this object. Units are currently in
+radians, but will likely be extended to RA/DEC.</p></td>
           <td>
               <em>required</em>
           </td>
         </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-<th>Name</th>        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
         <tr>
-<td><code>params_dict</code></td>          <td>
-                <code>dict</code>
-          </td>
-          <td><p>The <code>params_dict</code> parameter with the <code>Wavefront</code> entry 
-updated.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.layers.AddPhase.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">phase_array</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Add Phase&#39;</span><span class="p">)</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>phase_array</code></td>
+          <td><code>flux</code></td>
           <td>
-                <code>float, radians</code>
+                <code><span title="dLux.sources.Array">Array</span>, photons</code>
           </td>
-          <td><p>Array of phase values to be applied to the input wavefront.</p></td>
+          <td><p>The flux of the object.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>spectrum</code></td>
+          <td>
+                <code><span title="dLux.sources.Spectrum">Spectrum</span></code>
+          </td>
+          <td><p>The spectrum of this object, represented by a Spectrum object.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -1607,12 +1403,11 @@ updated.</p></td>
         <tr>
           <td><code>name</code></td>
           <td>
-                <code>string</code>
+                <code>str(optional)</code>
           </td>
-          <td><p>The name of the layer, which is used to index the layers
-dictionary. Default is 'Add Phase'</p></td>
+          <td><p>The name for this object. Defaults to 'Source'</p></td>
           <td>
-                <code>&#39;Add Phase&#39;</code>
+                <code>&#39;Source&#39;</code>
           </td>
         </tr>
     </tbody>
@@ -1649,7 +1444,7 @@ dictionary. Default is 'Add Phase'</p></td>
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../apply_basis_opd/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Apply Basis OPD" rel="prev">
+        <a href="../source/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Source" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1658,20 +1453,20 @@ dictionary. Default is 'Add Phase'</p></td>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Apply Basis OPD
+              Source
             </div>
           </div>
         </a>
       
       
         
-        <a href="../apply_opd/" class="md-footer__link md-footer__link--next" aria-label="Next: Apply OPD" rel="next">
+        <a href="../binary_source/" class="md-footer__link md-footer__link--next" aria-label="Next: Binary Source" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Apply OPD
+              Binary Source
             </div>
           </div>
           <div class="md-footer__button md-icon">
