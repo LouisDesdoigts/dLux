@@ -90,11 +90,10 @@ nav:
         - Angular Wavefront:           wavefronts/angular_wavefront.md
         - Far Field Fresnel Wavefront: wavefronts/far_field_fresnel_wavefront.md
     - Sources:
-        - Source:        sources/source.md
         - Point Source:  sources/point_source.md
         - Binary Source: sources/binary_source.md
     - Spectrums:
-        - Spectrum:            spectrums/spectrum.md
+        - Array Spectrum:      spectrums/array_spectrum.md
         - Polynomial Spectrum: spectrums/polynomial_spectrum.md
         - Combined Spectrum:   spectrums/combined_spectrum.md
     - Utils:

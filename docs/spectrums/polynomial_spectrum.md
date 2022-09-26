@@ -1,1 +1,1 @@
-::: dLux.spectrums.Spectrum
+::: dLux.spectrums.PolynomialSpectrum
