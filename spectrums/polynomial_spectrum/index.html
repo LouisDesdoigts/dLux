@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dLux.spectrums.Spectrum" class="md-skip">
+        <a href="#dLux.spectrums.PolynomialSpectrum" class="md-skip">
           Skip to content
         </a>
       
@@ -944,20 +944,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sources/source/" class="md-nav__link">
-        Source
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../sources/point_source/" class="md-nav__link">
         Point Source
       </a>
@@ -1022,8 +1008,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../spectrum/" class="md-nav__link">
-        Spectrum
+      <a href="../array_spectrum/" class="md-nav__link">
+        Array Spectrum
       </a>
     </li>
   
@@ -1066,57 +1052,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum" class="md-nav__link">
-    dLux.spectrums.Spectrum
+  <a href="#dLux.spectrums.PolynomialSpectrum" class="md-nav__link">
+    dLux.spectrums.PolynomialSpectrum
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.wavelengths" class="md-nav__link">
-    wavelengths
+  <a href="#dLux.spectrums.PolynomialSpectrum.coefficients" class="md-nav__link">
+    coefficients
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.__init__" class="md-nav__link">
+  <a href="#dLux.spectrums.PolynomialSpectrum.degree" class="md-nav__link">
+    degree
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.PolynomialSpectrum.__init__" class="md-nav__link">
     __init__()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_spectrum" class="md-nav__link">
-    get_spectrum()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_wavelengths" class="md-nav__link">
-    get_wavelengths()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_weights" class="md-nav__link">
+  <a href="#dLux.spectrums.PolynomialSpectrum.get_weights" class="md-nav__link">
     get_weights()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.normalise" class="md-nav__link">
+  <a href="#dLux.spectrums.PolynomialSpectrum.normalise" class="md-nav__link">
     normalise()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.set_wavelengths" class="md-nav__link">
-    set_wavelengths()
   </a>
   
 </li>
@@ -1326,57 +1298,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum" class="md-nav__link">
-    dLux.spectrums.Spectrum
+  <a href="#dLux.spectrums.PolynomialSpectrum" class="md-nav__link">
+    dLux.spectrums.PolynomialSpectrum
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.wavelengths" class="md-nav__link">
-    wavelengths
+  <a href="#dLux.spectrums.PolynomialSpectrum.coefficients" class="md-nav__link">
+    coefficients
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.__init__" class="md-nav__link">
+  <a href="#dLux.spectrums.PolynomialSpectrum.degree" class="md-nav__link">
+    degree
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.PolynomialSpectrum.__init__" class="md-nav__link">
     __init__()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_spectrum" class="md-nav__link">
-    get_spectrum()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_wavelengths" class="md-nav__link">
-    get_wavelengths()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_weights" class="md-nav__link">
+  <a href="#dLux.spectrums.PolynomialSpectrum.get_weights" class="md-nav__link">
     get_weights()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.normalise" class="md-nav__link">
+  <a href="#dLux.spectrums.PolynomialSpectrum.normalise" class="md-nav__link">
     normalise()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.set_wavelengths" class="md-nav__link">
-    set_wavelengths()
   </a>
   
 </li>
@@ -1406,13 +1364,16 @@
 <div class="doc doc-object doc-class">
 
 
-<a id="dLux.spectrums.Spectrum"></a>
+<a id="dLux.spectrums.PolynomialSpectrum"></a>
   <div class="doc doc-contents first">
       <p class="doc doc-class-bases">
-        Bases: <code>dLux.<span title="dLux.base">base</span>.<a class="autorefs autorefs-internal" title="dLux.base.Base" href="../../base/base/#dLux.base.Base">Base</a></code>, <code>abc.<span title="abc.ABC">ABC</span></code></p>
+        Bases: <code><span title="dLux.spectrums.Spectrum">Spectrum</span></code></p>
 
   
-      <p>Abstract base class for arbitrary spectral parametrisations.</p>
+      <p>Implements a generic polynomial spectrum. This is likely not needed and
+will probably just be turned into LinearSpectrum in the future.</p>
+<p>This implements a polynomial as follows:
+f(x) = c0 + c1<em>x + c2</em>x^2 + ... + cn*x^n</p>
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1425,11 +1386,18 @@
     </thead>
     <tbody>
         <tr>
-          <td><code>wavelengths</code></td>
+          <td><code>degree</code></td>
           <td>
-                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
+                <code>int</code>
           </td>
-          <td><p>The array of wavelengths at which the spectrum is defined.</p></td>
+          <td><p>The degree of the polynomial.</p></td>
+        </tr>
+        <tr>
+          <td><code>coefficients</code></td>
+          <td>
+                <code><span title="dLux.spectrums.Array">Array</span></code>
+          </td>
+          <td><p>The array of polynomial coefficient values.</p></td>
         </tr>
     </tbody>
   </table>
@@ -1450,8 +1418,27 @@
 
 
 
-<h2 id="dLux.spectrums.Spectrum.wavelengths" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
+<h2 id="dLux.spectrums.PolynomialSpectrum.coefficients" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.spectrums.PolynomialSpectrum.degree" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">degree</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coefficients</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -1471,8 +1458,8 @@
 
 
 
-<h2 id="dLux.spectrums.Spectrum.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span></code>
+<h2 id="dLux.spectrums.PolynomialSpectrum.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1501,161 +1488,12 @@
               <em>required</em>
           </td>
         </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.spectrums.Spectrum.get_spectrum" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get_spectrum</span><span class="p">()</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Getter method for the spectrum.</p>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-<th>Name</th>        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
         <tr>
-<td><code>spectrum</code></td>          <td>
+          <td><code>coefficients</code></td>
+          <td>
                 <code><span title="dLux.spectrums.Array">Array</span></code>
           </td>
-          <td><p>The array of wavelengths at which the spectrum is defined and their
-corresponding relative weights.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.spectrums.Spectrum.get_wavelengths" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get_wavelengths</span><span class="p">()</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Getter method for the wavelengths.</p>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-<th>Name</th>        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-<td><code>wavelengths</code></td>          <td>
-                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
-          </td>
-          <td><p>The array of wavelengths at which the spectrum is defined.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.spectrums.Spectrum.get_weights" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get_weights</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.spectrums.Spectrum.normalise" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">normalise</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.spectrums.Spectrum.set_wavelengths" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">set_wavelengths</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Setter method for the wavelengths.</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>wavelengths</code></td>
-          <td>
-                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
-          </td>
-          <td><p>The new array of wavelengths at which the spectrum is defined.</p></td>
+          <td><p>The array of polynomial coefficient values.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -1663,6 +1501,26 @@ corresponding relative weights.</p></td>
     </tbody>
   </table>
 
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.spectrums.PolynomialSpectrum.get_weights" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_weights</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Gets the relative spectral weights by evalutating the polynomial
+function at the internal wavelengths. This automaically normalises
+the weights to have unitary amplitude.</p>
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1673,13 +1531,37 @@ corresponding relative weights.</p></td>
     </thead>
     <tbody>
         <tr>
-<td><code>spectrum</code></td>          <td>
-                <code>Specturm</code>
+<td><code>weights</code></td>          <td>
+                <code><span title="dLux.spectrums.Array">Array</span></code>
           </td>
-          <td><p>The spectrum object with the updated wavelengths.</p></td>
+          <td><p>The normalised relative weights of each wavelength.</p></td>
         </tr>
     </tbody>
   </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.spectrums.PolynomialSpectrum.normalise" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">normalise</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>This method currently does nothing becuase solving for normalised
+polynomial coefficients is difficut and the get_weights() method
+already returns normalised weights. This method is currently kept
+becuase of the way <code>scene.decompose()</code> currently works.</p>
+<p>Returns:
+spectrum : Specturm
+    The unmodified spectrum object</p>
 
   </div>
 
@@ -1712,7 +1594,7 @@ corresponding relative weights.</p></td>
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../spectrum/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Spectrum" rel="prev">
+        <a href="../array_spectrum/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Array Spectrum" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1721,7 +1603,7 @@ corresponding relative weights.</p></td>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Spectrum
+              Array Spectrum
             </div>
           </div>
         </a>

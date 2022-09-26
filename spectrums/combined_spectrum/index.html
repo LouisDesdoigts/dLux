@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dLux.spectrums.Spectrum" class="md-skip">
+        <a href="#dLux.spectrums.CombinedSpectrum" class="md-skip">
           Skip to content
         </a>
       
@@ -944,20 +944,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sources/source/" class="md-nav__link">
-        Source
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../sources/point_source/" class="md-nav__link">
         Point Source
       </a>
@@ -1022,8 +1008,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../spectrum/" class="md-nav__link">
-        Spectrum
+      <a href="../array_spectrum/" class="md-nav__link">
+        Array Spectrum
       </a>
     </li>
   
@@ -1080,57 +1066,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum" class="md-nav__link">
-    dLux.spectrums.Spectrum
+  <a href="#dLux.spectrums.CombinedSpectrum" class="md-nav__link">
+    dLux.spectrums.CombinedSpectrum
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.wavelengths" class="md-nav__link">
+  <a href="#dLux.spectrums.CombinedSpectrum.wavelengths" class="md-nav__link">
     wavelengths
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.__init__" class="md-nav__link">
+  <a href="#dLux.spectrums.CombinedSpectrum.weights" class="md-nav__link">
+    weights
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.CombinedSpectrum.__init__" class="md-nav__link">
     __init__()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_spectrum" class="md-nav__link">
-    get_spectrum()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_wavelengths" class="md-nav__link">
-    get_wavelengths()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_weights" class="md-nav__link">
-    get_weights()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.normalise" class="md-nav__link">
+  <a href="#dLux.spectrums.CombinedSpectrum.normalise" class="md-nav__link">
     normalise()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.set_wavelengths" class="md-nav__link">
-    set_wavelengths()
   </a>
   
 </li>
@@ -1326,57 +1291,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum" class="md-nav__link">
-    dLux.spectrums.Spectrum
+  <a href="#dLux.spectrums.CombinedSpectrum" class="md-nav__link">
+    dLux.spectrums.CombinedSpectrum
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.wavelengths" class="md-nav__link">
+  <a href="#dLux.spectrums.CombinedSpectrum.wavelengths" class="md-nav__link">
     wavelengths
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.__init__" class="md-nav__link">
+  <a href="#dLux.spectrums.CombinedSpectrum.weights" class="md-nav__link">
+    weights
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.CombinedSpectrum.__init__" class="md-nav__link">
     __init__()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_spectrum" class="md-nav__link">
-    get_spectrum()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_wavelengths" class="md-nav__link">
-    get_wavelengths()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.get_weights" class="md-nav__link">
-    get_weights()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.normalise" class="md-nav__link">
+  <a href="#dLux.spectrums.CombinedSpectrum.normalise" class="md-nav__link">
     normalise()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.spectrums.Spectrum.set_wavelengths" class="md-nav__link">
-    set_wavelengths()
   </a>
   
 </li>
@@ -1406,33 +1350,14 @@
 <div class="doc doc-object doc-class">
 
 
-<a id="dLux.spectrums.Spectrum"></a>
+<a id="dLux.spectrums.CombinedSpectrum"></a>
   <div class="doc doc-contents first">
       <p class="doc doc-class-bases">
-        Bases: <code>dLux.<span title="dLux.base">base</span>.<a class="autorefs autorefs-internal" title="dLux.base.Base" href="../../base/base/#dLux.base.Base">Base</a></code>, <code>abc.<span title="abc.ABC">ABC</span></code></p>
+        Bases: <code><a class="autorefs autorefs-internal" title="dLux.spectrums.ArraySpectrum" href="../array_spectrum/#dLux.spectrums.ArraySpectrum">ArraySpectrum</a></code></p>
 
   
-      <p>Abstract base class for arbitrary spectral parametrisations.</p>
-
-  <p><strong>Attributes:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>wavelengths</code></td>
-          <td>
-                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
-          </td>
-          <td><p>The array of wavelengths at which the spectrum is defined.</p></td>
-        </tr>
-    </tbody>
-  </table>
+      <p>Implements a combined spectrum, in order to have only a single spectrum
+object for parameterised sources such as binary stars.</p>
 
 
 
@@ -1450,8 +1375,27 @@
 
 
 
-<h2 id="dLux.spectrums.Spectrum.wavelengths" class="doc doc-heading">
+<h2 id="dLux.spectrums.CombinedSpectrum.wavelengths" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="dLux.spectrums.CombinedSpectrum.weights" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -1471,14 +1415,16 @@
 
 
 
-<h2 id="dLux.spectrums.Spectrum.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span></code>
+<h2 id="dLux.spectrums.CombinedSpectrum.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
+      <p>Expects wavelengths and weights to have the same dimensionality, ie
+(nsources, nwavelengths)</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1496,7 +1442,18 @@
           <td>
                 <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
           </td>
-          <td><p>The array of wavelengths at which the spectrum is defined.</p></td>
+          <td><p>The (2, n) array of wavelengths at which the spectrum is defined.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>weights</code></td>
+          <td>
+                <code><span title="dLux.spectrums.Array">Array</span>(optional)</code>
+          </td>
+          <td><p>The (2, n) relative weights of each wavelength. Defaults to uniform
+throughput.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -1512,156 +1469,16 @@
 
 
 
-<h2 id="dLux.spectrums.Spectrum.get_spectrum" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get_spectrum</span><span class="p">()</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Getter method for the spectrum.</p>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-<th>Name</th>        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-<td><code>spectrum</code></td>          <td>
-                <code><span title="dLux.spectrums.Array">Array</span></code>
-          </td>
-          <td><p>The array of wavelengths at which the spectrum is defined and their
-corresponding relative weights.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.spectrums.Spectrum.get_wavelengths" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get_wavelengths</span><span class="p">()</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Getter method for the wavelengths.</p>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-<th>Name</th>        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-<td><code>wavelengths</code></td>          <td>
-                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
-          </td>
-          <td><p>The array of wavelengths at which the spectrum is defined.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.spectrums.Spectrum.get_weights" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get_weights</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.spectrums.Spectrum.normalise" class="doc doc-heading">
+<h2 id="dLux.spectrums.CombinedSpectrum.normalise" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">normalise</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-  </span>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.spectrums.Spectrum.set_wavelengths" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">set_wavelengths</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Setter method for the wavelengths.</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>wavelengths</code></td>
-          <td>
-                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
-          </td>
-          <td><p>The new array of wavelengths at which the spectrum is defined.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+      <p>Method for returning a new spectrum object with a normalised total
+spectrum for each individual source.</p>
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -1676,7 +1493,7 @@ corresponding relative weights.</p></td>
 <td><code>spectrum</code></td>          <td>
                 <code>Specturm</code>
           </td>
-          <td><p>The spectrum object with the updated wavelengths.</p></td>
+          <td><p>The spectrum object with the normalised spectrums.</p></td>
         </tr>
     </tbody>
   </table>
