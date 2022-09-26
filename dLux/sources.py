@@ -620,8 +620,8 @@ class BinarySource(Source):
         flux : Array, photons
             The flux of the object.
         """
-        return self.get_flux()
-        # return np.expand_dims(self.get_flux(), -1)
+        # return self.get_flux()
+        return np.expand_dims(self.get_flux(), -1)
     
     
     def _get_position(self : Source) -> Array:
