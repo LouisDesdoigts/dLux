@@ -4,22 +4,21 @@ import jax
 import jax.numpy as np
 import equinox as eqx
 
-Scalar = typing.NewType("Scalar", np.ndarray) # 0d
-Vector = typing.NewType("Vector", np.ndarray) # 1d
-Array =  typing.NewType("Array",  np.ndarray) # 2d +
+Scalar = typing.TypeVar("Scalar") # 0d
+Vector = typing.TypeVar("Vector") # 1d
+Array =  typing.TypeVar("Array") # 2d +
 
-# Base ∂Lux Objects
-Wavefront   = typing.NewType("Wavefront",   dLux.Wavefront)
-Propagator  = typing.NewType("Propagator",  dLux.Propagator)
-PlaneType   = typing.NewType("PlaneType",   dLux.PlaneType)
-Layer       = typing.NewType("Layers",  object)
+Wavefront   = typing.TypeVar("Wavefront")
+Propagator  = typing.TypeVar("Propagator")
+PlaneType   = typing.TypeVar("PlaneType")
+Layer       = typing.TypeVar("Layers")
 
 
 __all__ = ["GaussianWavefront", "GaussianPropagator", "GaussianLens"]
 __author__ = "Jordan Dennis"
 
 
-class GaussianWavefront(dLux.Wavefront):
+class GaussianWavefront(dLux.wavefronts.Wavefront):
     """
     Expresses the behaviour and state of a wavefront propagating in 
     an optical system under the fresnel assumptions. This 
