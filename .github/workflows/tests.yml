@@ -17,7 +17,7 @@ jobs:
       - name: python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.9.14
+          python-version: 3.6.15
           architecture: x64
 
       - name: install environment
