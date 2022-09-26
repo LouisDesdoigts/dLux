@@ -13,7 +13,7 @@
     
     
       
-        <title>Add Phase - ∂Lux - Differentiable Optical Simulation</title>
+        <title>Optics - ∂Lux - Differentiable Optical Simulation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dLux.layers.AddPhase" class="md-skip">
+        <a href="#dLux.base.Optics" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Add Phase
+              Optics
             
           </span>
         </div>
@@ -322,12 +322,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
       
       
       
@@ -350,7 +352,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../base/base/" class="md-nav__link">
+      <a href="../base/" class="md-nav__link">
         Base
       </a>
     </li>
@@ -364,7 +366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../base/optical_system/" class="md-nav__link">
+      <a href="../optical_system/" class="md-nav__link">
         Optical System
       </a>
     </li>
@@ -378,7 +380,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../base/telescope/" class="md-nav__link">
+      <a href="../telescope/" class="md-nav__link">
         Telescope
       </a>
     </li>
@@ -390,11 +392,83 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../base/optics/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Optics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Optics
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.base.Optics" class="md-nav__link">
+    dLux.base.Optics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.base.Optics.layers" class="md-nav__link">
+    layers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.base.Optics.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.base.Optics.debug_prop" class="md-nav__link">
+    debug_prop()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.base.Optics.propagate_mono" class="md-nav__link">
+    propagate_mono()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.base.Optics.propagate_single" class="md-nav__link">
+    propagate_single()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -406,7 +480,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../base/scene/" class="md-nav__link">
+      <a href="../scene/" class="md-nav__link">
         Scene
       </a>
     </li>
@@ -420,7 +494,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../base/detector/" class="md-nav__link">
+      <a href="../detector/" class="md-nav__link">
         Detector
       </a>
     </li>
@@ -434,7 +508,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../base/filter/" class="md-nav__link">
+      <a href="../filter/" class="md-nav__link">
         Filter
       </a>
     </li>
@@ -454,14 +528,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
       
       
       
@@ -484,7 +556,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../create_wavefront/" class="md-nav__link">
+      <a href="../../layers/create_wavefront/" class="md-nav__link">
         Create Wavefront
       </a>
     </li>
@@ -498,7 +570,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tilt_wavefront/" class="md-nav__link">
+      <a href="../../layers/tilt_wavefront/" class="md-nav__link">
         Tilt Wavefront
       </a>
     </li>
@@ -512,7 +584,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../circular_aperture/" class="md-nav__link">
+      <a href="../../layers/circular_aperture/" class="md-nav__link">
         Circular Aperture
       </a>
     </li>
@@ -526,7 +598,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../compound_aperture/" class="md-nav__link">
+      <a href="../../layers/compound_aperture/" class="md-nav__link">
         Compound Aperture
       </a>
     </li>
@@ -540,7 +612,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../normalise_wavefront/" class="md-nav__link">
+      <a href="../../layers/normalise_wavefront/" class="md-nav__link">
         Normalise Wavefront
       </a>
     </li>
@@ -554,7 +626,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../apply_basis_opd/" class="md-nav__link">
+      <a href="../../layers/apply_basis_opd/" class="md-nav__link">
         Apply Basis OPD
       </a>
     </li>
@@ -566,83 +638,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Add Phase
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../layers/add_phase/" class="md-nav__link">
         Add Phase
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase" class="md-nav__link">
-    dLux.layers.AddPhase
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.name" class="md-nav__link">
-    name
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.npix" class="md-nav__link">
-    npix
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.phase_array" class="md-nav__link">
-    phase_array
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__call__" class="md-nav__link">
-    __call__()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__init__" class="md-nav__link">
-    __init__()
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -654,7 +654,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../apply_opd/" class="md-nav__link">
+      <a href="../../layers/apply_opd/" class="md-nav__link">
         Apply OPD
       </a>
     </li>
@@ -668,7 +668,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../transmissive_optic/" class="md-nav__link">
+      <a href="../../layers/transmissive_optic/" class="md-nav__link">
         Transmissive Optic
       </a>
     </li>
@@ -1312,43 +1312,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase" class="md-nav__link">
-    dLux.layers.AddPhase
+  <a href="#dLux.base.Optics" class="md-nav__link">
+    dLux.base.Optics
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.name" class="md-nav__link">
-    name
+  <a href="#dLux.base.Optics.layers" class="md-nav__link">
+    layers
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.npix" class="md-nav__link">
-    npix
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.phase_array" class="md-nav__link">
-    phase_array
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__call__" class="md-nav__link">
-    __call__()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__init__" class="md-nav__link">
+  <a href="#dLux.base.Optics.__init__" class="md-nav__link">
     __init__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.base.Optics.debug_prop" class="md-nav__link">
+    debug_prop()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.base.Optics.propagate_mono" class="md-nav__link">
+    propagate_mono()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.base.Optics.propagate_single" class="md-nav__link">
+    propagate_single()
   </a>
   
 </li>
@@ -1367,68 +1367,43 @@
                 
                   
 
-  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/layers/add_phase.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/base/optics.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-  <h1>Add Phase</h1>
+  <h1>Optics</h1>
 
 <div class="doc doc-object doc-class">
 
 
-<a id="dLux.layers.AddPhase"></a>
+<a id="dLux.base.Optics"></a>
   <div class="doc doc-contents first">
       <p class="doc doc-class-bases">
-        Bases: <code>dLux.<span title="dLux.base">base</span>.<a class="autorefs autorefs-internal" title="dLux.base.Base" href="../../base/base/#dLux.base.Base">Base</a></code></p>
+        Bases: <code><a class="autorefs autorefs-internal" title="dLux.base.Base" href="../base/#dLux.base.Base">Base</a></code></p>
 
   
-      <p>Takes in an array of phase values and adds them to the phase term of the 
-input wavefront. ie wavelength independent</p>
-<p>This would represent a geometric phase optic like the TinyTol liquid crystal Pupil.</p>
+      <p>A high level class desgined to model the behaviour of some optical systems
+response to wavefronts.</p>
 
-  <p><strong>Parameters:</strong></p>
+  <p><strong>Attributes:</strong></p>
   <table>
     <thead>
       <tr>
         <th>Name</th>
         <th>Type</th>
         <th>Description</th>
-        <th>Default</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td><code>npix</code></td>
+          <td><code>layers</code></td>
           <td>
-                <code>int</code>
+                <code>dict</code>
           </td>
-          <td><p>The number of pixels along the edge of the wavefront. This 
-is not a differentiable parameter.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>phase_array</code></td>
-          <td>
-          </td>
-          <td><p>Array of phase values to be applied to the input wavefront.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>name</code></td>
-          <td>
-                <code>string</code>
-          </td>
-          <td><p>The name of the layer, which is used to index the layers
-dictionary. Default is 'Add Phase'</p></td>
-          <td>
-                <code>&#39;Add Phase&#39;</code>
-          </td>
+          <td><p>A collections.OrderedDict of 'layers' that define the transformations
+and operations upon some input wavefront through an optical system.</p></td>
         </tr>
     </tbody>
   </table>
@@ -1449,46 +1424,8 @@ dictionary. Default is 'Add Phase'</p></td>
 
 
 
-<h2 id="dLux.layers.AddPhase.name" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">name</span> <span class="o">=</span> <span class="n">name</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.layers.AddPhase.npix" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">npix</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">phase_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.layers.AddPhase.phase_array" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">phase_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">phase_array</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span></code>
+<h2 id="dLux.base.Optics.layers" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">layers</span> <span class="o">=</span> <span class="n">dLux</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">list_to_dict</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -1508,16 +1445,14 @@ dictionary. Default is 'Add Phase'</p></td>
 
 
 
-<h2 id="dLux.layers.AddPhase.__call__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__call__</span><span class="p">(</span><span class="n">params_dict</span><span class="p">)</span></code>
+<h2 id="dLux.base.Optics.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      <p>Apply the phase shift represented by this <code>Layer</code> to the 
-wavefront.        </p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1531,17 +1466,70 @@ wavefront.        </p>
     </thead>
     <tbody>
         <tr>
-          <td><code>params_dict</code></td>
+          <td><code>layers</code></td>
           <td>
-                <code>dict</code>
+                <code>list</code>
           </td>
-          <td><p>A dictionary of the parameters. The following conditions
-must be satisfied:</p>
-<pre><code class="language-py">params_dict.get(&quot;Wavefront&quot;) != None
-params_dict.get(&quot;Wavefront&quot;).shape == self.phase_array.shape
-</code></pre></td>
+          <td><p>A list of ∂Lux 'layers' that define the transformations and
+operations upon some input wavefront through an optical system.</p></td>
           <td>
               <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.base.Optics.debug_prop" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">debug_prop</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Propagates a monochromatic point source through the optical layers,
+while also returning the intermediate state of the parameter dictionary
+and layers after each layer application.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wavelength</code></td>
+          <td>
+                <code><span title="dLux.base.Array">Array</span>, meters</code>
+          </td>
+          <td><p>The wavelength of the wavefront to propagate through the optical
+layers.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>offset</code></td>
+          <td>
+                <code><span title="dLux.base.Array">Array</span>, radians, optional</code>
+          </td>
+          <td><p>The (x, y) offset from the optical axis of the source. Default
+value is (0, 0), on axis.</p></td>
+          <td>
+                <code>np.zeros(2)</code>
           </td>
         </tr>
     </tbody>
@@ -1557,11 +1545,24 @@ params_dict.get(&quot;Wavefront&quot;).shape == self.phase_array.shape
     </thead>
     <tbody>
         <tr>
-<td><code>params_dict</code></td>          <td>
-                <code>dict</code>
+<td><code>psf</code></td>          <td>
+                <code><span title="dLux.base.Array">Array</span></code>
           </td>
-          <td><p>The <code>params_dict</code> parameter with the <code>Wavefront</code> entry 
-updated.</p></td>
+          <td><p>The monochromatic point spread function after being propagated
+though the optical layers.</p></td>
+        </tr>
+        <tr>
+<td><code>intermediate_dicts</code></td>          <td>
+                <code>list</code>
+          </td>
+          <td><p>The intermediate states of the parameters dictionary.</p></td>
+        </tr>
+        <tr>
+<td><code>intermediate_layers</code></td>          <td>
+                <code>list</code>
+          </td>
+          <td><p>The intermediate states of each layer after being applied to the
+wavefront.</p></td>
         </tr>
     </tbody>
   </table>
@@ -1574,14 +1575,15 @@ updated.</p></td>
 
 
 
-<h2 id="dLux.layers.AddPhase.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">phase_array</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Add Phase&#39;</span><span class="p">)</span></code>
+<h2 id="dLux.base.Optics.propagate_mono" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">propagate_mono</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
+      <p>Propagates a monochromatic point source through the optical layers.</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1595,25 +1597,138 @@ updated.</p></td>
     </thead>
     <tbody>
         <tr>
-          <td><code>phase_array</code></td>
+          <td><code>wavelength</code></td>
           <td>
-                <code>float, radians</code>
+                <code><span title="dLux.base.Array">Array</span>, meters</code>
           </td>
-          <td><p>Array of phase values to be applied to the input wavefront.</p></td>
+          <td><p>The wavelength of the wavefront to propagate through the optical
+layers.</p></td>
           <td>
               <em>required</em>
           </td>
         </tr>
         <tr>
-          <td><code>name</code></td>
+          <td><code>offset</code></td>
           <td>
-                <code>string</code>
+                <code><span title="dLux.base.Array">Array</span>, radians, optional</code>
           </td>
-          <td><p>The name of the layer, which is used to index the layers
-dictionary. Default is 'Add Phase'</p></td>
+          <td><p>The (x, y) offset from the optical axis of the source. Default
+value is (0, 0), on axis.</p></td>
           <td>
-                <code>&#39;Add Phase&#39;</code>
+                <code>np.zeros(2)</code>
           </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>psf</code></td>          <td>
+                <code><span title="dLux.base.Array">Array</span></code>
+          </td>
+          <td><p>The monochromatic point spread function after being propagated
+though the optical layers.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.base.Optics.propagate_single" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">propagate_single</span><span class="p">(</span><span class="n">wavelenghts</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">flux</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Propagates a single broadband point source through the optical layers.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wavelengths</code></td>
+          <td>
+                <code><span title="dLux.base.Array">Array</span>, meters</code>
+          </td>
+          <td><p>The wavelengths of the wavefront to propagate through the optical
+layers.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>offset</code></td>
+          <td>
+                <code><span title="dLux.base.Array">Array</span>, radians, optional</code>
+          </td>
+          <td><p>The (x, y) offset from the optical axis of the source. Default
+value is (0, 0), on axis.</p></td>
+          <td>
+                <code>np.zeros(2)</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>weights</code></td>
+          <td>
+                <code><span title="dLux.base.Array">Array</span>, optional</code>
+          </td>
+          <td><p>The relative weights of each wavelength from the source</p></td>
+          <td>
+                <code>np.ones(1)</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>flux</code></td>
+          <td>
+                <code><span title="dLux.base.Array">Array</span>, optional</code>
+          </td>
+          <td><p>The total flux of the source</p></td>
+          <td>
+                <code>np.ones(1)</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>psf</code></td>          <td>
+                <code><span title="dLux.base.Array">Array</span></code>
+          </td>
+          <td><p>The point spread function of the point source after being
+propagated though the optical layers.</p></td>
         </tr>
     </tbody>
   </table>
@@ -1649,7 +1764,7 @@ dictionary. Default is 'Add Phase'</p></td>
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../apply_basis_opd/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Apply Basis OPD" rel="prev">
+        <a href="../telescope/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Telescope" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1658,20 +1773,20 @@ dictionary. Default is 'Add Phase'</p></td>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Apply Basis OPD
+              Telescope
             </div>
           </div>
         </a>
       
       
         
-        <a href="../apply_opd/" class="md-footer__link md-footer__link--next" aria-label="Next: Apply OPD" rel="next">
+        <a href="../scene/" class="md-footer__link md-footer__link--next" aria-label="Next: Scene" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Apply OPD
+              Scene
             </div>
           </div>
           <div class="md-footer__button md-icon">

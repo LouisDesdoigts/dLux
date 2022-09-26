@@ -13,7 +13,7 @@
     
     
       
-        <title>Add Phase - ∂Lux - Differentiable Optical Simulation</title>
+        <title>Combined Spectrum - ∂Lux - Differentiable Optical Simulation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dLux.layers.AddPhase" class="md-skip">
+        <a href="#dLux.spectrums.Spectrum" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Add Phase
+              Combined Spectrum
             
           </span>
         </div>
@@ -454,14 +454,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
       
       
       
@@ -484,7 +482,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../create_wavefront/" class="md-nav__link">
+      <a href="../../layers/create_wavefront/" class="md-nav__link">
         Create Wavefront
       </a>
     </li>
@@ -498,7 +496,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tilt_wavefront/" class="md-nav__link">
+      <a href="../../layers/tilt_wavefront/" class="md-nav__link">
         Tilt Wavefront
       </a>
     </li>
@@ -512,7 +510,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../circular_aperture/" class="md-nav__link">
+      <a href="../../layers/circular_aperture/" class="md-nav__link">
         Circular Aperture
       </a>
     </li>
@@ -526,7 +524,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../compound_aperture/" class="md-nav__link">
+      <a href="../../layers/compound_aperture/" class="md-nav__link">
         Compound Aperture
       </a>
     </li>
@@ -540,7 +538,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../normalise_wavefront/" class="md-nav__link">
+      <a href="../../layers/normalise_wavefront/" class="md-nav__link">
         Normalise Wavefront
       </a>
     </li>
@@ -554,7 +552,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../apply_basis_opd/" class="md-nav__link">
+      <a href="../../layers/apply_basis_opd/" class="md-nav__link">
         Apply Basis OPD
       </a>
     </li>
@@ -566,83 +564,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Add Phase
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../layers/add_phase/" class="md-nav__link">
         Add Phase
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase" class="md-nav__link">
-    dLux.layers.AddPhase
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.name" class="md-nav__link">
-    name
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.npix" class="md-nav__link">
-    npix
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.phase_array" class="md-nav__link">
-    phase_array
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__call__" class="md-nav__link">
-    __call__()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__init__" class="md-nav__link">
-    __init__()
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -654,7 +580,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../apply_opd/" class="md-nav__link">
+      <a href="../../layers/apply_opd/" class="md-nav__link">
         Apply OPD
       </a>
     </li>
@@ -668,7 +594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../transmissive_optic/" class="md-nav__link">
+      <a href="../../layers/transmissive_optic/" class="md-nav__link">
         Transmissive Optic
       </a>
     </li>
@@ -1066,12 +992,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" checked>
       
       
       
@@ -1094,7 +1022,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../spectrums/spectrum/" class="md-nav__link">
+      <a href="../spectrum/" class="md-nav__link">
         Spectrum
       </a>
     </li>
@@ -1108,7 +1036,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../spectrums/polynomial_spectrum/" class="md-nav__link">
+      <a href="../polynomial_spectrum/" class="md-nav__link">
         Polynomial Spectrum
       </a>
     </li>
@@ -1120,11 +1048,97 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../spectrums/combined_spectrum/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Combined Spectrum
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Combined Spectrum
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum" class="md-nav__link">
+    dLux.spectrums.Spectrum
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.wavelengths" class="md-nav__link">
+    wavelengths
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.get_spectrum" class="md-nav__link">
+    get_spectrum()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.get_wavelengths" class="md-nav__link">
+    get_wavelengths()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.get_weights" class="md-nav__link">
+    get_weights()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.normalise" class="md-nav__link">
+    normalise()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.set_wavelengths" class="md-nav__link">
+    set_wavelengths()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1312,43 +1326,57 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase" class="md-nav__link">
-    dLux.layers.AddPhase
+  <a href="#dLux.spectrums.Spectrum" class="md-nav__link">
+    dLux.spectrums.Spectrum
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.name" class="md-nav__link">
-    name
+  <a href="#dLux.spectrums.Spectrum.wavelengths" class="md-nav__link">
+    wavelengths
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.npix" class="md-nav__link">
-    npix
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.phase_array" class="md-nav__link">
-    phase_array
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__call__" class="md-nav__link">
-    __call__()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dLux.layers.AddPhase.__init__" class="md-nav__link">
+  <a href="#dLux.spectrums.Spectrum.__init__" class="md-nav__link">
     __init__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.get_spectrum" class="md-nav__link">
+    get_spectrum()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.get_wavelengths" class="md-nav__link">
+    get_wavelengths()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.get_weights" class="md-nav__link">
+    get_weights()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.normalise" class="md-nav__link">
+    normalise()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dLux.spectrums.Spectrum.set_wavelengths" class="md-nav__link">
+    set_wavelengths()
   </a>
   
 </li>
@@ -1367,68 +1395,41 @@
                 
                   
 
-  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/layers/add_phase.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/spectrums/combined_spectrum.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-  <h1>Add Phase</h1>
+  <h1>Combined Spectrum</h1>
 
 <div class="doc doc-object doc-class">
 
 
-<a id="dLux.layers.AddPhase"></a>
+<a id="dLux.spectrums.Spectrum"></a>
   <div class="doc doc-contents first">
       <p class="doc doc-class-bases">
-        Bases: <code>dLux.<span title="dLux.base">base</span>.<a class="autorefs autorefs-internal" title="dLux.base.Base" href="../../base/base/#dLux.base.Base">Base</a></code></p>
+        Bases: <code>dLux.<span title="dLux.base">base</span>.<a class="autorefs autorefs-internal" title="dLux.base.Base" href="../../base/base/#dLux.base.Base">Base</a></code>, <code>abc.<span title="abc.ABC">ABC</span></code></p>
 
   
-      <p>Takes in an array of phase values and adds them to the phase term of the 
-input wavefront. ie wavelength independent</p>
-<p>This would represent a geometric phase optic like the TinyTol liquid crystal Pupil.</p>
+      <p>Abstract base class for arbitrary spectral parametrisations.</p>
 
-  <p><strong>Parameters:</strong></p>
+  <p><strong>Attributes:</strong></p>
   <table>
     <thead>
       <tr>
         <th>Name</th>
         <th>Type</th>
         <th>Description</th>
-        <th>Default</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td><code>npix</code></td>
+          <td><code>wavelengths</code></td>
           <td>
-                <code>int</code>
+                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
           </td>
-          <td><p>The number of pixels along the edge of the wavefront. This 
-is not a differentiable parameter.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>phase_array</code></td>
-          <td>
-          </td>
-          <td><p>Array of phase values to be applied to the input wavefront.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>name</code></td>
-          <td>
-                <code>string</code>
-          </td>
-          <td><p>The name of the layer, which is used to index the layers
-dictionary. Default is 'Add Phase'</p></td>
-          <td>
-                <code>&#39;Add Phase&#39;</code>
-          </td>
+          <td><p>The array of wavelengths at which the spectrum is defined.</p></td>
         </tr>
     </tbody>
   </table>
@@ -1449,46 +1450,8 @@ dictionary. Default is 'Add Phase'</p></td>
 
 
 
-<h2 id="dLux.layers.AddPhase.name" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">name</span> <span class="o">=</span> <span class="n">name</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.layers.AddPhase.npix" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">npix</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">phase_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h2 id="dLux.layers.AddPhase.phase_array" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">phase_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">phase_array</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span></code>
+<h2 id="dLux.spectrums.Spectrum.wavelengths" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
@@ -1508,16 +1471,14 @@ dictionary. Default is 'Add Phase'</p></td>
 
 
 
-<h2 id="dLux.layers.AddPhase.__call__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__call__</span><span class="p">(</span><span class="n">params_dict</span><span class="p">)</span></code>
+<h2 id="dLux.spectrums.Spectrum.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span></code>
 
 </h2>
 
 
   <div class="doc doc-contents ">
   
-      <p>Apply the phase shift represented by this <code>Layer</code> to the 
-wavefront.        </p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1531,15 +1492,170 @@ wavefront.        </p>
     </thead>
     <tbody>
         <tr>
-          <td><code>params_dict</code></td>
+          <td><code>wavelengths</code></td>
           <td>
-                <code>dict</code>
+                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
           </td>
-          <td><p>A dictionary of the parameters. The following conditions
-must be satisfied:</p>
-<pre><code class="language-py">params_dict.get(&quot;Wavefront&quot;) != None
-params_dict.get(&quot;Wavefront&quot;).shape == self.phase_array.shape
-</code></pre></td>
+          <td><p>The array of wavelengths at which the spectrum is defined.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.spectrums.Spectrum.get_spectrum" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_spectrum</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Getter method for the spectrum.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>spectrum</code></td>          <td>
+                <code><span title="dLux.spectrums.Array">Array</span></code>
+          </td>
+          <td><p>The array of wavelengths at which the spectrum is defined and their
+corresponding relative weights.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.spectrums.Spectrum.get_wavelengths" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_wavelengths</span><span class="p">()</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Getter method for the wavelengths.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>wavelengths</code></td>          <td>
+                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
+          </td>
+          <td><p>The array of wavelengths at which the spectrum is defined.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.spectrums.Spectrum.get_weights" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_weights</span><span class="p">()</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.spectrums.Spectrum.normalise" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">normalise</span><span class="p">()</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.spectrums.Spectrum.set_wavelengths" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_wavelengths</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Setter method for the wavelengths.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wavelengths</code></td>
+          <td>
+                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
+          </td>
+          <td><p>The new array of wavelengths at which the spectrum is defined.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -1557,63 +1673,10 @@ params_dict.get(&quot;Wavefront&quot;).shape == self.phase_array.shape
     </thead>
     <tbody>
         <tr>
-<td><code>params_dict</code></td>          <td>
-                <code>dict</code>
+<td><code>spectrum</code></td>          <td>
+                <code>Specturm</code>
           </td>
-          <td><p>The <code>params_dict</code> parameter with the <code>Wavefront</code> entry 
-updated.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="dLux.layers.AddPhase.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">phase_array</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Add Phase&#39;</span><span class="p">)</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>phase_array</code></td>
-          <td>
-                <code>float, radians</code>
-          </td>
-          <td><p>Array of phase values to be applied to the input wavefront.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>name</code></td>
-          <td>
-                <code>string</code>
-          </td>
-          <td><p>The name of the layer, which is used to index the layers
-dictionary. Default is 'Add Phase'</p></td>
-          <td>
-                <code>&#39;Add Phase&#39;</code>
-          </td>
+          <td><p>The spectrum object with the updated wavelengths.</p></td>
         </tr>
     </tbody>
   </table>
@@ -1649,7 +1712,7 @@ dictionary. Default is 'Add Phase'</p></td>
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../apply_basis_opd/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Apply Basis OPD" rel="prev">
+        <a href="../polynomial_spectrum/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Polynomial Spectrum" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1658,20 +1721,20 @@ dictionary. Default is 'Add Phase'</p></td>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Apply Basis OPD
+              Polynomial Spectrum
             </div>
           </div>
         </a>
       
       
         
-        <a href="../apply_opd/" class="md-footer__link md-footer__link--next" aria-label="Next: Apply OPD" rel="next">
+        <a href="../../utils/coordinates/get_coordinates_vector/" class="md-footer__link md-footer__link--next" aria-label="Next: get coordinates vector" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Apply OPD
+              get coordinates vector
             </div>
           </div>
           <div class="md-footer__button md-icon">
