@@ -863,7 +863,7 @@ class Telescope(Base):
     
     
     def model_image(self : Telescope, detector : Detector = None,
-                    scene : Scene = None) -> Array:
+                    scene : Scene = None, flatten : bool = False) -> Array:
         """
         Models the scene through the telescope optics and detector.
         
@@ -875,6 +875,8 @@ class Telescope(Base):
         scene : Scene (optional)
             The scene to observe, defaults to using the internally stored scene
             if no value is passed.
+        flatten : bool (optional)
+            Whether the output image should be flattened
         
         Returns
         -------
@@ -885,7 +887,7 @@ class Telescope(Base):
         psfs = self.model_scene(scene=scene)
         detector = self.detector if detector is None else detector
         image = detector.apply_detector_layers(psfs)
-        return image
+        return image.flatten() if flatten else image
     
     
 class Optics(Base):
