@@ -89,7 +89,7 @@ def nyquist_pix(Nyq_rate, wavel, optic_size, focal_length):
 
 
 # List to dictionary function
-def list_to_dict(list_in):
+def list_to_dict(list_in, ordered=True):
     """
     Converts some input list of dLux layers and converts them into
     an OrderedDict with the correct structure.
@@ -125,7 +125,7 @@ def list_to_dict(list_in):
                 idx += 1
 
     # Turn list into Dictionary
-    dict_out = OrderedDict()
+    dict_out = OrderedDict() if ordered else {}
     for i in range(len(names)):
         dict_out[names[i]] = list_in[i]
 
