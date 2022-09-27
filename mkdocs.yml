@@ -51,43 +51,56 @@ nav:
     - Home: index.md
     - Tutorials:
         - Interfacing with PyTrees: notebooks/PyTree_interface.ipynb
-        - Phase Retrieval: notebooks/phase_retrieval_demo.ipynb
-        - Phase Mask Design: notebooks/designing_a_mask.ipynb
-        - Pixel Level Calibration: notebooks/flatfield_calibration.ipynb
-        - Fisher Information: notebooks/fisher_information.ipynb
-    - Base: base.md
-    - Optical System: optical_system.md
+        - Phase Retrieval:          notebooks/phase_retrieval_demo.ipynb
+        - Phase Mask Design:        notebooks/designing_a_mask.ipynb
+        - Pixel Level Calibration:  notebooks/flatfield_calibration.ipynb
+        - Fisher Information:       notebooks/fisher_information.ipynb
+    - Base Classes:
+        - Base:           base/base.md
+        - Optical System: base/optical_system.md
+        - Telescope:      base/telescope.md
+        - Optics:         base/optics.md
+        - Scene:          base/scene.md
+        - Detector:       base/detector.md
+        - Filter:         base/filter.md
     - Layers:
-        - Create Wavefront: layers/create_wavefront.md
-        - Tilt Wavefront: layers/tilt_wavefront.md
-        - Circular Aperture: layers/circular_aperture.md
-        - Compound Aperture: layers/compound_aperture.md
+        - Create Wavefront:    layers/create_wavefront.md
+        - Tilt Wavefront:      layers/tilt_wavefront.md
+        - Circular Aperture:   layers/circular_aperture.md
+        - Compound Aperture:   layers/compound_aperture.md
         - Normalise Wavefront: layers/normalise_wavefront.md
-        - Apply Basis OPD: layers/apply_basis_opd.md
-        - Add Phase: layers/add_phase.md
-        - Apply OPD: layers/apply_opd.md
-        - Transmissive Optic: layers/transmissive_optic.md
+        - Apply Basis OPD:     layers/apply_basis_opd.md
+        - Add Phase:           layers/add_phase.md
+        - Apply OPD:           layers/apply_opd.md
+        - Transmissive Optic:  layers/transmissive_optic.md
     - Propagators:
         - Propagator: propagators/propagator.md
         - Variable Sampling:
             - Variable Sampling Propagator: propagators/variable_sampling/variable_sampling_propagator.md
-            - PhysicalMFT: propagators/variable_sampling/physical_mft.md
-            - Physical Fresnel: propagators/variable_sampling/physical_fresnel.md
-            - AngularMFT: propagators/variable_sampling/angular_mft.md
+            - PhysicalMFT:                  propagators/variable_sampling/physical_mft.md
+            - Physical Fresnel:             propagators/variable_sampling/physical_fresnel.md
+            - AngularMFT:                   propagators/variable_sampling/angular_mft.md
         - Fixed Sampling:
             - Fixed Sampling Propagator: propagators/fixed_sampling/fixed_sampling_propagator.md
-            - PhysicalFFT: propagators/fixed_sampling/physical_fft.md
-            - AngularFFT: propagators/fixed_sampling/angular_fft.md
+            - PhysicalFFT:               propagators/fixed_sampling/physical_fft.md
+            - AngularFFT:                propagators/fixed_sampling/angular_fft.md
     - Wavefronts:
-        - Wavefront: wavefronts/wavefront.md
-        - Cartesian Wavefront: wavefronts/cartesian_wavefront.md
-        - Angular Wavefront: wavefronts/angular_wavefront.md
+        - Wavefront:                   wavefronts/wavefront.md
+        - Cartesian Wavefront:         wavefronts/cartesian_wavefront.md
+        - Angular Wavefront:           wavefronts/angular_wavefront.md
         - Far Field Fresnel Wavefront: wavefronts/far_field_fresnel_wavefront.md
+    - Sources:
+        - Point Source:  sources/point_source.md
+        - Binary Source: sources/binary_source.md
+    - Spectrums:
+        - Array Spectrum:      spectrums/array_spectrum.md
+        - Polynomial Spectrum: spectrums/polynomial_spectrum.md
+        - Combined Spectrum:   spectrums/combined_spectrum.md
     - Utils:
         - Coordinates:
             - get coordinates vector: utils/coordinates/get_coordinates_vector.md
-            - get positions vector: utils/coordinates/get_positions_vector.md
-            - get pixel positions: utils/coordinates/get_pixel_positions.md
-            - get pixel coordinates: utils/coordinates/get_pixel_coordinates.md
-            - get polar positions: utils/coordinates/get_polar_positions.md
-            - get polar coordinates: utils/coordinates/get_polar_coordinates.md
+            - get positions vector:   utils/coordinates/get_positions_vector.md
+            - get pixel positions:    utils/coordinates/get_pixel_positions.md
+            - get pixel coordinates:  utils/coordinates/get_pixel_coordinates.md
+            - get polar positions:    utils/coordinates/get_polar_positions.md
+            - get polar coordinates:  utils/coordinates/get_polar_coordinates.md
