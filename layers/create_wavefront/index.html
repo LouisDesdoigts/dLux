@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../assets/logo.jpg">
-      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.5.3">
+      <meta name="generator" content="mkdocs-1.4.0, mkdocs-material-8.5.3">
     
     
       
@@ -1561,8 +1561,11 @@ phase arrays as well as the pixel_scale. </p>
           </td>
           <td><p>A dictionary of the parameters. The following condition
 must be satisfied:</p>
-<pre><code class="language-py">params_dict.get(&quot;Wavefront&quot;) != None
-</code></pre></td>
+<pre><code class="language-py">params_dict.get(&quot;wavelength&quot;) != None
+params_dict.get(&quot;offset&quot;) != None
+</code></pre>
+<p>where "wavelength" points to an array of wavelengths in meters
+and offset points to an x-y tilt of the wavefront.</p></td>
           <td>
               <em>required</em>
           </td>
