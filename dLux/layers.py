@@ -96,8 +96,11 @@ class CreateWavefront(dLux.base.Base):
             A dictionary of the parameters. The following condition
             must be satisfied:
             ```py
-            params_dict.get("Wavefront") != None
+            params_dict.get("wavelength") != None
+            params_dict.get("offset") != None
             ```
+            where "wavelength" points to an array of wavelengths in meters
+            and offset points to an x-y tilt of the wavefront. 
 
         Returns
         -------
