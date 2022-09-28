@@ -5,8 +5,6 @@
 # ===== Setup and Themes =====
 markdown_extensions:
   # - mkdocs_graphviz
-  # - inline_graphviz
-  # - mdx_inline_graphviz
   - pymdownx.arithmatex:
       generic: true
 
@@ -55,6 +53,7 @@ nav:
         - Phase Mask Design:        notebooks/designing_a_mask.ipynb
         - Pixel Level Calibration:  notebooks/flatfield_calibration.ipynb
         - Fisher Information:       notebooks/fisher_information.ipynb
+        - Parameter Inference:      notebooks/HMC.ipynb
     - Base Classes:
         - Base:           base/base.md
         - Optical System: base/optical_system.md
