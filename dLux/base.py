@@ -1168,7 +1168,7 @@ class Filter(Base):
                 
         # Both wavelengths and throughput are specified
         else:
-            assert len(wavelengths) == len(throughput), "wavelengths and \
+            assert len(wavelengths) != len(throughput), "wavelengths and \
             throughput must have the same dimension"
             self.wavelengths = np.asarray(wavelengths, dtype=float)
             self.throughput  = np.asarray(throughput,  dtype=float)
