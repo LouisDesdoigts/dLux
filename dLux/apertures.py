@@ -64,7 +64,7 @@ class Aperture(eqx.Module, abc.ABC):
             element of the tuple is the x coordinate and the second 
             is the y coordinate.
         """
-        return np.array([self.x_offset, -self.y_offset])
+        return np.array([self.x_offset, self.y_offset])
 
 
     def _translate(self, coordinates: Tensor) -> Tensor:
