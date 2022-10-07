@@ -1,3 +1,4 @@
+from __future__ import annotations
 import jax
 import jax.numpy as np
 from jax import vmap
@@ -8,23 +9,20 @@ import typing
 import optax
 import abc
 from collections import OrderedDict
+import warnings
+import jax.tree_util as jtu
 
-__all__ = ["Base", "OpticalSystem", "Telescope", "Optics", "Scene",
+
+__all__ = ["OpticalSystem", "Instrument", "Optics", "Scene",
            "Filter", "Detector"]
 
 # Types
-Array =  typing.NewType("Array",  np.ndarray)
+Array     = typing.NewType("Array",  np.ndarray)
 list_like = typing.Union[list, tuple]
-Path = typing.Union[list, tuple]
-Pytree = typing.NewType("Pytree", object)
-Leaf = typing.Any
+Path      = typing.Union[list, tuple]
+Pytree    = typing.NewType("Pytree", object)
+Leaf      = typing.Any
 
-# Classes
-Telescope   = typing.NewType("Telescope",   object)
-Optics      = typing.NewType("Optics",      object)
-Scene       = typing.NewType("Scene",       object)
-Filter      = typing.NewType("Filter",      object)
-Detector    = typing.NewType("Detector",    object)
 
 class Base(abc.ABC, eqx.Module):
     """
@@ -207,16 +205,10 @@ class Base(abc.ABC, eqx.Module):
         leaf : Leaf
             The leaf object specified at the end of the path object
         """
-        # Check if path dict exists
-        if path_dict is not None:
-            # Allow for string and single entry list inputs
-            if isinstance(path, str):
-                path = path_dict[path]
-            else:
-                path = path_dict[path[0]]
+        new_path = self._unwrap_paths([path], path_dict=path_dict)[0]
 
         # Get the leaf
-        return self._get_leaf(self, path)
+        return self._get_leaf(self, new_path)
 
     def get_leaves(self : Pytree, paths : list_like, 
                     path_dict : dict = None) -> list:
@@ -235,10 +227,10 @@ class Base(abc.ABC, eqx.Module):
         -------
         leaves : list
             The list of leaf objects specified by the paths object
-        """
+        """        
         # Unwrap paths
         new_paths = self._unwrap_paths(paths, path_dict=path_dict)
-        return [self.get_leaf(path) for path in new_paths]
+        return [self._get_leaf(self, path) for path in new_paths]
 
     #######################
     ### Updater methods ###
@@ -274,11 +266,12 @@ class Base(abc.ABC, eqx.Module):
         get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
         return eqx.tree_at(get_leaves_fn, self, new_values)
 
+
     def apply_to_leaves(self : Pytree, paths : list_like, fns : list_like, \
                         path_dict : dict = None) -> Pytree:
         """
-        Returns an updated version of the pytree with the leaves speficied by 
-        paths updated with the values in values.
+        Returns an updated version of the pytree with the the input functions 
+        applied to the leaves speficied by the paths.
         
         Parameters
         ----------
@@ -295,7 +288,7 @@ class Base(abc.ABC, eqx.Module):
         -------
         pytree : Pytree
             An updated version of the current pytree
-        """
+        """        
         # Unwrap paths
         new_paths, new_fns = self._unwrap_paths(paths, values=fns, \
                                                 path_dict=path_dict)
@@ -308,7 +301,8 @@ class Base(abc.ABC, eqx.Module):
         # Define 'where' function and update pytree
         get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
         return eqx.tree_at(get_leaves_fn, self, new_values)
-
+    
+    
     #########################
     ### Equinox functions ###
     #########################
@@ -340,6 +334,7 @@ class Base(abc.ABC, eqx.Module):
         filter_spec = jax.tree_map(lambda _: False, self)
         values = len(paths) * [True]
         return filter_spec.update_leaves(paths, values, path_dict=path_dict)
+    
     
     #######################
     ### Optax functions ###
@@ -388,6 +383,7 @@ class Base(abc.ABC, eqx.Module):
         else:
             return param_spec, self.get_filter_spec(paths, path_dict=path_dict)
 
+    
     def get_optimiser(self : Pytree, paths : list_like, \
                       optimisers : list_like, get_filter_spec : bool = False, \
                       path_dict : dict = None) -> object:
@@ -437,6 +433,7 @@ class Base(abc.ABC, eqx.Module):
         else:
             return optim, self.get_filter_spec(paths, path_dict=path_dict)
 
+    
     #########################
     ### Numpyro functions ###
     #########################
@@ -768,7 +765,7 @@ single valued float 'array' of shape (0,)....
 """
 
 
-class Telescope(Base):
+class Instrument(Base):
     """
     A high level class desgined to model the behaviour of a telescope. It
     stores a series different ∂Lux objects, and primarily passes the relevant
@@ -778,103 +775,237 @@ class Telescope(Base):
     Attributes
     ----------
     optics : Optics
-        An Optics object that is used to propagate wavefronts through some
-        some optical configuration to generate a psf.
-    scene : Scene
-        A Scene object that stores the various source objects that the
-        telescope is observing.
+        A dLux.base.Optics object that defines some optical configuration.
+    sources : Scene
+        A dLux.base.Scene that stores the various source objects that the 
+        instrument is observing.
     detector : Detector
-        A Detector object that is used to model the various instrumental 
-        effects on a psf.
+        A dLux.base.Detector object that is used to model the various 
+        instrumental effects on a psf.
     filter : Filter
-        A Filter object that is used to model the effective throughput of each
-        wavelength though the optical system.
+        A dLux.base.Filter object that is used to model the effective 
+        throughput of each wavelength though the optical system.
     """
-    scene    : Scene
     optics   : Optics
+    scene    : Scene
     detector : Detector
     filter   : Filter
     # Observation: Observation
     
     
-    def __init__(self     : Telescope,
-                 optics   : Optics,
-                 scene    : Scene,
-                 detector : Detector = None,
-                 filter   : Filter   = None,
+    def __init__(self     : Instrument,
+                 
+                 # Class inputs
+                 optics   : Optics    = None,
+                 scene    : Scene     = None,
+                 detector : Detector  = None,
+                 filter   : Filter    = None,
+                 
+                 # List inputs
+                 optical_layers  : list = [],
+                 sources         : list = [],
+                 detector_layers : list = [],
+                 
                  # Observation :
-                ) -> Telescope:
+                 ) -> Instrument:
         """
         Parameters
         ----------
-        optics : Optics, list
-            An Optics object that is used to propagate wavefronts through some
-            some optical configuration to generate a psf.
-        scene : Scene, list
-            A Scene object that stores the various source objects that the
-            telescope is observing.
+        optics : Optics, (optional)
+            A pre-configured dLux.base.Optics object. Can not be specified if
+            optical layers in specified.
+        optical_layers : list, (optional)
+            A list of dLux optical layer classes that define the optical 
+            transformations within some optical configuration. Can not be 
+            specified if optics is specified.
+        scene : Scene, (optional)
+            A pre-configured dLux.base.Scene object. Can not be specified if
+            sources is specified.
+        sources : list, (optional)
+            A list of dLux source objects that the telescope is observing.
         detector : Detector (optional)
-            A Detector object that is used to model the various instrumental
-            effects on a psf.
+            A pre-configured dLux.base.Detector object. Can not be specified if
+            detector_layers is specified.
+        detector_layers : list (optional)
+            An list of dLux detector layer classes that define the instrumental 
+            effects for some detector. Can not be specified if detector is 
+            specified.
         filter : Filter (optional)
             A Filter object that is used to model the effective throughput of
-            each wavelength though the optical system.
+            each wavelength though the Instrument.
+        """ 
+        # Optics            
+        if optics is None and optical_layers == []:
+            self.optics = Optics([])
+        elif optics is not None and optical_layers != []:
+            raise ValueError("Either optics OR optical_layers can be \
+                                                        specified, not both.")
+        elif optics is not None and optical_layers == []:
+            assert isinstance(optics, Optics), "If optics is specified \
+            it must a dLux.base.Optics object."
+            self.optics = optics
+        elif optics is None and optical_layers != []:
+            assert isinstance(optical_layers, list), "If optical_layers is \
+            specified it must be a list."
+            self.optics = Optics(optical_layers)
+        else:
+            raise ValueError("How did you get here? Please raise a bug report \
+                                                to help improve the software.")
+        
+        # Detector            
+        if detector is None and detector_layers == []:
+            self.detector = Detector([])
+        elif detector is not None and detector_layers != []:
+            raise ValueError("Either detector OR detector_layers can be \
+                                                        specified, not both.")
+        elif detector is not None and detector_layers == []:
+            assert isinstance(detector, Detector), "If detector is specified \
+            it must a dLux.base.Detector object."
+            self.detector = detector
+        elif detector is None and detector_layers != []:
+            assert isinstance(detector_layers, list), "If detector_layers is \
+            specified it must be a list."
+            self.detector = Detector(detector_layers)
+        else:
+            raise ValueError("How did you get here? Please raise a bug report \
+                                                to help improve the software.")
+        
+        # Scene            
+        if scene is None and sources == []:
+            self.scene = Scene([])
+        elif scene is not None and sources != []:
+            raise ValueError("Either scene OR sources can be \
+                                                        specified, not both.")
+        elif scene is not None and sources == []:
+            assert isinstance(scene, Scene), "If scene is specified it must a \
+            dLux.base.Scene object."
+            self.scene = scene
+        elif scene is None and sources != []:
+            assert isinstance(sources, list), "If sources is specified it \
+            must be a list."
+            self.scene = Scene(sources)
+        else:
+            raise ValueError("How did you get here? Please raise a bug report \
+                                                to help improve the software.")
+        
+        # Filter
+        if filter is None:
+            self.filter = Filter() 
+        elif isinstance(filter, Filter):
+            self.filter = filter
+        else:
+            raise ValueError("filter input must be None or a Filter object")
+    
+    
+    def normalise(self : Instrument) -> Instrument:
         """
-        self.scene    = Secene(scene)  if isinstance(scene, list) else scene
-        self.optics   = Optics(optics) if isinstance(optics, list) else optics
-        self.detector = Detector()     if detector is None else detector
-        self.filter   = Filter()       if filter   is None else filter
-        
-        
-    def model_scene(self : Telescope, scene : Scene = None) -> Array:
-        """
-        Models the scene through the telescope optics.
-        
-        Parameters
-        ----------
-        scene : Scene (optional)
-            The scene to observe, defaults to using the internally stored scene
-            if no value is passed.
+        Normalises the internally stored scene.
         
         Returns
         -------
-        psfs : Array
-            The summed psfs of the scene modelled through the telescope.
+        instrument : Instrument
+            A new version of the instrument with the interally stored scene
+            normalised.
         """
-        # Get the scene
-        scene = self.scene if scene is None else scene
-        
-        # vmap the appropriate functions
-        vector_prop = jax.vmap(self.optics.propagate_mono, in_axes=(0, 0))
-        source_prop = jax.vmap(vector_prop, in_axes=(0, 0))
-        throughput_mapped = jax.vmap(self.filter.get_throughput, in_axes=0)
-        
-        # Decompose the scene and format the observation wavelengths
-        modelling_dict = scene.decompose()
-        wavelengths = modelling_dict['wavelengths']
-        offsets = modelling_dict['positions']
-        weights = np.expand_dims(modelling_dict['weights'] * \
-                                 throughput_mapped(wavelengths), (-1, -2))
-
-        # Model and combine the individual psfs
-        out = weights * source_prop(wavelengths, offsets)
-        psfs = out.sum((0, 1))
-        return psfs
+        return eqx.tree_at(lambda instrument: instrument.scene, self, \
+                           self.scene.normalise())
     
     
-    def model_image(self : Telescope, detector : Detector = None,
-                    scene : Scene = None, flatten : bool = False) -> Array:
+    def model_source(self      : Instrument, 
+                     source    : dLux.sources.Source,
+                     optics    : Optics   = None,
+                     detector  : Detector = None,
+                     filter_in : Filter   = None) -> Array:
         """
-        Models the scene through the telescope optics and detector.
+        Models the source through the optics.
         
         Parameters
         ----------
+        source : dict
+            The source to observe
+        optics : Optics
+            The optics through which to model the source object.
         detector : Detector (optional)
-            The detector to use with the observation, defaults to using the
-            internally stored detector if no value is passed.
+            The detector object that is observing the psf.
+        filter_in : Filter (optional)
+            The filter through which the source is being observed. Default is 
+            None which is uniform throughput.
+        
+        Returns
+        -------
+        psf : Array
+            The summed psfs of the sources modelled through the telescope.
+        """
+        optics = self.optics if optics is None else optics
+        source = source.normalise()
+        return source.model(optics, detector=detector, filter_in=filter_in)
+    
+    
+    def model_sources(self      : Optics,
+                      sources   : dict,
+                      optics    : Optics   = None,
+                      detector  : Detector = None,
+                      filter_in : Filter   = None) -> Array:
+        """
+        Models the sources through the optics.
+        
+        Parameters
+        ----------
+        sources : dict
+            The sources to observe
+        optics : Optics
+            The optics through which to model the sources.
+        detector : Detector (optional)
+            The detector object that is observing the psf.
+        filter_in : Filter (optional)
+            The filter through which the source is being observed. Default is 
+            None which is uniform throughput.
+        
+        Returns
+        -------
+        psf : Array
+            The summed psfs of the sources modelled through the intrument.
+        """
+        # Apply optional inputs (check this work properly)
+        model_fn = lambda source: self.model_source(source, 
+                                                        filter_in=filter_in)
+        
+        # Map the model_source function across the sources
+        psf_tree = jtu.tree_map(model_fn, sources, \
+                        is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
+        
+        # Get psfs
+        psf = np.array(jtu.tree_flatten(psf_tree)[0]).sum(0)
+        
+        # apply detector
+        if detector is None:
+            return psf
+        else:
+            return detector.apply_detector(psf)
+
+    def model(self      : Instrument, 
+              optics    : Optics   = None,
+              scene     : Scene    = None, 
+              detector  : Detector = None,
+              filter_in : Filter   = None,
+              flatten   : bool     = False) -> Array:
+        """
+        Models the sources through the instrument optics and detector.
+        
+        Parameters
+        ----------
+        optics : Optics (optional)
+            The optics through which to model the source objects, defaults to 
+            using the internally stored optics if no value is passed.
         scene : Scene (optional)
             The scene to observe, defaults to using the internally stored scene
             if no value is passed.
+        detector : Detector (optional)
+            The detector to use with the observation, defaults to using the
+            internally stored detector if no value is passed.
+        filter_in : Filter (optional)
+            The filter through which the source is being observed, defaults to 
+            using the internally stored detfilter ector if no value is passed.
         flatten : bool (optional)
             Whether the output image should be flattened
         
@@ -884,10 +1015,28 @@ class Telescope(Base):
             The image of the scene modelled through the telescope with detector
             effects applied.
         """
-        psfs = self.model_scene(scene=scene)
+        # Format inputs
+        optics   = self.optics   if optics   is None else optics
+        scene    = self.scene    if scene    is None else scene
         detector = self.detector if detector is None else detector
-        image = detector.apply_detector_layers(psfs)
-        return image.flatten() if flatten else image
+        
+        # Apply optional inputs (check this work properly)
+        model_fn = lambda source: self.model_source(source, 
+                                                    optics=optics,
+                                                    filter_in=filter_in)
+        
+        # Map the model_source function across the sources
+        psf_tree = jtu.tree_map(model_fn, scene.sources, \
+                        is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
+        
+        # Get psfs
+        psf = np.array(jtu.tree_flatten(psf_tree)[0]).sum(0)
+        
+        # Apply detector
+        image = detector.apply_detector(psf)
+        
+        # Possibly flatten
+        return image.flatten() if flatten else image 
     
     
 class Optics(Base):
@@ -901,7 +1050,7 @@ class Optics(Base):
         A collections.OrderedDict of 'layers' that define the transformations
         and operations upon some input wavefront through an optical system.
     """
-    layers : dict
+    layers : OrderedDict
     
     
     def __init__(self : Optics, layers : list) -> Optics:
@@ -914,9 +1063,11 @@ class Optics(Base):
         """
         self.layers = dLux.utils.list_to_dict(layers)
     
-    
-    def propagate_mono(self : Optics, wavelength : Array,
-                       offset : Array = np.zeros(2)) -> Array:
+
+    def propagate_mono(self       : Optics,
+                       wavelength : Array,
+                       offset     : Array = np.zeros(2),
+                       weight     : Array = np.ones(1)) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
         
@@ -928,6 +1079,9 @@ class Optics(Base):
         offset : Array, radians, (optional)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
+        weight : Array, (optional)
+            The relative weighting of the wavelength. Simply scales the output
+            psf.
         
         Returns
         -------
@@ -935,21 +1089,24 @@ class Optics(Base):
             The monochromatic point spread function after being propagated
             though the optical layers.
         """
-        params_dict = {"OpticalSystem": self,
-                       "wavelength": wavelength,
-                       "offset": offset}
+        # Construct parameters dictionary
+        params_dict = {"optics"     : self,
+                       "wavelength" : wavelength,
+                       "offset"     : offset}
         
+        # Propagate though layers
         for key, layer in self.layers.items():
             params_dict = layer(params_dict)
-        return params_dict["Wavefront"].wavefront_to_psf()
+        psf = params_dict["Wavefront"].wavefront_to_psf()
+        return weight * psf
     
     
-    def propagate_single(self : Optics, wavelenghts : Array,
-                         offset  : Array = np.zeros(2),
-                         weights : Array = np.ones(1),
-                         flux    : Array = np.ones(1)) -> Array:
+    def propagate_multi(self        : Optics,
+                        wavelengths : Array,
+                        offset      : Array = np.zeros(2),
+                        weights     : Array = np.ones(1)) -> Array:
         """
-        Propagates a single broadband point source through the optical layers.
+        Propagates a broadband point source through the optical layers.
         
         Parameters
         ----------
@@ -960,29 +1117,23 @@ class Optics(Base):
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
         weights : Array, (optional)
-            The relative weights of each wavelength from the source
-        flux : Array, (optional)
-            The total flux of the source
+            The relative weighting of the wavelengths. Simply scales the output
+            psf.
         
         Returns
         -------
         psf : Array
-            The point spread function of the point source after being
-            propagated though the optical layers.
+            The broadband point spread function after being propagated
+            though the optical layers.
         """
-        # Mapping propagator over wavelengths
-        prop_wf_map = jax.vmap(self.propagate_mono, in_axes=(0, None))
-        
-        # Propagate wavelengths
-        monochromatic_psfs = prop_wf_map(wavelenghts, offset)/len(wavels)
-        
-        # Sum into single psf
-        psf = flux * (weights * monochromatic_psfs).sum(0)
-        return psf
+        propagator = jax.vmap(self.propagate_mono, in_axes=(0, None, 0, None))
+        psfs = propagator(wavelengths, offset, weights)
+        return psfs.sum(0)
     
     
-    def debug_prop(self : Optics, wavelength : Array,
-                   offset : Array = np.zeros(2)) -> Array:
+    def debug_prop(self       : Optics,
+                   wavelength : Array,
+                   offset     : Array = np.zeros(2)) -> Array:
         """
         Propagates a monochromatic point source through the optical layers,
         while also returning the intermediate state of the parameter dictionary
@@ -1023,11 +1174,78 @@ class Optics(Base):
                                 intermediate_dicts, intermediate_layers
     
     
+    def model_source(self      : Optics, 
+                     source    : dLux.Source, 
+                     detector  : Detector = None,
+                     filter_in : Filter   = None) -> Array:
+        """
+        Models the source through the optics.
+        
+        Parameters
+        ----------
+        sources : dict
+            The sources to observe, defaults to using the internally stored 
+            sources if no value is passed.
+        detector : Detector (optional)
+            The detector object that is observing the psf.
+        filter_in : Filter (optional)
+            The filter through which the source is being observed. Default is 
+            None which is uniform throughput.
+        
+        Returns
+        -------
+        psf : Array
+            The summed psfs of the sources modelled through the telescope.
+        """
+        source = source.normalise()
+        return source.model(self, detector=detector, filter_in=filter_in)
+    
+    
+    def model_sources(self      : Optics,
+                      sources   : dict,
+                      detector  : Detector = None,
+                      filter_in : Filter   = None) -> Array:
+        """
+        Models the sources through the optics.
+        
+        Parameters
+        ----------
+        sources : dict
+            The sources to observe, defaults to using the internally stored 
+            sources if no value is passed.
+        detector : Detector (optional)
+            The detector object that is observing the psf.
+        filter_in : Filter (optional)
+            The filter through which the source is being observed. Default is 
+            None which is uniform throughput.
+        
+        Returns
+        -------
+        psf : Array
+            The summed psfs of the sources modelled through the telescope.
+        """
+        # Apply optional inputs (check this work properly)
+        model_fn = lambda source: self.model_source(source, 
+                                                        filter_in=filter_in)
+        
+        # Map the model_source function across the sources
+        psf_tree = jtu.tree_map(model_fn, sources, \
+                        is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
+        
+        # Get psfs
+        psf = np.array(jtu.tree_flatten(psf_tree)[0]).sum(0)
+        
+        # apply detector
+        if detector is None:
+            return psf
+        else:
+            return detector.apply_detector(psf)
+    
+    
 class Scene(Base):
     """
     A high level class representing some 'astrophysical scene', which is
-    composed of Sources. This class mainly serves as an interface between the
-    individual source objects and the Optics/Telescope classes.
+    composed of Sources.
     
     Attributes
     ----------
@@ -1035,7 +1253,6 @@ class Scene(Base):
         A dictionary containing all the of sources that comprise the
         astrophysical scene.
     """
-    
     sources: dict
     
     
@@ -1048,62 +1265,86 @@ class Scene(Base):
             into a dictionary
         """
         self.sources = dLux.utils.list_to_dict(sources, ordered=False)
-    
-    
-    def decompose(self : Scene) -> dict:
-        """
-        Decomposes the individual sources into a 'source dictionary' that
-        stores all of the necessary information about the sources needed to
-        model them through the optical system.
         
-        NOTE: Currently only works with source spectrum of the same length.
-        this should be able to fixed by implementing 1d arrays with indexing or
-        identifiers needed to reconstruct back into individual sources.
+    
+    def normalise(self : Scene) -> Scene:
+        """
+        Normalises the internally stores sources of the scene.
         
         Returns
         -------
-        modelling_dict : dict
-            A dictionary containing all of the information about all of the
-            source objects needed to model their psfs.
+        scene : Scene
+            A new version of the scene with the interally stored sources
+            normalised.
         """
-        keys = list(self.sources.keys())
-        source = self.sources[keys[0]].normalise()
+        normalised_sources = self.normalise_sources(self.sources)
+        return eqx.tree_at(lambda scene: scene.sources, self, \
+                                                    normalised_sources)
+    
+    
+    # Pretty sure this should be moved to utils
+    def normalise_sources(self    : Scene, 
+                          sources : dict) -> dict:
+        """
+        Normalises a dictionary of source objects.
         
-        # Correctly shaped arrays must exist in order to be correctly
-        # appended to, so we must initiliase the source dictionary 
-        # outside of the iterative loop
-        modelling_dict = {"wavelengths": source._get_wavelengths(), 
-                          "weights":     source._get_weights() * \
-                                              source._get_flux(),
-                          "positions":   source._get_position(),
-                          "resolved":    source._is_resolved(),
-                          "source_key":  [keys[0]],
-                         }
+        Parameters
+        ----------
+        sources : dict
+            The sources to normalise.
+            
+        Returns
+        -------
+        sources : dict
+            The normalised sources.
+        """
+        normalise_fn = lambda source: source.normalise()
         
-        for i in range(1, len(keys)):
-            key = keys[i]
-            source = self.sources[key].normalise()
-            
-            wavelengths = source._get_wavelengths()
-            modelling_dict['wavelengths'] = np.append(
-                modelling_dict['wavelengths'], wavelengths, axis=0)
-
-            weights = source._get_weights() * source._get_flux()
-            modelling_dict['weights'] = np.append(
-                modelling_dict['weights'], weights, axis=0)
-            
-            positions = source._get_position()
-            modelling_dict['positions'] = np.append(
-                modelling_dict['positions'], positions, axis=0)
-            
-            resolved = source._is_resolved()
-            modelling_dict['resolved'] = np.append(
-                modelling_dict['resolved'], resolved, axis=0)
-            
-            modelling_dict['source_key'] = \
-                modelling_dict['source_key'] + [key]
-
-        return modelling_dict
+        # Map the model_source function across the sources
+        return jtu.tree_map(normalise_fn, sources, \
+                        is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
+    
+        
+    
+    def model_optics(self      : Scene, 
+                     optics    : Optics,
+                     detector  : Detector = None,
+                     filter_in : Filter   = None) -> Array:
+        """
+        Models the scene through some optics.
+        
+        Parameters
+        ----------
+        optics : Optics
+            The optics through which to model the source objects.
+        detector : Detector (optional)
+            The detector object that is observing the psf.
+        filter_in : Filter (optional)
+            The filter through which the source is being observed. Default is 
+            None which is uniform throughput.
+        
+        Returns
+        -------
+        psfs : Array
+            The summed psfs of the sources modelled through the telescope.
+        """
+        # Apply optional inputs (check this work properly)
+        model_fn = lambda source: optics.model_source(source, 
+                                                        filter_in=filter_in)
+        
+        # Map the model_source function across the sources
+        psf_tree = jtu.tree_map(model_fn, sources, \
+                        is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
+        
+        
+        # Get psf
+        psf = np.array(jtu.tree_flatten(psf_tree)[0]).sum(0)
+        
+        # apply detector
+        if detector is None:
+            return psf
+        else:
+            return detector.apply_detector(psf)
     
     
 class Filter(Base):
@@ -1168,13 +1409,20 @@ class Filter(Base):
                 
         # Both wavelengths and throughput are specified
         else:
-            assert len(wavelengths) != len(throughput), "wavelengths and \
+            assert len(wavelengths) == len(throughput), "wavelengths and \
             throughput must have the same dimension"
             self.wavelengths = np.asarray(wavelengths, dtype=float)
             self.throughput  = np.asarray(throughput,  dtype=float)
             self.filter_name = 'custom'
-    
-    
+            
+            # Check bounds
+            nlarge = np.sum(self.throughput > 1)
+            nsmall = np.sum(self.throughput < 0)
+            if nlarge + nsmall >= 1:
+                warnings.warn("Filter throughputs should be between 0-1, {} \
+                throughputs are above 1 or below 0.".format(nlarge + nsmall))
+            
+    # Cache this? It will likely be called many times with the same inputs
     # TODO: Make an integrated, rather than interpolated filter
     def get_throughput(self : Filter, wavelengths : Array) -> Array:
         """
@@ -1196,8 +1444,9 @@ class Filter(Base):
         # Translate input wavelengths to indexes 
         min_wavelength = self.wavelengths.min()
         max_wavelength = self.wavelengths.max()
+        wavelength_range = max_wavelength - min_wavelength
         num_wavelength = self.wavelengths.shape[0]
-        indxs = num_wavelength * (wavelengths - min_wavelength)/max_wavelength
+        indxs = num_wavelength*(wavelengths - min_wavelength)/wavelength_range
         throughputs = jax.scipy.ndimage.map_coordinates(self.throughput, \
                                         np.array([indxs]), 1, 'nearest')
         return throughputs
@@ -1208,34 +1457,30 @@ class Detector(Base):
     A high level class desgined to model the behaviour of some detectors
     response to some psf.
     
-    This class is currently very minimal and will be expanded in future for
-    more flexibility
-    
     Attributes
     ----------
     layers: dict
         A collections.OrderedDict of 'layers' that define the transformations
         and operations upon some input psf as it interacts with the detector.
     """
-    layers: dict
-
-    def __init__(self: Detector, layers : list = []) -> Detector:
+    layers : OrderedDict
+    
+    
+    def __init__(self : Detector, layers : list) -> Instrument:
         """
         Parameters
         ----------
         layers : list
-            A list of ∂Lux detector 'layers' that define the transformations
-            and operations upon some input psf as it interacts with the
-            detector.
+            An list of dLux detector layer classes that define the instrumental 
+            effects for some detector.
         """
         self.layers = dLux.utils.list_to_dict(layers)
-
-
-    def apply_detector_layers(self : Detector, image : Array) -> Array:
+    
+    
+    def apply_detector(self  : Instrument, 
+                       image : Array) -> Array:
         """
-        Applied the stored detector layers to the input image. Will be extended
-        in the future to take in a modelling dictionary, so that all parameters
-        are accessible to the detector layers.
+        Applied the stored detector layers to the input image.
         
         Parameters
         ----------
@@ -1247,6 +1492,39 @@ class Detector(Base):
         image : Array
             The ouput 'image' after being transformed by the detector layers.
         """
+        # Apply detector layers
         for key, layer in self.layers.items():
             image = layer(image)
         return image
+    
+    
+    def debug_apply_detector(self  : Instrument, 
+                             image : Array) -> Array:
+        """
+        Applied the stored detector layers to the input image, storing and
+        returning the intermediate states of the image and layers.
+        
+        Parameters
+        ----------
+        image : Array
+            The input 'image' to the detector to be transformed.
+        
+        Returns
+        -------
+        image : Array
+            The ouput 'image' after being transformed by the detector layers.
+        intermediate_images : list
+            The intermediate states of the image.
+        intermediate_layers : list
+            The intermediate states of each layer after being applied to the
+            image.
+        """
+        intermediate_images = []
+        intermediate_layers = []
+        
+        # Apply detector layers
+        for key, layer in self.layers.items():
+            image = layer(image)
+            intermediate_images.append(image.copy())
+            intermediate_layers.append(deepcopy(layer))
+        return image, intermediate_images, intermediate_layers

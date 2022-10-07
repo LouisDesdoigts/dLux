@@ -1,3 +1,4 @@
+from __future__ import annotations
 import jax
 import jax.numpy as np
 import equinox as eqx
@@ -9,10 +10,7 @@ __author__ = "Louis Desdoigts"
 __date__ = "30/08/2022"
 __all__ = ["ArraySpectrum", "PolynomialSpectrum", "CombinedSpectrum"]
 
-# Base Jax Types
 Array =  typing.NewType("Array",  np.ndarray)
-
-Spectrum = typing.NewType("Spectrum", object)
 
 class Spectrum(dLux.base.Base, abc.ABC):
     """
@@ -40,7 +38,9 @@ class Spectrum(dLux.base.Base, abc.ABC):
     @abc.abstractmethod
     def get_weights(self : Spectrum) -> Array:
         """
+        
         """
+        return
     
     
     def get_wavelengths(self : Spectrum) -> Array:
@@ -55,23 +55,12 @@ class Spectrum(dLux.base.Base, abc.ABC):
         return self.wavelengths
     
     
-    def get_spectrum(self : Spectrum) -> Array:
-        """
-        Getter method for the spectrum.
-        
-        Returns
-        -------
-        spectrum : Array
-            The array of wavelengths at which the spectrum is defined and their
-            corresponding relative weights.
-        """
-        return np.array([self.get_wavelengths(), self.get_weights()])
-    
-    
     @abc.abstractmethod
     def normalise(self : Spectrum) -> Spectrum:
         """
+        
         """
+        return
     
     
     def set_wavelengths(self : Spectrum, wavelengths : Array) -> Spectrum:
@@ -136,6 +125,9 @@ class ArraySpectrum(Spectrum):
         weights = np.ones(len(self.wavelengths))/len(wavelengths) \
                                     if weights is None else weights
         self.weights = np.asarray(weights, dtype=float)
+        
+        assert len(self.wavelengths) == len(self.weights), "Wavelengths and \
+        weights must have the same length"
     
     
     def get_weights(self : Spectrum) -> Array:
@@ -148,20 +140,6 @@ class ArraySpectrum(Spectrum):
             The relative weights of each wavelength.
         """
         return self.weights
-    
-    
-    ### Formatted Output Methods ###
-    def _get_weights(self : Spectrum) -> Array:
-        """
-        Method for returning the weights of the spectrum, formatted
-        correctly for the `scene.decompose()` method.
-        
-        Returns
-        -------
-        weights : Array
-            The formatted array of reltaive weights of each wavelength.
-        """
-        return np.array([self.weights])
     
     
     def set_weights(self : Spectrum, weights : Array) -> Spectrum:
@@ -251,26 +229,11 @@ class PolynomialSpectrum(Spectrum):
         return weights/weights.sum()
     
     
-    ### Formatted Output Methods ###
-    def _get_weights(self : Spectrum) -> Array:
-        """
-        Method for returning the weights of the spectrum, formatted
-        correctly for the `scene.decompose()` method.
-        
-        Returns
-        -------
-        weights : Array
-            The formatted array of reltaive weights of each wavelength.
-        """
-        return np.array([self.get_weights()])
-    
-    
     def normalise(self : Spectrum) -> Spectrum:
         """
         This method currently does nothing becuase solving for normalised
         polynomial coefficients is difficut and the get_weights() method
-        already returns normalised weights. This method is currently kept
-        becuase of the way `scene.decompose()` currently works.
+        already returns normalised weights.
         
         Returns:
         spectrum : Specturm
@@ -324,30 +287,3 @@ class CombinedSpectrum(ArraySpectrum):
         total_power = weights.sum(1).reshape((len(weights), 1))
         norm_weights = weights/total_power
         return self.set_weights(norm_weights)
-
-    ### Formatted Output Methods ###
-    def _get_wavelengths(self : Spectrum) -> Array:
-        """
-        Method for returning the wavelengths of the spectrum, formatted
-        correctly for the `scene.decompose()` method.
-        
-        Returns
-        -------
-        wavelengths : Array, meters
-            The formatted array of wavelengths at which the spectrum is defined.
-        """
-        return self.get_wavelengths()
-    
-    
-    ### Formatted Output Methods ###
-    def _get_weights(self : Spectrum) -> Array:
-        """
-        Method for returning the weights of the spectrum, formatted
-        correctly for the `scene.decompose()` method.
-        
-        Returns
-        -------
-        weights : Array
-            The formatted array of reltaive weights of each wavelength.
-        """
-        return self.get_weights()
