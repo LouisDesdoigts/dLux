@@ -118,7 +118,7 @@ class CreateWavefront(dLux.base.Base):
         amplitude /= np.linalg.norm(amplitude)
         
         # TODO: Make jax safe
-        if self.wavefront_type is 'Cartesian':
+        if self.wavefront_type == 'Cartesian':
             wavefront = dLux.CartesianWavefront(
                                         wavel, 
                                         offset,
@@ -127,7 +127,7 @@ class CreateWavefront(dLux.base.Base):
                                         amplitude, 
                                         phase)
             
-        elif self.wavefront_type is 'Angular':
+        elif self.wavefront_type == 'Angular':
             wavefront = dLux.AngularWavefront(
                                         wavel, 
                                         offset,
@@ -136,7 +136,7 @@ class CreateWavefront(dLux.base.Base):
                                         amplitude, 
                                         phase)
             
-        elif self.wavefront_type is 'FarFieldFresnel':
+        elif self.wavefront_type == 'FarFieldFresnel':
             wavefront = dLux.FarFieldFresnelWavefront(
                                         wavel, 
                                         offset,
