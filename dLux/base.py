@@ -1196,8 +1196,9 @@ class Filter(Base):
         # Translate input wavelengths to indexes 
         min_wavelength = self.wavelengths.min()
         max_wavelength = self.wavelengths.max()
+        wavelength_range = max_wavelength - min_wavelength
         num_wavelength = self.wavelengths.shape[0]
-        indxs = num_wavelength * (wavelengths - min_wavelength)/max_wavelength
+        indxs = num_wavelength * (wavelengths - min_wavelength)/wavelength_range
         throughputs = jax.scipy.ndimage.map_coordinates(self.throughput, \
                                         np.array([indxs]), 1, 'nearest')
         return throughputs
