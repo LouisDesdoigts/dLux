@@ -1,19 +1,17 @@
 from __future__ import annotations
-import jax
-import jax.numpy as np
-import equinox as eqx
 import abc
 import typing
+import jax.numpy as np
+from jax.scipy.signal import convolve
+from jax import vmap
+from equinox import tree_at, static_field
 import dLux
-import jax.scipy as jsp
 
-__author__ = "Louis Desdoigts"
-__date__ = "30/08/2022"
+
 __all__ = ["PointSource", "ArrayDistribution", "BinarySource", 
            "PointExtendedSource", "PointAndExtendedSource"]
-
-# Base Jax Types
 Array = typing.NewType("Array", np.ndarray)
+
 
 """
 If you are confused about the class inheritance, please read this stack 
@@ -62,7 +60,7 @@ class Source(dLux.base.Base, abc.ABC):
     position : Array
     flux     : Array
     spectrum : Spectrum
-    name     : str = eqx.static_field()
+    name     : str = static_field()
     
     
     def __init__(self     : Source,
@@ -177,7 +175,7 @@ class Source(dLux.base.Base, abc.ABC):
         source : Source
             The source object with the updated flux parameter.
         """
-        return eqx.tree_at(
+        return tree_at(
             lambda source : source.flux, self, flux)
     
     
@@ -195,7 +193,7 @@ class Source(dLux.base.Base, abc.ABC):
         source : Source
             The source object with the updated position parameter.
         """
-        return eqx.tree_at(
+        return tree_at(
             lambda source : source.position, self, position)
     
     
@@ -213,7 +211,7 @@ class Source(dLux.base.Base, abc.ABC):
         source : Source
             The source object with the updated spectrum.
         """
-        return eqx.tree_at(
+        return tree_at(
             lambda source : source.spectrum, self, spectrum)
     ### End Setter Methods ###
     
@@ -229,7 +227,7 @@ class Source(dLux.base.Base, abc.ABC):
             The normalised source object.
         """
         normalised_spectrum = self.spectrum.normalise()
-        return eqx.tree_at(
+        return tree_at(
             lambda source : source.spectrum, self, normalised_spectrum)
     
     
@@ -350,14 +348,14 @@ class ResolvedSource(Source, abc.ABC):
                             self.format_inputs(filter_in=filter_in)
         
         # Vmap propagator
-        propagator = jax.vmap(optics.propagate_mono, in_axes=(0, None, 0))
+        propagator = vmap(optics.propagate_mono, in_axes=(0, None, 0))
         
         # Model psf
         psf = propagator(wavelengths, positions, weights).sum(0)
         
         # Convolve distribution
         distribution = self.get_distribution()
-        psf_out = jsp.signal.convolve(psf, distribution, mode='same')
+        psf_out = convolve(psf, distribution, mode='same')
     
         # Apply detector if supplied
         if detector is None:
@@ -444,7 +442,7 @@ class RelativeFluxSource(Source, abc.ABC):
         source : Source
             The source object with updated flux ratio.
         """
-        return eqx.tree_at(
+        return tree_at(
            lambda source: source.flux_ratio, self, flux_ratio)
     
     
@@ -544,7 +542,7 @@ class RelativePositionSource(Source, abc.ABC):
         source : Source
             The source object with updated separation.
         """
-        return eqx.tree_at(
+        return tree_at(
            lambda source: source.separation, self, separation)
     
     
@@ -563,7 +561,7 @@ class RelativePositionSource(Source, abc.ABC):
         source : Source
             The source object with updated field angle.
         """
-        return eqx.tree_at(
+        return tree_at(
            lambda source: source.field_angle, self, field_angle)
     
     
@@ -623,7 +621,7 @@ class PointSource(Source):
                             self.format_inputs(filter_in=filter_in)
         
         # Vmap propagator
-        propagator = jax.vmap(optics.propagate_mono, in_axes=(0, None, 0))
+        propagator = vmap(optics.propagate_mono, in_axes=(0, None, 0))
         
         # Model Psf
         psf = propagator(wavelengths, positions, weights).sum(0)
@@ -711,7 +709,7 @@ class ArrayDistribution(ResolvedSource):
         source : Source
             The source object with updated distribution.
         """
-        return eqx.tree_at(
+        return tree_at(
            lambda source: source.distribution, self, distribution)
     
     
@@ -727,7 +725,7 @@ class ArrayDistribution(ResolvedSource):
         """
         normalised_spectrum = self.spectrum.normalise()
         normalised_distribution = self.distribution/self.distribution.sum()
-        return eqx.tree_at(
+        return tree_at(
             lambda source : (source.spectrum, source.distribution), self, \
                             (normalised_spectrum, normalised_distribution))
     
@@ -805,8 +803,8 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
                             self.format_inputs(filter_in=filter_in)
         
         # Vmap propagator
-        base_propagator = jax.vmap(optics.propagate_mono, in_axes=(0, None, 0))
-        propagator = jax.vmap(base_propagator, in_axes=(0, 0, 0))
+        base_propagator = vmap(optics.propagate_mono, in_axes=(0, None, 0))
+        propagator = vmap(base_propagator, in_axes=(0, 0, 0))
         
         # Model Psf
         psf = propagator(wavelengths, positions, weights).sum((0, 1))
@@ -888,7 +886,7 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
                             self.format_inputs(filter_in=filter_in)
         
         # Vmap propagator
-        propagator = jax.vmap(optics.propagate_mono, in_axes=(0, None))
+        propagator = vmap(optics.propagate_mono, in_axes=(0, None))
         
         # Model psfs
         spectral_psf = propagator(wavelengths, positions)
@@ -898,7 +896,7 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
         extended_psf = spectral_psfs[1].sum(0)
         
         # Convolve distribution
-        convolved = jsp.signal.convolve(extended_psf, self.get_distribution(), \
+        convolved = convolve(extended_psf, self.get_distribution(), \
                                         mode='same')
         psf = convolved + point_psf
     
@@ -984,7 +982,7 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
                             self.format_inputs(filter_in=filter_in)
         
         # Vmap propagator
-        propagator = jax.vmap(optics.propagate_mono, in_axes=(0, None))
+        propagator = vmap(optics.propagate_mono, in_axes=(0, None))
         
         # Model psfs
         spectral_psf = propagator(wavelengths[0], positions)
@@ -994,7 +992,7 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
         extended_psf = spectral_psfs[1].sum(0)
         
         # Convolve distribution
-        convolved = jsp.signal.convolve(extended_psf, self.get_distribution(),\
+        convolved = convolve(extended_psf, self.get_distribution(),\
                                         mode='same')
         psf = convolved + point_psf
     
