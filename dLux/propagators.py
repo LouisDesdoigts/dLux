@@ -55,47 +55,40 @@ Propagator
     VariableSampling (MFT)
         PhysicalMFT
         AngularMFT
-        
+
     FixedSampling (FFT)
         PhysicalFFT
         AngularFFT
-        
 """
-__author__ = "Louis Desdoigts"
-__author__ = "Jordan Dennis"
-__date__ = "17/08/2022"
-__all__ = ["Propagator", "VariableSamplingPropagator", "FixedSamplingPropagator",
-           "PhysicalMFT", "AngularMFT", "PhysicalFFT", "AngularFFT", "PhysicalFresnel"]
-
-
+from __future__ import annotations
 import jax.numpy as np
 import jax
 import equinox as eqx
 import typing
 import dLux
+import abc
 
 
-Scalar = typing.NewType("Scalar", np.ndarray) # 0 dim
-Vector = typing.NewType("Vector", np.ndarray) # 1 dim
-Array =  typing.NewType("Array",  np.ndarray) # 2 dim +
-Wavefront =  typing.NewType("Wavefront",  object)
-Propagator = typing.NewType("Propagator", object)
+__all__ = ["PhysicalMFT", "AngularMFT", "PhysicalFFT", "AngularFFT",
+           "PhysicalFresnel"]
+Array =  typing.NewType("Array",  np.ndarray)
+Wavefront =  typing.NewType("Wavefront",  dLux.wavefronts.Wavefront)
 
 
-class Propagator(dLux.base.Base):     
+class Propagator(dLux.base.Base, abc.ABC):
     """
     An abstract class indicating a spatial transfromation of the
-    `Wavefront`. This is a separate class because it allows 
-    us to take gradients with respect to the fields of the 
-    propagator and hence optimise distances ect.     
+    `Wavefront`. This is a separate class because it allows
+    us to take gradients with respect to the fields of the
+    propagator and hence optimise distances ect.
 
     Attributes
     ----------
     inverse : bool
-        True if the inverse algorithm is to be used else false. 
+        True if the inverse algorithm is to be used else false.
     tilt : bool
         True if the offset of the `Wavefront` is to be considered
-        otherwise false. 
+        otherwise false.
     """
     inverse : bool
     
@@ -107,7 +100,7 @@ class Propagator(dLux.base.Base):
         inverse : bool = False
             True if the inverse algorithm is to be used else False.
         """
-        self.inverse = bool(inverse)  
+        self.inverse = bool(inverse)
         
 
     def is_inverse(self : Propagator) -> bool:
@@ -118,8 +111,9 @@ class Propagator(dLux.base.Base):
             Whether or not the inverse algorithm is to be used.
         """
         return self.inverse
-
-
+    
+    
+    @abc.abstractmethod
     def _fourier_transform(self : Propagator, wavefront : Wavefront) -> Array:
         """
         The implementation of the Fourier transform that is to 
@@ -139,9 +133,10 @@ class Propagator(dLux.base.Base):
             The complex electric field amplitude following the 
             propagation. 
         """
-        pass  
-
-
+        return
+    
+    
+    @abc.abstractmethod
     def _inverse_fourier_transform(self : Propagator,
             wavefront : Wavefront) -> Array:
         """
@@ -162,7 +157,7 @@ class Propagator(dLux.base.Base):
             The complex electric field amplitude following the 
             propagation. 
         """  
-        pass
+        return
 
 
     def _propagate(self : Propagator, wavefront : Wavefront) -> Array:
@@ -187,8 +182,9 @@ class Propagator(dLux.base.Base):
 
         field *= self._normalising_factor(wavefront)
         return field
-
-
+    
+    
+    @abc.abstractmethod
     def _normalising_factor(self : Propagator, wavefront : Wavefront) -> float:
         """
         Apply a normalisation to the wavefront to ensure that it 
@@ -206,10 +202,10 @@ class Propagator(dLux.base.Base):
             The `Wavefront` where the electric field power has 
             been conserved.
         """
-        pass 
+        return
 
 
-class VariableSamplingPropagator(Propagator):
+class VariableSamplingPropagator(Propagator, abc.ABC):
     """
     A propagator that users the Soummer et. al. 2007 MFT algorithm 
     to implement variable sampling in the plane of propagation 
@@ -524,8 +520,9 @@ class VariableSamplingPropagator(Propagator):
 
         parameters["Wavefront"] = new_wavefront
         return parameters           
-
-
+    
+    
+    @abc.abstractmethod
     def number_of_fringes(self : Propagator, wavefront : Wavefront) -> float:
         """
         The number of diffraction fringes in the output plane. 
@@ -543,10 +540,10 @@ class VariableSamplingPropagator(Propagator):
         fringes : float
             The number of diffraction fringes in the output plane. 
         """
-        pass
+        return
 
 
-class FixedSamplingPropagator(Propagator):
+class FixedSamplingPropagator(Propagator, abc.ABC):
     """
     A propagator that samples the electric field in the output plane
     at the rate of one fringe per pixel where a fringe is a wavelength 
@@ -556,6 +553,8 @@ class FixedSamplingPropagator(Propagator):
     These propagators are implemented using the numpy.fft sub-sub-package
     and cannot be modified elsewise. 
     """
+    
+    
     def _fourier_transform(self : Propagator, 
             wavefront : Wavefront) -> Array:
         """
@@ -611,8 +610,9 @@ class FixedSamplingPropagator(Propagator):
         """
         return self.is_inverse() / wavefront.number_of_pixels() + \
             (1 - self.is_inverse()) * wavefront.number_of_pixels()
-
-
+    
+    
+    @abc.abstractmethod
     def get_pixel_scale_out(self : Propagator, 
             wavefront : Wavefront) -> float:
         """
@@ -630,8 +630,8 @@ class FixedSamplingPropagator(Propagator):
             The pixel scale in the output plane in units of meters
             (radians) per pixel.
         """
-        pass
-  
+        return
+
 
     def __call__(self : Propagator, parameters : dict) -> dict:
         """
