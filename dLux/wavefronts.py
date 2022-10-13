@@ -4,6 +4,7 @@ import equinox as eqx
 import jax.numpy as np
 import typing
 import enum
+import abc
 
 __all__ = ["PlaneType", "Wavefront", "CartesianWavefront", 
            "AngularWavefront", 'FarFieldFresnelWavefront']
@@ -30,7 +31,7 @@ class PlaneType(enum.IntEnum):
     Intermediate = 3
 
 
-class Wavefront(dLux.base.Base):
+class Wavefront(dLux.base.Base, abc.ABC):
     """
     An abstract module that should never be directly instantiated.
     This class represents a general optical wavefront although the 
@@ -110,9 +111,7 @@ class Wavefront(dLux.base.Base):
         assert isinstance(plane_type, PlaneType), "plane_type must a PlaneType \
         object"
 
-
     ### Getter / Accessors Functions ###
-
     def get_wavelength(self : Wavefront) -> Scalar:
         """
         Returns
@@ -372,10 +371,6 @@ class Wavefront(dLux.base.Base):
             The new `Wavefront` specified by `amplitude` and `phase`        
         """
         return self.set_phase(phase).set_amplitude(amplitude)
-
-
-    
-    
 
 
     ### Mutator / Other Functions ###

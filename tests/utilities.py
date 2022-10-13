@@ -458,6 +458,7 @@ class PropagatorUtility(Utility):
         The directionality of the generated propagators. 
     """
     inverse : bool
+    dLux.propagators.Propagator.__abstractmethods__ = ()
 
 
     def __init__(self : Utility) -> Utility:
@@ -475,7 +476,7 @@ class PropagatorUtility(Utility):
         propagator : Propagator 
             A safe propagator for testing purposes. 
         """
-        return dLux.Propagator(
+        return dLux.propagators.Propagator(
             self.inverse if inverse is None else inverse)
 
 
@@ -509,6 +510,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
     utility : Utility = WavefrontUtility()
     pixels_out : int
     pixel_scale_out : float
+    dLux.propagators.VariableSamplingPropagator.__abstractmethods__ = ()
    
 
     def __init__(self : Utility) -> Utility:
@@ -544,7 +546,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         """
         # TODO: These should not be accessible in the importable 
         # dLux. need to confer with @LouisDesdoigts.
-        return dLux.VariableSamplingPropagator(
+        return dLux.propagators.VariableSamplingPropagator(
             tilt = tilt,
             inverse = self.is_inverse() if inverse is None else inverse,
             pixels_out = self.pixels_out if pixels_out is None \
@@ -586,6 +588,7 @@ class FixedSamplingUtility(PropagatorUtility, UtilityUser):
         with the `FixedSamplingPropagator`.
     """
     utility : Utility = WavefrontUtility()
+    dLux.propagators.FixedSamplingPropagator.__abstractmethods__ = ()
 
 
     def __init__(self : Utility) -> Utility:
@@ -610,7 +613,7 @@ class FixedSamplingUtility(PropagatorUtility, UtilityUser):
         propagator : Propagator
             The safe testing `Propagator`
         """
-        return dLux.FixedSamplingPropagator(
+        return dLux.propagators.FixedSamplingPropagator(
             self.is_inverse() if inverse is None else inverse)
 
 
