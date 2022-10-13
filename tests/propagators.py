@@ -483,8 +483,8 @@ class TestPhysicalFFT(UtilityUser):
 
         assert short_focal_length.get_focal_length() == SHORT
         assert long_focal_length.get_focal_length() == LONG
-  
- 
+
+
     def test_get_pixel_scale_out(self : Tester) -> None:
         """
         Repeats the calculation of the pixel_scale_out to make sure
@@ -499,7 +499,7 @@ class TestPhysicalFFT(UtilityUser):
                 wavefront.number_of_pixels())
 
         assert PIXEL_SCALE == propagator.get_pixel_scale_out(wavefront)
-                   
+
 
     def test_propagate(self : Tester) -> None:
         """
@@ -526,7 +526,7 @@ class TestPhysicalFFT(UtilityUser):
             .all()
 
         assert is_forwards_correct
-        assert is_backwards_correct        
+        assert is_backwards_correct
 
 
     def test_physical_fft(self : Tester) -> None:
