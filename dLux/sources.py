@@ -13,17 +13,17 @@ __all__ = ["PointSource", "ArrayDistribution", "BinarySource",
            "PointExtendedSource", "PointAndExtendedSource"]
 
 # Base Jax Types
-Array    = typing.NewType("Array",  np.ndarray)
+Array = typing.NewType("Array", np.ndarray)
 
 """
-Complex class inheritance: Parameterisation classes can only implement methods,
-not attributes because python
+If you are confused about the class inheritance, please read this stack 
+overflow post on diamond inheritance in python, where each class instantiates
+parameters: https://stackoverflow.com/questions/34884567/python-multiple-inheritance-passing-arguments-to-constructors-using-super
 """
 
 ########################
 ### Abstract Classes ###
 ########################
-
 class Source(dLux.base.Base, abc.ABC):
     """
     Base class for source objects. The idea of these source classes is to allow
@@ -51,8 +51,7 @@ class Source(dLux.base.Base, abc.ABC):
     Attributes
     ----------
     position : Array, radians
-        The (x, y) on-sky position of this object. Units are currently in
-        radians, but will likely be extended to RA/DEC.
+        The (x, y) on-sky position of this object.
     flux : Array, photons
         The flux of the object.
     spectrum : Spectrum
@@ -66,7 +65,7 @@ class Source(dLux.base.Base, abc.ABC):
     name     : str = eqx.static_field()
     
     
-    def __init__(self     : Source, 
+    def __init__(self     : Source,
                  position : Array,
                  flux     : Array,
                  spectrum : Spectrum,
@@ -75,8 +74,7 @@ class Source(dLux.base.Base, abc.ABC):
         Parameters
         ----------
         position : Array, radians
-            The (x, y) on-sky position of this object. Units are currently in
-            radians, but will likely be extended to RA/DEC.
+            The (x, y) on-sky position of this object.
         flux : Array, photons
             The flux of the object.
         spectrum : Spectrum
@@ -88,6 +86,31 @@ class Source(dLux.base.Base, abc.ABC):
         self.flux     = np.asarray(flux,     dtype=float)
         self.spectrum = spectrum
         self.name     = name
+        
+        # Input position checking
+        assert self.position.ndim == 1, \
+        ("position must be a 1d array.")
+        assert self.position.shape == (2,), \
+        ("positions must be shape (2,), ie (x, y).")
+        assert not np.isnan(self.position).any(), \
+        ("position must not be nan.")
+        assert not np.isinf(self.position).any(), \
+        ("position must be not be infinite.")
+        
+        # Input flux checking
+        assert self.flux.shape == (), \
+        ("flux must be a scalar, (shape == ()).")
+        assert not np.isnan(self.flux).any(), \
+        ("flux must not be nan.")
+        assert not np.isinf(self.flux).any(), \
+        ("flux must be not be infinite.")
+        
+        # Input spectrum checking
+        assert isinstance(self.spectrum, dLux.spectrums.Spectrum), \
+        ("Spectrum must be dLux Spectrum object.")
+        
+        # Input name checking
+        assert isinstance(self.name, str), "Name must be a string."
     
     
     ### Start Getter Methods ###
@@ -194,6 +217,7 @@ class Source(dLux.base.Base, abc.ABC):
             lambda source : source.spectrum, self, spectrum)
     ### End Setter Methods ###
     
+    
     ### General Methods ###
     def normalise(self : Source) -> Source:
         """
@@ -207,7 +231,7 @@ class Source(dLux.base.Base, abc.ABC):
         normalised_spectrum = self.spectrum.normalise()
         return eqx.tree_at(
             lambda source : source.spectrum, self, normalised_spectrum)
-        
+    
     
     def format_inputs(self : Source, filter_in : Filter = None) -> tuple:
         """
@@ -219,7 +243,7 @@ class Source(dLux.base.Base, abc.ABC):
         filter_in : Filter (optional)
             The filter through which the source is being observed. Default is 
             None which is uniform throughput.
-            
+        
         Returns
         -------
         wavelengths : Array, meters
@@ -249,6 +273,7 @@ class Source(dLux.base.Base, abc.ABC):
                                 np.expand_dims(self.get_flux(), -1)
         
         return wavelengths, weights, positions
+    
     
     @abc.abstractmethod
     def model(self      : Source,
@@ -280,10 +305,11 @@ class ResolvedSource(Source, abc.ABC):
     """
     Base class for resolved source objects. This simply extends the base Source
     class by implementing an abstract get_distribution() method and a concrete 
-    model() method. 
+    model() method.
     """
     
     
+    @abc.abstractmethod
     def get_distribution(self):
         """
         Abstract method for returning the distribution of the resolved source.
@@ -296,10 +322,10 @@ class ResolvedSource(Source, abc.ABC):
         pass
     
     
-    def model(self      : Source, 
+    def model(self      : Source,
               optics    : Optics,
               detector  : Detector = None,
-              filter_in : Filter = None) -> Array:
+              filter_in : Filter   = None) -> Array:
         """
         Method to model the psf of the source through the optics. Implements a
         basic convolution with the psf and source distribution.
@@ -338,14 +364,41 @@ class ResolvedSource(Source, abc.ABC):
             return psf_out
         else:
             return detector.apply_detector(psf_out)
-           
-           
+    
+    
 class RelativeFluxSource(Source, abc.ABC):
     """
     Abstract class that extend the methods of Source to allow for binary-object
     sources to be parameterised by their relative flux. Classes that inherit 
     from this class must instantiate a flux_ratio attribute.
+    
+    Attributes
+    ----------
+    flux_ratio : Array
+        The contrast ratio between the two sources.
     """
+    flux_ratio : Array
+    
+    
+    def __init__(self       : Source,
+                 flux_ratio : Array,
+                 *args, **kwargs) -> Source:
+        """
+        Parameters
+        ----------
+        flux_ratio : Array
+            The contrast ratio between the two sources.
+        """
+        super().__init__(*args, **kwargs)
+        self.flux_ratio = np.asarray(flux_ratio, dtype=float)
+        
+        # Input flux_ratio checking
+        assert self.flux_ratio.shape == (), \
+        ("Flux ratio must be a scalar, (shape == ()).")
+        assert not np.isnan(self.flux_ratio).any(), \
+        ("flux_ratio must not be nan.")
+        assert not np.isinf(self.flux_ratio).any(), \
+        ("flux_ratio must be not be infinite.")
     
     
     def get_flux_ratio(self : Source) -> Array:
@@ -400,7 +453,41 @@ class RelativePositionSource(Source, abc.ABC):
     Abstract class that extend the methods of Source to allow for binary-object
     sources to be parameterised by their relative position. Classes that
     inherit from this class must instantiate a separation attribute.
+    
+    Attributes
+    ----------
+    separation : Array, radians
+        The separation of the two sources in radians.
+    field_angle : Array, radians
+        The field angle between the two sources measure from the positive
+        x axis.
     """
+    separation  : Array
+    field_angle : Array
+    
+    
+    def __init__(self        : Source,
+                 separation  : Array,
+                 field_angle : Array,
+                 *args, **kwargs) -> Source:
+        """
+        Parameters
+        ----------
+        separation : Array, radians
+            The separation of the two sources in radians.
+        field_angle : Array, radians
+            The field angle between the two sources measure from the positive
+            x axis.
+        """
+        super().__init__(*args, **kwargs)
+        self.separation  = np.asarray(separation,  dtype=float)
+        self.field_angle = np.asarray(field_angle, dtype=float)
+        
+        assert self.separation.shape == (), "Separation must be a scalar, \
+        (shape == ())."
+        
+        assert self.field_angle.shape == (), "Field angle must be a scalar, \
+        (shape == ())."
     
     
     def get_separation(self : Source) -> Array:
@@ -441,9 +528,9 @@ class RelativePositionSource(Source, abc.ABC):
                                         self.get_field_angle())
         return np.array([super().get_position() + sep_vec, 
                          super().get_position() - sep_vec])
-
     
-    def set_separation(self : Source) -> Source:
+    
+    def set_separation(self : Source, separation : Array) -> Source:
         """
         Setter method for the source separation.
         
@@ -461,7 +548,7 @@ class RelativePositionSource(Source, abc.ABC):
            lambda source: source.separation, self, separation)
     
     
-    def set_field_angle(self : Source) -> Source:
+    def set_field_angle(self : Source, field_angle : Array) -> Source:
         """
         Setter method for the source field angle.
         
@@ -483,7 +570,6 @@ class RelativePositionSource(Source, abc.ABC):
 ########################
 ### Concrete Classes ###
 ########################
-           
 class PointSource(Source):
     """
     Concrete Class for unresolved point source objects.
@@ -499,8 +585,7 @@ class PointSource(Source):
         Parameters
         ----------
         position : Array, radians
-            The (x, y) on-sky position of this object. Units are currently in
-            radians, but will likely be extended to RA/DEC.
+            The (x, y) on-sky position of this object.
         flux : Array, photons
             The flux of the object.
         spectrum : Spectrum
@@ -511,7 +596,7 @@ class PointSource(Source):
         super().__init__(position, flux, spectrum, name=name)
         
         
-    def model(self      : Source, 
+    def model(self      : Source,
               optics    : Optics,
               detector  : Detector = None,
               filter_in : Filter   = None) -> Array:
@@ -563,18 +648,19 @@ class ArrayDistribution(ResolvedSource):
     distribution : Array
     
     
-    def __init__(self         : Source, 
+    def __init__(self         : Source,
                  position     : Array,
                  flux         : Array,
                  spectrum     : Spectrum,
                  distribution : Array,
-                 name         : str = 'ArrayDistribution') -> Source:
+                 *args,
+                 name         : str = 'ArrayDistribution',
+                 **kwargs) -> Source:
         """
         Parameters
         ----------
         position : Array, radians
-            The (x, y) on-sky position of this object. Units are currently in
-            radians, but will likely be extended to RA/DEC.
+            The (x, y) on-sky position of this object.
         flux : Array, photons
             The flux of the object.
         spectrum : Spectrum
@@ -584,9 +670,19 @@ class ArrayDistribution(ResolvedSource):
         name : str (optional)
             The name for this object. Defaults to 'Source'
         """
-        super().__init__(position, flux, spectrum, name=name)
+        super().__init__(position, flux, spectrum, *args, name=name, **kwargs)
         distribution = np.asarray(distribution, dtype=float)
         self.distribution = distribution/distribution.sum()
+        
+        # Input checking
+        assert self.distribution.ndim == 2, \
+        ("distribution must be a 2d array.")
+        assert len(self.distribution) > 0, \
+        ("Length of distribution must be greater than 1.")
+        assert not np.isnan(self.distribution).any(), \
+        ("distribution must not be nan.")
+        assert not np.isinf(self.distribution).any(), \
+        ("distribution must be not be infinite.")
     
     
     def get_distribution(self : Source) -> Array:
@@ -596,12 +692,30 @@ class ArrayDistribution(ResolvedSource):
         Returns
         -------
         distribution : Array, intensity
-            The distribution of the sources intensity.
+            The distribution of the source intensity.
         """
         return self.distribution
     
     
-    def normalise(self : Source):
+    def set_distribution(self : Source, distribution : Array) -> Source:
+        """
+        Setter method for the source distribution.
+        
+        Parameters
+        ----------
+        distribution : Array, intensity
+            The distribution of the source intensity.
+        
+        Returns
+        -------
+        source : Source
+            The source object with updated distribution.
+        """
+        return eqx.tree_at(
+           lambda source: source.distribution, self, distribution)
+    
+    
+    def normalise(self : Source) -> Source:
         """
         Method for returning a new source object with a normalised total
         spectrum and source distribution.
@@ -618,23 +732,10 @@ class ArrayDistribution(ResolvedSource):
                             (normalised_spectrum, normalised_distribution))
     
     
-class BinarySource(RelativeFluxSource, RelativePositionSource):
+class BinarySource(RelativePositionSource, RelativeFluxSource):
     """
     A parameterised binary source.
-    
-    Attributes
-    ----------
-    separation : Array, radians
-        The separation of the two sources in radians.
-    field_angle : Array, radians
-        The field angle between the two sources measure from the positive
-        x axis.
-    flux_ratio : Array
-        The contrast ratio between the two sources.
     """
-    separation  : Array
-    field_angle : Array
-    flux_ratio  : Array
     
     
     def __init__(self        : Source,
@@ -649,12 +750,12 @@ class BinarySource(RelativeFluxSource, RelativePositionSource):
         Parameters
         ----------
         position : Array, radians
-            The (x, y) on-sky position of this object. Units are currently in
-            radians, but will likely be extended to RA/DEC.
+            The (x, y) on-sky position of this object.
         flux : Array, photons
             The mean flux of the sources.
-        spectrum : Spectrum
-            The spectrum of this object, represented by a Spectrum object.
+        spectrum : CombinedSpectrum
+            The spectrum of this object, represented by a CombinedSpectrum \
+            object.
         separation : Array, radians
             The separation of the two sources in radians.
         field_angle : Array, radians
@@ -665,16 +766,19 @@ class BinarySource(RelativeFluxSource, RelativePositionSource):
         name : str (optional)
             The name for this object. Defaults to 'Binary Source'
         """
-        assert isinstance(spectrum, dLux.CombinedSpectrum), "The input spectrum \
-        must be a CombinedSpectrum object"
-        super().__init__(position, flux, spectrum, name=name)
+        assert isinstance(spectrum, dLux.CombinedSpectrum), \
+        ("The input spectrum must be a CombinedSpectrum object.")
         
-        self.separation  = np.asarray(separation, dtype=float)
-        self.field_angle = np.asarray(field_angle, dtype=float)
-        self.flux_ratio  = np.asarray(flux_ratio, dtype=float)
+        super().__init__(position=position,
+                         flux=flux,
+                         spectrum=spectrum,
+                         separation=separation,
+                         field_angle=field_angle,
+                         flux_ratio=flux_ratio,
+                         name=name)
     
     
-    def model(self      : Source, 
+    def model(self      : Source,
               optics    : Optics,
               detector  : Detector = None,
               filter_in : Filter   = None) -> Array:
@@ -712,9 +816,9 @@ class BinarySource(RelativeFluxSource, RelativePositionSource):
             return psf
         else:
             return detector.apply_detector(psf)
-        
-        
-class PointExtendedSource(ArrayDistribution, RelativeFluxSource):
+    
+    
+class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
     """
     A class for modelling a point source and a resolved source that is defined 
     relative to the point source. An example would be an unresolved star with 
@@ -723,15 +827,10 @@ class PointExtendedSource(ArrayDistribution, RelativeFluxSource):
     ratio (contrast) between the point source and resolved distribution. The
     resolved component is defined by an array (ie this class inherits from 
     ArrayDistribution).
-    
-    Attributes
-    ----------
-    flux_ratio : Array
-        The contrast ratio between the point source and the resolved source.
     """
-    flux_ratio : Array
     
-    def __init__(self         : Source, 
+    
+    def __init__(self         : Source,
                  position     : Array,
                  flux         : Array,
                  spectrum     : Spectrum,
@@ -742,8 +841,7 @@ class PointExtendedSource(ArrayDistribution, RelativeFluxSource):
         Parameters
         ----------
         position : Array, radians
-            The (x, y) on-sky position of this object. Units are currently in
-            radians, but will likely be extended to RA/DEC.
+            The (x, y) on-sky position of this object.
         flux : Array, photons
             The flux of the object.
         spectrum : Spectrum
@@ -754,13 +852,14 @@ class PointExtendedSource(ArrayDistribution, RelativeFluxSource):
             The contrast ratio between the point source and the resolved 
             source.
         name : str (optional)
-            The name for this object. Defaults to 'Source'
+            The name for this object. Defaults to 'PointExtendedSource'
         """
-        super().__init__(position, flux, spectrum, distribution, name=name)
-        self.flux_ratio = np.asarray(flux_ratio, dtype=float)
-
+        super().__init__(position=position, flux=flux, spectrum=spectrum, \
+                         distribution=distribution, flux_ratio=flux_ratio, \
+                         name=name)
         
-    def model(self      : Source, 
+        
+    def model(self      : Source,
               optics    : Optics,
               detector  : Detector = None,
               filter_in : Filter   = None) -> Array:
@@ -799,7 +898,7 @@ class PointExtendedSource(ArrayDistribution, RelativeFluxSource):
         extended_psf = spectral_psfs[1].sum(0)
         
         # Convolve distribution
-        convolved = jsp.signal.convolve(extended_psf, self.get_distribution(),\
+        convolved = jsp.signal.convolve(extended_psf, self.get_distribution(), \
                                         mode='same')
         psf = convolved + point_psf
     
@@ -810,7 +909,7 @@ class PointExtendedSource(ArrayDistribution, RelativeFluxSource):
             return detector.apply_detector(psf)
     
     
-class PointAndExtendedSource(ArrayDistribution, RelativeFluxSource):
+class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
     """
     A class for modelling a point source and a resolved source that is defined 
     relative to the point source, but with its own spectra. An example would be
@@ -819,47 +918,43 @@ class PointAndExtendedSource(ArrayDistribution, RelativeFluxSource):
     and the flux ratio (contrast) between the point source and resolved 
     distribution. The resolved component is defined by an array (ie this class
     inherits from ArrayDistribution).
-    
-    Attributes
-    ----------
-    flux_ratio : Array
-        The contrast ratio between the point source and the resolved source.
     """
-    flux_ratio : Array
     
-           
-    def __init__(self         : Source, 
+    
+    def __init__(self         : Source,
                  position     : Array,
                  flux         : Array,
                  spectrum     : Spectrum,
                  distribution : Array,
                  flux_ratio   : Array,
-                 name         : str = 'Source') -> Source:
+                 name         : str = 'PointAndExtendedSource') -> Source:
         """
         Parameters
         ----------
         position : Array, radians
-            The (x, y) on-sky position of this object. Units are currently in
-            radians, but will likely be extended to RA/DEC.
+            The (x, y) on-sky position of this object.
         flux : Array, photons
             The flux of the object.
-        spectrum : Spectrum
-            The spectrum of this object, represented by a Spectrum object.
+        spectrum : CombinedSpectrum
+            The spectrum of this object, represented by a CombinedSpectrum \
+            object.
         distribution : Array
             The array of intensities respresenting the resolved source.
         flux_ratio : Array
             The contrast ratio between the point source and the resolved 
             source.
         name : str (optional)
-            The name for this object. Defaults to 'Source'
+            The name for this object. Defaults to 'PointAndExtendedSource'
         """
-        assert isinstance(spectrum, dLux.CombinedSpectrum), "The input spectrum \
-        must be a CombinedSpectrum object"
-        super().__init__(position, flux, spectrum, distribution, name=name)
-        self.flux_ratio = np.asarray(flux_ratio, dtype=float)
-    
+        assert isinstance(spectrum, dLux.CombinedSpectrum), \
+        ("The input spectrum must be a CombinedSpectrum object.")
         
-    def model(self      : Source, 
+        super().__init__(position=position, flux=flux, spectrum=spectrum, \
+                         distribution=distribution, flux_ratio=flux_ratio, \
+                         name=name)
+    
+    
+    def model(self      : Source,
               optics    : Optics,
               detector  : Detector = None,
               filter_in : Filter   = None) -> Array:

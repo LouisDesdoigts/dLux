@@ -64,6 +64,7 @@ class Base(abc.ABC, eqx.Module):
         unique to and and all parameter names within the PyTree structure!
     """
     
+    
     ######################
     ### Hidden methods ###
     ######################
@@ -99,7 +100,8 @@ class Base(abc.ABC, eqx.Module):
 
         # Return param if at the end of path, else recurse
         return pytree if len(path) == 1 else self._get_leaf(pytree, path[1:])
-
+    
+    
     # TODO: Re-write the logic in this a bit nice for optional values input
     def _unwrap_paths(self : Pytree, paths : list_like, 
                       values : list_like = None, 
@@ -123,7 +125,7 @@ class Base(abc.ABC, eqx.Module):
             be nested
         path_dict : dict (optional)
             A dictionary of absolute paths 
-            
+        
         Returns
         -------
         new_paths : list
@@ -185,7 +187,8 @@ class Base(abc.ABC, eqx.Module):
             return new_paths
         else:
             return new_paths, new_values
-
+    
+    
     ########################
     ### Accessor methods ###
     ########################
@@ -209,7 +212,8 @@ class Base(abc.ABC, eqx.Module):
 
         # Get the leaf
         return self._get_leaf(self, new_path)
-
+    
+    
     def get_leaves(self : Pytree, paths : list_like, 
                     path_dict : dict = None) -> list:
         """
@@ -221,8 +225,8 @@ class Base(abc.ABC, eqx.Module):
             A list/tuple of nested paths. Note path objects can only be 
             nested a single time
         path_dict : dict (optional)
-            A dictionary of absolute paths 
-            
+            A dictionary of absolute paths
+        
         Returns
         -------
         leaves : list
@@ -231,7 +235,8 @@ class Base(abc.ABC, eqx.Module):
         # Unwrap paths
         new_paths = self._unwrap_paths(paths, path_dict=path_dict)
         return [self._get_leaf(self, path) for path in new_paths]
-
+    
+    
     #######################
     ### Updater methods ###
     #######################
@@ -250,8 +255,8 @@ class Base(abc.ABC, eqx.Module):
             A list/tuple of new values to be applied to the leaves 
             specified by paths. These can not be nested.
         path_dict : dict (optional)
-            A dictionary of absolute paths .
-            
+            A dictionary of absolute paths.
+        
         Returns
         -------
         pytree : Pytree
@@ -265,8 +270,8 @@ class Base(abc.ABC, eqx.Module):
         # Define 'where' function and update pytree
         get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
         return eqx.tree_at(get_leaves_fn, self, new_values)
-
-
+    
+    
     def apply_to_leaves(self : Pytree, paths : list_like, fns : list_like, \
                         path_dict : dict = None) -> Pytree:
         """
@@ -283,7 +288,7 @@ class Base(abc.ABC, eqx.Module):
             by paths. These can not be nested.
         path_dict : dict (optional)
             A dictionary of absolute paths.
-            
+        
         Returns
         -------
         pytree : Pytree
@@ -382,7 +387,7 @@ class Base(abc.ABC, eqx.Module):
             return param_spec
         else:
             return param_spec, self.get_filter_spec(paths, path_dict=path_dict)
-
+    
     
     def get_optimiser(self : Pytree, paths : list_like, \
                       optimisers : list_like, get_filter_spec : bool = False, \
@@ -404,7 +409,7 @@ class Base(abc.ABC, eqx.Module):
             object.
         path_dict : dict (optional)
             A dictionary of absolute paths.
-            
+        
         Returns
         -------
         optimiser : Optax.GradientTransformion
@@ -432,7 +437,7 @@ class Base(abc.ABC, eqx.Module):
             return optim
         else:
             return optim, self.get_filter_spec(paths, path_dict=path_dict)
-
+    
     
     #########################
     ### Numpyro functions ###
@@ -531,8 +536,6 @@ class OpticalSystem(Base):
     detector_layers: list, optional
         - A second list of layer objects designed to allow processing of psfs, rather than wavefronts
         - It is applied to each image after psfs have been approraitely weighted and summed
-    
-    
     """
 
     # Helpers, Determined from inputs, not real params
@@ -834,7 +837,7 @@ class Instrument(Base):
             A Filter object that is used to model the effective throughput of
             each wavelength though the Instrument.
         """ 
-        # Optics            
+        # Optics
         if optics is None and optical_layers == []:
             self.optics = Optics([])
         elif optics is not None and optical_layers != []:
@@ -852,7 +855,7 @@ class Instrument(Base):
             raise ValueError("How did you get here? Please raise a bug report \
                                                 to help improve the software.")
         
-        # Detector            
+        # Detector
         if detector is None and detector_layers == []:
             self.detector = Detector([])
         elif detector is not None and detector_layers != []:
@@ -870,7 +873,7 @@ class Instrument(Base):
             raise ValueError("How did you get here? Please raise a bug report \
                                                 to help improve the software.")
         
-        # Scene            
+        # Scene
         if scene is None and sources == []:
             self.scene = Scene([])
         elif scene is not None and sources != []:
@@ -982,7 +985,8 @@ class Instrument(Base):
             return psf
         else:
             return detector.apply_detector(psf)
-
+    
+    
     def model(self      : Instrument, 
               optics    : Optics   = None,
               scene     : Scene    = None, 
@@ -1061,9 +1065,11 @@ class Optics(Base):
             A list of ∂Lux 'layers' that define the transformations and
             operations upon some input wavefront through an optical system.
         """
+        assert isinstance(layers, list), "Input layers must be a list, it is \
+        automatically converted to a dictionary"
         self.layers = dLux.utils.list_to_dict(layers)
     
-
+    
     def propagate_mono(self       : Optics,
                        wavelength : Array,
                        offset     : Array = np.zeros(2),
@@ -1264,6 +1270,8 @@ class Scene(Base):
             a list of individual source objects that is automatically converted
             into a dictionary
         """
+        assert isinstance(layers, list), "Input sources must be a list, it is \
+        automatically converted to a dictionary"
         self.sources = dLux.utils.list_to_dict(sources, ordered=False)
         
     
@@ -1304,7 +1312,6 @@ class Scene(Base):
         return jtu.tree_map(normalise_fn, sources, \
                         is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
     
-        
     
     def model_optics(self      : Scene, 
                      optics    : Optics,
@@ -1474,6 +1481,8 @@ class Detector(Base):
             An list of dLux detector layer classes that define the instrumental 
             effects for some detector.
         """
+        assert isinstance(layers, list), "Input layers must be a list, it is \
+        automatically converted to a dictionary"
         self.layers = dLux.utils.list_to_dict(layers)
     
     
