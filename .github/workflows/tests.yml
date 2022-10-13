@@ -34,5 +34,11 @@ jobs:
       - name: propagator tests
         run: pytest --quiet tests/propagators.py
 
+      - name: spectrum tests
+        run: pytest --quiet tests/spectrums.py
+
+      - name: source tests
+        run: pytest --quiet tests/sources.py
+
 #            - name: layer tests
 #              run: pytest --quiet tests/layers.py
