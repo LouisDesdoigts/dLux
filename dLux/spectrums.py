@@ -1,16 +1,15 @@
 from __future__ import annotations
-import jax
-import jax.numpy as np
-import equinox as eqx
 import abc
 import typing
+import jax.numpy as np
+from equinox import tree_at
+from jax import vmap
 import dLux
 
-__author__ = "Louis Desdoigts"
-__date__ = "30/08/2022"
-__all__ = ["ArraySpectrum", "PolynomialSpectrum", "CombinedSpectrum"]
 
+__all__ = ["ArraySpectrum", "PolynomialSpectrum", "CombinedSpectrum"]
 Array =  typing.NewType("Array", np.ndarray)
+
 
 class Spectrum(dLux.base.Base, abc.ABC):
     """
@@ -71,7 +70,7 @@ class Spectrum(dLux.base.Base, abc.ABC):
         spectrum : Specturm
             The spectrum object with the updated wavelengths.
         """
-        return eqx.tree_at(
+        return tree_at(
             lambda spectrum : spectrum.wavelengths, self, wavelengths)
     
     
@@ -91,8 +90,8 @@ class Spectrum(dLux.base.Base, abc.ABC):
         classes.
         """
         return
-    
-    
+
+
 class ArraySpectrum(Spectrum):
     """
     A Spectrum class that interally parametersises the spectrum via arrays (ie
@@ -163,7 +162,7 @@ class ArraySpectrum(Spectrum):
         spectrum : Specturm
             The spectrum object with the updated weights.
         """
-        return eqx.tree_at(
+        return tree_at(
             lambda spectrum : spectrum.weights, self, weights)
     
     
@@ -179,8 +178,8 @@ class ArraySpectrum(Spectrum):
         """
         total_power = self.get_weights().sum()
         return self.set_weights(self.get_weights()/total_power)
-    
-    
+
+
 class PolynomialSpectrum(Spectrum):
     """
     Implements a generic polynomial spectrum. This is likely not needed and
@@ -245,8 +244,7 @@ class PolynomialSpectrum(Spectrum):
         weights : Array
             The normalised relative weights of each wavelength.
         """
-        # TODO: test this a bit more rigorously - at first pass seems fine
-        generate_polynomial = jax.vmap(lambda wavelength : 
+        generate_polynomial = vmap(lambda wavelength : 
                                 np.array([self.coefficients[i] * wavelength**i 
                                 for i in range(len(self.coefficients))]).sum())
         weights = generate_polynomial(self.wavelengths)
@@ -279,7 +277,7 @@ class PolynomialSpectrum(Spectrum):
         spectrum : Specturm
             The spectrum object with the updated coefficients.
         """
-        return eqx.tree_at(
+        return tree_at(
             lambda spectrum : spectrum.coefficients, self, coefficients)
     
     
@@ -294,8 +292,8 @@ class PolynomialSpectrum(Spectrum):
             The unmodified spectrum object
         """
         return self
-    
-    
+
+
 class CombinedSpectrum(ArraySpectrum):
     """
     Implements a combined spectrum, in order to have only a single spectrum
