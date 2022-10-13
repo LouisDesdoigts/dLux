@@ -1,22 +1,20 @@
 from __future__ import annotations
-import jax
+import typing
+import abc
+import warnings
 import jax.numpy as np
 from jax import vmap
-import equinox as eqx
+from jax.tree_util import tree_map, tree_flatten
+from jax.scipy.ndimage import map_coordinates
+from equinox import tree_at, Module, static_field
+from optax import adam, multi_transform
+from collections import OrderedDict
 from copy import deepcopy
 import dLux
-import typing
-import optax
-import abc
-from collections import OrderedDict
-import warnings
-import jax.tree_util as jtu
 
 
 __all__ = ["OpticalSystem", "Instrument", "Optics", "Scene",
            "Filter", "Detector"]
-
-# Types
 Array     = typing.NewType("Array",  np.ndarray)
 list_like = typing.Union[list, tuple]
 Path      = typing.Union[list, tuple]
@@ -24,7 +22,7 @@ Pytree    = typing.NewType("Pytree", object)
 Leaf      = typing.Any
 
 
-class Base(abc.ABC, eqx.Module):
+class Base(abc.ABC, Module):
     """
     An abstract base class that is used to give a user-friendly API for working
     with PyTrees, specifically using Equniox. This can be thought of as
@@ -95,7 +93,7 @@ class Base(abc.ABC, eqx.Module):
             The leaf object specified at the end of the path object
         """
         key = path[0]
-        pytree = pytree.__dict__[key] if isinstance(pytree, eqx.Module) else \
+        pytree = pytree.__dict__[key] if isinstance(pytree, Module) else \
                  pytree[key]
 
         # Return param if at the end of path, else recurse
@@ -269,7 +267,7 @@ class Base(abc.ABC, eqx.Module):
 
         # Define 'where' function and update pytree
         get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
-        return eqx.tree_at(get_leaves_fn, self, new_values)
+        return tree_at(get_leaves_fn, self, new_values)
     
     
     def apply_to_leaves(self : Pytree, paths : list_like, fns : list_like, \
@@ -305,7 +303,7 @@ class Base(abc.ABC, eqx.Module):
 
         # Define 'where' function and update pytree
         get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
-        return eqx.tree_at(get_leaves_fn, self, new_values)
+        return tree_at(get_leaves_fn, self, new_values)
     
     
     #########################
@@ -336,7 +334,7 @@ class Base(abc.ABC, eqx.Module):
             An pytree of matching structre with boolean values at the 
             leaves
         """
-        filter_spec = jax.tree_map(lambda _: False, self)
+        filter_spec = tree_map(lambda _: False, self)
         values = len(paths) * [True]
         return filter_spec.update_leaves(paths, values, path_dict=path_dict)
     
@@ -377,7 +375,7 @@ class Base(abc.ABC, eqx.Module):
             An pytree of matching structre with string values at the 
             leaves specified by groups. 
         """
-        param_spec = jax.tree_map(lambda _: "null", self)
+        param_spec = tree_map(lambda _: "null", self)
         param_spec = param_spec.update_leaves(paths, groups, \
                                               path_dict=path_dict)
 
@@ -426,10 +424,10 @@ class Base(abc.ABC, eqx.Module):
                          for i in range(len(groups))])
 
         # Assign the null group
-        opt_dict["null"] = optax.adam(0.0)
+        opt_dict["null"] = adam(0.0)
 
         # Get optimiser object
-        optim = optax.multi_transform(opt_dict, param_spec)
+        optim = multi_transform(opt_dict, param_spec)
 
         # For some weird ass reason this works correctly but single liner 
         # doesn't
@@ -910,7 +908,7 @@ class Instrument(Base):
             A new version of the instrument with the interally stored scene
             normalised.
         """
-        return eqx.tree_at(lambda instrument: instrument.scene, self, \
+        return tree_at(lambda instrument: instrument.scene, self, \
                            self.scene.normalise())
     
     
@@ -974,11 +972,11 @@ class Instrument(Base):
                                                         filter_in=filter_in)
         
         # Map the model_source function across the sources
-        psf_tree = jtu.tree_map(model_fn, sources, \
+        psf_tree = tree_map(model_fn, sources, \
                         is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
         
         # Get psfs
-        psf = np.array(jtu.tree_flatten(psf_tree)[0]).sum(0)
+        psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
         
         # apply detector
         if detector is None:
@@ -1030,11 +1028,11 @@ class Instrument(Base):
                                                     filter_in=filter_in)
         
         # Map the model_source function across the sources
-        psf_tree = jtu.tree_map(model_fn, scene.sources, \
+        psf_tree = tree_map(model_fn, scene.sources, \
                         is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
         
         # Get psfs
-        psf = np.array(jtu.tree_flatten(psf_tree)[0]).sum(0)
+        psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
         
         # Apply detector
         image = detector.apply_detector(psf)
@@ -1132,7 +1130,7 @@ class Optics(Base):
             The broadband point spread function after being propagated
             though the optical layers.
         """
-        propagator = jax.vmap(self.propagate_mono, in_axes=(0, None, 0, None))
+        propagator = vmap(self.propagate_mono, in_axes=(0, None, 0, None))
         psfs = propagator(wavelengths, offset, weights)
         return psfs.sum(0)
     
@@ -1235,11 +1233,11 @@ class Optics(Base):
                                                         filter_in=filter_in)
         
         # Map the model_source function across the sources
-        psf_tree = jtu.tree_map(model_fn, sources, \
+        psf_tree = tree_map(model_fn, sources, \
                         is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
         
         # Get psfs
-        psf = np.array(jtu.tree_flatten(psf_tree)[0]).sum(0)
+        psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
         
         # apply detector
         if detector is None:
@@ -1286,7 +1284,7 @@ class Scene(Base):
             normalised.
         """
         normalised_sources = self.normalise_sources(self.sources)
-        return eqx.tree_at(lambda scene: scene.sources, self, \
+        return tree_at(lambda scene: scene.sources, self, \
                                                     normalised_sources)
     
     
@@ -1309,7 +1307,7 @@ class Scene(Base):
         normalise_fn = lambda source: source.normalise()
         
         # Map the model_source function across the sources
-        return jtu.tree_map(normalise_fn, sources, \
+        return tree_map(normalise_fn, sources, \
                         is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
     
     
@@ -1340,12 +1338,12 @@ class Scene(Base):
                                                         filter_in=filter_in)
         
         # Map the model_source function across the sources
-        psf_tree = jtu.tree_map(model_fn, sources, \
+        psf_tree = tree_map(model_fn, sources, \
                         is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
         
         
         # Get psf
-        psf = np.array(jtu.tree_flatten(psf_tree)[0]).sum(0)
+        psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
         
         # apply detector
         if detector is None:
@@ -1369,7 +1367,7 @@ class Filter(Base):
     """
     wavelengths : Array
     throughput  : Array
-    filter_name : str = eqx.static_field()
+    filter_name : str = static_field()
     
     
     def __init__(self        : Filter,
@@ -1454,7 +1452,7 @@ class Filter(Base):
         wavelength_range = max_wavelength - min_wavelength
         num_wavelength = self.wavelengths.shape[0]
         indxs = num_wavelength*(wavelengths - min_wavelength)/wavelength_range
-        throughputs = jax.scipy.ndimage.map_coordinates(self.throughput, \
+        throughputs = map_coordinates(self.throughput, \
                                         np.array([indxs]), 1, 'nearest')
         return throughputs
 
