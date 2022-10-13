@@ -1,50 +1,19 @@
-"""
-utilities.py
-------------
-This file contains testing utilities to help with the generation of 
-safe test wavefronts, propagators, layers and detectors. 
-
-Abstract Classes 
-----------------
-- Utility (abstract)
-- UtilityUser (abstract)
-
-Concrete Classes
-----------------
-- Utility
-- PhysicalUtility
-- AngularUtility
-- GaussianUtility
-- PropagatorUtility
-- VariabelSamplingUtility
-- FixedSamplingUtility
-- PhysicalMFTUtility
-- PhysicalFFTUtility
-- PhysicalFresnelUtility
-- AngularMFTUtility
-- AngularFFTUtility
-- AngularFresnelUtility
-- GaussianPropagatorUtility
-"""
-__author__ = "Jordan Dennis"
-__date__ = "28/06/2022"
-
-
-import jax.numpy as numpy
+from __future__ import annotations
+import jax.numpy as np
 import dLux
 import typing
 import abc
 
+__author__ = "Jordan Dennis"
+__date__ = "28/06/2022"
 
-Array = typing.NewType("Array", numpy.ndarray)
-PlaneType = typing.NewType("PlaneType", dLux.PlaneType)
-Wavefront = typing.NewType("Wavefront", object)
-Propagator = typing.NewType("Propagator", object)
-Utility = typing.NewType("Utility", object)
-UtilityUser = typing.NewType("UtilityUser", object)
+Array = typing.NewType("Array", np.ndarray)
+PlaneType = typing.NewType("PlaneType", dLux.wavefronts.PlaneType)
+Wavefront = typing.NewType("Wavefront", dLux.wavefronts.Wavefront)
+Propagator = typing.NewType("Propagator", dLux.propagators.Propagator)
 
 
-class UtilityUser(object):
+class UtilityUser():
     """
     The base utility class. These utility classes are designed to 
     define safe constructors and constants for testing. These   
@@ -62,10 +31,10 @@ class UtilityUser(object):
         utility : Utility
             The utility
         """
-        return self.utility 
+        return self.utility
 
 
-class Utility(object):
+class Utility():
     """
     """
     def __init__(self : Utility) -> Utility:
@@ -137,7 +106,7 @@ class WavefrontUtility(Utility):
     plane_type : PlaneType
 
 
-    def __init__(self : Utility, /, 
+    def __init__(self : Utility, /,
             wavelength : float = None, 
             offset : Array = None,
             size : int = None,
@@ -171,12 +140,12 @@ class WavefrontUtility(Utility):
             The new utility for generating test cases.
         """
         self.wavelength = 550e-09 if not wavelength else wavelength
-        self.offset = numpy.array([0., 0.]).astype(float) if not \
-            offset else numpy.array(offset).astype(float)           
+        self.offset = np.array([0., 0.]).astype(float) if not \
+            offset else np.array(offset).astype(float)           
         self.size = 128 if not size else size
-        self.amplitude = numpy.ones((1, self.size, self.size)) if not \
+        self.amplitude = np.ones((1, self.size, self.size)) if not \
             amplitude else amplitude
-        self.phase = numpy.zeros((1, self.size, self.size)) if not \
+        self.phase = np.zeros((1, self.size, self.size)) if not \
             phase else phase
         self.pixel_scale = 1. if not pixel_scale else pixel_scale
         self.plane_type = dLux.PlaneType.Pupil if not \
@@ -186,7 +155,7 @@ class WavefrontUtility(Utility):
         assert self.size == self.amplitude.shape[-2]
         assert self.size == self.phase.shape[-1]
         assert self.size == self.phase.shape[-2]          
- 
+
 
     def construct(self : Utility) -> Wavefront:
         """
@@ -423,7 +392,7 @@ class AngularWavefrontUtility(WavefrontUtility):
 #         """
 #         super().__init__(wavelength, offset, size, amplitude, phase)
 #         self.beam_radius = 1. if not beam_radius else beam_radius
-#         self.phase_radius = numpy.inf if not phase_radius else phase_radius
+#         self.phase_radius = np.inf if not phase_radius else phase_radius
 #         self.position = 0. if not position else position
 
 
@@ -473,7 +442,7 @@ class AngularWavefrontUtility(WavefrontUtility):
 #             .update_phasor(self.amplitude, self.phase)\
 #             .set_pixel_scale(self.pixel_scale)\
 #             .set_position(self.position)\
-#             .set_phase_radius(numpy.inf)\
+#             .set_phase_radius(np.inf)\
 #             .set_beam_radius(self.beam_radius)
 
 #         return wavefront
@@ -997,3 +966,445 @@ class AngularFFTUtility(FixedSamplingUtility, UtilityUser):
 #         """
 #         return dLux.GaussianPropagator(distance)
 
+
+##########################
+### Spectrum Utilities ###
+##########################
+class SpectrumUtility(Utility):
+    """
+    Utility for the Spectrum class.
+    """
+    wavelengths : Array
+    dLux.spectrums.Spectrum.__abstractmethods__ = ()
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constrcutor for the Spectrum Utility.
+        """
+        self.wavelengths = np.linspace(500e-9, 600e-9, 10)
+    
+    
+    def construct(self : Utility, wavelengths : Array = None) -> Spectrum:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        wavelengths = self.wavelengths if wavelengths is None else wavelengths
+        return dLux.spectrums.Spectrum(wavelengths)
+    
+    
+class SpectrumUtility(Utility):
+    """
+    Utility for the Spectrum class.
+    """
+    wavelengths : Array
+    dLux.spectrums.Spectrum.__abstractmethods__ = ()
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constrcutor for the Spectrum Utility.
+        """
+        self.wavelengths = np.linspace(500e-9, 600e-9, 10)
+    
+    
+    def construct(self : Utility, wavelengths : Array = None) -> Spectrum:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        wavelengths = self.wavelengths if wavelengths is None else wavelengths
+        return dLux.spectrums.Spectrum(wavelengths)
+    
+    
+class ArraySpectrumUtility(SpectrumUtility):
+    """
+    Utility for the ArraySpectrum class.
+    """
+    weights : Array
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constrcutor for the ArraySpectrum Utility.
+        """
+        super().__init__()
+        self.weights = np.arange(10)
+    
+    
+    def construct(self : Utility, wavelengths : Array = None,
+                  weights : Array = None) -> Spectrum:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        wavelengths = self.wavelengths if wavelengths is None else wavelengths
+        weights = self.weights if weights is None else weights
+        return dLux.spectrums.ArraySpectrum(wavelengths, weights)
+    
+    
+class PolynomialSpectrumUtility(SpectrumUtility):
+    """
+    Utility for the PolynomialSpectrum class.
+    """
+    coefficients : Array
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constrcutor for the PolynomialSpectrum Utility.
+        """
+        super().__init__()
+        self.coefficients = np.arange(3)
+    
+    
+    def construct(self : Utility, wavelengths : Utility = None,
+                  coefficients : Utility = None) -> Spectrum:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        wavelengths = self.wavelengths if wavelengths is None else wavelengths
+        coefficients = self.coefficients if coefficients is None \
+                                                            else coefficients
+        return dLux.spectrums.PolynomialSpectrum(wavelengths, coefficients)
+    
+    
+class CombinedSpectrumUtility(SpectrumUtility):
+    """
+    Utility for the ArraySpectrum class.
+    """
+    wavelengths : Array
+    weights     : Array
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constrcutor for the ArraySpectrum Utility.
+        """
+        super()
+        self.wavelengths = np.tile(np.linspace(500e-9, 600e-9, 10), (2, 1))
+        self.weights = np.tile(np.arange(10), (2, 1))
+    
+    
+    def construct(self : Utility, wavelengths : Utility = None,
+                  weights : Utility = None) -> Spectrum:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        wavelengths = self.wavelengths if wavelengths is None else wavelengths
+        weights = self.weights if weights is None else weights
+        return dLux.spectrums.CombinedSpectrum(wavelengths, weights)
+
+
+########################
+### Source Utilities ###
+########################
+class SourceUtility(Utility):
+    """
+    Utility for the Source class.
+    """
+    position : Array
+    flux     : Array
+    spectrum : dLux.spectrums.Spectrum
+    name     : str
+    dLux.sources.Source.__abstractmethods__ = ()
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the Source Utility.
+        """
+        self.position = np.array([0., 0.])
+        self.flux     = np.array(1.)
+        self.spectrum = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
+                                                                 600e-9, 10))
+        self.name = "Source"
+    
+    
+    def construct(self     : Utility,
+                  position : Array    = None,
+                  flux     : Array    = None,
+                  spectrum : Spectrum = None,
+                  name     : str      = None) -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        position = self.position if position is None else position
+        flux     = self.flux     if flux     is None else flux
+        spectrum = self.spectrum if spectrum is None else spectrum
+        name     = self.name     if name     is None else name
+        return dLux.sources.Source(position, flux, spectrum, name=name)
+    
+    
+class ResolvedSourceUtility(SourceUtility):
+    """
+    Utility for the ResolvedSource class.
+    """
+    dLux.sources.ResolvedSource.__abstractmethods__ = ()
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the ResolvedSource Utility.
+        """
+        pass
+    
+    
+    def construct(self     : Utility,
+                  position : Array    = None,
+                  flux     : Array    = None,
+                  spectrum : Spectrum = None,
+                  name     : str      = None) -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        position = self.position if position is None else position
+        flux     = self.flux     if flux     is None else flux
+        spectrum = self.spectrum if spectrum is None else spectrum
+        name     = self.name     if name     is None else name
+        return dLux.sources.Source(position, flux, spectrum, name=name)
+    
+    
+class RelativeFluxSourceUtility(SourceUtility):
+    """
+    Utility for the RelativeFluxSource class.
+    """
+    flux_ratio : Array
+    dLux.sources.RelativeFluxSource.__abstractmethods__ = ()
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the RelativeFluxSource Utility.
+        """
+        super().__init__()
+        self.flux_ratio = np.array(2.)
+    
+    
+    def construct(self       : Utility,
+                  position   : Array    = None,
+                  flux       : Array    = None,
+                  spectrum   : Spectrum = None,
+                  flux_ratio : Array    = None,
+                  name       : str      = None) -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        position   = self.position   if position   is None else position
+        flux       = self.flux       if flux       is None else flux
+        spectrum   = self.spectrum   if spectrum   is None else spectrum
+        flux_ratio = self.flux_ratio if flux_ratio is None else flux_ratio
+        name       = self.name       if name       is None else name
+        return dLux.sources.RelativeFluxSource(flux_ratio, position, flux, \
+                                               spectrum, name=name)
+    
+    
+class RelativePositionSourceUtility(SourceUtility):
+    """
+    Utility for the RelativePositionSource class.
+    """
+    separation : Array
+    field_angle : Array
+    dLux.sources.RelativePositionSource.__abstractmethods__ = ()
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the RelativePositionSource Utility.
+        """
+        super().__init__()
+        self.separation  = np.array(1.)
+        self.field_angle = np.array(0.)
+    
+    
+    def construct(self        : Utility,
+                  position    : Array    = None,
+                  flux        : Array    = None,
+                  spectrum    : Spectrum = None,
+                  separation  : Array    = None,
+                  field_angle : Array    = None,
+                  name        : str      = None) -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        position    = self.position    if position    is None else position
+        flux        = self.flux        if flux        is None else flux
+        spectrum    = self.spectrum    if spectrum    is None else spectrum
+        separation  = self.separation  if separation  is None else separation
+        field_angle = self.field_angle if field_angle is None else field_angle
+        name        = self.name        if name        is None else name
+        return dLux.sources.RelativePositionSource(separation, field_angle, \
+                                            position, flux, spectrum, name=name)
+    
+    
+class PointSourceUtility(SourceUtility):
+    """
+    Utility for the PointSource class.
+    """
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the PointSource Utility.
+        """
+        super().__init__()
+    
+    
+    def construct(self     : Utility,
+                  position : Array    = None,
+                  flux     : Array    = None,
+                  spectrum : Spectrum = None,
+                  name     : str      = None) -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        position = self.position if position is None else position
+        flux     = self.flux     if flux     is None else flux
+        spectrum = self.spectrum if spectrum is None else spectrum
+        name     = self.name     if name     is None else name
+        return dLux.sources.PointSource(position, flux, spectrum, name=name)
+    
+    
+class ArrayDistributionUtility(SourceUtility):
+    """
+    Utility for the ArrayDistribution class.
+    """
+    distribution : Array
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the ArrayDistribution Utility.
+        """
+        super().__init__()
+        distribution = np.ones((5, 5))
+        self.distribution = distribution/distribution.sum()
+    
+    
+    def construct(self         : Utility,
+                  position     : Array    = None,
+                  flux         : Array    = None,
+                  spectrum     : Spectrum = None,
+                  distribution : Array    = None,
+                  name         : str      = None) -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        position     = self.position     if position     is None else position
+        flux         = self.flux         if flux         is None else flux
+        spectrum     = self.spectrum     if spectrum     is None else spectrum
+        name         = self.name         if name         is None else name
+        distribution = self.distribution if distribution is None \
+                                                            else distribution
+        return dLux.sources.ArrayDistribution(position, flux, spectrum, \
+                                              distribution, name=name)
+    
+    
+class BinarySourceUtility(RelativePositionSourceUtility, \
+                          RelativeFluxSourceUtility):
+    """
+    Utility for the BinarySource class.
+    """
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the BinarySource Utility.
+        """
+        super().__init__()
+        wavelengths = np.tile(np.linspace(500e-9, 600e-9, 10), (2, 1))
+        weights     = np.tile(np.arange(10), (2, 1))
+        self.spectrum = dLux.spectrums.CombinedSpectrum(wavelengths, weights)
+    
+    
+    def construct(self        : Utility,
+                  position    : Array    = None,
+                  flux        : Array    = None,
+                  spectrum    : Spectrum = None,
+                  separation  : Array    = None,
+                  field_angle : Array    = None,
+                  flux_ratio  : Array    = None,
+                  name        : str      = None) -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        position    = self.position    if position    is None else position
+        flux        = self.flux        if flux        is None else flux
+        spectrum    = self.spectrum    if spectrum    is None else spectrum
+        separation  = self.separation  if separation  is None else separation
+        field_angle = self.field_angle if field_angle is None else field_angle
+        flux_ratio  = self.flux_ratio  if flux_ratio  is None else flux_ratio
+        name        = self.name        if name        is None else name
+        return dLux.sources.BinarySource(position, flux, separation, \
+                                  field_angle, flux_ratio, spectrum, name=name)
+    
+    
+class PointExtendedSourceUtility(RelativeFluxSourceUtility, \
+                                 ArrayDistributionUtility):
+    """
+    Utility for the PointExtendedSource class.
+    """
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the PointExtendedSource Utility.
+        """
+        super().__init__()
+    
+    
+    def construct(self         : Utility,
+                  position     : Array    = None,
+                  flux         : Array    = None,
+                  spectrum     : Spectrum = None,
+                  flux_ratio   : Array    = None,
+                  distribution : Array    = None,
+                  name         : str      = None) -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        position     = self.position     if position     is None else position
+        flux         = self.flux         if flux         is None else flux
+        spectrum     = self.spectrum     if spectrum     is None else spectrum
+        flux_ratio   = self.flux_ratio   if flux_ratio   is None else flux_ratio
+        name         = self.name         if name         is None else name
+        distribution = self.distribution if distribution is None \
+                                                            else distribution
+        return dLux.sources.PointExtendedSource(position, flux, spectrum, \
+                                         distribution, flux_ratio, name=name)
+    
+    
+class PointAndExtendedSourceUtility(RelativeFluxSourceUtility, \
+                                    ArrayDistributionUtility):
+    """
+    Utility for the PointAndExtendedSource class.
+    """
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the PointAndExtendedSource Utility.
+        """
+        super().__init__()
+        wavelengths = np.tile(np.linspace(500e-9, 600e-9, 10), (2, 1))
+        weights = np.tile(np.arange(10), (2, 1))
+        self.spectrum = dLux.spectrums.CombinedSpectrum(wavelengths, weights)
+    
+    
+    def construct(self         : Utility,
+                  position     : Array    = None,
+                  flux         : Array    = None,
+                  spectrum     : Spectrum = None,
+                  flux_ratio   : Array    = None,
+                  distribution : Array    = None,
+                  name         : str      = None) -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        position     = self.position     if position     is None else position
+        flux         = self.flux         if flux         is None else flux
+        spectrum     = self.spectrum     if spectrum     is None else spectrum
+        flux_ratio   = self.flux_ratio   if flux_ratio   is None else flux_ratio
+        name         = self.name         if name         is None else name
+        distribution = self.distribution if distribution is None \
+                                                            else distribution
+        return dLux.sources.PointAndExtendedSource(position, flux, spectrum, \
+                                         distribution, flux_ratio, name=name)
