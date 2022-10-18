@@ -9,8 +9,11 @@ from jax.scipy.ndimage import map_coordinates
 from equinox import tree_at, Module, static_field
 from optax import adam, multi_transform
 from collections import OrderedDict
+from jax_cosmo.scipy.interpolate import InterpolatedUnivariateSpline
 from copy import deepcopy
 import dLux
+
+# TODO: Add jaxcosmos to requirements
 
 
 __all__ = ["OpticalSystem", "Instrument", "Optics", "Scene",
@@ -238,7 +241,7 @@ class Base(abc.ABC, Module):
     #######################
     ### Updater methods ###
     #######################
-    def update_leaves(self : Pytree, paths : list_like, values : list_like, \
+    def update_leaves(self : Pytree, paths : list_like, values : list_like,
                       path_dict : dict = None) -> Pytree:
         """
         Returns an updated version of the pytree with the leaves speficied by 
@@ -270,7 +273,7 @@ class Base(abc.ABC, Module):
         return tree_at(get_leaves_fn, self, new_values)
     
     
-    def apply_to_leaves(self : Pytree, paths : list_like, fns : list_like, \
+    def apply_to_leaves(self : Pytree, paths : list_like, fns : list_like,
                         path_dict : dict = None) -> Pytree:
         """
         Returns an updated version of the pytree with the the input functions 
@@ -309,7 +312,7 @@ class Base(abc.ABC, Module):
     #########################
     ### Equinox functions ###
     #########################
-    def get_filter_spec(self : Pytree, paths : list_like, \
+    def get_filter_spec(self : Pytree, paths : list_like,
                         path_dict : dict = None) -> Pytree:
         """
         Returns 'filter_spec' object, to be used in conjunction with the 
@@ -342,8 +345,8 @@ class Base(abc.ABC, Module):
     #######################
     ### Optax functions ###
     #######################
-    def get_param_spec(self : Pytree, paths : list_like, groups : list_like, \
-                       get_filter_spec : bool = False, \
+    def get_param_spec(self : Pytree, paths : list_like, groups : list_like,
+                       get_filter_spec : bool = False,
                        path_dict : dict = None) -> Pytree:
         """
         Returns 'param_spec' object, to be used in conjunction with the 
@@ -388,7 +391,7 @@ class Base(abc.ABC, Module):
     
     
     def get_optimiser(self : Pytree, paths : list_like, \
-                      optimisers : list_like, get_filter_spec : bool = False, \
+                      optimisers : list_like, get_filter_spec : bool = False,
                       path_dict : dict = None) -> object:
         """
         Returns an Optax.GradientTransformion object, with the optimisers 
@@ -440,8 +443,8 @@ class Base(abc.ABC, Module):
     #########################
     ### Numpyro functions ###
     #########################
-    def update_and_model(self : Pytree, model_fn : str, paths : list_like, \
-                         values : list_like, path_dict : dict = None, \
+    def update_and_model(self : Pytree, model_fn : str, paths : list_like,
+                         values : list_like, path_dict : dict = None,
                          *args, **kwargs) -> object:
         """
         Updates the leaves speficied by paths with values, and then calls the
@@ -803,9 +806,9 @@ class Instrument(Base):
                  filter   : Filter    = None,
                  
                  # List inputs
-                 optical_layers  : list = [],
-                 sources         : list = [],
-                 detector_layers : list = [],
+                 optical_layers  : list = None,
+                 sources         : list = None,
+                 detector_layers : list = None,
                  
                  # Observation :
                  ) -> Instrument:
@@ -836,66 +839,66 @@ class Instrument(Base):
             each wavelength though the Instrument.
         """ 
         # Optics
-        if optics is None and optical_layers == []:
+        if optics is None and optical_layers is None:
             self.optics = Optics([])
-        elif optics is not None and optical_layers != []:
-            raise ValueError("Either optics OR optical_layers can be \
-                                                        specified, not both.")
-        elif optics is not None and optical_layers == []:
-            assert isinstance(optics, Optics), "If optics is specified \
-            it must a dLux.base.Optics object."
+        elif optics is not None and optical_layers is not None:
+            raise ValueError("Either optics OR optical_layers can be "
+            "specified, not both.")
+        elif optics is not None and optical_layers is None:
+            assert isinstance(optics, Optics), "If optics is specified "
+            "it must a dLux.base.Optics object."
             self.optics = optics
-        elif optics is None and optical_layers != []:
-            assert isinstance(optical_layers, list), "If optical_layers is \
-            specified it must be a list."
+        elif optics is None and optical_layers is not None:
+            assert isinstance(optical_layers, list), "If optical_layers is "
+            "specified it must be a list."
             self.optics = Optics(optical_layers)
         else:
-            raise ValueError("How did you get here? Please raise a bug report \
-                                                to help improve the software.")
+            raise ValueError("How did you get here? Please raise a bug report "
+            "to help improve the software.")
         
         # Detector
-        if detector is None and detector_layers == []:
+        if detector is None and detector_layers is None:
             self.detector = Detector([])
-        elif detector is not None and detector_layers != []:
-            raise ValueError("Either detector OR detector_layers can be \
-                                                        specified, not both.")
-        elif detector is not None and detector_layers == []:
-            assert isinstance(detector, Detector), "If detector is specified \
-            it must a dLux.base.Detector object."
+        elif detector is not None and detector_layers is not None:
+            raise ValueError("Either detector OR detector_layers can be "
+            "specified, not both.")
+        elif detector is not None and detector_layers is None:
+            assert isinstance(detector, Detector), "If detector is specified "
+            "it must a dLux.base.Detector object."
             self.detector = detector
-        elif detector is None and detector_layers != []:
-            assert isinstance(detector_layers, list), "If detector_layers is \
-            specified it must be a list."
+        elif detector is None and detector_layers is not None:
+            assert isinstance(detector_layers, list), "If detector_layers is "
+            "specified it must be a list."
             self.detector = Detector(detector_layers)
         else:
-            raise ValueError("How did you get here? Please raise a bug report \
-                                                to help improve the software.")
+            raise ValueError("How did you get here? Please raise a bug report "
+            "to help improve the software.")
         
         # Scene
-        if scene is None and sources == []:
+        if scene is None and sources is None:
             self.scene = Scene([])
-        elif scene is not None and sources != []:
-            raise ValueError("Either scene OR sources can be \
-                                                        specified, not both.")
-        elif scene is not None and sources == []:
-            assert isinstance(scene, Scene), "If scene is specified it must a \
-            dLux.base.Scene object."
+        elif scene is not None and sources is not None:
+            raise ValueError("Either scene OR sources can be "
+            "specified, not both.")
+        elif scene is not None and sources is None:
+            assert isinstance(scene, Scene), "If scene is specified it must a "
+            "dLux.base.Scene object."
             self.scene = scene
-        elif scene is None and sources != []:
-            assert isinstance(sources, list), "If sources is specified it \
-            must be a list."
+        elif scene is None and sources is not None:
+            assert isinstance(sources, list), "If sources is specified it "
+            "must be a list."
             self.scene = Scene(sources)
         else:
-            raise ValueError("How did you get here? Please raise a bug report \
-                                                to help improve the software.")
+            raise ValueError("How did you get here? Please raise a bug report "
+            "to help improve the software.")
         
         # Filter
         if filter is None:
-            self.filter = Filter() 
-        elif isinstance(filter, Filter):
-            self.filter = filter
+            self.filter = Filter()
         else:
-            raise ValueError("filter input must be None or a Filter object")
+            assert isinstance(filter, dLux.base.Filter), \
+            ("filter must be a dLux.base.Filter object.")
+            self.filter = filter
     
     
     def normalise(self : Instrument) -> Instrument:
@@ -913,23 +916,24 @@ class Instrument(Base):
     
     
     def model_source(self      : Instrument, 
-                     source    : dLux.sources.Source,
+                     source    : dLux.sources.Sources.Source,
                      optics    : Optics   = None,
                      detector  : Detector = None,
                      filter_in : Filter   = None) -> Array:
         """
-        Models the source through the optics.
+        Models the source through the instrument.
         
         Parameters
         ----------
         source : dict
             The source to observe
-        optics : Optics
-            The optics through which to model the source object.
+        optics : Optics (optional)
+            The optics through which to model the source object. Defaults to
+            the internally stored optics.
         detector : Detector (optional)
             The detector object that is observing the psf.
         filter_in : Filter (optional)
-            The filter through which the source is being observed. Default is 
+            The filter through which the source is being observed. Default is
             None which is uniform throughput.
         
         Returns
@@ -937,24 +941,37 @@ class Instrument(Base):
         psf : Array
             The summed psfs of the sources modelled through the telescope.
         """
-        optics = self.optics if optics is None else optics
+        # Type checking
+        assert isinstance(source, dLux.sources.Source), \
+        ("source must be a dLux.sources.Source object.")
+        assert isinstance(optics, (dLux.base.Optics, type(None))), \
+        ("optics must be a dLux.base.Optics object.")
+        assert isinstance(detector, (dLux.base.Detector, type(None))), \
+        ("detector must be a dLux.base.Detector object.")
+        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
+        ("filter_in must be a dLux.base.Filter object.")
+        
+        # Format inputs
+        optics    = self.optics   if optics    is None else optics
+        detector  = self.detector if detector  is None else detector
+        filter_in = self.filter   if filter_in is None else filter_in
         source = source.normalise()
         return source.model(optics, detector=detector, filter_in=filter_in)
     
     
-    def model_sources(self      : Optics,
-                      sources   : dict,
-                      optics    : Optics   = None,
-                      detector  : Detector = None,
-                      filter_in : Filter   = None) -> Array:
+    def model_scene(self      : Optics,
+                    scene     : dLux.base.Scene,
+                    optics    : Optics   = None,
+                    detector  : Detector = None,
+                    filter_in : Filter   = None) -> Array:
         """
-        Models the sources through the optics.
+        Models the scene through the instrument.
         
         Parameters
         ----------
-        sources : dict
-            The sources to observe
-        optics : Optics
+        scene : dict
+            The scene to observe.
+        optics : Optics (optional)
             The optics through which to model the sources.
         detector : Detector (optional)
             The detector object that is observing the psf.
@@ -967,27 +984,38 @@ class Instrument(Base):
         psf : Array
             The summed psfs of the sources modelled through the intrument.
         """
-        # Apply optional inputs (check this work properly)
-        model_fn = lambda source: self.model_source(source, 
-                                                        filter_in=filter_in)
+        # Type checking
+        assert isinstance(scene, dLux.base.Scene), \
+        ("scene must be a dLux.base.Scene object.")
+        assert isinstance(optics, (dLux.base.Optics, type(None))), \
+        ("optics must be a dLux.base.Optics object.")
+        assert isinstance(detector, (dLux.base.Detector, type(None))), \
+        ("detector must be a dLux.base.Detector object.")
+        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
+        ("filter_in must be a dLux.base.Filter object.")
+        
+        # Format inputs
+        optics    = self.optics   if optics    is None else optics
+        detector  = self.detector if detector  is None else detector
+        filter_in = self.filter   if filter_in is None else filter_in
+        
+        # Apply optional inputs
+        model_fn = lambda source: self.model_source(source, filter_in=filter_in)
         
         # Map the model_source function across the sources
-        psf_tree = tree_map(model_fn, sources, \
-                        is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
+        psf_tree = tree_map(model_fn, scene.sources, \
+                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
         
         # Get psfs
         psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
         
         # apply detector
-        if detector is None:
-            return psf
-        else:
-            return detector.apply_detector(psf)
+        return detector.apply_detector(psf)
     
     
-    def model(self      : Instrument, 
+    def model(self      : Instrument,
               optics    : Optics   = None,
-              scene     : Scene    = None, 
+              scene     : Scene    = None,
               detector  : Detector = None,
               filter_in : Filter   = None,
               flatten   : bool     = False) -> Array:
@@ -1007,7 +1035,7 @@ class Instrument(Base):
             internally stored detector if no value is passed.
         filter_in : Filter (optional)
             The filter through which the source is being observed, defaults to 
-            using the internally stored detfilter ector if no value is passed.
+            using the internally stored filter if no value is passed.
         flatten : bool (optional)
             Whether the output image should be flattened
         
@@ -1017,19 +1045,30 @@ class Instrument(Base):
             The image of the scene modelled through the telescope with detector
             effects applied.
         """
-        # Format inputs
-        optics   = self.optics   if optics   is None else optics
-        scene    = self.scene    if scene    is None else scene
-        detector = self.detector if detector is None else detector
+        # Type checking
+        assert isinstance(scene, dLux.base.Scene), \
+        ("scene must be a dLux.base.Scene object.")
+        assert isinstance(optics, (dLux.base.Optics, type(None))), \
+        ("optics must be a dLux.base.Optics object.")
+        assert isinstance(detector, (dLux.base.Detector, type(None))), \
+        ("detector must be a dLux.base.Detector object.")
+        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
+        ("filter_in must be a dLux.base.Filter object.")
         
-        # Apply optional inputs (check this work properly)
-        model_fn = lambda source: self.model_source(source, 
+        # Format inputs
+        optics    = self.optics   if optics    is None else optics
+        scene     = self.scene    if scene     is None else scene
+        detector  = self.detector if detector  is None else detector
+        filter_in = self.filter   if filter_in is None else filter_in
+        
+        # Apply optional inputs
+        model_fn = lambda source: self.model_source(source,
                                                     optics=optics,
                                                     filter_in=filter_in)
         
         # Map the model_source function across the sources
         psf_tree = tree_map(model_fn, scene.sources, \
-                        is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
+                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
         
         # Get psfs
         psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
@@ -1038,7 +1077,7 @@ class Instrument(Base):
         image = detector.apply_detector(psf)
         
         # Possibly flatten
-        return image.flatten() if flatten else image 
+        return image.flatten() if flatten else image
     
     
 class Optics(Base):
@@ -1063,15 +1102,22 @@ class Optics(Base):
             A list of ∂Lux 'layers' that define the transformations and
             operations upon some input wavefront through an optical system.
         """
-        assert isinstance(layers, list), "Input layers must be a list, it is \
-        automatically converted to a dictionary"
+        # Ensure input is a list
+        assert isinstance(layers, list), ("Input layers must be a list, it is" \
+        " automatically converted to a dictionary")
+        
+        # Ensure all entries are dLux layers
+        for layer in layers:
+            assert isinstance(layer, dLux.layers.OpticalLayer), ("All entries" \
+            " within layers must be a dLux.layers.OpticalLayer object")
+        
         self.layers = dLux.utils.list_to_dict(layers)
     
     
     def propagate_mono(self       : Optics,
                        wavelength : Array,
                        offset     : Array = np.zeros(2),
-                       weight     : Array = np.ones(1)) -> Array:
+                       weight     : Array = np.array(1.)) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
         
@@ -1093,6 +1139,19 @@ class Optics(Base):
             The monochromatic point spread function after being propagated
             though the optical layers.
         """
+        # Ensure jax arrays
+        wavelength = np.asarray(wavelength, dtype=float) \
+                        if not isinstance(wavelength, np.ndarray) else wavelength
+        offset = np.asarray(offset, dtype=float) \
+                        if not isinstance(offset, np.ndarray) else offset
+        weight = np.asarray(weight, dtype=float) \
+                        if not isinstance(weight, np.ndarray) else weight
+        
+        # Ensure dimensionality
+        assert wavelength.shape == (), "wavelength must be a scalar."
+        assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
+        assert weight.shape == (), "weight must be a scalar."
+        
         # Construct parameters dictionary
         params_dict = {"optics"     : self,
                        "wavelength" : wavelength,
@@ -1108,7 +1167,7 @@ class Optics(Base):
     def propagate_multi(self        : Optics,
                         wavelengths : Array,
                         offset      : Array = np.zeros(2),
-                        weights     : Array = np.ones(1)) -> Array:
+                        weights     : Array = None) -> Array:
         """
         Propagates a broadband point source through the optical layers.
         
@@ -1130,14 +1189,37 @@ class Optics(Base):
             The broadband point spread function after being propagated
             though the optical layers.
         """
-        propagator = vmap(self.propagate_mono, in_axes=(0, None, 0, None))
+        # Format weights input
+        wavelengths = np.asarray(wavelengths, dtype=float) \
+                      if not isinstance(wavelengths, np.ndarray) else wavelengths
+        assert wavelengths.ndim == 1, "wavelengths must be 1 dimensional.."
+        
+        # Format weights input
+        if weights is None:
+            weights = np.ones(len(wavelengths))
+        elif not isinstance(weights, np.ndarray):
+            weights = np.asarray(weights, dtype=float)
+        assert weights.ndim == 1, "weights must be 1 dimensional."
+        
+        # Ensure matching dimensionality
+        assert wavelengths.shape == weights.shape, \
+        ("wavelengths and weights must have the same shape.")
+        
+        # Offset checking
+        offset = np.asarray(offset, dtype=float) \
+                 if not isinstance(offset, np.ndarray) else offset
+        assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
+        
+        # Propagate
+        propagator = vmap(self.propagate_mono, in_axes=(0, None, 0))
         psfs = propagator(wavelengths, offset, weights)
         return psfs.sum(0)
     
     
     def debug_prop(self       : Optics,
                    wavelength : Array,
-                   offset     : Array = np.zeros(2)) -> Array:
+                   offset     : Array = np.zeros(2),
+                   weight     : Array = np.array(1.)) -> Array:
         """
         Propagates a monochromatic point source through the optical layers,
         while also returning the intermediate state of the parameter dictionary
@@ -1163,8 +1245,21 @@ class Optics(Base):
             The intermediate states of each layer after being applied to the
             wavefront.
         """
-        params_dict = {"OpticalSystem": self,
-                       "wavelength": wavel,
+        # Ensure jax arrays
+        wavelength = np.asarray(wavelength, dtype=float) \
+                        if not isinstance(wavelength, np.ndarray) else wavelength
+        offset = np.asarray(offset, dtype=float) \
+                        if not isinstance(offset, np.ndarray) else offset
+        weight = np.asarray(weight, dtype=float) \
+                        if not isinstance(weight, np.ndarray) else weight
+        
+        # Ensure dimensionality
+        assert wavelength.shape == (), "wavelength must be a scalar."
+        assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
+        assert weight.shape == (), "weight must be a scalar."
+        
+        params_dict = {"Optics": self,
+                       "wavelength": wavelength,
                        "offset": offset}
         
         intermediate_dicts = []
@@ -1178,8 +1273,8 @@ class Optics(Base):
                                 intermediate_dicts, intermediate_layers
     
     
-    def model_source(self      : Optics, 
-                     source    : dLux.Source, 
+    def model_source(self      : Optics,
+                     source    : dLux.sources.Source,
                      detector  : Detector = None,
                      filter_in : Filter   = None) -> Array:
         """
@@ -1187,13 +1282,12 @@ class Optics(Base):
         
         Parameters
         ----------
-        sources : dict
-            The sources to observe, defaults to using the internally stored 
-            sources if no value is passed.
+        source : Source
+            The source to observe.
         detector : Detector (optional)
             The detector object that is observing the psf.
         filter_in : Filter (optional)
-            The filter through which the source is being observed. Default is 
+            The filter through which the source is being observed. Default is
             None which is uniform throughput.
         
         Returns
@@ -1201,6 +1295,15 @@ class Optics(Base):
         psf : Array
             The summed psfs of the sources modelled through the telescope.
         """
+        # Type checking
+        assert isinstance(source, dLux.sources.Source), \
+        ("source must be a dLux.sources.Source object.")
+        assert isinstance(detector, (dLux.base.Detector, type(None))), \
+        ("detector must be a dLux.base.Detector object.")
+        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
+        ("filter_in must be a dLux.base.Filter object.")
+        
+        # Model
         source = source.normalise()
         return source.model(self, detector=detector, filter_in=filter_in)
     
@@ -1215,12 +1318,11 @@ class Optics(Base):
         Parameters
         ----------
         sources : dict
-            The sources to observe, defaults to using the internally stored 
-            sources if no value is passed.
+            The sources to observe
         detector : Detector (optional)
             The detector object that is observing the psf.
         filter_in : Filter (optional)
-            The filter through which the source is being observed. Default is 
+            The filter through which the source is being observed. Default is
             None which is uniform throughput.
         
         Returns
@@ -1228,13 +1330,25 @@ class Optics(Base):
         psf : Array
             The summed psfs of the sources modelled through the telescope.
         """
-        # Apply optional inputs (check this work properly)
+        # Type checking
+        assert isinstance(sources, dict), "sources must be dictionary."
+        assert isinstance(detector, (dLux.base.Detector, type(None))), \
+        ("detector must be a dLux.base.Detector object.")
+        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
+        ("filter_in must be a dLux.base.Filter object.")
+        
+        # Ensure all entries are dLux Sources
+        for source in list(sources.values()):
+            assert isinstance(source, dLux.sources.Source), ("All entries " \
+            "within sources must be a dLux.source.Source object")
+        
+        # Apply optional inputs
         model_fn = lambda source: self.model_source(source, 
                                                         filter_in=filter_in)
         
         # Map the model_source function across the sources
         psf_tree = tree_map(model_fn, sources, \
-                        is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
+                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
         
         # Get psfs
         psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
@@ -1268,10 +1382,16 @@ class Scene(Base):
             a list of individual source objects that is automatically converted
             into a dictionary
         """
-        assert isinstance(layers, list), "Input sources must be a list, it is \
-        automatically converted to a dictionary"
-        self.sources = dLux.utils.list_to_dict(sources, ordered=False)
+        assert isinstance(sources, list), ("Input sources must be a list, it" \
+        " is automatically converted to a dictionary.")
         
+        # Ensure all entries are dLux Sources
+        for source in sources:
+            assert isinstance(source, dLux.sources.Source), ("All entries " \
+            "within sources must be a dLux.source.Source object.")
+        
+        self.sources = dLux.utils.list_to_dict(sources, ordered=False)
+    
     
     def normalise(self : Scene) -> Scene:
         """
@@ -1284,13 +1404,11 @@ class Scene(Base):
             normalised.
         """
         normalised_sources = self.normalise_sources(self.sources)
-        return tree_at(lambda scene: scene.sources, self, \
-                                                    normalised_sources)
+        return tree_at(lambda scene: scene.sources, self, normalised_sources)
     
     
     # Pretty sure this should be moved to utils
-    def normalise_sources(self    : Scene, 
-                          sources : dict) -> dict:
+    def normalise_sources(self : Scene, sources : dict) -> dict:
         """
         Normalises a dictionary of source objects.
         
@@ -1304,14 +1422,23 @@ class Scene(Base):
         sources : dict
             The normalised sources.
         """
+        # Input checking
+        assert isinstance(sources, dict), "sources must be a dict."
+        
+        # Ensure all entries are dLux Sources
+        for source in sources.values():
+            assert isinstance(source, dLux.sources.Source), ("All entries " \
+            "within sources must be a dLux.source.Source object")
+        
+        # Define the normalisation function
         normalise_fn = lambda source: source.normalise()
         
         # Map the model_source function across the sources
         return tree_map(normalise_fn, sources, \
-                        is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
+                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
     
     
-    def model_optics(self      : Scene, 
+    def model_optics(self      : Scene,
                      optics    : Optics,
                      detector  : Detector = None,
                      filter_in : Filter   = None) -> Array:
@@ -1333,13 +1460,21 @@ class Scene(Base):
         psfs : Array
             The summed psfs of the sources modelled through the telescope.
         """
-        # Apply optional inputs (check this work properly)
-        model_fn = lambda source: optics.model_source(source, 
+        # Input Checking
+        assert isinstance(optics, dLux.base.Optics), \
+        ("optics must be a dLux.base.Optics object.")
+        assert isinstance(detector, (dLux.base.Detector, type(None))), \
+        ("detector must be a dLux.base.Detector object.")
+        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
+        ("filter_in must be a dLux.base.Filter object.")
+        
+        # Apply optional inputs
+        model_fn = lambda source: optics.model_source(source,
                                                         filter_in=filter_in)
         
         # Map the model_source function across the sources
-        psf_tree = tree_map(model_fn, sources, \
-                        is_leaf = lambda leaf: isinstance(leaf, dLux.Source))
+        psf_tree = tree_map(model_fn, self.sources, \
+                        is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
         
         
         # Get psf
@@ -1352,111 +1487,6 @@ class Scene(Base):
             return detector.apply_detector(psf)
     
     
-class Filter(Base):
-    """
-    A class for modelling optical filters.
-    
-    Attributes
-    ----------
-    wavelengths : Array
-        The wavelengths at which the filter is defined.
-    throughput : Array
-        The throughput of the filter at the corresponding wavelength.
-    filter_name : str
-        A string identifier that can be used to initialise specific filters.
-    """
-    wavelengths : Array
-    throughput  : Array
-    filter_name : str = static_field()
-    
-    
-    def __init__(self        : Filter,
-                 wavelengths : Array = None,
-                 throughput  : Array = None,
-                 filter_name : str   = None) -> Filter:
-        """
-        Initialises the filter. All inputs are optional and defaults to uniform
-        unitary throughput. If filter_name is specified then wavelengths and
-        weights must not be specified.
-        
-        Parameters
-        ----------
-        wavelengths : Array (optional)
-            The wavelengths at which the filter is defined.
-        throughput : Array (optional)
-            The throughput of the filter at the corresponding wavelength.
-        filter_name : str (optional)
-            A string identifier that can be used to initialise specific filters.
-            Currently no pre-built filters are implemented.
-        """
-        # Take the filter name as the priority input
-        if filter_name is not None:
-            # TODO: Pre load filters
-            raise NotImplementedError("You know what this means")
-            pass
-            
-            # Check that wavelengths and throughput are not specified
-            if wavelengths is not None or throughput is not None:
-                raise ValueError("If filter_name is specified, wavelengths \
-                and throughput can not be specified")
-        
-        # Neither is specified
-        elif wavelengths is None and throughput is None:
-            self.wavelengths = np.array([1.])
-            self.throughput  = np.array([1.])
-            self.filter_name = 'Unitary'
-                
-        # Check that both wavelengths and throughput are specified
-        elif (wavelengths is     None and throughput is not None) or \
-             (wavelengths is not None and throughput is     None):
-            raise ValueError("If either wavelengths or throughput is\
-            specified, then both must be specified")
-                
-        # Both wavelengths and throughput are specified
-        else:
-            assert len(wavelengths) == len(throughput), "wavelengths and \
-            throughput must have the same dimension"
-            self.wavelengths = np.asarray(wavelengths, dtype=float)
-            self.throughput  = np.asarray(throughput,  dtype=float)
-            self.filter_name = 'custom'
-            
-            # Check bounds
-            nlarge = np.sum(self.throughput > 1)
-            nsmall = np.sum(self.throughput < 0)
-            if nlarge + nsmall >= 1:
-                warnings.warn("Filter throughputs should be between 0-1, {} \
-                throughputs are above 1 or below 0.".format(nlarge + nsmall))
-            
-    # Cache this? It will likely be called many times with the same inputs
-    # TODO: Make an integrated, rather than interpolated filter
-    def get_throughput(self : Filter, wavelengths : Array) -> Array:
-        """
-        Get the correspondning throughput for the filter at the specified
-        wavelengths. Currently uses a linear interpolation method, but is
-        planned to use an integration method in the future. Any wavelengths
-        outside of the defined wavelength range are taken as zero (except for
-        'Unitary' throughput which is uniform)
-        
-        Parameters
-        ----------
-        wavelengths: Array
-            An array of wavelengths to sample the filter at.
-        
-        Returns:
-        throughputs : Array
-            An array of the corresponding throughputs at the given wavlengths.
-        """
-        # Translate input wavelengths to indexes 
-        min_wavelength = self.wavelengths.min()
-        max_wavelength = self.wavelengths.max()
-        wavelength_range = max_wavelength - min_wavelength
-        num_wavelength = self.wavelengths.shape[0]
-        indxs = num_wavelength*(wavelengths - min_wavelength)/wavelength_range
-        throughputs = map_coordinates(self.throughput, \
-                                        np.array([indxs]), 1, 'nearest')
-        return throughputs
-
-
 class Detector(Base):
     """
     A high level class desgined to model the behaviour of some detectors
@@ -1479,12 +1509,21 @@ class Detector(Base):
             An list of dLux detector layer classes that define the instrumental 
             effects for some detector.
         """
-        assert isinstance(layers, list), "Input layers must be a list, it is \
-        automatically converted to a dictionary"
+        # Ensure input is a list
+        assert isinstance(layers, list), ("Input layers must be a list, it is" \
+        " automatically converted to a dictionary.")
+        
+        # Ensure all entries are dLux layers
+        for layer in layers:
+            assert isinstance(layer, dLux.detectors.DetectorLayer), ("All " \
+            "entries within layers must be a dLux.detectors.DetectorLayer " \
+            "object.")
+        
+        # Construct layers
         self.layers = dLux.utils.list_to_dict(layers)
     
     
-    def apply_detector(self  : Instrument, 
+    def apply_detector(self  : Instrument,
                        image : Array) -> Array:
         """
         Applied the stored detector layers to the input image.
@@ -1499,6 +1538,10 @@ class Detector(Base):
         image : Array
             The ouput 'image' after being transformed by the detector layers.
         """
+        # Input type checking
+        assert isinstance(image, np.ndarray), "Input must be a jax array."
+        assert image.ndim == 2, "Input image must a 2d array."
+        
         # Apply detector layers
         for key, layer in self.layers.items():
             image = layer(image)
@@ -1526,12 +1569,435 @@ class Detector(Base):
             The intermediate states of each layer after being applied to the
             image.
         """
-        intermediate_images = []
-        intermediate_layers = []
+        # Input type checking
+        assert isinstance(image, np.ndarray), "Input must be a jax array."
+        assert image.ndim == 2, "Input image must a 2d array."
         
         # Apply detector layers
+        intermediate_images = []
+        intermediate_layers = []
         for key, layer in self.layers.items():
             image = layer(image)
             intermediate_images.append(image.copy())
             intermediate_layers.append(deepcopy(layer))
         return image, intermediate_images, intermediate_layers
+
+
+class Filter(Base):
+    """
+    A class for modelling optical filters.
+    
+    Attributes
+    ----------
+    wavelengths : Array
+        The wavelengths at which the filter is defined.
+    throughput : Array
+        The throughput of the filter at the corresponding wavelength.
+    order : int
+        The order of interpolation to use for the filter. Must be 1, 2 or 3.
+    coefficients : Array
+        The coefficients of the spline. This is generated based on the
+        wavelengths and throughput values and can not be specified.
+    filter_name : str
+        A string identifier that can be used to initialise specific filters.
+    """
+    wavelengths  : Array
+    throughput   : Array
+    order        : int
+    coefficients : Array
+    filter_name  : str = static_field()
+    
+    
+    def __init__(self        : Filter,
+                 wavelengths : Array = None,
+                 throughput  : Array = None,
+                 order       : int   = 1,
+                 filter_name : str   = None) -> Filter:
+        """
+        Initialises the filter. All inputs are optional and defaults to uniform
+        unitary throughput. If filter_name is specified then wavelengths and
+        weights must not be specified.
+        
+        Parameters
+        ----------
+        wavelengths : Array (optional)
+            The wavelengths at which the filter is defined.
+        throughput : Array (optional)
+            The throughput of the filter at the corresponding wavelength.
+        order : int (optional)
+            The order of interpolation to use for the filter. Must be 1, 2 or 3.
+        filter_name : str (optional)
+            A string identifier that can be used to initialise specific filters.
+            Currently no pre-built filters are implemented.
+        """
+        # Take the filter name as the priority input
+        if filter_name is not None:
+            # TODO: Pre load filters
+            raise NotImplementedError("You know what this means.")
+            pass
+            
+            # Check that wavelengths and throughput are not specified
+            if wavelengths is not None or throughput is not None:
+                raise ValueError("If filter_name is specified, wavelengths "
+                "and throughput can not be specified.")
+            
+        # Check that both wavelengths and throughput are specified
+        elif (wavelengths is     None and throughput is not None) or \
+             (wavelengths is not None and throughput is     None):
+            raise ValueError("If either wavelengths or throughput is "
+            "specified, then both must be specified.")
+        
+        # Neither is specified
+        elif wavelengths is None and throughput is None:
+            self.wavelengths = np.array([0., np.inf])
+            self.throughput  = np.array([1., 1.])
+            self.filter_name = 'Unitary'
+            self.order = None
+            
+            # Set coefficients to zero since they arent used
+            self.coefficients = np.array(0.)
+            
+        # Both wavelengths and throughputs are specified
+        else:
+            self.wavelengths = np.asarray(wavelengths, dtype=float)
+            self.throughput  = np.asarray(throughput,  dtype=float)
+            self.filter_name = 'Custom'
+            self.order = int(order)
+
+            # Check bounds
+            assert self.wavelengths.ndim == 1 and self.throughput.ndim == 1, \
+            "Both wavelengths and throughput must be 1 dimensional."
+            assert self.wavelengths.shape == self.throughput.shape, \
+            ("wavelengths and throughput must have the same length.")
+            assert np.min(self.wavelengths) >= 0, \
+            ("wavelengths can not be less than 0.")
+            assert (self.throughput >= 0).all() and (self.throughput <= 1).all(), \
+            ("throughput must be between 0-1.")
+            assert np.min(wavelengths) < np.max(wavelengths), \
+            ("wavelengths must be in-order from small to large.")
+            assert self.order in (1, 2, 3), "order must be in {1, 2, 3}."
+
+            # Implement the jax-cosmo 1d interpolator from here:
+            """https://jax-cosmo.readthedocs.io/en/latest/_modules/jax_cosmo/
+            scipy/interpolate.html#interp"""
+
+            # Assign wavelengths as x and throughputs as y to match jax-cosmo code
+            x = self.wavelengths
+            y = self.throughput
+
+            # Verify inputs
+            x = np.atleast_1d(x)
+            y = np.atleast_1d(y)
+            assert len(x) == len(y), "Input arrays must be the same length."
+            assert x.ndim == 1 and y.ndim == 1, "Input arrays must be 1D."
+            n_data = len(x)
+
+            # Difference vectors
+            h = np.diff(x)  # x[i+1] - x[i] for i=0,...,n-1
+            p = np.diff(y)  # y[i+1] - y[i]
+
+            # Build the linear system of equations depending on order
+            # (No matrix necessary for order=1)
+            if self.order == 1:
+                assert n_data > 1, "Not enough input points for linear spline."
+                coefficients = p / h
+
+            if self.order == 2:
+                assert n_data > 2, "Not enough input points for quadratic spline."
+                assert endpoints == "not-a-knot"  # I have only validated this
+                # And actually I think it's probably the best choice of border condition
+
+                # The knots are actually in between data points
+                knots = (x[1:] + x[:-1]) / 2.0
+                # We add 2 artificial knots before and after
+                knots = np.concatenate(
+                    [
+                        np.array([x[0] - (x[1] - x[0]) / 2.0]),
+                        knots,
+                        np.array([x[-1] + (x[-1] - x[-2]) / 2.0]),
+                    ]
+                )
+                n = len(knots)
+                # Compute interval lenghts for these new knots
+                h = np.diff(knots)
+                # postition of data point inside the interval
+                dt = x - knots[:-1]
+
+                # Now we build the system natrix
+                A = np.diag(
+                    np.concatenate(
+                        [
+                            np.ones(1),
+                            (
+                                2 * dt[1:]
+                                - dt[1:] ** 2 / h[1:]
+                                - dt[:-1] ** 2 / h[:-1]
+                                + h[:-1]
+                            ),
+                            np.ones(1),
+                        ]
+                    )
+                )
+
+                A += np.diag(
+                    np.concatenate([-np.array([1 + h[0] / h[1]]), dt[1:] ** 2 / h[1:]]),
+                    k=1,
+                )
+                A += np.diag(
+                    np.concatenate([np.atleast_1d(h[0] / h[1]), np.zeros(n - 3)]), k=2
+                )
+
+                A += np.diag(
+                    np.concatenate(
+                        [
+                            h[:-1] - 2 * dt[:-1] + dt[:-1] ** 2 / h[:-1],
+                            -np.array([1 + h[-1] / h[-2]]),
+                        ]
+                    ),
+                    k=-1,
+                )
+                A += np.diag(
+                    np.concatenate([np.zeros(n - 3), np.atleast_1d(h[-1] / h[-2])]),
+                    k=-2,
+                )
+
+                # And now we build the RHS vector
+                s = np.concatenate([np.zeros(1), 2 * p, np.zeros(1)])
+
+                # Compute spline coefficients by solving the system
+                coefficients = np.linalg.solve(A, s)
+
+            if self.order == 3:
+                assert n_data > 3, "Not enough input points for cubic spline."
+                if endpoints not in ("natural", "not-a-knot"):
+                    print("Warning : endpoints not recognized. Using natural.")
+                    endpoints = "natural"
+
+                # Special values for the first and last equations
+                zero = array([0.0])
+                one = array([1.0])
+                A00 = one if endpoints == "natural" else array([h[1]])
+                A01 = zero if endpoints == "natural" else array([-(h[0] + h[1])])
+                A02 = zero if endpoints == "natural" else array([h[0]])
+                ANN = one if endpoints == "natural" else array([h[-2]])
+                AN1 = (
+                    -one if endpoints == "natural" else array([-(h[-2] + h[-1])])
+                )  # A[N, N-1]
+                AN2 = zero if endpoints == "natural" else array([h[-1]])  # A[N, N-2]
+
+                # Construct the tri-diagonal matrix A
+                A = np.diag(concatenate((A00, 2 * (h[:-1] + h[1:]), ANN)))
+                upper_diag1 = np.diag(concatenate((A01, h[1:])), k=1)
+                upper_diag2 = np.diag(concatenate((A02, zeros(n_data - 3))), k=2)
+                lower_diag1 = np.diag(concatenate((h[:-1], AN1)), k=-1)
+                lower_diag2 = np.diag(concatenate((zeros(n_data - 3), AN2)), k=-2)
+                A += upper_diag1 + upper_diag2 + lower_diag1 + lower_diag2
+
+                # Construct RHS vector s
+                center = 3 * (p[1:] / h[1:] - p[:-1] / h[:-1])
+                s = concatenate((zero, center, zero))
+                # Compute spline coefficients by solving the system
+                coefficients = np.linalg.solve(A, s)
+
+            # Saving spline parameters for evaluation later
+            self.coefficients = coefficients
+    
+    
+    def _antiderivative(self, xs):
+        """
+        Computes the antiderivative of first order of this spline
+        """
+        # Retrieve parameters
+        x, y = self.wavelengths, self.throughput
+        coefficients = self.coefficients
+
+        # In case of quadratic, we redefine the knots
+        if self.order == 2:
+            knots = (x[1:] + x[:-1]) / 2.0
+            # We add 2 artificial knots before and after
+            knots = np.concatenate(
+                [
+                    np.array([x[0] - (x[1] - x[0]) / 2.0]),
+                    knots,
+                    np.array([x[-1] + (x[-1] - x[-2]) / 2.0]),
+                ]
+            )
+        else:
+            knots = x
+
+        # Determine the interval that x lies in
+        ind = np.digitize(xs, knots) - 1
+        # Include the right endpoint in spline piece C[m-1]
+        ind = np.clip(ind, 0, len(knots) - 2)
+        t = xs - knots[ind]
+
+        if self.order == 1:
+            a = y[:-1]
+            b = coefficients
+            h = np.diff(knots)
+            cst = np.concatenate([np.zeros(1), np.cumsum(a * h + b * h ** 2 / 2)])
+            return cst[ind] + a[ind] * t + b[ind] * t ** 2 / 2
+
+        if self.order == 2:
+            h = np.diff(knots)
+            dt = x - knots[:-1]
+            b = coefficients[:-1]
+            b1 = coefficients[1:]
+            a = y - b * dt - (b1 - b) * dt ** 2 / (2 * h)
+            c = (b1 - b) / (2 * h)
+            cst = np.concatenate(
+                [np.zeros(1), np.cumsum(a * h + b * h ** 2 / 2 + c * h ** 3 / 3)]
+            )
+            return cst[ind] + a[ind] * t + b[ind] * t ** 2 / 2 + c[ind] * t ** 3 / 3
+
+        if self.order == 3:
+            h = np.diff(knots)
+            c = coefficients[:-1]
+            c1 = coefficients[1:]
+            a = y[:-1]
+            a1 = y[1:]
+            b = (a1 - a) / h - (2 * c + c1) * h / 3.0
+            d = (c1 - c) / (3 * h)
+            cst = np.concatenate(
+                [
+                    np.zeros(1),
+                    np.cumsum(a * h + b * h ** 2 / 2 + c * h ** 3 / 3 + d * h ** 4 / 4),
+                ]
+            )
+            return (
+                cst[ind]
+                + a[ind] * t
+                + b[ind] * t ** 2 / 2
+                + c[ind] * t ** 3 / 3
+                + d[ind] * t ** 4 / 4
+            )
+    
+    
+    def _compute_coeffs(self, xs):
+        """Compute the spline coefficients for a given x."""
+        # Retrieve parameters
+        x, y = self.wavelengths, self.throughput
+        coefficients = self.coefficients
+        
+        # In case of quadratic, we redefine the knots
+        if self.order == 2:
+            knots = (x[1:] + x[:-1]) / 2.0
+            # We add 2 artificial knots before and after
+            knots = np.concatenate(
+                [
+                    np.array([x[0] - (x[1] - x[0]) / 2.0]),
+                    knots,
+                    np.array([x[-1] + (x[-1] - x[-2]) / 2.0]),
+                ]
+            )
+        else:
+            knots = x
+
+        # Determine the interval that x lies in
+        ind = np.digitize(xs, knots) - 1
+        # Include the right endpoint in spline piece C[m-1]
+        ind = np.clip(ind, 0, len(knots) - 2)
+        t = xs - knots[ind]
+        h = np.diff(knots)[ind]
+
+        if self.order == 1:
+            a = y[ind]
+            result = (t, a, coefficients[ind])
+
+        if self.order == 2:
+            dt = (x - knots[:-1])[ind]
+            b = coefficients[ind]
+            b1 = coefficients[ind + 1]
+            a = y[ind] - b * dt - (b1 - b) * dt ** 2 / (2 * h)
+            c = (b1 - b) / (2 * h)
+            result = (t, a, b, c)
+
+        if self.order == 3:
+            c = coefficients[ind]
+            c1 = coefficients[ind + 1]
+            a = y[ind]
+            a1 = y[ind + 1]
+            b = (a1 - a) / h - (2 * c + c1) * h / 3.0
+            d = (c1 - c) / (3 * h)
+            result = (t, a, b, c, d)
+
+        return result
+    
+    
+    # Cache this? It will likely be called many times with the same inputs
+    def get_throughput(self        : Filter,
+                       wavelengths : Array,
+                       integrate   : bool = True) -> Array:
+        """
+        Get the correspondning throughput for the filter at the specified
+        wavelengths. By default this integrates over the filter, but can be set
+        to interpolate by setting the integrate flag to False. Any wavelengths
+        outside of the defined wavelength range are taken as zero (except for
+        'Unitary' throughput which is uniform).
+        
+        Note that wavelengths mut be a uniqie set of wavelengths, ie you can
+        not pass in two wavelengths with the same values or you will get a
+        nan result.
+        
+        Parameters
+        ----------
+        wavelengths: Array
+            An array of wavelengths to sample the filter at. Note it is assumed
+            that the wavelengths are evenly spaced.
+        integrate : bool
+            Whether to integrate, or interpolate the filter values. Default is
+            to integrate.
+        
+        Returns:
+        throughputs : Array
+            An array of the corresponding throughputs at the given wavlengths.
+        """
+        # Return unitary if filter is unitary
+        if self.filter_name == 'Unitary':
+            return np.ones(wavelengths.shape)
+        
+        # ensure numpy array input
+        wavelengths = np.asarray(wavelengths, dtype=float) \
+                if not isinstance(wavelengths, np.ndarray) else wavelengths
+        
+        # Set to interpolate if a single wavelength is passed
+        integrate = False if wavelengths.shape == (1,) or \
+                                        wavelengths.ndim == 0 else integrate
+        
+        # Integrate over filter
+        if integrate:
+            # Get bin size
+            dwavelengths = wavelengths[1] - wavelengths[0]
+
+            # Clip bounds inside defined wavelengths
+            mins = wavelengths - dwavelengths/2
+            maxs = wavelengths + dwavelengths/2
+            ranges = np.clip(np.array([mins, maxs]),
+                             a_min=np.min(self.wavelengths),
+                             a_max=np.max(self.wavelengths))
+            
+            # Get values
+            integral_fn = vmap(self._antiderivative, in_axes=0)
+            integrals = np.diff(integral_fn(ranges), axis=0)[0]
+            
+            # Divide by bin size
+            throughputs = integrals/dwavelengths
+            return throughputs
+        
+        else:
+            bounded_wavelengths = np.clip(wavelengths,
+                                          a_min=np.min(self.wavelengths),
+                                          a_max=np.max(self.wavelengths))
+            if self.order == 1:
+                t, a, b = self._compute_coeffs(bounded_wavelengths)
+                result = a + b * t
+
+            if self.order == 2:
+                t, a, b, c = self._compute_coeffs(bounded_wavelengths)
+                result = a + b * t + c * t ** 2
+
+            if self.order == 3:
+                t, a, b, c, d = self._compute_coeffs(bounded_wavelengths)
+                result = a + b * t + c * t ** 2 + d * t ** 3
+
+            return result
