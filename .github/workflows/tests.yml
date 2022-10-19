@@ -9,16 +9,20 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    # runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+
     steps:
       - name: checkout
         uses: actions/checkout@main
 
-      - name: python
-        # uses: actions/setup-python@v1
-        uses: actions/setup-python
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.python-version }}
           architecture: x64
 
       - name: install environment
