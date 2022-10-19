@@ -1,14 +1,31 @@
+from __future__ import annotations
 import jax
 import jax.numpy as np
 import equinox as eqx
 import dLux
+import abc
 
 
 __all__ = ["ApplyPixelResponse", "ApplyJitter", 
            "ApplySaturation", "AddConstant"]
 
 
-class ApplyPixelResponse(dLux.base.Base):
+class DetectorLayer(dLux.base.Base, abc.ABC):
+    """
+    A base Detector layer class to help with type checking throuhgout the rest
+    of the software.
+    """
+    
+    
+    @abc.abstractmethod
+    def __call__(self : DetectorLayer, image : Array) -> Array:
+        """
+        Abstract method for Detector Layers
+        """
+        return
+
+
+class ApplyPixelResponse(DetectorLayer):
     """
     
     """
@@ -27,7 +44,7 @@ class ApplyPixelResponse(dLux.base.Base):
         image *= self.pixel_response
         return image
     
-class ApplyJitter(dLux.base.Base):
+class ApplyJitter(DetectorLayer):
     """
     Convolves the output image with a gaussian kernal
     """
@@ -54,7 +71,7 @@ class ApplyJitter(dLux.base.Base):
         image_out = jax.scipy.signal.convolve(image, window, mode='same')
         return image_out
     
-class ApplySaturation(dLux.base.Base):
+class ApplySaturation(DetectorLayer):
     """
     Reduces any values above self.saturation to self.saturation
     """
@@ -71,7 +88,7 @@ class ApplySaturation(dLux.base.Base):
         image_out = np.minimum(image, self.saturation)
         return image_out
     
-class AddConstant(dLux.base.Base):
+class AddConstant(DetectorLayer):
     """
     Add a constant to the output image.
     Typically used as the mean of the detector noise
