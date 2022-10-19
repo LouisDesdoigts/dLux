@@ -3,7 +3,7 @@ import pytest
 import jax.random as random
 import typing
 
-from dLux import Wavefront
+from dLux.wavefronts import Wavefront
 from dLux import CartesianWavefront
 from dLux import AngularWavefront
 # from dLux import GaussianWavefront
