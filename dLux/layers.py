@@ -133,7 +133,6 @@ class CreateWavefront(OpticalLayer):
         amplitude = np.ones([1, self.npix, self.npix])
         amplitude /= np.linalg.norm(amplitude)
         
-        # TODO: Make jax safe
         if self.wavefront_type == 'Cartesian':
             wavefront = dLux.CartesianWavefront(
                                         wavel, 
