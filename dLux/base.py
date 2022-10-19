@@ -13,6 +13,7 @@ from copy import deepcopy
 import dLux
 from typing import Union
 
+
 __all__ = ["model", "OpticalSystem", "Instrument", "Optics", "Scene",
            "Filter", "Detector"]
 Array     = typing.NewType("Array",  np.ndarray)
@@ -109,7 +110,9 @@ def model(optics      : Optics,
         ("If sources is specified, scene and source can not be specified.")
         
         # Check that sources is a dict object.
-        assert isinstance(sources, Union[dict, list, tuple]), \
+        assert isinstance(sources, dict) or \
+               isinstance(sources, list) or \
+               isinstance(sources, tuple), \
         ("sources must be a dict, list, or tuple object.")
         
         # Check that all inputs are Source objects
@@ -340,8 +343,8 @@ class Base(abc.ABC, Module):
 
         # Wrap non-list path objects in list
         new_paths = [
-            [path] if not isinstance(path, typing.Union[list, tuple]) else path
-            for path in new_paths
+            [path] if not (isinstance(path, list) or isinstance(path, tuple)) \
+                                                else path for path in new_paths
         ]
 
         # Return values
