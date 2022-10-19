@@ -228,7 +228,9 @@ class Base(abc.ABC, Module):
     ######################
     ### Hidden methods ###
     ######################
-    def _get_leaf(self : Pytree, pytree : Pytree, path : Path) -> Leaf:
+    def _get_leaf(self   : Pytree,
+                  pytree : Pytree,
+                  path   : Path) -> Leaf:
         """
         A hidden class desinged to recurse down a pytree following the path, 
         returning the leaf at the end of the path.
@@ -263,9 +265,10 @@ class Base(abc.ABC, Module):
     
     
     # TODO: Re-write the logic in this a bit nice for optional values input
-    def _unwrap_paths(self : Pytree, paths : list_like, 
-                      values : list_like = None, 
-                      path_dict : dict = None) -> list_like:
+    def _unwrap_paths(self      : Pytree,
+                      paths     : list_like,
+                      values    : list_like = None,
+                      path_dict : dict      = None) -> list_like:
         """
         Helper function designed to unwrap nested paths, while also extracting 
         the absolute paths from the path dictionary. It similarly will tile out
@@ -352,7 +355,9 @@ class Base(abc.ABC, Module):
     ########################
     ### Accessor methods ###
     ########################
-    def get_leaf(self : Pytree, path : Path, path_dict : dict = None) -> Leaf:
+    def get_leaf(self      : Pytree,
+                 path      : Path,
+                 path_dict : dict = None) -> Leaf:
         """
         Returns the leaf specified by path
         
@@ -374,8 +379,9 @@ class Base(abc.ABC, Module):
         return self._get_leaf(self, new_path)
     
     
-    def get_leaves(self : Pytree, paths : list_like, 
-                    path_dict : dict = None) -> list:
+    def get_leaves(self      : Pytree,
+                   paths     : list_like,
+                   path_dict : dict = None) -> list:
         """
         Returns a list of leaves specified by the paths
         
@@ -400,7 +406,9 @@ class Base(abc.ABC, Module):
     #######################
     ### Updater methods ###
     #######################
-    def update_leaves(self : Pytree, paths : list_like, values : list_like,
+    def update_leaves(self      : Pytree,
+                      paths     : list_like,
+                      values    : list_like,
                       path_dict : dict = None) -> Pytree:
         """
         Returns an updated version of the pytree with the leaves speficied by 
@@ -432,7 +440,9 @@ class Base(abc.ABC, Module):
         return tree_at(get_leaves_fn, self, new_values)
     
     
-    def apply_to_leaves(self : Pytree, paths : list_like, fns : list_like,
+    def apply_to_leaves(self      : Pytree,
+                        paths     : list_like,
+                        fns       : list_like,
                         path_dict : dict = None) -> Pytree:
         """
         Returns an updated version of the pytree with the the input functions 
@@ -471,7 +481,8 @@ class Base(abc.ABC, Module):
     #########################
     ### Equinox functions ###
     #########################
-    def get_filter_spec(self : Pytree, paths : list_like,
+    def get_filter_spec(self      : Pytree,
+                        paths     : list_like,
                         path_dict : dict = None) -> Pytree:
         """
         Returns 'filter_spec' object, to be used in conjunction with the 
@@ -504,9 +515,11 @@ class Base(abc.ABC, Module):
     #######################
     ### Optax functions ###
     #######################
-    def get_param_spec(self : Pytree, paths : list_like, groups : list_like,
+    def get_param_spec(self            : Pytree,
+                       paths           : list_like,
+                       groups          : list_like,
                        get_filter_spec : bool = False,
-                       path_dict : dict = None) -> Pytree:
+                       path_dict       : dict = None) -> Pytree:
         """
         Returns 'param_spec' object, to be used in conjunction with the 
         Optax.multi_transform functions. The param_spec is a pytree of matching
@@ -549,9 +562,11 @@ class Base(abc.ABC, Module):
             return param_spec, self.get_filter_spec(paths, path_dict=path_dict)
     
     
-    def get_optimiser(self : Pytree, paths : list_like, \
-                      optimisers : list_like, get_filter_spec : bool = False,
-                      path_dict : dict = None) -> object:
+    def get_optimiser(self            : Pytree,
+                      paths           : list_like,
+                      optimisers      : list_like,
+                      get_filter_spec : bool = False,
+                      path_dict       : dict = None) -> object:
         """
         Returns an Optax.GradientTransformion object, with the optimisers 
         specified by optimisers applied to the leaves specified by paths.
@@ -602,9 +617,13 @@ class Base(abc.ABC, Module):
     #########################
     ### Numpyro functions ###
     #########################
-    def update_and_model(self : Pytree, model_fn : str, paths : list_like,
-                         values : list_like, path_dict : dict = None,
-                         *args, **kwargs) -> object:
+    def update_and_model(self      : Pytree,
+                         model_fn  : str,
+                         paths     : list_like,
+                         values    : list_like,
+                         path_dict : dict = None,
+                         *args,
+                         **kwargs) -> object:
         """
         Updates the leaves speficied by paths with values, and then calls the
         function specified by the string model_fn, returning whatever is 
@@ -630,7 +649,7 @@ class Base(abc.ABC, Module):
 
         Returns
         -------
-        out : object 
+        out : object
             Whatever object is returned by model_fn
         """
         return getattr(
@@ -913,11 +932,11 @@ class Optics(Base):
         """
         # Ensure jax arrays
         wavelength = np.asarray(wavelength, dtype=float) \
-                        if not isinstance(wavelength, np.ndarray) else wavelength
+                    if not isinstance(wavelength, np.ndarray) else wavelength
         offset = np.asarray(offset, dtype=float) \
-                        if not isinstance(offset, np.ndarray) else offset
+                    if not isinstance(offset, np.ndarray) else offset
         weight = np.asarray(weight, dtype=float) \
-                        if not isinstance(weight, np.ndarray) else weight
+                    if not isinstance(weight, np.ndarray) else weight
         
         # Ensure dimensionality
         assert wavelength.shape == (), "wavelength must be a scalar."
@@ -963,7 +982,7 @@ class Optics(Base):
         """
         # Format weights input
         wavelengths = np.asarray(wavelengths, dtype=float) \
-                      if not isinstance(wavelengths, np.ndarray) else wavelengths
+                  if not isinstance(wavelengths, np.ndarray) else wavelengths
         assert wavelengths.ndim == 1, "wavelengths must be 1 dimensional.."
         
         # Format weights input
@@ -1019,11 +1038,11 @@ class Optics(Base):
         """
         # Ensure jax arrays
         wavelength = np.asarray(wavelength, dtype=float) \
-                        if not isinstance(wavelength, np.ndarray) else wavelength
+                    if not isinstance(wavelength, np.ndarray) else wavelength
         offset = np.asarray(offset, dtype=float) \
-                        if not isinstance(offset, np.ndarray) else offset
+                    if not isinstance(offset, np.ndarray) else offset
         weight = np.asarray(weight, dtype=float) \
-                        if not isinstance(weight, np.ndarray) else weight
+                    if not isinstance(weight, np.ndarray) else weight
         
         # Ensure dimensionality
         assert wavelength.shape == (), "wavelength must be a scalar."
@@ -1404,8 +1423,8 @@ class Filter(Base):
             ("wavelengths and throughput must have the same length.")
             assert np.min(self.wavelengths) >= 0, \
             ("wavelengths can not be less than 0.")
-            assert (self.throughput >= 0).all() and (self.throughput <= 1).all(), \
-            ("throughput must be between 0-1.")
+            assert (self.throughput >= 0).all() and \
+            (self.throughput <= 1).all(), ("throughput must be between 0-1.")
             assert np.min(wavelengths) < np.max(wavelengths), \
             ("wavelengths must be in-order from small to large.")
             assert self.order in (1, 2, 3), "order must be in {1, 2, 3}."
@@ -1414,7 +1433,7 @@ class Filter(Base):
             """https://jax-cosmo.readthedocs.io/en/latest/_modules/jax_cosmo/
             scipy/interpolate.html#interp"""
 
-            # Assign wavelengths as x and throughputs as y to match jax-cosmo code
+            # Assign wavelengths as x and throughputs as y to match jax-cosmo
             x = self.wavelengths
             y = self.throughput
 
@@ -1436,9 +1455,11 @@ class Filter(Base):
                 coefficients = p / h
 
             if self.order == 2:
-                assert n_data > 2, "Not enough input points for quadratic spline."
+                assert n_data > 2, \
+                ("Not enough input points for quadratic spline.")
                 assert endpoints == "not-a-knot"  # I have only validated this
-                # And actually I think it's probably the best choice of border condition
+                # And actually I think it's probably the best choice of border
+                # condition
 
                 # The knots are actually in between data points
                 knots = (x[1:] + x[:-1]) / 2.0
@@ -1473,11 +1494,13 @@ class Filter(Base):
                 )
 
                 A += np.diag(
-                    np.concatenate([-np.array([1 + h[0] / h[1]]), dt[1:] ** 2 / h[1:]]),
+                    np.concatenate([-np.array([1 + h[0] / h[1]]), dt[1:] ** 2 \
+                                    / h[1:]]),
                     k=1,
                 )
                 A += np.diag(
-                    np.concatenate([np.atleast_1d(h[0] / h[1]), np.zeros(n - 3)]), k=2
+                    np.concatenate([np.atleast_1d(h[0] / h[1]), 
+                                    np.zeros(n - 3)]), k=2
                 )
 
                 A += np.diag(
@@ -1490,7 +1513,8 @@ class Filter(Base):
                     k=-1,
                 )
                 A += np.diag(
-                    np.concatenate([np.zeros(n - 3), np.atleast_1d(h[-1] / h[-2])]),
+                    np.concatenate([np.zeros(n - 3), np.atleast_1d(h[-1] \
+                                                                   / h[-2])]),
                     k=-2,
                 )
 
@@ -1510,20 +1534,25 @@ class Filter(Base):
                 zero = array([0.0])
                 one = array([1.0])
                 A00 = one if endpoints == "natural" else array([h[1]])
-                A01 = zero if endpoints == "natural" else array([-(h[0] + h[1])])
+                A01 = zero if endpoints == "natural" else array([-(h[0] + \
+                                                                   h[1])])
                 A02 = zero if endpoints == "natural" else array([h[0]])
                 ANN = one if endpoints == "natural" else array([h[-2]])
                 AN1 = (
-                    -one if endpoints == "natural" else array([-(h[-2] + h[-1])])
+                    -one if endpoints == "natural" else array([-(h[-2] + \
+                                                                 h[-1])])
                 )  # A[N, N-1]
-                AN2 = zero if endpoints == "natural" else array([h[-1]])  # A[N, N-2]
+                AN2 = zero if endpoints == "natural" else array([h[-1]])
+                # A[N, N-2]
 
                 # Construct the tri-diagonal matrix A
                 A = np.diag(concatenate((A00, 2 * (h[:-1] + h[1:]), ANN)))
                 upper_diag1 = np.diag(concatenate((A01, h[1:])), k=1)
-                upper_diag2 = np.diag(concatenate((A02, zeros(n_data - 3))), k=2)
+                upper_diag2 = np.diag(concatenate((A02, zeros(n_data - 3))), \
+                                      k=2)
                 lower_diag1 = np.diag(concatenate((h[:-1], AN1)), k=-1)
-                lower_diag2 = np.diag(concatenate((zeros(n_data - 3), AN2)), k=-2)
+                lower_diag2 = np.diag(concatenate((zeros(n_data - 3), AN2)), \
+                                      k=-2)
                 A += upper_diag1 + upper_diag2 + lower_diag1 + lower_diag2
 
                 # Construct RHS vector s
@@ -1568,7 +1597,8 @@ class Filter(Base):
             a = y[:-1]
             b = coefficients
             h = np.diff(knots)
-            cst = np.concatenate([np.zeros(1), np.cumsum(a * h + b * h ** 2 / 2)])
+            cst = np.concatenate([np.zeros(1), np.cumsum(a * h + b * h ** 2 \
+                                                         / 2)])
             return cst[ind] + a[ind] * t + b[ind] * t ** 2 / 2
 
         if self.order == 2:
@@ -1579,9 +1609,11 @@ class Filter(Base):
             a = y - b * dt - (b1 - b) * dt ** 2 / (2 * h)
             c = (b1 - b) / (2 * h)
             cst = np.concatenate(
-                [np.zeros(1), np.cumsum(a * h + b * h ** 2 / 2 + c * h ** 3 / 3)]
+                [np.zeros(1), np.cumsum(a * h + b * h ** 2 / 2 + c * h ** 3 \
+                                        / 3)]
             )
-            return cst[ind] + a[ind] * t + b[ind] * t ** 2 / 2 + c[ind] * t ** 3 / 3
+            return cst[ind] + a[ind] * t + b[ind] * t ** 2 / 2 + c[ind] * \
+                                                                    t ** 3 / 3
 
         if self.order == 3:
             h = np.diff(knots)
@@ -1594,7 +1626,8 @@ class Filter(Base):
             cst = np.concatenate(
                 [
                     np.zeros(1),
-                    np.cumsum(a * h + b * h ** 2 / 2 + c * h ** 3 / 3 + d * h ** 4 / 4),
+                    np.cumsum(a * h + b * h ** 2 / 2 + c * h ** 3 / 3 + \
+                              d * h ** 4 / 4),
                 ]
             )
             return (
