@@ -9,7 +9,6 @@ from jax.scipy.ndimage import map_coordinates
 from equinox import tree_at, Module, static_field
 from optax import adam, multi_transform
 from collections import OrderedDict
-from jax_cosmo.scipy.interpolate import InterpolatedUnivariateSpline
 from copy import deepcopy
 import dLux
 from typing import Union
