@@ -1196,8 +1196,9 @@ class RelativeFluxSourceUtility(SourceUtility):
         spectrum   = self.spectrum   if spectrum   is None else spectrum
         flux_ratio = self.flux_ratio if flux_ratio is None else flux_ratio
         name       = self.name       if name       is None else name
-        return dLux.sources.RelativeFluxSource(flux_ratio, position, flux, \
-                                               spectrum, name=name)
+        return dLux.sources.RelativeFluxSource(flux_ratio, position=position,
+                                               flux=flux, spectrum=spectrum,
+                                               name=name)
     
     
 class RelativePositionSourceUtility(SourceUtility):
@@ -1234,8 +1235,9 @@ class RelativePositionSourceUtility(SourceUtility):
         separation  = self.separation  if separation  is None else separation
         field_angle = self.field_angle if field_angle is None else field_angle
         name        = self.name        if name        is None else name
-        return dLux.sources.RelativePositionSource(separation, field_angle, \
-                                            position, flux, spectrum, name=name)
+        return dLux.sources.RelativePositionSource(separation, field_angle,
+                                                   position=position, flux=flux,
+                                                   spectrum=spectrum, name=name)
     
     
 class PointSourceUtility(SourceUtility):
@@ -1411,3 +1413,239 @@ class PointAndExtendedSourceUtility(RelativeFluxSourceUtility, \
                                                             else distribution
         return dLux.sources.PointAndExtendedSource(position, flux, spectrum, \
                                          distribution, flux_ratio, name=name)
+
+######################
+### Base Utilities ###
+######################
+class BaseUtility(Utility):
+    """
+    Utility for the Base class.
+    """
+    param1 : float
+    param2 : float
+    
+    
+    class A(dLux.base.Base):
+        """
+        Test subclass to test the Base methods
+        """
+        param : float
+        b     : B
+        
+        
+        def __init__(self, param, b):
+            """
+            Constructor for the Base testing class
+            """
+            self.param = param
+            self.b = b
+        
+        
+        def model(self):
+            """
+            Sample modelling function
+            """
+            return self.param**2 + self.b.param**2
+    
+    
+    class B(dLux.base.Base):
+        """
+        Test subclass to test the Base methods
+        """
+        param : float
+        
+        
+        def __init__(self, param):
+            """
+            Constructor for the Base testing class
+            """
+            self.param = param
+    
+    
+    def __init__(self : Utility):
+        """
+        Constructor for the Optics Utility.
+        """ 
+        self.param1 = 1.
+        self.param2 = 1.
+    
+    
+    def construct(self : Utility, 
+                  param1 : float = None, 
+                  param2 : float = None):
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        param1 = self.param1 if param1 is None else param1
+        param2 = self.param2 if param2 is None else param2
+        return self.A(param1, self.B(param2))
+
+
+class OpticsUtility(Utility):
+    """
+    Utility for the Optics class.
+    """
+    layers : list
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the Optics Utility.
+        """    
+        self.layers = [
+            dLux.layers.CreateWavefront(16, 1),
+            dLux.layers.CompoundAperture([0.5]),
+            dLux.layers.NormaliseWavefront(),
+            dLux.propagators.PhysicalMFT(16, 1., 1e-6)
+        ]
+    
+    
+    def construct(self : Utility, layers : list = None) -> Optics:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        layers = self.layers if layers is None else layers
+        return dLux.base.Optics(layers)
+
+
+class DetectorUtility(Utility):
+    """
+    Utility for the Detector class.
+    """
+    layers : list
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the Detector Utility.
+        """    
+        self.layers = [
+            dLux.detectors.AddConstant(1.)
+        ]
+    
+    
+    def construct(self : Utility, layers : list = None) -> Detector:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        layers = self.layers if layers is None else layers
+        return dLux.base.Detector(layers)
+
+
+class SceneUtility(Utility):
+    """
+    Utility for the Scene class.
+    """
+    sources : list
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the Scene Utility.
+        """
+        self.sources = [
+            PointSourceUtility().construct()
+        ]
+    
+    
+    def construct(self : Utility, sources : list = None) -> Scene:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        sources = self.sources if sources is None else sources
+        return dLux.base.Scene(sources)
+
+
+class FilterUtility(Utility):
+    """
+    Utility for the Filter class.
+    """
+    wavelengths : Array
+    throughput  : Array
+    order       : int
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the Filter Utility.
+        """
+        self.wavelengths = np.linspace(1e-6, 10e-6, 10)
+        self.throughput  = np.linspace(0, 1, len(self.wavelengths))
+        self.order       = int(1)
+    
+    
+    def construct(self        : Utility, 
+                  wavelengths : Array = None, 
+                  throughput  : Array = None,
+                  order       : int   = 1,
+                  filter_name : str   = None) -> Filter:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        wavelengths = self.wavelengths if wavelengths is None else wavelengths
+        throughput  = self.throughput  if throughput  is None else throughput
+        order       = self.order       if order       is None else order
+        
+        if filter_name is None:
+            return dLux.base.Filter(wavelengths, throughput, order=order)
+        else:
+            return dLux.base.Filter(wavelengths, throughput, order=order, 
+                                    filter_name=filter_name)
+
+
+class InstrumentUtility(Utility):
+    """
+    Utility for the Instrument class.
+    """
+    optics   : Optics
+    scene    : Scene
+    detector : Detector
+    filter   : Filter
+    
+    
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the Instrument Utility.
+        """    
+        self.optics   = OpticsUtility().construct()
+        self.scene    = SceneUtility().construct()
+        self.detector = DetectorUtility().construct()
+        self.filter   = FilterUtility().construct()
+    
+    
+    def construct(self            : Utility,
+                  optics          : Optics   = None,
+                  scene           : Scene    = None,
+                  detector        : Detector = None,
+                  filter          : Filter   = None,
+                  optical_layers  : list     = None,
+                  sources         : list     = None,
+                  detector_layers : list     = None,
+                  input_layers    : bool     = False,
+                  input_both      : bool     = False) -> Instrument:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        optics   = self.optics   if optics   is None else optics
+        scene    = self.scene    if scene    is None else scene
+        detector = self.detector if detector is None else detector
+        filter   = self.filter   if filter   is None else filter
+        
+        if input_both:
+            return dLux.base.Instrument(optics=optics,
+                                        scene=scene,
+                                        detector=detector,
+                                        filter=filter,
+                                        optical_layers=optical_layers,
+                                        sources=sources,
+                                        detector_layers=detector_layers)
+        elif not input_layers:
+            return dLux.base.Instrument(optics=optics,
+                                        scene=scene,
+                                        detector=detector,
+                                        filter=filter)
+        else:
+            return dLux.base.Instrument(filter=filter,
+                                        optical_layers=optical_layers,
+                                        sources=sources,
+                                        detector_layers=detector_layers)

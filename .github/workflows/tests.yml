@@ -40,5 +40,8 @@ jobs:
       - name: source tests
         run: pytest --quiet tests/sources.py
 
+      - name: source tests
+        run: pytest --quiet tests/base.py
+
 #            - name: layer tests
 #              run: pytest --quiet tests/layers.py
