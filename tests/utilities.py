@@ -106,7 +106,7 @@ class WavefrontUtility(Utility):
     plane_type : PlaneType
 
 
-    def __init__(self : Utility, /,
+    def __init__(self : Utility,
             wavelength : float = None, 
             offset : Array = None,
             size : int = None,
@@ -261,7 +261,7 @@ class CartesianWavefrontUtility(WavefrontUtility):
     Defines useful safes state constants as well as a basic 
     constructor for a safe `CartesianWavefront`.
     """
-    def __init__(self : Utility, /,
+    def __init__(self : Utility,
             wavelength : float = None, 
             offset : Array = None,
             size : int = None, 
@@ -301,7 +301,7 @@ class AngularWavefrontUtility(WavefrontUtility):
     Defines useful safes state constants as well as a basic 
     constructor for a safe `CartesianWavefront`.
     """
-    def __init__(self : Utility, /,
+    def __init__(self : Utility,
             wavelength : float = None, 
             offset : Array = None,
             size : int = None, 
@@ -523,7 +523,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         self.pixel_scale_out = 1.e-3
 
 
-    def construct(self : Utility, /, inverse : bool = None, 
+    def construct(self : Utility, inverse : bool = None, 
             pixels_out : int = None, 
             pixel_scale_out : float = None, tilt : bool = False) -> Propagator:
         """
