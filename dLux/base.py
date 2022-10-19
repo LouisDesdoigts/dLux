@@ -301,7 +301,7 @@ class Base(abc.ABC, Module):
         if values is None:
             for path in paths:
                 # Check if path has sub-paths
-                if isinstance(path[0], typing.Union[list, tuple]) or \
+                if isinstance(path[0], list) or isinstance(path[0], tuple) \
                                                             path[0] in keys:
                     # Un-nest sub paths
                     for sub_path in path:
@@ -320,7 +320,7 @@ class Base(abc.ABC, Module):
             new_values = []
             for path, value in zip(paths, values):
                 # Check if path has sub-paths
-                if isinstance(path[0], typing.Union[list, tuple]) or \
+                if isinstance(path[0], list) or isinstance(path[0], tuple) \
                                                             path[0] in keys:
                     # Un-nest sub-paths
                     for sub_path in path:
