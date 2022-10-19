@@ -166,7 +166,7 @@ class WavefrontUtility(Utility):
         wavefront : Wavefront
             The safe testing wavefront.
         """
-        return dLux.Wavefront(self.wavelength, self.offset, \
+        return dLux.wavefronts.Wavefront(self.wavelength, self.offset, \
               self.pixel_scale, self.plane_type, self.amplitude, self.phase)
 
 
