@@ -15,7 +15,8 @@ jobs:
         uses: actions/checkout@main
 
       - name: python
-        uses: actions/setup-python@v1
+        # uses: actions/setup-python@v1
+        uses: actions/setup-python
         with:
           python-version: 3.x
           architecture: x64
@@ -42,6 +43,3 @@ jobs:
 
       - name: source tests
         run: pytest --quiet tests/base.py
-
-#            - name: layer tests
-#              run: pytest --quiet tests/layers.py
