@@ -12,11 +12,9 @@ from collections import OrderedDict
 from jax_cosmo.scipy.interpolate import InterpolatedUnivariateSpline
 from copy import deepcopy
 import dLux
+from typing import Union
 
-# TODO: Add jaxcosmos to requirements
-
-
-__all__ = ["OpticalSystem", "Instrument", "Optics", "Scene",
+__all__ = ["model", "OpticalSystem", "Instrument", "Optics", "Scene",
            "Filter", "Detector"]
 Array     = typing.NewType("Array",  np.ndarray)
 list_like = typing.Union[list, tuple]
@@ -25,6 +23,167 @@ Pytree    = typing.NewType("Pytree", object)
 Leaf      = typing.Any
 
 
+###############
+### Methods ###
+###############
+def model(optics      : Optics,
+          detector    : Detector                 = None,
+          filter      : Filter                   = None,
+          scene       : Scene                    = None,
+          sources     : Union[dict, list, tuple] = None,
+          source      : dLux.sources.Souce       = None,
+          normalise   : bool                     = True,
+          flatten     : bool                     = False,
+          return_tree : bool                     = False) -> Array:
+    """
+    A base level modelling function designed to robustly handle the different
+    combinations of inputs. Models the sources through the instrument optics
+    and detector. Users must provide optics and some form of source, either via
+    a scene, sources or single source input, but not multiple.
+
+    Parameters
+    ----------
+    optics : Optics
+        The optics through which to model the source objects.
+    detector : Detector (optional)
+        The detector to use with the observation.
+    filter : Filter (optional)
+        The filter through which the source is being observed.
+    scene : Scene (optional)
+        The scene to observe.
+    sources : Union[dict, list, tuple) (optional)
+        The sources to observe.
+    source : Source (optional)
+        The source to observe.
+    normalise : bool (optional)
+        Whether to normalise the sources before modelling. Default is True.
+    flatten : bool (optional)
+        Whether the output image should be flattened. Default is False.
+    return_tree : bool (optional)
+        Whether to return a Pytree like object with matching tree structure as
+        the input scene/sources/source. Default is False.
+
+    Returns
+    -------
+    image : Array, Pytree
+        The image of the scene modelled through the optics with detector and
+        filter effects applied if they are supplied. Returns either as a single
+        array (if return_tree is false), or a pytree like object with matching
+        tree strucutre as the input scene/sources/source.
+    """
+    '''Input checking and formatting'''
+    # Check that optics input is an Optics object.
+    assert isinstance(optics, (dLux.base.Optics)), \
+    ("optics must be a dLux.base.Optics object.")
+    
+    # Check that detector input is a Detector object if specified.
+    assert isinstance(detector, (dLux.base.Detector, type(None))), \
+    ("detector must be a dLux.base.Detector object.")
+    
+    # Check that filter input is a Filter object if specified.
+    assert isinstance(filter, (dLux.base.Filter, type(None))), \
+    ("filter must be a dLux.base.Filter object.")
+    
+    # Make sure that some form of source is speficied
+    assert scene is not None or sources is not None or source is not None, \
+    ("Either a scene, source, or sources must be specified")
+    
+    # Make sure that input types are correct
+    # scene is specified
+    if scene is not None:
+        # Check for other inputs
+        assert sources is None and source is None, \
+        ("If scene is specified, sources and source can not be specified.")
+        
+        # Check that scene is a Scehen object.
+        assert isinstance(scene, dLux.base.Scene), \
+        ("scene must be a dLux.base.Scene object.")
+        
+        # Get sources
+        sources_in = scene.normalise().sources if normalise \
+                                                       else scene.sources
+    
+    # Check sources as next input
+    elif sources is not None:
+        # Check for other inputs
+        assert source is None, \
+        ("If sources is specified, scene and source can not be specified.")
+        
+        # Check that sources is a dict object.
+        assert isinstance(sources, Union[dict, list, tuple]), \
+        ("sources must be a dict, list, or tuple object.")
+        
+        # Check that all inputs are Source objects
+        source_vals = sources.values() if isinstance(sources, dict) else sources
+        for source in source_vals:
+            assert isinstance(source, dLux.sources.Source), \
+            ("All entries within sources must be a dLux.source.Source object.")
+        
+        # Get sources
+        if normalise:
+            # Define the normalisation function
+            normalise_fn = lambda source: source.normalise()
+
+            # Map the normalisation function across the sources
+            sources_in = tree_map(normalise_fn, sources, \
+                   is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
+        else:
+            sources_in = sources
+    
+    # source is provided
+    else:
+        assert isinstance(source, dLux.sources.Source), \
+        ("source must be a dLux.source.Source object.")
+        
+        # Get sources
+        sources_in = source.normalise() if normalise else source
+        
+    '''Begin modelling'''
+    # Apply optional inputs
+    model_fn = lambda source: source.model(optics, filter_in=filter)
+
+    # Map the model_source function across the sources
+    psf_tree = tree_map(model_fn, sources_in, 
+            is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
+    
+    # Return psfs in the same structure as the sources
+    if return_tree:
+        
+        # Apply detector if required
+        if detector is not None:
+            detector_fn = lambda psf: detector.apply_detector(psf)
+            image_tree = tree_map(detector_fn, psf_tree, 
+                            is_leaf = lambda leaf: isinstance(leaf, np.ndarray))
+        else:
+            image_tree = psf_tree
+        
+        # flatten if required
+        if flatten:
+            flatten_fn = lambda image: image.flatten()
+            tree_out = tree_map(flatten_fn, image_tree,
+                            is_leaf = lambda leaf: isinstance(leaf, np.ndarray))
+        else:
+            tree_out = image_tree
+        
+        # Return psfs with matching tree strucutre as input
+        return tree_out
+        
+        
+    # Return a single summed psf
+    else:
+        # Get flatten tree and sum to single psf
+        psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
+
+        # Apply detector
+        image = detector.apply_detector(psf) if detector is not None else psf
+
+        # Flatten
+        return image.flatten() if flatten else image
+
+
+###############
+### Classes ###
+###############
 class Base(abc.ABC, Module):
     """
     An abstract base class that is used to give a user-friendly API for working
@@ -479,276 +638,6 @@ class Base(abc.ABC, Module):
                 model_fn)(*args, **kwargs)
 
 
-class OpticalSystem(Base):
-    """ Optical System class, Equinox Modle
-    
-    DOCSTRING NOT COMPLETE
-    
-    A Class to store and apply properties external to the optical system
-    Ie: stellar positions and spectra
-    
-    positions: (Nstars, 2) array
-    wavels: (Nwavels) array
-    weights: (Nwavel)/(Nwavels, Nstars) array
-    
-    dLux currently does not check that inputs are correctly shaped/formatted!
-
-    Notes:
-     - Take in layers in order to re-intialise the model every call?
-    
-    General images output shape: (Nimages, Nstars, Nwavels, Npix, Npix)
-    
-     - Currently doesnt allow temporal variation in spectrum 
-     - Currently doesnt allow temporal variation in flux
-    
-    ToDo: Add getter methods for accessing weights and fluxes attributes that
-    use np.squeeze to remove empy axes
-
-    
-    Attributes
-    ----------
-    layers: list, required
-        - A list of layers that defines the tranformaitons and operations of the system (typically optical)
-     
-    wavels: ndarray
-        - An array of wavelengths in meters to simulate
-        - The shape must be 1d - stellar spectrums are controlled through the weights parameter
-        - No default value is set if not provided and this will throw an error if you try to call functions that depend on this parameter
-        - It is left as optional so that functions that allow wavelength input can be called on objects without having to pre-input wavelengths
-    positions: ndarray, optional
-        - An array of (x,y) stellar positions in units of radians, measured as deviation of the optical axis. 
-        - Its input shape should be (Nstars, 2), defining an x, y position for each star. 
-        - If not provided, the value defaults to (0, 0) - on axis
-    fluxes: ndarray, optional
-        - An array of stellar fluxes, its length must match the positions inputs size to work properly
-        - Theoretically this has arbitrary units, but we think of it as photons
-        - Defaults to 1 (ie, returning a unitary flux psf if not specified)
-    weights: ndarray, optional
-        - An array of stellar spectral weights (arb units)
-        - This can take multiple shapes
-        - Default is to weight all wavelengths equally (top-hat)
-        - If a 1d array is provided this is applied to all stars, shape (Nwavels)
-        - if a 2d array is provided each is applied to each individual star, shape (Nstars, Nwavels)
-        - Note the inputs values are always normalised and will not directly change total output flux (inderectly it can change it by weighting more flux to wavelengths with more aperture losses, for example)
-    dithers: ndarray, optional
-        - An arary of (x, y) positional dithers in units of radians
-        - Its input shape should be (Nims, 2), defining the (x,y) dither for each image
-        - if not provided, defualts to no-dither
-    detector_layers: list, optional
-        - A second list of layer objects designed to allow processing of psfs, rather than wavefronts
-        - It is applied to each image after psfs have been approraitely weighted and summed
-    """
-
-    # Helpers, Determined from inputs, not real params
-    Nstars:  int
-    Nwavels: int
-    Nims:    int
-    
-    wavels:          np.ndarray
-    positions:       np.ndarray
-    fluxes:          np.ndarray
-    weights:         np.ndarray
-    dithers:         np.ndarray
-    layers:          list
-    detector_layers: list
-    
-    # To Do - add asset conditions to ensure that everything is formatted correctly 
-    # To Do - pass in positions for multiple images, ignoring dither (ie multi image)
-    def __init__(self, layers, wavels, positions=None, fluxes=None, 
-                       weights=None, dithers=None, detector_layers=None):
-        
-        # Required Inputs
-        self.layers = layers
-        self.wavels = np.array(wavels).astype(float)
-        self.Nwavels = len(self.wavels)
-        
-        # Set to default values
-        self.positions = np.zeros([1, 2]) if positions is None else np.array(positions)
-        self.fluxes = np.ones(len(self.positions)) if fluxes is None else np.array(fluxes)
-        self.weights = np.ones(len(self.wavels)) if weights is None else np.array(weights)
-        self.dithers = np.zeros([1, 2]) if dithers is None else dithers
-        self.detector_layers = [] if detector_layers is None else detector_layers
-        
-        if self.fluxes.shape == ():
-            self.fluxes = np.array([self.fluxes])
-        
-        # Determined from inputs - treated as static
-        self.Nstars =  len(self.positions)
-        self.Nims =    len(self.dithers)
-        
-        # Check Input shapes
-        assert self.positions.shape[-1] == 2, """Input positions must be 
-        of shape (Nstars, 2)"""
-        
-        assert self.fluxes.shape[0] == self.Nstars, """Input fluxes must be
-        match input positions."""
-        
-        weight_shape = self.weights.shape
-        if len(weight_shape) == 1 and weights is not None:
-            assert weight_shape[0] == self.Nwavels, """Inputs weights shape 
-            must be either (len(wavels)) or  (len(positions), len(wavels)), 
-            got shape: {}""".format(self.weights.shape)
-        elif len(weight_shape) == 2:
-            assert weight_shape == [self.Nstars, self.Nwavels], """Inputs 
-            weights shape must be either (len(wavels)) or  (len(positions), 
-            len(wavels))"""
-
-    def debug_prop(self, wavel, offset=np.zeros(2)):        
-        """
-        I believe this is diffable but there is no reason to force it to be
-        """
-        params_dict = {"wavelength" : wavel, 
-                       "offset" : offset,
-                       "Optical System" : self}
-        intermeds = []
-        layers_applied = []
-        for i in range(len(self.layers)):
-            params_dict = self.layers[i](params_dict)
-            intermeds.append(deepcopy(params_dict))
-            layers_applied.append(self.layers[i].__str__())
-        return params_dict["Wavefront"].wavefront_to_psf(), intermeds, layers_applied
-            
-        
-        
-    """################################"""
-    ### DIFFERENTIABLE FUNCTIONS BELOW ###
-    """################################"""
-    
-    
-    
-    def propagate(self):
-        """
-        Maps the wavelength and position calcualtions across multiple dimesions
-        
-        To Do: Reformat the vmaps such that we only vmap over wavelengths and
-        positions in order to simplify the dimensionality
-        """
-        
-        # Mapping over wavelengths
-        propagate_single = vmap(self.propagate_mono, in_axes=(0, None))
-        
-        # Then over the positions 
-        propagator = vmap(propagate_single, in_axes=(None, 0))
-
-        # Generate input positions vector
-        dithered_positions = self.dither_positions()
-        
-        # Calculate PSFs
-        psfs = propagator(self.wavels, dithered_positions)
-        
-        # Reshape output into images
-        psfs = self.reshape_psfs(psfs)
-        
-        # Weight PSFs and sum into images
-        psfs = self.weight_psfs(psfs).sum([1, 2])
-        
-        # Vmap detector operations over each image
-        detector_vmap = vmap(self.apply_detector_layers, in_axes=0)
-        images = detector_vmap(psfs)
-        
-        return np.squeeze(images)
-    
-    def propagate_mono(self, wavel, offset=np.zeros(2)):        
-        """
-        
-        """
-        params_dict = {"wavelength" : wavel, 
-                       "offset" : offset,
-                       "Optical System" : self}
-        
-        for i in range(len(self.layers)):
-            params_dict = self.layers[i](params_dict)
-            
-        return params_dict["Wavefront"].wavefront_to_psf()
-    
-    def propagate_single(self, wavels, offset=np.zeros(2), weights=1., flux=1.,
-                         apply_detector=False):
-        """
-        Only propagates a single star, allowing wavelength input
-        sums output to single array
-        
-        Wavels must be an array and the same shape as weights if provided
-        """
-        
-        # Mapping over wavelengths
-        prop_wf_map = vmap(self.propagate_mono, in_axes=(0, None))
-        
-        # Apply spectral weighting
-        psfs = weights * prop_wf_map(wavels, offset)/len(wavels)
-        
-        # Sum into single psf and apply flux
-        image = flux * psfs.sum(0)
-        
-        if apply_detector:
-            image = self.apply_detector_layers(image)
-        
-        return image
-    
-    def apply_detector_layers(self, image):
-        """
-        
-        """
-        for i in range(len(self.detector_layers)):
-            image = self.detector_layers[i](image)
-        return image
-    
-    def reshape_psfs(self, psfs):
-        """
-        
-        """
-        npix = psfs.shape[-1]
-        return psfs.reshape([self.Nims, self.Nstars, self.Nwavels, npix, npix])
-    
-    def dither_positions(self):
-        """
-        Dithers the input positions, returned with shape (Npsfs, 2)
-        """
-        Npsfs = self.Nstars * self.Nims
-        shaped_pos = self.positions.reshape([1, self.Nstars, 2])
-        shaped_dith = self.dithers.reshape([self.Nims, 1, 2])
-        dithered_positions = (shaped_pos + shaped_dith).reshape([Npsfs, 2])
-        return dithered_positions
-    
-    
-    def weight_psfs(self, psfs):
-        """
-        Normalise Weights, and format weights/fluxes
-        Psfs output shape: (Nims, Nstars, Nwavels, npix, npix)
-        We want weights shape: (1, 1, Nwavels, 1, 1)
-        We want fluxes shape: (1, Nstars, 1, 1, 1)
-        """
-        # Get values
-        Nims = self.Nims
-        Nstars = self.Nstars
-        Nwavels = self.Nwavels
-        
-        # Format and normalise weights
-        if len(self.weights.shape) == 3:
-            weights_in = self.weights.reshape([Nims, Nstars, Nwavels, 1, 1])
-            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
-        elif len(self.weights.shape) == 2:
-            weights_in = self.weights.reshape([1, Nstars, Nwavels, 1, 1])
-            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
-        elif self.weights.shape[0] == self.Nwavels:
-            weights_in = self.weights.reshape([1, 1, Nwavels, 1, 1])
-            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
-        else:
-            weights_in = self.weights
-        
-        # Format Fluxes
-        if len(self.fluxes) == 1:
-            fluxes = self.fluxes
-        else:
-            fluxes = self.fluxes.reshape([1, Nstars, 1, 1, 1])
-        
-        
-        # Apply weights and fluxus
-        psfs *= weights_in
-        psfs *= fluxes
-        return psfs
-
-
-
 """
 High level notes:
 
@@ -758,14 +647,6 @@ but no guarantee can be made!
 
 There should be some way to cache psf calculations during observations in order
 to only calculte novel psfs for large observations.
-
-TODO: Build the observation object, open questions here.
-
-Q: Should the modelling_dict object store single dimension arrays, with
-recombinations happening after via some indexing parameter?
-
-Q: For inputs like wavelenght, should the input type be Array or float? Its a
-single valued float 'array' of shape (0,)....
 """
 
 
@@ -840,7 +721,7 @@ class Instrument(Base):
         """ 
         # Optics
         if optics is None and optical_layers is None:
-            self.optics = Optics([])
+            self.optics = None
         elif optics is not None and optical_layers is not None:
             raise ValueError("Either optics OR optical_layers can be "
             "specified, not both.")
@@ -858,7 +739,7 @@ class Instrument(Base):
         
         # Detector
         if detector is None and detector_layers is None:
-            self.detector = Detector([])
+            self.detector = None
         elif detector is not None and detector_layers is not None:
             raise ValueError("Either detector OR detector_layers can be "
             "specified, not both.")
@@ -876,7 +757,7 @@ class Instrument(Base):
         
         # Scene
         if scene is None and sources is None:
-            self.scene = Scene([])
+            self.scene = None
         elif scene is not None and sources is not None:
             raise ValueError("Either scene OR sources can be "
             "specified, not both.")
@@ -894,7 +775,7 @@ class Instrument(Base):
         
         # Filter
         if filter is None:
-            self.filter = Filter()
+            self.filter = None
         else:
             assert isinstance(filter, dLux.base.Filter), \
             ("filter must be a dLux.base.Filter object.")
@@ -903,7 +784,8 @@ class Instrument(Base):
     
     def normalise(self : Instrument) -> Instrument:
         """
-        Normalises the internally stored scene.
+        Normalises the internally stored scene by calling the scene.normalise()
+        method.
         
         Returns
         -------
@@ -915,169 +797,59 @@ class Instrument(Base):
                            self.scene.normalise())
     
     
-    def model_source(self      : Instrument, 
-                     source    : dLux.sources.Sources.Source,
-                     optics    : Optics   = None,
-                     detector  : Detector = None,
-                     filter_in : Filter   = None) -> Array:
+    def model(self : Instrument, **kwargs):
         """
-        Models the source through the instrument.
-        
+        A base level modelling function designed to robustly handle the
+        different combinations of inputs. Models the sources through the
+        instrument optics and detector. Users must provide optics and some form
+        of source, either via a scene, sources or single source input, but not
+        multiple.
+
         Parameters
         ----------
-        source : dict
-            The source to observe
         optics : Optics (optional)
-            The optics through which to model the source object. Defaults to
-            the internally stored optics.
+            The optics through which to model the source objects. Defaults to
+            the internally stored value.
         detector : Detector (optional)
-            The detector object that is observing the psf.
-        filter_in : Filter (optional)
-            The filter through which the source is being observed. Default is
-            None which is uniform throughput.
-        
-        Returns
-        -------
-        psf : Array
-            The summed psfs of the sources modelled through the telescope.
-        """
-        # Type checking
-        assert isinstance(source, dLux.sources.Source), \
-        ("source must be a dLux.sources.Source object.")
-        assert isinstance(optics, (dLux.base.Optics, type(None))), \
-        ("optics must be a dLux.base.Optics object.")
-        assert isinstance(detector, (dLux.base.Detector, type(None))), \
-        ("detector must be a dLux.base.Detector object.")
-        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
-        ("filter_in must be a dLux.base.Filter object.")
-        
-        # Format inputs
-        optics    = self.optics   if optics    is None else optics
-        detector  = self.detector if detector  is None else detector
-        filter_in = self.filter   if filter_in is None else filter_in
-        source = source.normalise()
-        return source.model(optics, detector=detector, filter_in=filter_in)
-    
-    
-    def model_scene(self      : Optics,
-                    scene     : dLux.base.Scene,
-                    optics    : Optics   = None,
-                    detector  : Detector = None,
-                    filter_in : Filter   = None) -> Array:
-        """
-        Models the scene through the instrument.
-        
-        Parameters
-        ----------
-        scene : dict
-            The scene to observe.
-        optics : Optics (optional)
-            The optics through which to model the sources.
-        detector : Detector (optional)
-            The detector object that is observing the psf.
-        filter_in : Filter (optional)
-            The filter through which the source is being observed. Default is 
-            None which is uniform throughput.
-        
-        Returns
-        -------
-        psf : Array
-            The summed psfs of the sources modelled through the intrument.
-        """
-        # Type checking
-        assert isinstance(scene, dLux.base.Scene), \
-        ("scene must be a dLux.base.Scene object.")
-        assert isinstance(optics, (dLux.base.Optics, type(None))), \
-        ("optics must be a dLux.base.Optics object.")
-        assert isinstance(detector, (dLux.base.Detector, type(None))), \
-        ("detector must be a dLux.base.Detector object.")
-        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
-        ("filter_in must be a dLux.base.Filter object.")
-        
-        # Format inputs
-        optics    = self.optics   if optics    is None else optics
-        detector  = self.detector if detector  is None else detector
-        filter_in = self.filter   if filter_in is None else filter_in
-        
-        # Apply optional inputs
-        model_fn = lambda source: self.model_source(source, filter_in=filter_in)
-        
-        # Map the model_source function across the sources
-        psf_tree = tree_map(model_fn, scene.sources, \
-                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-        
-        # Get psfs
-        psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
-        
-        # apply detector
-        return detector.apply_detector(psf)
-    
-    
-    def model(self      : Instrument,
-              optics    : Optics   = None,
-              scene     : Scene    = None,
-              detector  : Detector = None,
-              filter_in : Filter   = None,
-              flatten   : bool     = False) -> Array:
-        """
-        Models the sources through the instrument optics and detector.
-        
-        Parameters
-        ----------
-        optics : Optics (optional)
-            The optics through which to model the source objects, defaults to 
-            using the internally stored optics if no value is passed.
+            The detector to use with the observation. Defaults to the
+            internally stored value.
+        filter : Filter (optional)
+            The filter through which the source is being observed. Defaults to
+            the internally stored value.
         scene : Scene (optional)
-            The scene to observe, defaults to using the internally stored scene
-            if no value is passed.
-        detector : Detector (optional)
-            The detector to use with the observation, defaults to using the
-            internally stored detector if no value is passed.
-        filter_in : Filter (optional)
-            The filter through which the source is being observed, defaults to 
-            using the internally stored filter if no value is passed.
+            The scene to observe. Defaults to the internally stored value.
+        sources : Union[dict, list, tuple) (optional)
+            The sources to observe.
+        source : Source (optional)
+            The source to observe.
+        normalise_sources : bool (optional)
+            Whether to normalise the sources before modelling. Default is True.
         flatten : bool (optional)
-            Whether the output image should be flattened
-        
+            Whether the output image should be flattened. Default is False.
+        return_tree : bool (optional)
+            Whether to return a Pytree like object with matching tree structure
+            as the input scene/sources/source. Default is False.
+
         Returns
         -------
-        image : Array
-            The image of the scene modelled through the telescope with detector
-            effects applied.
+        image : Array, Pytree
+            The image of the scene modelled through the optics with detector and
+            filter effects applied if they are supplied. Returns either as a
+            single array (if return_tree is false), or a pytree like object
+            with matching tree strucutre as the input scene/sources/source.
         """
-        # Type checking
-        assert isinstance(scene, dLux.base.Scene), \
-        ("scene must be a dLux.base.Scene object.")
-        assert isinstance(optics, (dLux.base.Optics, type(None))), \
-        ("optics must be a dLux.base.Optics object.")
-        assert isinstance(detector, (dLux.base.Detector, type(None))), \
-        ("detector must be a dLux.base.Detector object.")
-        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
-        ("filter_in must be a dLux.base.Filter object.")
+        optics = optics if 'optics' in kwargs else self.optics
+        kwargs['detector'] = self.detector if 'detector' not in kwargs \
+                                                        else kwargs['detector']
+        kwargs['filter']   = self.filter   if 'filter'   not in kwargs \
+                                                        else kwargs['filter']
+        if 'scene' not in kwargs and \
+           'source' not in kwargs and \
+           'sources' not in kwargs:
+            kwargs['scene'] = self.scene
         
-        # Format inputs
-        optics    = self.optics   if optics    is None else optics
-        scene     = self.scene    if scene     is None else scene
-        detector  = self.detector if detector  is None else detector
-        filter_in = self.filter   if filter_in is None else filter_in
-        
-        # Apply optional inputs
-        model_fn = lambda source: self.model_source(source,
-                                                    optics=optics,
-                                                    filter_in=filter_in)
-        
-        # Map the model_source function across the sources
-        psf_tree = tree_map(model_fn, scene.sources, \
-                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-        
-        # Get psfs
-        psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
-        
-        # Apply detector
-        image = detector.apply_detector(psf)
-        
-        # Possibly flatten
-        return image.flatten() if flatten else image
+        return model(optics,
+                     **kwargs)
     
     
 class Optics(Base):
@@ -1273,91 +1045,45 @@ class Optics(Base):
                                 intermediate_dicts, intermediate_layers
     
     
-    def model_source(self      : Optics,
-                     source    : dLux.sources.Source,
-                     detector  : Detector = None,
-                     filter_in : Filter   = None) -> Array:
+    def model(self : Optics, **kwargs):
         """
-        Models the source through the optics.
-        
+        A base level modelling function designed to robustly handle the
+        different combinations of inputs. Models the sources through the
+        instrument optics and detector. Users must provide optics and some form
+        of source, either via a scene, sources or single source input, but not
+        multiple.
+
         Parameters
         ----------
-        source : Source
+        detector : Detector (optional)
+            The detector to use with the observation. Defaults to the
+            internally stored value.
+        filter : Filter (optional)
+            The filter through which the source is being observed. Defaults to
+            the internally stored value.
+        scene : Scene (optional)
+            The scene to observe. Defaults to the internally stored value.
+        sources : Union[dict, list, tuple) (optional)
+            The sources to observe.
+        source : Source (optional)
             The source to observe.
-        detector : Detector (optional)
-            The detector object that is observing the psf.
-        filter_in : Filter (optional)
-            The filter through which the source is being observed. Default is
-            None which is uniform throughput.
-        
+        normalise_sources : bool (optional)
+            Whether to normalise the sources before modelling. Default is True.
+        flatten : bool (optional)
+            Whether the output image should be flattened. Default is False.
+        return_tree : bool (optional)
+            Whether to return a Pytree like object with matching tree structure
+            as the input scene/sources/source. Default is False.
+
         Returns
         -------
-        psf : Array
-            The summed psfs of the sources modelled through the telescope.
+        image : Array, Pytree
+            The image of the scene modelled through the optics with detector and
+            filter effects applied if they are supplied. Returns either as a
+            single array (if return_tree is false), or a pytree like object
+            with matching tree strucutre as the input scene/sources/source.
         """
-        # Type checking
-        assert isinstance(source, dLux.sources.Source), \
-        ("source must be a dLux.sources.Source object.")
-        assert isinstance(detector, (dLux.base.Detector, type(None))), \
-        ("detector must be a dLux.base.Detector object.")
-        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
-        ("filter_in must be a dLux.base.Filter object.")
-        
-        # Model
-        source = source.normalise()
-        return source.model(self, detector=detector, filter_in=filter_in)
-    
-    
-    def model_sources(self      : Optics,
-                      sources   : dict,
-                      detector  : Detector = None,
-                      filter_in : Filter   = None) -> Array:
-        """
-        Models the sources through the optics.
-        
-        Parameters
-        ----------
-        sources : dict
-            The sources to observe
-        detector : Detector (optional)
-            The detector object that is observing the psf.
-        filter_in : Filter (optional)
-            The filter through which the source is being observed. Default is
-            None which is uniform throughput.
-        
-        Returns
-        -------
-        psf : Array
-            The summed psfs of the sources modelled through the telescope.
-        """
-        # Type checking
-        assert isinstance(sources, dict), "sources must be dictionary."
-        assert isinstance(detector, (dLux.base.Detector, type(None))), \
-        ("detector must be a dLux.base.Detector object.")
-        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
-        ("filter_in must be a dLux.base.Filter object.")
-        
-        # Ensure all entries are dLux Sources
-        for source in list(sources.values()):
-            assert isinstance(source, dLux.sources.Source), ("All entries " \
-            "within sources must be a dLux.source.Source object")
-        
-        # Apply optional inputs
-        model_fn = lambda source: self.model_source(source, 
-                                                        filter_in=filter_in)
-        
-        # Map the model_source function across the sources
-        psf_tree = tree_map(model_fn, sources, \
-                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-        
-        # Get psfs
-        psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
-        
-        # apply detector
-        if detector is None:
-            return psf
-        else:
-            return detector.apply_detector(psf)
+        return model(self, **kwargs)
     
     
 class Scene(Base):
@@ -1403,88 +1129,52 @@ class Scene(Base):
             A new version of the scene with the interally stored sources
             normalised.
         """
-        normalised_sources = self.normalise_sources(self.sources)
-        return tree_at(lambda scene: scene.sources, self, normalised_sources)
-    
-    
-    # Pretty sure this should be moved to utils
-    def normalise_sources(self : Scene, sources : dict) -> dict:
-        """
-        Normalises a dictionary of source objects.
-        
-        Parameters
-        ----------
-        sources : dict
-            The sources to normalise.
-            
-        Returns
-        -------
-        sources : dict
-            The normalised sources.
-        """
-        # Input checking
-        assert isinstance(sources, dict), "sources must be a dict."
-        
-        # Ensure all entries are dLux Sources
-        for source in sources.values():
-            assert isinstance(source, dLux.sources.Source), ("All entries " \
-            "within sources must be a dLux.source.Source object")
-        
         # Define the normalisation function
         normalise_fn = lambda source: source.normalise()
         
         # Map the model_source function across the sources
-        return tree_map(normalise_fn, sources, \
+        normalised_sources = tree_map(normalise_fn, self.sources, \
                 is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-    
-    
-    def model_optics(self      : Scene,
-                     optics    : Optics,
-                     detector  : Detector = None,
-                     filter_in : Filter   = None) -> Array:
-        """
-        Models the scene through some optics.
         
+        return tree_at(lambda scene: scene.sources, self, normalised_sources)
+    
+    
+    def model(self : Scene, optics : Optics, **kwargs):
+        """
+        A base level modelling function designed to robustly handle the
+        different combinations of inputs. Models the sources through the
+        instrument optics and detector. Users must provide optics and some form
+        of source, either via a scene, sources or single source input, but not
+        multiple.
+
         Parameters
         ----------
         optics : Optics
-            The optics through which to model the source objects.
+            The optics through which to model the source objects. Defaults to
+            the internally stored value.
         detector : Detector (optional)
-            The detector object that is observing the psf.
-        filter_in : Filter (optional)
-            The filter through which the source is being observed. Default is 
-            None which is uniform throughput.
-        
+            The detector to use with the observation. Defaults to the
+            internally stored value.
+        filter : Filter (optional)
+            The filter through which the source is being observed. Defaults to
+            the internally stored value.
+        normalise_sources : bool (optional)
+            Whether to normalise the sources before modelling. Default is True.
+        flatten : bool (optional)
+            Whether the output image should be flattened. Default is False.
+        return_tree : bool (optional)
+            Whether to return a Pytree like object with matching tree structure
+            as the input scene/sources/source. Default is False.
+
         Returns
         -------
-        psfs : Array
-            The summed psfs of the sources modelled through the telescope.
+        image : Array, Pytree
+            The image of the scene modelled through the optics with detector and
+            filter effects applied if they are supplied. Returns either as a
+            single array (if return_tree is false), or a pytree like object
+            with matching tree strucutre as the input scene/sources/source.
         """
-        # Input Checking
-        assert isinstance(optics, dLux.base.Optics), \
-        ("optics must be a dLux.base.Optics object.")
-        assert isinstance(detector, (dLux.base.Detector, type(None))), \
-        ("detector must be a dLux.base.Detector object.")
-        assert isinstance(filter_in, (dLux.base.Filter, type(None))), \
-        ("filter_in must be a dLux.base.Filter object.")
-        
-        # Apply optional inputs
-        model_fn = lambda source: optics.model_source(source,
-                                                        filter_in=filter_in)
-        
-        # Map the model_source function across the sources
-        psf_tree = tree_map(model_fn, self.sources, \
-                        is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-        
-        
-        # Get psf
-        psf = np.array(tree_flatten(psf_tree)[0]).sum(0)
-        
-        # apply detector
-        if detector is None:
-            return psf
-        else:
-            return detector.apply_detector(psf)
+        return model(optics, scene=self, **kwargs)
     
     
 class Detector(Base):
@@ -1581,11 +1271,54 @@ class Detector(Base):
             intermediate_images.append(image.copy())
             intermediate_layers.append(deepcopy(layer))
         return image, intermediate_images, intermediate_layers
+    
+    
+    def model(self : Detector, optics : Optics, **kwargs):
+        """
+        A base level modelling function designed to robustly handle the
+        different combinations of inputs. Models the sources through the
+        instrument optics and detector. Users must provide optics and some form
+        of source, either via a scene, sources or single source input, but not
+        multiple.
+
+        Parameters
+        ----------
+        optics : Optics
+            The optics through which to model the source objects.
+        filter : Filter (optional)
+            The filter through which the source is being observed. Defaults to
+            the internally stored value.
+        scene : Scene (optional)
+            The scene to observe. Defaults to the internally stored value.
+        sources : Union[dict, list, tuple) (optional)
+            The sources to observe.
+        source : Source (optional)
+            The source to observe.
+        normalise_sources : bool (optional)
+            Whether to normalise the sources before modelling. Default is True.
+        flatten : bool (optional)
+            Whether the output image should be flattened. Default is False.
+        return_tree : bool (optional)
+            Whether to return a Pytree like object with matching tree structure
+            as the input scene/sources/source. Default is False.
+
+        Returns
+        -------
+        image : Array, Pytree
+            The image of the scene modelled through the optics with detector and
+            filter effects applied if they are supplied. Returns either as a
+            single array (if return_tree is false), or a pytree like object
+            with matching tree strucutre as the input scene/sources/source.
+        """
+        return model(optics, detector=self, **kwargs)
 
 
 class Filter(Base):
     """
-    A class for modelling optical filters.
+    A class for modelling optical filters. Note most of the code used to
+    integrate and interpolate within this class has been taken from the
+    jax-cosmo package. (https://github.com/DifferentiableUniverseInitiative/
+    jax_cosmo/blob/master/jax_cosmo/scipy/interpolate.py)
     
     Attributes
     ----------
@@ -2001,3 +1734,314 @@ class Filter(Base):
                 result = a + b * t + c * t ** 2 + d * t ** 3
 
             return result
+    
+    
+    def model(self : Filter, optics : Optics, **kwargs):
+        """
+        A base level modelling function designed to robustly handle the
+        different combinations of inputs. Models the sources through the
+        instrument optics and detector. Users must provide optics and some form
+        of source, either via a scene, sources or single source input, but not
+        multiple.
+
+        Parameters
+        ----------
+        optics : Optics
+            The optics through which to model the source objects.
+        detector : Detector (optional)
+            The detector to use with the observation. Defaults to the
+            internally stored value.
+        scene : Scene (optional)
+            The scene to observe. Defaults to the internally stored value.
+        sources : Union[dict, list, tuple) (optional)
+            The sources to observe.
+        source : Source (optional)
+            The source to observe.
+        normalise_sources : bool (optional)
+            Whether to normalise the sources before modelling. Default is True.
+        flatten : bool (optional)
+            Whether the output image should be flattened. Default is False.
+        return_tree : bool (optional)
+            Whether to return a Pytree like object with matching tree structure
+            as the input scene/sources/source. Default is False.
+
+        Returns
+        -------
+        image : Array, Pytree
+            The image of the scene modelled through the optics with detector and
+            filter effects applied if they are supplied. Returns either as a
+            single array (if return_tree is false), or a pytree like object
+            with matching tree strucutre as the input scene/sources/source.
+        """
+        return model(optics, filter=self, **kwargs)
+
+
+
+"""Legacy code"""
+class OpticalSystem(Base):
+    """ Optical System class, Equinox Modle
+    
+    DOCSTRING NOT COMPLETE
+    
+    A Class to store and apply properties external to the optical system
+    Ie: stellar positions and spectra
+    
+    positions: (Nstars, 2) array
+    wavels: (Nwavels) array
+    weights: (Nwavel)/(Nwavels, Nstars) array
+    
+    dLux currently does not check that inputs are correctly shaped/formatted!
+
+    Notes:
+     - Take in layers in order to re-intialise the model every call?
+    
+    General images output shape: (Nimages, Nstars, Nwavels, Npix, Npix)
+    
+     - Currently doesnt allow temporal variation in spectrum 
+     - Currently doesnt allow temporal variation in flux
+    
+    ToDo: Add getter methods for accessing weights and fluxes attributes that
+    use np.squeeze to remove empy axes
+
+    
+    Attributes
+    ----------
+    layers: list, required
+        - A list of layers that defines the tranformaitons and operations of the system (typically optical)
+     
+    wavels: ndarray
+        - An array of wavelengths in meters to simulate
+        - The shape must be 1d - stellar spectrums are controlled through the weights parameter
+        - No default value is set if not provided and this will throw an error if you try to call functions that depend on this parameter
+        - It is left as optional so that functions that allow wavelength input can be called on objects without having to pre-input wavelengths
+    positions: ndarray, optional
+        - An array of (x,y) stellar positions in units of radians, measured as deviation of the optical axis. 
+        - Its input shape should be (Nstars, 2), defining an x, y position for each star. 
+        - If not provided, the value defaults to (0, 0) - on axis
+    fluxes: ndarray, optional
+        - An array of stellar fluxes, its length must match the positions inputs size to work properly
+        - Theoretically this has arbitrary units, but we think of it as photons
+        - Defaults to 1 (ie, returning a unitary flux psf if not specified)
+    weights: ndarray, optional
+        - An array of stellar spectral weights (arb units)
+        - This can take multiple shapes
+        - Default is to weight all wavelengths equally (top-hat)
+        - If a 1d array is provided this is applied to all stars, shape (Nwavels)
+        - if a 2d array is provided each is applied to each individual star, shape (Nstars, Nwavels)
+        - Note the inputs values are always normalised and will not directly change total output flux (inderectly it can change it by weighting more flux to wavelengths with more aperture losses, for example)
+    dithers: ndarray, optional
+        - An arary of (x, y) positional dithers in units of radians
+        - Its input shape should be (Nims, 2), defining the (x,y) dither for each image
+        - if not provided, defualts to no-dither
+    detector_layers: list, optional
+        - A second list of layer objects designed to allow processing of psfs, rather than wavefronts
+        - It is applied to each image after psfs have been approraitely weighted and summed
+    """
+
+    # Helpers, Determined from inputs, not real params
+    Nstars:  int
+    Nwavels: int
+    Nims:    int
+    
+    wavels:          np.ndarray
+    positions:       np.ndarray
+    fluxes:          np.ndarray
+    weights:         np.ndarray
+    dithers:         np.ndarray
+    layers:          list
+    detector_layers: list
+    
+    # To Do - add asset conditions to ensure that everything is formatted correctly 
+    # To Do - pass in positions for multiple images, ignoring dither (ie multi image)
+    def __init__(self, layers, wavels, positions=None, fluxes=None, 
+                       weights=None, dithers=None, detector_layers=None):
+        
+        # Required Inputs
+        self.layers = layers
+        self.wavels = np.array(wavels).astype(float)
+        self.Nwavels = len(self.wavels)
+        
+        # Set to default values
+        self.positions = np.zeros([1, 2]) if positions is None else np.array(positions)
+        self.fluxes = np.ones(len(self.positions)) if fluxes is None else np.array(fluxes)
+        self.weights = np.ones(len(self.wavels)) if weights is None else np.array(weights)
+        self.dithers = np.zeros([1, 2]) if dithers is None else dithers
+        self.detector_layers = [] if detector_layers is None else detector_layers
+        
+        if self.fluxes.shape == ():
+            self.fluxes = np.array([self.fluxes])
+        
+        # Determined from inputs - treated as static
+        self.Nstars =  len(self.positions)
+        self.Nims =    len(self.dithers)
+        
+        # Check Input shapes
+        assert self.positions.shape[-1] == 2, """Input positions must be 
+        of shape (Nstars, 2)"""
+        
+        assert self.fluxes.shape[0] == self.Nstars, """Input fluxes must be
+        match input positions."""
+        
+        weight_shape = self.weights.shape
+        if len(weight_shape) == 1 and weights is not None:
+            assert weight_shape[0] == self.Nwavels, """Inputs weights shape 
+            must be either (len(wavels)) or  (len(positions), len(wavels)), 
+            got shape: {}""".format(self.weights.shape)
+        elif len(weight_shape) == 2:
+            assert weight_shape == [self.Nstars, self.Nwavels], """Inputs 
+            weights shape must be either (len(wavels)) or  (len(positions), 
+            len(wavels))"""
+
+    def debug_prop(self, wavel, offset=np.zeros(2)):        
+        """
+        I believe this is diffable but there is no reason to force it to be
+        """
+        params_dict = {"wavelength" : wavel, 
+                       "offset" : offset,
+                       "Optical System" : self}
+        intermeds = []
+        layers_applied = []
+        for i in range(len(self.layers)):
+            params_dict = self.layers[i](params_dict)
+            intermeds.append(deepcopy(params_dict))
+            layers_applied.append(self.layers[i].__str__())
+        return params_dict["Wavefront"].wavefront_to_psf(), intermeds, layers_applied
+            
+        
+        
+    """################################"""
+    ### DIFFERENTIABLE FUNCTIONS BELOW ###
+    """################################"""
+    
+    
+    
+    def propagate(self):
+        """
+        Maps the wavelength and position calcualtions across multiple dimesions
+        
+        To Do: Reformat the vmaps such that we only vmap over wavelengths and
+        positions in order to simplify the dimensionality
+        """
+        
+        # Mapping over wavelengths
+        propagate_single = vmap(self.propagate_mono, in_axes=(0, None))
+        
+        # Then over the positions 
+        propagator = vmap(propagate_single, in_axes=(None, 0))
+
+        # Generate input positions vector
+        dithered_positions = self.dither_positions()
+        
+        # Calculate PSFs
+        psfs = propagator(self.wavels, dithered_positions)
+        
+        # Reshape output into images
+        psfs = self.reshape_psfs(psfs)
+        
+        # Weight PSFs and sum into images
+        psfs = self.weight_psfs(psfs).sum([1, 2])
+        
+        # Vmap detector operations over each image
+        detector_vmap = vmap(self.apply_detector_layers, in_axes=0)
+        images = detector_vmap(psfs)
+        
+        return np.squeeze(images)
+    
+    def propagate_mono(self, wavel, offset=np.zeros(2)):        
+        """
+        
+        """
+        params_dict = {"wavelength" : wavel, 
+                       "offset" : offset,
+                       "Optical System" : self}
+        
+        for i in range(len(self.layers)):
+            params_dict = self.layers[i](params_dict)
+            
+        return params_dict["Wavefront"].wavefront_to_psf()
+    
+    def propagate_single(self, wavels, offset=np.zeros(2), weights=1., flux=1.,
+                         apply_detector=False):
+        """
+        Only propagates a single star, allowing wavelength input
+        sums output to single array
+        
+        Wavels must be an array and the same shape as weights if provided
+        """
+        
+        # Mapping over wavelengths
+        prop_wf_map = vmap(self.propagate_mono, in_axes=(0, None))
+        
+        # Apply spectral weighting
+        psfs = weights * prop_wf_map(wavels, offset)/len(wavels)
+        
+        # Sum into single psf and apply flux
+        image = flux * psfs.sum(0)
+        
+        if apply_detector:
+            image = self.apply_detector_layers(image)
+        
+        return image
+    
+    def apply_detector_layers(self, image):
+        """
+        
+        """
+        for i in range(len(self.detector_layers)):
+            image = self.detector_layers[i](image)
+        return image
+    
+    def reshape_psfs(self, psfs):
+        """
+        
+        """
+        npix = psfs.shape[-1]
+        return psfs.reshape([self.Nims, self.Nstars, self.Nwavels, npix, npix])
+    
+    def dither_positions(self):
+        """
+        Dithers the input positions, returned with shape (Npsfs, 2)
+        """
+        Npsfs = self.Nstars * self.Nims
+        shaped_pos = self.positions.reshape([1, self.Nstars, 2])
+        shaped_dith = self.dithers.reshape([self.Nims, 1, 2])
+        dithered_positions = (shaped_pos + shaped_dith).reshape([Npsfs, 2])
+        return dithered_positions
+    
+    
+    def weight_psfs(self, psfs):
+        """
+        Normalise Weights, and format weights/fluxes
+        Psfs output shape: (Nims, Nstars, Nwavels, npix, npix)
+        We want weights shape: (1, 1, Nwavels, 1, 1)
+        We want fluxes shape: (1, Nstars, 1, 1, 1)
+        """
+        # Get values
+        Nims = self.Nims
+        Nstars = self.Nstars
+        Nwavels = self.Nwavels
+        
+        # Format and normalise weights
+        if len(self.weights.shape) == 3:
+            weights_in = self.weights.reshape([Nims, Nstars, Nwavels, 1, 1])
+            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
+        elif len(self.weights.shape) == 2:
+            weights_in = self.weights.reshape([1, Nstars, Nwavels, 1, 1])
+            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
+        elif self.weights.shape[0] == self.Nwavels:
+            weights_in = self.weights.reshape([1, 1, Nwavels, 1, 1])
+            weights_in /= np.expand_dims(weights_in.sum(2), axis=2) 
+        else:
+            weights_in = self.weights
+        
+        # Format Fluxes
+        if len(self.fluxes) == 1:
+            fluxes = self.fluxes
+        else:
+            fluxes = self.fluxes.reshape([1, Nstars, 1, 1, 1])
+        
+        
+        # Apply weights and fluxus
+        psfs *= weights_in
+        psfs *= fluxes
+        return psfs

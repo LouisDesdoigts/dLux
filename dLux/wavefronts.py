@@ -6,7 +6,9 @@ import typing
 import enum
 import abc
 
-__all__ = ["PlaneType", "Wavefront", "CartesianWavefront", 
+# __all__ = ["PlaneType", "Wavefront", "CartesianWavefront", 
+#            "AngularWavefront", 'FarFieldFresnelWavefront']
+__all__ = ["PlaneType", "CartesianWavefront", 
            "AngularWavefront", 'FarFieldFresnelWavefront']
 
 

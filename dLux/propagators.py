@@ -75,7 +75,7 @@ Array =  typing.NewType("Array",  np.ndarray)
 Wavefront =  typing.NewType("Wavefront",  dLux.wavefronts.Wavefront)
 
 
-class Propagator(dLux.base.Base, abc.ABC):
+class Propagator(dLux.layers.OpticalLayer, abc.ABC):
     """
     An abstract class indicating a spatial transfromation of the
     `Wavefront`. This is a separate class because it allows

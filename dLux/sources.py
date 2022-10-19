@@ -262,7 +262,7 @@ class Source(dLux.base.Base, abc.ABC):
         
         # Get filter throughput
         if filter_in is not None:
-            throughput = filter_in.get_throughput(wavelengths) 
+            throughput = filter_in.get_throughput(wavelengths)
         else:
             throughput = np.ones(wavelengths.shape)
         
@@ -380,14 +380,14 @@ class RelativeFluxSource(Source, abc.ABC):
     
     def __init__(self       : Source,
                  flux_ratio : Array,
-                 *args, **kwargs) -> Source:
+                 **kwargs) -> Source:
         """
         Parameters
         ----------
         flux_ratio : Array
             The contrast ratio between the two sources.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.flux_ratio = np.asarray(flux_ratio, dtype=float)
         
         # Input flux_ratio checking
@@ -467,7 +467,7 @@ class RelativePositionSource(Source, abc.ABC):
     def __init__(self        : Source,
                  separation  : Array,
                  field_angle : Array,
-                 *args, **kwargs) -> Source:
+                 **kwargs) -> Source:
         """
         Parameters
         ----------
@@ -477,7 +477,7 @@ class RelativePositionSource(Source, abc.ABC):
             The field angle between the two sources measure from the positive
             x axis.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.separation  = np.asarray(separation,  dtype=float)
         self.field_angle = np.asarray(field_angle, dtype=float)
         
@@ -651,7 +651,6 @@ class ArrayDistribution(ResolvedSource):
                  flux         : Array,
                  spectrum     : Spectrum,
                  distribution : Array,
-                 *args,
                  name         : str = 'ArrayDistribution',
                  **kwargs) -> Source:
         """
@@ -668,7 +667,7 @@ class ArrayDistribution(ResolvedSource):
         name : str (optional)
             The name for this object. Defaults to 'Source'
         """
-        super().__init__(position, flux, spectrum, *args, name=name, **kwargs)
+        super().__init__(position, flux, spectrum, name=name, **kwargs)
         distribution = np.asarray(distribution, dtype=float)
         self.distribution = distribution/distribution.sum()
         
