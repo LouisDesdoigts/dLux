@@ -110,9 +110,7 @@ def model(optics      : Optics,
         ("If sources is specified, scene and source can not be specified.")
         
         # Check that sources is a dict object.
-        assert isinstance(sources, dict) or \
-               isinstance(sources, list) or \
-               isinstance(sources, tuple), \
+        assert isinstance(sources, (dict, list, tuple)), \
         ("sources must be a dict, list, or tuple object.")
         
         # Check that all inputs are Source objects
@@ -306,8 +304,7 @@ class Base(abc.ABC, Module):
         if values is None:
             for path in paths:
                 # Check if path has sub-paths
-                if isinstance(path[0], list) or isinstance(path[0], tuple) or \
-                                                                path[0] in keys:
+                if isinstance(path[0], (list, tuple)) or path[0] in keys:
                     # Un-nest sub paths
                     for sub_path in path:
                         if sub_path in keys:
@@ -325,8 +322,7 @@ class Base(abc.ABC, Module):
             new_values = []
             for path, value in zip(paths, values):
                 # Check if path has sub-paths
-                if isinstance(path[0], list) or isinstance(path[0], tuple) or \
-                                                                path[0] in keys:
+                if isinstance(path[0], (list, tuple)) or path[0] in keys:
                     # Un-nest sub-paths
                     for sub_path in path:
                         if sub_path in keys:
@@ -343,8 +339,8 @@ class Base(abc.ABC, Module):
 
         # Wrap non-list path objects in list
         new_paths = [
-            [path] if not (isinstance(path, list) or isinstance(path, tuple)) \
-                                                else path for path in new_paths
+            [path] if not isinstance(path, (list, tuple)) else path \
+                                                        for path in new_paths
         ]
 
         # Return values
