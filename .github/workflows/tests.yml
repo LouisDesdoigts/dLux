@@ -1,19 +1,12 @@
-# Author : Jordan Dennis
-# Date : 29/06/2022
-# Title : tests.yml
-# Description : Automatically runs tests when branches are merged.
-#   The tests that are run can be found in the tests directory.
-
 name: automated tests
 on: [push]
 
 jobs:
   build:
-    # runs-on: ubuntu-20.04
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
 
     steps:
       - name: checkout
