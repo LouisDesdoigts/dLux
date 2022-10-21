@@ -73,11 +73,12 @@ class CreateWavefront(OpticalLayer):
     """
     npix : int
     wavefront_size : float
+    # offset : float
     wavefront_type : str = eqx.static_field()
     name : str = eqx.static_field()
 
 
-    def __init__(self, npix, wavefront_size, wavefront_type='Cartesian', name='Wavefront Creation'):
+    def __init__(self, npix, wavefront_size, offset, wavefront_type='Cartesian', name='Wavefront Creation'):
         """
         Parameters
         ----------
@@ -95,6 +96,7 @@ class CreateWavefront(OpticalLayer):
         """
         self.npix = int(npix)
         self.wavefront_size = np.array(wavefront_size).astype(float)
+        # self.offset = np.asarray(offset, float)
         assert wavefront_type in ['Cartesian', 'Angular', 'FarFieldFresnel'], \
         "wavefront_type must be either 'Cartesian', 'Angular' or 'FarFieldFresnel'"
         self.wavefront_type = str(wavefront_type)
@@ -125,18 +127,27 @@ class CreateWavefront(OpticalLayer):
             updated.
         """
         wavel = params_dict["wavelength"]
-        offset = params_dict["offset"]
+        # offset = params_dict["offset"]
         
         pixel_scale = self.wavefront_size/self.npix
         plane_type = dLux.PlaneType.Pupil
-        phase = np.zeros([1, self.npix, self.npix])
+        
+        x_angle, y_angle = params_dict["offset"]
+        x_positions, y_positions = dLux.utils.coordinates \
+                                  .get_pixel_coordinates(self.npix, pixel_scale)
+        wavenumber = 2 * np.pi / wavel
+        phase = - wavenumber * (x_positions * x_angle + y_positions * y_angle)
+        
+        phase = np.expand_dims(phase, 0)
+        
+        # phase = np.zeros([1, self.npix, self.npix])
         amplitude = np.ones([1, self.npix, self.npix])
         amplitude /= np.linalg.norm(amplitude)
         
         if self.wavefront_type == 'Cartesian':
             wavefront = dLux.CartesianWavefront(
                                         wavel, 
-                                        offset,
+                                        # offset,
                                         pixel_scale,
                                         plane_type,
                                         amplitude, 
@@ -145,7 +156,7 @@ class CreateWavefront(OpticalLayer):
         elif self.wavefront_type == 'Angular':
             wavefront = dLux.AngularWavefront(
                                         wavel, 
-                                        offset,
+                                        # offset,
                                         pixel_scale,
                                         plane_type,
                                         amplitude, 
@@ -154,7 +165,7 @@ class CreateWavefront(OpticalLayer):
         elif self.wavefront_type == 'FarFieldFresnel':
             wavefront = dLux.FarFieldFresnelWavefront(
                                         wavel, 
-                                        offset,
+                                        # offset,
                                         pixel_scale,
                                         plane_type,
                                         amplitude, 
@@ -182,30 +193,32 @@ class CreateWavefront(OpticalLayer):
 # that class.
 class TiltWavefront(OpticalLayer):
     """ 
-    Applies a paraxial tilt by adding a phase slope
-    
+    Tilts the wavefront by the tilt_angles.
+
     Attributes
     ----------
-    name : string
-        The name of the layer, which is used to index the layers
-        dictionary. Default is 'Wavefront Tilt'
+    tilt_angles : Array, radians
+        The (x, y) angles by which to tilt the wavefront.
     """
+    tilt_angles = Array
     name : str = eqx.static_field()
-        
-    def __init__(self, name='Wavefront Tilt'):
+
+    def __init__(self, tilt_angles, name='Wavefront Tilt'):
         """
         Parameters
         ----------
+        tilt_angles : Array, radians
+            The (x, y) angles by which to tilt the wavefront.
         name : string
             The name of the layer, which is used to index the layers
             dictionary. Default is 'Wavefront Tilt'
         """
+        self.tilt_angles = np.asarray(tilt_angles, dtype=float)
         self.name = name
     
     def __call__(self, params_dict):
         """
-        Applies a tilt to the phase of the wavefront according to the
-        offset that is stored in the `Wavefront`.
+        Applies the tilt_angle to the phase of the wavefront.
 
         Parameters
         ----------
@@ -223,13 +236,17 @@ class TiltWavefront(OpticalLayer):
             updated. 
         """
         wavefront = params_dict["Wavefront"]
-        x_angle, y_angle = wavefront.get_offset()
-        x_positions, y_positions = wavefront.get_pixel_coordinates()
-        wavenumber = 2 * np.pi / wavefront.get_wavelength()
-        phase = - wavenumber * (x_positions * x_angle + \
-            y_positions * y_angle)
-        params_dict["Wavefront"] = wavefront.add_phase(phase)
+        tilted_wavefront = wavefront.tilt_wavefront(self.tilt_angles)
+        params_dict["Wavefront"] = wavefront.tilt_wavefront(self.tilt_angles)
         return params_dict
+        
+        # x_angle, y_angle = self.tilt_angles
+        # x_positions, y_positions = wavefront.get_pixel_coordinates()
+        # wavenumber = 2 * np.pi / wavefront.get_wavelength()
+        # phase = - wavenumber * (x_positions * x_angle + \
+        #     y_positions * y_angle)
+        # params_dict["Wavefront"] = wavefront.add_phase(phase)
+        # return params_dict
 
     
 class CircularAperture(OpticalLayer):
@@ -881,7 +898,7 @@ class CompoundAperture(OpticalLayer):
         """
         WF = params_dict["Wavefront"]
         wavefront_diameter = WF.get_diameter()
-        wavefront_npixels = WF.number_of_pixels()
+        wavefront_npixels = WF.get_npixels()
         aper = self.construct_aperture(wavefront_diameter, wavefront_npixels)
         WF = WF.multiply_amplitude(aper)
 
