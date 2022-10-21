@@ -10,7 +10,8 @@ import dLux
 
 __all__ = ["PointSource", "ArrayDistribution", "BinarySource", 
            "PointExtendedSource", "PointAndExtendedSource"]
-Array = typing.NewType("Array", np.ndarray)
+# Array = typing.NewType("Array", np.ndarray)
+Array = np.ndarray
 
 
 """
@@ -175,6 +176,8 @@ class Source(dLux.base.Base, abc.ABC):
         source : Source
             The source object with the updated flux parameter.
         """
+        assert isinstance(flux, Array) and flux.ndim == 0, \
+        ("flux must be a scalar array.")
         return tree_at(
             lambda source : source.flux, self, flux)
     
@@ -193,6 +196,8 @@ class Source(dLux.base.Base, abc.ABC):
         source : Source
             The source object with the updated position parameter.
         """
+        assert isinstance(position, Array) and position.shape == (2,), \
+        ("position must be a array of shape (2,), ie (x, y).")
         return tree_at(
             lambda source : source.position, self, position)
     
@@ -211,6 +216,8 @@ class Source(dLux.base.Base, abc.ABC):
         source : Source
             The source object with the updated spectrum.
         """
+        assert isinstance(spectrum, dLux.spectrums.Spectrum), \
+        ("spectrum must be a dLux.spectrums.Spectrum object.")
         return tree_at(
             lambda source : source.spectrum, self, spectrum)
     ### End Setter Methods ###
@@ -442,6 +449,8 @@ class RelativeFluxSource(Source, abc.ABC):
         source : Source
             The source object with updated flux ratio.
         """
+        assert isinstance(flux_ratio, Array) and flux_ratio.ndim == 0, \
+        ("flux_ratio must be a scalar array.")
         return tree_at(
            lambda source: source.flux_ratio, self, flux_ratio)
     
@@ -542,6 +551,8 @@ class RelativePositionSource(Source, abc.ABC):
         source : Source
             The source object with updated separation.
         """
+        assert isinstance(separation, Array) and separation.ndim == 0, \
+        ("separation must be a scalar array.")
         return tree_at(
            lambda source: source.separation, self, separation)
     
@@ -561,6 +572,8 @@ class RelativePositionSource(Source, abc.ABC):
         source : Source
             The source object with updated field angle.
         """
+        assert isinstance(field_angle, Array) and field_angle.ndim == 0, \
+        ("field_angle must be a scalar array.")
         return tree_at(
            lambda source: source.field_angle, self, field_angle)
     
@@ -708,6 +721,8 @@ class ArrayDistribution(ResolvedSource):
         source : Source
             The source object with updated distribution.
         """
+        assert isinstance(distribution, Array) and distribution.ndim == 2, \
+        ("distribution must be a 2d array.")
         return tree_at(
            lambda source: source.distribution, self, distribution)
     

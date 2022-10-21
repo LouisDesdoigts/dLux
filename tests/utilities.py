@@ -61,7 +61,9 @@ class Utility():
         pass
 
 
-    def approx(self : Utility, result : Array, comparator : Array) -> Array:
+    def approx(self : Utility, 
+               result : Array, 
+               comparator : Array) -> Array:
         """
         Compare two arrays to within floating point precision.
 
@@ -139,15 +141,21 @@ class WavefrontUtility(Utility):
         utility : Utility 
             The new utility for generating test cases.
         """
-        self.wavelength = 550e-09 if not wavelength else wavelength
-        self.offset = np.array([0., 0.]).astype(float) if not \
-            offset else np.array(offset).astype(float)           
-        self.size = 128 if not size else size
-        self.amplitude = np.ones((1, self.size, self.size)) if not \
-            amplitude else amplitude
-        self.phase = np.zeros((1, self.size, self.size)) if not \
-            phase else phase
-        self.pixel_scale = 1. if not pixel_scale else pixel_scale
+        # self.wavelength = 550e-09 if not wavelength else wavelength
+        self.wavelength = np.array(550e-09)
+        # self.offset = np.array([0., 0.]).astype(float) if not \
+        #     offset else np.array(offset).astype(float)           
+        self.offset = np.array([0., 0.])
+        # self.size = 128 if not size else size
+        self.size = 16
+        # self.amplitude = np.ones((1, self.size, self.size)) if not \
+        #     amplitude else amplitude
+        self.amplitude = np.ones((1, self.size, self.size))
+        # self.phase = np.zeros((1, self.size, self.size)) if not \
+        #     phase else phase
+        self.phase = np.zeros((1, self.size, self.size))
+        # self.pixel_scale = 1. if not pixel_scale else pixel_scale
+        self.pixel_scale = np.array(1.)
         self.plane_type = dLux.PlaneType.Pupil if not \
             plane_type else pixel_scale
 
@@ -500,7 +508,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
     utility : Utility 
         A utility for building `Wavefront` objects that interact 
         with the `VariableSamplingPropagator`.
-    pixels_out : int
+    npixels_out : int
         The safe number of pixels in the output plane for the 
         `Propagator`.
     pixel_scale_out : float
@@ -508,7 +516,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         The units are (radians) meters per pixel.
     """
     utility : Utility = WavefrontUtility()
-    pixels_out : int
+    npixels_out : int
     pixel_scale_out : float
     dLux.propagators.VariableSamplingPropagator.__abstractmethods__ = ()
    
@@ -519,12 +527,12 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         stored as attributes in this Utility.
         """
         super().__init__()
-        self.pixels_out = 256
-        self.pixel_scale_out = 1.e-3
+        self.npixels_out = 256
+        self.pixel_scale_out = np.asarray(1e-3, dtype=float)
 
 
     def construct(self : Utility, inverse : bool = None, 
-            pixels_out : int = None, 
+            npixels_out : int = None, 
             pixel_scale_out : float = None, tilt : bool = False) -> Propagator:
         """
         Build a safe `VariableSamplingPropagator` for testing purposes.
@@ -533,7 +541,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         ----------
         inverse : bool
             True if the inverse `Propagtor` is to be set.
-        pixels_out : int
+        npixels_out : int
             The number of pixels in the output plane.
         pixel_scale_out : float
             The pixel scale in the output plane in units of (radians)
@@ -549,21 +557,21 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         return dLux.propagators.VariableSamplingPropagator(
             tilt = tilt,
             inverse = self.is_inverse() if inverse is None else inverse,
-            pixels_out = self.pixels_out if pixels_out is None \
-                else pixels_out,
+            npixels_out = self.npixels_out if npixels_out is None \
+                else npixels_out,
             pixel_scale_out = self.pixel_scale_out if pixel_scale_out \
                 is None else pixel_scale_out) 
 
 
-    def get_pixels_out(self : Utility) -> int:
+    def get_npixels_out(self : Utility) -> int:
         """
         Returns
         -------
-        pixels_out : int
+        npixels_out : int
             The number of pixels in the output plane for the safe
             `Propagator`
         """
-        return self.pixels_out
+        return self.npixels_out
 
 
     def get_pixel_scale_out(self : Utility) -> float:
@@ -613,20 +621,20 @@ class FixedSamplingUtility(PropagatorUtility, UtilityUser):
         propagator : Propagator
             The safe testing `Propagator`
         """
-        return dLux.propagators.FixedSamplingPropagator(
-            self.is_inverse() if inverse is None else inverse)
+        inverse = self.is_inverse() if inverse is None else inverse
+        return dLux.propagators.FixedSamplingPropagator(inverse=inverse)
 
 
-class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
+class CartesianMFTUtility(VariableSamplingUtility, UtilityUser):
     """
     Container of useful functions and constructors for testing the 
-    PhysicalMFT class.
+    CartesianMFT class.
 
     Attributes
     ----------
     utility : Utility 
         A utility for building `Wavefront` objects that interact 
-        with the `PhysicalMFT`.
+        with the `CartesianMFT`.
     focal_length : float
         The safe focal length of the lens or mirror associated with 
         the porpagation.
@@ -645,16 +653,16 @@ class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
 
 
     def construct(self : Utility, inverse : bool = None, 
-            pixels_out : int = None, pixel_scale_out : float = None, 
+            npixels_out : int = None, pixel_scale_out : float = None, 
             focal_length = None, tilt : bool = False) -> Propagator:
         """
-        Build a safe `PhysicalMFT` for testing purposes.
+        Build a safe `CartesianMFT` for testing purposes.
 
         Parameters
         ----------
         inverse : bool
             True if the inverse `Propagtor` is to be set.
-        pixels_out : int
+        npixels_out : int
             The number of pixels in the output plane.
         pixel_scale_out : float
             The pixel scale in the output plane in units of (radians)
@@ -668,10 +676,10 @@ class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
         propagator : Propagator
             The safe testing `Propagator`
         """
-        return dLux.PhysicalMFT(
+        return dLux.CartesianMFT(
             tilt = tilt,
             inverse = self.is_inverse() if inverse is None else inverse,
-            pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
+            npixels_out = self.get_npixels_out() if npixels_out is None else npixels_out,
             pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
             focal_length = self.get_focal_length() if focal_length is None else focal_length)
 
@@ -687,16 +695,16 @@ class PhysicalMFTUtility(VariableSamplingUtility, UtilityUser):
         return self.focal_length
 
 
-class PhysicalFFTUtility(FixedSamplingUtility, UtilityUser):
+class CartesianFFTUtility(FixedSamplingUtility, UtilityUser):
     """
     Container of useful functions and constructors for testing the 
-    PhysicalFFT class.
+    CartesianFFT class.
 
     Attributes
     ----------
     utility : Utility 
         A utility for building `Wavefront` objects that interact 
-        with the `PhysicalFFT`.
+        with the `CartesianFFT`.
     focal_length : float
         The safe focal length of the lens or mirror associated with 
         the porpagation.
@@ -718,7 +726,7 @@ class PhysicalFFTUtility(FixedSamplingUtility, UtilityUser):
     def construct(self : Utility, inverse : bool = None, 
             focal_length = None) -> Propagator:
         """
-        Build a safe `PhysicalFFT` for testing purposes.
+        Build a safe `CartesianFFT` for testing purposes.
 
         Parameters
         ----------
@@ -733,7 +741,7 @@ class PhysicalFFTUtility(FixedSamplingUtility, UtilityUser):
         propagator : Propagator
             The safe testing `Propagator`
         """
-        return dLux.PhysicalFFT(
+        return dLux.CartesianFFT(
             inverse = self.is_inverse() if inverse is None else inverse,
             focal_length = self.get_focal_length() if focal_length is None else focal_length)
 
@@ -750,16 +758,16 @@ class PhysicalFFTUtility(FixedSamplingUtility, UtilityUser):
         return self.focal_length
 
 
-# class PhysicalFresnelUtility(VariableSamplingUtility, UtilityUser):
+# class CartesianFresnelUtility(VariableSamplingUtility, UtilityUser):
 #     """
 #     Container of useful functions and constructors for testing the 
-#     PhysicalFresnel class.
+#     CartesianFresnel class.
 
 #     Attributes
 #     ----------
 #     utility : Utility 
 #         A utility for building `Wavefront` objects that interact 
-#         with the `PhysicalFresnel`.
+#         with the `CartesianFresnel`.
 #     focal_length : float
 #         The safe focal length of the lens or mirror associated with 
 #         the porpagation.
@@ -783,17 +791,17 @@ class PhysicalFFTUtility(FixedSamplingUtility, UtilityUser):
 
 
 #     def construct(self : Utility, inverse : bool = None, 
-#             pixels_out : int = None, pixel_scale_out : float = None, 
+#             npixels_out : int = None, pixel_scale_out : float = None, 
 #             focal_length = None, focal_shift :float = None,
 #             tilt = False) -> Propagator:
 #         """
-#         Build a safe `PhysicalFresnel` for testing purposes.
+#         Build a safe `CartesianFresnel` for testing purposes.
 
 #         Parameters
 #         ----------
 #         inverse : bool
 #             True if the inverse `Propagtor` is to be set.
-#         pixels_out : int
+#         npixels_out : int
 #             The number of pixels in the output plane.
 #         pixel_scale_out : float
 #             The pixel scale in the output plane in units of (radians)
@@ -810,10 +818,10 @@ class PhysicalFFTUtility(FixedSamplingUtility, UtilityUser):
 #         propagator : Propagator
 #             The safe testing `Propagator`
 #         """
-#         return dLux.PhysicalFresnel(
+#         return dLux.CartesianFresnel(
 #             tilt = tilt,
 #             inverse = self.is_inverse() if inverse is None else inverse,
-#             pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
+#             npixels_out = self.get_npixels_out() if npixels_out is None else npixels_out,
 #             pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
 #             focal_length = self.get_focal_length() if focal_length is None else focal_length,
 #             focal_shift = self.get_focal_shift() if focal_shift is None else focal_shift)
@@ -863,17 +871,17 @@ class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
 
 
     def construct(self : Utility, inverse : bool = None, 
-            pixels_out : int = None, pixel_scale_out : float = None, 
+            npixels_out : int = None, pixel_scale_out : float = None, 
             focal_length = None, focal_shift :float = None,
             tilt : bool = False) -> Propagator:
         """
-        Build a safe `PhysicalMFT` for testing purposes.
+        Build a safe `CartesianMFT` for testing purposes.
 
         Parameters
         ----------
         inverse : bool
             True if the inverse `Propagtor` is to be set.
-        pixels_out : int
+        npixels_out : int
             The number of pixels in the output plane.
         pixel_scale_out : float
             The pixel scale in the output plane in units of (radians)
@@ -887,7 +895,7 @@ class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
         return dLux.AngularMFT(
             tilt = tilt,
             inverse = self.is_inverse() if inverse is None else inverse,
-            pixels_out = self.get_pixels_out() if pixels_out is None else pixels_out,
+            npixels_out = self.get_npixels_out() if npixels_out is None else npixels_out,
             pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out)
 
 
@@ -915,7 +923,7 @@ class AngularFFTUtility(FixedSamplingUtility, UtilityUser):
 
     def construct(self : Utility, inverse : bool = None) -> Propagator:
         """
-        Build a safe `PhysicalMFT` for testing purposes.
+        Build a safe `CartesianMFT` for testing purposes.
 
         Parameters
         ----------
@@ -1496,7 +1504,7 @@ class OpticsUtility(Utility):
             dLux.layers.CreateWavefront(16, 1),
             dLux.layers.CompoundAperture([0.5]),
             dLux.layers.NormaliseWavefront(),
-            dLux.propagators.PhysicalMFT(16, 1., 1e-6)
+            dLux.propagators.CartesianMFT(16, 1., 1e-6)
         ]
     
     

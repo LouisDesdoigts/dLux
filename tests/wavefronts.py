@@ -14,8 +14,8 @@ from utilities import CartesianWavefrontUtility
 from utilities import AngularWavefrontUtility
 from utilities import UtilityUser
 
-
-Array = typing.NewType("Array", numpy.ndarray)
+import jax.numpy as np
+Array = np.ndarray
 
 TestWavefront = typing.NewType("TestWavefront", UtilityUser)
 TestCartesianWavefront = typing.NewType("TestCartesianWavefront", UtilityUser)
@@ -57,7 +57,7 @@ class TestWavefront(UtilityUser):
         Test for the mutator set_wavelength.
         """
         OLD_WAVELENGTH = self.get_utility().get_wavelength()
-        NEW_WAVELENGTH = 540e-09
+        NEW_WAVELENGTH = np.array(540e-09)
 
         wavefront = self\
             .get_utility()\
@@ -105,15 +105,15 @@ class TestWavefront(UtilityUser):
     def test_get_real(self : TestWavefront) -> None:
         """
         Rotates the phasor through real -> imaginary and checks that 
-        the output is correct.         
+        the output is correct.
         """
-        FULL_REAL = 0.
-        PART_REAL = numpy.pi / 4
-        NONE_REAL = numpy.pi / 2
+        FULL_REAL = np.array(0.)
+        PART_REAL = np.array(np.pi / 4)
+        NONE_REAL = np.array(np.pi / 2)
 
-        FULL_REAL_OUTPUT = 1.
-        PART_REAL_OUTPUT = 1. / numpy.sqrt(2.)
-        NONE_REAL_OUTPUT = 0.        
+        FULL_REAL_OUTPUT = np.array(1.)
+        PART_REAL_OUTPUT = np.array(1. / np.sqrt(2.))
+        NONE_REAL_OUTPUT = np.array(0.)
 
         full_real_wavefront = self\
             .utility\
@@ -156,13 +156,13 @@ class TestWavefront(UtilityUser):
         Rotates the phasor through real -> imaginary and checks that 
         the output is correct
         """
-        NONE_IMAGINARY = numpy.pi
-        PART_IMAGINARY = numpy.pi / 4
-        FULL_IMAGINARY = numpy.pi / 2
+        NONE_IMAGINARY = np.array(np.pi)
+        PART_IMAGINARY = np.array(np.pi / 4)
+        FULL_IMAGINARY = np.array(np.pi / 2)
 
-        NONE_IMAGINARY_OUT = 0.
-        PART_IMAGINARY_OUT = 1. / numpy.sqrt(2)
-        FULL_IMAGINARY_OUT = 1.
+        NONE_IMAGINARY_OUT = np.array(0.)
+        PART_IMAGINARY_OUT = np.array(1. / np.sqrt(2))
+        FULL_IMAGINARY_OUT = np.array(1.)
 
         none_imaginary_wavefront = self\
             .utility\
@@ -190,7 +190,7 @@ class TestWavefront(UtilityUser):
             .approx(part_imaginary_wavefront.get_imaginary(),
                 PART_IMAGINARY_OUT)\
             .all()
-  
+
         assert self\
             .get_utility()\
             .approx(none_imaginary_wavefront.get_imaginary(),
@@ -203,12 +203,12 @@ class TestWavefront(UtilityUser):
         Checks that the amplitude array has been updated, after 
         operations
         """
-        INITIAL_AMPLITUDE = 1.
-        CHANGED_AMPLITUDE = 2.
+        INITIAL_AMPLITUDE = np.array(1.)
+        CHANGED_AMPLITUDE = np.array(2.)
 
         initial_wavefront = self.get_utility().construct()
         initial_amplitude = initial_wavefront.get_amplitude()
-        changed_wavefront = initial_wavefront.multiply_amplitude(2)
+        changed_wavefront = initial_wavefront.multiply_amplitude(np.array(2.))
         changed_amplitude = changed_wavefront.get_amplitude()
         
         assert (initial_amplitude == INITIAL_AMPLITUDE).all()  
@@ -220,12 +220,12 @@ class TestWavefront(UtilityUser):
         Checks that the phase array is correctly updated by the 
         operations. 
         """
-        INITIAL_PHASE = 0.
-        CHANGED_PHASE = numpy.pi
+        INITIAL_PHASE = np.array(0.)
+        CHANGED_PHASE = np.array(np.pi)
 
         initial_wavefront = self.get_utility().construct()
         initial_phase = initial_wavefront.get_phase()
-        changed_wavefront = initial_wavefront.add_phase(numpy.pi)
+        changed_wavefront = initial_wavefront.add_phase(np.array(np.pi))
         changed_phase = changed_wavefront.get_phase()
         
         assert (initial_phase == INITIAL_PHASE).all()
@@ -300,7 +300,7 @@ class TestWavefront(UtilityUser):
         key = random.PRNGKey(0)
         size = self.get_utility().get_size() 
         
-        INITIAL_AMPLITUDE = random.normal(key, (size, size))
+        INITIAL_AMPLITUDE = random.normal(key, (1, size, size))
         OUTPUT = INITIAL_AMPLITUDE / numpy.linalg.norm(INITIAL_AMPLITUDE)
 
         normalised_amplitude = self\
@@ -347,11 +347,11 @@ class TestWavefront(UtilityUser):
         """
         Functionality that is not currently supported, allows the 
         state to be immutably changed and viewed from outside the 
-        namespace. 
+        namespace.
         """
         size = self.get_utility().get_size()
         key = random.PRNGKey(0)
-        phase = random.normal(key, (size, size))
+        phase = random.normal(key, (1, size, size))
 
         wavefront = self\
             .get_utility()\
@@ -368,7 +368,7 @@ class TestWavefront(UtilityUser):
         """
         size = self.get_utility().get_size()
         key = random.PRNGKey(0)
-        amplitude = random.normal(key, (size, size))
+        amplitude = random.normal(key, (1, size, size))
 
         wavefront = self\
             .get_utility()\

@@ -27,8 +27,8 @@ def toliman_layers(extra_layers=[],
         dLux.NormaliseWavefront()]
     [layers.append(layer) for layer in extra_layers]
     if in_focus:
-        layers.append(dLux.PhysicalMFT(det_npix, fl, det_pixsize))
+        layers.append(dLux.CartesianMFT(det_npix, fl, det_pixsize))
     else:
-        layers.append(dLux.FresnelProp(det_npix, fl, fl_shift, det_pixsize))
+        layers.append(dLux.CartesianFresnel(det_npix, fl, fl_shift, det_pixsize))
     
     return layers
