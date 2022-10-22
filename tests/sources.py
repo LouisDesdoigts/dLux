@@ -314,7 +314,7 @@ class TestPointSource(UtilityUser):
         source = self.utility.construct()
         optics = dLux.base.Optics([dLux.CreateWavefront(16, 1)])
         detector = dLux.base.Detector([dLux.AddConstant(0.)])
-        filter_in = dLux.Filter()        
+        filter_in = dLux.Filter()
         source.model(optics)
         source.model(optics, detector)
         source.model(optics, detector, filter_in)

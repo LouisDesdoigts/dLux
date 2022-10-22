@@ -100,7 +100,7 @@ class WavefrontUtility(Utility):
         A safe wavelength for the testing wavefronts in meters
     """
     wavelength : float
-    offset : Array
+    # offset : Array
     size : int
     amplitude : Array 
     phase : Array
@@ -110,7 +110,7 @@ class WavefrontUtility(Utility):
 
     def __init__(self : Utility,
             wavelength : float = None, 
-            offset : Array = None,
+            # offset : Array = None,
             size : int = None,
             amplitude : Array = None,
             phase : Array = None,
@@ -145,7 +145,7 @@ class WavefrontUtility(Utility):
         self.wavelength = np.array(550e-09)
         # self.offset = np.array([0., 0.]).astype(float) if not \
         #     offset else np.array(offset).astype(float)           
-        self.offset = np.array([0., 0.])
+        # self.offset = np.array([0., 0.])
         # self.size = 128 if not size else size
         self.size = 16
         # self.amplitude = np.ones((1, self.size, self.size)) if not \
@@ -174,8 +174,10 @@ class WavefrontUtility(Utility):
         wavefront : Wavefront
             The safe testing wavefront.
         """
-        return dLux.wavefronts.Wavefront(self.wavelength, self.offset, \
-              self.pixel_scale, self.plane_type, self.amplitude, self.phase)
+        # return dLux.wavefronts.Wavefront(self.wavelength, self.offset, \
+        #       self.pixel_scale, self.plane_type, self.amplitude, self.phase)
+        return dLux.wavefronts.Wavefront(self.wavelength, \
+              self.pixel_scale, self.amplitude, self.phase, self.plane_type)
 
 
     def get_wavelength(self : Utility) -> float:
@@ -271,7 +273,7 @@ class CartesianWavefrontUtility(WavefrontUtility):
     """
     def __init__(self : Utility,
             wavelength : float = None, 
-            offset : Array = None,
+            # offset : Array = None,
             size : int = None, 
             amplitude : Array = None, 
             phase : Array = None,
@@ -300,8 +302,12 @@ class CartesianWavefrontUtility(WavefrontUtility):
         utility : CartesianWavefrontUtility 
             A helpful class for implementing the tests. 
         """
-        super().__init__(wavelength, offset, size, amplitude, phase, 
-            pixel_scale, plane_type)
+        # super().__init__(wavelength, offset, size, amplitude, phase, 
+        #     pixel_scale, plane_type)
+        # super().__init__(wavelength, size, amplitude, phase, 
+        #     pixel_scale, plane_type)
+        super().__init__(wavelength, pixel_scale, amplitude, phase, 
+            plane_type)
 
 
 class AngularWavefrontUtility(WavefrontUtility):
@@ -311,7 +317,7 @@ class AngularWavefrontUtility(WavefrontUtility):
     """
     def __init__(self : Utility,
             wavelength : float = None, 
-            offset : Array = None,
+            # offset : Array = None,
             size : int = None, 
             amplitude : Array = None, 
             phase : Array = None,
@@ -340,8 +346,12 @@ class AngularWavefrontUtility(WavefrontUtility):
         wavefront : AngularWavefrontUtility 
             A helpful class for implementing the tests. 
         """
-        super().__init__(wavelength, offset, size, amplitude, phase,
-            pixel_scale, plane_type)
+        # super().__init__(wavelength, offset, size, amplitude, phase,
+        #     pixel_scale, plane_type)
+        # super().__init__(wavelength, size, amplitude, phase,
+        #     pixel_scale, plane_type)
+        super().__init__(wavelength, pixel_scale, amplitude, phase, 
+            plane_type)
 
 
 # class GaussianWavefrontUtility(CartesianWavefrontUtility):
@@ -533,7 +543,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
 
     def construct(self : Utility, inverse : bool = None, 
             npixels_out : int = None, 
-            pixel_scale_out : float = None, tilt : bool = False) -> Propagator:
+            pixel_scale_out : float = None, shift : Array = np.zeros(2)) -> Propagator:
         """
         Build a safe `VariableSamplingPropagator` for testing purposes.
 
@@ -555,7 +565,7 @@ class VariableSamplingUtility(PropagatorUtility, UtilityUser):
         # TODO: These should not be accessible in the importable 
         # dLux. need to confer with @LouisDesdoigts.
         return dLux.propagators.VariableSamplingPropagator(
-            tilt = tilt,
+            shift = shift,
             inverse = self.is_inverse() if inverse is None else inverse,
             npixels_out = self.npixels_out if npixels_out is None \
                 else npixels_out,
@@ -654,7 +664,7 @@ class CartesianMFTUtility(VariableSamplingUtility, UtilityUser):
 
     def construct(self : Utility, inverse : bool = None, 
             npixels_out : int = None, pixel_scale_out : float = None, 
-            focal_length = None, tilt : bool = False) -> Propagator:
+            focal_length = None, shift : Array = np.zeros(2)) -> Propagator:
         """
         Build a safe `CartesianMFT` for testing purposes.
 
@@ -677,7 +687,7 @@ class CartesianMFTUtility(VariableSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.CartesianMFT(
-            tilt = tilt,
+            shift = shift,
             inverse = self.is_inverse() if inverse is None else inverse,
             npixels_out = self.get_npixels_out() if npixels_out is None else npixels_out,
             pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
@@ -793,7 +803,7 @@ class CartesianFFTUtility(FixedSamplingUtility, UtilityUser):
 #     def construct(self : Utility, inverse : bool = None, 
 #             npixels_out : int = None, pixel_scale_out : float = None, 
 #             focal_length = None, focal_shift :float = None,
-#             tilt = False) -> Propagator:
+#             shift = False) -> Propagator:
 #         """
 #         Build a safe `CartesianFresnel` for testing purposes.
 
@@ -819,7 +829,7 @@ class CartesianFFTUtility(FixedSamplingUtility, UtilityUser):
 #             The safe testing `Propagator`
 #         """
 #         return dLux.CartesianFresnel(
-#             tilt = tilt,
+#             shift = shift,
 #             inverse = self.is_inverse() if inverse is None else inverse,
 #             npixels_out = self.get_npixels_out() if npixels_out is None else npixels_out,
 #             pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out,
@@ -873,7 +883,7 @@ class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
     def construct(self : Utility, inverse : bool = None, 
             npixels_out : int = None, pixel_scale_out : float = None, 
             focal_length = None, focal_shift :float = None,
-            tilt : bool = False) -> Propagator:
+            shift : Array = np.zeros(2)) -> Propagator:
         """
         Build a safe `CartesianMFT` for testing purposes.
 
@@ -893,7 +903,7 @@ class AngularMFTUtility(VariableSamplingUtility, UtilityUser):
             The safe testing `Propagator`
         """
         return dLux.AngularMFT(
-            tilt = tilt,
+            shift = shift,
             inverse = self.is_inverse() if inverse is None else inverse,
             npixels_out = self.get_npixels_out() if npixels_out is None else npixels_out,
             pixel_scale_out = self.get_pixel_scale_out() if pixel_scale_out is None else pixel_scale_out)

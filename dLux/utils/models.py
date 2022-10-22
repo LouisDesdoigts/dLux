@@ -21,14 +21,14 @@ def toliman_layers(extra_layers=[],
         
     layers = [
         dLux.CreateWavefront(wf_npix, aperture),
-        dLux.TiltWavefront(),
-        dLux.CircularAperture(wf_npix, rmin=m2/aperture, eps=1e-7),
+        # dLux.TiltWavefront(),
+        dLux.CircularAperture(wf_npix, rmin=m2/aperture, epsilon=1e-7),
         # dLux.CompoundAperture([aperture/2], occulter_radii=[m2/2]),
         dLux.NormaliseWavefront()]
     [layers.append(layer) for layer in extra_layers]
     if in_focus:
-        layers.append(dLux.CartesianMFT(det_npix, fl, det_pixsize))
+        layers.append(dLux.CartesianMFT(det_npix, det_pixsize, fl))
     else:
-        layers.append(dLux.CartesianFresnel(det_npix, fl, fl_shift, det_pixsize))
+        layers.append(dLux.CartesianFresnel(det_npix, det_pixsize, fl, fl_shift))
     
     return layers
