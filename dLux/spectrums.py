@@ -1,6 +1,5 @@
 from __future__ import annotations
-import abc
-import typing
+from abc import ABC, abstractmethod
 import jax.numpy as np
 from equinox import tree_at
 from jax import vmap
@@ -8,11 +7,12 @@ import dLux
 
 
 __all__ = ["ArraySpectrum", "PolynomialSpectrum", "CombinedSpectrum"]
-# Array =  typing.NewType("Array", np.ndarray)
+
+
 Array = np.ndarray
 
 
-class Spectrum(dLux.base.Base, abc.ABC):
+class Spectrum(dLux.base.Base, ABC):
     """
     Abstract base class for arbitrary spectral parametrisations.
     
@@ -77,7 +77,7 @@ class Spectrum(dLux.base.Base, abc.ABC):
             lambda spectrum : spectrum.wavelengths, self, wavelengths)
     
     
-    @abc.abstractmethod
+    @abstractmethod
     def normalise(self : Spectrum) -> Spectrum:
         """
         Abstract method to normalise the spectrum. Must be overwitten by child
@@ -86,7 +86,7 @@ class Spectrum(dLux.base.Base, abc.ABC):
         return
     
     
-    @abc.abstractmethod
+    @abstractmethod
     def get_weights(self : Spectrum) -> Array:
         """
         Abstract getter method for the weights. Must be overwritten by child

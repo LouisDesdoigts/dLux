@@ -128,6 +128,8 @@ def list_to_dict(list_in, ordered=True):
     dict_out = OrderedDict() if ordered else {}
     for i in range(len(names)):
         dict_out[names[i]] = list_in[i]
+        # Throws an equinox error since name is defined as a static_field
+        # dict_out[names[i]] = list_in[i].set_name(names[i])
 
     return dict_out
 

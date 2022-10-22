@@ -23,156 +23,246 @@ import jax.numpy as np
 import equinox as eqx
 import dLux
 import abc
+from inspect import signature
 
 
 __author__ = "Louis Desdoigts"
 __date__ = "05/07/2022"
 
 
-__all__ = ["AddPhase", "TransmissiveOptic", "ApplyBasisCLIMB", 
-           "ApplyBasisOPD", "ApplyOPD", "CircularAperture", "CreateWavefront",
-           "NormaliseWavefront", "TiltWavefront", "CompoundAperture",
-           "InformationConservingRotation"]
+__all__ = ["CreateWavefront", "TiltWavefront", "CircularAperture",
+           "NormaliseWavefront", "ApplyBasisOPD", "AddPhase", "AddOPD",
+           "TransmissiveOptic", "CompoundAperture", "ApplyBasisCLIMB",
+           "FourierRotation"]
+
+
+Array = np.ndarray
 
 
 class OpticalLayer(dLux.base.Base, abc.ABC):
     """
     A base Optical layer class to help with type checking throuhgout the rest
-    of the software.
+    of the software. Instantiates the apply method which inspects the function
+    signature of the __call__ method in order to only pass and return the
+    parameters dictionary if it is needed and modified.
+
+    Attributes
+    ----------
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
-    
-    
-    @abc.abstractmethod
-    def __call__(self : OpticalLayer, params_dict : dict) -> dict:
+    # name : str = eqx.static_field()
+    name : str
+
+
+    def __init__(self : OpticalLayer,
+                 name : str = 'OpticalLayer') -> OpticalLayer:
         """
-        Abstract method for Optical Layers
+        Constructor for the OpticalLayer class.
+
+        Parameters
+        ----------
+        name : str = 'OpticalLayer'
+            The name of the layer, which is used to index the layers dictionary.
+        """
+        self.name = str(name)
+
+
+    def get_name(self : OpticalLayer) -> str:
+        """
+        Accessor for the name attribute.
+
+        Returns
+        -------
+        name : str
+            The name attribute for this OpticalLayer.
+        """
+        return self.name
+
+
+    def set_name(self : OpticalLayer, name : str) -> OpticalLayer:
+        """
+        Mutator for the name attribute.
+
+        Parameters
+        ----------
+        name : str
+            The new string for the name attribute of this OpticalLayer.
+
+        Returns
+        -------
+        optical_layer : OpticalLayer
+            The OpticalLayer with the updated name.
+        """
+        assert isinstance(name, str), ("name must be a string.")
+        return eqx.tree_at(lambda layer: layer.name, self, name)
+
+
+    @abc.abstractmethod
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+        """
+        Appies the layer to the `Wavefront`.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront with the optical layer applied.
         """
         return
 
 
-class CreateWavefront(OpticalLayer):
-    """
-    Initialises an on-axis input wavefront
-
-    Attributes
-    ----------
-    npix : int
-        The number of pixels along one side that represent the 
-        wavefront.
-    pixel_scale: float, meters/pixel
-        The pixelscae of each array between each layer operation
-        Its value is automatically calculated from the input values 
-    wavefront_size: float, meters
-        Width of the array representing the wavefront in physical units
-    wavefront_type: string
-        Determines the type of wavefront class to create. Currently
-        supports 'Cartesian', 'Angular', 'FarFieldFresnel'
-    name : string
-        The name of the layer, which is used to index the layers
-        dictionary. Default is 'Wavefront Creation'
-    """
-    npix : int
-    wavefront_size : float
-    # offset : float
-    wavefront_type : str = eqx.static_field()
-    name : str = eqx.static_field()
-
-
-    def __init__(self, npix, wavefront_size, offset, wavefront_type='Cartesian', name='Wavefront Creation'):
+    def apply(self : OpticalLayer, parameters : dict) -> dict:
         """
-        Parameters
-        ----------
-        npix : int
-            The number of pixels along one edge of the wavefront.
-        wavefront_size : float, meters
-            The physical dimensions of the wavefront in units of
-            (radians) meters.
-        wavefront_type: string
-            Determines the type of wavefront class to create. Currently
-            supports 'Cartesian', 'Angular', 'FarFieldFresnel'
-        name : string
-            The name of the layer, which is used to index the layers
-            dictionary. Default is 'Wavefront Creation'
-        """
-        self.npix = int(npix)
-        self.wavefront_size = np.array(wavefront_size).astype(float)
-        # self.offset = np.asarray(offset, float)
-        assert wavefront_type in ['Cartesian', 'Angular', 'FarFieldFresnel'], \
-        "wavefront_type must be either 'Cartesian', 'Angular' or 'FarFieldFresnel'"
-        self.wavefront_type = str(wavefront_type)
-        self.name = name
-
-
-    def __call__(self, params_dict):
-        """
-        Creates a safe wavefront by populating the amplitude and 
-        phase arrays as well as the pixel_scale. 
+        Unpacks the wavefront object from the parameters dictionary and applies
+        the layers __call__ method upon it.
 
         Parameters
         ----------
-        params_dict : dict
-            A dictionary of the parameters. The following condition
-            must be satisfied:
-            ```py
-            params_dict.get("wavelength") != None
-            params_dict.get("offset") != None
-            ```
-            where "wavelength" points to an array of wavelengths in meters
-            and offset points to an x-y tilt of the wavefront. 
+        parameters : dict
+            A dictionary that must contain a "Wavefront" key with a
+            corresponding dLux.wavefronts.Wavefront object.
 
         Returns
         -------
-        params_dict : dict
-            The `params_dict` parameter with the `Wavefront` entry 
-            updated.
+        parameters : dict
+            A dictionary with the updated "Wavefront" key with the propagated
+            wavefront object.
         """
-        wavel = params_dict["wavelength"]
-        # offset = params_dict["offset"]
-        
-        pixel_scale = self.wavefront_size/self.npix
-        plane_type = dLux.PlaneType.Pupil
-        
-        x_angle, y_angle = params_dict["offset"]
+        # Inspect apply function to see if it takes/returns the parameters dict
+        input_parameters = signature(self.__call__).parameters
+
+        # Method does not take in the parameters, update in place
+        if 'parameters' not in input_parameters:
+            parameters["Wavefront"] = self.__call__(parameters["Wavefront"])
+
+        # Method takes and return updated parameters
+        elif input_parameters['returns_parameters'].default == True:
+            wavefront, parameters = self.__call__(parameters["Wavefront"],
+                                                  parameters)
+            parameters["Wavefront"] = wavefront
+
+        # Method takes but does not return parameters
+        else:
+            parameters["Wavefront"] = self.__call__(parameters["Wavefront"],
+                                                    parameters)
+
+        # Return updated parameters dictionary
+        return parameters
+
+
+class CreateWavefront(OpticalLayer):
+    """
+    Initialises the relevant Wavefront class with the specified attributes.
+    Also applies the tilt specified by the source object, defined in the
+    parameters dictionary. All wavefronts are cosntructed in the Pupil plane.
+
+    Attributes
+    ----------
+    npixels : int
+        The number of pixels used to represent the wavefront.
+    wavefront_diameter: Array, meters
+        The diameter of the wavefront in the Pupil plane.
+    wavefront_type: str
+        Determines the type of wavefront class to create. Currently supports
+        'Cartesian', 'Angular', 'FarFieldFresnel'.
+    """
+    npixels            : int
+    wavefront_diameter : Array
+    wavefront_type     : str = eqx.static_field()
+
+
+    def __init__(self               : OpticalLayer,
+                 npixels            : int,
+                 wavefront_diameter : Array,
+                 wavefront_type     : str = 'Cartesian',
+                 name               : str = 'CreateWavefront') -> OpticalLayer:
+        """
+        Constructor for the CreateWavefront class.
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels used to represent the wavefront.
+        wavefront_diameter: Array, meters
+            The diameter of the wavefront in the Pupil plane.
+        wavefront_type: str = 'Cartesian'
+            Determines the type of wavefront class to create. Currently supports
+            'Cartesian', 'Angular', 'FarFieldFresnel'.
+        name : str = 'CreateWavefront'
+            The name of the layer, which is used to index the layers dictionary.
+            Default is 'CreateWavefront'.
+        """
+        super().__init__(name)
+        self.npixels            = int(npixels)
+        self.wavefront_diameter = np.asarray(wavefront_diameter, dtype=float)
+        self.wavefront_type     = str(wavefront_type)
+
+        # Input checks
+        assert self.wavefront_diameter.ndim == 0, ("wavefront_diameter must be "
+        "a scalar array.")
+        assert wavefront_type in ('Cartesian', 'Angular', 'FarFieldFresnel'), \
+        ("wavefront_type must be either 'Cartesian', 'Angular' or "
+         "'FarFieldFresnel'")
+
+
+    def __call__(self               : OpticalLayer,
+                 wavefront          : Wavefront,
+                 parameters         : dict,
+                 returns_parameters : bool = True) -> Wavefront:
+        """
+        Constructs a wavefront obect based on the parameters of the class and
+        the parameters within the parameters dictionary.
+
+        Parameters
+        ----------
+        wavefront : None
+            Any empty None type input to the class in order to maintain the
+            input conventions determied by the apply method of OpticalLayers.
+        parameters : dict
+            A dictionary of parameters needed to construct the wavefront.
+        returns_parametrs: bool = True
+            Determines if the class returns the parameters dictionary.
+
+        Returns
+        -------
+        wavefront, parameters : (Wavefront, dict)
+            Returns the constructed wavefront and the updated parameters
+            dictionary. If returns_parameters is False, only the wavefront is
+            returned.
+        """
+        # Get the wavelength
+        wavelength = parameters["wavelength"]
+
+        # Determine the pixel scale
+        pixel_scale = self.wavefront_diameter/self.npixels
+
+        # Construct tilted phases for the wavefront based on the source offset
+        x_angle, y_angle = parameters["offset"]
         x_positions, y_positions = dLux.utils.coordinates \
-                                  .get_pixel_coordinates(self.npix, pixel_scale)
-        wavenumber = 2 * np.pi / wavel
+                              .get_pixel_coordinates(self.npixels, pixel_scale)
+        wavenumber = 2 * np.pi / wavelength
         phase = - wavenumber * (x_positions * x_angle + y_positions * y_angle)
-        
         phase = np.expand_dims(phase, 0)
-        
-        # phase = np.zeros([1, self.npix, self.npix])
-        amplitude = np.ones([1, self.npix, self.npix])
+
+        # Construct normalised Amplitude
+        amplitude = np.ones([1, self.npixels, self.npixels])
         amplitude /= np.linalg.norm(amplitude)
-        
-        if self.wavefront_type == 'Cartesian':
-            wavefront = dLux.CartesianWavefront(
-                                        wavel, 
-                                        # offset,
-                                        pixel_scale,
-                                        plane_type,
-                                        amplitude, 
-                                        phase)
-            
-        elif self.wavefront_type == 'Angular':
-            wavefront = dLux.AngularWavefront(
-                                        wavel, 
-                                        # offset,
-                                        pixel_scale,
-                                        plane_type,
-                                        amplitude, 
-                                        phase)
-            
-        elif self.wavefront_type == 'FarFieldFresnel':
-            wavefront = dLux.FarFieldFresnelWavefront(
-                                        wavel, 
-                                        # offset,
-                                        pixel_scale,
-                                        plane_type,
-                                        amplitude, 
-                                        phase)
-            
+
+        # Get correct Wavefront type
+        wavefront_constructor = getattr(dLux.wavefronts,
+                                        self.wavefront_type + "Wavefront")
+
+        # Construct Wavefront
+        wavefront = wavefront_constructor(wavelength, pixel_scale, amplitude,
+                                      phase, dLux.wavefronts.PlaneType.Pupil)
+
         # Kill PlaneType Gradients
-        is_leaf = lambda x: isinstance(x, dLux.PlaneType)
+        is_leaf = lambda x: isinstance(x, dLux.wavefronts.PlaneType)
         def kill_gradient(x):
             if is_leaf(x):
                 return jax.lax.stop_gradient(x.value)
@@ -180,642 +270,592 @@ class CreateWavefront(OpticalLayer):
                 return x
         wavefront = jax.tree_map(kill_gradient, wavefront, is_leaf=is_leaf)
 
-        params_dict["Wavefront"] = wavefront
-        return params_dict
+        # Update the parameters dictionary with the constructed wavefront
+        parameters["Wavefront"] = wavefront
+
+        # Return either the wavefront or wavefront and parameters dictionary
+        if returns_parameters:
+            return wavefront, parameters
+        else:
+            return wavefront
 
 
-# TODO: Talk to @Louis abot incorporating this into the Wavefronts 
-# because it is not differentiable and only relies on the state of 
-# the wavefront. 
-# I now think it might be a good idea to add this into the wavefront 
-# class and then leave the call function as a simple call to it.
-# This would allow other class to apply arbitrary tilts tracked in 
-# that class.
 class TiltWavefront(OpticalLayer):
-    """ 
-    Tilts the wavefront by the tilt_angles.
+    """
+    Tilts the wavefront by the input tilt_angles.
 
     Attributes
     ----------
     tilt_angles : Array, radians
         The (x, y) angles by which to tilt the wavefront.
     """
-    tilt_angles = Array
-    name : str = eqx.static_field()
+    tilt_angles : Array
 
-    def __init__(self, tilt_angles, name='Wavefront Tilt'):
+
+    def __init__(self        : OpticalLayer,
+                 tilt_angles : Array,
+                 name        : str = 'TiltWavefront') -> OpticalLayer:
         """
+        Constructor for the TiltWavefront class.
+
         Parameters
         ----------
         tilt_angles : Array, radians
             The (x, y) angles by which to tilt the wavefront.
-        name : string
-            The name of the layer, which is used to index the layers
-            dictionary. Default is 'Wavefront Tilt'
+        name : str = TiltWavefront
+            The name of the layer, which is used to index the layers dictionary.
+            Default is 'TiltWavefront'.
         """
+        super().__init__(name)
         self.tilt_angles = np.asarray(tilt_angles, dtype=float)
-        self.name = name
-    
-    def __call__(self, params_dict):
+
+        # Input checks
+        assert self.tilt_angles.shape == (2,), \
+        ("tilt_angles must be an array of shape (2,), ie (x, y).")
+
+
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
         """
         Applies the tilt_angle to the phase of the wavefront.
 
         Parameters
         ----------
-        params_dict : dict
-            A dictionary of the parameters. The following condition
-            must be satisfied:
-            ```py
-            params_dict.get("Wavefront") != None
-            ```
+        wavefront : Wavefront
+            The wavefront to operate on.
 
         Returns
         -------
-        params_dict : dict
-            The `params_dict` parameter with the `Wavefront` entry 
-            updated. 
+        wavefront : Wavefront
+            The wavefront with the optical layer applied.
         """
-        wavefront = params_dict["Wavefront"]
-        tilted_wavefront = wavefront.tilt_wavefront(self.tilt_angles)
-        params_dict["Wavefront"] = wavefront.tilt_wavefront(self.tilt_angles)
-        return params_dict
-        
-        # x_angle, y_angle = self.tilt_angles
-        # x_positions, y_positions = wavefront.get_pixel_coordinates()
-        # wavenumber = 2 * np.pi / wavefront.get_wavelength()
-        # phase = - wavenumber * (x_positions * x_angle + \
-        #     y_positions * y_angle)
-        # params_dict["Wavefront"] = wavefront.add_phase(phase)
-        # return params_dict
+        return wavefront.tilt_wavefront(self.tilt_angles)
 
-    
+
 class CircularAperture(OpticalLayer):
     """
-    Multiplies the input wavefront by a pre calculated circular binary 
-    (float) mask that fills the size of the array
+    Multiplies the input wavefront amplitude by a pre calculated circular binary
+    (float) mask that extents to the edge of the wavefront. Supports an inner
+    occuulting mask as would be seen for typical optical systems using a
+    seconday mirror.
 
     Attributes
     ----------
-    npix : int 
-        The number of pixels along one side of the aperture. This 
-        parameters is not differentiable.
-    array : Array[float]
-        A binary `float` array describing the apertures location.
-        The parameter is differentiable but refers to _Notes_ for 
-        a known bug.
-    name : string
-        The name of the layer, which is used to index the layers
-        dictionary. Default is 'Circular Aperture'
+    npixels : int
+        The number of pixels along one side of the aperture. This must match the
+        size of the wavefront when it is applied to it or it will throw an
+        error.
+    transmission : Array, transmission
+        A binary array describing the transmission of the apertures location.
     """
-    npix : int
-    array : float
-    name : str = eqx.static_field()
+    npixels      : int
+    transmission : Array
 
-    
-    def __init__(self, npix, rmin=0., rmax=1., eps=1e-8, 
-                                 name='Circular Aperture'):
+
+    def __init__(self    : OpticalLayer,
+                 npixels : int,
+                 rmin    : float = 0.,
+                 rmax    : float = 1.,
+                 epsilon : float = 1e-8,
+                 name    : str   = 'CircularAperture') -> OpticalLayer:
         """
-        Parameters
-        ----------
-        npix : int
-            The number of pixels along one side of the aperture when 
-            represented as an array.
-        rmin : float = 0.
-            The inner radius of the Annular aperture. Note that the 
-            description `Circular` is a misnomer. Additionally notice 
-            that this parameter must satisfy the condition
-            ```py
-            0 <= rmin < rmax
-            ```
-        rmax : float = 1.
-            The outer radius of the Anular aperture. Note that this 
-            must satisfy the condition.
-            ```py
-            rmin < rmax <= 1.
-            ``` 
-        eps : float = 1e-08
-            A small constant that is added to the binary aperture array
-            to stablize autodiff. This parameter should not be changed 
-            very often.
-        name : string
-            The name of the layer, which is used to index the layers
-            dictionary. Default is 'Circular Aperture'
-        """
-        self.npix = int(npix)
-        self.array = self.create_aperture(self.npix, 
-            rmin = rmin, rmax = rmax) + eps
-        self.name = name
-   
- 
-    def create_aperture(self, npix, rmin, rmax):     
-        """
-        Produces the aperture array from the parameters; `rmin`, `rmax` 
-        and `npix`.
+        Constructor for the CircularAperture class.
 
         Parameters
         ----------
-        npix : int
-            The number of pixels along the side of the array that is 
-            used to represent the aperture. 
+        npixels : int
+            The number of pixels along one side of the aperture. This must
+            match the size of the wavefront when it is applied to it or it will
+            throw an error.
         rmin : float = 0.
-            The inner radius of the annular opening. This is a unitless
-            quantity that must satisfy the following condition:
-            ```py
-            0 <= rmin < rmax
-            ```
+            The inner radius of the cirucular aperture, ie the radius of the
+            secondary mirror obscuration. A value of 0.5 will have the diameter
+            of the obscuration span half of the array. This value must be
+            smaller than rmax.
         rmax : float = 1.
-            The outer radius of the annular opening. This is a unitless
-            quantity and must satisfy the condition:
-            ```py
-            rmin < rmax <= 1.
-            ```
-        """   
-        centre = (npix - 1.) / 2.
-        normalised_coordinates = (np.arange(npix) - centre) / centre
+            The outer radius of the cirucular aperture. A value of 0.5 will
+            have the diameter of the aperture span half of the array. This
+            value must be larger than rmax.
+        epsilon : float = 1e-8
+            A small constant that is added to the binary aperture array to
+            stablize gradients. The default value is 1e-8 whic is sufficient for
+            32-bit, but can be lowered to 1e-12 for 64-bit.
+        name : str = 'CircularAperture'
+            The name of the layer, which is used to index the layers dictionary.
+            Default is 'CircularAperture'.
+        """
+        super().__init__(name)
+        self.npixels = int(npixels)
+        self.transmission = self.create_aperture(self.npixels, float(rmin),
+                                                 float(rmax), float(epsilon))
+
+
+    def create_aperture(self    : OpticalLayer,
+                        npixels : int,
+                        rmin    : float,
+                        rmax    : float,
+                        epsilon : float) -> Array:
+        """
+        Produces the annular aperture array. The coordinate aray upon which the
+        radial values are used defines the center of the array as a radius of
+        zero, and the central edges a radial value of one, therefore the corners
+        of the array have a radial value of 2**0.5.
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels along one side of the aperture. This must
+            match the size of the wavefront when it is applied to it or it will
+            throw an error.
+        rmin : float
+            The inner radius of the cirucular aperture, ie the radius of the
+            secondary mirror obscuration. A value of 0.5 will have the diameter
+            of the obscuration span half of the array. This value must be
+            smaller than rmax.
+        rmax : float
+            The outer radius of the cirucular aperture. A value of 0.5 will
+            have the diameter of the aperture span half of the array. This
+            value must be larger than rmax.
+        epsilon : float
+            A small constant that is added to the binary aperture array to
+            stablize gradients. The default value is 1e-8 whic is sufficient for
+            32-bit, but can be lowered to 1e-12 for 64-bit.
+
+        Returns
+        -------
+        aperture : Array
+            The array representing the tranmission of the aperture.
+        """
+        centre = (npixels - 1.) / 2.
+        normalised_coordinates = (np.arange(npixels) - centre) / centre
         stacked_grids = np.array(np.meshgrid(normalised_coordinates,
-            normalised_coordinates)) 
+            normalised_coordinates))
         radial_coordinates = np.sqrt(np.sum(stacked_grids ** 2, axis = 0))
-        aperture = np.logical_and(radial_coordinates <= rmax,   
+        aperture = np.logical_and(radial_coordinates <= rmax,
             radial_coordinates > rmin).astype(float)
-        return aperture.astype(float)
-   
- 
-    def __call__(self, params_dict):
+        aperture = np.maximum(aperture, epsilon)
+        return aperture
+
+
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
         """
-        Apply the aperture to the wavefront. Note that the name 
-        `CircularAperture` is a misnomer since because this Module
-        can also represent annular openings.
+        Apply the aperture transmisson to the wavefront.
 
         Parameters
         ----------
-        params_dict : dict
-            A dictionary of the parameters. The following condition
-            must be satisfied:
-            ```py
-            params_dict.get("Wavefront") != None
-            ```
+        wavefront : Wavefront
+            The wavefront to operate on.
 
         Returns
         -------
-        params_dict : dict
-            The `params_dict` parameter with the `Wavefront` entry 
-            updated. 
+        wavefront : Wavefront
+            The wavefront with the aperture tranmission applied.
         """
-        # Get relevant parameters
-        wavefront = params_dict["Wavefront"]        
-        wavefront = wavefront.multiply_amplitude(self.array)
+        return wavefront.multiply_amplitude(self.transmission)
 
-        # Update Wavefront Object
-        params_dict["Wavefront"] = wavefront
-        return params_dict
 
-    
 class NormaliseWavefront(OpticalLayer):
-    """ 
-    Normalises the input wavefront using the in-built normalisation 
-    
-    Attributes
-    ----------
-    name : string
-        The name of the layer, which is used to index the layers
-        dictionary. Default is 'Wavefront Tilt'
     """
-    name : str = eqx.static_field()
-        
-    def __init__(self, name='Wavefront Normalisation'):
+    Normalises the input wavefront using the in-built wavefront normalisation
+    method.
+    """
+
+
+    def __init__(self : OpticalLayer,
+                 name : str = 'NormaliseWavefront') -> OpticalLayer:
         """
-        Parameters
-        ----------
-        name : string
-            The name of the layer, which is used to index the layers
-            dictionary. Default is 'Wavefront Normalisation'
-        """
-        self.name = name
-    
-    
-    def __call__(self, params_dict):
-        """
-        Normalise the wavefront. 
+        Constructor for the NormaliseWavefront class.
 
         Parameters
         ----------
-        params_dict : dict
-            A dictionary of the parameters. The following condition
-            must be satisfied:
-            ```py
-            params_dict.get("Wavefront") != None
-            ```
+        name : string = 'NormaliseWavefront'
+            The name of the layer, which is used to index the layers
+            dictionary.
+        """
+        super().__init__(name)
+
+
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+        """
+        Normalises the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
 
         Returns
         -------
-        params_dict : dict
-            The `params_dict` parameter with the `Wavefront` entry 
-            updated. 
+        wavefront : Wavefront
+            The wavefront with the wavefront normalisation method applied.
         """
-        # Get relevant parameters
-        wavefront = params_dict["Wavefront"]
-        wavefront = wavefront.normalise()
-        params_dict["Wavefront"] = wavefront
-        return params_dict
-    
+        return wavefront.normalise()
+
 
 class ApplyBasisOPD(OpticalLayer):
     """
-    Adds an array of phase values to the input wavefront calculated 
-    from the OPD. The phases are calculated from the basis 
-    arrays, and weighted by the coefficients.
-     
+    Adds an array of phase values to the input wavefront calculated from the
+    Optical Path Difference (OPD). The OPDs are calculated from the basis
+    arrays, and weighted by the coefficients, and converted to phases by the
+    wavefront methods.
+
     Parameters
     ----------
-    nterms: int, equinox.static_field
-        The number of zernike terms to apply, ignoring the first two 
-        radial terms: Piston, Tip, Tilt. This is not a differentiable
-        parameter.
-    basis: jax.numpy.ndarray
-        Arrays holding the pre-calculated basis vectors. This is not a 
-        differentiable parameter.
-    coeffs: jax.numpy.ndarray
-        Array of shape (nterns) of coefficients to be applied to each 
-        basis vector.
-    name : string
-        The name of the layer, which is used to index the layers
-        dictionary. Default is 'Apply Basis OPD'
+    basis: Array, meters
+        Arrays holding the pre-calculated basis vectors.
+    coefficients: Array
+        The Array of coefficients to be applied to each basis vector.
     """
-    npix: int
-    basis: float
-    coeffs: float
-    name : str = eqx.static_field()
-    
-    
-
-    def __init__(self, basis, coeffs=None, name='Apply Basis OPD'):
-        """
-        Parameters
-        ----------
-        basis : Array
-            The basis polynomials (2-dimensional) to use calculating 
-            the phase difference. It is assumed that the polynomials 
-            have been evaluated on a square surface. That is, the 
-            following condition is satisfied:
-            ```py
-            basis.shape[-1] == basis.shape[-2]
-            ```
-            The array should be 3-dimensional unless a single 
-            basis vector is getting used. The leading axes (dimesion)
-            should match the number of coefficients. 
-        coeffs : Array = None
-            The coefficients by which to weight the basis vectors.
-            This is assumed to be one dimensional and have the same 
-            length as the leading dimension of the `basis`. That is,
-            the following conditions are met:
-            ```py
-            coeffs.shape = (n, )
-            basis.shape = (n, m, m)
-            ```
-            If `None`, the default value is passed it is interpretted 
-            as `np.zeros((n, ))`.
-        name : string
-            The name of the layer, which is used to index the layers
-            dictionary. Default is 'Apply Basis OPD'
-        """
-        self.basis = np.array(basis).astype(float)
-        self.npix = self.basis.shape[-1]
-        self.coeffs = np.zeros(len(self.basis)) if coeffs is None \
-                 else np.array(coeffs).astype(float)
-        self.name = name
+    basis        : Array
+    coefficients : Array
 
 
-    def __call__(self, params_dict):
+    def __init__(self         : OpticalLayer,
+                 basis        : Array,
+                 coefficients : Array = None,
+                 name         : str = 'ApplyBasisOPD') -> OpticalLayer:
         """
-        Calculate and apply the appropriate phase shift to the 
-        wavefront.         
+        Constructor for the ApplyBasisOPD class.
 
         Parameters
         ----------
-        params_dict : dict
-            A dictionary of the parameters. The following condition
-            must be satisfied:
-            ```py
-            params_dict.get("Wavefront") != None
-            ```
-            It is also assumed that `self.basis.shape[-1] == 
-            wavefront.shape[0]` and that both are square. 
+        basis : Array, meters
+            The Array of basis polynomials. This should be a 3 dimensional Array
+            with the first dimension being the number of basis vectors, and the
+            last two dimensions being equal to the wavefront shape at the time
+            of application to the wavefront.
+        coefficients : Array = None
+            The coefficients by which to weight the basis vectors. This must
+            have the same length as the first dimension of the basis Array. If
+            None is supplied an Array of zeros is constructed.
+        name : str = 'ApplyBasisOPD'
+            The name of the layer, which is used to index the layers dictionary.
+        """
+        super().__init__(name)
+        self.basis        = np.asarray(basis, dtype=float)
+        self.coefficients = np.zeros(basis.shape[0]) if coefficients is None \
+                            else np.asarray(coefficients, dtype=float)
+
+        # Input checks
+        assert self.basis.ndim == 3, \
+        ("basis must be a 3 dimensional array, ie (nterms, npixels, npixels).")
+        assert self.coefficients.ndim == 1 and \
+        self.coefficients.shape[0] == self.basis.shape[0], \
+        ("coefficients must be a 1 dimensional array with length equal to the "
+        "First dimension of the basis array.")
+
+
+    def get_total_opd(self : OpticalLayer) -> Array:
+        """
+        A function to calculate the total OPD from the basis vector and the
+        coefficients.
 
         Returns
         -------
-        params_dict : dict
-            The `params_dict` parameter with the `Wavefront` entry 
-            updated. 
+        OPD : Array, meters
+            The total OPD calulated from the basis vectors and coefficients.
         """
-        # Get relevant parameters
-        wavefront = params_dict["Wavefront"]
-        wavefront = wavefront.add_opd(self.get_total_opd())
-        params_dict["Wavefront"] = wavefront
-        return params_dict
-    
+        return np.dot(self.basis.T, self.coefficients)
 
-    def get_total_opd(self):
+
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+
         """
-        A convinience function to calculate the phase shift from the
-        coefficients and the basis vectors. 
+        Calculate and apply the appropriate phase shift to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
 
         Returns
         -------
-        phase_shift : Array
-            The per-pixel phase shift of the wavefront.
+        wavefront : Wavefront
+            The wavefront with the appropriate phase applied.
         """
-        return np.dot(self.basis.T, self.coeffs)
-    
+        return wavefront.add_opd(self.get_total_opd())
+
 
 class AddPhase(OpticalLayer):
-    """ 
-    Takes in an array of phase values and adds them to the phase term of the 
-    input wavefront. ie wavelength independent
-    
-    This would represent a geometric phase optic like the TinyTol liquid crystal Pupil.
-    
+    """
+    Adds an array of phase values to the wavefront.
+
     Parameters
     ----------
-    npix : int
-        The number of pixels along the edge of the wavefront. This 
-        is not a differentiable parameter.
-    phase_array: float, radians
-        Array of phase values to be applied to the input wavefront.
-    name : string
-        The name of the layer, which is used to index the layers
-        dictionary. Default is 'Add Phase'
+    phase: Array, radians
+        The Array of phase values to be applied to the input wavefront.
     """
-    npix: int
-    phase_array : float
-    name : str = eqx.static_field()
-    
-    
+    phase : Array
 
-    def __init__(self, phase_array, name='Add Phase'):
+
+    def __init__(self  : OpticalLayer,
+                 phase : Array,
+                 name  : str = 'AddPhase') -> OpticalLayer:
         """
-        Parameters
-        ----------
-        phase_array : float, radians
-            Array of phase values to be applied to the input wavefront.
-        name : string
-            The name of the layer, which is used to index the layers
-            dictionary. Default is 'Add Phase'
-        """
-        self.phase_array = np.array(phase_array).astype(float)
-        self.npix = int(phase_array.shape[0])
-        self.name = name
-    
-    
-    def __call__(self, params_dict):
-        """
-        Apply the phase shift represented by this `Layer` to the 
-        wavefront.        
+        Constructor for the AddPhase class.
 
         Parameters
         ----------
-        params_dict : dict
-            A dictionary of the parameters. The following conditions
-            must be satisfied:
-            ```py
-            params_dict.get("Wavefront") != None
-            params_dict.get("Wavefront").shape == self.phase_array.shape
-            ```
+        phase : Array, radians
+            Array of phase values to be applied to the input wavefront. This
+            must a 0, 2 or 3 dimensional array with equal to that of the wavefront
+            at time of aplication.
+        name : str = 'AddPhase'
+            The name of the layer, which is used to index the layers dictionary.
+        """
+        super().__init__(name)
+        self.phase = np.asarray(phase, dtype=float)
+
+        # Input checks
+        assert self.phase.ndim in (0, 2, 3), ("phase must be either a scalar "
+        "array, or a 2 or 3 dimensional arary.")
+
+
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+        """
+        Adds the phase to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
 
         Returns
         -------
-        params_dict : dict
-            The `params_dict` parameter with the `Wavefront` entry 
-            updated. 
+        wavefront : Wavefront
+            The wavefront with the phase added.
         """
-        # Get relevant parameters
-        wavefront = params_dict["Wavefront"]
-        wavefront = wavefront.add_phase(self.phase_array)
-        params_dict["Wavefront"] = wavefront
-        return params_dict
-    
+        return wavefront.add_phase(self.phase_array)
 
-class ApplyOPD(OpticalLayer):
-    """ 
-    Takes in an array representing the Optical Path Difference (OPD) and 
-    applies the corresponding phase difference to the input wavefront. 
 
-    This would represent an etched reflective optic, or phase plate
-    
+class AddOPD(OpticalLayer):
+    """
+    Adds an Optical Path Difference (OPD) to the wavefront.
+
     Parameters
     ----------
-    opd_array : float
-        Array of OPD values to be applied to the input wavefront in 
-        units of meters. This is a differentiable parameter.
-    npix : int
-        The number of pixels along the leading edge of the `opd_array`
-        stored for debugging purposes.
-    name : string
-        The name of the layer, which is used to index the layers
-        dictionary. Default is 'Apply OPD'
+    opd : Array, meters
+        Array of OPD values to be applied to the input wavefront.
     """
-    npix: int
-    opd_array: float
-    name : str = eqx.static_field()
-    
+    opd : Array
 
-    def __init__(self, opd_array, name='Apply OPD'):
+
+    def __init__(self : OpticalLayer,
+                 opd  : Array,
+                 name : str = 'AddOPD') -> OpticalLayer:
         """
-        Parameters
-        ----------
-        opd_array : float, meters
-            The per pixel optical path differences.
-        name : string
-            The name of the layer, which is used to index the layers
-            dictionary. Default is 'Apply OPD'
-        """
-        self.opd_array = np.array(opd_array).astype(float)
-        self.npix = int(opd_array.shape[0])
-        self.name = name
-        
-    def __call__(self, params_dict):
-        """
-        Apply the optical path difference represented by this `Layer`
-        to the `Wavefront`.
+        Constructor for the ApplyOPD class.
 
         Parameters
         ----------
-        params_dict : dict
-            A dictionary of the parameters. The following conditions
-            must be satisfied:
-            ```py
-            params_dict.get("Wavefront") != None
-            params_dict.get("Wavefront").shape == self.phase_array.shape
-            ```
+        opd : float, meters
+            The Array of OPDs to be applied to the input wavefront. This must
+            a 0, 2 or 3 dimensional array with equal to that of the wavefront
+            at time of aplication.
+        name : str = 'AddOPD'
+            The name of the layer, which is used to index the layers dictionary.
+        """
+        super().__init__(name)
+        self.opd = np.asarray(opd, dtype=float)
+
+        # Input checks
+        assert self.opd.ndim in (0, 2, 3), ("opd must be either a scalar "
+        "array, or a 2 or 3 dimensional arary.")
+
+
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+        """
+        Apply the OPD array to the input wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
 
         Returns
         -------
-        params_dict : dict
-            The `params_dict` parameter with the `Wavefront` entry 
-            updated.
+        wavefront : Wavefront
+            The wavefront with the OPD added.
         """
-        # Get relevant parameters
-        wavefront = params_dict["Wavefront"]
-        wavefront = wavefront.add_opd(self.opd_array)
-        params_dict["Wavefront"] = wavefront
-        return params_dict
-    
+        return wavefront.add_opd(self.opd)
+
 
 class TransmissiveOptic(OpticalLayer):
-    """ 
-    Represents an arbitrary transmissive optic in the optical path. 
-    
-    Note this class does not normalise the 'transmission' between 
-    0 and 1, but simply multiplies the wavefront amplitude by the 
-    TransmissiveOptic.transmision array.
+    """
+    Represents an arbitrary transmissive optic.
+
+    Note this class does not normalise the 'transmission' between 0 and 1, but
+    simply multiplies the wavefront amplitude by the transmision array.
 
     Attributes
     ----------
-    npix : int, eqx.static_field()
-        The number of pixels along the leading edge of the wavefront.
-    transmission : float
-        An array representing the transmission of the aperture.
-    name : string
-        The name of the layer, which is used to index the layers
-        dictionary. Default is 'Transmissive Optic'
+    transmission : Array
+        An array representing the transmission of the optic.
     """
-    npix: int
-    transmission: float
-    name : str = eqx.static_field()
-    
+    transmission: Array
 
-    def __init__(self, transmission, name='Transmissive Optic'):
-        """
-        Parameters
-        ----------
-        transmission : Array[float]
-            The array representing the transmission of the aperture.
-        name : string
-            The name of the layer, which is used to index the layers
-            dictionary. Default is 'Transmissive Optic'
-        """
-        self.transmission = np.array(transmission).astype(float)
-        self.npix = transmission.shape[0]
-        self.name = name
-        
 
-    def __call__(self, params_dict):
+    def __init__(self         : OpticalLayer,
+                 transmission : Array,
+                 name         : str = 'TransmissiveOptic') -> OpticalLayer:
         """
-        Pass the wavefront through the `Aperture`.
+        Constructor for the TransmissiveOptic class.
 
         Parameters
         ----------
-        params_dict : dict
-            A dictionary of the parameters. The following conditions
-            must be satisfied:
-            ```py
-            params_dict.get("Wavefront") != None
-            params_dict.get("Wavefront").shape == self.aperture.shape
-            ```
+        transmission : Array
+            The array representing the transmission of the aperture. This must
+            a 0, 2 or 3 dimensional array with equal to that of the wavefront
+            at time of aplication.
+        name : str = 'TransmissiveOptic'
+            The name of the layer, which is used to index the layers dictionary.
+        """
+        super().__init__(name)
+        self.transmission = np.asarray(transmission, dtype=float)
+
+        # Input checks
+        assert self.transmission.ndim in (0, 2, 3), ("transmission must be "
+        "either a scalar array, or a 2 or 3 dimensional arary.")
+
+
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+        """
+        Applies the tranmission of the optical to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
 
         Returns
         -------
-        params_dict : dict
-            The `params_dict` parameter with the `Wavefront` entry 
-            updated.
+        wavefront : Wavefront
+            The wavefront with the tranmission applied.
         """
-        # Get relevant parameters
-        wavefront = params_dict["Wavefront"]
-        wavefront = wavefront.multiply_amplitude(self.transmission)
-        params_dict["Wavefront"] = wavefront
-        return params_dict
+        return wavefront.multiply_amplitude(self.transmission)
 
 
 class CompoundAperture(OpticalLayer):
     """
-    Applies a series of soft-edged, circular aperture and occulters, 
-    defined by their physical (x, y) positions and radii.
-    Coordinates are defined paraxilly with physical units.
-    All parameters are differentiable.
-    
-    NOTE: Needs unit testing
-    
+    Applies a series of soft-edged, circular aperture and occulters, defined by
+    their physical (x, y) positions and radii. Coordinates are taken from the
+    wavefront.
+
     Attributes
     ----------
-    aperture_radii : Array[float], meters
-        The radii of the apertures
-    aperture_coords : Array[float], meters
-        The (x, y) coordinates of the centers of the apertures
-    occulter_radii : Array[float], meters
-        The radii of the occulters
-    occulter_coords : Array[float], meters
-        The (x, y) coordinates of the centers of the occulters
-    name : string
-        The name of the layer, which is used to index the layers
-        dictionary. Default is 'Compound Aperture'
+    aperture_radii : Array, meters
+        The array of radii of the apertures.
+    aperture_coords : Array, meters
+        The array of (x, y) coordinates of the centers of the apertures.
+    occulter_radii : Array, meters
+        The array of radii of the occulters.
+    occulter_coords : Array, meters
+        The array of (x, y) coordinates of the centers of the occulters.
     """
-    aperture_radii: float
-    aperture_coords: float
-    occulter_radii: float
-    occulter_coords: float
-    name : str = eqx.static_field()
-    
-    
-    def __init__(self, aperture_radii, aperture_coords=None, 
-                 occulter_radii=None, occulter_coords=None,
-                 name='Compound Aperture'):
-        """
-        Parameters
-        ----------
-        aperture_radii : Array[float], meters
-            The radii of the apertures
-        aperture_coords : Array[float], meters
-            The (x, y) coordinates of the centers of the apertures
-        occulter_radii : Array[float], meters
-            The radii of the occulters
-        occulter_coords : Array[float], meters
-            The (x, y) coordinates of the centers of the occulters
-        name : string
-            The name of the layer, which is used to index the layers
-            dictionary. Default is 'Compound Aperture'
-        """
-        self.aperture_radii = np.zeros(1)  if aperture_radii is None else \
-                                np.array(aperture_radii).astype(float)
-        self.occulter_radii = np.array([]) if occulter_radii is None else \
-                                np.array(occulter_radii).astype(float)
-        
-        if self.aperture_radii.shape == ():
-            self.aperture_coords = np.zeros([1, 2])
-        else:
-            self.aperture_coords = np.zeros([len(self.aperture_radii), 2]) \
-            if aperture_coords is None \
-            else np.array(aperture_coords).astype(float)
-        
-        if self.occulter_radii.shape == ():
-            self.occulter_coords = np.zeros([1, 2])
-        else:
-            self.occulter_coords = np.zeros([len(self.occulter_radii), 2]) \
-            if occulter_coords is None \
-            else np.array(occulter_coords).astype(float)
-        
-        self.name = name
-            
+    aperture_radii  : Array
+    aperture_coords : Array
+    occulter_radii  : Array
+    occulter_coords : Array
 
-    def get_aperture(self, radius, center, xycoords, aper, vmin=1e-8, vmax=1):
+
+    def __init__(self            : OpticalLayer,
+                 aperture_radii  : Array,
+                 aperture_coords : Array = None,
+                 occulter_radii  : Array = None,
+                 occulter_coords : Array = None,
+                 name            : str   = 'CompoundAperture') -> OpticalLayer:
         """
-        Constructs a soft-edged aperture or occulter 
-        This function is general and probably be moved into utils 
-        since it is very general
-        
+        Constructor for the CompoundAperture class.
+
         Parameters
         ----------
-        radius : float, meters
-            The radius of the aperture/occulter
-        center : Array[float], meters
-            The (x, y) center of the aperture/occulter, as measured
-            from the optical axis
-        xycoords : Array[float], meters
-            The ((x, y), npix, npix) coordinate arrays to calculate the
-            apertures/occulters within
-        aper : bool
-            Determines whether an aperture (True) or occulter (False)
-            is calculated
+        aperture_radii : Array, meters
+            The array of radii of the apertures.
+        aperture_coords : Array, meters
+            The array of (x, y) coordinates of the centers of the apertures.
+        occulter_radii : Array, meters
+            The array of radii of the occulters.
+        occulter_coords : Array, meters
+            The array of (x, y) coordinates of the centers of the occulters.
+        name : str = 'CompoundAperture'.
+            The name of the layer, which is used to index the layers dictionary.
         """
-        
+        super().__init__(name)
+
+        # Get aperture radii and propmote to at least 1d
+        self.aperture_radii = np.asarray(aperture_radii, dtype=float)
+        self.aperture_radii = np.atleast_1d(self.aperture_radii)
+
+        # Ensure corred dimensionality before using shape
+        assert self.aperture_radii.ndim == 1, \
+        ("aperture_radii must be one dimensional.")
+
+        # Construct an empty occulter radii if none is provided
+        self.occulter_radii = np.array([]) if occulter_radii is None else \
+                                np.asarray(occulter_radii, dtype=float)
+
+        # Ensure corred dimensionality before using shape
+        assert self.occulter_radii.ndim == 1, \
+        ("aperture_radii must be one dimensional.")
+
+        # Construct at center if no coordinates are supplied
+        if aperture_coords is None:
+            self.aperture_coords = np.zeros([self.aperture_radii.shape[0], 2])
+        else:
+            self.aperture_coords = np.asarray(aperture_coords, dtype=float)
+            assert self.aperture_coords.ndim == 2 and \
+            self.aperture_coords.shape[0] == self.aperture_radii.shape[0] and \
+            self.aperture_coords.shape[1] == 2, \
+            ("aperture_coords must a 2d array with leading dimension equal to "
+            "The length of aperture_radii, and second dimension equal to 2, ie "
+            "shape == (napertures, 2) ie [(x0, y0), (x1, y1) ...]")
+
+        # Construct at center if no coordinates are supplied
+        if occulter_coords is None:
+            self.occulter_coords = np.zeros([self.occulter_radii.shape[0], 2])
+        else:
+            self.occulter_coords = np.asarray(occulter_coords, dtype=float)
+            assert self.occulter_coords.ndim == 2 and \
+            self.occulter_coords.shape[0] == self.occulter_radii.shape[0] and \
+            self.occulter_coords.shape[1] == 2, \
+            ("occulter_coords must a 2d array with leading dimension equal to "
+            "The length of occulter_radii, and second dimension equal to 2, ie "
+            "shape == (nocculters, 2) ie [(x0, y0), (x1, y1) ...]")
+
+
+    def get_aperture(self        : OpticalLayer,
+                     radius      : Array,
+                     center      : Array,
+                     xycoords    : Array,
+                     is_aperture : Array,
+                     vmin        : float = 1e-8,
+                     vmax        : float = 1.) -> Array:
+        """
+        Constructs a soft-edged aperture or occulter.
+
+        Parameters
+        ----------
+        radius : Array, meters
+            The radius of the aperture/occulter.
+        center : Array, meters
+            The (x, y) center of the aperture/occulter.
+        xycoords : Array, meters
+            The (xcoordinates, ycoordinates) arrays to calculate the
+            apertures/occulters upon.
+        is_aperture : bool
+            Determines whether an aperture (True) or occulter (False) is
+            calculated.
+        vmin : float = 1e-8
+            The minimum value to set the transmission to, default is 1e-8 in
+            order to keep gradients stable.
+        vmax : float = 1.
+            The maximum value to set the transmission to, default is 1.
+
+        Returns
+        -------
+        aperture : Array
+            The corresponding aperture or occuler, depending on the is_aperture
+            parameter.
+        """
         # Shift coordinates
         xycoords -= center.reshape(2, 1, 1)
         rcoords = np.hypot(xycoords[0], xycoords[1])
@@ -823,193 +863,201 @@ class CompoundAperture(OpticalLayer):
 
         # Wrap theta values around circle
         thetas_mapped = (thetacoords + np.pi/4)%(np.pi/2) - np.pi/4
-        
+
         # Calculate projected pixel size
-        npix = xycoords.shape[-1]
-        pixel_scale = (np.max(xycoords) - np.min(xycoords))/(npix-1)
-        alpha = (pixel_scale/2)*np.hypot(1, np.tan(thetas_mapped))
-        
+        npixels = xycoords.shape[-1]
+        pixel_scale = (np.max(xycoords) - np.min(xycoords))/(npixels-1)
+        angle = (pixel_scale/2)*np.hypot(1, np.tan(thetas_mapped))
+
         # Get projected radial distance
         distance = radius - rcoords
-        if not aper:
+        if not is_aperture:
             distance *= -1
-        
+
         # Fit linear slop slong projected pixel sizes/radial distances
-        m = (vmax-vmin)/(2*alpha)
+        m = (vmax-vmin)/(2*angle)
         b = (vmax-vmin)/2
         grey = m * distance + b
-        
+
         # Clip to desired range
-        grey_out = np.clip(grey, a_min=vmin, a_max=vmax)
-        return grey_out
-    
-    def construct_aperture(self, diameter, npixels):
+        aperture = np.clip(grey, a_min=vmin, a_max=vmax)
+        return aperture
+
+
+    def construct_combined_aperture(self     : OpticalLayer,
+                                    diameter : Array,
+                                    npixels  : int) -> Array:
         """
-        Constructs the various apertures and occulters from the and 
-        combines them into a single transmission array
-        
+        Constructs the various apertures and occulters from the and combines
+        them into a single transmission array.
+
         Parameters
         ----------
-        diameter : float, meters
-            The diameter of the wavefront to calculate the aperture on
+        diameter : Array, meters
+            The diameter of the wavefront to calculate the aperture on.
         npixels : int
-            The linear size of the array to calculate the aperture on
+            The linear size of the array to calculate the aperture on.
+
+        Returns
+        -------
+        aperture : Array
+            The final combined aperture.
         """
-        
         # Map aperture function
-        mapped_aperture = jax.vmap(self.get_aperture, 
-                               in_axes=(0, 0, None, None))
-        
+        mapped_aperture = jax.vmap(self.get_aperture,
+                                   in_axes=(0, 0, None, None))
+
         # Generate coordinate grid
         pixel_scale = diameter/npixels
         xycoords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
-        
+
         # Generate aperture/occulters
         outer_apers = mapped_aperture(self.aperture_radii, \
                                       self.aperture_coords, xycoords, True)
         inner_apers = mapped_aperture(self.occulter_radii, \
                                       self.occulter_coords, xycoords, False)
-        
-        # Bound values 
+
+        # Bound values
         outer_comb = np.clip(outer_apers.sum(0), a_min=0., a_max=1.)
         inner_comb = np.prod(inner_apers, axis=0)
-        
+
         # Combine
         return outer_comb * inner_comb
-    
-    
-    def __call__(self, params_dict):
+
+
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
         """
-        Generates and applies the output transmission array to the Wavefront
-        
+        Generates and applies the combined apertures transmission array to the
+        wavefront.
+
         Parameters
         ----------
-        params_dict : dict
-            A dictionary of the parameters. The following conditions
-            must be satisfied:
-            ```py
-            params_dict.get("Wavefront") != None
-            ```
+        wavefront : Wavefront
+            The wavefront to operate on.
+
         Returns
         -------
-        params_dict : dict
-            The `params_dict` parameter with the `Wavefront` entry 
-            updated.
+        wavefront : Wavefront
+            The wavefront with the combined aperture applied.
         """
-        WF = params_dict["Wavefront"]
-        wavefront_diameter = WF.get_diameter()
-        wavefront_npixels = WF.get_npixels()
-        aper = self.construct_aperture(wavefront_diameter, wavefront_npixels)
-        WF = WF.multiply_amplitude(aper)
-
-        # Update Wavefront Object
-        params_dict["Wavefront"] = WF
-        return params_dict
+        wavefront_diameter = wavefront.get_diameter()
+        wavefront_npixels = wavefront.get_npixels()
+        aper = self.construct_combined_aperture(wavefront_diameter, wavefront_npixels)
+        return wavefront.multiply_amplitude(aper)
 
 
 class ApplyBasisCLIMB(OpticalLayer):
     """
-    Adds an array of phase values to the input wavefront calculated 
-    from the OPD
-     
+    Adds an array of binary phase values to the input wavefront from a set of
+    continuous basis vectors. This uses the CLIMB algorithm in order to
+    generate the binary values in a continous manner as described in the
+    paper Wong et al. 2021. The basis vectors are taken as an Optical Path
+    Difference (OPD), and applied to the phase of the wavefront. The ideal
+    wavelength parameter described the wavelength that will have a perfect
+    anti-phase relationship given by the Optical Path Difference.
+
+    Note: Many of the methods in the class still need doccumentation.
+
     Parameters
     ----------
-    npix: int, equinox.static_field
-        The number of pixels of the basis, before downsampling through CLIMB.
-    basis: jax.numpy.ndarray, equinox.static_field
-        Arrays holding the pre-calculated basis terms. This is a 
-        differentiable parameter.
-    coefficients: jax.numpy.ndarray
-        Array of shape (nterns) of coefficients to be applied to each 
-        Zernike term. This is a differentiable parameter.
-    ideal_wavel : float
-        The wavelength 
-    name : string
-        The name of the layer, which is used to index the layers
-        dictionary. Default is 'CLIMB'
+    basis: Array
+        Arrays holding the continous pre-calculated basis vectors.
+    coefficients: Array
+        The Array of coefficients to be applied to each basis vector.
+    ideal_wavelength : Array
+        The target wavelength at which a perfect anti-phase relationship is
+        applied via the OPD.
     """
-    npix: int
-    basis: float
-    coeffs: float
-    ideal_wavel: float
-    name : str = eqx.static_field()
-    
+    basis            : Array
+    coefficients     : Array
+    ideal_wavelength : Array
 
-    # TODO: This will need to be reviewed by @LouisDesdoigts
-    def __init__(self, basis, coeffs, ideal_wavel, name='CLIMB'):
+
+    def __init__(self             : OpticalLayer,
+                 basis            : Array,
+                 ideal_wavelength : Array,
+                 coefficients     : Array = None,
+                 name             : str   = 'ApplyBasisCLIMB') -> OpticalLayer:
         """
+        Constructor for the ApplyBasisCLIMB class.
+
         Parameters
         ----------
         basis : Array
-            The basis functions of the zernike polynomials precomputed
-            over a square grid. If there is more than one order of the 
-            Zernike polynomials getting used it is assumed that the 
-            results are stored in a 3-dimensional array with the 
-            leading dimension matching the number of polynomial terms
-            to use. That is, the following conditions are met:
-            ```py
-            basis.shape = (n, m, m)
-            coeffs.shape = (n, )
-            ```
-            where, `n` and `m` are integers representianf the number
-            polynomial terms and the wavefront dimensions respectively.
-        coeffs : Array
-            The coefficients of the zernike polynomials defined in 
-            basis. These must satisfy the condition that is described 
-            above. 
-        ideal_wavel : float
-            The target wavelength that results in a perfect half-wave
-            step. Ie the output OPD will be ideal_wavel/2
-        name : string
-            The name of the layer, which is used to index the layers
-            dictionary. Default is 'CLIMB'
+            Arrays holding the continous pre-calculated basis vectors. This must
+            be a 3d array of shape (nterms, npixels, npixels), with the final
+            two dimensions matching that of the wavefront at time of
+            application.
+        ideal_wavelength : Array
+            The target wavelength at which a perfect anti-phase relationship is
+            applied via the OPD.
+        coefficients : Array = None
+            The Array of coefficients to be applied to each basis vector. This
+            must be a one dimensional array with leading dimension equal to the
+            leading dimension of the basis vectors. Default is None which
+            initialises an array of zeros.
+        name : str = 'ApplyBasisCLIMB'
+            The name of the layer, which is used to index the layers dictionary.
         """
-        self.npix = int(basis.shape[-1])
-        self.basis = np.array(basis).astype(float)
-        self.coeffs = np.array(coeffs).astype(float)
-        self.ideal_wavel = np.array(ideal_wavel).astype(float)
-        self.name = name
+        super().__init__(name)
+        self.basis  = np.asarray(basis, dtype=float)
+        self.ideal_wavelength = np.asarray(ideal_wavelength, dtype=float)
+        self.coefficients = np.array(coefficients).astype(float) \
+                    if coefficients is not None else np.zeros(len(self.basis))
+
+        # Inputs checks
+        assert self.basis.ndim == 3, \
+        ("basis must be a 3 dimensional array, ie (nterms, npixels, npixels).")
+        assert self.coefficients.ndim == 1 and \
+        self.coefficients.shape[0] == self.basis.shape[0], \
+        ("coefficients must be a 1 dimensional array with length equal to the "
+        "First dimension of the basis array.")
+        assert self.ideal_wavelength.ndim == 0, ("ideal_wavelength must be a "
+                                                 "scalar array.")
 
 
-    def __call__(self, params_dict):
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
         """
-        
-        """
-        # Get relevant parameters
-        wavefront = params_dict["Wavefront"]
-        wavel = wavefront.wavelength
+        Generates and applies the binary OPD array to the wavefront in a
+        differentiable manner.
 
-        # Get basis phase
-        latent = self.get_opd(self.basis, self.coeffs)
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront with the binary OPD applied.
+        """
+        latent = self.get_opd(self.basis, self.coefficients)
         binary_phase = np.pi*self.CLIMB(latent)
-        opd = self.phase_to_opd(binary_phase, self.ideal_wavel)
-        wavefront = wavefront.add_opd(opd)
+        opd = self.phase_to_opd(binary_phase, self.ideal_wavelength)
+        return wavefront.add_opd(opd)
 
-        params_dict["Wavefront"] = wavefront
-        return params_dict
-    
 
     def opd_to_phase(self, opd, wavel):
         return 2*np.pi*opd/wavel
-    
+
 
     def phase_to_opd(self, phase, wavel):
         return phase*wavel/(2*np.pi)
-    
+
 
     def get_opd(self, basis, coefficients):
         return np.dot(basis.T, coefficients)
-    
+
 
     def get_total_opd(self):
         return self.get_opd(self.basis, self.coeffs)
-    
+
 
     def get_binary_phase(self):
         latent = self.get_opd(self.basis, self.coeffs)
         binary_phase = np.pi*self.CLIMB(latent)
         return binary_phase
-    
+
 
     def lsq_params(self, img):
         xx, yy = np.meshgrid(np.linspace(0,1,img.shape[0]),np.linspace(0,1,img.shape[1]))
@@ -1024,7 +1072,6 @@ class ApplyBasisCLIMB(OpticalLayer):
 
 
     def area(self, img, epsilon = 1e-15):
-
         a,b,c = self.lsq(img)
         a, b, c = np.where(a==0,epsilon,a), np.where(b==0,epsilon,b), np.where(c==0,epsilon,c)
         x1 = (-b-c)/(a) # don't divide by zero
@@ -1067,95 +1114,96 @@ class ApplyBasisCLIMB(OpticalLayer):
         return soft_bin
 
 
-class InformationConservingRotation(OpticalLayer):
+class FourierRotation(OpticalLayer):
     """
-    Imagine the following scenario: you rotate and image, under the hood the 
-    code interpolates into the image. You rotate the same image again and the 
-    image is re-interpolated based on the old interpolations. Repeating this 
-    the image will become increasingly distorted even once it is rotated back 
-    into the initial coordinate system. This code aims to combat this by 
-    reducing the information loss in rotations. The cost is computational 
-    efficiency so this should be used with caution. 
+    Applies a rotation to the wavefront using fourier methods. This method is
+    information conserving and can be repeatedly applied without any loss of
+    fidelity, unlike methods that use interpolation.
 
     Parameters
     ----------
-    alpha: float, radians
-        The amount by which to rotate the wavefront. 
-    padding: int 
+    angle : Array, radians
+        The angle by which to rotate the wavefront in the {}wise direction.
+    padding : int
         A factor by which to pad the array in the Fourier Space Representation.
-        This defaults to 4 but for more efficient less accurate code use a 
-        smaller number.
     """
-    alpha: float
-    padding: int
+    angle   : Array
+    padding : int
 
 
-    def __init__(self, alpha: float, padding: int = 2):
+    def __init__(self    : OpticalLayer,
+                 angle   : Array,
+                 padding : int = 2,
+                 name    : str = 'FourierRotation') -> OpticalLayer:
         """
+        Constructor for the FourierRotation class.
+
         Parameters
         ----------
-        alpha: float, radians 
-            The amount by which to rotate the image.
-        padding: int
-            This parameter cannot be differentiated and will default to 4.
-            Change the parameter to 2 for a performance boost but it may 
-            not result in lower accuracy.
+        angle: float, radians
+            The angle by which to rotate the wavefront in the {}wise direction.
+        padding : int = 2
+            A factor by which to pad the array in the Fourier Space
+            Representation.
+        name : str = 'FourierRotation'
+            The name of the layer, which is used to index the layers dictionary.
         """
-        self.alpha = np.asarray(alpha).astype(float)
+        super().__init__(name)
+        self.angle   = np.asarray(angle, dtype=float)
         self.padding = int(padding)
 
 
-    def __rotate(
-            self,                                                                      
-            image: float,                                                             
-            rotation: float) -> float:                                                          
+    def __rotate(self  : OpticalLayer,
+                 image : Array,
+                 angle : Array) -> Array:
         """
-        A simple rotation that is not information preserving. 
+        A simple angle using linear interpolation.
 
         Parameters
         ----------
-        image: float
+        image: Array
             The image to rotate.
-        rotation: float, radians
-            The amount to rotate the image. 
-
-        Returns 
-        -------
-        image: float
-            The rotated image. 
-        """
-        npix = image.shape[0]                                                          
-        centre = (npix - 1) / 2                                                        
-        x_pixels, y_pixels = dLux.utils.get_pixel_positions(npix)                                 
-        rs, phis = dLux.utils.cart2polar(x_pixels, y_pixels)                                      
-        phis += rotation                                                               
-        coordinates_rot = np.roll(dLux.utils.polar2cart(rs, phis) + centre,                       
-            shift=1, axis=0)                                                           
-        rotated = jax.scipy.ndimage.map_coordinates(
-            image, coordinates_rot, order=1)                     
-        return rotated  
-
-
-    def _rotate(self, image: float, alpha: float, pad: int) -> float:
-        """
-        Rotates the image by some amount. In the process the image is padded,
-        when entering the fourier space so that FFTs can be used. 
-
-        Parameters
-        ----------
-        image: Matrix
-            The image to rotate. Notice that the Fourier methods we have used do 
-            not cope so well with had edges in the image. 
-        alpha: float, radians
-            The amount by which to rotate the image. 
-        pad: int = 2
-            A padding factor. 
+        angle: Array, radians
+            The amount to rotate the image.
 
         Returns
         -------
-        image: Matrix
-            The input image rotated and resampled onto the intial grid. This often 
-            leads to cropping of the corners in the rotated plane.         
+        image: Array
+            The rotated image.
+        """
+        npixels = image.shape[0]
+        centre = (npixels - 1) / 2
+        x_pixels, y_pixels = dLux.utils.get_pixel_positions(npixels)
+        rs, phis = dLux.utils.cart2polar(x_pixels, y_pixels)
+        phis += angle
+        coordinates_rot = np.roll(dLux.utils.polar2cart(rs, phis) + centre,
+            shift=1, axis=0)
+        rotated = jax.scipy.ndimage.map_coordinates(
+            image, coordinates_rot, order=1)
+        return rotated  
+
+
+    def _rotate(self  : OpticalLayer,
+                image : Array,
+                angle : Array,
+                pad   : int) -> Array:
+        """
+        Rotates the image by angle using a fourier rotation.
+
+        Parameters
+        ----------
+        image: Array
+            The image to rotate.
+        angle: Array, radians
+            The amount by which to rotate the image.
+        pad: int = 2
+            The padding factor.
+
+        Returns
+        -------
+        image: Array
+            The input image rotated and resampled onto the intial grid. This
+            can result in cropping of the corners after rotation.
         """
         in_shape = image.shape
         image_shape = np.array(in_shape, dtype=int) + 3 
@@ -1164,11 +1212,11 @@ class InformationConservingRotation(OpticalLayer):
             .set(image)
 
         # FFT rotation only work in the -45:+45 range
-        # So I need to work out how to determine the quadrant that 
-        # alpha is in and hence the 
-        # number of required pi/2 rotations and angle in radians. 
-        half_pi_to_1st_quadrant = alpha // (np.pi / 2)
-        angle_in_1st_quadrant = - alpha + (half_pi_to_1st_quadrant * np.pi / 2)
+        # So I need to work out how to determine the quadrant that
+        # angle is in and hence the
+        # number of required pi/2 rotations and angle in radians.
+        half_pi_to_1st_quadrant = angle // (np.pi / 2)
+        angle_in_1st_quadrant = - angle + (half_pi_to_1st_quadrant * np.pi / 2)
 
         image = np.rot90(image, half_pi_to_1st_quadrant)\
             .at[:-1, :-1]\
@@ -1189,7 +1237,7 @@ class InformationConservingRotation(OpticalLayer):
         padded_mask = np.ones(out_shape, dtype=bool)\
             .at[left_corner : right_corner, top_corner : bottom_corner]\
             .set(np.where(np.isnan(image), True, False))
-        
+
         # Rotate the mask, to know what part is actually the image
         padded_mask = self.__rotate(padded_mask, -angle_in_1st_quadrant)
 
@@ -1217,7 +1265,7 @@ class InformationConservingRotation(OpticalLayer):
 
         f1 = np.fft.ifft(
             (np.fft.fft(padded_image, axis=0).T * uncentered_phase).T, axis=0)
-        
+
         f2 = np.fft.ifft(
             np.fft.fft(f1, axis=1) * centered_phase, axis=1)
 
@@ -1225,33 +1273,29 @@ class InformationConservingRotation(OpticalLayer):
             (np.fft.fft(f2, axis=0).T * uncentered_phase).T, axis=0)\
             .at[padded_mask]\
             .set(np.nan)
-        
+
         return np.real(rotated_image\
             .at[left_corner + 1 : right_corner - 1, 
                 top_corner + 1 : bottom_corner - 1]\
             .get()).copy()
 
 
-    def __call__(self, params: dict) -> dict:
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
         """
-        Applying the information preserving rotation to a wavefront. 
+        Applies the Fourier rotation to a wavefront.
 
         Parameters
         ----------
-        params: dict
-            A dictionary that must contain a "Wavefront" entry.
+        wavefront : Wavefront
+            The wavefront to operate on.
 
-        Returns 
+        Returns
         -------
-        params: dict
-            The same dictionary but the "Wavefront" entry has been updated.
+        wavefront : Wavefront
+            The rotated wavefront.
         """
-        wavefront = params["Wavefront"]
         field = wavefront.get_complex_form()
-        rotated_field = self._rotate(field, self.alpha, self.padding)
-        # TODO: Fix updates
-        rotated_wavefront = wavefront\
-            .set_phase(np.angle(rotated_field))\
-            .set_amplitude(np.abs(rotated_field))
-        params["Wavefront"] = rotated_wavefront
-        return params
+        rotated_field = self._rotate(field, self.angle, self.padding)
+        rotated_wavefront = wavefront.update_phasor(np.abs(rotated_field),
+                                                    np.angle(rotated_field))
+        return rotated_wavefront

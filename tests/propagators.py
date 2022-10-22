@@ -358,26 +358,26 @@ class TestCartesianMFT(UtilityUser):
         assert long_focal_length.get_focal_length() == LONG
 
 
-    def test_get_pixel_offsets(self : Tester) -> None:
-        """
-        Tests that the get_pixel_offsets function correctly generates
-        the wavefront offsets in picels. 
-        """
-        OFFSET_RADIANS = numpy.array([0., 1.])
+#     def test_get_pixel_offsets(self : Tester) -> None:
+#         """
+#         Tests that the get_pixel_offsets function correctly generates
+#         the wavefront offsets in picels. 
+#         """
+#         OFFSET_RADIANS = numpy.array([0., 1.])
 
-        propagator = self\
-            .get_utility()\
-            .construct()
+#         propagator = self\
+#             .get_utility()\
+#             .construct()
 
-        wavefront = self\
-            .get_utility()\
-            .get_utility()\
-            .construct()\
-            .set_offset(OFFSET_RADIANS)
+#         wavefront = self\
+#             .get_utility()\
+#             .get_utility()\
+#             .construct()\
+#             .set_offset(OFFSET_RADIANS)
 
-        OFFSET_PIXELS = OFFSET_RADIANS * \
-            self.get_utility().get_focal_length() /\
-            self.get_utility().get_pixel_scale_out()
+#         OFFSET_PIXELS = OFFSET_RADIANS * \
+#             self.get_utility().get_focal_length() /\
+#             self.get_utility().get_pixel_scale_out()
 
         # assert (propagator.get_pixel_offsets(wavefront) == \
         #     OFFSET_PIXELS).all()
@@ -419,11 +419,14 @@ class TestCartesianMFT(UtilityUser):
         """
         propagator = self.get_utility().construct()
         wavefront = self.get_utility().get_utility().construct()
+        
+        print(type(wavefront))
 
         OUTPUT_FIELD = propagator.propagate(wavefront)
 
-        output_field = propagator({"Wavefront": wavefront})\
-            ["Wavefront"].get_phasor()
+        # output_field = propagator({"Wavefront": wavefront})\
+        #     ["Wavefront"].get_phasor()
+        output_field = propagator(wavefront).get_phasor()
 
         is_correct = self\
             .get_utility()\
@@ -539,8 +542,9 @@ class TestCartesianFFT(UtilityUser):
 
         OUTPUT_FIELD = propagator.propagate(wavefront)
 
-        output_field = propagator({"Wavefront": wavefront})\
-            ["Wavefront"].get_phasor()
+        # output_field = propagator({"Wavefront": wavefront})\
+        #     ["Wavefront"].get_phasor()
+        output_field = propagator(wavefront).get_phasor()
 
         # Because the test wavefront has uniform electric field 
         # the fourier transform is only non-zero in the top 
@@ -782,8 +786,9 @@ class TestAngularMFT(UtilityUser):
 
         OUTPUT = propagator.propagate(wavefront)
 
-        output = propagator({"Wavefront": wavefront})["Wavefront"]\
-            .get_phasor()
+        # output = propagator({"Wavefront": wavefront})["Wavefront"]\
+        #     .get_phasor()
+        output = propagator(wavefront).get_phasor()
 
         is_correct = self\
             .get_utility()\
@@ -864,8 +869,9 @@ class TestAngularFFT(UtilityUser):
 
         OUTPUT = propagator.propagate(wavefront)
 
-        output = propagator({"Wavefront": wavefront})["Wavefront"]\
-            .get_phasor()
+        # output = propagator({"Wavefront": wavefront})["Wavefront"]\
+        #     .get_phasor()
+        output = propagator(wavefront).get_phasor()
 
         is_correct = self\
             .get_utility()\

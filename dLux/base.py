@@ -1,7 +1,4 @@
 from __future__ import annotations
-import typing
-import abc
-import warnings
 import jax.numpy as np
 from jax import vmap
 from jax.tree_util import tree_map, tree_flatten
@@ -10,17 +7,20 @@ from equinox import tree_at, Module, static_field
 from optax import adam, multi_transform
 from collections import OrderedDict
 from copy import deepcopy
+from typing import Union, NewType, Any
+from abc import ABC
 import dLux
-from typing import Union
 
 
 __all__ = ["model", "OpticalSystem", "Instrument", "Optics", "Scene",
            "Filter", "Detector"]
-Array     = typing.NewType("Array",  np.ndarray)
-list_like = typing.Union[list, tuple]
-Path      = typing.Union[list, tuple]
-Pytree    = typing.NewType("Pytree", object)
-Leaf      = typing.Any
+
+
+Array     = np.ndarray
+list_like = Union[list, tuple]
+Path      = Union[list, tuple]
+Pytree    = NewType("Pytree", object)
+Leaf      = Any
 
 
 ###############
@@ -184,7 +184,7 @@ def model(optics      : Optics,
 ###############
 ### Classes ###
 ###############
-class Base(abc.ABC, Module):
+class Base(ABC, Module):
     """
     An abstract base class that is used to give a user-friendly API for working
     with PyTrees, specifically using Equniox. This can be thought of as
@@ -942,13 +942,15 @@ class Optics(Base):
         assert weight.shape == (), "weight must be a scalar."
         
         # Construct parameters dictionary
-        params_dict = {"optics"     : self,
+        params_dict = {"Wavefront"  : None,
+                       "optics"     : self,
                        "wavelength" : wavelength,
                        "offset"     : offset}
         
         # Propagate though layers
         for key, layer in self.layers.items():
-            params_dict = layer(params_dict)
+            # params_dict = layer(params_dict)
+            params_dict = layer.apply(params_dict)
         psf = params_dict["Wavefront"].wavefront_to_psf()
         return weight * psf
     
@@ -1047,14 +1049,16 @@ class Optics(Base):
         assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
         assert weight.shape == (), "weight must be a scalar."
         
-        params_dict = {"Optics": self,
-                       "wavelength": wavelength,
-                       "offset": offset}
+        # Construct parameters dictionary
+        params_dict = {"Wavefront"  : None,
+                       "optics"     : self,
+                       "wavelength" : wavelength,
+                       "offset"     : offset}
         
         intermediate_dicts = []
         intermediate_layers = []
         for key, layer in self.layers.items():
-            params_dict = layer(params_dict)
+            params_dict = layer.applydl(params_dict)
             intermediate_dicts.append(params_dict.copy())
             intermediate_layers.append(deepcopy(layer))
         
@@ -1982,12 +1986,14 @@ class OpticalSystem(Base):
         """
         
         """
-        params_dict = {"wavelength" : wavel, 
+        params_dict = {"Wavefront" : None,
+                       "wavelength" : wavel, 
                        "offset" : offset,
                        "Optical System" : self}
         
         for i in range(len(self.layers)):
-            params_dict = self.layers[i](params_dict)
+            # params_dict = self.layers[i](params_dict)
+            params_dict = self.layers[i].apply(params_dict)
             
         return params_dict["Wavefront"].wavefront_to_psf()
     

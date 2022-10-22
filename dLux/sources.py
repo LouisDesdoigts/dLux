@@ -1,21 +1,21 @@
 from __future__ import annotations
-import abc
-import typing
 import jax.numpy as np
 from jax.scipy.signal import convolve
 from jax import vmap
 from equinox import tree_at, static_field
+from abc import ABC, abstractmethod
 import dLux
 
 
-__all__ = ["PointSource", "ArrayDistribution", "BinarySource", 
+__all__ = ["PointSource", "ArrayDistribution", "BinarySource",
            "PointExtendedSource", "PointAndExtendedSource"]
-# Array = typing.NewType("Array", np.ndarray)
+
+
 Array = np.ndarray
 
 
 """
-If you are confused about the class inheritance, please read this stack 
+If you are confused about the class inheritance, please read this stack
 overflow post on diamond inheritance in python, where each class instantiates
 parameters: https://stackoverflow.com/questions/34884567/python-multiple-inheritance-passing-arguments-to-constructors-using-super
 """
@@ -23,7 +23,7 @@ parameters: https://stackoverflow.com/questions/34884567/python-multiple-inherit
 ########################
 ### Abstract Classes ###
 ########################
-class Source(dLux.base.Base, abc.ABC):
+class Source(dLux.base.Base, ABC):
     """
     Base class for source objects. The idea of these source classes is to allow
     an arbitrary parametrisation of the underlying astrophyical objects. Each 
@@ -280,7 +280,7 @@ class Source(dLux.base.Base, abc.ABC):
         return wavelengths, weights, positions
     
     
-    @abc.abstractmethod
+    @abstractmethod
     def model(self      : Source,
               optics    : Optics,
               detector  : Detector = None,
@@ -306,7 +306,7 @@ class Source(dLux.base.Base, abc.ABC):
         return
     
     
-class ResolvedSource(Source, abc.ABC):
+class ResolvedSource(Source, ABC):
     """
     Base class for resolved source objects. This simply extends the base Source
     class by implementing an abstract get_distribution() method and a concrete 
@@ -314,7 +314,7 @@ class ResolvedSource(Source, abc.ABC):
     """
     
     
-    @abc.abstractmethod
+    @abstractmethod
     def get_distribution(self):
         """
         Abstract method for returning the distribution of the resolved source.
@@ -371,7 +371,7 @@ class ResolvedSource(Source, abc.ABC):
             return detector.apply_detector(psf_out)
     
     
-class RelativeFluxSource(Source, abc.ABC):
+class RelativeFluxSource(Source, ABC):
     """
     Abstract class that extend the methods of Source to allow for binary-object
     sources to be parameterised by their relative flux. Classes that inherit 
@@ -455,7 +455,7 @@ class RelativeFluxSource(Source, abc.ABC):
            lambda source: source.flux_ratio, self, flux_ratio)
     
     
-class RelativePositionSource(Source, abc.ABC):
+class RelativePositionSource(Source, ABC):
     """
     Abstract class that extend the methods of Source to allow for binary-object
     sources to be parameterised by their relative position. Classes that
