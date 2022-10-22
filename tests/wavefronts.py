@@ -68,38 +68,38 @@ class TestWavefront(UtilityUser):
         assert wavefront.get_wavelength() != OLD_WAVELENGTH
 
 
-    def test_get_offset(self : TestWavefront) -> None:
-        """
-        Test for the accessor method get_offset.
-        """
-        wavefront = self\
-            .get_utility()\
-            .construct()
+#     def test_get_offset(self : TestWavefront) -> None:
+#         """
+#         Test for the accessor method get_offset.
+#         """
+#         wavefront = self\
+#             .get_utility()\
+#             .construct()
 
-        is_correct = (wavefront.get_offset() == self\
-            .get_utility()\
-            .get_offset())\
-            .all()
+#         is_correct = (wavefront.get_offset() == self\
+#             .get_utility()\
+#             .get_offset())\
+#             .all()
 
-        assert is_correct
+#         assert is_correct
 
 
-    def test_set_offset(self : TestWavefront) -> None:
-        """
-        Test for the mutator method set_offset.
-        """
-        NEW_OFFSET = numpy.array([numpy.pi] * 2)
-        OLD_OFFSET = self\
-            .get_utility()\
-            .get_offset()
+#     def test_set_offset(self : TestWavefront) -> None:
+#         """
+#         Test for the mutator method set_offset.
+#         """
+#         NEW_OFFSET = numpy.array([numpy.pi] * 2)
+#         OLD_OFFSET = self\
+#             .get_utility()\
+#             .get_offset()
 
-        wavefront = self\
-            .get_utility()\
-            .construct()\
-            .set_offset(NEW_OFFSET)
+#         wavefront = self\
+#             .get_utility()\
+#             .construct()\
+#             .set_offset(NEW_OFFSET)
 
-        assert (wavefront.get_offset() == NEW_OFFSET).all()
-        assert (wavefront.get_offset() != OLD_OFFSET).all()
+#         assert (wavefront.get_offset() == NEW_OFFSET).all()
+#         assert (wavefront.get_offset() != OLD_OFFSET).all()
     
 
     def test_get_real(self : TestWavefront) -> None:
@@ -395,18 +395,22 @@ class TestCartesianWavefront(UtilityUser):
         Tests the `CartesianeWavefront` constructor.
         """
         WAVELENGTH = self.get_utility().get_wavelength()
-        OFFSET = self.get_utility().get_offset()
+        # OFFSET = self.get_utility().get_offset()
         SIZE = self.get_utility().get_size()
         AMPLITUDE = self.get_utility().get_amplitude()
         PHASE = self.get_utility().get_phase()
         PIXEL_SCALE = self.get_utility().get_pixel_scale()
         PLANE_TYPE = self.get_utility().get_plane_type()
+        
+        print(AMPLITUDE.shape)
+        
+        print(PHASE.shape)
 
-        wavefront = CartesianWavefront(WAVELENGTH, OFFSET, PIXEL_SCALE, 
-                                       PLANE_TYPE, AMPLITUDE, PHASE)
+        wavefront = CartesianWavefront(WAVELENGTH, PIXEL_SCALE, 
+                                       AMPLITUDE, PHASE, PLANE_TYPE)
         
         assert wavefront.get_wavelength() == WAVELENGTH
-        assert (wavefront.get_offset() == OFFSET).all()
+        # assert (wavefront.get_offset() == OFFSET).all()
         assert (wavefront.get_amplitude() == AMPLITUDE).all()
         assert (wavefront.get_phase() == PHASE).all()
         
@@ -431,18 +435,18 @@ class TestAngularWavefront(UtilityUser):
         fields.
         """
         WAVELENGTH = self.get_utility().get_wavelength()
-        OFFSET = self.get_utility().get_offset()
+        # OFFSET = self.get_utility().get_offset()
         SIZE = self.get_utility().get_size()
         AMPLITUDE = self.get_utility().get_amplitude()
         PHASE = self.get_utility().get_phase()
         PIXEL_SCALE = self.get_utility().get_pixel_scale()
         PLANE_TYPE = self.get_utility().get_plane_type()
 
-        wavefront = AngularWavefront(WAVELENGTH, OFFSET, PIXEL_SCALE, 
-                                       PLANE_TYPE, AMPLITUDE, PHASE)
+        wavefront = AngularWavefront(WAVELENGTH, PIXEL_SCALE, 
+                                       AMPLITUDE, PHASE, PLANE_TYPE)
         
         assert wavefront.get_wavelength() == WAVELENGTH
-        assert (wavefront.get_offset() == OFFSET).all()
+        # assert (wavefront.get_offset() == OFFSET).all()
         assert (wavefront.get_amplitude() == AMPLITUDE).all()
         assert (wavefront.get_phase() == PHASE).all()
 

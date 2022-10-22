@@ -1,19 +1,21 @@
 from __future__ import annotations
-import abc
 import jax.numpy as np
 from equinox import tree_at
+from abc import ABC, abstractmethod
 import dLux
 
 
 __all__ = ["CartesianMFT", "AngularMFT", "CartesianFFT", "AngularFFT",
            "CartesianFresnel"]
+
+
 Array = np.ndarray
 
 
 ########################
 ### Abstract Classes ###
 ########################
-class Propagator(dLux.layers.OpticalLayer, abc.ABC):
+class Propagator(dLux.layers.OpticalLayer, ABC):
     """
     An abstract class to store the various properties of the propagation of
     some wavefront.
@@ -28,7 +30,9 @@ class Propagator(dLux.layers.OpticalLayer, abc.ABC):
     inverse : bool
 
 
-    def __init__(self : Propagator, inverse : bool = False) -> Propagator:
+    def __init__(self    : Propagator,
+                 inverse : bool = False,
+                 **kwargs) -> Propagator:
         """
         Constructor for the Propagator.
 
@@ -39,6 +43,7 @@ class Propagator(dLux.layers.OpticalLayer, abc.ABC):
             represents propagation from a pupil to a focal plane, and inverse
             represents propagation from a focal to a pupil plane.
         """
+        super().__init__(**kwargs)
         self.inverse = bool(inverse)
 
 
@@ -73,7 +78,7 @@ class Propagator(dLux.layers.OpticalLayer, abc.ABC):
         assert isinstance(inverse, bool), "inverse must be a boolen."
         return tree_at(lambda propagator: propagator.inverse, self, tilt)
 
-    @abc.abstractmethod
+    @abstractmethod
     def propagate(self : Propagator, wavefront : Wavefront) -> Array:
         """
         Performs the propagation as a directional wrapper to the fourier methods
@@ -92,26 +97,7 @@ class Propagator(dLux.layers.OpticalLayer, abc.ABC):
         return
 
 
-    @abc.abstractmethod
-    def __call__(self : Propagator, parameters : dict) -> dict:
-        """
-        Propagates the `Wavefront` stored withing the parameters dictionary.
-
-        Parameters
-        ----------
-        parameters : dict
-            A dictionary that must contain a "Wavefront" key with a
-            corresponding dLux.wavefronts.Wavefront object.
-
-        Returns
-        -------
-        parameters : dict
-            A dictionary with the updated "Wavefront" key with the propagated
-            wavefront object.
-        """
-
-
-class VariableSamplingPropagator(Propagator, abc.ABC):
+class VariableSamplingPropagator(Propagator, ABC):
     """
     A propagator that implements the Soummer et. al. 2007 MFT algorithm
     allowing variable sampling in the outuput plane rather than the fixed
@@ -119,31 +105,28 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
 
     Attributes
     ----------
+    npixels_out : int
+        The number of pixels in the output plane.
     pixel_scale_out : Array, meters/pixel or radians/pixel
         The pixel scale in the output plane, measured in meters or radians per
         pixel for Cartesian or Angular Wavefront respectively.
-    npixels_out : int
-        The number of pixels in the output plane.
-    tilt : bool
-        Should the tilt value (stored as the offset parameter) within the
-        wavefront be appied using the propagator. True applies the offset value
-        stored within the propagated wavefront.
-    pixel_tilt : bool
-        Should the offset value stored within the propagated wavefront be
-        considered in units of radians, or pixels. True applies the offset value
-        in units of pixels. This parameter is redundant if the tilt parameter
-        is False.
+    shift : Array
+        The (x, y) shift to apply to the wavefront in the output plane.
+    pixel_shift : bool
+        Should the shift value be considered in units of pixels, or in the
+        physical units of the output plane (ie pixels or meters, radians). True
+        interprets the shift value in pixel units.
     """
-    pixel_scale_out : Array
     npixels_out     : int
-    tilt            : bool
-    pixel_tilt      : bool
+    pixel_scale_out : Array
+    shift           : Array
+    pixel_shift     : bool
 
     def __init__(self            : Propagator,
                  pixel_scale_out : Array,
                  npixels_out     : int,
-                 tilt            : bool = False,
-                 pixel_tilt      : bool = False,
+                 shift           : Array = np.array([0., 0.]),
+                 pixel_shift     : bool  = False,
                  **kwargs) -> Propagator:
         """
         Constructor for VariableSampling propagators.
@@ -155,52 +138,47 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
         pixel_scale_out : Array, meters/pixel or radians/pixel
             The pixel scale in the output plane, measured in meters or radians
             per pixel for Cartesian or Angular Wavefront respectively.
-        tilt : bool = False
-            Should the tilt value (stored as the offset parameter) within the
-            wavefront be appied using the propagator. True applies the offset
-            value stored within the propagated wavefront.
-        pixel_tilt : bool = False
-            Should the offset value stored within the propagated wavefront be
-            considered in units of radians, or pixels. True applies the offset
-            value in units of pixels. This parameter is redundant if the tilt
-            parameter is False.
+        shift : Array = np.array([0., 0.])
+            The (x, y) shift to apply to the wavefront in the output plane.
+        pixel_shift : bool
+            Should the shift value be considered in units of pixel, or in the
+            physical units of the output plane (ie pixels or meters, radians). =
+            True interprets the shift value in pixel units.
         """
         super().__init__(**kwargs)
         self.pixel_scale_out = np.asarray(pixel_scale_out, dtype=float)
         self.npixels_out     = int(npixels_out)
-        self.tilt            = bool(tilt)
-        self.pixel_tilt      = bool(pixel_tilt)
+        self.shift           = np.asarray(shift, dtype=float)
+        self.pixel_shift     = bool(pixel_shift)
         assert self.pixel_scale_out.ndim == 0, \
         ("pixel_scale_out must be a scalar.")
+        assert self.shift.shape == (2,), \
+        ("shift must be an array of shape (2,) ie (x, y).")
 
 
-    def is_tilted(self : Propagator) -> bool:
+    def is_pixel_shifted(self : Propagator) -> bool:
         """
-        Accessor for the tilt parameter.
+        Accessor for the pixel_shift parameter.
 
         Returns
         -------
-        tilt : bool
-            Should the tilt value (stored as the offset parameter) within the
-            wavefront be appied using the propagator. True applies the offset
-            value stored within the propagated wavefront.
+        pixel_shift : bool
+
         """
-        return self.tilt
+        return self.pixel_shift
 
 
-    def is_pixel_tilted(self : Propagator) -> bool:
+    def get_shift(self : Propagator) -> Array:
         """
-        Accessor for the pixel_tilt parameter.
+        Accessor for the shift parameter.
 
         Returns
         -------
-        pixel_tilt : bool
-            Should the offset value stored within the propagated wavefront be
-            considered in units of radians, or pixels. True applies the offset
-            value in units of pixels. This parameter is redundant if the tilt
-            parameter is False.
+        shift : Array
+            The (x, y) shift to apply to the wavefront throughout the
+            propagation.
         """
-        return self.pixel_tilt
+        return self.shift
 
 
     def get_pixel_scale_out(self : Propagator) -> Array:
@@ -228,41 +206,43 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
         return self.npixels_out
 
 
-    def set_tilted(self : Propagator, tilt : bool) -> Propagator:
+    def set_shift(self : Propagator,
+                  shift : bool) -> Propagator:
         """
-        Mutator for the tilt attribute.
+        Mutator for the shift attribute.
 
         Parameters
         ----------
-        tilt : bool
-            The new value for the tilt attribute.
+        shift : Array
+            The new (x, y) value for the shift attribute.
 
         Returns
         -------
         propagator : Propagator
-            The Propagator with the updated tilt attribute.
+            The Propagator with the updated shift attribute.
         """
-        assert isinstance(tilt, bool), "tilt must be a boolen."
-        return tree_at(lambda propagator: propagator.tilt, self, tilt)
+        assert isinstance(shift, Array) and shift.shape == (2,), \
+        ("shift must be an array of shape (2,) ie (x, y).")
+        return tree_at(lambda propagator: propagator.shift, self, shift)
 
 
-    def set_pixel_tilted(self : Propagator, pixel_tilt : bool) -> Propagator:
+    def set_pixel_shifted(self : Propagator, pixel_shift : bool) -> Propagator:
         """
-        Mutator for the pixel_tilt attribute.
+        Mutator for the pixel_shift attribute.
 
         Parameters
         ----------
-        pixel_tilt : bool
-            The new value for the pixel_tilt attribute.
+        pixel_shift : bool
+            The new value for the pixel_shift attribute.
 
         Returns
         -------
         propagator : Propagator
-            The Propagator with the updated pixel_tilt attribute.
+            The Propagator with the updated pixel_shift attribute.
         """
-        assert isinstance(pixel_tilt, bool), "pixel_tilt must be a boolean."
-        return tree_at(lambda propagator: propagator.pixel_tilt, self,
-                                                                   pixel_tilt)
+        assert isinstance(pixel_shift, bool), "pixel_shift must be a boolean."
+        return tree_at(lambda propagator: propagator.pixel_shift, self,
+                                                                   pixel_shift)
 
 
     def set_pixel_scale_out(self            : Propagator,
@@ -301,34 +281,11 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
             The Propagator with the updated npixels_out attribute.
         """
         assert isinstance(npixels_out, int), "npixels_out must be a integer."
-        return tree_at(lambda propagator: propagator.npixels_out, self, 
+        return tree_at(lambda propagator: propagator.npixels_out, self,
                                                                    npixels_out)
 
 
-    @abc.abstractmethod
-    def get_offset_value(self     : Propagator,
-                        wavefront : Wavefront) -> Array:
-        """
-        Returns the offset value either as-is or scaled by the physical focal
-        length and pixel scale, depending on the boolean value of pixel_tilt.
-        Used to handle cases where the offset value is given in either units of
-        pixels or radians.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront being propagated.
-
-        Returns
-        -------
-        offset : Array
-            The (x, y) offset of the wavefront from the center of the output
-            plane.
-        """
-        return
-
-
-    @abc.abstractmethod
+    @abstractmethod
     def get_nfringes(self : Propagator, wavefront : Wavefront) -> Array:
         """
         The number of diffraction fringes in the output plane.
@@ -407,9 +364,7 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
         output_scale = self.get_nfringes(wavefront) / self.get_npixels_out()
         npixels_in = wavefront.get_npixels()
         npixels_out = self.get_npixels_out()
-
-        x_offset, y_offset = self.get_offset_value(wavefront) \
-                                if self.is_tilted() else np.array([0., 0.])
+        x_offset, y_offset = self.get_shift()
 
         # TODO: This can be vmapped
         x_twiddle_factors = np.tile(self._generate_twiddle_factors(
@@ -428,46 +383,41 @@ class VariableSamplingPropagator(Propagator, abc.ABC):
         return output_field * normalising_factor
 
 
-    def __call__(self : Propagator, parameters : dict) -> dict:
+    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
         """
-        Propagates the `Wavefront` stored withing the parameters dictionary.
+        Propagates the `Wavefront`.
 
         Parameters
         ----------
-        parameters : dict
-            A dictionary that must contain a "Wavefront" key with a
-            corresponding dLux.wavefronts.Wavefront object.
+        wavefront : Wavefront
+            The wavefront to propagate.
 
         Returns
         -------
-        parameters : dict
-            A dictionary with the updated "Wavefront" key with the propagated
-            wavefront object.
+        wavefront : Wavefront
+            The wavefront with the optical layer applied.
         """
-        wavefront = parameters["Wavefront"]
-        new_wavefront = self.propagate(wavefront)
+        # print(wavefront)
+        phasor = self.propagate(wavefront)
 
-        new_amplitude = np.abs(new_wavefront)
-        new_phase = np.angle(new_wavefront)
+        new_amplitude = np.abs(phasor)
+        new_phase = np.angle(phasor)
         new_plane_type = dLux.PlaneType.Pupil if self.inverse else \
                          dLux.PlaneType.Focal
 
-        new_wavefront = tree_at(lambda wavefront: \
-                                   (wavefront.amplitude,
-                                    wavefront.phase,
-                                    wavefront.plane_type,
-                                    wavefront.pixel_scale),
-                                    wavefront,
-                                   (new_amplitude,
-                                    new_phase,
-                                    new_plane_type,
-                                    self.get_pixel_scale_out()))
-
-        parameters["Wavefront"] = new_wavefront
-        return parameters
+        return tree_at(lambda wavefront: \
+                       (wavefront.amplitude,
+                        wavefront.phase,
+                        wavefront.plane_type,
+                        wavefront.pixel_scale),
+                        wavefront,
+                       (new_amplitude,
+                        new_phase,
+                        new_plane_type,
+                        self.get_pixel_scale_out()))
 
 
-class FixedSamplingPropagator(Propagator, abc.ABC):
+class FixedSamplingPropagator(Propagator, ABC):
     """
     A propagator that implements the Fast Fourier Transform algorithm. This
     algorith has a fixed sampling in the output plane, at one fringe per pixel.
@@ -487,7 +437,7 @@ class FixedSamplingPropagator(Propagator, abc.ABC):
         super().__init__(**kwargs)
 
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_pixel_scale_out(self     : Propagator,
                            wavefront : Wavefront) -> Array:
         """
@@ -533,47 +483,40 @@ class FixedSamplingPropagator(Propagator, abc.ABC):
         return output_field * normalising_factor
 
 
-    def __call__(self : Propagator, parameters : dict) -> dict:
+    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
         """
-        Propagates the `Wavefront` stored withing the parameters dictionary.
+        Propagates the `Wavefront`.
 
         Parameters
         ----------
-        parameters : dict
-            A dictionary that must contain a "Wavefront" key with a
-            corresponding dLux.wavefronts.Wavefront object.
+        wavefront : Wavefront
+            The wavefront to propagate.
 
         Returns
         -------
-        parameters : dict
-            A dictionary with the updated "Wavefront" key with the propagated
-            wavefront object.
+        wavefront : Wavefront
+            The wavefront with the optical layer applied.
         """
-        wavefront = parameters["Wavefront"]
+        phasor = self.propagate(wavefront)
 
-        new_wavefront = self.propagate(wavefront)
-
-        new_amplitude = np.abs(new_wavefront)
-        new_phase = np.angle(new_wavefront)
+        new_amplitude = np.abs(phasor)
+        new_phase = np.angle(phasor)
         new_plane_type = dLux.PlaneType.Pupil if self.inverse else \
                          dLux.PlaneType.Focal
 
-        new_wavefront = tree_at(lambda wavefront: \
-                                   (wavefront.amplitude,
-                                    wavefront.phase,
-                                    wavefront.plane_type,
-                                    wavefront.pixel_scale),
-                                    wavefront,
-                                   (new_amplitude,
-                                    new_phase,
-                                    new_plane_type,
-                                    self.get_pixel_scale_out(wavefront)))
-
-        parameters["Wavefront"] = new_wavefront
-        return parameters
+        return tree_at(lambda wavefront: \
+                       (wavefront.amplitude,
+                        wavefront.phase,
+                        wavefront.plane_type,
+                        wavefront.pixel_scale),
+                        wavefront,
+                       (new_amplitude,
+                        new_phase,
+                        new_plane_type,
+                        self.get_pixel_scale_out(wavefront)))
 
 
-class CartesianPropagator(Propagator, abc.ABC):
+class CartesianPropagator(Propagator, ABC):
     """
     A propagator class to store the focal_length parameter for cartesian
     propagations defined by a physical propagation distance defined as
@@ -636,7 +579,7 @@ class CartesianPropagator(Propagator, abc.ABC):
                                                                 focal_length)
 
 
-class AngularPropagator(Propagator, abc.ABC):
+class AngularPropagator(Propagator, ABC):
     """
     A simple propagator class designed to be inhereited by propagators that
     operate on wavefronts defined in angular units in focal planes.
@@ -650,7 +593,7 @@ class AngularPropagator(Propagator, abc.ABC):
         super().__init__(**kwargs)
 
 
-class FarFieldFresnel(Propagator, abc.ABC):
+class FarFieldFresnel(Propagator, ABC):
     """
     A propagator class to store the propagation_shift parameter required for
     Far-Field fresnel propagations. These classes implement algorithms that use
@@ -725,12 +668,13 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
 
 
     def __init__(self            : Propagator,
-                 pixel_scale_out : Array,
                  npixels_out     : int,
+                 pixel_scale_out : Array,
                  focal_length    : Array,
-                 inverse         : bool = False,
-                 tilt            : bool = False,
-                 pixel_tilt      : bool = False) -> Propagator:
+                 inverse         : bool  = False,
+                 shift           : Array = np.array([0., 0.]),
+                 pixel_shift     : bool  = False,
+                 name            : str   = 'CartesianMFT') -> Propagator:
         """
         Parameters
         ----------
@@ -744,19 +688,18 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
             Is this an 'inverse' propagation. Non-inverse propagations
             represents propagation from a pupil to a focal plane, and inverse
             represents propagation from a focal to a pupil plane.
-        tilt : bool = False
-            Should the tilt value (stored as the offset parameter) within the
-            wavefront be appied using the propagator. True applies the offset
-            value stored within the propagated wavefront.
-        pixel_tilt : bool = False
-            Should the offset value stored within the propagated wavefront be
-            considered in units of radians, or pixels. True applies the offset
-            value in units of pixels. This parameter is redundant if the tilt
-            parameter is False.
+        shift : Array = np.array([0., 0.])
+            The (x, y) shift to apply to the wavefront in the output plane.
+        pixel_shift : bool
+            Should the shift value be considered in units of pixel, or in the
+            physical units of the output plane (ie pixels or meters, radians).
+        name : str = 'CartesianMFT'
+            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(inverse         = inverse,
-                         tilt            = tilt,
-                         pixel_tilt      = pixel_tilt,
+        super().__init__(name            = name,
+                         inverse         = inverse,
+                         shift           = shift,
+                         pixel_shift     = pixel_shift,
                          focal_length    = focal_length,
                          pixel_scale_out = pixel_scale_out,
                          npixels_out     = npixels_out)
@@ -783,27 +726,19 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
                                                     wavefront.get_wavelength()
 
 
-    def get_offset_value(self     : Propagator,
-                        wavefront : Wavefront) -> Array:
+    def get_shift(self : Propagator) -> Array:
         """
-        Returns the offset value either as-is or scaled by the physical focal
-        length and pixel scale, depending on the boolean value of pixel_tilt.
-        Used to handle cases where the offset value is given in either units of
-        pixels or radians.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront being propagated.
+        Accessor for the shift parameter. Converts to units of pixels if the
+        pixel_shift parameter is True.
 
         Returns
         -------
-        offset : Array
-            The (x, y) offset of the wavefront from the center of the output
-            plane.
+        shift : Array
+            The (x, y) shift to apply to the wavefront throughout the
+            propagation.
         """
-        return wavefront.get_offset() if self.is_pixel_tilted() else \
-               wavefront.get_offset() * self.focal_length / self.pixel_scale_out
+        return super().get_shift() if self.is_pixel_shifted() else \
+               super().get_shift() * self.focal_length / self.pixel_scale_out
 
 
 class AngularMFT(AngularPropagator, VariableSamplingPropagator):
@@ -813,11 +748,12 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
     planes, with a variable output sampling in the output plane.
     """
     def __init__(self            : Propagator,
-                 pixel_scale_out : Array,
                  npixels_out     : int,
-                 inverse         : bool = False,
-                 tilt            : bool = False,
-                 pixel_tilt      : bool = False) -> Propagator:
+                 pixel_scale_out : Array,
+                 inverse         : bool  = False,
+                 shift           : Array = np.array([0., 0.]),
+                 pixel_shift     : bool  = False,
+                 name            : str   = 'AngularMFT') -> Propagator:
         """
         Parameters
         ----------
@@ -830,19 +766,18 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
             Is this an 'inverse' propagation. Non-inverse propagations
             represents propagation from a pupil to a focal plane, and inverse
             represents propagation from a focal to a pupil plane.
-        tilt : bool = False
-            Should the tilt value (stored as the offset parameter) within the
-            wavefront be appied using the propagator. True applies the offset
-            value stored within the propagated wavefront.
-        pixel_tilt : bool = False
-            Should the offset value stored within the propagated wavefront be
-            considered in units of radians, or pixels. True applies the offset
-            value in units of pixels. This parameter is redundant if the tilt
-            parameter is False.
+        shift : Array = np.array([0., 0.])
+            The (x, y) shift to apply to the wavefront in the output plane.
+        pixel_shift : bool
+            Should the shift value be considered in units of pixel, or in the
+            physical units of the output plane (ie pixels or meters, radians).
+        name : str = 'AngularMFT'
+            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(inverse         = inverse,
-                         tilt            = tilt,
-                         pixel_tilt      = pixel_tilt,
+        super().__init__(name            = name,
+                         inverse         = inverse,
+                         shift           = shift,
+                         pixel_shift     = pixel_shift,
                          pixel_scale_out = pixel_scale_out,
                          npixels_out     = npixels_out)
 
@@ -869,27 +804,19 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
         return nfringe
 
 
-    def get_offset_value(self     : Propagator,
-                        wavefront : Wavefront) -> Array:
+    def get_shift(self : Propagator) -> Array:
         """
-        Returns the offset value either as-is or scaled by the physical focal
-        length and pixel scale, depending on the boolean value of pixel_tilt.
-        Used to handle cases where the offset value is given in either units of
-        pixels or radians.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront being propagated.
+        Accessor for the shift parameter. Converts to units of pixels if the
+        pixel_shift parameter is True.
 
         Returns
         -------
-        offset : Array
-            The (x, y) offset of the wavefront from the center of the output
-            plane.
+        shift : Array
+            The (x, y) shift to apply to the wavefront throughout the
+            propagation.
         """
-        return wavefront.get_offset() * self.get_pixel_scale_out() \
-                if self.is_pixel_tilted() else wavefront.get_offset()
+        return super().get_shift() if self.is_pixel_shifted() else \
+               super().get_shift() / self.pixel_scale_out
 
 
 class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
@@ -901,7 +828,8 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
 
     def __init__(self         : Propagator,
                  focal_length : Array,
-                 inverse      : bool = False) -> Propagator:
+                 inverse      : bool = False,
+                 name         : str  = 'CartesianFFT') -> Propagator:
         """
         Parameters
         ----------
@@ -911,8 +839,11 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
             Is this an 'inverse' propagation. Non-inverse propagations
             represents propagation from a pupil to a focal plane, and inverse
             represents propagation from a focal to a pupil plane.
+        name : str = 'CartesianFFT'
+            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(inverse      = inverse,
+        super().__init__(name         = name,
+                         inverse      = inverse,
                          focal_length = focal_length)
 
 
@@ -942,7 +873,9 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
     """
 
 
-    def __init__(self : Propagator, inverse : bool = False) -> Propagator:
+    def __init__(self    : Propagator,
+                 inverse : bool = False,
+                 name    : str = 'AngularFFT') -> Propagator:
         """
         Constructor for the AngularFFT propagator.
 
@@ -952,8 +885,10 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
             Is this an 'inverse' propagation. Non-inverse propagations
             represents propagation from a pupil to a focal plane, and inverse
             represents propagation from a focal to a pupil plane.
+        name : str = 'AngularFFT'
+            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(inverse = inverse)
+        super().__init__(name = name, inverse = inverse)
 
 
     def get_pixel_scale_out(self : Propagator, wavefront : Wavefront) -> Array:
@@ -985,13 +920,14 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
 
 
     def __init__(self              : Propagator,
-                 pixel_scale_out   : Array,
                  npixels_out       : Array,
+                 pixel_scale_out   : Array,
                  focal_length      : Array,
                  propagation_shift : Array,
-                 inverse           : bool = False,
-                 tilt              : bool = False,
-                 pixel_tilt        : bool = False) -> Propagator:
+                 inverse           : bool  = False,
+                 shift             : Array = np.array([0., 0.]),
+                 pixel_shift       : bool  = False,
+                 name              : str   = 'CartesianFresnel') -> Propagator:
         """
         Constructor for the CartesianFresnel propagator
 
@@ -1009,23 +945,22 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
             Is this an 'inverse' propagation. Non-inverse propagations
             represents propagation from a pupil to a focal plane, and inverse
             represents propagation from a focal to a pupil plane.
-        tilt : bool = False
-            Should the tilt value (stored as the offset parameter) within the
-            wavefront be appied using the propagator. True applies the offset
-            value stored within the propagated wavefront.
-        pixel_tilt : bool = False
-            Should the offset value stored within the propagated wavefront be
-            considered in units of radians, or pixels. True applies the offset
-            value in units of pixels. This parameter is redundant if the tilt
-            parameter is False.
+        shift : Array = np.array([0., 0.])
+            The (x, y) shift to apply to the wavefront in the output plane.
+        pixel_shift : bool
+            Should the shift value be considered in units of pixel, or in the
+            physical units of the output plane (ie pixels or meters, radians).
+        name : str = 'CartesianFresnel'
+            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(inverse         = inverse,
-                         tilt            = tilt,
-                         pixel_tilt      = pixel_tilt,
-                         focal_length    = focal_length,
-                         pixel_scale_out = pixel_scale_out,
-                         npixels_out     = npixels_out,
-                         propagation_shift     = propagation_shift)
+        super().__init__(name               = name,
+                         inverse            = inverse,
+                         shift              = shift,
+                         pixel_shift        = pixel_shift,
+                         focal_length       = focal_length,
+                         pixel_scale_out    = pixel_scale_out,
+                         npixels_out        = npixels_out,
+                         propagation_shift  = propagation_shift)
 
 
     def get_nfringes(self      : Propagator,
@@ -1104,8 +1039,7 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
             The normalised electric field phasor after the propagation.
         """
         # See gihub issue #52
-        offsets = self.get_offset_value(wavefront) if self.is_tilted() \
-                                                        else np.array([0., 0.])
+        offsets = self.get_shift()
 
         input_positions = wavefront.get_pixel_coordinates()
         output_positions = dLux.utils.coordinates.get_pixel_coordinates(
