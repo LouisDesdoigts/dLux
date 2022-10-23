@@ -70,7 +70,7 @@ nav:
         - Normalise Wavefront: layers/normalise_wavefront.md
         - Apply Basis OPD:     layers/apply_basis_opd.md
         - Add Phase:           layers/add_phase.md
-        - Apply OPD:           layers/apply_opd.md
+        - Apply OPD:           layers/add_opd.md
         - Transmissive Optic:  layers/transmissive_optic.md
     - Propagators:
         - Propagator: propagators/propagator.md
@@ -95,6 +95,12 @@ nav:
         - Array Spectrum:      spectrums/array_spectrum.md
         - Polynomial Spectrum: spectrums/polynomial_spectrum.md
         - Combined Spectrum:   spectrums/combined_spectrum.md
+    - Detectors:
+        - Apply Pixel Response:  detectors/apply_pixel_response.md
+        - Apply Jitter:          detectors/apply_jitter.md
+        - Apply Saturation:      detectors/apply_saturation.md
+        - Add Constant:          detectors/add_constant.md
+        - Integer Downsample:    detectors/integer_downsample.md
     - Utils:
         - Coordinates:
             - get coordinates vector: utils/coordinates/get_coordinates_vector.md

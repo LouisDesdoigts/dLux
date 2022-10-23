@@ -15,25 +15,27 @@ Array = np.ndarray
 class Spectrum(dLux.base.Base, ABC):
     """
     Abstract base class for arbitrary spectral parametrisations.
-    
+
     Attributes
     ----------
     wavelengths : Array, meters
         The array of wavelengths at which the spectrum is defined.
     """
     wavelengths : Array
-    
-    
+
+
     def __init__(self        : Spectrum,
                  wavelengths : Array) -> Spectrum:
         """
+        Constructor for the Spectrum class.
+
         Parameters
         ----------
         wavelengths : Array, meters
             The array of wavelengths at which the spectrum is defined.
         """
         self.wavelengths = np.asarray(wavelengths, dtype=float)
-        
+
         # Input checking
         assert self.wavelengths.ndim == 1, \
         ("Wavelengths must be a 1d array.")
@@ -43,29 +45,29 @@ class Spectrum(dLux.base.Base, ABC):
         ("Wavelengths must not be nan.")
         assert not np.isinf(self.wavelengths).any(), \
         ("Wavelengths must be not be infinite.")
-    
-    
+
+
     def get_wavelengths(self : Spectrum) -> Array:
         """
         Getter method for the wavelengths.
-        
+
         Returns
         -------
         wavelengths : Array, meters
             The array of wavelengths at which the spectrum is defined.
         """
         return self.wavelengths
-    
-    
+
+
     def set_wavelengths(self : Spectrum, wavelengths : Array) -> Spectrum:
         """
         Setter method for the wavelengths.
-        
+
         Parameters
         ----------
         wavelengths : Array, meters
             The new array of wavelengths at which the spectrum is defined.
-        
+
         Returns
         -------
         spectrum : Specturm
@@ -75,8 +77,8 @@ class Spectrum(dLux.base.Base, ABC):
         ("wavelengths must be a 1d array.")
         return tree_at(
             lambda spectrum : spectrum.wavelengths, self, wavelengths)
-    
-    
+
+
     @abstractmethod
     def normalise(self : Spectrum) -> Spectrum:
         """
@@ -84,8 +86,8 @@ class Spectrum(dLux.base.Base, ABC):
         classes.
         """
         return
-    
-    
+
+
     @abstractmethod
     def get_weights(self : Spectrum) -> Array:
         """
@@ -99,33 +101,35 @@ class ArraySpectrum(Spectrum):
     """
     A Spectrum class that interally parametersises the spectrum via arrays (ie
     wavelengths and weights)
-    
+
     Attributes
     ----------
     weights : Array
         The relative weights of each wavelength.
     """
     weights : Array
-    
-    
+
+
     def __init__(self        : Spectrum,
                  wavelengths : Array,
                  weights     : Array = None) -> Spectrum:
         """
+        Constructor for the ArraySpectrum class.
+
         Parameters
         ----------
         wavelengths : Array, meters
             The array of wavelengths at which the spectrum is defined.
-        weights : Array (optional)
+        weights : Array = None
             The relative weights of each wavelength. Defaults to uniform
-            throughput. Weights are automatically normalised to a sum of 1.
+            spectrum. Weights are automatically normalised to a sum of 1.
         """
         super().__init__(wavelengths)
         weights = np.ones(len(self.wavelengths))/len(wavelengths) \
                                     if weights is None else weights
         weights = np.asarray(weights, dtype=float)
         self.weights = weights/np.sum(weights)
-        
+
         # Input checks
         assert self.weights.ndim == 1, \
         ("weights must be a 1d array.")
@@ -137,29 +141,29 @@ class ArraySpectrum(Spectrum):
         ("weights must be not be infinite.")
         assert len(self.wavelengths) == len(self.weights), \
         ("wavelengths and weights must have the same length.")
-    
-    
+
+
     def get_weights(self : Spectrum) -> Array:
         """
         Getter method for the weights.
-        
+
         Returns
         -------
         weights : Array
             The relative weights of each wavelength.
         """
         return self.weights
-    
-    
+
+
     def set_weights(self : Spectrum, weights : Array) -> Spectrum:
         """
         Setter method for the weights.
-        
+
         Parameters
         ----------
         weights : Array
             The relative weights of each wavelength.
-        
+
         Returns
         -------
         spectrum : Specturm
@@ -169,13 +173,13 @@ class ArraySpectrum(Spectrum):
         ("weights must be a 1d array.")
         return tree_at(
             lambda spectrum : spectrum.weights, self, weights)
-    
-    
+
+
     def normalise(self : Spectrum) -> Spectrum:
         """
         Method for returning a new spectrum object with a normalised total
         spectrum.
-        
+
         Returns
         -------
         spectrum : Specturm
@@ -189,10 +193,10 @@ class PolynomialSpectrum(Spectrum):
     """
     Implements a generic polynomial spectrum. This is likely not needed and
     will probably just be turned into LinearSpectrum in the future.
-    
+
     This implements a polynomial as follows:
     f(x) = c0 + c1*x + c2*x^2 + ... + cn*x^n
-    
+
     Attributes
     ----------
     degree : int
@@ -202,12 +206,14 @@ class PolynomialSpectrum(Spectrum):
     """
     degree       : int # Just a helper
     coefficients : Array
-    
-    
+
+
     def __init__(self         : Spectrum,
                  wavelengths  : Array,
                  coefficients : Array) -> Spectrum:
         """
+        Constructor for the PolynomialSpectrum class.
+
         Parameters
         ----------
         wavelengths : Array, meters
@@ -218,13 +224,13 @@ class PolynomialSpectrum(Spectrum):
         super().__init__(wavelengths)
 
         self.coefficients = np.asarray(coefficients, dtype=float)
-        
+
         assert self.coefficients.ndim == 1, "Coefficients must be a 1d array."
         assert not np.isnan(self.coefficients).any(), \
         ("Coefficients must not be nan.")
         assert not np.isinf(self.coefficients).any(), \
         ("Coefficients must be not be infinite.")
-        
+
         # Input checks
         assert self.coefficients.ndim == 1, \
         ("coefficients must be a 1d array.")
@@ -234,16 +240,16 @@ class PolynomialSpectrum(Spectrum):
         ("coefficients must not be nan.")
         assert not np.isinf(self.coefficients).any(), \
         ("coefficients must be not be infinite.")
-        
+
         self.degree = int(len(coefficients) - 1)
-    
-    
+
+
     def get_weights(self : Spectrum) -> Array:
         """
         Gets the relative spectral weights by evalutating the polynomial
         function at the internal wavelengths. This automaically normalises
         the weights to have unitary amplitude.
-        
+
         Returns
         -------
         weights : Array
@@ -254,29 +260,29 @@ class PolynomialSpectrum(Spectrum):
                                 for i in range(len(self.coefficients))]).sum())
         weights = generate_polynomial(self.wavelengths)
         return weights/weights.sum()
-    
-    
+
+
     def get_coefficients(self : Spectrum) -> Array:
         """
         Getter method for the coefficients.
-        
+
         Returns
         -------
         coefficients : Array
             The array of polynomial coefficient values.
         """
         return self.coefficients
-    
-    
+
+
     def set_coefficients(self : Spectrum, coefficients : Array) -> Spectrum:
         """
         Setter method for the coefficients.
-        
+
         Parameters
         ----------
         coefficients : Array
             The array of polynomial coefficient values.
-        
+
         Returns
         -------
         spectrum : Specturm
@@ -286,14 +292,14 @@ class PolynomialSpectrum(Spectrum):
         ("coefficients must be a 1d array.")
         return tree_at(
             lambda spectrum : spectrum.coefficients, self, coefficients)
-    
-    
+
+
     def normalise(self : Spectrum) -> Spectrum:
         """
         This method currently does nothing becuase solving for normalised
         polynomial coefficients is difficut and the get_weights() method
         already returns normalised weights.
-        
+
         Returns:
         spectrum : Specturm
             The unmodified spectrum object
@@ -306,15 +312,15 @@ class CombinedSpectrum(ArraySpectrum):
     Implements a combined spectrum, in order to have only a single spectrum
     object for parameterised sources such as binary stars.
     """
-    
-    
+
+
     def __init__(self        : Spectrum,
                  wavelengths : Array,
                  weights     : Array = None) -> Spectrum:
         """
-        Expects wavelengths and weights to have the same dimensionality, ie
-        (nsources, nwavelengths)
-        
+        Constructor for the PolynomialSpectrum class. Expects wavelengths and
+        weights to have the same dimensionality, ie (nsources, nwavelengths).
+
         Parameters
         ----------
         wavelengths : Array, meters
@@ -326,12 +332,12 @@ class CombinedSpectrum(ArraySpectrum):
         """
         super() # Access methods but don't instatiate attributes
         self.wavelengths = np.asarray(wavelengths, dtype=float)
-        
+
         # Wavelengths
         # Tile single dimension wavelengths inputs
         if self.wavelengths.ndim == 1:
             self.wavelengths = np.tile(self.wavelengths, (2, 1))
-        
+
         # Input checking
         assert self.wavelengths.ndim == 2, \
         ("Wavelengths must be a 2d array.")
@@ -341,16 +347,16 @@ class CombinedSpectrum(ArraySpectrum):
         ("Wavelengths must not be nan.")
         assert not np.isinf(self.wavelengths).any(), \
         ("Wavelengths must be not be infinite.")
-        
+
         # Weights
         weights = np.ones(self.wavelengths.shape)/self.wavelengths.shape[1] \
                                                 if weights is None else weights
         self.weights = np.asarray(weights, dtype=float)
-        
+
         # Tile single dimension weights inputs
         if self.weights.ndim == 1:
             self.weights = np.tile(self.weights, (2, 1))
-        
+
         # Input checking
         assert self.weights.ndim == 2, \
         ("weights must be a 2d array.")
@@ -360,17 +366,17 @@ class CombinedSpectrum(ArraySpectrum):
         ("weights must not be nan.")
         assert not np.isinf(self.weights).any(), \
         ("weights must be not be infinite.")
-        
+
         # Check consistency between wavelenghts and weights
         assert self.wavelengths.shape == self.weights.shape, "Weights and \
         Wavelengths must have the same shape."
-    
-    
+
+
     def normalise(self : Spectrum) -> Spectrum:
         """
         Method for returning a new spectrum object with a normalised total
         spectrum for each individual source.
-        
+
         Returns
         -------
         spectrum : Specturm
@@ -380,17 +386,17 @@ class CombinedSpectrum(ArraySpectrum):
         total_power = weights.sum(1).reshape((len(weights), 1))
         norm_weights = weights/total_power
         return self.set_weights(norm_weights)
-    
-    
+
+
     def set_wavelengths(self : Spectrum, wavelengths : Array) -> Spectrum:
         """
         Setter method for the wavelengths.
-        
+
         Parameters
         ----------
         wavelengths : Array, meters
             The new array of wavelengths at which the spectrum is defined.
-        
+
         Returns
         -------
         spectrum : Specturm
@@ -400,17 +406,17 @@ class CombinedSpectrum(ArraySpectrum):
         ("wavelengths must be a 2d array.")
         return tree_at(
             lambda spectrum : spectrum.wavelengths, self, wavelengths)
-    
-    
+
+
     def set_weights(self : Spectrum, weights : Array) -> Spectrum:
         """
         Setter method for the weights.
-        
+
         Parameters
         ----------
         weights : Array
             The relative weights of each wavelength.
-        
+
         Returns
         -------
         spectrum : Specturm

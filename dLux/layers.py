@@ -1,33 +1,13 @@
-"""
-layers.py
----------
-A layer is a mathematical abstraction of an optical interaction. 
-The physical interpretation of most layers is straightforward but 
-some are not obvious. This structure was chosen because of the 
-constrainst of automatic differentiation using `equinox`.
-
-Concrete Classes 
-----------------
-- CreateWavefront
-- TiltWavefront
-- CircularAperture
-- NormaliseWavefront
-- ApplyBasisOPD
-- AddPhase
-- TransmissiveOptic
-- ApplyBasisCLIMB
-"""
 from __future__ import annotations
-import jax
 import jax.numpy as np
-import equinox as eqx
-import dLux
-import abc
+from jax import vmap
+from jax.scipy.ndimage import map_coordinates
+from jax.tree_util import tree_map
+from jax.lax import stop_gradient
+from equinox import tree_at, static_field
+from abc import ABC, abstractmethod
 from inspect import signature
-
-
-__author__ = "Louis Desdoigts"
-__date__ = "05/07/2022"
+import dLux
 
 
 __all__ = ["CreateWavefront", "TiltWavefront", "CircularAperture",
@@ -39,7 +19,7 @@ __all__ = ["CreateWavefront", "TiltWavefront", "CircularAperture",
 Array = np.ndarray
 
 
-class OpticalLayer(dLux.base.Base, abc.ABC):
+class OpticalLayer(dLux.base.Base, ABC):
     """
     A base Optical layer class to help with type checking throuhgout the rest
     of the software. Instantiates the apply method which inspects the function
@@ -51,8 +31,7 @@ class OpticalLayer(dLux.base.Base, abc.ABC):
     name : str
         The name of the layer, which is used to index the layers dictionary.
     """
-    # name : str = eqx.static_field()
-    name : str
+    name : str = static_field()
 
 
     def __init__(self : OpticalLayer,
@@ -95,10 +74,10 @@ class OpticalLayer(dLux.base.Base, abc.ABC):
             The OpticalLayer with the updated name.
         """
         assert isinstance(name, str), ("name must be a string.")
-        return eqx.tree_at(lambda layer: layer.name, self, name)
+        return tree_at(lambda layer: layer.name, self, name)
 
 
-    @abc.abstractmethod
+    @abstractmethod
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
         """
         Appies the layer to the `Wavefront`.
@@ -173,7 +152,7 @@ class CreateWavefront(OpticalLayer):
     """
     npixels            : int
     wavefront_diameter : Array
-    wavefront_type     : str = eqx.static_field()
+    wavefront_type     : str = static_field()
 
 
     def __init__(self               : OpticalLayer,
@@ -265,10 +244,10 @@ class CreateWavefront(OpticalLayer):
         is_leaf = lambda x: isinstance(x, dLux.wavefronts.PlaneType)
         def kill_gradient(x):
             if is_leaf(x):
-                return jax.lax.stop_gradient(x.value)
+                return stop_gradient(x.value)
             else:
                 return x
-        wavefront = jax.tree_map(kill_gradient, wavefront, is_leaf=is_leaf)
+        wavefront = tree_map(kill_gradient, wavefront, is_leaf=is_leaf)
 
         # Update the parameters dictionary with the constructed wavefront
         parameters["Wavefront"] = wavefront
@@ -904,7 +883,7 @@ class CompoundAperture(OpticalLayer):
             The final combined aperture.
         """
         # Map aperture function
-        mapped_aperture = jax.vmap(self.get_aperture,
+        mapped_aperture = vamp(self.get_aperture,
                                    in_axes=(0, 0, None, None))
 
         # Generate coordinate grid
@@ -1107,7 +1086,7 @@ class ApplyBasisCLIMB(OpticalLayer):
         subarray = dummy[:,:,0,0]
 
         flat = dummy.reshape(-1, 3, 3)
-        vmap_mask = jax.vmap(self.area, in_axes=(0))
+        vmap_mask = vamp(self.area, in_axes=(0))
 
         soft_bin = vmap_mask(flat).reshape(ppsz, ppsz)
 
@@ -1178,8 +1157,7 @@ class FourierRotation(OpticalLayer):
         phis += angle
         coordinates_rot = np.roll(dLux.utils.polar2cart(rs, phis) + centre,
             shift=1, axis=0)
-        rotated = jax.scipy.ndimage.map_coordinates(
-            image, coordinates_rot, order=1)
+        rotated = map_coordinates(image, coordinates_rot, order=1)
         return rotated  
 
 
