@@ -1058,7 +1058,7 @@ class Optics(Base):
         intermediate_dicts = []
         intermediate_layers = []
         for key, layer in self.layers.items():
-            params_dict = layer.applydl(params_dict)
+            params_dict = layer.apply(params_dict)
             intermediate_dicts.append(params_dict.copy())
             intermediate_layers.append(deepcopy(layer))
         
