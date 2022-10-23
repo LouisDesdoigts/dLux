@@ -45,21 +45,21 @@ def model(optics      : Optics,
     ----------
     optics : Optics
         The optics through which to model the source objects.
-    detector : Detector (optional)
+    detector : Detector = None
         The detector to use with the observation.
-    filter : Filter (optional)
+    filter : Filter = None
         The filter through which the source is being observed.
-    scene : Scene (optional)
+    scene : Scene = None
         The scene to observe.
-    sources : Union[dict, list, tuple) (optional)
+    sources : Union[dict, list, tuple) = None
         The sources to observe.
-    source : Source (optional)
+    source : Source = None
         The source to observe.
-    normalise : bool (optional)
+    normalise : bool = None
         Whether to normalise the sources before modelling. Default is True.
-    flatten : bool (optional)
+    flatten : bool = False
         Whether the output image should be flattened. Default is False.
-    return_tree : bool (optional)
+    return_tree : bool = False
         Whether to return a Pytree like object with matching tree structure as
         the input scene/sources/source. Default is False.
 
@@ -75,50 +75,50 @@ def model(optics      : Optics,
     # Check that optics input is an Optics object.
     assert isinstance(optics, (dLux.base.Optics)), \
     ("optics must be a dLux.base.Optics object.")
-    
+
     # Check that detector input is a Detector object if specified.
     assert isinstance(detector, (dLux.base.Detector, type(None))), \
     ("detector must be a dLux.base.Detector object.")
-    
+
     # Check that filter input is a Filter object if specified.
     assert isinstance(filter, (dLux.base.Filter, type(None))), \
     ("filter must be a dLux.base.Filter object.")
-    
+
     # Make sure that some form of source is speficied
     assert scene is not None or sources is not None or source is not None, \
     ("Either a scene, source, or sources must be specified")
-    
+
     # Make sure that input types are correct
     # scene is specified
     if scene is not None:
         # Check for other inputs
         assert sources is None and source is None, \
         ("If scene is specified, sources and source can not be specified.")
-        
+
         # Check that scene is a Scehen object.
         assert isinstance(scene, dLux.base.Scene), \
         ("scene must be a dLux.base.Scene object.")
-        
+
         # Get sources
         sources_in = scene.normalise().sources if normalise \
                                                        else scene.sources
-    
+
     # Check sources as next input
     elif sources is not None:
         # Check for other inputs
         assert source is None, \
         ("If sources is specified, scene and source can not be specified.")
-        
+
         # Check that sources is a dict object.
         assert isinstance(sources, (dict, list, tuple)), \
         ("sources must be a dict, list, or tuple object.")
-        
+
         # Check that all inputs are Source objects
         source_vals = sources.values() if isinstance(sources, dict) else sources
         for source in source_vals:
             assert isinstance(source, dLux.sources.Source), \
             ("All entries within sources must be a dLux.source.Source object.")
-        
+
         # Get sources
         if normalise:
             # Define the normalisation function
@@ -129,15 +129,15 @@ def model(optics      : Optics,
                    is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
         else:
             sources_in = sources
-    
+
     # source is provided
     else:
         assert isinstance(source, dLux.sources.Source), \
         ("source must be a dLux.source.Source object.")
-        
+
         # Get sources
         sources_in = source.normalise() if normalise else source
-        
+
     '''Begin modelling'''
     # Apply optional inputs
     model_fn = lambda source: source.model(optics, filter_in=filter)
@@ -145,10 +145,10 @@ def model(optics      : Optics,
     # Map the model_source function across the sources
     psf_tree = tree_map(model_fn, sources_in, 
             is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-    
+
     # Return psfs in the same structure as the sources
     if return_tree:
-        
+
         # Apply detector if required
         if detector is not None:
             detector_fn = lambda psf: detector.apply_detector(psf)
@@ -156,7 +156,7 @@ def model(optics      : Optics,
                             is_leaf = lambda leaf: isinstance(leaf, np.ndarray))
         else:
             image_tree = psf_tree
-        
+
         # flatten if required
         if flatten:
             flatten_fn = lambda image: image.flatten()
@@ -164,11 +164,11 @@ def model(optics      : Optics,
                             is_leaf = lambda leaf: isinstance(leaf, np.ndarray))
         else:
             tree_out = image_tree
-        
+
         # Return psfs with matching tree strucutre as input
         return tree_out
-        
-        
+
+
     # Return a single summed psf
     else:
         # Get flatten tree and sum to single psf
@@ -188,16 +188,16 @@ class Base(ABC, Module):
     """
     An abstract base class that is used to give a user-friendly API for working
     with PyTrees, specifically using Equniox. This can be thought of as
-    extending the equinox.Module class. It also has some methods with a 
+    extending the equinox.Module class. It also has some methods with a
     user-friendly interface for some other usefull packages such as optax
     and numpyro.
-    
+
     If you are unfamiliar with PyTrees, check out this jax tutorial
     and have a look a the equinox docs to see how they can be extending to give
     object-oriented jax:
      - https://jax.readthedocs.io/en/latest/jax-101/05.1-pytrees.html
      - https://docs.kidger.site/equinox/
-     
+
     New concept: Paths
         In order to make working with PyTrees easier, there is one concept that
         is introduced, the paths object. a path object is not a unique or new
@@ -205,26 +205,26 @@ class Base(ABC, Module):
         PyTrees. We define a 'path' here as list/tuple that contains either
         strings or integers. Each path object refers to a unique 'leaf' in the
         PyTree. Since each PyTrees is constructed from nested lists, tuples and
-        dictionaries (and since we're using Equinox, Equinox.Modules too), we 
-        can refer to any unique leaf via a chain of strings and intergers. 
-        
+        dictionaries (and since we're using Equinox, Equinox.Modules too), we
+        can refer to any unique leaf via a chain of strings and intergers.
+
         Example path objects:
             path1 = ['param1', 3, 'nested_param3', 5]
             path2 = ('p1', 'p2', 'p3')
             path3 = (1, 4, 6, 3, 6, 2, 'param')
-            
+
         These objects are quite simple, but are worth clarifying since they are
         integral to this new PyTree interface.
-        
+
     New concept: Path Dictionary
-        Since PyTrees can have both very deep and wide structures it would be 
-        impractical to always refer to each leaf via its full absolute path. 
-        The path dictionary is simply a dictionary that allows a simple key to 
-        be used to refer to the full path to some leaf. Note the key must be 
+        Since PyTrees can have both very deep and wide structures it would be
+        impractical to always refer to each leaf via its full absolute path.
+        The path dictionary is simply a dictionary that allows a simple key to
+        be used to refer to the full path to some leaf. Note the key must be
         unique to and and all parameter names within the PyTree structure!
     """
-    
-    
+
+
     ######################
     ### Hidden methods ###
     ######################
@@ -232,29 +232,29 @@ class Base(ABC, Module):
                   pytree : Pytree,
                   path   : Path) -> Leaf:
         """
-        A hidden class desinged to recurse down a pytree following the path, 
+        A hidden class desinged to recurse down a pytree following the path,
         returning the leaf at the end of the path.
-        
+
         Base case: len(path) == 1
-            In this case the leaf referred to by the single path entry is 
-            returned (and hence recursively sent up to the initial call)
-            
+            In this case the leaf referred to by the single path entry is
+            returned (and hence recursively sent up to the initial call).
+
         Recursive case: len(path) > 1
             In this case the function takes the PyTree like object referred to
             by the first entry in path, and recursively calls this function
-            with this new pytree object and the path without the first entry
-        
+            with this new pytree object and the path without the first entry.
+
         Parameters
         ----------
         pytree : Pytree
-            The pytee object to recurse though
+            The pytee object to recurse though.
         path : Path
-            The path to recurse down
-            
+            The path to recurse down.
+
         Returns
         -------
         leaf : Leaf
-            The leaf object specified at the end of the path object
+            The leaf object specified at the end of the path object.
         """
         key = path[0]
         pytree = pytree.__dict__[key] if isinstance(pytree, Module) else \
@@ -262,40 +262,40 @@ class Base(ABC, Module):
 
         # Return param if at the end of path, else recurse
         return pytree if len(path) == 1 else self._get_leaf(pytree, path[1:])
-    
-    
+
+
     # TODO: Re-write the logic in this a bit nice for optional values input
     def _unwrap_paths(self      : Pytree,
                       paths     : list_like,
                       values    : list_like = None,
                       path_dict : dict      = None) -> list_like:
         """
-        Helper function designed to unwrap nested paths, while also extracting 
+        Helper function designed to unwrap nested paths, while also extracting
         the absolute paths from the path dictionary. It similarly will tile out
-        the correct value to apply for each nested path object. It outputs 
+        the correct value to apply for each nested path object. It outputs
         a flat, non-nested set of absolute paths and values, as this is the
-        format required by Equinox in order to simultaneously update multiple 
+        format required by Equinox in order to simultaneously update multiple
         parameters.
-        
+
         Parameters
         ----------
         paths : list_like
-            A list/tuple of nested paths. Note path objects can only be 
-            nested a single time
-        values : list_like (optional)
-            A list/tuple of values (which can be functions) to be 
-            updated/applied to the leaves specified by paths. These can not 
-            be nested
-        path_dict : dict (optional)
-            A dictionary of absolute paths 
-        
+            A list/tuple of nested paths. Note path objects can only be
+            nested a single time.
+        values : list_like = None
+            A list/tuple of values (which can be functions) to be
+            updated/applied to the leaves specified by paths. These can not
+            be nested.
+        path_dict : dict = None
+            A dictionary of absolute paths.
+
         Returns
         -------
         new_paths : list
-            A flat list of absolute paths
+            A flat list of absolute paths.
         new_values : list (if values is not None)
-            A flat list of values/functions to be updated/applied to the 
-            leaves specified by new_paths
+            A flat list of values/functions to be updated/applied to the
+            leaves specified by new_paths.
         """
         new_paths = []
         keys = list(path_dict.keys()) if path_dict is not None else []
@@ -348,8 +348,8 @@ class Base(ABC, Module):
             return new_paths
         else:
             return new_paths, new_values
-    
-    
+
+
     ########################
     ### Accessor methods ###
     ########################
@@ -357,50 +357,50 @@ class Base(ABC, Module):
                  path      : Path,
                  path_dict : dict = None) -> Leaf:
         """
-        Returns the leaf specified by path
-        
+        Returns the leaf specified by path.
+
         Parameters
         ----------
         path : Path
-            The path to recurse down
-        path_dict : dict (optional)
-            A dictionary of absolute paths 
-            
+            The path to recurse down.
+        path_dict : dict = None
+            A dictionary of absolute paths.
+
         Returns
         -------
         leaf : Leaf
-            The leaf object specified at the end of the path object
+            The leaf object specified at the end of the path object.
         """
         new_path = self._unwrap_paths([path], path_dict=path_dict)[0]
 
         # Get the leaf
         return self._get_leaf(self, new_path)
-    
-    
+
+
     def get_leaves(self      : Pytree,
                    paths     : list_like,
                    path_dict : dict = None) -> list:
         """
-        Returns a list of leaves specified by the paths
-        
+        Returns a list of leaves specified by the paths.
+
         Parameters
         ----------
         paths : list_like
-            A list/tuple of nested paths. Note path objects can only be 
-            nested a single time
-        path_dict : dict (optional)
-            A dictionary of absolute paths
-        
+            A list/tuple of nested paths. Note path objects can only be
+            nested a single time.
+        path_dict : dict = None
+            A dictionary of absolute paths.
+
         Returns
         -------
         leaves : list
             The list of leaf objects specified by the paths object
-        """        
+        """
         # Unwrap paths
         new_paths = self._unwrap_paths(paths, path_dict=path_dict)
         return [self._get_leaf(self, path) for path in new_paths]
-    
-    
+
+
     #######################
     ### Updater methods ###
     #######################
@@ -409,20 +409,20 @@ class Base(ABC, Module):
                       values    : list_like,
                       path_dict : dict = None) -> Pytree:
         """
-        Returns an updated version of the pytree with the leaves speficied by 
+        Returns an updated version of the pytree with the leaves speficied by
         paths updated with the values in values.
-        
+
         Parameters
         ----------
         paths : list_like
-            A list/tuple of nested paths. Note path objects can only be 
+            A list/tuple of nested paths. Note path objects can only be
             nested a single time.
         values : list_like
-            A list/tuple of new values to be applied to the leaves 
+            A list/tuple of new values to be applied to the leaves
             specified by paths. These can not be nested.
-        path_dict : dict (optional)
+        path_dict : dict = None
             A dictionary of absolute paths.
-        
+
         Returns
         -------
         pytree : Pytree
@@ -436,32 +436,32 @@ class Base(ABC, Module):
         # Define 'where' function and update pytree
         get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
         return tree_at(get_leaves_fn, self, new_values)
-    
-    
+
+
     def apply_to_leaves(self      : Pytree,
                         paths     : list_like,
                         fns       : list_like,
                         path_dict : dict = None) -> Pytree:
         """
-        Returns an updated version of the pytree with the the input functions 
+        Returns an updated version of the pytree with the the input functions
         applied to the leaves speficied by the paths.
-        
+
         Parameters
         ----------
         paths : list_like
-            A list/tuple of nested paths. Note path objects can only be 
+            A list/tuple of nested paths. Note path objects can only be
             nested a single time.
         fns : list_like
             A list/tuple of functions to be applied to the leaves specified
             by paths. These can not be nested.
-        path_dict : dict (optional)
+        path_dict : dict = None
             A dictionary of absolute paths.
-        
+
         Returns
         -------
         pytree : Pytree
-            An updated version of the current pytree
-        """        
+            An updated version of the current pytree.
+        """
         # Unwrap paths
         new_paths, new_fns = self._unwrap_paths(paths, values=fns, \
                                                 path_dict=path_dict)
@@ -474,8 +474,8 @@ class Base(ABC, Module):
         # Define 'where' function and update pytree
         get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
         return tree_at(get_leaves_fn, self, new_values)
-    
-    
+
+
     #########################
     ### Equinox functions ###
     #########################
@@ -483,33 +483,33 @@ class Base(ABC, Module):
                         paths     : list_like,
                         path_dict : dict = None) -> Pytree:
         """
-        Returns 'filter_spec' object, to be used in conjunction with the 
+        Returns 'filter_spec' object, to be used in conjunction with the
         Equinox filter functions. A 'filter_spec' is a Pytree with a matching
-        tree strucutre, but with boolean values at the leaves. This is 
-        primarily used by the Equinox.filter_grad() and 
-        Equinox.filter_value_and_grad() functions, passed in as the optional 
-        'arg' argument. It is used to either turn on or off gradient 
+        tree strucutre, but with boolean values at the leaves. This is
+        primarily used by the Equinox.filter_grad() and
+        Equinox.filter_value_and_grad() functions, passed in as the optional
+        'arg' argument. It is used to either turn on or off gradient
         calculations with respect to each leaf.
-        
+
         Parameters
         ----------
         paths : list_like
-            A list/tuple of nested paths. Note path objects can only be 
+            A list/tuple of nested paths. Note path objects can only be
             nested a single time.
-        path_dict : dict (optional)
+        path_dict : dict = None
             A dictionary of absolute paths.
-            
+
         Returns
         -------
         filter_spec : Pytree
-            An pytree of matching structre with boolean values at the 
+            An pytree of matching structre with boolean values at the
             leaves
         """
         filter_spec = tree_map(lambda _: False, self)
         values = len(paths) * [True]
         return filter_spec.update_leaves(paths, values, path_dict=path_dict)
-    
-    
+
+
     #######################
     ### Optax functions ###
     #######################
@@ -519,75 +519,75 @@ class Base(ABC, Module):
                        get_filter_spec : bool = False,
                        path_dict       : dict = None) -> Pytree:
         """
-        Returns 'param_spec' object, to be used in conjunction with the 
+        Returns 'param_spec' object, to be used in conjunction with the
         Optax.multi_transform functions. The param_spec is a pytree of matching
         strucutre that has strings assigned to every node, denoting the group
         that is belongs to. Each of these groups can then have unique optimiser
         objects assigned to them. This is typically used to assign different
         learning rates to different parameters.
-        
+
         Note this sets the default or non-trainable group to 'null'.
 
         Parameters
         ----------
         paths : list_like
-            A list/tuple of nested paths. Note path objects can only be 
+            A list/tuple of nested paths. Note path objects can only be
             nested a single time.
         groups : list_like
-            A list/tuple of strings, denoting which group to assign the 
+            A list/tuple of strings, denoting which group to assign the
             corresponding leaves denoted by paths to.
         get_filter_spec : bool = False
             Boolean defining whether to return a corresponding filter_spec
             object.
-        path_dict : dict (optional)
+        path_dict : dict = None
             A dictionary of absolute paths.
-            
+
         Returns
         -------
         param_spec : Pytree
-            An pytree of matching structre with string values at the 
-            leaves specified by groups. 
+            An pytree of matching structre with string values at the
+            leaves specified by groups.
         """
         param_spec = tree_map(lambda _: "null", self)
         param_spec = param_spec.update_leaves(paths, groups, \
                                               path_dict=path_dict)
 
-        # For some weird ass reason this works correctly but single liner 
+        # For some weird ass reason this works correctly but single liner
         # doesn't
         if not get_filter_spec:
             return param_spec
         else:
             return param_spec, self.get_filter_spec(paths, path_dict=path_dict)
-    
-    
+
+
     def get_optimiser(self            : Pytree,
                       paths           : list_like,
                       optimisers      : list_like,
                       get_filter_spec : bool = False,
                       path_dict       : dict = None) -> object:
         """
-        Returns an Optax.GradientTransformion object, with the optimisers 
+        Returns an Optax.GradientTransformion object, with the optimisers
         specified by optimisers applied to the leaves specified by paths.
 
         Parameters
         ----------
         paths : list_like
-            A list/tuple of nested paths. Note path objects can only be 
+            A list/tuple of nested paths. Note path objects can only be
             nested a single time.
         optimisers : list_like
-            A list/tuple of optax.GradientTransformation objects to be 
+            A list/tuple of optax.GradientTransformation objects to be
             applied to the leaves specified by paths.
         get_filter_spec : bool = False
             Boolean defining whether to return a corresponding filter_spec
             object.
-        path_dict : dict (optional)
+        path_dict : dict = None
             A dictionary of absolute paths.
-        
+
         Returns
         -------
         optimiser : Optax.GradientTransformion
-            An Optax.GradientTransformion object, with the optimisers 
-            specified by optimisers applied to the leaves specified 
+            An Optax.GradientTransformion object, with the optimisers
+            specified by optimisers applied to the leaves specified
             by paths.
         """
         # Construct groups and get param_spec
@@ -604,14 +604,14 @@ class Base(ABC, Module):
         # Get optimiser object
         optim = multi_transform(opt_dict, param_spec)
 
-        # For some weird ass reason this works correctly but single liner 
+        # For some weird ass reason this works correctly but single liner
         # doesn't
         if not get_filter_spec:
             return optim
         else:
             return optim, self.get_filter_spec(paths, path_dict=path_dict)
-    
-    
+
+
     #########################
     ### Numpyro functions ###
     #########################
@@ -624,25 +624,25 @@ class Base(ABC, Module):
                          **kwargs) -> object:
         """
         Updates the leaves speficied by paths with values, and then calls the
-        function specified by the string model_fn, returning whatever is 
-        returnd by the model_fn. Any extra positional arguments or key-word 
+        function specified by the string model_fn, returning whatever is
+        returnd by the model_fn. Any extra positional arguments or key-word
         arguments are passed through to the modelling function.
-        
-        This function is desigend to be used in conjunction with numpyro. 
+
+        This function is desigend to be used in conjunction with numpyro.
         Please go through the 'Pytree interface' tutorial to see how this
         is used.
-        
+
         Parameters
         ----------
         model_fn : str
-            A string specifying which model function to call
+            A string specifying which model function to call.
         paths : list_like
             A list/tuple of nested paths. Note path objects can only be nested
             a single time.
         values : list_like
             A list/tuple of new values to be applied to the leaves specified by
             paths. These can not be nested.
-        path_dict : dict (optional)
+        path_dict : dict = None
             A dictionary of absolute paths.
 
         Returns
@@ -655,37 +655,25 @@ class Base(ABC, Module):
                 model_fn)(*args, **kwargs)
 
 
-"""
-High level notes:
-
-These classes are still in early development and are still subject to change
-both at the internals and API. Ideally the API should be relatively stable,
-but no guarantee can be made!
-
-There should be some way to cache psf calculations during observations in order
-to only calculte novel psfs for large observations.
-"""
-
-
 class Instrument(Base):
     """
     A high level class desgined to model the behaviour of a telescope. It
     stores a series different ∂Lux objects, and primarily passes the relevant
     information between these objects in order to coherently model some
     telescope observation.
-    
+
     Attributes
     ----------
     optics : Optics
         A dLux.base.Optics object that defines some optical configuration.
     sources : Scene
-        A dLux.base.Scene that stores the various source objects that the 
+        A dLux.base.Scene that stores the various source objects that the
         instrument is observing.
     detector : Detector
-        A dLux.base.Detector object that is used to model the various 
+        A dLux.base.Detector object that is used to model the various
         instrumental effects on a psf.
     filter : Filter
-        A dLux.base.Filter object that is used to model the effective 
+        A dLux.base.Filter object that is used to model the effective
         throughput of each wavelength though the optical system.
     """
     optics   : Optics
@@ -693,49 +681,51 @@ class Instrument(Base):
     detector : Detector
     filter   : Filter
     # Observation: Observation
-    
-    
+
+
     def __init__(self     : Instrument,
-                 
+
                  # Class inputs
                  optics   : Optics    = None,
                  scene    : Scene     = None,
                  detector : Detector  = None,
                  filter   : Filter    = None,
-                 
+
                  # List inputs
                  optical_layers  : list = None,
                  sources         : list = None,
                  detector_layers : list = None,
-                 
+
                  # Observation :
                  ) -> Instrument:
         """
+        Constructor for the Instrument class.
+
         Parameters
         ----------
-        optics : Optics, (optional)
+        optics : Optics, = None
             A pre-configured dLux.base.Optics object. Can not be specified if
             optical layers in specified.
-        optical_layers : list, (optional)
-            A list of dLux optical layer classes that define the optical 
-            transformations within some optical configuration. Can not be 
+        optical_layers : list, = None
+            A list of dLux optical layer classes that define the optical
+            transformations within some optical configuration. Can not be
             specified if optics is specified.
-        scene : Scene, (optional)
+        scene : Scene, = None
             A pre-configured dLux.base.Scene object. Can not be specified if
             sources is specified.
-        sources : list, (optional)
+        sources : list, = None
             A list of dLux source objects that the telescope is observing.
-        detector : Detector (optional)
+        detector : Detector = None
             A pre-configured dLux.base.Detector object. Can not be specified if
             detector_layers is specified.
-        detector_layers : list (optional)
-            An list of dLux detector layer classes that define the instrumental 
-            effects for some detector. Can not be specified if detector is 
+        detector_layers : list = None
+            An list of dLux detector layer classes that define the instrumental
+            effects for some detector. Can not be specified if detector is
             specified.
-        filter : Filter (optional)
+        filter : Filter = None
             A Filter object that is used to model the effective throughput of
             each wavelength though the Instrument.
-        """ 
+        """
         # Optics
         if optics is None and optical_layers is None:
             self.optics = None
@@ -753,7 +743,7 @@ class Instrument(Base):
         else:
             raise ValueError("How did you get here? Please raise a bug report "
             "to help improve the software.")
-        
+
         # Detector
         if detector is None and detector_layers is None:
             self.detector = None
@@ -771,7 +761,7 @@ class Instrument(Base):
         else:
             raise ValueError("How did you get here? Please raise a bug report "
             "to help improve the software.")
-        
+
         # Scene
         if scene is None and sources is None:
             self.scene = None
@@ -789,7 +779,7 @@ class Instrument(Base):
         else:
             raise ValueError("How did you get here? Please raise a bug report "
             "to help improve the software.")
-        
+
         # Filter
         if filter is None:
             self.filter = None
@@ -797,13 +787,13 @@ class Instrument(Base):
             assert isinstance(filter, dLux.base.Filter), \
             ("filter must be a dLux.base.Filter object.")
             self.filter = filter
-    
-    
+
+
     def normalise(self : Instrument) -> Instrument:
         """
         Normalises the internally stored scene by calling the scene.normalise()
         method.
-        
+
         Returns
         -------
         instrument : Instrument
@@ -812,8 +802,8 @@ class Instrument(Base):
         """
         return tree_at(lambda instrument: instrument.scene, self, \
                            self.scene.normalise())
-    
-    
+
+
     def model(self : Instrument, **kwargs):
         """
         A base level modelling function designed to robustly handle the
@@ -824,26 +814,26 @@ class Instrument(Base):
 
         Parameters
         ----------
-        optics : Optics (optional)
+        optics : Optics = None
             The optics through which to model the source objects. Defaults to
             the internally stored value.
-        detector : Detector (optional)
+        detector : Detector = None
             The detector to use with the observation. Defaults to the
             internally stored value.
-        filter : Filter (optional)
+        filter : Filter = None
             The filter through which the source is being observed. Defaults to
             the internally stored value.
-        scene : Scene (optional)
+        scene : Scene = None
             The scene to observe. Defaults to the internally stored value.
-        sources : Union[dict, list, tuple) (optional)
+        sources : Union[dict, list, tuple) = None
             The sources to observe.
-        source : Source (optional)
+        source : Source = None
             The source to observe.
-        normalise_sources : bool (optional)
+        normalise_sources : bool = True
             Whether to normalise the sources before modelling. Default is True.
-        flatten : bool (optional)
+        flatten : bool = False
             Whether the output image should be flattened. Default is False.
-        return_tree : bool (optional)
+        return_tree : bool = False
             Whether to return a Pytree like object with matching tree structure
             as the input scene/sources/source. Default is False.
 
@@ -864,16 +854,16 @@ class Instrument(Base):
            'source' not in kwargs and \
            'sources' not in kwargs:
             kwargs['scene'] = self.scene
-        
+
         return model(optics,
                      **kwargs)
-    
-    
+
+
 class Optics(Base):
     """
     A high level class desgined to model the behaviour of some optical systems
     response to wavefronts.
-    
+
     Attributes
     ----------
     layers: dict
@@ -881,10 +871,12 @@ class Optics(Base):
         and operations upon some input wavefront through an optical system.
     """
     layers : OrderedDict
-    
-    
+
+
     def __init__(self : Optics, layers : list) -> Optics:
         """
+        Constructor for the Optics class.
+
         Parameters
         ----------
         layers : list
@@ -894,34 +886,34 @@ class Optics(Base):
         # Ensure input is a list
         assert isinstance(layers, list), ("Input layers must be a list, it is" \
         " automatically converted to a dictionary")
-        
+
         # Ensure all entries are dLux layers
         for layer in layers:
             assert isinstance(layer, dLux.layers.OpticalLayer), ("All entries" \
             " within layers must be a dLux.layers.OpticalLayer object")
-        
+
         self.layers = dLux.utils.list_to_dict(layers)
-    
-    
+
+
     def propagate_mono(self       : Optics,
                        wavelength : Array,
                        offset     : Array = np.zeros(2),
                        weight     : Array = np.array(1.)) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
-        
+
         Parameters
         ----------
         wavelength : Array, meters
             The wavelength of the wavefront to propagate through the optical
             layers.
-        offset : Array, radians, (optional)
+        offset : Array, radians, = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
-        weight : Array, (optional)
+        weight : Array, = np.array(1.)
             The relative weighting of the wavelength. Simply scales the output
             psf.
-        
+
         Returns
         -------
         psf : Array
@@ -935,45 +927,44 @@ class Optics(Base):
                     if not isinstance(offset, np.ndarray) else offset
         weight = np.asarray(weight, dtype=float) \
                     if not isinstance(weight, np.ndarray) else weight
-        
+
         # Ensure dimensionality
         assert wavelength.shape == (), "wavelength must be a scalar."
         assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
         assert weight.shape == (), "weight must be a scalar."
-        
+
         # Construct parameters dictionary
         params_dict = {"Wavefront"  : None,
                        "optics"     : self,
                        "wavelength" : wavelength,
                        "offset"     : offset}
-        
+
         # Propagate though layers
         for key, layer in self.layers.items():
-            # params_dict = layer(params_dict)
             params_dict = layer.apply(params_dict)
         psf = params_dict["Wavefront"].wavefront_to_psf()
         return weight * psf
-    
-    
+
+
     def propagate_multi(self        : Optics,
                         wavelengths : Array,
                         offset      : Array = np.zeros(2),
                         weights     : Array = None) -> Array:
         """
         Propagates a broadband point source through the optical layers.
-        
+
         Parameters
         ----------
         wavelengths : Array, meters
             The wavelengths of the wavefront to propagate through the optical
             layers.
-        offset : Array, radians, (optional)
+        offset : Array, radians = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
-        weights : Array, (optional)
+        weights : Array = None
             The relative weighting of the wavelengths. Simply scales the output
             psf.
-        
+
         Returns
         -------
         psf : Array
@@ -984,29 +975,29 @@ class Optics(Base):
         wavelengths = np.asarray(wavelengths, dtype=float) \
                   if not isinstance(wavelengths, np.ndarray) else wavelengths
         assert wavelengths.ndim == 1, "wavelengths must be 1 dimensional.."
-        
+
         # Format weights input
         if weights is None:
             weights = np.ones(len(wavelengths))
         elif not isinstance(weights, np.ndarray):
             weights = np.asarray(weights, dtype=float)
         assert weights.ndim == 1, "weights must be 1 dimensional."
-        
+
         # Ensure matching dimensionality
         assert wavelengths.shape == weights.shape, \
         ("wavelengths and weights must have the same shape.")
-        
+
         # Offset checking
         offset = np.asarray(offset, dtype=float) \
                  if not isinstance(offset, np.ndarray) else offset
         assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
-        
+
         # Propagate
         propagator = vmap(self.propagate_mono, in_axes=(0, None, 0))
         psfs = propagator(wavelengths, offset, weights)
         return psfs.sum(0)
-    
-    
+
+
     def debug_prop(self       : Optics,
                    wavelength : Array,
                    offset     : Array = np.zeros(2),
@@ -1015,16 +1006,19 @@ class Optics(Base):
         Propagates a monochromatic point source through the optical layers,
         while also returning the intermediate state of the parameter dictionary
         and layers after each layer application.
-        
+
         Parameters
         ----------
         wavelength : Array, meters
             The wavelength of the wavefront to propagate through the optical
             layers.
-        offset : Array, radians, (optional)
+        offset : Array, radians = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
-        
+        weight : Array, = np.array(1.)
+            The relative weighting of the wavelength. Simply scales the output
+            psf.
+
         Returns
         -------
         psf : Array
@@ -1043,29 +1037,29 @@ class Optics(Base):
                     if not isinstance(offset, np.ndarray) else offset
         weight = np.asarray(weight, dtype=float) \
                     if not isinstance(weight, np.ndarray) else weight
-        
+
         # Ensure dimensionality
         assert wavelength.shape == (), "wavelength must be a scalar."
         assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
         assert weight.shape == (), "weight must be a scalar."
-        
+
         # Construct parameters dictionary
         params_dict = {"Wavefront"  : None,
                        "optics"     : self,
                        "wavelength" : wavelength,
                        "offset"     : offset}
-        
+
         intermediate_dicts = []
         intermediate_layers = []
         for key, layer in self.layers.items():
             params_dict = layer.apply(params_dict)
             intermediate_dicts.append(params_dict.copy())
             intermediate_layers.append(deepcopy(layer))
-        
+
         return params_dict["Wavefront"].wavefront_to_psf(), \
                                 intermediate_dicts, intermediate_layers
-    
-    
+
+
     def model(self : Optics, **kwargs):
         """
         A base level modelling function designed to robustly handle the
@@ -1076,23 +1070,23 @@ class Optics(Base):
 
         Parameters
         ----------
-        detector : Detector (optional)
+        detector : Detector = None
             The detector to use with the observation. Defaults to the
             internally stored value.
-        filter : Filter (optional)
+        filter : Filter = None
             The filter through which the source is being observed. Defaults to
             the internally stored value.
-        scene : Scene (optional)
+        scene : Scene = None
             The scene to observe. Defaults to the internally stored value.
-        sources : Union[dict, list, tuple) (optional)
+        sources : Union[dict, list, tuple) = None
             The sources to observe.
-        source : Source (optional)
+        source : Source = None
             The source to observe.
-        normalise_sources : bool (optional)
+        normalise_sources : bool = True
             Whether to normalise the sources before modelling. Default is True.
-        flatten : bool (optional)
+        flatten : bool = False
             Whether the output image should be flattened. Default is False.
-        return_tree : bool (optional)
+        return_tree : bool = False
             Whether to return a Pytree like object with matching tree structure
             as the input scene/sources/source. Default is False.
 
@@ -1105,13 +1099,13 @@ class Optics(Base):
             with matching tree strucutre as the input scene/sources/source.
         """
         return model(self, **kwargs)
-    
-    
+
+
 class Scene(Base):
     """
     A high level class representing some 'astrophysical scene', which is
     composed of Sources.
-    
+
     Attributes
     ----------
     sources : dict
@@ -1119,10 +1113,12 @@ class Scene(Base):
         astrophysical scene.
     """
     sources: dict
-    
-    
+
+
     def __init__(self, sources : list) -> Scene:
         """
+        Constructor for the Scene class.
+
         Parameters
         ----------
         sources : list
@@ -1131,19 +1127,19 @@ class Scene(Base):
         """
         assert isinstance(sources, list), ("Input sources must be a list, it" \
         " is automatically converted to a dictionary.")
-        
+
         # Ensure all entries are dLux Sources
         for source in sources:
             assert isinstance(source, dLux.sources.Source), ("All entries " \
             "within sources must be a dLux.source.Source object.")
-        
+
         self.sources = dLux.utils.list_to_dict(sources, ordered=False)
-    
-    
+
+
     def normalise(self : Scene) -> Scene:
         """
         Normalises the internally stores sources of the scene.
-        
+
         Returns
         -------
         scene : Scene
@@ -1152,14 +1148,14 @@ class Scene(Base):
         """
         # Define the normalisation function
         normalise_fn = lambda source: source.normalise()
-        
+
         # Map the model_source function across the sources
         normalised_sources = tree_map(normalise_fn, self.sources, \
                 is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-        
+
         return tree_at(lambda scene: scene.sources, self, normalised_sources)
-    
-    
+
+
     def model(self : Scene, optics : Optics, **kwargs):
         """
         A base level modelling function designed to robustly handle the
@@ -1173,17 +1169,17 @@ class Scene(Base):
         optics : Optics
             The optics through which to model the source objects. Defaults to
             the internally stored value.
-        detector : Detector (optional)
+        detector : Detector = None
             The detector to use with the observation. Defaults to the
             internally stored value.
-        filter : Filter (optional)
+        filter : Filter = None
             The filter through which the source is being observed. Defaults to
             the internally stored value.
-        normalise_sources : bool (optional)
+        normalise_sources : bool = True
             Whether to normalise the sources before modelling. Default is True.
-        flatten : bool (optional)
+        flatten : bool = False
             Whether the output image should be flattened. Default is False.
-        return_tree : bool (optional)
+        return_tree : bool = False
             Whether to return a Pytree like object with matching tree structure
             as the input scene/sources/source. Default is False.
 
@@ -1196,13 +1192,13 @@ class Scene(Base):
             with matching tree strucutre as the input scene/sources/source.
         """
         return model(optics, scene=self, **kwargs)
-    
-    
+
+
 class Detector(Base):
     """
     A high level class desgined to model the behaviour of some detectors
     response to some psf.
-    
+
     Attributes
     ----------
     layers: dict
@@ -1210,10 +1206,12 @@ class Detector(Base):
         and operations upon some input psf as it interacts with the detector.
     """
     layers : OrderedDict
-    
-    
+
+
     def __init__(self : Detector, layers : list) -> Instrument:
         """
+        Constructor for the Detector class.
+
         Parameters
         ----------
         layers : list
@@ -1223,27 +1221,27 @@ class Detector(Base):
         # Ensure input is a list
         assert isinstance(layers, list), ("Input layers must be a list, it is" \
         " automatically converted to a dictionary.")
-        
+
         # Ensure all entries are dLux layers
         for layer in layers:
             assert isinstance(layer, dLux.detectors.DetectorLayer), ("All " \
             "entries within layers must be a dLux.detectors.DetectorLayer " \
             "object.")
-        
+
         # Construct layers
         self.layers = dLux.utils.list_to_dict(layers)
-    
-    
+
+
     def apply_detector(self  : Instrument,
                        image : Array) -> Array:
         """
         Applied the stored detector layers to the input image.
-        
+
         Parameters
         ----------
         image : Array
             The input 'image' to the detector to be transformed.
-        
+
         Returns
         -------
         image : Array
@@ -1252,24 +1250,24 @@ class Detector(Base):
         # Input type checking
         assert isinstance(image, np.ndarray), "Input must be a jax array."
         assert image.ndim == 2, "Input image must a 2d array."
-        
+
         # Apply detector layers
         for key, layer in self.layers.items():
             image = layer(image)
         return image
-    
-    
+
+
     def debug_apply_detector(self  : Instrument, 
                              image : Array) -> Array:
         """
         Applied the stored detector layers to the input image, storing and
         returning the intermediate states of the image and layers.
-        
+
         Parameters
         ----------
         image : Array
             The input 'image' to the detector to be transformed.
-        
+
         Returns
         -------
         image : Array
@@ -1283,7 +1281,7 @@ class Detector(Base):
         # Input type checking
         assert isinstance(image, np.ndarray), "Input must be a jax array."
         assert image.ndim == 2, "Input image must a 2d array."
-        
+
         # Apply detector layers
         intermediate_images = []
         intermediate_layers = []
@@ -1292,8 +1290,8 @@ class Detector(Base):
             intermediate_images.append(image.copy())
             intermediate_layers.append(deepcopy(layer))
         return image, intermediate_images, intermediate_layers
-    
-    
+
+
     def model(self : Detector, optics : Optics, **kwargs):
         """
         A base level modelling function designed to robustly handle the
@@ -1306,20 +1304,20 @@ class Detector(Base):
         ----------
         optics : Optics
             The optics through which to model the source objects.
-        filter : Filter (optional)
+        filter : Filter = None
             The filter through which the source is being observed. Defaults to
             the internally stored value.
-        scene : Scene (optional)
+        scene : Scene = None
             The scene to observe. Defaults to the internally stored value.
-        sources : Union[dict, list, tuple) (optional)
+        sources : Union[dict, list, tuple) = None
             The sources to observe.
-        source : Source (optional)
+        source : Source = None
             The source to observe.
-        normalise_sources : bool (optional)
+        normalise_sources : bool = True
             Whether to normalise the sources before modelling. Default is True.
-        flatten : bool (optional)
+        flatten : bool = False
             Whether the output image should be flattened. Default is False.
-        return_tree : bool (optional)
+        return_tree : bool = False
             Whether to return a Pytree like object with matching tree structure
             as the input scene/sources/source. Default is False.
 
@@ -1340,7 +1338,7 @@ class Filter(Base):
     integrate and interpolate within this class has been taken from the
     jax-cosmo package. (https://github.com/DifferentiableUniverseInitiative/
     jax_cosmo/blob/master/jax_cosmo/scipy/interpolate.py)
-    
+
     Attributes
     ----------
     wavelengths : Array
@@ -1360,27 +1358,27 @@ class Filter(Base):
     order        : int
     coefficients : Array
     filter_name  : str = static_field()
-    
-    
+
+
     def __init__(self        : Filter,
                  wavelengths : Array = None,
                  throughput  : Array = None,
                  order       : int   = 1,
                  filter_name : str   = None) -> Filter:
         """
-        Initialises the filter. All inputs are optional and defaults to uniform
-        unitary throughput. If filter_name is specified then wavelengths and
-        weights must not be specified.
-        
+        Constructor for the Filter class. All inputs are optional and defaults
+        to uniform unitary throughput. If filter_name is specified then
+        wavelengths and weights must not be specified.
+
         Parameters
         ----------
-        wavelengths : Array (optional)
+        wavelengths : Array = None
             The wavelengths at which the filter is defined.
-        throughput : Array (optional)
+        throughput : Array = None
             The throughput of the filter at the corresponding wavelength.
-        order : int (optional)
+        order : int = 1
             The order of interpolation to use for the filter. Must be 1, 2 or 3.
-        filter_name : str (optional)
+        filter_name : str = None
             A string identifier that can be used to initialise specific filters.
             Currently no pre-built filters are implemented.
         """
@@ -1389,28 +1387,28 @@ class Filter(Base):
             # TODO: Pre load filters
             raise NotImplementedError("You know what this means.")
             pass
-            
+
             # Check that wavelengths and throughput are not specified
             if wavelengths is not None or throughput is not None:
                 raise ValueError("If filter_name is specified, wavelengths "
                 "and throughput can not be specified.")
-            
+
         # Check that both wavelengths and throughput are specified
         elif (wavelengths is     None and throughput is not None) or \
              (wavelengths is not None and throughput is     None):
             raise ValueError("If either wavelengths or throughput is "
             "specified, then both must be specified.")
-        
+
         # Neither is specified
         elif wavelengths is None and throughput is None:
             self.wavelengths = np.array([0., np.inf])
             self.throughput  = np.array([1., 1.])
             self.filter_name = 'Unitary'
             self.order = None
-            
+
             # Set coefficients to zero since they arent used
             self.coefficients = np.array(0.)
-            
+
         # Both wavelengths and throughputs are specified
         else:
             self.wavelengths = np.asarray(wavelengths, dtype=float)
@@ -1565,11 +1563,11 @@ class Filter(Base):
 
             # Saving spline parameters for evaluation later
             self.coefficients = coefficients
-    
-    
+
+
     def _antiderivative(self, xs):
         """
-        Computes the antiderivative of first order of this spline
+        Computes the antiderivative of first order of this spline.
         """
         # Retrieve parameters
         x, y = self.wavelengths, self.throughput
@@ -1639,14 +1637,16 @@ class Filter(Base):
                 + c[ind] * t ** 3 / 3
                 + d[ind] * t ** 4 / 4
             )
-    
-    
+
+
     def _compute_coeffs(self, xs):
-        """Compute the spline coefficients for a given x."""
+        """
+        Compute the spline coefficients for a given x.
+        """
         # Retrieve parameters
         x, y = self.wavelengths, self.throughput
         coefficients = self.coefficients
-        
+
         # In case of quadratic, we redefine the knots
         if self.order == 2:
             knots = (x[1:] + x[:-1]) / 2.0
@@ -1690,8 +1690,8 @@ class Filter(Base):
             result = (t, a, b, c, d)
 
         return result
-    
-    
+
+
     # Cache this? It will likely be called many times with the same inputs
     def get_throughput(self        : Filter,
                        wavelengths : Array,
@@ -1702,36 +1702,37 @@ class Filter(Base):
         to interpolate by setting the integrate flag to False. Any wavelengths
         outside of the defined wavelength range are taken as zero (except for
         'Unitary' throughput which is uniform).
-        
+
         Note that wavelengths mut be a uniqie set of wavelengths, ie you can
         not pass in two wavelengths with the same values or you will get a
         nan result.
-        
+
         Parameters
         ----------
         wavelengths: Array
             An array of wavelengths to sample the filter at. Note it is assumed
             that the wavelengths are evenly spaced.
-        integrate : bool
+        integrate : bool = True
             Whether to integrate, or interpolate the filter values. Default is
             to integrate.
-        
-        Returns:
+
+        Returns
+        -------
         throughputs : Array
             An array of the corresponding throughputs at the given wavlengths.
         """
         # Return unitary if filter is unitary
         if self.filter_name == 'Unitary':
             return np.ones(wavelengths.shape)
-        
+
         # ensure numpy array input
         wavelengths = np.asarray(wavelengths, dtype=float) \
                 if not isinstance(wavelengths, np.ndarray) else wavelengths
-        
+
         # Set to interpolate if a single wavelength is passed
         integrate = False if wavelengths.shape == (1,) or \
                                         wavelengths.ndim == 0 else integrate
-        
+
         # Integrate over filter
         if integrate:
             # Get bin size
@@ -1743,15 +1744,15 @@ class Filter(Base):
             ranges = np.clip(np.array([mins, maxs]),
                              a_min=np.min(self.wavelengths),
                              a_max=np.max(self.wavelengths))
-            
+
             # Get values
             integral_fn = vmap(self._antiderivative, in_axes=0)
             integrals = np.diff(integral_fn(ranges), axis=0)[0]
-            
+
             # Divide by bin size
             throughputs = integrals/dwavelengths
             return throughputs
-        
+
         else:
             bounded_wavelengths = np.clip(wavelengths,
                                           a_min=np.min(self.wavelengths),
@@ -1769,8 +1770,8 @@ class Filter(Base):
                 result = a + b * t + c * t ** 2 + d * t ** 3
 
             return result
-    
-    
+
+
     def model(self : Filter, optics : Optics, **kwargs):
         """
         A base level modelling function designed to robustly handle the
@@ -1783,20 +1784,20 @@ class Filter(Base):
         ----------
         optics : Optics
             The optics through which to model the source objects.
-        detector : Detector (optional)
+        detector : Detector = None
             The detector to use with the observation. Defaults to the
             internally stored value.
-        scene : Scene (optional)
+        scene : Scene = None
             The scene to observe. Defaults to the internally stored value.
-        sources : Union[dict, list, tuple) (optional)
+        sources : Union[dict, list, tuple) = None
             The sources to observe.
-        source : Source (optional)
+        source : Source = None
             The source to observe.
-        normalise_sources : bool (optional)
+        normalise_sources : bool = True
             Whether to normalise the sources before modelling. Default is True.
-        flatten : bool (optional)
+        flatten : bool = False
             Whether the output image should be flattened. Default is False.
-        return_tree : bool (optional)
+        return_tree : bool = False
             Whether to return a Pytree like object with matching tree structure
             as the input scene/sources/source. Default is False.
 
