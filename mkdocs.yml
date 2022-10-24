@@ -128,6 +128,13 @@ nav:
             - get pixels per fringe: utils/optics/get_pixels_per_fringe.md
             - get pixel scale:       utils/optics/get_pixel_scale.md
             - get airy pixel scale:  utils/optics/get_airy_pixel_scale.md
+        - Bayes:
+            - poisson likelihood:     utils/bayes/poisson_likelihood.md
+            - poisson log likelihood: utils/bayes/poisson_log_likelihood.md
+            - chi2 likelihood:        utils/bayes/chi2_likelihood.md
+            - chi2 log likelihood:    utils/bayes/chi2_log_likelihood.md
+            - calculate covariance:   utils/bayes/calculate_covariance.md
+            - calculate entropy:      utils/bayes/calculate_entropy.md
         - Gradient Energy:
             - get GE:          utils/gradient_energy/get_GE.md
             - get RGE:         utils/gradient_energy/get_RGE.md
