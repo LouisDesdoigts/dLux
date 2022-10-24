@@ -218,7 +218,7 @@ class Wavefront(dLux.base.Base, ABC):
         field : Array
             The electric field phasor of the wavefront.
         """
-        return self.get_amplitude() * np.exp(1j * self.get_phase()) 
+        return self.get_amplitude() * np.exp(1j * self.get_phase())
 
 
     ########################
@@ -473,25 +473,14 @@ class Wavefront(dLux.base.Base, ABC):
         Calculates the Point Spread Function (PSF), ie the squared modulus
         of the complex wavefront.
 
-        TODO: Work out how to apply optional inputs to the wavefront psf for
-        polarised wavefronts. This should likely be done using the parameters
-        dictionary.
+        TODO: Take in the parameters dictionary and use the parameters in that
+        to determine the way to output the wavefront.
 
         Returns
         -------
         psf : Array
             The PSF of the wavefront.
         """
-        # TODO: Make this work properly for polarisation matrices
-        # and allows for the returning of the individual polarised wavefront
-        # Note this might need to wait until OpticalSystem is divorced from
-        # Optics, since telescope detector do not respond to polarisation
-        # effects, and this currently breaks the array formatting.
-        # Also note we may not be able to pass a boolean value to return
-        # different array shapes, as a limitation within jax.lax.cond()
-        # The solution MAY be add a CombinePolarisation layer, or
-        # some other layer to deal with this
-
         # Sums the first axis for empty polarisation array
         return np.sum(self.get_amplitude() ** 2, axis=0)
 
@@ -555,50 +544,10 @@ class Wavefront(dLux.base.Base, ABC):
         return self.update_phasor(new_amplitude, new_phase)
 
 
-    def interpolate(self           : Wavefront,
-                    coordinates    : Array,
-                    real_imaginary : bool = False) -> tuple:
-        """
-        Interpolates the `Wavefront` to the points specified by coordinates. By
-        default the interpolation is done on the amplitude and phase arrays,
-        however by passing `real_imgainary=True` the interpolation is done on
-        the real and imaginary components. This option allows for consistent
-        interpolation behaviour when the phase array has a large amount of
-        wrapping.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinates to interpolate the wavefront to.
-        real_imaginary : bool = False
-            Whether to interpolate the real and imaginary representation of the
-            wavefront as opposed to the the amplitude and phase representation.
-
-        Returns
-        -------
-        field : tuple
-            The (amplitude, phase) tuple of the wavefront at `coordinates`
-            based on a linear interpolation.
-        """
-        if not real_imaginary:
-            new_amplitude = map_coordinates(
-                self.amplitude, coordinates, order=1)
-            new_phase = map_coordinates(
-                self.phase, coordinates, order=1)
-        else:
-            real = map_coordinates(
-                self.get_real(), coordinates, order=1)
-            imaginary = map_coordinates(
-                self.get_imaginary(), coordinates, order=1)
-            new_amplitude = np.hypot(real, imaginary)
-            new_phase = np.arctan2(imaginary, real)
-        return new_amplitude, new_phase
-
-
-    def paraxial_interpolate(self            : Wavefront,
-                             npixels_out     : int,
-                             pixel_scale_out : Array,
-                             real_imaginary  : bool = False) -> Wavefront: 
+    def interpolate(self            : Wavefront,
+                    npixels_out     : int,
+                    pixel_scale_out : Array,
+                    real_imaginary  : bool = False) -> Wavefront:
         """
         Performs a paraxial interpolation on the wavefront, determined by the
         the pixel_scale_out and npixels_out parameters. By default the
@@ -625,25 +574,18 @@ class Wavefront(dLux.base.Base, ABC):
             The new wavefront interpolated to the size and shape determined by
             npixels_out and pixel_scale_out, with the updated pixel_scale.
         """
-        # Get coords arrays
-        npixels_in = self.get_npixels()
-        ratio = pixel_scale_out / self.get_pixel_scale()
-
-        old_centre = (npixels_in  - 1) / 2
-        new_centre = (npixels_out - 1) / 2
-        pixels = ratio * (-new_centre, new_centre, npixels_out) + old_centre
-        x_pixels, y_pixels = np.meshgrid(pixels, pixels)
-        coordinates = np.array([y_pixels, x_pixels])
-        new_amplitude, new_phase = self.interpolate(
-            coordinates, real_imaginary=real_imaginary)
-
-        # Conserve energy
-        new_ampltiude_norm = new_amplitude * ratio
+        sampling_ratio = pixel_scale_out / self.get_pixel_scale()
+        if real_imaginary:
+            field = np.array([self.get_real(), self.get_imaginary()])
+        else:
+            field = np.array([self.get_amplitude(), self.get_phase()])
+        new_ampltiude, new_phase = dLux.utils.interpolation.interpolate_field( \
+            field, npixels_out, sampling_ratio, real_imaginary=real_imaginary)
 
         # Update parameters
         return tree_at(lambda wavefront:
                  (wavefront.amplitude, wavefront.phase, wavefront.pixel_scale),
-                        self, (new_ampltiude_norm, new_phase, pixel_scale_out))
+                        self, (new_ampltiude, new_phase, pixel_scale_out))
 
 
     def pad_to(self : Wavefront, npixels_out : int) -> Wavefront:

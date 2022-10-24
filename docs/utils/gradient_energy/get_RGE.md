@@ -1,0 +1,1 @@
+::: dLux.utils.gradient_energy.get_RGE
