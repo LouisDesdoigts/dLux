@@ -150,31 +150,31 @@ class TestRelativeFluxSource(UtilityUser):
         """
         # Test string inputs
         with pytest.raises(ValueError):
-            self.utility.construct(flux_ratio="")
+            self.utility.construct(constrast="")
         
         # Test one dimension input
         with pytest.raises(AssertionError):
-            self.utility.construct(flux_ratio=[5.])
+            self.utility.construct(constrast=[5.])
         
         # Test zero length input
         with pytest.raises(AssertionError):
-            self.utility.construct(flux_ratio=[])
+            self.utility.construct(constrast=[])
         
         # Test nan inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(flux_ratio=[np.nan])
+            self.utility.construct(constrast=[np.nan])
         
         # Test infinite inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(flux_ratio=[np.inf])
+            self.utility.construct(constrast=[np.inf])
     
     
-    def test_get_flux_ratio(self : UtilityUser) -> None:
+    def test_get_constrast(self : UtilityUser) -> None:
         """
-        Tests the get_flux_ratio method.
+        Tests the get_constrast method.
         """
         source = self.utility.construct()
-        assert (source.get_flux_ratio() == source.flux_ratio).all()
+        assert (source.get_constrast() == source.constrast).all()
     
     
     def test_get_flux(self : UtilityUser) -> None:
@@ -184,16 +184,16 @@ class TestRelativeFluxSource(UtilityUser):
         source = self.utility.construct()
         flux_out = source.get_flux()
         assert flux_out.shape == (2,)
-        assert np.allclose(flux_out[0]/flux_out[1], source.flux_ratio)
+        assert np.allclose(flux_out[0]/flux_out[1], source.constrast)
     
     
-    def test_set_flux_ratio(self : UtilityUser) -> None:
+    def test_set_constrast(self : UtilityUser) -> None:
         """
-        Tests the set_flux_ratio method.
+        Tests the set_constrast method.
         """
-        new_flux_ratio = np.array(1.5)
-        new_source = self.utility.construct().set_flux_ratio(new_flux_ratio)
-        assert (new_source.flux_ratio == new_flux_ratio).all()
+        new_constrast = np.array(1.5)
+        new_source = self.utility.construct().set_constrast(new_constrast)
+        assert (new_source.constrast == new_constrast).all()
 
 
 class TestRelativePositionSource(UtilityUser):
@@ -228,26 +228,26 @@ class TestRelativePositionSource(UtilityUser):
         with pytest.raises(AssertionError):
             self.utility.construct(separation=[np.inf])
         
-        # Field_angle
+        # position_angle
         # Test string inputs
         with pytest.raises(ValueError):
-            self.utility.construct(field_angle="")
+            self.utility.construct(position_angle="")
         
         # Test one dimension input
         with pytest.raises(AssertionError):
-            self.utility.construct(field_angle=[5.])
+            self.utility.construct(position_angle=[5.])
         
         # Test zero length input
         with pytest.raises(AssertionError):
-            self.utility.construct(field_angle=[])
+            self.utility.construct(position_angle=[])
         
         # Test nan inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(field_angle=[np.nan])
+            self.utility.construct(position_angle=[np.nan])
         
         # Test infinite inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(field_angle=[np.inf])
+            self.utility.construct(position_angle=[np.inf])
     
     
     def test_get_separation(self : UtilityUser) -> None:
@@ -258,12 +258,12 @@ class TestRelativePositionSource(UtilityUser):
         assert (source.get_separation() == source.separation).all()
     
     
-    def test_get_field_angle(self : UtilityUser) -> None:
+    def test_get_position_angle(self : UtilityUser) -> None:
         """
-        Tests the get_field_angle method.
+        Tests the get_position_angle method.
         """
         source = self.utility.construct()
-        assert (source.get_field_angle() == source.field_angle).all()
+        assert (source.get_position_angle() == source.position_angle).all()
     
     
     def test_get_position(self : UtilityUser) -> None:
@@ -274,10 +274,10 @@ class TestRelativePositionSource(UtilityUser):
         position_out = source.get_position()
         sep_vec = position_out[0] - position_out[1]
         separation = np.hypot(sep_vec[0], sep_vec[1])
-        field_angle = np.arctan2(sep_vec[1], sep_vec[0])
+        position_angle = np.arctan2(sep_vec[0], sep_vec[1])
         assert position_out.shape == (2,2)
         assert np.allclose(source.separation, separation).all()
-        assert np.allclose(source.field_angle, field_angle).all()
+        assert np.allclose(source.position_angle, position_angle).all()
     
     
     def test_set_separation(self : UtilityUser) -> None:
@@ -290,14 +290,14 @@ class TestRelativePositionSource(UtilityUser):
         assert (new_source.separation == new_separation).all()
     
     
-    def test_set_field_angle(self : UtilityUser) -> None:
+    def test_set_position_angle(self : UtilityUser) -> None:
         """
-        Tests the set_field_angle method.
+        Tests the set_position_angle method.
         """
         source = self.utility.construct()
-        new_field_angle = np.array(np.pi)
-        new_source = source.set_field_angle(new_field_angle)
-        assert (new_source.field_angle == new_field_angle).all()
+        new_position_angle = np.array(np.pi)
+        new_source = source.set_position_angle(new_position_angle)
+        assert (new_source.position_angle == new_position_angle).all()
 
 
 class TestPointSource(UtilityUser):

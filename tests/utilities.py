@@ -1188,7 +1188,7 @@ class RelativeFluxSourceUtility(SourceUtility):
     """
     Utility for the RelativeFluxSource class.
     """
-    flux_ratio : Array
+    constrast : Array
     dLux.sources.RelativeFluxSource.__abstractmethods__ = ()
     
     
@@ -1197,14 +1197,14 @@ class RelativeFluxSourceUtility(SourceUtility):
         Constructor for the RelativeFluxSource Utility.
         """
         super().__init__()
-        self.flux_ratio = np.array(2.)
+        self.constrast = np.array(2.)
     
     
     def construct(self       : Utility,
                   position   : Array    = None,
                   flux       : Array    = None,
                   spectrum   : Spectrum = None,
-                  flux_ratio : Array    = None,
+                  constrast : Array    = None,
                   name       : str      = None) -> Source:
         """
         Safe constructor for the dLuxModule, associated with this utility.
@@ -1212,9 +1212,9 @@ class RelativeFluxSourceUtility(SourceUtility):
         position   = self.position   if position   is None else position
         flux       = self.flux       if flux       is None else flux
         spectrum   = self.spectrum   if spectrum   is None else spectrum
-        flux_ratio = self.flux_ratio if flux_ratio is None else flux_ratio
+        constrast = self.constrast if constrast is None else constrast
         name       = self.name       if name       is None else name
-        return dLux.sources.RelativeFluxSource(flux_ratio, position=position,
+        return dLux.sources.RelativeFluxSource(constrast, position=position,
                                                flux=flux, spectrum=spectrum,
                                                name=name)
     
@@ -1224,7 +1224,7 @@ class RelativePositionSourceUtility(SourceUtility):
     Utility for the RelativePositionSource class.
     """
     separation : Array
-    field_angle : Array
+    position_angle : Array
     dLux.sources.RelativePositionSource.__abstractmethods__ = ()
     
     
@@ -1234,7 +1234,7 @@ class RelativePositionSourceUtility(SourceUtility):
         """
         super().__init__()
         self.separation  = np.array(1.)
-        self.field_angle = np.array(0.)
+        self.position_angle = np.array(0.)
     
     
     def construct(self        : Utility,
@@ -1242,7 +1242,7 @@ class RelativePositionSourceUtility(SourceUtility):
                   flux        : Array    = None,
                   spectrum    : Spectrum = None,
                   separation  : Array    = None,
-                  field_angle : Array    = None,
+                  position_angle : Array    = None,
                   name        : str      = None) -> Source:
         """
         Safe constructor for the dLuxModule, associated with this utility.
@@ -1251,9 +1251,9 @@ class RelativePositionSourceUtility(SourceUtility):
         flux        = self.flux        if flux        is None else flux
         spectrum    = self.spectrum    if spectrum    is None else spectrum
         separation  = self.separation  if separation  is None else separation
-        field_angle = self.field_angle if field_angle is None else field_angle
+        position_angle = self.position_angle if position_angle is None else position_angle
         name        = self.name        if name        is None else name
-        return dLux.sources.RelativePositionSource(separation, field_angle,
+        return dLux.sources.RelativePositionSource(separation, position_angle,
                                                    position=position, flux=flux,
                                                    spectrum=spectrum, name=name)
     
@@ -1343,8 +1343,8 @@ class BinarySourceUtility(RelativePositionSourceUtility, \
                   flux        : Array    = None,
                   spectrum    : Spectrum = None,
                   separation  : Array    = None,
-                  field_angle : Array    = None,
-                  flux_ratio  : Array    = None,
+                  position_angle : Array    = None,
+                  constrast  : Array    = None,
                   name        : str      = None) -> Source:
         """
         Safe constructor for the dLuxModule, associated with this utility.
@@ -1353,11 +1353,11 @@ class BinarySourceUtility(RelativePositionSourceUtility, \
         flux        = self.flux        if flux        is None else flux
         spectrum    = self.spectrum    if spectrum    is None else spectrum
         separation  = self.separation  if separation  is None else separation
-        field_angle = self.field_angle if field_angle is None else field_angle
-        flux_ratio  = self.flux_ratio  if flux_ratio  is None else flux_ratio
+        position_angle = self.position_angle if position_angle is None else position_angle
+        constrast  = self.constrast  if constrast  is None else constrast
         name        = self.name        if name        is None else name
         return dLux.sources.BinarySource(position, flux, separation, \
-                                  field_angle, flux_ratio, spectrum, name=name)
+                                  position_angle, constrast, spectrum, name=name)
     
     
 class PointExtendedSourceUtility(RelativeFluxSourceUtility, \
@@ -1378,7 +1378,7 @@ class PointExtendedSourceUtility(RelativeFluxSourceUtility, \
                   position     : Array    = None,
                   flux         : Array    = None,
                   spectrum     : Spectrum = None,
-                  flux_ratio   : Array    = None,
+                  constrast   : Array    = None,
                   distribution : Array    = None,
                   name         : str      = None) -> Source:
         """
@@ -1387,12 +1387,12 @@ class PointExtendedSourceUtility(RelativeFluxSourceUtility, \
         position     = self.position     if position     is None else position
         flux         = self.flux         if flux         is None else flux
         spectrum     = self.spectrum     if spectrum     is None else spectrum
-        flux_ratio   = self.flux_ratio   if flux_ratio   is None else flux_ratio
+        constrast   = self.constrast   if constrast   is None else constrast
         name         = self.name         if name         is None else name
         distribution = self.distribution if distribution is None \
                                                             else distribution
         return dLux.sources.PointExtendedSource(position, flux, spectrum, \
-                                         distribution, flux_ratio, name=name)
+                                         distribution, constrast, name=name)
     
     
 class PointAndExtendedSourceUtility(RelativeFluxSourceUtility, \
@@ -1416,7 +1416,7 @@ class PointAndExtendedSourceUtility(RelativeFluxSourceUtility, \
                   position     : Array    = None,
                   flux         : Array    = None,
                   spectrum     : Spectrum = None,
-                  flux_ratio   : Array    = None,
+                  constrast   : Array    = None,
                   distribution : Array    = None,
                   name         : str      = None) -> Source:
         """
@@ -1425,12 +1425,12 @@ class PointAndExtendedSourceUtility(RelativeFluxSourceUtility, \
         position     = self.position     if position     is None else position
         flux         = self.flux         if flux         is None else flux
         spectrum     = self.spectrum     if spectrum     is None else spectrum
-        flux_ratio   = self.flux_ratio   if flux_ratio   is None else flux_ratio
+        constrast   = self.constrast   if constrast   is None else constrast
         name         = self.name         if name         is None else name
         distribution = self.distribution if distribution is None \
                                                             else distribution
         return dLux.sources.PointAndExtendedSource(position, flux, spectrum, \
-                                         distribution, flux_ratio, name=name)
+                                         distribution, constrast, name=name)
 
 ######################
 ### Base Utilities ###
