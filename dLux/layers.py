@@ -883,7 +883,7 @@ class CompoundAperture(OpticalLayer):
             The final combined aperture.
         """
         # Map aperture function
-        mapped_aperture = vamp(self.get_aperture,
+        mapped_aperture = vmap(self.get_aperture,
                                    in_axes=(0, 0, None, None))
 
         # Generate coordinate grid
@@ -1086,7 +1086,7 @@ class ApplyBasisCLIMB(OpticalLayer):
         subarray = dummy[:,:,0,0]
 
         flat = dummy.reshape(-1, 3, 3)
-        vmap_mask = vamp(self.area, in_axes=(0))
+        vmap_mask = vmap(self.area, in_axes=(0))
 
         soft_bin = vmap_mask(flat).reshape(ppsz, ppsz)
 
