@@ -367,55 +367,55 @@ class RelativeFluxSource(Source, ABC):
     """
     Abstract class that extend the methods of Source to allow for binary-object
     sources to be parameterised by their relative flux. Classes that inherit
-    from this class must instantiate a flux_ratio attribute.
+    from this class must instantiate a constrast attribute.
 
     Attributes
     ----------
-    flux_ratio : Array
+    constrast : Array
         The contrast ratio between the two sources.
     """
-    flux_ratio : Array
+    constrast : Array
 
 
-    def __init__(self       : Source,
-                 flux_ratio : Array,
+    def __init__(self      : Source,
+                 constrast : Array,
                  **kwargs) -> Source:
         """
         Constructor for the RelativeFluxSource class.
 
         Parameters
         ----------
-        flux_ratio : Array
+        constrast : Array
             The contrast ratio between the two sources.
         """
         super().__init__(**kwargs)
-        self.flux_ratio = np.asarray(flux_ratio, dtype=float)
+        self.constrast = np.asarray(constrast, dtype=float)
 
-        # Input flux_ratio checking
-        assert self.flux_ratio.shape == (), \
+        # Input constrast checking
+        assert self.constrast.shape == (), \
         ("Flux ratio must be a scalar, (shape == ()).")
-        assert not np.isnan(self.flux_ratio).any(), \
-        ("flux_ratio must not be nan.")
-        assert not np.isinf(self.flux_ratio).any(), \
-        ("flux_ratio must be not be infinite.")
+        assert not np.isnan(self.constrast).any(), \
+        ("constrast must not be nan.")
+        assert not np.isinf(self.constrast).any(), \
+        ("constrast must be not be infinite.")
 
 
-    def get_flux_ratio(self : Source) -> Array:
+    def get_constrast(self : Source) -> Array:
         """
         Getter method for the source contrast ratio.
 
         Returns
         -------
-        flux_ratio : Array
+        constrast : Array
             The contrast ratio between the two sources.
         """
-        return self.flux_ratio
+        return self.constrast
 
 
     def get_flux(self : Source) -> Array:
         """
         Getter method for the fluxes. This paramterieses the source such that
-        flux refers to the mean_flux and flux_ratio is defined as the ratio of
+        flux refers to the mean_flux and constrast is defined as the ratio of
         the flux of the first entry divided by the second entry.
 
         Returns
@@ -423,19 +423,19 @@ class RelativeFluxSource(Source, ABC):
         flux : Array, photons
             The flux (flux1, flux2) of the binary object.
         """
-        flux_A = 2 * self.get_flux_ratio() * super().get_flux() / \
-                                                    (1 + self.get_flux_ratio())
-        flux_B = 2 * super().get_flux() / (1 + self.get_flux_ratio())
+        flux_A = 2 * self.get_constrast() * super().get_flux() / \
+                                                    (1 + self.get_constrast())
+        flux_B = 2 * super().get_flux() / (1 + self.get_constrast())
         return np.array([flux_A, flux_B])
 
 
-    def set_flux_ratio(self : Source, flux_ratio : Array) -> Source:
+    def set_constrast(self : Source, constrast : Array) -> Source:
         """
         Setter method for the source flux ratio.
 
         Parameters
         ----------
-        flux_ratio : Array
+        constrast : Array
             The contrast ratio between the two sources.
 
         Returns
@@ -443,9 +443,9 @@ class RelativeFluxSource(Source, ABC):
         source : Source
             The source object with updated flux ratio.
         """
-        assert isinstance(flux_ratio, Array) and flux_ratio.ndim == 0, \
-        ("flux_ratio must be a scalar array.")
-        return tree_at(lambda source: source.flux_ratio, self, flux_ratio)
+        assert isinstance(constrast, Array) and constrast.ndim == 0, \
+        ("constrast must be a scalar array.")
+        return tree_at(lambda source: source.constrast, self, constrast)
 
 
 class RelativePositionSource(Source, ABC):
@@ -458,17 +458,17 @@ class RelativePositionSource(Source, ABC):
     ----------
     separation : Array, radians
         The separation of the two sources in radians.
-    field_angle : Array, radians
+    position_angle : Array, radians
         The field angle between the two sources measure from the positive
         x axis.
     """
-    separation  : Array
-    field_angle : Array
+    separation     : Array
+    position_angle : Array
 
 
-    def __init__(self        : Source,
-                 separation  : Array,
-                 field_angle : Array,
+    def __init__(self           : Source,
+                 separation     : Array,
+                 position_angle : Array,
                  **kwargs) -> Source:
         """
         Constructor for the RelativePositionSource class.
@@ -477,18 +477,18 @@ class RelativePositionSource(Source, ABC):
         ----------
         separation : Array, radians
             The separation of the two sources in radians.
-        field_angle : Array, radians
+        position_angle : Array, radians
             The field angle between the two sources measure from the positive
             x axis.
         """
         super().__init__(**kwargs)
-        self.separation  = np.asarray(separation,  dtype=float)
-        self.field_angle = np.asarray(field_angle, dtype=float)
+        self.separation     = np.asarray(separation,     dtype=float)
+        self.position_angle = np.asarray(position_angle, dtype=float)
 
         assert self.separation.shape == (), "Separation must be a scalar, \
         (shape == ())."
 
-        assert self.field_angle.shape == (), "Field angle must be a scalar, \
+        assert self.position_angle.shape == (), "Field angle must be a scalar, \
         (shape == ())."
 
 
@@ -504,17 +504,17 @@ class RelativePositionSource(Source, ABC):
         return self.separation
 
 
-    def get_field_angle(self : Source) -> Array:
+    def get_position_angle(self : Source) -> Array:
         """
         Getter method for the source field angle.
 
         Returns
         -------
-        field_angle : Array, radians
+        position_angle : Array, radians
             The field angle between the two sources measure from the positive
             x axis.
         """
-        return self.field_angle
+        return self.position_angle
 
 
     def get_position(self : Source) -> Array:
@@ -526,10 +526,9 @@ class RelativePositionSource(Source, ABC):
         position : Array, radians
             The ((x, y), (x, y)) on-sky position of this object.
         """
-        polar_coordinates = np.array([self.get_separation()/2,
-                                     self.get_field_angle()])
-        sep_vec = dLux.utils.polar_to_cartesian(polar_coordinates)
-        return np.array([super().get_position() + sep_vec, 
+        r, phi = self.get_separation()/2, self.get_position_angle()
+        sep_vec = np.array([r*np.sin(phi), r*np.cos(phi)])
+        return np.array([super().get_position() + sep_vec,
                          super().get_position() - sep_vec])
 
 
@@ -552,13 +551,13 @@ class RelativePositionSource(Source, ABC):
         return tree_at(lambda source: source.separation, self, separation)
 
 
-    def set_field_angle(self : Source, field_angle : Array) -> Source:
+    def set_position_angle(self : Source, position_angle : Array) -> Source:
         """
         Setter method for the source field angle.
 
         Parameters
         ----------
-        field_angle : Array, radians
+        position_angle : Array, radians
             The field angle between the two sources measure from the positive
             x axis.
 
@@ -567,9 +566,9 @@ class RelativePositionSource(Source, ABC):
         source : Source
             The source object with updated field angle.
         """
-        assert isinstance(field_angle, Array) and field_angle.ndim == 0, \
-        ("field_angle must be a scalar array.")
-        return tree_at(lambda source: source.field_angle, self, field_angle)
+        assert isinstance(position_angle, Array) and position_angle.ndim == 0, \
+        ("position_angle must be a scalar array.")
+        return tree_at(lambda source: source.position_angle, self, position_angle)
 
 
 ########################
@@ -746,14 +745,14 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
     """
 
 
-    def __init__(self        : Source,
-                 position    : Array,
-                 flux        : Array,
-                 separation  : Array,
-                 field_angle : Array,
-                 flux_ratio  : Array,
-                 spectrum    : Spectrum,
-                 name        : str = 'BinarySource') -> Source:
+    def __init__(self           : Source,
+                 position       : Array,
+                 flux           : Array,
+                 separation     : Array,
+                 position_angle : Array,
+                 constrast      : Array,
+                 spectrum       : Spectrum,
+                 name           : str = 'BinarySource') -> Source:
         """
         Parameters
         ----------
@@ -766,10 +765,10 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
             object.
         separation : Array, radians
             The separation of the two sources in radians.
-        field_angle : Array, radians
+        position_angle : Array, radians
             The field angle between the two sources measure from the positive
             x axis.
-        flux_ratio : Array
+        constrast : Array
             The contrast ratio between the two sources.
         name : str = 'BinarySource'
             The name for this object.
@@ -781,8 +780,8 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
                          flux=flux,
                          spectrum=spectrum,
                          separation=separation,
-                         field_angle=field_angle,
-                         flux_ratio=flux_ratio,
+                         position_angle=position_angle,
+                         constrast=constrast,
                          name=name)
 
 
@@ -842,7 +841,7 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
                  flux         : Array,
                  spectrum     : Spectrum,
                  distribution : Array,
-                 flux_ratio   : Array,
+                 constrast    : Array,
                  name         : str = 'PointExtendedSource') -> Source:
         """
         Parameters
@@ -855,14 +854,14 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
             The spectrum of this object, represented by a Spectrum object.
         distribution : Array
             The array of intensities respresenting the resolved source.
-        flux_ratio : Array
+        constrast : Array
             The contrast ratio between the point source and the resolved
             source.
         name : str = 'PointExtendedSource'
             The name for this object.
         """
         super().__init__(position=position, flux=flux, spectrum=spectrum, \
-                         distribution=distribution, flux_ratio=flux_ratio, \
+                         distribution=distribution, constrast=constrast, \
                          name=name)
 
 
@@ -933,7 +932,7 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
                  flux         : Array,
                  spectrum     : Spectrum,
                  distribution : Array,
-                 flux_ratio   : Array,
+                 constrast    : Array,
                  name         : str = 'PointAndExtendedSource') -> Source:
         """
         Parameters
@@ -947,7 +946,7 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
             object.
         distribution : Array
             The array of intensities respresenting the resolved source.
-        flux_ratio : Array
+        constrast : Array
             The contrast ratio between the point source and the resolved
             source.
         name : str = 'PointAndExtendedSource'
@@ -957,7 +956,7 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
         ("The input spectrum must be a CombinedSpectrum object.")
 
         super().__init__(position=position, flux=flux, spectrum=spectrum, \
-                         distribution=distribution, flux_ratio=flux_ratio, \
+                         distribution=distribution, constrast=constrast, \
                          name=name)
 
 
