@@ -526,8 +526,9 @@ class RelativePositionSource(Source, ABC):
         position : Array, radians
             The ((x, y), (x, y)) on-sky position of this object.
         """
-        sep_vec = dLux.utils.polar2cart(self.get_separation()/2, 
-                                        self.get_field_angle())
+        polar_coordinates = np.array([self.get_separation()/2,
+                                     self.get_field_angle()])
+        sep_vec = dLux.utils.polar_to_cartesian(polar_coordinates)
         return np.array([super().get_position() + sep_vec, 
                          super().get_position() - sep_vec])
 
