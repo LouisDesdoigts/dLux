@@ -102,10 +102,36 @@ nav:
         - Add Constant:          detectors/add_constant.md
         - Integer Downsample:    detectors/integer_downsample.md
     - Utils:
+        - Units:
+            - radians to arcseconds: utils/units/radians_to_arcseconds.md
+            - arcseconds to radians: utils/units/arcseconds_to_radians.md
         - Coordinates:
+            - cartesian to polar:     utils/coordinates/cartesian_to_polar.md
+            - polar to cartesian:     utils/coordinates/polar_to_cartesian.md
             - get coordinates vector: utils/coordinates/get_coordinates_vector.md
             - get positions vector:   utils/coordinates/get_positions_vector.md
             - get pixel positions:    utils/coordinates/get_pixel_positions.md
             - get pixel coordinates:  utils/coordinates/get_pixel_coordinates.md
             - get polar positions:    utils/coordinates/get_polar_positions.md
             - get polar coordinates:  utils/coordinates/get_polar_coordinates.md
+        - Interpolation:
+            - scale array:          utils/interpolation/scale_array.md
+            - generate coordinates: utils/interpolation/generate_coordinates.md
+            - interpolate:          utils/interpolation/interpolate.md
+            - interpolate field:    utils/interpolation/interpolate_field.md
+            - rotate:               utils/interpolation/rotate.md
+            - fourier_rotate:       utils/interpolation/fourier_rotate.md
+        - Optics:
+            - opd to phase:          utils/optics/opd_to_phase.md
+            - phase to opd:          utils/optics/phase_to_opd.md
+            - get fringe size:       utils/optics/get_fringe_size.md
+            - get pixels per fringe: utils/optics/get_pixels_per_fringe.md
+            - get pixel scale:       utils/optics/get_pixel_scale.md
+            - get airy pixel scale:  utils/optics/get_airy_pixel_scale.md
+        - Gradient Energy:
+            - get GE:          utils/gradient_energy/get_GE.md
+            - get RGE:         utils/gradient_energy/get_RGE.md
+            - get RWGE:        utils/gradient_energy/get_RWGE.md
+            - get radial mask: utils/gradient_energy/get_radial_mask.md
+        - Helpers:
+            - list to dictionary: utils/helpers/list_to_dictionary.md

@@ -13,7 +13,7 @@ import dLux
 __all__ = ["CreateWavefront", "TiltWavefront", "CircularAperture",
            "NormaliseWavefront", "ApplyBasisOPD", "AddPhase", "AddOPD",
            "TransmissiveOptic", "CompoundAperture", "ApplyBasisCLIMB",
-           "FourierRotation"]
+           "Rotate", "FourierRotate"]
 
 
 Array = np.ndarray
@@ -1093,7 +1093,82 @@ class ApplyBasisCLIMB(OpticalLayer):
         return soft_bin
 
 
-class FourierRotation(OpticalLayer):
+class Rotate(OpticalLayer):
+    """
+    Applies a rotation to the wavefront using interpolation methods.
+
+    Parameters
+    ----------
+    angle : Array, radians
+        The angle by which to rotate the wavefront in the {}wise direction.
+    real_imaginary : bool
+        Should the rotation be performed on the amplitude and phase array
+        or the real and imaginary arrays.
+    """
+    angle          : Array
+    real_imaginary : bool
+
+
+    def __init__(self           : OpticalLayer,
+                 angle          : Array,
+                 real_imaginary : bool = False,
+                 name           : str  = 'Rotate') -> OpticalLayer:
+        """
+        Constructor for the Rotate class.
+
+        Parameters
+        ----------
+        angle: float, radians
+            The angle by which to rotate the wavefront in the {}wise direction.
+        real_imaginary : bool = False
+            Should the rotation be performed on the amplitude and phase array
+            or the real and imaginary arrays.
+        name : str = 'Rotate'
+            The name of the layer, which is used to index the layers dictionary.
+        """
+        super().__init__(name)
+        self.angle          = np.asarray(angle, dtype=float)
+        self.real_imaginary = bool(real_imaginary)
+        assert self.angle.nidm == 0, ("angle must be scalar array.")
+
+
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+        """
+        Applies the rotation to a wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The rotated wavefront.
+        """
+        # Get field
+        if real_imaginary:
+            field = np.array([wavefront.get_real(), wavefront.get_imaginary()])
+        else:
+            field = np.array([wavefront.get_amplitude(), wavefront.get_phase()])
+
+        # Rotate
+        rotator = vmap(dLux.utils.interpolation.rotate, in_axes=0)
+        rotated_field = rotator(field, self.angle)
+
+        # Conserve energy
+        if real_imaginary:
+            amplitude = np.hypot(rotated_field[0], rotated_field[1])
+            phase = np.arctan2(rotated_field[1], rotated_field[0])
+        else:
+            amplitude = rotated_field[0]
+            phase = rotated_field[1]
+
+        return tree_at(lambda wavefront: (wavefront.amplitude, wavefront.phase),
+                                          self, (amplitude, phase))
+
+
+class FourierRotate(OpticalLayer):
     """
     Applies a rotation to the wavefront using fourier methods. This method is
     information conserving and can be repeatedly applied without any loss of
@@ -1105,15 +1180,20 @@ class FourierRotation(OpticalLayer):
         The angle by which to rotate the wavefront in the {}wise direction.
     padding : int
         A factor by which to pad the array in the Fourier Space Representation.
+    real_imaginary : bool
+        Should the rotation be performed on the amplitude and phase array
+        or the real and imaginary arrays.
     """
-    angle   : Array
-    padding : int
+    angle          : Array
+    padding        : int
+    real_imaginary : bool
 
 
-    def __init__(self    : OpticalLayer,
-                 angle   : Array,
-                 padding : int = 2,
-                 name    : str = 'FourierRotation') -> OpticalLayer:
+    def __init__(self           : OpticalLayer,
+                 angle          : Array,
+                 padding        : int  = 2,
+                 real_imaginary : bool = False,
+                 name           : str  = 'FourierRotate') -> OpticalLayer:
         """
         Constructor for the FourierRotation class.
 
@@ -1124,138 +1204,17 @@ class FourierRotation(OpticalLayer):
         padding : int = 2
             A factor by which to pad the array in the Fourier Space
             Representation.
-        name : str = 'FourierRotation'
+        real_imaginary : bool = False
+            Should the rotation be performed on the amplitude and phase array
+            or the real and imaginary arrays.
+        name : str = 'FourierRotate'
             The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(name)
-        self.angle   = np.asarray(angle, dtype=float)
-        self.padding = int(padding)
-
-
-    def __rotate(self  : OpticalLayer,
-                 image : Array,
-                 angle : Array) -> Array:
-        """
-        A simple angle using linear interpolation.
-
-        Parameters
-        ----------
-        image: Array
-            The image to rotate.
-        angle: Array, radians
-            The amount to rotate the image.
-
-        Returns
-        -------
-        image: Array
-            The rotated image.
-        """
-        npixels = image.shape[0]
-        centre = (npixels - 1) / 2
-        x_pixels, y_pixels = dLux.utils.get_pixel_positions(npixels)
-        rs, phis = dLux.utils.cart2polar(x_pixels, y_pixels)
-        phis += angle
-        coordinates_rot = np.roll(dLux.utils.polar2cart(rs, phis) + centre,
-            shift=1, axis=0)
-        rotated = map_coordinates(image, coordinates_rot, order=1)
-        return rotated  
-
-
-    def _rotate(self  : OpticalLayer,
-                image : Array,
-                angle : Array,
-                pad   : int) -> Array:
-        """
-        Rotates the image by angle using a fourier rotation.
-
-        Parameters
-        ----------
-        image: Array
-            The image to rotate.
-        angle: Array, radians
-            The amount by which to rotate the image.
-        pad: int = 2
-            The padding factor.
-
-        Returns
-        -------
-        image: Array
-            The input image rotated and resampled onto the intial grid. This
-            can result in cropping of the corners after rotation.
-        """
-        in_shape = image.shape
-        image_shape = np.array(in_shape, dtype=int) + 3 
-        image = np.full(image_shape, np.nan, dtype=float)\
-            .at[1 : in_shape[0] + 1, 1 : in_shape[1] + 1]\
-            .set(image)
-
-        # FFT rotation only work in the -45:+45 range
-        # So I need to work out how to determine the quadrant that
-        # angle is in and hence the
-        # number of required pi/2 rotations and angle in radians.
-        half_pi_to_1st_quadrant = angle // (np.pi / 2)
-        angle_in_1st_quadrant = - angle + (half_pi_to_1st_quadrant * np.pi / 2)
-
-        image = np.rot90(image, half_pi_to_1st_quadrant)\
-            .at[:-1, :-1]\
-            .get()  
-
-        width, height = image.shape
-        left_corner = int(((pad - 1) / 2.) * width)
-        right_corner = int(((pad + 1) / 2.) * width)
-        top_corner = int(((pad - 1) / 2.) * height)
-        bottom_corner = int(((pad + 1) / 2.) * height)
-
-        # Make the padded array 
-        out_shape = (width * pad, height * pad)
-        padded_image = np.full(out_shape, np.nan, dtype=float)\
-            .at[left_corner : right_corner, top_corner : bottom_corner]\
-            .set(image)
-
-        padded_mask = np.ones(out_shape, dtype=bool)\
-            .at[left_corner : right_corner, top_corner : bottom_corner]\
-            .set(np.where(np.isnan(image), True, False))
-
-        # Rotate the mask, to know what part is actually the image
-        padded_mask = self.__rotate(padded_mask, -angle_in_1st_quadrant)
-
-        # Replace part outside the image which are NaN by 0, and go into 
-        # Fourier space.
-        padded_image = np.where(np.isnan(padded_image), 0. , padded_image)
-
-        uncentered_angular_displacement = np.tan(angle_in_1st_quadrant / 2.)
-        centered_angular_displacement = -np.sin(angle_in_1st_quadrant)
-
-        uncentered_frequencies = np.fft.fftfreq(out_shape[0])
-        centered_frequencies = np.arange(-out_shape[0] / 2., out_shape[0] / 2.)
-
-        pi_factor = -2.j * np.pi * np.ones(out_shape, dtype=float)
-
-        uncentered_phase = np.exp(
-            uncentered_angular_displacement *\
-            ((pi_factor * uncentered_frequencies).T *\
-            centered_frequencies).T)
-
-        centered_phase = np.exp(
-            centered_angular_displacement *\
-            (pi_factor * centered_frequencies).T *\
-            uncentered_frequencies)
-
-        f1 = np.fft.ifft(
-            (np.fft.fft(padded_image, axis=0).T * uncentered_phase).T, axis=0)
-
-        f2 = np.fft.ifft(
-            np.fft.fft(f1, axis=1) * centered_phase, axis=1)
-
-        rotated_image = np.fft.ifft(
-            (np.fft.fft(f2, axis=0).T * uncentered_phase).T, axis=0)\
-            .at[padded_mask]\
-            .set(np.nan)
-
-        return np.real(rotated_image\
-            .at[left_corner + 1 : right_corner - 1, 
-                top_corner + 1 : bottom_corner - 1]\
-            .get()).copy()
+        self.angle          = np.asarray(angle, dtype=float)
+        self.padding        = int(padding)
+        self.real_imaginary = bool(real_imaginary)
+        assert self.angle.nidm == 0, ("angle must be scalar array.")
 
 
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
@@ -1272,8 +1231,23 @@ class FourierRotation(OpticalLayer):
         wavefront : Wavefront
             The rotated wavefront.
         """
-        field = wavefront.get_complex_form()
-        rotated_field = self._rotate(field, self.angle, self.padding)
-        rotated_wavefront = wavefront.update_phasor(np.abs(rotated_field),
-                                                    np.angle(rotated_field))
-        return rotated_wavefront
+        # Get field
+        if real_imaginary:
+            field = np.array([wavefront.get_real(), wavefront.get_imaginary()])
+        else:
+            field = np.array([wavefront.get_amplitude(), wavefront.get_phase()])
+
+        # Rotate
+        rotator = vmap(dLux.utils.interpolation.fourier_rotate, in_axes=0)
+        rotated_field = rotator(field, self.angle, self.padding)
+
+        # Conserve energy
+        if real_imaginary:
+            amplitude = np.hypot(rotated_field[0], rotated_field[1])
+            phase = np.arctan2(rotated_field[1], rotated_field[0])
+        else:
+            amplitude = rotated_field[0]
+            phase = rotated_field[1]
+
+        return tree_at(lambda wavefront: (wavefront.amplitude, wavefront.phase),
+                                          self, (amplitude, phase))
