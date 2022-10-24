@@ -8,8 +8,8 @@ import dLux
 
 
 
-__all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation", 
-           "AddConstant", "IntegerDownsample"]
+__all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
+           "AddConstant", "IntegerDownsample", "Rotate", "FourierRotate"]
 
 
 Array = np.ndarray
@@ -287,7 +287,7 @@ class IntegerDownsample(DetectorLayer):
 
     def __call__(self, image):
         """
-        Downsamples the input image by the internall stored kernel_size.
+        Downsamples the input image by the internally stored kernel_size.
 
         Parameters
         ----------
@@ -300,3 +300,109 @@ class IntegerDownsample(DetectorLayer):
             The downsampled image.
         """
         return self.downsample(image, self.kernel_size)
+
+
+class Rotate(DetectorLayer):
+    """
+    Applies a rotation to the image using interpolation methods.
+
+    Parameters
+    ----------
+    angle : Array, radians
+        The angle by which to rotate the image in the {}wise direction.
+    """
+    angle : Array
+
+
+    def __init__(self           : DetectorLayer,
+                 angle          : Array,
+                 name           : str = 'Rotate') -> DetectorLayer:
+        """
+        Constructor for the Rotate class.
+
+        Parameters
+        ----------
+        angle: float, radians
+            The angle by which to rotate the image in the {}wise direction.
+        name : str = 'Rotate'
+            The name of the layer, which is used to index the layers dictionary.
+        """
+        super().__init__(name)
+        self.angle = np.asarray(angle, dtype=float)
+        assert self.angle.nidm == 0, ("angle must be scalar array.")
+
+
+    def __call__(self : DetectorLayer, image : Array) -> Array:
+        """
+        Applies the rotation to an image.
+
+        Parameters
+        ----------
+        image : Array
+            The image to rotate.
+
+        Returns
+        -------
+        image : Array
+            The rotated image.
+        """
+        return dLux.utils.interpolation.rotate(image, self.angle)
+
+
+class FourierRotate(DetectorLayer):
+    """
+    Applies a rotation to the image using fourier methods. This method is
+    information conserving and can be repeatedly applied without any loss of
+    fidelity, unlike methods that use interpolation.
+
+    Parameters
+    ----------
+    angle : Array, radians
+        The angle by which to rotate the image in the {}wise direction.
+    padding : int
+        A factor by which to pad the array in the Fourier Space Representation.
+    """
+    angle          : Array
+    padding        : int
+    real_imaginary : bool
+
+
+    def __init__(self           : DetectorLayer,
+                 angle          : Array,
+                 padding        : int  = 2,
+                 name           : str  = 'FourierRotate') -> DetectorLayer:
+        """
+        Constructor for the FourierRotation class.
+
+        Parameters
+        ----------
+        angle: float, radians
+            The angle by which to rotate the wavefront in the {}wise direction.
+        padding : int = 2
+            A factor by which to pad the array in the Fourier Space
+            Representation.
+        name : str = 'FourierRotate'
+            The name of the layer, which is used to index the layers dictionary.
+        """
+        super().__init__(name)
+        self.angle          = np.asarray(angle, dtype=float)
+        self.padding        = int(padding)
+        assert self.angle.nidm == 0, ("angle must be scalar array.")
+
+
+    def __call__(self : DetectorLayer, image : Array) -> Array:
+        """
+        Applies the rotation to an image.
+
+        Parameters
+        ----------
+        image : Array
+            The image to rotate.
+
+        Returns
+        -------
+        image : Array
+            The rotated image.
+        """
+        return dLux.utils.interpolation.fourier_rotate(image, self.angle,
+                                                         self.padding)
