@@ -892,7 +892,7 @@ class Optics(Base):
             assert isinstance(layer, dLux.layers.OpticalLayer), ("All entries" \
             " within layers must be a dLux.layers.OpticalLayer object")
 
-        self.layers = dLux.utils.list_to_dict(layers)
+        self.layers = dLux.utils.list_to_dictionary(layers)
 
 
     def propagate_mono(self       : Optics,
@@ -1133,7 +1133,7 @@ class Scene(Base):
             assert isinstance(source, dLux.sources.Source), ("All entries " \
             "within sources must be a dLux.source.Source object.")
 
-        self.sources = dLux.utils.list_to_dict(sources, ordered=False)
+        self.sources = dLux.utils.list_to_dictionary(sources, ordered=False)
 
 
     def normalise(self : Scene) -> Scene:
@@ -1229,7 +1229,7 @@ class Detector(Base):
             "object.")
 
         # Construct layers
-        self.layers = dLux.utils.list_to_dict(layers)
+        self.layers = dLux.utils.list_to_dictionary(layers)
 
 
     def apply_detector(self  : Instrument,
