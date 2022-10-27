@@ -54,54 +54,73 @@ nav:
         - Pixel Level Calibration:  notebooks/flatfield_calibration.ipynb
         - Fisher Information:       notebooks/fisher_information.ipynb
         - Parameter Inference:      notebooks/HMC.ipynb
-    - Base Classes:
-        - Base:           base/base.md
-        - Optical System: base/optical_system.md
-        - Telescope:      base/telescope.md
-        - Optics:         base/optics.md
-        - Scene:          base/scene.md
-        - Detector:       base/detector.md
-        - Filter:         base/filter.md
+
+    - Base:
+        - Base:      base/base.md
+        - Telescope: base/instrument.md
+        - Optics:    base/optics.md
+        - Scene:     base/scene.md
+        - Detector:  base/detector.md
+        - Filter:    base/filter.md
+        - model:     base/model.md
+        - Optical System (depreceated): base/optical_system.md
+
     - Layers:
         - Create Wavefront:    layers/create_wavefront.md
+        - Normalise Wavefront: layers/normalise_wavefront.md
         - Tilt Wavefront:      layers/tilt_wavefront.md
         - Circular Aperture:   layers/circular_aperture.md
         - Compound Aperture:   layers/compound_aperture.md
-        - Normalise Wavefront: layers/normalise_wavefront.md
-        - Apply Basis OPD:     layers/apply_basis_opd.md
-        - Add Phase:           layers/add_phase.md
-        - Apply OPD:           layers/add_opd.md
         - Transmissive Optic:  layers/transmissive_optic.md
+        - Add Phase:           layers/add_phase.md
+        - Add OPD:             layers/add_opd.md
+        - Apply Basis OPD:     layers/apply_basis_opd.md
+        - Apply Basis CLIMB:   layers/apply_basis_climb.md
+
     - Propagators:
-        - Propagator: propagators/propagator.md
-        - Variable Sampling:
-            - Variable Sampling Propagator: propagators/variable_sampling/variable_sampling_propagator.md
-            - PhysicalMFT:                  propagators/variable_sampling/physical_mft.md
-            - Physical Fresnel:             propagators/variable_sampling/physical_fresnel.md
-            - AngularMFT:                   propagators/variable_sampling/angular_mft.md
-        - Fixed Sampling:
-            - Fixed Sampling Propagator: propagators/fixed_sampling/fixed_sampling_propagator.md
-            - PhysicalFFT:               propagators/fixed_sampling/physical_fft.md
-            - AngularFFT:                propagators/fixed_sampling/angular_fft.md
+        # - Abstract Propagators:
+        #     - Prpoagator:        propagators/abstract/propagator.md
+        #     - Variable Sampling: propagators/abstract/variable_sampling_propagator.md
+        #     - Fixed Sampling:    propagators/abstract/fixed_sampling_propagator.md
+        #     - Angular:           propagators/abstract/angular_propagator.md
+        #     - Cartesian:         propagators/abstract/cartesian_propagator.md
+        #     - Far Field Fresnel: propagators/abstract/far_field_fresnel.md
+        # - Concrete Propagators:
+        - Cartesian MFT:     propagators/concrete/cartesian_mft.md
+        - Angular MFT:       propagators/concrete/angular_mft.md
+        - Cartesian FFT:     propagators/concrete/cartesian_fft.md
+        - Angular FFT:       propagators/concrete/angular_fft.md
+        - Cartesian Fresnel: propagators/concrete/cartesian_fresnel.md
+
     - Wavefronts:
         - Wavefront:                   wavefronts/wavefront.md
         - Cartesian Wavefront:         wavefronts/cartesian_wavefront.md
         - Angular Wavefront:           wavefronts/angular_wavefront.md
         - Far Field Fresnel Wavefront: wavefronts/far_field_fresnel_wavefront.md
+
     - Sources:
-        - Point Source:  sources/point_source.md
-        - Binary Source: sources/binary_source.md
+        - Point Source:              sources/point_source.md
+        - Multiple Point Sources:    sources/multi_point_source.md
+        - Binary Source:             sources/binary_source.md
+        - Array Distribution:        sources/array_distribution.md
+        - Point Extended Source:     sources/point_extended_source.md
+        - Point And Extended Source: sources/point_and_extended_source.md
+
     - Spectrums:
         - Array Spectrum:      spectrums/array_spectrum.md
         - Polynomial Spectrum: spectrums/polynomial_spectrum.md
         - Combined Spectrum:   spectrums/combined_spectrum.md
+
     - Detectors:
         - Apply Pixel Response:  detectors/apply_pixel_response.md
         - Apply Jitter:          detectors/apply_jitter.md
         - Apply Saturation:      detectors/apply_saturation.md
         - Add Constant:          detectors/add_constant.md
         - Integer Downsample:    detectors/integer_downsample.md
+
     - Utils:
+        - Models:
+            - simple optical system: utils/models/simple_optical_system.md
         - Units:
             - radians to arcseconds: utils/units/radians_to_arcseconds.md
             - arcseconds to radians: utils/units/arcseconds_to_radians.md

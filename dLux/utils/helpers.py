@@ -59,6 +59,11 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
     # Turn list into Dictionary
     dict_out = OrderedDict() if ordered else {}
     for i in range(len(names)):
+
+        # Assert no spaces in the name in order to ensure the __getattrr__
+        # method will work
+        assert ' ' not in names[i], \
+        ("names can not contain spaces, {} was supplied.".format(names[i]))
         dict_out[names[i]] = list_in[i]
         # Throws an equinox error since name is defined as a static_field
         # dict_out[names[i]] = list_in[i].set_name(names[i])

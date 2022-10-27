@@ -73,7 +73,7 @@ def generate_coordinates(npixels_in     : int,
 
 
 def interpolate_field(field           : Array,
-                      npixles_out     : int,
+                      npixels_out     : int,
                       sampling_ratio  : Array,
                       real_imaginary  : bool = False,
                       x_shift         : Array = np.array(0.),
@@ -128,7 +128,7 @@ def interpolate_field(field           : Array,
     return np.array([amplitude, phase])
 
 def interpolate(array          : Array,
-                npixles_out    : int,
+                npixels_out    : int,
                 sampling_ratio : Array,
                 x_shift        : Array = np.array(0.),
                 y_shift        : Array = np.array(0.)) -> Array:

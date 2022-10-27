@@ -770,7 +770,8 @@ class CompoundAperture(OpticalLayer):
 
         # Construct an empty occulter radii if none is provided
         self.occulter_radii = np.array([]) if occulter_radii is None else \
-                                np.asarray(occulter_radii, dtype=float)
+                              np.asarray(occulter_radii, dtype=float)
+        self.occulter_radii = np.atleast_1d(self.occulter_radii)
 
         # Ensure corred dimensionality before using shape
         assert self.occulter_radii.ndim == 1, \
@@ -801,13 +802,13 @@ class CompoundAperture(OpticalLayer):
             "shape == (nocculters, 2) ie [(x0, y0), (x1, y1) ...]")
 
 
-    def get_aperture(self        : OpticalLayer,
-                     radius      : Array,
-                     center      : Array,
-                     xycoords    : Array,
-                     is_aperture : Array,
-                     vmin        : float = 1e-8,
-                     vmax        : float = 1.) -> Array:
+    def make_aperture(self        : OpticalLayer,
+                      radius      : Array,
+                      center      : Array,
+                      xycoords    : Array,
+                      is_aperture : Array,
+                      vmin        : float = 1e-8,
+                      vmax        : float = 1.) -> Array:
         """
         Constructs a soft-edged aperture or occulter.
 
@@ -867,8 +868,8 @@ class CompoundAperture(OpticalLayer):
                                     diameter : Array,
                                     npixels  : int) -> Array:
         """
-        Constructs the various apertures and occulters from the and combines
-        them into a single transmission array.
+        Constructs the various apertures and occulters from the stored
+        parameters and combines them into a single transmission array.
 
         Parameters
         ----------
@@ -883,7 +884,7 @@ class CompoundAperture(OpticalLayer):
             The final combined aperture.
         """
         # Map aperture function
-        mapped_aperture = vmap(self.get_aperture,
+        mapped_aperture = vmap(self.make_aperture,
                                    in_axes=(0, 0, None, None))
 
         # Generate coordinate grid
@@ -904,6 +905,32 @@ class CompoundAperture(OpticalLayer):
         return outer_comb * inner_comb
 
 
+    def get_aperture(self     : OpticalLayer,
+                     diameter : Array = None,
+                     npixels  : int   = 512) -> Array:
+        """
+        Constructs the various apertures and occulters from the stored
+        parameters and combines them into a single transmission array. By
+        defualt this method takes the largest aperture and uses that as the
+        diameters, and defaults to 512 pixels.
+
+        Parameters
+        ----------
+        diameter : Array, meters = None
+            The diameter of the wavefront to calculate the aperture on. Uses
+            the largest aperture by default
+        npixels : int = 512
+            The linear size of the array to calculate the aperture on.
+
+        Returns
+        -------
+        aperture : Array
+            The final combined aperture.
+        """
+        diameter = 2*self.aperture_radii.max() if diameter is None else diameter
+        return self.construct_combined_aperture(diameter, npixels)
+
+
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
         """
         Generates and applies the combined apertures transmission array to the
@@ -921,7 +948,8 @@ class CompoundAperture(OpticalLayer):
         """
         wavefront_diameter = wavefront.get_diameter()
         wavefront_npixels = wavefront.get_npixels()
-        aper = self.construct_combined_aperture(wavefront_diameter, wavefront_npixels)
+        aper = self.construct_combined_aperture(wavefront_diameter,
+                                                wavefront_npixels)
         return wavefront.multiply_amplitude(aper)
 
 
@@ -1029,11 +1057,11 @@ class ApplyBasisCLIMB(OpticalLayer):
 
 
     def get_total_opd(self):
-        return self.get_opd(self.basis, self.coeffs)
+        return self.get_opd(self.basis, self.coefficients)
 
 
     def get_binary_phase(self):
-        latent = self.get_opd(self.basis, self.coeffs)
+        latent = self.get_opd(self.basis, self.coefficients)
         binary_phase = np.pi*self.CLIMB(latent)
         return binary_phase
 

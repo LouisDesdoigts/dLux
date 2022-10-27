@@ -142,7 +142,7 @@ class Wavefront(dLux.base.Base, ABC):
         Returns
         -------
         diameter : Array, meters or radians
-           The current diameter of the wavefront.
+            The current diameter of the wavefront.
         """
         return self.get_npixels() * self.get_pixel_scale()
 
@@ -204,7 +204,7 @@ class Wavefront(dLux.base.Base, ABC):
         Returns
         -------
         wavefront : Array
-           The imaginary component of the `Wavefront` phasor.
+            The imaginary component of the `Wavefront` phasor.
         """
         return self.get_amplitude() * np.sin(self.get_phase())
 
