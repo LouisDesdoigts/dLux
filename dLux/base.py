@@ -9,6 +9,7 @@ from collections import OrderedDict
 from copy import deepcopy
 from typing import Union, NewType, Any
 from abc import ABC
+from functools import partial
 import dLux
 
 
@@ -16,25 +17,28 @@ __all__ = ["model", "OpticalSystem", "Instrument", "Optics", "Scene",
            "Filter", "Detector"]
 
 
-Array     = np.ndarray
-list_like = Union[list, tuple]
-Path      = Union[list, tuple]
-Pytree    = NewType("Pytree", object)
-Leaf      = Any
+# Types
+Array        = np.ndarray
+Path         = Union[list, str]
+Pytree       = NewType("Pytree", object)
+Leaf         = Any
+# dLux.sources.Source       = dLux.sources.dLux.sources.Source
+# dLux.optics.OpticalLayer = dLux.optics.dLux.optics.OpticalLayer
+# dLux.detectors.DetectorLayer = dLux.detectors.DetectorLayer
 
 
 ###############
 ### Methods ###
 ###############
 def model(optics      : Optics,
-          detector    : Detector                 = None,
-          filter      : Filter                   = None,
-          scene       : Scene                    = None,
-          sources     : Union[dict, list, tuple] = None,
-          source      : dLux.sources.Souce       = None,
-          normalise   : bool                     = True,
-          flatten     : bool                     = False,
-          return_tree : bool                     = False) -> Array:
+          detector    : Detector             = None,
+          filter      : Filter               = None,
+          scene       : Scene                = None,
+          sources     : Union[dict, list]    = None,
+          source      : dLux.sources.Source  = None,
+          normalise   : bool                 = True,
+          flatten     : bool                 = False,
+          return_tree : bool                 = False) -> Array:
     """
     A base level modelling function designed to robustly handle the different
     combinations of inputs. Models the sources through the instrument optics
@@ -53,7 +57,7 @@ def model(optics      : Optics,
         The scene to observe.
     sources : Union[dict, list, tuple) = None
         The sources to observe.
-    source : Source = None
+    source : dLux.sources.Source = None
         The source to observe.
     normalise : bool = None
         Whether to normalise the sources before modelling. Default is True.
@@ -73,16 +77,15 @@ def model(optics      : Optics,
     """
     '''Input checking and formatting'''
     # Check that optics input is an Optics object.
-    assert isinstance(optics, (dLux.base.Optics)), \
-    ("optics must be a dLux.base.Optics object.")
+    assert isinstance(optics, (Optics)), ("optics must be an Optics object.")
 
     # Check that detector input is a Detector object if specified.
-    assert isinstance(detector, (dLux.base.Detector, type(None))), \
-    ("detector must be a dLux.base.Detector object.")
+    assert isinstance(detector, (Detector, type(None))), \
+    ("detector must be a Detector object.")
 
     # Check that filter input is a Filter object if specified.
-    assert isinstance(filter, (dLux.base.Filter, type(None))), \
-    ("filter must be a dLux.base.Filter object.")
+    assert isinstance(filter, (Filter, type(None))), \
+    ("filter must be a Filter object.")
 
     # Make sure that some form of source is speficied
     assert scene is not None or sources is not None or source is not None, \
@@ -96,8 +99,8 @@ def model(optics      : Optics,
         ("If scene is specified, sources and source can not be specified.")
 
         # Check that scene is a Scehen object.
-        assert isinstance(scene, dLux.base.Scene), \
-        ("scene must be a dLux.base.Scene object.")
+        assert isinstance(scene, Scene), \
+        ("scene must be a Scene object.")
 
         # Get sources
         sources_in = scene.normalise().sources if normalise \
@@ -113,11 +116,11 @@ def model(optics      : Optics,
         assert isinstance(sources, (dict, list, tuple)), \
         ("sources must be a dict, list, or tuple object.")
 
-        # Check that all inputs are Source objects
+        # Check that all inputs are dLux.sources.Source objects
         source_vals = sources.values() if isinstance(sources, dict) else sources
         for source in source_vals:
             assert isinstance(source, dLux.sources.Source), \
-            ("All entries within sources must be a dLux.source.Source object.")
+            ("All entries within sources must be a dLux.sources.Source object.")
 
         # Get sources
         if normalise:
@@ -133,7 +136,7 @@ def model(optics      : Optics,
     # source is provided
     else:
         assert isinstance(source, dLux.sources.Source), \
-        ("source must be a dLux.source.Source object.")
+        ("source must be a dLux.sources.Source object.")
 
         # Get sources
         sources_in = source.normalise() if normalise else source
@@ -202,26 +205,17 @@ class Base(ABC, Module):
         In order to make working with PyTrees easier, there is one concept that
         is introduced, the paths object. a path object is not a unique or new
         class of object type, just a helpfull way of thinking about navigating
-        PyTrees. We define a 'path' here as list/tuple that contains either
-        strings or integers. Each path object refers to a unique 'leaf' in the
-        PyTree. Since each PyTrees is constructed from nested lists, tuples and
-        dictionaries (and since we're using Equinox, Equinox.Modules too), we
-        can refer to any unique leaf via a chain of strings and intergers.
+        PyTrees. We define a 'path' here as string or list of strings. Each
+        path object refers to a unique 'leaf' in the PyTree. Each nested item
+        should be joined with a dot ie '.'
 
         Example path objects:
-            path1 = ['param1', 3, 'nested_param3', 5]
-            path2 = ('p1', 'p2', 'p3')
-            path3 = (1, 4, 6, 3, 6, 2, 'param')
+            path1 = 'object.param.value'
+            path2 = 'p1.p2.p3'
 
-        These objects are quite simple, but are worth clarifying since they are
-        integral to this new PyTree interface.
-
-    New concept: Path Dictionary
-        Since PyTrees can have both very deep and wide structures it would be
-        impractical to always refer to each leaf via its full absolute path.
-        The path dictionary is simply a dictionary that allows a simple key to
-        be used to refer to the full path to some leaf. Note the key must be
-        unique to and and all parameter names within the PyTree structure!
+    Note: These method currently do not work with lists, as they can not be
+    indexed. This could be extended to allow list indexing but we currently
+    do not have a need.
     """
 
 
@@ -260,7 +254,7 @@ class Base(ABC, Module):
         if hasattr(pytree, key):
             pytree = getattr(pytree, key)
         else:
-            # does theo above logic allow the removal of the .__dict__ need?
+            # does the above logic allow the removal of the .__dict__ need?
             pytree = pytree.__dict__[key] if isinstance(pytree, Module) else \
                      pytree[key]
 
@@ -288,6 +282,220 @@ class Base(ABC, Module):
             The list of leaf objects specified by the paths object
         """
         return [self._get_leaf(self, path) for path in paths]
+
+    def _unwrap(self, paths, values = None, map = None):
+        """
+
+        """
+        # Get keys
+        keys = map.keys() if map is not None else []
+
+        # Inititalise empty lists
+        paths_out, values_out = [], []
+
+        # Make sure values is list
+        values = values if isinstance(values, list) else [values]
+
+        # Repeat values to match length of paths
+        values = values * len(paths) if len(values) == 1 else values
+        assert len(values) == len(paths), ("Something odd has happened.")
+
+        # Iterate over paths and values
+        for path, value in zip(paths, values):
+
+            # Recurse and add in the case of list inputs
+            if isinstance(path, list):
+                new_paths, new_values = self._unwrap(path, [value], map)
+                paths_out  += new_paths
+                values_out += new_values
+
+            # Get the absolute path and append
+            elif path in keys:
+                paths_out.append(map[path])
+                values_out.append(value)
+
+            # Path must already be absolute
+            else:
+                paths_out.append(path)
+                values_out.append(value)
+
+        # Return
+        return paths_out, values_out
+
+
+    def _format(self, path, value=None, map=None):
+        """
+
+        """
+        # Nested/multiple inputs
+        if isinstance(path, list):
+
+            # If there is nesting, ensure correct dis
+            if len(path) > 1 and value is not None \
+                and True in [isinstance(p, list) for p in path]:
+                assert isinstance(value, list) and len(value) == len(path), \
+                ("If a list of paths is provided, the list of values must be "
+                 "of equal length.")
+
+            # Its a list - iterate and unbind all the keys
+            flat_paths, new_values = self._unwrap(path, value, map)
+
+            # Turn into seperate strings
+            new_paths = [path.split('.') if '.' in path else [path] \
+                         for path in flat_paths]
+
+        # Un-nested/singular input
+        else:
+            # Get from dict if it extsts
+            keys = map.keys() if map is not None else []
+            path = map[path] if path in keys else path
+
+            # Turn into seperate strings
+            new_paths = [path.split('.') if '.' in path else [path]]
+            new_values = [value]
+
+        # Return
+        return new_paths, new_values
+
+
+    ########################
+    ### Jax like methods ###
+    ########################
+    def get(self : Pytree, path : str, map=None) -> Pytree:
+        """
+
+        """
+        new_paths, _ = self._format(path, map=map)
+        values = self._get_leaves(new_paths)
+        return values[0] if len(new_paths) == 1 else values
+
+
+    def set(self  : Pytree,
+            path  : Union[str, list],
+            value : Union[object, list],
+            map   : dict = None) -> Pytree:
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values,
+                      is_leaf = lambda leaf: leaf is None)
+
+
+    def add(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        new_values = [leaf + value for value, leaf in zip(new_values, \
+                                                   self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values,
+                      is_leaf = lambda leaf: leaf is None)
+
+
+    def multiply(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        new_values = [leaf * value for value, leaf in zip(new_values, \
+                                                   self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values,
+                      is_leaf = lambda leaf: leaf is None)
+
+
+    def divide(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        new_values = [leaf / value for value, leaf in zip(new_values, \
+                                                   self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values,
+                      is_leaf = lambda leaf: leaf is None)
+
+
+    def power(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        new_values = [leaf ** value for value, leaf in zip(new_values, \
+                                                   self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values,
+                      is_leaf = lambda leaf: leaf is None)
+
+
+    def min(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        new_values = [np.minimum(leaf, value) for value, leaf in \
+                                  zip(new_values, self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values,
+                      is_leaf = lambda leaf: leaf is None)
+
+
+    def max(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        new_values = [np.maximum(leaf, value) for value, leaf in \
+                                  zip(new_values, self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values,
+                      is_leaf = lambda leaf: leaf is None)
+
+
+    def apply(self, path, fn, map=None):
+        """
+
+        """
+        new_paths, new_fns = self._format(path, fn, map)
+        new_values = [fn(leaf) for fn, leaf in zip(new_fns, \
+                                               self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values,
+                      is_leaf = lambda leaf: leaf is None)
+
+
+    def apply_args(self, path, fn, args, map=None):
+        """
+
+        """
+        new_paths, new_fns = self._format(path, fn, map)
+        new_paths, new_args = self._format(path, args, map)
+        new_values = [fn(leaf, *args) for fn, args, leaf in zip(new_fns, \
+                                        new_args, self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values,
+                      is_leaf = lambda leaf: leaf is None)
 
 
     #########################
@@ -456,9 +664,6 @@ class Base(ABC, Module):
             Whatever object is returned by model_fn
         """
         return getattr(self.set(paths, values, map), model_fn)(*args, **kwargs)
-        # return getattr(
-        #     self.update_leaves(paths, values, path_dict=path_dict), \
-        #         model_fn)(*args, **kwargs)
 
 
     #######################
@@ -497,212 +702,6 @@ class Base(ABC, Module):
             Whatever object is returned by model_fn
         """
         return getattr(self.apply(paths, fns, map), model_fn)(*args, **kwargs)
-        # return getattr(
-        #     self.apply_to_leaves(paths, fns, path_dict=path_dict), \
-        #                          model_fn)(*args, **kwargs)
-
-
-    def _unwrap(self, paths, values = None, map = None):
-        """
-
-        """
-        # Get keys
-        keys = map.keys() if map is not None else []
-
-        # Inititalise empty lists
-        paths_out, values_out = [], []
-
-        # Make sure values is list
-        values = values if isinstance(values, list) else [values]
-
-        # Repeat values to match length of paths
-        values = values * len(paths) if len(values) == 1 else values
-        assert len(values) == len(paths), ("Something odd has happened.")
-
-        # Iterate over paths and values
-        for path, value in zip(paths, values):
-
-            # Recurse and add in the case of list inputs
-            if isinstance(path, list):
-                new_paths, new_values = self._unwrap(path, [value], map)
-                paths_out  += new_paths
-                values_out += new_values
-
-            # Get the absolute path and append
-            elif path in keys:
-                paths_out.append(map[path])
-                values_out.append(value)
-
-            # Path must already be absolute
-            else:
-                paths_out.append(path)
-                values_out.append(value)
-
-        # Return
-        return paths_out, values_out
-
-
-    def _format(self, path, value=None, map=None):
-        """
-
-        """
-        # Nested/multiple inputs
-        if isinstance(path, list):
-
-            # If there is nesting, ensure correct dis
-            if len(path) > 1 and value is not None \
-                and True in [isinstance(p, list) for p in path]:
-                assert isinstance(value, list) and len(value) == len(path), \
-                ("If a list of paths is provided, the list of values must be "
-                 "of equal length.")
-
-            # Its a list - iterate and unbind all the keys
-            flat_paths, new_values = self._unwrap(path, value, map)
-
-            # Turn into seperate strings
-            new_paths = [path.split('.') if '.' in path else [path] for path in flat_paths]
-
-        # Un-nested/singular input
-        else:
-            # Get from dict if it extsts
-            keys = map.keys() if map is not None else []
-            path = map[path] if path in keys else path
-
-            # Turn into seperate strings
-            new_paths = [path.split('.') if '.' in path else [path]]
-            new_values = [value]
-
-        # Return
-        return new_paths, new_values
-
-
-    def get(self : Pytree, path : str, map=None) -> Pytree:
-        """
-
-        """
-        new_paths, _ = self._format(path, map=map)
-        values = self._get_leaves(new_paths)
-        return values[0] if len(new_paths) == 1 else values
-
-
-    def set(self  : Pytree,
-            path  : Union[str, list],
-            value : Union[object, list],
-            map   : dict = None) -> Pytree:
-        """
-
-        """
-        new_paths, new_values = self._format(path, value, map)
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, new_values)
-
-
-    def apply(self, path, fn, map=None):
-        """
-
-        """
-        new_paths, new_fns = self._format(path, fn, map)
-        new_values = [fn(leaf) for fn, leaf in zip(new_fns, \
-                                               self._get_leaves(new_paths))]
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, new_values)
-
-
-    def apply_args(self, path, fn, args, map=None):
-        """
-
-        """
-        new_paths, new_fns = self._format(path, fn, map)
-        new_paths, new_args = self._format(path, args, map)
-        new_values = [fn(leaf, *args) for fn, args, leaf in zip(new_fns, \
-                                        new_args, self._get_leaves(new_paths))]
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, new_values)
-
-
-    def add(self, path, value, map=None):
-        """
-
-        """
-        new_paths, new_values = self._format(path, value, map)
-        updated_values = [leaf + value for value, leaf in zip(new_values, \
-                                                   self._get_leaves(new_paths))]
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, updated_values)
-
-
-    def multiply(self, path, value, map=None):
-        """
-
-        """
-        new_paths, new_values = self._format(path, value, map)
-        updated_values = [leaf * value for value, leaf in zip(new_values, \
-                                                   self._get_leaves(new_paths))]
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, updated_values)
-
-
-    def divide(self, path, value, map=None):
-        """
-
-        """
-        new_paths, new_values = self._format(path, value, map)
-        updated_values = [leaf / value for value, leaf in zip(new_values, \
-                                                   self._get_leaves(new_paths))]
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, updated_values)
-
-
-    def power(self, path, value, map=None):
-        """
-
-        """
-        new_paths, new_values = self._format(path, value, map)
-        updated_values = [leaf ** value for value, leaf in zip(new_values, \
-                                                   self._get_leaves(new_paths))]
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, updated_values)
-
-
-    def min(self, path, value, map=None):
-        """
-
-        """
-        new_paths, new_values = self._format(path, value, map)
-        updated_values = [np.minimum(leaf, value) for value, leaf in \
-                                  zip(new_values, self._get_leaves(new_paths))]
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, updated_values)
-
-
-    def max(self, path, value, map=None):
-        """
-
-        """
-        new_paths, new_values = self._format(path, value, map)
-        updated_values = [np.maximum(leaf, value) for value, leaf in \
-                                  zip(new_values, self._get_leaves(new_paths))]
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, updated_values)
-
 
 
     # Method 1, get first
@@ -832,23 +831,27 @@ class Instrument(Base):
     Attributes
     ----------
     optics : Optics
-        A dLux.base.Optics object that defines some optical configuration.
+        A Optics object that defines some optical configuration.
     sources : Scene
-        A dLux.base.Scene that stores the various source objects that the
+        A Scene that stores the various source objects that the
         instrument is observing.
     detector : Detector
-        A dLux.base.Detector object that is used to model the various
+        A Detector object that is used to model the various
         instrumental effects on a psf.
     filter : Filter
-        A dLux.base.Filter object that is used to model the effective
+        A Filter object that is used to model the effective
         throughput of each wavelength though the optical system.
+    observation : dict
+        A dictionary that must have the keys 'fn' and 'args'. The 'fn' key must
+        refer to a function that takes in the argument stored in 'args'. This
+        is to allow flexibility in the different kind of observations, ie
+        applying dithers, switching filters, etc.
     """
-    optics   : Optics
-    scene    : Scene
-    detector : Detector
-    filter   : Filter
-
-    observation : None
+    optics      : Optics
+    scene       : Scene
+    detector    : Detector
+    filter      : Filter
+    observation : dict
 
 
     def __init__(self     : Instrument,
@@ -864,7 +867,8 @@ class Instrument(Base):
                  sources         : list = None,
                  detector_layers : list = None,
 
-                 # Observation :
+                 # Obervation
+                 observation : dict = None,
                  ) -> Instrument:
         """
         Constructor for the Instrument class.
@@ -872,19 +876,19 @@ class Instrument(Base):
         Parameters
         ----------
         optics : Optics, = None
-            A pre-configured dLux.base.Optics object. Can not be specified if
+            A pre-configured Optics object. Can not be specified if
             optical layers in specified.
         optical_layers : list, = None
             A list of dLux optical layer classes that define the optical
             transformations within some optical configuration. Can not be
             specified if optics is specified.
         scene : Scene, = None
-            A pre-configured dLux.base.Scene object. Can not be specified if
+            A pre-configured Scene object. Can not be specified if
             sources is specified.
         sources : list, = None
             A list of dLux source objects that the telescope is observing.
         detector : Detector = None
-            A pre-configured dLux.base.Detector object. Can not be specified if
+            A pre-configured Detector object. Can not be specified if
             detector_layers is specified.
         detector_layers : list = None
             An list of dLux detector layer classes that define the instrumental
@@ -893,6 +897,11 @@ class Instrument(Base):
         filter : Filter = None
             A Filter object that is used to model the effective throughput of
             each wavelength though the Instrument.
+        observation : dict = None
+            A dictionary that must have the keys 'fn' and 'args'. The 'fn' key
+            must refer to a function that takes in the argument stored in
+            'args'. This is to allow flexibility in the different kind of
+            observations, ie applying dithers, switching filters, etc.
         """
         # Optics
         if optics is None and optical_layers is None:
@@ -902,7 +911,7 @@ class Instrument(Base):
             "specified, not both.")
         elif optics is not None and optical_layers is None:
             assert isinstance(optics, Optics), "If optics is specified "
-            "it must a dLux.base.Optics object."
+            "it must a Optics object."
             self.optics = optics
         elif optics is None and optical_layers is not None:
             assert isinstance(optical_layers, list), "If optical_layers is "
@@ -920,7 +929,7 @@ class Instrument(Base):
             "specified, not both.")
         elif detector is not None and detector_layers is None:
             assert isinstance(detector, Detector), "If detector is specified "
-            "it must a dLux.base.Detector object."
+            "it must a Detector object."
             self.detector = detector
         elif detector is None and detector_layers is not None:
             assert isinstance(detector_layers, list), "If detector_layers is "
@@ -938,7 +947,7 @@ class Instrument(Base):
             "specified, not both.")
         elif scene is not None and sources is None:
             assert isinstance(scene, Scene), "If scene is specified it must a "
-            "dLux.base.Scene object."
+            "Scene object."
             self.scene = scene
         elif scene is None and sources is not None:
             assert isinstance(sources, list), "If sources is specified it "
@@ -952,23 +961,77 @@ class Instrument(Base):
         if filter is None:
             self.filter = None
         else:
-            assert isinstance(filter, dLux.base.Filter), \
-            ("filter must be a dLux.base.Filter object.")
+            assert isinstance(filter, Filter), \
+            ("filter must be a Filter object.")
             self.filter = filter
 
-        # self.observation = lambda x: x
-        # self.observation = {lambda x: x}
-        self.observation = {}
+        if observation is not None:
+            assert isinstance(observation, dict) and \
+            'fn' in observation.keys() and 'args' in observation.keys(), \
+            ("observation must be a dictionary with the keys 'fn' and 'args'.")
+        self.observation = observation
 
 
-    # def observe(self, *args, **kwargs):
-        # return self.observation(self, *args, **kwargs)
+    def observe(self : Instrument) -> Any:
+        """
+        Call the function stored within the observation attribute at key 'fn',
+        passing in the instrument (self) as the first argument and 'args' as
+        the second.
 
-    def observe(self):
-        fn = self.observation['fn']
-        args = self.observation['args']
-        return fn(self, args)
+        Returns
+        -------
+         : Any
+            The output of the function store in the observation at 'fn' with
+            arguments (instrument, observation['args']).
+        """
+        return self.observation['fn'](self, self.observation['args'])
 
+
+    def dither_position(self : Instrument, dither : Array) -> Instrument:
+        """
+        Dithers the position of the source objects by dither.
+
+        Parameters
+        ----------
+        dither : Array, radians
+            The (x, y) dither to apply to the source positions.
+
+        Returns
+        -------
+        instrument : Instrument
+            The instrument with the sources dithered.
+        """
+        assert dither.shape == (2,), ("dither must have shape (2,) ie (x, y)")
+        # Define the dither function
+        dither_fn = lambda source: source.add('position', dither)
+
+        # Map the dithers across the sources
+        dithered_sources = tree_map(dither_fn, self.scene.sources, \
+                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
+
+        # Apply updates
+        return tree_at(lambda instrument: instrument.scene.sources, self, \
+                       dithered_sources)
+
+
+    @partial(vmap, in_axes=(None, 0))
+    def dither_and_model(self, dithers):
+        """
+        Applies a series of dithers to the instrument sources and calls the
+        .model() method after applying each dither.
+
+        Parameters
+        ----------
+        dithers : Array, radians
+            The array of dithers to apply to the source positions.
+
+        Returns
+        -------
+        psfs : Array
+            The psfs generated after applying the dithers to the source
+            positions.
+        """
+        return self.dither_position(dithers).model()
 
 
     def __getattr__(self : Instrument, key : str) -> object:
@@ -1040,7 +1103,7 @@ class Instrument(Base):
             The scene to observe. Defaults to the internally stored value.
         sources : Union[dict, list, tuple) = None
             The sources to observe.
-        source : Source = None
+        source : dLux.sources.Source = None
             The source to observe.
         normalise_sources : bool = True
             Whether to normalise the sources before modelling. Default is True.
@@ -1102,8 +1165,8 @@ class Optics(Base):
 
         # Ensure all entries are dLux layers
         for layer in layers:
-            assert isinstance(layer, dLux.layers.OpticalLayer), ("All entries" \
-            " within layers must be a dLux.layers.OpticalLayer object")
+            assert isinstance(layer, dLux.optics.OpticalLayer), ("All entries" \
+            " within layers must be an dLux.optics.OpticalLayer object")
 
         self.layers = dLux.utils.list_to_dictionary(layers)
 
@@ -1315,7 +1378,7 @@ class Optics(Base):
             The scene to observe. Defaults to the internally stored value.
         sources : Union[dict, list, tuple) = None
             The sources to observe.
-        source : Source = None
+        source : dLux.sources.Source = None
             The source to observe.
         normalise_sources : bool = True
             Whether to normalise the sources before modelling. Default is True.
@@ -1339,7 +1402,7 @@ class Optics(Base):
 class Scene(Base):
     """
     A high level class representing some 'astrophysical scene', which is
-    composed of Sources.
+    composed of dLux.sources.Sources.
 
     Attributes
     ----------
@@ -1363,10 +1426,10 @@ class Scene(Base):
         assert isinstance(sources, list), ("Input sources must be a list, it" \
         " is automatically converted to a dictionary.")
 
-        # Ensure all entries are dLux Sources
+        # Ensure all entries are dLux dLux.sources.Sources
         for source in sources:
             assert isinstance(source, dLux.sources.Source), ("All entries " \
-            "within sources must be a dLux.source.Source object.")
+            "within sources must be a dLux.sources.Source object.")
 
         self.sources = dLux.utils.list_to_dictionary(sources, ordered=False)
 
@@ -1473,7 +1536,7 @@ class Detector(Base):
         Parameters
         ----------
         layers : list
-            An list of dLux detector layer classes that define the instrumental 
+            An list of dLux detector layer classes that define the instrumental
             effects for some detector.
         """
         # Ensure input is a list
@@ -1482,9 +1545,9 @@ class Detector(Base):
 
         # Ensure all entries are dLux layers
         for layer in layers:
-            assert isinstance(layer, dLux.detectors.DetectorLayer), ("All " \
-            "entries within layers must be a dLux.detectors.DetectorLayer " \
-            "object.")
+            assert isinstance(layer, dLux.detectors.DetectorLayer), \
+            ("All entries within layers must be a "
+             "dLux.detectors.DetectorLayer object.")
 
         # Construct layers
         self.layers = dLux.utils.list_to_dictionary(layers)
@@ -1591,7 +1654,7 @@ class Detector(Base):
             The scene to observe. Defaults to the internally stored value.
         sources : Union[dict, list, tuple) = None
             The sources to observe.
-        source : Source = None
+        source : dLux.sources.Source = None
             The source to observe.
         normalise_sources : bool = True
             Whether to normalise the sources before modelling. Default is True.
@@ -2071,7 +2134,7 @@ class Filter(Base):
             The scene to observe. Defaults to the internally stored value.
         sources : Union[dict, list, tuple) = None
             The sources to observe.
-        source : Source = None
+        source : dLux.sources.Source = None
             The source to observe.
         normalise_sources : bool = True
             Whether to normalise the sources before modelling. Default is True.

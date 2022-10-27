@@ -329,7 +329,7 @@ class Rotate(DetectorLayer):
         """
         super().__init__(name)
         self.angle = np.asarray(angle, dtype=float)
-        assert self.angle.nidm == 0, ("angle must be scalar array.")
+        assert self.angle.ndim == 0, ("angle must be scalar array.")
 
 
     def __call__(self : DetectorLayer, image : Array) -> Array:
