@@ -65,32 +65,24 @@ nav:
         - model:     base/model.md
         - Optical System (depreceated): base/optical_system.md
 
-    - Layers:
-        - Create Wavefront:    layers/create_wavefront.md
-        - Normalise Wavefront: layers/normalise_wavefront.md
-        - Tilt Wavefront:      layers/tilt_wavefront.md
-        - Circular Aperture:   layers/circular_aperture.md
-        - Compound Aperture:   layers/compound_aperture.md
-        - Transmissive Optic:  layers/transmissive_optic.md
-        - Add Phase:           layers/add_phase.md
-        - Add OPD:             layers/add_opd.md
-        - Apply Basis OPD:     layers/apply_basis_opd.md
-        - Apply Basis CLIMB:   layers/apply_basis_climb.md
+    - Optical Layers:
+        - Create Wavefront:    optics/create_wavefront.md
+        - Normalise Wavefront: optics/normalise_wavefront.md
+        - Tilt Wavefront:      optics/tilt_wavefront.md
+        - Circular Aperture:   optics/circular_aperture.md
+        - Compound Aperture:   optics/compound_aperture.md
+        - Transmissive Optic:  optics/transmissive_optic.md
+        - Add Phase:           optics/add_phase.md
+        - Add OPD:             optics/add_opd.md
+        - Apply Basis OPD:     optics/apply_basis_opd.md
+        - Apply Basis CLIMB:   optics/apply_basis_climb.md
 
-    - Propagators:
-        # - Abstract Propagators:
-        #     - Prpoagator:        propagators/abstract/propagator.md
-        #     - Variable Sampling: propagators/abstract/variable_sampling_propagator.md
-        #     - Fixed Sampling:    propagators/abstract/fixed_sampling_propagator.md
-        #     - Angular:           propagators/abstract/angular_propagator.md
-        #     - Cartesian:         propagators/abstract/cartesian_propagator.md
-        #     - Far Field Fresnel: propagators/abstract/far_field_fresnel.md
-        # - Concrete Propagators:
-        - Cartesian MFT:     propagators/concrete/cartesian_mft.md
-        - Angular MFT:       propagators/concrete/angular_mft.md
-        - Cartesian FFT:     propagators/concrete/cartesian_fft.md
-        - Angular FFT:       propagators/concrete/angular_fft.md
-        - Cartesian Fresnel: propagators/concrete/cartesian_fresnel.md
+        - Propagators:
+            - Cartesian MFT:     propagators/concrete/cartesian_mft.md
+            - Angular MFT:       propagators/concrete/angular_mft.md
+            - Cartesian FFT:     propagators/concrete/cartesian_fft.md
+            - Angular FFT:       propagators/concrete/angular_fft.md
+            - Cartesian Fresnel: propagators/concrete/cartesian_fresnel.md
 
     - Wavefronts:
         - Wavefront:                   wavefronts/wavefront.md
@@ -121,6 +113,7 @@ nav:
     - Utils:
         - Models:
             - simple optical system: utils/models/simple_optical_system.md
+            - toliman:               utils/models/toliman.md
         - Units:
             - radians to arcseconds: utils/units/radians_to_arcseconds.md
             - arcseconds to radians: utils/units/arcseconds_to_radians.md

@@ -8,35 +8,6 @@ __all__ = ["simple_optical_system", "toliman"]
 Array = np.ndarray
 
 
-def toliman(wavefront_npixels         : int,
-            detector_npixels          : int,
-            aperture_diameter         : Array = 0.125,
-            secondary_mirror_diameter : Array = 0.025,
-            detector_pixel_size       : Array = 1.,
-            angular                   : bool  = True,
-            focal_length              : Array = None,
-            nzernike                  : int   = None,
-            zernike_coefficients      : Array = None,
-            extra_layers              : list  = None,
-            return_layers             : bool  = False):
-    """
-    Gets a simple Toliman Optical System
-    """
-    return simple_optical_system(
-                        aperture_diameter,
-                        wavefront_npixels,
-                        detector_npixels,
-                        detector_pixel_size=detector_pixel_size,
-                        angular=angular,
-                        focal_length=focal_length,
-                        secondary_mirror_diameter=secondary_mirror_diameter,
-                        nzernike=nzernike,
-                        zernike_coefficients=zernike_coefficients,
-                        extra_layers=extra_layers,
-                        return_layers=return_layers
-                        )
-
-
 def simple_optical_system(aperture_diameter         : Array,
                           wavefront_npixels         : int,
                           detector_npixels          : int,
@@ -171,3 +142,64 @@ def simple_optical_system(aperture_diameter         : Array,
 
     # Return optics or layers
     return layers if return_layers else dLux.base.Optics(layers)
+
+
+def toliman(wavefront_npixels         : int,
+            detector_npixels          : int,
+            aperture_diameter         : Array = 0.125,
+            secondary_mirror_diameter : Array = 0.025,
+            detector_pixel_size       : Array = 0.5,
+            angular                   : bool  = True,
+            focal_length              : Array = None,
+            nzernike                  : int   = None,
+            zernike_coefficients      : Array = None,
+            extra_layers              : list  = None,
+            return_layers             : bool  = False):
+    """
+    Gets a simple Toliman optical system by calling the simple_optical_system
+    function with pre-loaded values.
+
+    Parameters
+    ----------
+    wavefront_npixels : int
+        The number of pixel used to represent the wavefront.
+    detector_npixels : int
+        The number of pixel of the detector
+    aperture_diameter : Array, meters = 0.125
+        The diameter of the optical system aperture.
+    secondary_mirror_diameter : Array = 0.025
+        The diameter of the secondary mirror obscuration.
+    detector_pixel_size : Array, arcseconds/pixel or meters/pixel = 0.5
+        The size of the detector pixels. Taken in units of arcseconds per pixel
+        if anuglar == True, else units are taken in meters per pixel.
+    angular : bool = True
+        Whether to use angular (radians) or cartesian (meters) units.
+    focal_length : Array = None
+        The focal length of the optical system. This paramter is only used if
+        angular == False.
+    nzernike : int = None
+        The number of zernike terms to use. Ignore piston tip tilt.
+    zernike_coefficients : Array = None
+        The values of the zernike coefficients. Only used if nzerike == None.
+    extra_layers : list = None
+        The extra layers to add to the optical system.
+    return_layers : bool = False
+        Should the function return the layers, or an Optics class.
+
+    Returns
+    -------
+    optics : OpticalSystem
+        The optical system with the optical layers loaded.
+    """
+    return simple_optical_system(
+                        aperture_diameter,
+                        wavefront_npixels,
+                        detector_npixels,
+                        detector_pixel_size=detector_pixel_size,
+                        angular=angular,
+                        focal_length=focal_length,
+                        secondary_mirror_diameter=secondary_mirror_diameter,
+                        nzernike=nzernike,
+                        zernike_coefficients=zernike_coefficients,
+                        extra_layers=extra_layers,
+                        return_layers=return_layers)
