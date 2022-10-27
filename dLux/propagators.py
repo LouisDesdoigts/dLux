@@ -15,7 +15,7 @@ Array = np.ndarray
 ########################
 ### Abstract Classes ###
 ########################
-class Propagator(dLux.layers.OpticalLayer, ABC):
+class Propagator(dLux.optics.OpticalLayer, ABC):
     """
     An abstract class to store the various properties of the propagation of
     some wavefront.
