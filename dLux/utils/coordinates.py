@@ -123,7 +123,7 @@ def get_polar_positions(npixels        : int,
         The (r, phi) array of the radial coordinates.
     """
     positions = get_pixel_positions(npixels, x_pixel_offset, y_pixel_offset)
-    return dLux.utils.helpers.cart2polar(positions[0], positions[1])
+    return cartesian_to_polar(positions)
 
 
 ### Coordinate Calculations ###
@@ -193,10 +193,10 @@ def get_polar_coordinates(npixels     : int,
         The number of pixels along one edge of the square array.
     pixel_scale : Array, meters
         The physical size of each pixel
-    x_pixel : Array = np.array(0.).
+    x_offset : Array = np.array(0.).
         The x offset of the centre of the coordinate system in the
         square output array.
-    y_pixel : Array = np.array(0.)
+    y_offset : Array = np.array(0.)
         The y offset of the centre of the coordinate system in the
         square output array.
 

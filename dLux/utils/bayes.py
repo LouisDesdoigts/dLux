@@ -14,7 +14,7 @@ Array = np.ndarray
 def poisson_likelihood(X         : Array,
                        data      : Array,
                        model     : object,
-                       update_fn : Callable
+                       update_fn : Callable,
                        model_fn  : str,
                        *args,
                        **kwargs) -> Array:
@@ -49,7 +49,7 @@ def poisson_likelihood(X         : Array,
 def poisson_log_likelihood(X         : Array,
                            data      : Array,
                            model     : object,
-                           update_fn : Callable
+                           update_fn : Callable,
                            model_fn  : str,
                            *args,
                            **kwargs) -> Array:
@@ -85,7 +85,7 @@ def poisson_log_likelihood(X         : Array,
 def chi2_likelihood(X         : Array,
                     data      : Array,
                     model     : object,
-                    update_fn : Callable
+                    update_fn : Callable,
                     model_fn  : str,
                     *args,
                     **kwargs) -> Array:
@@ -120,7 +120,7 @@ def chi2_likelihood(X         : Array,
 def chi2_log_likelihood(X         : Array,
                         data      : Array,
                         model     : object,
-                        update_fn : Callable
+                        update_fn : Callable,
                         model_fn  : str,
                         *args,
                         **kwargs) -> Array:
