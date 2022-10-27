@@ -7,8 +7,8 @@ from abc import ABC, abstractmethod
 import dLux
 
 
-__all__ = ["PointSource", "ArrayDistribution", "BinarySource",
-           "PointExtendedSource", "PointAndExtendedSource"]
+__all__ = ["PointSource", "MultiPointSource", "ArrayDistribution",
+           "BinarySource", "PointExtendedSource", "PointAndExtendedSource"]
 
 
 Array = np.ndarray
@@ -59,23 +59,23 @@ class Source(dLux.base.Base, ABC):
 
 
     def __init__(self     : Source,
-                 position : Array,
-                 flux     : Array,
-                 spectrum : Spectrum,
-                 name     : str = 'Source') -> Source:
+                 position : Array    = None,
+                 flux     : Array    = None,
+                 spectrum : Spectrum = None,
+                 name     : str      = 'Source') -> Source:
         """
         Constructor for the Source class.
 
         Parameters
         ----------
-        position : Array, radians
+        position : Array, radians = None
             The (x, y) on-sky position of this object.
-        flux : Array, photons
+        flux : Array, photons = None
             The flux of the object.
-        spectrum : Spectrum
+        spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
         name : str = 'Source'
-            The name for this object. Defaults to 'Source'
+            The name for this object.
         """
         self.position = np.asarray(position, dtype=float)
         self.flux     = np.asarray(flux,     dtype=float)
@@ -83,22 +83,24 @@ class Source(dLux.base.Base, ABC):
         self.name     = name
 
         # Input position checking
-        assert self.position.ndim == 1, \
-        ("position must be a 1d array.")
-        assert self.position.shape == (2,), \
-        ("positions must be shape (2,), ie (x, y).")
-        assert not np.isnan(self.position).any(), \
-        ("position must not be nan.")
-        assert not np.isinf(self.position).any(), \
-        ("position must be not be infinite.")
+        if position is not None:
+            assert self.position.ndim == 1, \
+            ("position must be a 1d array.")
+            assert self.position.shape == (2,), \
+            ("positions must be shape (2,), ie (x, y).")
+            assert not np.isnan(self.position).any(), \
+            ("position must not be nan.")
+            assert not np.isinf(self.position).any(), \
+            ("position must be not be infinite.")
 
         # Input flux checking
-        assert self.flux.shape == (), \
-        ("flux must be a scalar, (shape == ()).")
-        assert not np.isnan(self.flux).any(), \
-        ("flux must not be nan.")
-        assert not np.isinf(self.flux).any(), \
-        ("flux must be not be infinite.")
+        if flux is not None:
+            assert self.flux.shape == (), \
+            ("flux must be a scalar, (shape == ()).")
+            assert not np.isnan(self.flux).any(), \
+            ("flux must not be nan.")
+            assert not np.isinf(self.flux).any(), \
+            ("flux must be not be infinite.")
 
         # Input spectrum checking
         assert isinstance(self.spectrum, dLux.spectrums.Spectrum), \
@@ -596,7 +598,7 @@ class PointSource(Source):
             The flux of the object.
         spectrum : Spectrum
             The spectrum of this object, represented by a Spectrum object.
-        name : str 'PointSource'
+        name : str = 'PointSource'
             The name for this object.
         """
         super().__init__(position, flux, spectrum, name=name)
@@ -632,6 +634,142 @@ class PointSource(Source):
 
         # Model Psf
         psf = propagator(wavelengths, positions, weights).sum(0)
+
+        # Apply detector if supplied
+        if detector is None:
+            return psf
+        else:
+            return detector.apply_detector(psf)
+
+
+class MultiPointSource(Source):
+    """
+    Concrete Class for multiple unresolved point source objects.
+    """
+
+
+    def __init__(self     : Source,
+                 position : Array,
+                 flux     : Array,
+                 spectrum : Spectrum,
+                 name     : str = 'MultiPointSource') -> Source:
+        """
+        Constructor for the MultiPointSource class.
+
+        Parameters
+        ----------
+        position : Array, radians
+            The ((x0, y0), (x1, y1), ...) on-sky positions of these sourcese.
+        flux : Array, photons
+            The fluxes of the sources.
+        spectrum : Spectrum
+            The spectrum of this object, represented by a Spectrum object.
+            Every source in this class will have an identical spectrum.
+        name : str = 'MultiPointSource'
+            The name for this object.
+        """
+        # Only call super, not __init__ since we are overwriting all the attrs
+        super().__init__(spectrum=spectrum, name=name)
+
+        self.position = np.asarray(position, dtype=float)
+        self.flux     = np.asarray(flux,     dtype=float)
+
+        # Input position checking
+        assert self.position.ndim == 2, \
+        ("position must be a 2d array.")
+        assert self.position.shape[-1] == 2, \
+        ("positions must be shape (nstars, 2), ie [(x0, y0), (x1, y1), ...].")
+        assert not np.isnan(self.position).any(), \
+        ("position must not be nan.")
+        assert not np.isinf(self.position).any(), \
+        ("position must be not be infinite.")
+
+        # Input flux checking
+        assert self.flux.ndim == 1, \
+        ("flux must be a 1d array.")
+        assert not np.isnan(self.flux).any(), \
+        ("flux must not be nan.")
+        assert not np.isinf(self.flux).any(), \
+        ("flux must be not be infinite.")
+
+        # Ensure same dimensionality
+        assert self.flux.shape[0] == self.position.shape[0], ("position and "
+        "flux must have the same length leading dimension, ie nstars")
+
+
+    ### Start Setter Methods ###
+    def set_flux(self : Source, flux : Array) -> Source:
+        """
+        Setter method for the fluxes.
+
+        Parameters
+        ----------
+        flux : Array, photons
+            The fluxes of these sources.
+
+        Returns
+        -------
+        source : Source
+            The source object with the updated flux parameter.
+        """
+        assert isinstance(flux, Array) and flux.ndim == 1, \
+        ("flux must be a 1d array.")
+        return tree_at(lambda source : source.flux, self, flux)
+
+
+    def set_position(self : Source, position : Array) -> Source:
+        """
+        Setter method for the position.
+
+        Parameters
+        ----------
+        position : Array, radians
+            The ((x0, y0), (x1, y1), ...) on-sky positions of these sourcese.
+
+        Returns
+        -------
+        source : Source
+            The source object with the updated position parameter.
+        """
+        assert isinstance(position, Array) and position.ndim == 2 and \
+        self.position.shape[-1] == 2
+        ("positions must be shape (nstars, 2), ie [(x0, y0), (x1, y1), ...].")
+        return tree_at(lambda source : source.position, self, position)
+    ### End Setter Methods ###
+
+
+    ### General Methods ###
+    def model(self      : Source,
+              optics    : Optics,
+              detector  : Detector = None,
+              filter_in : Filter   = None) -> Array:
+        """
+        Method to model the psf of the point source through the optics.
+
+        Parameters
+        ----------
+        optics : Optics
+            The optics through which to model the source objects.
+        detector : Detector = None
+            The detector object that is observing the psf.
+        filter_in : Filter = None
+            The filter through which the source is being observed.
+
+        Returns
+        -------
+        psf : Array
+            The psf of the source source modelled through the optics.
+        """
+        # Format imputs
+        wavelengths, weights, positions = \
+                            self.format_inputs(filter_in=filter_in)
+
+        # Vmap propagator
+        source_propagator = vmap(optics.propagate_mono, in_axes=(0, None, 0))
+        propagator = vmap(source_propagator, in_axes=(None, 0, 0))
+
+        # Model Psf
+        psf = propagator(wavelengths, positions, weights).sum((0, 1))
 
         # Apply detector if supplied
         if detector is None:

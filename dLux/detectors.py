@@ -364,7 +364,6 @@ class FourierRotate(DetectorLayer):
     """
     angle          : Array
     padding        : int
-    real_imaginary : bool
 
 
     def __init__(self           : DetectorLayer,
@@ -385,8 +384,8 @@ class FourierRotate(DetectorLayer):
             The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(name)
-        self.angle          = np.asarray(angle, dtype=float)
-        self.padding        = int(padding)
+        self.angle   = np.asarray(angle, dtype=float)
+        self.padding = int(padding)
         assert self.angle.nidm == 0, ("angle must be scalar array.")
 
 

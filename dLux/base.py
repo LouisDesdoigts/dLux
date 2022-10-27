@@ -257,127 +257,18 @@ class Base(ABC, Module):
             The leaf object specified at the end of the path object.
         """
         key = path[0]
-        pytree = pytree.__dict__[key] if isinstance(pytree, Module) else \
-                 pytree[key]
+        if hasattr(pytree, key):
+            pytree = getattr(pytree, key)
+        else:
+            # does theo above logic allow the removal of the .__dict__ need?
+            pytree = pytree.__dict__[key] if isinstance(pytree, Module) else \
+                     pytree[key]
 
         # Return param if at the end of path, else recurse
         return pytree if len(path) == 1 else self._get_leaf(pytree, path[1:])
 
 
-    # TODO: Re-write the logic in this a bit nice for optional values input
-    def _unwrap_paths(self      : Pytree,
-                      paths     : list_like,
-                      values    : list_like = None,
-                      path_dict : dict      = None) -> list_like:
-        """
-        Helper function designed to unwrap nested paths, while also extracting
-        the absolute paths from the path dictionary. It similarly will tile out
-        the correct value to apply for each nested path object. It outputs
-        a flat, non-nested set of absolute paths and values, as this is the
-        format required by Equinox in order to simultaneously update multiple
-        parameters.
-
-        Parameters
-        ----------
-        paths : list_like
-            A list/tuple of nested paths. Note path objects can only be
-            nested a single time.
-        values : list_like = None
-            A list/tuple of values (which can be functions) to be
-            updated/applied to the leaves specified by paths. These can not
-            be nested.
-        path_dict : dict = None
-            A dictionary of absolute paths.
-
-        Returns
-        -------
-        new_paths : list
-            A flat list of absolute paths.
-        new_values : list (if values is not None)
-            A flat list of values/functions to be updated/applied to the
-            leaves specified by new_paths.
-        """
-        new_paths = []
-        keys = list(path_dict.keys()) if path_dict is not None else []
-
-        # Only unwrap paths
-        if values is None:
-            for path in paths:
-                # Check if path has sub-paths
-                if isinstance(path[0], (list, tuple)) or path[0] in keys:
-                    # Un-nest sub paths
-                    for sub_path in path:
-                        if sub_path in keys:
-                            new_paths.append(path_dict[sub_path])
-                        else:
-                            new_paths.append(sub_path)
-                else:
-                    if path in keys:
-                        new_paths.append(path_dict[path])
-                    else:
-                        new_paths.append(path)
-
-        # Unwrap paths and values
-        else:
-            new_values = []
-            for path, value in zip(paths, values):
-                # Check if path has sub-paths
-                if isinstance(path[0], (list, tuple)) or path[0] in keys:
-                    # Un-nest sub-paths
-                    for sub_path in path:
-                        if sub_path in keys:
-                            new_paths.append(path_dict[sub_path])
-                        else:
-                            new_paths.append(sub_path)
-                        new_values.append(value)
-                else:
-                    if path in keys:
-                        new_paths.append(path_dict[path])
-                    else:
-                        new_paths.append(path)
-                    new_values.append(value)
-
-        # Wrap non-list path objects in list
-        new_paths = [
-            [path] if not isinstance(path, (list, tuple)) else path \
-                                                        for path in new_paths
-        ]
-
-        # Return values
-        if values is None:
-            return new_paths
-        else:
-            return new_paths, new_values
-
-
-    ########################
-    ### Accessor methods ###
-    ########################
-    def get_leaf(self      : Pytree,
-                 path      : Path,
-                 path_dict : dict = None) -> Leaf:
-        """
-        Returns the leaf specified by path.
-
-        Parameters
-        ----------
-        path : Path
-            The path to recurse down.
-        path_dict : dict = None
-            A dictionary of absolute paths.
-
-        Returns
-        -------
-        leaf : Leaf
-            The leaf object specified at the end of the path object.
-        """
-        new_path = self._unwrap_paths([path], path_dict=path_dict)[0]
-
-        # Get the leaf
-        return self._get_leaf(self, new_path)
-
-
-    def get_leaves(self      : Pytree,
+    def _get_leaves(self      : Pytree,
                    paths     : list_like,
                    path_dict : dict = None) -> list:
         """
@@ -396,92 +287,15 @@ class Base(ABC, Module):
         leaves : list
             The list of leaf objects specified by the paths object
         """
-        # Unwrap paths
-        new_paths = self._unwrap_paths(paths, path_dict=path_dict)
-        return [self._get_leaf(self, path) for path in new_paths]
-
-
-    #######################
-    ### Updater methods ###
-    #######################
-    def update_leaves(self      : Pytree,
-                      paths     : list_like,
-                      values    : list_like,
-                      path_dict : dict = None) -> Pytree:
-        """
-        Returns an updated version of the pytree with the leaves speficied by
-        paths updated with the values in values.
-
-        Parameters
-        ----------
-        paths : list_like
-            A list/tuple of nested paths. Note path objects can only be
-            nested a single time.
-        values : list_like
-            A list/tuple of new values to be applied to the leaves
-            specified by paths. These can not be nested.
-        path_dict : dict = None
-            A dictionary of absolute paths.
-
-        Returns
-        -------
-        pytree : Pytree
-            An updated version of the current pytree
-        """
-        # Unwrap paths
-        new_paths, new_values = self._unwrap_paths(
-            paths, values=values, path_dict=path_dict
-        )
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, new_values)
-
-
-    def apply_to_leaves(self      : Pytree,
-                        paths     : list_like,
-                        fns       : list_like,
-                        path_dict : dict = None) -> Pytree:
-        """
-        Returns an updated version of the pytree with the the input functions
-        applied to the leaves speficied by the paths.
-
-        Parameters
-        ----------
-        paths : list_like
-            A list/tuple of nested paths. Note path objects can only be
-            nested a single time.
-        fns : list_like
-            A list/tuple of functions to be applied to the leaves specified
-            by paths. These can not be nested.
-        path_dict : dict = None
-            A dictionary of absolute paths.
-
-        Returns
-        -------
-        pytree : Pytree
-            An updated version of the current pytree.
-        """
-        # Unwrap paths
-        new_paths, new_fns = self._unwrap_paths(paths, values=fns, \
-                                                path_dict=path_dict)
-
-        # Call using the get_leaves function in order to properly apply path 
-        # dictionary
-        new_values = [fn(leaf) for fn, leaf in zip(new_fns, \
-                                                   self.get_leaves(new_paths))]
-
-        # Define 'where' function and update pytree
-        get_leaves_fn = lambda pytree: pytree.get_leaves(new_paths)
-        return tree_at(get_leaves_fn, self, new_values)
+        return [self._get_leaf(self, path) for path in paths]
 
 
     #########################
     ### Equinox functions ###
     #########################
-    def get_filter_spec(self      : Pytree,
-                        paths     : list_like,
-                        path_dict : dict = None) -> Pytree:
+    def get_args(self : Pytree,
+                 path : list_like,
+                 map  : dict = None) -> Pytree:
         """
         Returns 'filter_spec' object, to be used in conjunction with the
         Equinox filter functions. A 'filter_spec' is a Pytree with a matching
@@ -506,18 +320,18 @@ class Base(ABC, Module):
             leaves
         """
         filter_spec = tree_map(lambda _: False, self)
-        values = len(paths) * [True]
-        return filter_spec.update_leaves(paths, values, path_dict=path_dict)
+        values = len(path) * [True] if path is list else True
+        return filter_spec.set(path, values)
 
 
     #######################
     ### Optax functions ###
     #######################
-    def get_param_spec(self            : Pytree,
-                       paths           : list_like,
-                       groups          : list_like,
-                       get_filter_spec : bool = False,
-                       path_dict       : dict = None) -> Pytree:
+    def get_param_spec(self     : Pytree,
+                       paths    : list_like,
+                       groups   : list_like,
+                       get_args : bool = False,
+                       map      : dict = None) -> Pytree:
         """
         Returns 'param_spec' object, to be used in conjunction with the
         Optax.multi_transform functions. The param_spec is a pytree of matching
@@ -549,22 +363,17 @@ class Base(ABC, Module):
             leaves specified by groups.
         """
         param_spec = tree_map(lambda _: "null", self)
-        param_spec = param_spec.update_leaves(paths, groups, \
-                                              path_dict=path_dict)
+        param_spec = param_spec.set(paths, groups, map)
 
-        # For some weird ass reason this works correctly but single liner
-        # doesn't
-        if not get_filter_spec:
-            return param_spec
-        else:
-            return param_spec, self.get_filter_spec(paths, path_dict=path_dict)
+        return param_spec if not get_args \
+         else (param_spec, self.get_args(paths, map))
 
 
-    def get_optimiser(self            : Pytree,
-                      paths           : list_like,
-                      optimisers      : list_like,
-                      get_filter_spec : bool = False,
-                      path_dict       : dict = None) -> object:
+    def get_optimiser(self       : Pytree,
+                      paths      : list_like,
+                      optimisers : list_like,
+                      get_args   : bool = False,
+                      map        : dict = None) -> object:
         """
         Returns an Optax.GradientTransformion object, with the optimisers
         specified by optimisers applied to the leaves specified by paths.
@@ -592,7 +401,7 @@ class Base(ABC, Module):
         """
         # Construct groups and get param_spec
         groups = [str(i) for i in range(len(paths))]
-        param_spec = self.get_param_spec(paths, groups, path_dict=path_dict)
+        param_spec = self.get_param_spec(paths, groups, map=map)
 
         # Generate optimiser dictionary
         opt_dict = dict([(groups[i], optimisers[i]) \
@@ -604,12 +413,8 @@ class Base(ABC, Module):
         # Get optimiser object
         optim = multi_transform(opt_dict, param_spec)
 
-        # For some weird ass reason this works correctly but single liner
-        # doesn't
-        if not get_filter_spec:
-            return optim
-        else:
-            return optim, self.get_filter_spec(paths, path_dict=path_dict)
+        return optim if not get_args \
+         else (optim, self.get_args(paths, map))
 
 
     #########################
@@ -619,7 +424,7 @@ class Base(ABC, Module):
                          model_fn  : str,
                          paths     : list_like,
                          values    : list_like,
-                         path_dict : dict = None,
+                         map : dict = None,
                          *args,
                          **kwargs) -> object:
         """
@@ -641,7 +446,7 @@ class Base(ABC, Module):
             a single time.
         values : list_like
             A list/tuple of new values to be applied to the leaves specified by
-            paths. These can not be nested.
+            paths.
         path_dict : dict = None
             A dictionary of absolute paths.
 
@@ -650,9 +455,371 @@ class Base(ABC, Module):
         out : object
             Whatever object is returned by model_fn
         """
-        return getattr(
-            self.update_leaves(paths, values, path_dict=path_dict), \
-                model_fn)(*args, **kwargs)
+        return getattr(self.set(paths, values, map), model_fn)(*args, **kwargs)
+        # return getattr(
+        #     self.update_leaves(paths, values, path_dict=path_dict), \
+        #         model_fn)(*args, **kwargs)
+
+
+    #######################
+    ### Other Functions ###
+    #######################
+    def apply_and_model(self      : Pytree,
+                        model_fn  : str,
+                        paths     : list_like,
+                        fns       : list_like,
+                        path_dict : dict = None,
+                        *args,
+                        **kwargs) -> object:
+        """
+        Applies the functions specified by fns to the leaves speficied by
+        paths, and then calls the function specified by the string model_fn,
+        returning whatever is returnd by the model_fn. Any extra positional
+        arguments or keyword arguments are passed through to the modelling
+        function.
+
+        Parameters
+        ----------
+        model_fn : str
+            A string specifying which model function to call.
+        paths : list_like
+            A list/tuple of nested paths. Note path objects can only be nested
+            a single time.
+        fns : list_like
+            A list/tuple of functions to be applied to the leaves specified
+            by paths.
+        path_dict : dict = None
+            A dictionary of absolute paths.
+
+        Returns
+        -------
+        out : object
+            Whatever object is returned by model_fn
+        """
+        return getattr(self.apply(paths, fns, map), model_fn)(*args, **kwargs)
+        # return getattr(
+        #     self.apply_to_leaves(paths, fns, path_dict=path_dict), \
+        #                          model_fn)(*args, **kwargs)
+
+
+    def _unwrap(self, paths, values = None, map = None):
+        """
+
+        """
+        # Get keys
+        keys = map.keys() if map is not None else []
+
+        # Inititalise empty lists
+        paths_out, values_out = [], []
+
+        # Make sure values is list
+        values = values if isinstance(values, list) else [values]
+
+        # Repeat values to match length of paths
+        values = values * len(paths) if len(values) == 1 else values
+        assert len(values) == len(paths), ("Something odd has happened.")
+
+        # Iterate over paths and values
+        for path, value in zip(paths, values):
+
+            # Recurse and add in the case of list inputs
+            if isinstance(path, list):
+                new_paths, new_values = self._unwrap(path, [value], map)
+                paths_out  += new_paths
+                values_out += new_values
+
+            # Get the absolute path and append
+            elif path in keys:
+                paths_out.append(map[path])
+                values_out.append(value)
+
+            # Path must already be absolute
+            else:
+                paths_out.append(path)
+                values_out.append(value)
+
+        # Return
+        return paths_out, values_out
+
+
+    def _format(self, path, value=None, map=None):
+        """
+
+        """
+        # Nested/multiple inputs
+        if isinstance(path, list):
+
+            # If there is nesting, ensure correct dis
+            if len(path) > 1 and value is not None \
+                and True in [isinstance(p, list) for p in path]:
+                assert isinstance(value, list) and len(value) == len(path), \
+                ("If a list of paths is provided, the list of values must be "
+                 "of equal length.")
+
+            # Its a list - iterate and unbind all the keys
+            flat_paths, new_values = self._unwrap(path, value, map)
+
+            # Turn into seperate strings
+            new_paths = [path.split('.') if '.' in path else [path] for path in flat_paths]
+
+        # Un-nested/singular input
+        else:
+            # Get from dict if it extsts
+            keys = map.keys() if map is not None else []
+            path = map[path] if path in keys else path
+
+            # Turn into seperate strings
+            new_paths = [path.split('.') if '.' in path else [path]]
+            new_values = [value]
+
+        # Return
+        return new_paths, new_values
+
+
+    def get(self : Pytree, path : str, map=None) -> Pytree:
+        """
+
+        """
+        new_paths, _ = self._format(path, map=map)
+        values = self._get_leaves(new_paths)
+        return values[0] if len(new_paths) == 1 else values
+
+
+    def set(self  : Pytree,
+            path  : Union[str, list],
+            value : Union[object, list],
+            map   : dict = None) -> Pytree:
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values)
+
+
+    def apply(self, path, fn, map=None):
+        """
+
+        """
+        new_paths, new_fns = self._format(path, fn, map)
+        new_values = [fn(leaf) for fn, leaf in zip(new_fns, \
+                                               self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values)
+
+
+    def apply_args(self, path, fn, args, map=None):
+        """
+
+        """
+        new_paths, new_fns = self._format(path, fn, map)
+        new_paths, new_args = self._format(path, args, map)
+        new_values = [fn(leaf, *args) for fn, args, leaf in zip(new_fns, \
+                                        new_args, self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, new_values)
+
+
+    def add(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        updated_values = [leaf + value for value, leaf in zip(new_values, \
+                                                   self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, updated_values)
+
+
+    def multiply(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        updated_values = [leaf * value for value, leaf in zip(new_values, \
+                                                   self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, updated_values)
+
+
+    def divide(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        updated_values = [leaf / value for value, leaf in zip(new_values, \
+                                                   self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, updated_values)
+
+
+    def power(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        updated_values = [leaf ** value for value, leaf in zip(new_values, \
+                                                   self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, updated_values)
+
+
+    def min(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        updated_values = [np.minimum(leaf, value) for value, leaf in \
+                                  zip(new_values, self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, updated_values)
+
+
+    def max(self, path, value, map=None):
+        """
+
+        """
+        new_paths, new_values = self._format(path, value, map)
+        updated_values = [np.maximum(leaf, value) for value, leaf in \
+                                  zip(new_values, self._get_leaves(new_paths))]
+
+        # Define 'where' function and update pytree
+        get_leaves_fn = lambda pytree: pytree._get_leaves(new_paths)
+        return tree_at(get_leaves_fn, self, updated_values)
+
+
+
+    # Method 1, get first
+#     def __getattr__(self, key):
+#         """
+
+#         """
+#         # Found it, nice work
+#         dict_like = self.__dict__
+#         if key in dict_like.keys():
+#             return dict_like[key]
+
+#         # Expand and iterate though items
+#         for value in dict_like.values():
+
+#             # Dictionary, call the recursive method
+#             if isinstance(value, dict):
+#                 try:
+#                     return _recurse_dict(value, key)
+#                 except ValueError as e:
+#                     pass
+
+#             # dLux object, recurse
+#             if isinstance(value, Base):
+#                 try:
+#                     return getattr(value, key)
+#                 except ValueError as e:
+#                     pass
+
+#         # Not found, raise error
+#         raise ValueError("'{}' object has no attribute '{}'"\
+#                              .format(type(self), key))
+
+
+#     def _recurse_dict(self, dict_like, key):
+#         """
+
+#         """
+#         # Return item if it exists
+#         if key in dict_like:
+#             return dict_like[key]
+
+#         # Iterate through values
+#         for value in dict_like.values():
+
+#             # Value is a dict, Recurse
+#             if isinstance(value, dict):
+#                 try:
+#                     return self._recurse_dict(value, key)
+#                 except ValueError as e:
+#                     pass
+
+#             # Value is a dLux object, recall the getattr method
+#             if isinstance(value, Base):
+#                 try:
+#                     return getattr(value, key)
+#                 except ValueError as e:
+#                     pass
+
+#         # Nothing found, raise Error
+#         raise ValueError("'{}' not found.".format(key))
+
+
+#     # Method 2, get all
+#     def __getattr__(self, key):
+#         """
+
+#         """
+#         return self._get_all(key, [])
+
+
+#     def _get_all(self, key, values):
+
+#         # Found it, nice work
+#         dict_like = self.__dict__
+#         if key in dict_like.keys():
+#             values.append(dict_like[key])
+
+#         # Expand and iterate though items
+#         for value in dict_like.values():
+
+#             # Dictionary, call the recursive method
+#             if isinstance(value, dict):
+#                 # values.append(self._recurse_dict(value, key, values))
+#                 values = self._recurse_dict(value, key, values)
+
+#             # dLux object, recurse
+#             if isinstance(value, Base):
+#                 # values.append(value._get_all(key, values))
+#                 values = value._get_all(key, values)
+
+#         return values
+
+
+#     def _recurse_dict(self, dict_like, key, values):
+#         """
+
+#         """
+#         # Return item if it exists
+#         if key in dict_like:
+#             values.append(dict_like[key])
+
+#         # Iterate through values
+#         for value in dict_like.values():
+
+#             # Value is a dict, Recurse
+#             if isinstance(value, dict):
+#                 # values.append(self._recurse_dict(value, key, values))
+#                 values = self._recurse_dict(value, key, values)
+
+#             # Value is a dLux object, recall the getattr method
+#             if isinstance(value, Base):
+#                 # values.append(value._get_all(key, values))
+#                 values = value._get_all(key, values)
+
+#         return values
+
 
 
 class Instrument(Base):
@@ -680,7 +847,8 @@ class Instrument(Base):
     scene    : Scene
     detector : Detector
     filter   : Filter
-    # Observation: Observation
+
+    observation : None
 
 
     def __init__(self     : Instrument,
@@ -788,6 +956,51 @@ class Instrument(Base):
             ("filter must be a dLux.base.Filter object.")
             self.filter = filter
 
+        # self.observation = lambda x: x
+        # self.observation = {lambda x: x}
+        self.observation = {}
+
+
+    # def observe(self, *args, **kwargs):
+        # return self.observation(self, *args, **kwargs)
+
+    def observe(self):
+        fn = self.observation['fn']
+        args = self.observation['args']
+        return fn(self, args)
+
+
+
+    def __getattr__(self : Instrument, key : str) -> object:
+        """
+        Magic method designed to allow accessing of the various items within
+        the sub-dictionaries of this class via the 'class.attribute' method.
+        It is recommended that each dictionary key in the optical layers,
+        detector layers, and scene sources are unique to prevent unexpected
+        behaviour. In the case they there are idenitcal keys across the
+        dictionaries This method prioritises searching for keys in the optical
+        layers, then detector layers, and then the scene sources.
+
+        Parameters
+        ----------
+        key : str
+            The key of the item to be searched for in the sub-dictionaries.
+
+        Returns
+        -------
+        item : object
+            The item corresponding to the supplied key in the sub-dictionaries.
+        """
+        if self.optics is not None and key in self.optics.layers.keys():
+            return self.optics.layers[key]
+        elif self.detector is not None and key in self.detector.layers.keys():
+            return self.detector.layers[key]
+        elif self.scene is not None and key in self.scene.sources.keys():
+            return self.scene.sources[key]
+        else:
+            raise ValueError("'{}' object has no attribute '{}'"\
+                             .format(type(self), key))
+
 
     def normalise(self : Instrument) -> Instrument:
         """
@@ -893,6 +1106,28 @@ class Optics(Base):
             " within layers must be a dLux.layers.OpticalLayer object")
 
         self.layers = dLux.utils.list_to_dictionary(layers)
+
+
+    def __getattr__(self : Optics, key : str) -> object:
+        """
+        Magic method designed to allow accessing of the various items within
+        the layers dictionary of this class via the 'class.attribute' method.
+
+        Parameters
+        ----------
+        key : str
+            The key of the item to be searched for in the layers dictionary.
+
+        Returns
+        -------
+        item : object
+            The item corresponding to the supplied key in the layers dictionary.
+        """
+        if key in self.layers.keys():
+            return self.layers[key]
+        else:
+            raise ValueError("'{}' object has no attribute '{}'"\
+                             .format(type(self), key))
 
 
     def propagate_mono(self       : Optics,
@@ -1136,6 +1371,29 @@ class Scene(Base):
         self.sources = dLux.utils.list_to_dictionary(sources, ordered=False)
 
 
+    def __getattr__(self : Scene, key : str) -> object:
+        """
+        Magic method designed to allow accessing of the various items within
+        the sources dictionary of this class via the 'class.attribute' method.
+
+        Parameters
+        ----------
+        key : str
+            The key of the item to be searched for in the sources dictionary.
+
+        Returns
+        -------
+        item : object
+            The item corresponding to the supplied key in the sources
+            dictionary.
+        """
+        if key in self.sources.keys():
+            return self.sources[key]
+        else:
+            raise ValueError("'{}' object has no attribute '{}'"\
+                             .format(type(self), key))
+
+
     def normalise(self : Scene) -> Scene:
         """
         Normalises the internally stores sources of the scene.
@@ -1230,6 +1488,28 @@ class Detector(Base):
 
         # Construct layers
         self.layers = dLux.utils.list_to_dictionary(layers)
+
+
+    def __getattr__(self : Detector, key : str) -> object:
+        """
+        Magic method designed to allow accessing of the various items within
+        the layers dictionary of this class via the 'class.attribute' method.
+
+        Parameters
+        ----------
+        key : str
+            The key of the item to be searched for in the layers dictionary.
+
+        Returns
+        -------
+        item : object
+            The item corresponding to the supplied key in the layers dictionary.
+        """
+        if key in self.layers.keys():
+            return self.layers[key]
+        else:
+            raise ValueError("'{}' object has no attribute '{}'"\
+                             .format(type(self), key))
 
 
     def apply_detector(self  : Instrument,

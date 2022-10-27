@@ -1,4 +1,5 @@
 import jax.numpy as np
+import dLux
 
 __all__ = ["get_GE", "get_RGE", "get_RWGE", "get_radial_mask"]
 
@@ -97,5 +98,5 @@ def get_radial_mask(npixels : int,
     mask: Array
         A mask with the the values below rmin and above rmax masked out.
     """
-    radii = dLux.utils.coordinates.get_polar_positions(npix)
+    radii = dLux.utils.coordinates.get_polar_positions(npixels)
     return np.asarray((radii < rmax) & (radii > rmin), dtype=float)

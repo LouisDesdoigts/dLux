@@ -67,9 +67,9 @@ def get_fringe_size(wavelength : Array, aperture : Array) -> Array:
     return wavelength/aperture
 
 
-def get_pixels_per_fringe(wavelength : Array,
-                          aperture : Array,
-                          pixel_scale : Array,
+def get_pixels_per_fringe(wavelength   : Array,
+                          aperture     : Array,
+                          pixel_scale  : Array,
                           focal_length : Array = None) -> Array:
     """
     Calculates the number of pixels per diffraction fringe, ie the fringe
