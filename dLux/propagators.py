@@ -678,10 +678,10 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         """
         Parameters
         ----------
-        pixel_scale_out : Array, meters/pixel
-            The pixel scale in the output plane, measured in meters per pixel.
         npixels_out : int
             The number of pixels in the output plane.
+        pixel_scale_out : Array, meters/pixel
+            The pixel scale in the output plane, measured in meters per pixel.
         focal_length : Array, meters
             The focal_length of the lens/mirror this propagator represents.
         inverse : bool = False
@@ -757,11 +757,11 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
         """
         Parameters
         ----------
+        npixels_out : int
+            The number of pixels in the output plane.
         pixel_scale_out : Array, radians/pixel, meters/pixel
             The pixel scale in the output plane, measured in meters per pixel in
             pupil planes and radians per pixel in focal planes.
-        npixels_out : int
-            The number of pixels in the output plane.
         inverse : bool = False
             Is this an 'inverse' propagation. Non-inverse propagations
             represents propagation from a pupil to a focal plane, and inverse
