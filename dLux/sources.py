@@ -272,6 +272,7 @@ class Source(dLux.base.Base, ABC):
         weights = throughput * self.get_weights() * \
                                 np.expand_dims(self.get_flux(), -1)
 
+
         return wavelengths, weights, positions
 
 
