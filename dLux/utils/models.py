@@ -93,26 +93,26 @@ def simple_optical_system(aperture_diameter         : Array,
     if extra_layers is not None:
         assert isinstance(extra_layers, list), ("extra_layers must be a list.")
         for layer in extra_layers:
-            assert isinstance(layer, dLux.layers.OpticalLayer), \
+            assert isinstance(layer, dLux.optics.OpticalLayer), \
             ("Each item in extra_layers must be a dLux OpticalLayer.")
 
     assert isinstance(return_layers, bool), "return_layers must be a boolean."
 
     # Create wavefront
     if angular:
-        layers = [dLux.layers.CreateWavefront(wavefront_npixels,
+        layers = [dLux.optics.CreateWavefront(wavefront_npixels,
                                               aperture_diameter,
                                               wavefront_type="Angular")]
     else:
-        layers = [dLux.layers.CreateWavefront(wavefront_npixels,
+        layers = [dLux.optics.CreateWavefront(wavefront_npixels,
                                               aperture_diameter)]
 
     # Aperture
     if secondary_mirror_diameter is not None:
-        layers += [dLux.layers.CompoundAperture(aperture_diameter/2,
+        layers += [dLux.optics.CompoundAperture(aperture_diameter/2,
                                     occulter_radii=secondary_mirror_diameter/2)]
     else:
-        layers += [dLux.layers.CompoundAperture(aperture_diameter/2)]
+        layers += [dLux.optics.CompoundAperture(aperture_diameter/2)]
 
     # Zernikes
     if nzernike is not None:
@@ -141,7 +141,7 @@ def simple_optical_system(aperture_diameter         : Array,
                                    focal_length)]
 
     # Return optics or layers
-    return layers if return_layers else dLux.base.Optics(layers)
+    return layers if return_layers else dLux.core.Optics(layers)
 
 
 def toliman(wavefront_npixels         : int,
