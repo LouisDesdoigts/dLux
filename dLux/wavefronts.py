@@ -26,7 +26,7 @@ class PlaneType(IntEnum):
     Intermediate = 3
 
 
-class Wavefront(dLux.base.Base, ABC):
+class Wavefront(dLux.base.ExtendedBase, ABC):
     """
     A class representing some wavefront, designed to track the various
     parameters such as wavelength, pixel_scale, amplitude and phase, as well as

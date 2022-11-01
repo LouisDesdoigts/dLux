@@ -15,7 +15,7 @@ __all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
 Array = np.ndarray
 
 
-class DetectorLayer(dLux.base.Base, ABC):
+class DetectorLayer(dLux.base.ExtendedBase, ABC):
     """
     A base Detector layer class to help with type checking throuhgout the rest
     of the software.
