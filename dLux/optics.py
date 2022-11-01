@@ -19,7 +19,7 @@ __all__ = ["CreateWavefront", "TiltWavefront", "CircularAperture",
 Array = np.ndarray
 
 
-class OpticalLayer(dLux.base.Base, ABC):
+class OpticalLayer(dLux.base.ExtendedBase, ABC):
     """
     A base Optical layer class to help with type checking throuhgout the rest
     of the software. Instantiates the apply method which inspects the function
