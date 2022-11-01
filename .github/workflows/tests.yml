@@ -26,11 +26,11 @@ jobs:
           pip install --quiet .
 
       # ===== Tests =====
-      - name: wavefront tests
-        run: pytest --quiet tests/wavefronts.py
+      - name: base tests
+        run: pytest --quiet tests/base.py
 
-      - name: propagator tests
-        run: pytest --quiet tests/propagators.py
+      - name: core tests
+        run: pytest --quiet tests/core.py
 
       - name: spectrum tests
         run: pytest --quiet tests/spectrums.py
@@ -38,5 +38,17 @@ jobs:
       - name: source tests
         run: pytest --quiet tests/sources.py
 
-      - name: source tests
-        run: pytest --quiet tests/base.py
+      - name: wavefront tests
+        run: pytest --quiet tests/wavefronts.py
+
+      - name: propagator tests
+        run: pytest --quiet tests/propagators.py
+
+      - name: optics tests
+        run: pytest --quiet tests/optics.py
+
+      - name: detector tests
+        run: pytest --quiet tests/detector.py
+
+      - name: utils tests
+        run: pytest --quiet tests/utils.py
