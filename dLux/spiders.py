@@ -17,7 +17,7 @@ import matplotlib.pyplot as pyplot
 Layer = typing.TypeVar("Layer")
 
 
-class Spider(dLux.base.Base, abc.ABC):
+class Spider(dLux.base.ExtendedBase, abc.ABC):
     """
     An abstraction on the concept of an optical spider for a space telescope.
     These are the things that hold up the secondary mirrors. For example,

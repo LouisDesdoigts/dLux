@@ -303,12 +303,12 @@ class VariableSamplingPropagator(Propagator, ABC):
         return
 
 
-    def _generate_twiddle_factors(self         : Propagator,
-                                  pixel_offset : Array,
-                                  pixel_scales : tuple,
-                                  npixels      : tuple) -> Array:
+    def _generate_transfer_matrices(self         : Propagator,
+                                    pixel_offset : Array,
+                                    pixel_scales : tuple,
+                                    npixels      : tuple) -> Array:
         """
-        The twiddle factors for the fourier transforms.
+        The transfer matrices for the fourier transforms.
 
         Parameters
         ----------
@@ -321,8 +321,8 @@ class VariableSamplingPropagator(Propagator, ABC):
 
         Returns
         -------
-        twiddle_factors : Array
-            The twiddle factors.
+        transfer_matrices : Array
+            The transfer matrices.
         """
         input_scale, output_scale = pixel_scales
         pixels_input, npixels_out = npixels
@@ -367,18 +367,18 @@ class VariableSamplingPropagator(Propagator, ABC):
         x_offset, y_offset = self.get_shift()
 
         # TODO: This can be vmapped
-        x_twiddle_factors = np.tile(self._generate_twiddle_factors(
-            x_offset, (input_scale, output_scale), 
-            (npixels_in, npixels_out)), (nfields, 1, 1))
+        x_matrix = np.tile(self._generate_transfer_matrices(
+                    x_offset, (input_scale, output_scale),
+                    (npixels_in, npixels_out)), (nfields, 1, 1))
 
-        y_twiddle_factors = np.tile(self._generate_twiddle_factors(
-            y_offset, (input_scale, output_scale), 
-            (npixels_in, npixels_out)).T, (nfields, 1, 1))
+        y_matrix = np.tile(self._generate_transfer_matrices(
+                    y_offset, (input_scale, output_scale),
+                    (npixels_in, npixels_out)).T, (nfields, 1, 1))
 
-        output_field = (y_twiddle_factors @ field) @ x_twiddle_factors
+        output_field = (y_matrix @ field) @ x_matrix
 
         normalising_factor = np.exp(np.log(self.get_nfringes(wavefront)) - \
-               (np.log(npixels_in) + np.log(npixels_out)))
+                            (np.log(npixels_in) + np.log(npixels_out)))
 
         return output_field * normalising_factor
 
@@ -397,7 +397,6 @@ class VariableSamplingPropagator(Propagator, ABC):
         wavefront : Wavefront
             The wavefront with the optical layer applied.
         """
-        # print(wavefront)
         phasor = self.propagate(wavefront)
 
         new_amplitude = np.abs(phasor)
@@ -747,6 +746,8 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
     defined in meters per pixel in pupil planes and radians/pixel in focal
     planes, with a variable output sampling in the output plane.
     """
+
+
     def __init__(self            : Propagator,
                  npixels_out     : int,
                  pixel_scale_out : Array,
