@@ -163,7 +163,8 @@ class Base(ABC, Module):
 
         # Repeat values to match length of paths
         values = values * len(paths) if len(values) == 1 else values
-        assert len(values) == len(paths), ("Something odd has happened.")
+        assert len(values) == len(paths), ("Something odd has happened, this "
+        "is likely due to a missmatch between the input paths and values.")
 
         # Iterate over paths and values
         for path, value in zip(paths, values):
