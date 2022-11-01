@@ -12,7 +12,7 @@ __all__ = ["ArraySpectrum", "PolynomialSpectrum", "CombinedSpectrum"]
 Array = np.ndarray
 
 
-class Spectrum(dLux.base.Base, ABC):
+class Spectrum(dLux.base.ExtendedBase, ABC):
     """
     Abstract base class for arbitrary spectral parametrisations.
 
