@@ -47,34 +47,34 @@ class OpticalLayer(dLux.base.ExtendedBase, ABC):
         self.name = str(name)
 
 
-    def get_name(self : OpticalLayer) -> str:
-        """
-        Accessor for the name attribute.
+#     def get_name(self : OpticalLayer) -> str:
+#         """
+#         Accessor for the name attribute.
 
-        Returns
-        -------
-        name : str
-            The name attribute for this OpticalLayer.
-        """
-        return self.name
+#         Returns
+#         -------
+#         name : str
+#             The name attribute for this OpticalLayer.
+#         """
+#         return self.name
 
 
-    def set_name(self : OpticalLayer, name : str) -> OpticalLayer:
-        """
-        Mutator for the name attribute.
+#     def set_name(self : OpticalLayer, name : str) -> OpticalLayer:
+#         """
+#         Mutator for the name attribute.
 
-        Parameters
-        ----------
-        name : str
-            The new string for the name attribute of this OpticalLayer.
+#         Parameters
+#         ----------
+#         name : str
+#             The new string for the name attribute of this OpticalLayer.
 
-        Returns
-        -------
-        optical_layer : OpticalLayer
-            The OpticalLayer with the updated name.
-        """
-        assert isinstance(name, str), ("name must be a string.")
-        return tree_at(lambda layer: layer.name, self, name)
+#         Returns
+#         -------
+#         optical_layer : OpticalLayer
+#             The OpticalLayer with the updated name.
+#         """
+#         assert isinstance(name, str), ("name must be a string.")
+#         return tree_at(lambda layer: layer.name, self, name)
 
 
     @abstractmethod
@@ -946,10 +946,10 @@ class CompoundAperture(OpticalLayer):
         wavefront : Wavefront
             The wavefront with the combined aperture applied.
         """
-        wavefront_diameter = wavefront.get_diameter()
-        wavefront_npixels = wavefront.get_npixels()
-        aper = self.construct_combined_aperture(wavefront_diameter,
-                                                wavefront_npixels)
+        # wavefront_diameter = wavefront.get_diameter()
+        # wavefront_npixels = wavefront.get_npixels()
+        aper = self.construct_combined_aperture(wavefront.diameter,
+                                                wavefront.npixels)
         return wavefront.multiply_amplitude(aper)
 
 
@@ -1176,9 +1176,11 @@ class Rotate(OpticalLayer):
         """
         # Get field
         if real_imaginary:
-            field = np.array([wavefront.get_real(), wavefront.get_imaginary()])
+            # field = np.array([wavefront.get_real(), wavefront.get_imaginary()])
+            field = np.array([wavefront.real, wavefront.imaginary])
         else:
-            field = np.array([wavefront.get_amplitude(), wavefront.get_phase()])
+            # field = np.array([wavefront.get_amplitude(), wavefront.get_phase()])
+            field = np.array([wavefront.amplitude, wavefront.phase])
 
         # Rotate
         rotator = vmap(dLux.utils.interpolation.rotate, in_axes=0)
@@ -1261,9 +1263,11 @@ class FourierRotate(OpticalLayer):
         """
         # Get field
         if real_imaginary:
-            field = np.array([wavefront.get_real(), wavefront.get_imaginary()])
+            # field = np.array([wavefront.get_real(), wavefront.get_imaginary()])
+            field = np.array([wavefront.real, wavefront.imaginary])
         else:
-            field = np.array([wavefront.get_amplitude(), wavefront.get_phase()])
+            # field = np.array([wavefront.get_amplitude(), wavefront.get_phase()])
+            field = np.array([wavefront.amplitude, wavefront.phase])
 
         # Rotate
         rotator = vmap(dLux.utils.interpolation.fourier_rotate, in_axes=0)
