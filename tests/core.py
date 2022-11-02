@@ -46,7 +46,7 @@ class DetectorUtility(Utility):
     def __init__(self : Utility) -> Utility:
         """
         Constructor for the Detector Utility.
-        """    
+        """
         self.layers = [
             dLux.detectors.AddConstant(1.)
         ]
