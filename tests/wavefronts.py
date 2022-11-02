@@ -1,26 +1,4 @@
-import jax.numpy as numpy
-import pytest
-import jax.random as random
-import typing
 
-from dLux.wavefronts import Wavefront
-from dLux import CartesianWavefront
-from dLux import AngularWavefront
-# from dLux import GaussianWavefront
-
-from utilities import WavefrontUtility
-from utilities import CartesianWavefrontUtility
-# from utilities import GaussianWavefrontUtility
-from utilities import AngularWavefrontUtility
-from utilities import UtilityUser
-
-import jax.numpy as np
-Array = np.ndarray
-
-TestWavefront = typing.NewType("TestWavefront", UtilityUser)
-TestCartesianWavefront = typing.NewType("TestCartesianWavefront", UtilityUser)
-TestAngularWavefront = typing.NewType("TestAngularWavefront", UtilityUser)
-# TestGaussianWavefront = typing.NewType("TestGaussianWavefront", UtilityUser)
 
 
 class TestWavefront(UtilityUser):
@@ -32,8 +10,15 @@ class TestWavefront(UtilityUser):
     ----------
     utility : WavefrontUtility
         A helper for generating safe test cases.
-    """    
+    """
     utility : WavefrontUtility = WavefrontUtility()
+
+
+    def test_constructor(self):
+        """
+        Tests the constructor.
+        """
+        wf = self.utility.construct()
 
 
     def test_get_wavelength(self : TestWavefront) -> None:
@@ -49,7 +34,7 @@ class TestWavefront(UtilityUser):
             .construct()
 
         assert wavefront.get_wavelength() == OUTPUT_WAVELENGTH
-            
+
 
 
     def test_set_wavelength(self : TestWavefront) -> None:

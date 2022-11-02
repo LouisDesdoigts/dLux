@@ -1,20 +1,94 @@
+from __future__ import annotations
+from utilities import Utility, UtilityUser
 import jax.numpy as np
-from utilities import *
+import dLux
 from optax import GradientTransformation
+
+
+class BaseUtility(Utility):
+    """
+    Utility for the Base class.
+    """
+    param1 : float
+    param2 : float
+
+
+    class A(dLux.base.ExtendedBase):
+        """
+        Test subclass to test the Base methods
+        """
+        param : float
+        b     : B
+
+
+        def __init__(self, param, b):
+            """
+            Constructor for the Base testing class
+            """
+            self.param = param
+            self.b = b
+
+
+        def model(self):
+            """
+            Sample modelling function
+            """
+            return self.param**2 + self.b.param**2
+
+
+    class B(dLux.base.ExtendedBase):
+        """
+        Test subclass to test the Base methods
+        """
+        param : float
+
+
+        def __init__(self, param):
+            """
+            Constructor for the Base testing class
+            """
+            self.param = param
+
+
+    def __init__(self : Utility):
+        """
+        Constructor for the Optics Utility.
+        """
+        self.param1 = 1.
+        self.param2 = 1.
+
+
+    def construct(self : Utility,
+                  param1 : float = None,
+                  param2 : float = None):
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        param1 = self.param1 if param1 is None else param1
+        param2 = self.param2 if param2 is None else param2
+        return self.A(param1, self.B(param2))
+
+
+class ExtendedBaseUtility(BaseUtility):
+    """
+    Utility for the Base class.
+    """
+    pass
+
 
 class TestBase(UtilityUser):
     """
     Tests the Base class.
     """
     utility : BaseUtility = BaseUtility()
-    
-    
+
+
     def test_unwrap(self):
         """
         Test the _unwrap method
         """
         base = self.utility.construct()
-        
+
         # Test unwrapping
         wrapped_a = ['a', ['b', ['c', ['d']]]]
         wrapped_b = [[[['a'], 'b'], 'c'], 'd']
@@ -77,8 +151,8 @@ class TestBase(UtilityUser):
         assert base._format(path_a, [1, 2])[1]       == [1, 2, 2, 2]
         assert base._format(path_b, [1, 2])[1]       == [1, 1, 1, 2]
         assert base._format(path_c, [1, 2, 3, 4])[1] == [1, 2, 3, 4]
-    
-    
+
+
     def test_get(self):
         """
         tests the get method
@@ -87,15 +161,15 @@ class TestBase(UtilityUser):
         param1 = 5.
         param2 = 10.
         base = self.utility.construct(param1, param2)
-        
+
         # Define paths
         param1_path = 'param'
         param2_path = 'b.param'
-        
+
         assert base.get(param1_path) == param1
         assert base.get(param2_path) == param2
-    
-    
+
+
     def test_set(self):
         """
         tests the set method
@@ -104,17 +178,17 @@ class TestBase(UtilityUser):
         param1 = 5.
         param2 = 10.
         base = self.utility.construct()
-        
+
         # Define paths
         p1 = 'param'
         p2 = 'b.param'
-        
+
         # Test set
         new_base = base.set([p1, p2], [param1, param2])
         assert new_base.param   == param1
         assert new_base.b.param == param2
 
-        
+
     def test_add(self):
         """
         tests the add method
@@ -123,17 +197,17 @@ class TestBase(UtilityUser):
         param1 = 5.
         param2 = 10.
         base = self.utility.construct()
-        
+
         # Define paths
         p1 = 'param'
         p2 = 'b.param'
-        
+
         # Test add
         new_base = base.add([p1, p2], [param1, param2])
         assert new_base.param   == base.get(p1) + param1
         assert new_base.b.param == base.get(p2) + param2
-        
-        
+
+
     def test_multiply(self):
         """
         tests the multiply method
@@ -142,11 +216,11 @@ class TestBase(UtilityUser):
         param1 = 5.
         param2 = 10.
         base = self.utility.construct()
-        
+
         # Define paths
         p1 = 'param'
         p2 = 'b.param'
-        
+
         # Test multiply
         new_base = base.multiply([p1, p2], [param1, param2])
         assert new_base.param   == base.get(p1) * param1
@@ -273,60 +347,60 @@ class TestExtendedBase(UtilityUser):
     Tests the ExtendedBase class.
     """
     utility : ExtendedBaseUtility = ExtendedBaseUtility()
-    
-    
+
+
     def test_get_args(self):
         """
         tests the get_filter_spec method
         """
         # Define parameters and construct base
         base = self.utility.construct()
-        
+
         # Define paths
         p1 = 'param'
         p2 = 'b.param'
-        
+
         # Test paths
         args = base.get_args([p1, p2])
         assert args.param   == True
         assert args.b.param == True
-        
-    
+
+
     def test_get_param_spec(self):
         """
         tests the get_param_spec method
         """
         # Define parameters and construct base
         base = self.utility.construct()
-        
+
         # Define paths & groups
         p1 = 'param'
         p2 = 'b.param'
         groups = ['group1', 'group2']
-        
+
         # Test paths
         param_spec = base.get_param_spec([p1, p2], groups)
         assert param_spec.param   == groups[0]
         assert param_spec.b.param == groups[1]
-    
-    
+
+
     def test_get_optimiser(self):
         """
         tests the get_optimiser method
         """
         # Define parameters and construct base
         base = self.utility.construct()
-        
+
         # Define paths & groups
         p1 = 'param'
         p2 = 'b.param'
         optimisers = ['group1', 'group2'] # These are actually arbitrary
-        
+
         # Test paths
         optim = base.get_optimiser([p1, p2], optimisers)
         assert isinstance(optim, GradientTransformation)
-    
-    
+
+
     def test_update_and_model(self):
         """
         tests the update_and_model method
@@ -335,30 +409,30 @@ class TestExtendedBase(UtilityUser):
         param1 = 2.
         param2 = 4.
         base = self.utility.construct()
-        
+
         # Define paths & groups
         p1 = 'param'
         p2 = 'b.param'
         values = [param1, param2]
-        
+
         # Test paths
         new_base = base.update_and_model("model", [p1, p2], values)
         assert new_base == param1**2 + param2**2
-        
+
     def test_apply_and_model(self):
         """
         tests the apply_and_model method
         """
         # Define parameters and construct base
         base = self.utility.construct()
-        
+
         # Define paths & groups
         p1 = 'param'
         p2 = 'b.param'
         fn1 = lambda x: x * 2.
         fn2 = lambda x: x * 4.
         fns = [fn1, fn2]
-        
+
         # Test paths
         new_base = base.apply_and_model("model", [p1, p2], fns)
         assert new_base == (base.get(p1)*2.)**2 + (base.get(p2)*4.)**2

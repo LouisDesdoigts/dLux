@@ -47,37 +47,6 @@ class Propagator(dLux.optics.OpticalLayer, ABC):
         self.inverse = bool(inverse)
 
 
-#     def is_inverse(self : Propagator) -> bool:
-#         """
-#         Accessor for the inverse attribute.
-
-#         Returns
-#         -------
-#         inverse : bool
-#             Is this an 'inverse' propagation. Non-inverse propagations represent
-#             propagation from a pupil to a focal plane, and inverse represent
-#             propagation from a focal to a pupil plane.
-#         """
-#         return self.inverse
-
-
-#     def set_inverse(self : Propagator, inverse : bool) -> Propagator:
-#         """
-#         Mutator for the inverse attribute.
-
-#         Parameters
-#         ----------
-#         inverse : bool
-#             The new value for the inverse attribute.
-
-#         Returns
-#         -------
-#         propagator : Propagator
-#             The Propagator with the updated inverse attribute.
-#         """
-#         assert isinstance(inverse, bool), "inverse must be a boolen."
-#         return tree_at(lambda propagator: propagator.inverse, self, tilt)
-
     @abstractmethod
     def propagate(self : Propagator, wavefront : Wavefront) -> Array:
         """
@@ -156,135 +125,6 @@ class VariableSamplingPropagator(Propagator, ABC):
         ("shift must be an array of shape (2,) ie (x, y).")
 
 
-#     def is_pixel_shifted(self : Propagator) -> bool:
-#         """
-#         Accessor for the pixel_shift parameter.
-
-#         Returns
-#         -------
-#         pixel_shift : bool
-
-#         """
-#         return self.pixel_shift
-
-
-#     def get_shift(self : Propagator) -> Array:
-#         """
-#         Accessor for the shift parameter.
-
-#         Returns
-#         -------
-#         shift : Array
-#             The (x, y) shift to apply to the wavefront throughout the
-#             propagation.
-#         """
-#         return self.shift
-
-
-#     def get_pixel_scale_out(self : Propagator) -> Array:
-#         """
-#         Accessor for the pixel_scale_out parameter.
-
-#         Returns
-#         -------
-#         pixel_scale_out : Array, meters/pixel or radians/pixel
-#             The pixel scale in the output plane, measured in meters or radians
-#             per pixel for Cartesian or Angular Wavefront respectively.
-#         """
-#         return self.pixel_scale_out
-
-
-#     def get_npixels_out(self : Propagator) -> int:
-#         """
-#         Accessor for the npixels_out parameter.
-
-#         Returns
-#         -------
-#         npixels_out : int
-#             The number of pixels in the output plane.
-#         """
-#         return self.npixels_out
-
-
-#     def set_shift(self : Propagator,
-#                   shift : bool) -> Propagator:
-#         """
-#         Mutator for the shift attribute.
-
-#         Parameters
-#         ----------
-#         shift : Array
-#             The new (x, y) value for the shift attribute.
-
-#         Returns
-#         -------
-#         propagator : Propagator
-#             The Propagator with the updated shift attribute.
-#         """
-#         assert isinstance(shift, Array) and shift.shape == (2,), \
-#         ("shift must be an array of shape (2,) ie (x, y).")
-#         return tree_at(lambda propagator: propagator.shift, self, shift)
-
-
-#     def set_pixel_shifted(self : Propagator, pixel_shift : bool) -> Propagator:
-#         """
-#         Mutator for the pixel_shift attribute.
-
-#         Parameters
-#         ----------
-#         pixel_shift : bool
-#             The new value for the pixel_shift attribute.
-
-#         Returns
-#         -------
-#         propagator : Propagator
-#             The Propagator with the updated pixel_shift attribute.
-#         """
-#         assert isinstance(pixel_shift, bool), "pixel_shift must be a boolean."
-#         return tree_at(lambda propagator: propagator.pixel_shift, self,
-#                                                                    pixel_shift)
-
-
-#     def set_pixel_scale_out(self            : Propagator,
-#                             pixel_scale_out : bool) -> Propagator:
-#         """
-#         Mutator for the pixel_scale_out attribute.
-
-#         Parameters
-#         ----------
-#         pixel_scale_out : Array
-#             The new value for the pixel_scale_out attribute.
-
-#         Returns
-#         -------
-#         propagator : Propagator
-#             The Propagator with the updated pixel_scale_out attribute.
-#         """
-#         assert isinstance(pixel_scale_out, Array) and \
-#         pixel_scale_out.ndim == 0, ("pixel_scale_out must be scalar array.")
-#         return tree_at(lambda propagator: propagator.pixel_scale_out, self,
-#                                                             pixel_scale_out)
-
-
-#     def set_npixels_out(self : Propagator, npixels_out : int) -> Propagator:
-#         """
-#         Mutator for the npixels_out attribute.
-
-#         Parameters
-#         ----------
-#         npixels_out : int
-#             The new value for the npixels_out attribute.
-
-#         Returns
-#         -------
-#         propagator : Propagator
-#             The Propagator with the updated npixels_out attribute.
-#         """
-#         assert isinstance(npixels_out, int), "npixels_out must be a integer."
-#         return tree_at(lambda propagator: propagator.npixels_out, self,
-#                                                                    npixels_out)
-
-
     @abstractmethod
     def get_nfringes(self : Propagator, wavefront : Wavefront) -> Array:
         """
@@ -303,7 +143,6 @@ class VariableSamplingPropagator(Propagator, ABC):
         return
 
 
-    @abstractmethod
     def get_shift(self : Propagator) -> Array:
         """
         Accessor for the shift parameter. Converts to units of pixels if the
@@ -315,7 +154,8 @@ class VariableSamplingPropagator(Propagator, ABC):
             The (x, y) shift to apply to the wavefront throughout the
             propagation.
         """
-        return
+        return self.shift if self.pixel_shift else \
+               self.shift / self.pixel_scale_out
 
 
     def _generate_transfer_matrices(self         : Propagator,
@@ -372,14 +212,11 @@ class VariableSamplingPropagator(Propagator, ABC):
         field : Array
             The normalised electric field phasor after the propagation.
         """
-        # field = wavefront.get_phasor()
         field = wavefront.phasor
         nfields = wavefront.nfields
 
-        # input_scale = 1.0 / wavefront.get_npixels()
         input_scale = 1.0 / wavefront.npixels
         output_scale = self.get_nfringes(wavefront) / self.npixels_out
-        # npixels_in = wavefront.get_npixels()
         npixels_in = wavefront.npixels
         npixels_out = self.npixels_out
         x_offset, y_offset = self.get_shift()
@@ -489,14 +326,9 @@ class FixedSamplingPropagator(Propagator, ABC):
             The normalised electric field phasor after the propagation.
         """
         if self.inverse:
-            # output_field = np.fft.fft2(np.fft.ifftshift(wavefront.get_phasor()))
             output_field = np.fft.fft2(np.fft.ifftshift(wavefront.phasor))
         else:
-            # output_field = np.fft.fftshift(np.fft.ifft2(wavefront.get_phasor()))
             output_field = np.fft.fftshift(np.fft.ifft2(wavefront.phasor))
-
-        # normalising_factor = self.inverse / wavefront.get_npixels() + \
-        #                      (1 - self.inverse) * wavefront.get_npixels()
 
         normalising_factor = self.inverse / wavefront.npixels + \
                              (1 - self.inverse) * wavefront.npixels
@@ -567,39 +399,6 @@ class CartesianPropagator(Propagator, ABC):
         assert self.focal_length.ndim == 0, ("focal_length must a scalar.")
 
 
-#     def get_focal_length(self : Propagator) -> Array:
-#         """
-#         Accessor for the focal_length parameter.
-
-#         Returns
-#         -------
-#         focal_length: Array, meters
-#             The focal length.
-#         """
-#         return self.focal_length
-
-
-#     def set_focal_length(self         : Propagator,
-#                          focal_length : bool) -> Propagator:
-#         """
-#         Mutator for the focal_length attribute.
-
-#         Parameters
-#         ----------
-#         focal_length : Array
-#             The new value for the focal_length attribute.
-
-#         Returns
-#         -------
-#         propagator : Propagator
-#             The Propagator with the updated focal_length attribute.
-#         """
-#         assert isinstance(focal_length, Array) and \
-#         focal_length.ndim == 0, ("focal_length must be scalar array.")
-#         return tree_at(lambda propagator: propagator.focal_length, self,
-#                                                                 focal_length)
-
-
 class AngularPropagator(Propagator, ABC):
     """
     A simple propagator class designed to be inhereited by propagators that
@@ -629,7 +428,7 @@ class FarFieldFresnel(Propagator, ABC):
     propagation_shift : Array
 
 
-    def __init__(self, propagation_shift, **kwargs):
+    def __init__(self, propagation_shift, **kwargs) -> Propagator:
         """
         Constructor for FarFieldFresnel propagators.
 
@@ -642,39 +441,6 @@ class FarFieldFresnel(Propagator, ABC):
         self.propagation_shift  = np.asarray(propagation_shift,  dtype=float)
         assert self.propagation_shift.ndim == 0, \
         ("propagation_shift must be scalar array.")
-
-
-#     def get_propagation_shift(self : Propagator) -> Array:
-#         """
-#         Accessor for the propagation_shift attribute.
-
-#         Returns
-#         -------
-#         propagation_shift : Array, meters
-#             The shift in the propagation distance of the wavefront.
-#         """
-#         return self.propagation_shift
-
-
-#     def set_propagation_shift(self        : Propagator,
-#                         propagation_shift : bool) -> Propagator:
-#         """
-#         Mutator for the propagation_shift attribute.
-
-#         Parameters
-#         ----------
-#         propagation_shift : Array
-#             The new value for the propagation_shift attribute.
-
-#         Returns
-#         -------
-#         propagator : Propagator
-#             The Propagator with the updated propagation_shift attribute.
-#         """
-#         assert isinstance(propagation_shift, Array) and \
-#         propagation_shift.ndim == 0, ("propagation_shift must be scalar array.")
-#         return tree_at(lambda propagator: propagator.propagation_shift,
-#                                                        self, propagation_shift)
 
 
 ########################
@@ -741,27 +507,9 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         fringes : Array
             The number of diffraction fringes in the output plane.
         """
-        # size_in = wavefront.pixel_scale * wavefront.get_npixels()
-        # size_in = wavefront.pixel_scale * wavefront.npixels
         size_in = wavefront.diameter
         size_out = self.pixel_scale_out * self.npixels_out
         return size_in * size_out / self.focal_length / wavefront.wavelength
-
-
-    def get_shift(self : Propagator) -> Array:
-        """
-        Accessor for the shift parameter. Converts to units of pixels if the
-        pixel_shift parameter is True.
-
-        Returns
-        -------
-        shift : Array
-            The (x, y) shift to apply to the wavefront throughout the
-            propagation.
-        """
-        return self.shift if self.pixel_shift else \
-               self.shift / self.pixel_scale_out
-               # self.shift * self.focal_length / self.pixel_scale_out
 
 
 class AngularMFT(AngularPropagator, VariableSamplingPropagator):
@@ -822,26 +570,9 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
         fringes : Array
             The number of diffraction fringes in the output plane.
         """
-        # diameter = wavefront.npixels * wavefront.pixel_scale
-        # diameter = wavefront.diameter
         fringe_size = wavefront.wavelength / wavefront.diameter
         detector_size = self.npixels_out * self.pixel_scale_out
         return detector_size / fringe_size
-
-
-    def get_shift(self : Propagator) -> Array:
-        """
-        Accessor for the shift parameter. Converts to units of pixels if the
-        pixel_shift parameter is True.
-
-        Returns
-        -------
-        shift : Array
-            The (x, y) shift to apply to the wavefront throughout the
-            propagation.
-        """
-        return self.shift if self.pixel_shift else \
-               self.shift / self.pixel_scale_out
 
 
 class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
@@ -887,7 +618,6 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
             The pixel scale in the output plane.
         """
         return self.focal_length * wavefront.wavelength / wavefront.diameter
-               # (wavefront.get_pixel_scale() * wavefront.get_npixels())
 
 
 class AngularFFT(AngularPropagator, FixedSamplingPropagator):
@@ -1003,17 +733,10 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         fringes : Array
             The number of diffraction fringes in the output plane.
         """
-        # propagation_distance = self.get_focal_length() + self.get_propagation_shift()
         propagation_distance = self.focal_length + self.propagation_shift
-        # focal_ratio = self.get_focal_length() / propagation_distance
-        focal_ratio = self.focal_length / propagation_distance
-
-        # size_in = wavefront.get_pixel_scale() * wavefront.get_npixels()
         size_in = wavefront.diameter
         size_out = self.pixel_scale_out * self.npixels_out
-
-        return size_in * size_out / self.focal_length / \
-                   wavefront.wavelength * focal_ratio
+        return size_in * size_out / wavefront.wavelength / propagation_distance
 
 
     def quadratic_phase(self          : Propagator,
@@ -1067,41 +790,28 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         # See gihub issue #52
         offsets = self.get_shift()
 
-        # input_positions = wavefront.get_pixel_coordinates()
         input_positions = wavefront.pixel_coordinates
         output_positions = dLux.utils.coordinates.get_pixel_coordinates(
                                 self.npixels_out,
                                 self.pixel_scale_out)
-                                # self.get_npixels_out(),
-                                # self.get_pixel_scale_out())
 
-        # propagation_distance = self.get_focal_length() + self.get_propagation_shift()
         propagation_distance = self.focal_length + self.propagation_shift
 
-        # field = wavefront.get_phasor()
         field = wavefront.phasor
-        # field *= self.quadratic_phase(*input_positions,
-        #     wavefront.get_wavelength(), - self.get_focal_length())
         field *= self.quadratic_phase(*input_positions,
             wavefront.wavelength, - self.focal_length)
-
-        # field *= self.quadratic_phase(*input_positions,
-        #     wavefront.get_wavelength(), propagation_distance)
         field *= self.quadratic_phase(*input_positions,
             wavefront.wavelength, propagation_distance)
-
         wavefront = wavefront.update_phasor(np.abs(field), np.angle(field))
 
         field = super().propagate(wavefront)
         field *= wavefront.transfer_function(propagation_distance)
         field *= self.quadratic_phase(*output_positions,
             wavefront.wavelength, propagation_distance)
-            # wavefront.get_wavelength(), propagation_distance)
         return field
 
 
 # TODO: Implement eventually
-
 # class AngularFresnel(FarFieldFresnel, AngularMFT):
 #     """
 #     Propagates an AngularWavefront in the Fresnel approximation.
@@ -1110,4 +820,3 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
 #     ----------
 #     """
 #     pass
-
