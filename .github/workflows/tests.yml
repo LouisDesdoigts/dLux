@@ -2,6 +2,7 @@ name: automated tests
 on: [push]
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
     strategy:
