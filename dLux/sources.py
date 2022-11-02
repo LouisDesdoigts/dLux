@@ -159,63 +159,73 @@ class Source(dLux.base.ExtendedBase, ABC):
         return self.spectrum.get_weights()
 
 
-    ### Start Setter Methods ###
-    def set_flux(self : Source, flux : Array) -> Source:
-        """
-        Setter method for the flux.
+#     def get_spectrum(self : Source) -> tuple:
+#         """
+#         Returns the (wavelengths, weights) tuple of the spectrum attribute.
 
-        Parameters
-        ----------
-        flux : Array, photons
-            The flux of the object.
-
-        Returns
-        -------
-        source : Source
-            The source object with the updated flux parameter.
-        """
-        assert isinstance(flux, Array) and flux.ndim == 0, \
-        ("flux must be a scalar array.")
-        return tree_at(lambda source : source.flux, self, flux)
+#         Returns
+#         -------
+#         """
+#         return self.spectrum.spectrum
 
 
-    def set_position(self : Source, position : Array) -> Source:
-        """
-        Setter method for the position.
+#     ### Start Setter Methods ###
+#     def set_flux(self : Source, flux : Array) -> Source:
+#         """
+#         Setter method for the flux.
 
-        Parameters
-        ----------
-        position : Array, radians
-            The (x, y) on-sky position of this object.
+#         Parameters
+#         ----------
+#         flux : Array, photons
+#             The flux of the object.
 
-        Returns
-        -------
-        source : Source
-            The source object with the updated position parameter.
-        """
-        assert isinstance(position, Array) and position.shape == (2,), \
-        ("position must be a array of shape (2,), ie (x, y).")
-        return tree_at(lambda source : source.position, self, position)
+#         Returns
+#         -------
+#         source : Source
+#             The source object with the updated flux parameter.
+#         """
+#         assert isinstance(flux, Array) and flux.ndim == 0, \
+#         ("flux must be a scalar array.")
+#         return tree_at(lambda source : source.flux, self, flux)
 
 
-    def set_spectrum(self : Source, spectrum : Spectrum) -> Source:
-        """
-        Setter method for the specturm.
+#     def set_position(self : Source, position : Array) -> Source:
+#         """
+#         Setter method for the position.
 
-        Parameters
-        ----------
-        spectrum : Spectrum
-            The spectrum of this object, represented by a Spectrum object.
+#         Parameters
+#         ----------
+#         position : Array, radians
+#             The (x, y) on-sky position of this object.
 
-        Returns
-        -------
-        source : Source
-            The source object with the updated spectrum.
-        """
-        assert isinstance(spectrum, dLux.spectrums.Spectrum), \
-        ("spectrum must be a dLux.spectrums.Spectrum object.")
-        return tree_at(lambda source : source.spectrum, self, spectrum)
-    ### End Setter Methods ###
+#         Returns
+#         -------
+#         source : Source
+#             The source object with the updated position parameter.
+#         """
+#         assert isinstance(position, Array) and position.shape == (2,), \
+#         ("position must be a array of shape (2,), ie (x, y).")
+#         return tree_at(lambda source : source.position, self, position)
+
+
+#     def set_spectrum(self : Source, spectrum : Spectrum) -> Source:
+#         """
+#         Setter method for the specturm.
+
+#         Parameters
+#         ----------
+#         spectrum : Spectrum
+#             The spectrum of this object, represented by a Spectrum object.
+
+#         Returns
+#         -------
+#         source : Source
+#             The source object with the updated spectrum.
+#         """
+#         assert isinstance(spectrum, dLux.spectrums.Spectrum), \
+#         ("spectrum must be a dLux.spectrums.Spectrum object.")
+#         return tree_at(lambda source : source.spectrum, self, spectrum)
+#     ### End Setter Methods ###
 
 
     ### General Methods ###
@@ -233,73 +243,88 @@ class Source(dLux.base.ExtendedBase, ABC):
             lambda source : source.spectrum, self, normalised_spectrum)
 
 
-    def format_inputs(self : Source, filter_in : Filter = None) -> tuple:
-        """
-        Method for formatting the spectral and positional parameters of the
-        source object to be passed to the model() method.
+#     def format_inputs(self : Source, filter_in : Filter = None) -> tuple:
+#         """
+#         Method for formatting the spectral and positional parameters of the
+#         source object to be passed to the model() method.
 
-        Parameters
-        ----------
-        filter_in : Filter (optional)
-            The filter through which the source is being observed. Default is
-            None which is uniform throughput.
+#         Parameters
+#         ----------
+#         filter_in : Filter (optional)
+#             The filter through which the source is being observed. Default is
+#             None which is uniform throughput.
 
-        Returns
-        -------
-        wavelengths : Array, meters
-            The formatted wavelengths array to be passed to model()
-        weights : Array
-            The formatted weights array to be passed to model()
-        positions : Array, radians
-            The formatted positions array to be passed to model()
-        """
-        # Normalise source
-        self = self.normalise()
+#         Returns
+#         -------
+#         wavelengths : Array, meters
+#             The formatted wavelengths array to be passed to model()
+#         weights : Array
+#             The formatted weights array to be passed to model()
+#         positions : Array, radians
+#             The formatted positions array to be passed to model()
+#         """
+#         # Normalise source
+#         self = self.normalise()
 
-        # Get wavelengths
-        wavelengths = self.get_wavelengths()
+#         # Get wavelengths
+#         wavelengths = self.get_wavelengths()
 
-        # Get positional info
-        positions = self.get_position()
+#         # Get positional info
+#         positions = self.get_position()
 
-        # Get filter throughput
-        if filter_in is not None:
-            throughput = filter_in.get_throughput(wavelengths)
-        else:
-            throughput = np.ones(wavelengths.shape)
+#         # Get filter throughput
+#         if filter_in is not None:
+#             throughput = filter_in.get_throughput(wavelengths)
+#         else:
+#             throughput = np.ones(wavelengths.shape)
 
-        # Construct realtive weights
-        weights = throughput * self.get_weights() * \
-                                np.expand_dims(self.get_flux(), -1)
-
-
-        return wavelengths, weights, positions
+#         # Construct realtive weights
+#         weights = throughput * self.get_weights() * \
+#                                 np.expand_dims(self.get_flux(), -1)
 
 
-    @abstractmethod
+#         return wavelengths, weights, positions
+
+
     def model(self      : Source,
               optics    : Optics,
               detector  : Detector = None,
               filter_in : Filter   = None) -> Array:
         """
-        Abstract method to model the psf of the source through the optics.
+        Method to model the psf of the point source through the optics.
 
         Parameters
         ----------
         optics : Optics
             The optics through which to model the source objects.
-        detector : Detector (optional)
+        detector : Detector = None
             The detector object that is observing the psf.
-        filter_in : Filter (optional)
-            The filter through which the source is being observed. Default is
-            None which is uniform throughput.
+        filter_in : Filter = None
+            The filter through which the source is being observed.
 
         Returns
         -------
         psf : Array
-            The psf of the source source modelled through the optics
+            The psf of the source source modelled through the optics.
         """
-        return
+        # Normalise and get parameters
+        self        = self.normalise()
+        wavelengths = self.get_wavelengths()
+        weights     = self.get_weights()
+        position    = self.get_position()
+        flux        = self.get_flux()
+
+        # Get filter throughput
+        if filter_in is not None:
+            raise NotImplementedError("Filter modelling is under development.")
+
+        # Vmap propagator & model
+        propagator = vmap(optics.propagate_mono, in_axes=(0, None))
+        psfs = weights[:, None, None] * propagator(wavelengths, position)
+        psf = flux * psfs.sum(0)
+
+        # Apply detector if supplied
+        return psf if detector is None else detector.apply_detector(psf)
 
 
 class ResolvedSource(Source, ABC):
@@ -345,25 +370,25 @@ class ResolvedSource(Source, ABC):
         psf : Array
             The psf of the source modelled through the optics
         """
-        # Format imputs
-        wavelengths, weights, positions = \
-                            self.format_inputs(filter_in=filter_in)
-
-        # Vmap propagator
-        propagator = vmap(optics.propagate_mono, in_axes=(0, None, 0))
-
-        # Model psf
-        psf = propagator(wavelengths, positions, weights).sum(0)
-
-        # Convolve distribution
+        # Normalise and get parameters
+        self         = self.normalise()
+        wavelengths  = self.get_wavelengths()
+        weights      = self.get_weights()
+        position     = self.get_position()
+        flux         = self.get_flux()
         distribution = self.get_distribution()
-        psf_out = convolve(psf, distribution, mode='same')
+
+        # Get filter throughput
+        if filter_in is not None:
+            raise NotImplementedError("Filter modelling is under development.")
+
+        # Vmap propagator & model
+        propagator = vmap(optics.propagate_mono, in_axes=(0, None))
+        psfs = weights[:, None, None] * propagator(wavelengths, position)
+        psf = convolve(flux * psfs.sum(0), distribution, mode='same')
 
         # Apply detector if supplied
-        if detector is None:
-            return psf_out
-        else:
-            return detector.apply_detector(psf_out)
+        return psf if detector is None else detector.apply_detector(psf)
 
 
 class RelativeFluxSource(Source, ABC):
@@ -403,16 +428,16 @@ class RelativeFluxSource(Source, ABC):
         ("contrast must be not be infinite.")
 
 
-    def get_contrast(self : Source) -> Array:
-        """
-        Getter method for the source contrast ratio.
+#     def get_contrast(self : Source) -> Array:
+#         """
+#         Getter method for the source contrast ratio.
 
-        Returns
-        -------
-        contrast : Array
-            The contrast ratio between the two sources.
-        """
-        return self.contrast
+#         Returns
+#         -------
+#         contrast : Array
+#             The contrast ratio between the two sources.
+#         """
+#         return self.contrast
 
 
     def get_flux(self : Source) -> Array:
@@ -426,29 +451,32 @@ class RelativeFluxSource(Source, ABC):
         flux : Array, photons
             The flux (flux1, flux2) of the binary object.
         """
-        flux_A = 2 * self.get_contrast() * super().get_flux() / \
-                                                    (1 + self.get_contrast())
-        flux_B = 2 * super().get_flux() / (1 + self.get_contrast())
+        # flux_A = 2 * self.get_contrast() * super().get_flux() / \
+        #                                             (1 + self.get_contrast())
+        # flux_B = 2 * super().get_flux() / (1 + self.get_contrast())
+        # return np.array([flux_A, flux_B])
+        flux_A = 2 * self.contrast * self.flux / (1 + self.contrast)
+        flux_B = 2 * self.flux / (1 + self.contrast)
         return np.array([flux_A, flux_B])
 
 
-    def set_contrast(self : Source, contrast : Array) -> Source:
-        """
-        Setter method for the source flux ratio.
+#     def set_contrast(self : Source, contrast : Array) -> Source:
+#         """
+#         Setter method for the source flux ratio.
 
-        Parameters
-        ----------
-        contrast : Array
-            The contrast ratio between the two sources.
+#         Parameters
+#         ----------
+#         contrast : Array
+#             The contrast ratio between the two sources.
 
-        Returns
-        -------
-        source : Source
-            The source object with updated flux ratio.
-        """
-        assert isinstance(contrast, Array) and contrast.ndim == 0, \
-        ("contrast must be a scalar array.")
-        return tree_at(lambda source: source.contrast, self, contrast)
+#         Returns
+#         -------
+#         source : Source
+#             The source object with updated flux ratio.
+#         """
+#         assert isinstance(contrast, Array) and contrast.ndim == 0, \
+#         ("contrast must be a scalar array.")
+#         return tree_at(lambda source: source.contrast, self, contrast)
 
 
 class RelativePositionSource(Source, ABC):
@@ -495,29 +523,29 @@ class RelativePositionSource(Source, ABC):
         (shape == ())."
 
 
-    def get_separation(self : Source) -> Array:
-        """
-        Getter method for the source separation.
+#     def get_separation(self : Source) -> Array:
+#         """
+#         Getter method for the source separation.
 
-        Returns
-        -------
-        separation : Array, radians
-            The separation of the two sources in radians.
-        """
-        return self.separation
+#         Returns
+#         -------
+#         separation : Array, radians
+#             The separation of the two sources in radians.
+#         """
+#         return self.separation
 
 
-    def get_position_angle(self : Source) -> Array:
-        """
-        Getter method for the source field angle.
+#     def get_position_angle(self : Source) -> Array:
+#         """
+#         Getter method for the source field angle.
 
-        Returns
-        -------
-        position_angle : Array, radians
-            The field angle between the two sources measure from the positive
-            x axis.
-        """
-        return self.position_angle
+#         Returns
+#         -------
+#         position_angle : Array, radians
+#             The field angle between the two sources measure from the positive
+#             x axis.
+#         """
+#         return self.position_angle
 
 
     def get_position(self : Source) -> Array:
@@ -529,49 +557,53 @@ class RelativePositionSource(Source, ABC):
         position : Array, radians
             The ((x, y), (x, y)) on-sky position of this object.
         """
-        r, phi = self.get_separation()/2, self.get_position_angle()
+        # r, phi = self.get_separation()/2, self.get_position_angle()
+        # sep_vec = np.array([r*np.sin(phi), r*np.cos(phi)])
+        # return np.array([super().get_position() + sep_vec,
+        #                  super().get_position() - sep_vec])
+        r, phi = self.separation/2, self.position_angle
         sep_vec = np.array([r*np.sin(phi), r*np.cos(phi)])
-        return np.array([super().get_position() + sep_vec,
-                         super().get_position() - sep_vec])
+        return np.array([self.position + sep_vec,
+                         self.position - sep_vec])
 
 
-    def set_separation(self : Source, separation : Array) -> Source:
-        """
-        Setter method for the source separation.
+#     def set_separation(self : Source, separation : Array) -> Source:
+#         """
+#         Setter method for the source separation.
 
-        Parameters
-        ----------
-        separation : Array, radians
-            The separation of the two sources in radians.
+#         Parameters
+#         ----------
+#         separation : Array, radians
+#             The separation of the two sources in radians.
 
-        Returns
-        -------
-        source : Source
-            The source object with updated separation.
-        """
-        assert isinstance(separation, Array) and separation.ndim == 0, \
-        ("separation must be a scalar array.")
-        return tree_at(lambda source: source.separation, self, separation)
+#         Returns
+#         -------
+#         source : Source
+#             The source object with updated separation.
+#         """
+#         assert isinstance(separation, Array) and separation.ndim == 0, \
+#         ("separation must be a scalar array.")
+#         return tree_at(lambda source: source.separation, self, separation)
 
 
-    def set_position_angle(self : Source, position_angle : Array) -> Source:
-        """
-        Setter method for the source field angle.
+#     def set_position_angle(self : Source, position_angle : Array) -> Source:
+#         """
+#         Setter method for the source field angle.
 
-        Parameters
-        ----------
-        position_angle : Array, radians
-            The field angle between the two sources measure from the positive
-            x axis.
+#         Parameters
+#         ----------
+#         position_angle : Array, radians
+#             The field angle between the two sources measure from the positive
+#             x axis.
 
-        Returns
-        -------
-        source : Source
-            The source object with updated field angle.
-        """
-        assert isinstance(position_angle, Array) and position_angle.ndim == 0, \
-        ("position_angle must be a scalar array.")
-        return tree_at(lambda source: source.position_angle, self, position_angle)
+#         Returns
+#         -------
+#         source : Source
+#             The source object with updated field angle.
+#         """
+#         assert isinstance(position_angle, Array) and position_angle.ndim == 0, \
+#         ("position_angle must be a scalar array.")
+#         return tree_at(lambda source: source.position_angle, self, position_angle)
 
 
 ########################
@@ -605,42 +637,42 @@ class PointSource(Source):
         super().__init__(position, flux, spectrum, name=name)
 
 
-    def model(self      : Source,
-              optics    : Optics,
-              detector  : Detector = None,
-              filter_in : Filter   = None) -> Array:
-        """
-        Method to model the psf of the point source through the optics.
+#     def model(self      : Source,
+#               optics    : Optics,
+#               detector  : Detector = None,
+#               filter_in : Filter   = None) -> Array:
+#         """
+#         Method to model the psf of the point source through the optics.
 
-        Parameters
-        ----------
-        optics : Optics
-            The optics through which to model the source objects.
-        detector : Detector = None
-            The detector object that is observing the psf.
-        filter_in : Filter = None
-            The filter through which the source is being observed.
+#         Parameters
+#         ----------
+#         optics : Optics
+#             The optics through which to model the source objects.
+#         detector : Detector = None
+#             The detector object that is observing the psf.
+#         filter_in : Filter = None
+#             The filter through which the source is being observed.
 
-        Returns
-        -------
-        psf : Array
-            The psf of the source source modelled through the optics.
-        """
-        # Format imputs
-        wavelengths, weights, positions = \
-                            self.format_inputs(filter_in=filter_in)
+#         Returns
+#         -------
+#         psf : Array
+#             The psf of the source source modelled through the optics.
+#         """
+#         # Format imputs
+#         wavelengths, weights, positions = \
+#                             self.format_inputs(filter_in=filter_in)
 
-        # Vmap propagator
-        propagator = vmap(optics.propagate_mono, in_axes=(0, None, 0))
+#         # Vmap propagator
+#         propagator = vmap(optics.propagate_mono, in_axes=(0, None, 0))
 
-        # Model Psf
-        psf = propagator(wavelengths, positions, weights).sum(0)
+#         # Model Psf
+#         psf = propagator(wavelengths, positions, weights).sum(0)
 
-        # Apply detector if supplied
-        if detector is None:
-            return psf
-        else:
-            return detector.apply_detector(psf)
+#         # Apply detector if supplied
+#         if detector is None:
+#             return psf
+#         else:
+#             return detector.apply_detector(psf)
 
 
 class MultiPointSource(Source):
@@ -698,45 +730,45 @@ class MultiPointSource(Source):
         "flux must have the same length leading dimension, ie nstars")
 
 
-    ### Start Setter Methods ###
-    def set_flux(self : Source, flux : Array) -> Source:
-        """
-        Setter method for the fluxes.
+#     ### Start Setter Methods ###
+#     def set_flux(self : Source, flux : Array) -> Source:
+#         """
+#         Setter method for the fluxes.
 
-        Parameters
-        ----------
-        flux : Array, photons
-            The fluxes of these sources.
+#         Parameters
+#         ----------
+#         flux : Array, photons
+#             The fluxes of these sources.
 
-        Returns
-        -------
-        source : Source
-            The source object with the updated flux parameter.
-        """
-        assert isinstance(flux, Array) and flux.ndim == 1, \
-        ("flux must be a 1d array.")
-        return tree_at(lambda source : source.flux, self, flux)
+#         Returns
+#         -------
+#         source : Source
+#             The source object with the updated flux parameter.
+#         """
+#         assert isinstance(flux, Array) and flux.ndim == 1, \
+#         ("flux must be a 1d array.")
+#         return tree_at(lambda source : source.flux, self, flux)
 
 
-    def set_position(self : Source, position : Array) -> Source:
-        """
-        Setter method for the position.
+#     def set_position(self : Source, position : Array) -> Source:
+#         """
+#         Setter method for the position.
 
-        Parameters
-        ----------
-        position : Array, radians
-            The ((x0, y0), (x1, y1), ...) on-sky positions of these sourcese.
+#         Parameters
+#         ----------
+#         position : Array, radians
+#             The ((x0, y0), (x1, y1), ...) on-sky positions of these sourcese.
 
-        Returns
-        -------
-        source : Source
-            The source object with the updated position parameter.
-        """
-        assert isinstance(position, Array) and position.ndim == 2 and \
-        self.position.shape[-1] == 2
-        ("positions must be shape (nstars, 2), ie [(x0, y0), (x1, y1), ...].")
-        return tree_at(lambda source : source.position, self, position)
-    ### End Setter Methods ###
+#         Returns
+#         -------
+#         source : Source
+#             The source object with the updated position parameter.
+#         """
+#         assert isinstance(position, Array) and position.ndim == 2 and \
+#         self.position.shape[-1] == 2
+#         ("positions must be shape (nstars, 2), ie [(x0, y0), (x1, y1), ...].")
+#         return tree_at(lambda source : source.position, self, position)
+#     ### End Setter Methods ###
 
 
     ### General Methods ###
@@ -761,22 +793,28 @@ class MultiPointSource(Source):
         psf : Array
             The psf of the source source modelled through the optics.
         """
-        # Format imputs
-        wavelengths, weights, positions = \
-                            self.format_inputs(filter_in=filter_in)
+        # Normalise and get parameters
+        self        = self.normalise()
+        wavelengths = self.get_wavelengths()
+        weights     = self.get_weights()
+        positions   = self.get_position()
+        fluxes      = self.get_flux()
+
+        # Get filter throughput
+        if filter_in is not None:
+            raise NotImplementedError("Filter modelling is under development.")
 
         # Vmap propagator
-        source_propagator = vmap(optics.propagate_mono, in_axes=(0, None, 0))
-        propagator = vmap(source_propagator, in_axes=(None, 0, 0))
+        source_propagator = vmap(optics.propagate_mono, in_axes=(0, None))
+        propagator = vmap(source_propagator, in_axes=(None, 0))
 
         # Model Psf
-        psf = propagator(wavelengths, positions, weights).sum((0, 1))
+        psfs = propagator(wavelengths, positions)
+        psfs *= weights[None, :, None, None] * fluxes[:, None, None, None]
+        psf = psfs.sum((0, 1))
 
         # Apply detector if supplied
-        if detector is None:
-            return psf
-        else:
-            return detector.apply_detector(psf)
+        return psf if detector is None else detector.apply_detector(psf)
 
 
 class ArrayDistribution(ResolvedSource):
@@ -842,23 +880,23 @@ class ArrayDistribution(ResolvedSource):
         return self.distribution
 
 
-    def set_distribution(self : Source, distribution : Array) -> Source:
-        """
-        Setter method for the source distribution.
+#     def set_distribution(self : Source, distribution : Array) -> Source:
+#         """
+#         Setter method for the source distribution.
 
-        Parameters
-        ----------
-        distribution : Array, intensity
-            The distribution of the source intensity.
+#         Parameters
+#         ----------
+#         distribution : Array, intensity
+#             The distribution of the source intensity.
 
-        Returns
-        -------
-        source : Source
-            The source object with updated distribution.
-        """
-        assert isinstance(distribution, Array) and distribution.ndim == 2, \
-        ("distribution must be a 2d array.")
-        return tree_at(lambda source: source.distribution, self, distribution)
+#         Returns
+#         -------
+#         source : Source
+#             The source object with updated distribution.
+#         """
+#         assert isinstance(distribution, Array) and distribution.ndim == 2, \
+#         ("distribution must be a 2d array.")
+#         return tree_at(lambda source: source.distribution, self, distribution)
 
 
     def normalise(self : Source) -> Source:
@@ -889,7 +927,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
                  flux           : Array,
                  separation     : Array,
                  position_angle : Array,
-                 contrast      : Array,
+                 contrast       : Array,
                  spectrum       : Spectrum,
                  name           : str = 'BinarySource') -> Source:
         """
@@ -929,12 +967,12 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
               detector  : Detector = None,
               filter_in : Filter   = None) -> Array:
         """
-        Method to model the psf of the binary source through the optics.
+        Method to model the psf of the point source through the optics.
 
         Parameters
         ----------
         optics : Optics
-            The optics through which to model the soource objects
+            The optics through which to model the source objects.
         detector : Detector = None
             The detector object that is observing the psf.
         filter_in : Filter = None
@@ -943,24 +981,30 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         Returns
         -------
         psf : Array
-            The psf of the source source modelled through the optics
+            The psf of the source source modelled through the optics.
         """
-        # Format imputs
-        wavelengths, weights, positions = \
-                            self.format_inputs(filter_in=filter_in)
+        # Normalise and get parameters
+        self        = self.normalise()
+        wavelengths = self.get_wavelengths()[0]
+        weights     = self.get_weights()
+        positions   = self.get_position()
+        fluxes      = self.get_flux()
+
+        # Get filter throughput
+        if filter_in is not None:
+            raise NotImplementedError("Filter modelling is under development.")
 
         # Vmap propagator
-        base_propagator = vmap(optics.propagate_mono, in_axes=(0, None, 0))
-        propagator = vmap(base_propagator, in_axes=(0, 0, 0))
+        source_propagator = vmap(optics.propagate_mono, in_axes=(0, None))
+        propagator = vmap(source_propagator, in_axes=(None, 0))
 
         # Model Psf
-        psf = propagator(wavelengths, positions, weights).sum((0, 1))
+        psfs = propagator(wavelengths, positions)
+        psfs *= weights[:, :, None, None] * fluxes[:, None, None, None]
+        psf = psfs.sum((0, 1))
 
         # Apply detector if supplied
-        if detector is None:
-            return psf
-        else:
-            return detector.apply_detector(psf)
+        return psf if detector is None else detector.apply_detector(psf)
 
 
 class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
@@ -980,7 +1024,7 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
                  flux         : Array,
                  spectrum     : Spectrum,
                  distribution : Array,
-                 contrast    : Array,
+                 contrast     : Array,
                  name         : str = 'PointExtendedSource') -> Source:
         """
         Parameters
@@ -1028,30 +1072,32 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
         psf : Array
             The psf of the source modelled through the optics.
         """
-        # Format imputs
-        wavelengths, weights, positions = \
-                            self.format_inputs(filter_in=filter_in)
+        # Normalise and get parameters
+        self         = self.normalise()
+        wavelengths  = self.get_wavelengths()
+        weights      = self.get_weights()
+        position     = self.get_position()
+        fluxes       = self.get_flux()
+        distribution = self.get_distribution()
+
+        # Get filter throughput
+        if filter_in is not None:
+            raise NotImplementedError("Filter modelling is under development.")
 
         # Vmap propagator
         propagator = vmap(optics.propagate_mono, in_axes=(0, None))
 
         # Model psfs
-        spectral_psf = propagator(wavelengths, positions)
-        expanded_weights = np.expand_dims(weights, (-1, -2))
-        spectral_psfs = expanded_weights * np.tile(spectral_psf, (2, 1, 1, 1))
-        point_psf = spectral_psfs[0].sum(0)
-        extended_psf = spectral_psfs[1].sum(0)
-
-        # Convolve distribution
-        convolved = convolve(extended_psf, self.get_distribution(), \
-                                        mode='same')
+        psfs = propagator(wavelengths, position)
+        single_psf = (weights[:, None, None] * psfs).sum(0)
+        point_psf = fluxes[0] * single_psf
+        extended_psf = fluxes[1] * single_psf
+        convolved = convolve(extended_psf, distribution, mode='same')
         psf = convolved + point_psf
 
         # Apply detector if supplied
-        if detector is None:
-            return psf
-        else:
-            return detector.apply_detector(psf)
+        return psf if detector is None else detector.apply_detector(psf)
+
 
 
 class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
@@ -1124,27 +1170,27 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
         psf : Array
             The psf of the source modelled through the optics.
         """
-        # Format imputs
-        wavelengths, weights, positions = \
-                            self.format_inputs(filter_in=filter_in)
+        # Normalise and get parameters
+        self         = self.normalise()
+        wavelengths  = self.get_wavelengths()[0]
+        weights      = self.get_weights()
+        position     = self.get_position()
+        fluxes       = self.get_flux()
+        distribution = self.get_distribution()
+
+        # Get filter throughput
+        if filter_in is not None:
+            raise NotImplementedError("Filter modelling is under development.")
 
         # Vmap propagator
         propagator = vmap(optics.propagate_mono, in_axes=(0, None))
 
         # Model psfs
-        spectral_psf = propagator(wavelengths[0], positions)
-        expanded_weights = np.expand_dims(weights, (-1, -2))
-        spectral_psfs = expanded_weights * np.tile(spectral_psf, (2, 1, 1, 1))
-        point_psf = spectral_psfs[0].sum(0)
-        extended_psf = spectral_psfs[1].sum(0)
-
-        # Convolve distribution
-        convolved = convolve(extended_psf, self.get_distribution(),\
-                                        mode='same')
+        psfs = propagator(wavelengths, position)
+        point_psf    = fluxes[0] * (weights[0, :, None, None] * psfs).sum(0)
+        extended_psf = fluxes[1] * (weights[1, :, None, None] * psfs).sum(0)
+        convolved = convolve(extended_psf, distribution, mode='same')
         psf = convolved + point_psf
 
         # Apply detector if supplied
-        if detector is None:
-            return psf
-        else:
-            return detector.apply_detector(psf)
+        return psf if detector is None else detector.apply_detector(psf)
