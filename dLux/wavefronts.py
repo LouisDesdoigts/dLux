@@ -87,8 +87,14 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         self.plane_type  = plane_type
 
         # Input checks
-        assert wavelength.shape == (), ("wavelength must be a scalar Array.")
-        assert pixel_scale.shape == (), ("pixel_scale must be a scalar Array.")
+        assert self.wavelength.shape == (), \
+        ("wavelength must be a scalar Array.")
+        assert self.pixel_scale.shape == (), \
+        ("pixel_scale must be a scalar Array.")
+        assert self.amplitude.ndim == 3, \
+        ("amplitude must a 3d array (nfields, npix, npix).")
+        assert self.phase.ndim == 3, \
+        ("phase must a 3d array (nfields, npix, npix).")
         assert self.amplitude.shape == self.phase.shape, \
         ("The amplitude and phase arrays must have the same shape.")
         assert isinstance(plane_type, PlaneType), \
@@ -98,43 +104,57 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
     ########################
     ### Getter Functions ###
     ########################
-    def get_wavelength(self : Wavefront) -> Array:
-        """
-        Getter method for the wavelength attribute.
+#     def get_wavelength(self : Wavefront) -> Array:
+#         """
+#         Getter method for the wavelength attribute.
 
-        Returns
-        -------
-        wavelength : float, meters
-            The wavelength of the `Wavefront`.
-        """
-        return self.wavelength
-
-
-    def get_amplitude(self : Wavefront) -> Array:
-        """
-        Getter method for the amplitude attribute.
-
-        Returns
-        -------
-        amplitude : Array, power
-            The electric field amplitude of the `Wavefront`.
-        """
-        return self.amplitude
+#         Returns
+#         -------
+#         wavelength : float, meters
+#             The wavelength of the `Wavefront`.
+#         """
+#         return self.wavelength
 
 
-    def get_phase(self : Wavefront) -> Array:
-        """
-        Getter method for the phase attribute.
+#     def get_amplitude(self : Wavefront) -> Array:
+#         """
+#         Getter method for the amplitude attribute.
 
-        Returns
-        -------
-        phase : Array, radians
-            The phases of each pixel on the `Wavefront`.
-        """
-        return self.phase
+#         Returns
+#         -------
+#         amplitude : Array, power
+#             The electric field amplitude of the `Wavefront`.
+#         """
+#         return self.amplitude
 
 
-    def get_diameter(self : Wavefront) -> Array:
+#     def get_phase(self : Wavefront) -> Array:
+#         """
+#         Getter method for the phase attribute.
+
+#         Returns
+#         -------
+#         phase : Array, radians
+#             The phases of each pixel on the `Wavefront`.
+#         """
+#         return self.phase
+
+
+#     def get_diameter(self : Wavefront) -> Array:
+#         """
+#         Returns the current wavefront diameter calulated using the pixel scale
+#         and number of pixels.
+
+#         Returns
+#         -------
+#         diameter : Array, meters or radians
+#             The current diameter of the wavefront.
+#         """
+#         return self.get_npixels() * self.get_pixel_scale()
+
+
+    @property
+    def diameter(self : Wavefront) -> Array:
         """
         Returns the current wavefront diameter calulated using the pixel scale
         and number of pixels.
@@ -144,23 +164,37 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         diameter : Array, meters or radians
             The current diameter of the wavefront.
         """
-        return self.get_npixels() * self.get_pixel_scale()
+        return self.npixels * self.pixel_scale
 
 
-    def get_plane_type(self : Wavefront) -> PlaneType:
-        """
-        Getter method for the plane_type attribute.
+#     def get_plane_type(self : Wavefront) -> PlaneType:
+#         """
+#         Getter method for the plane_type attribute.
 
-        Returns
-        -------
-        plane : PlaneType
-            The plane that the `Wavefront` is currently in. The options are
-            currently "Pupil", "Focal" and "Intermediate".
-        """
-        return self.plane_type
+#         Returns
+#         -------
+#         plane : PlaneType
+#             The plane that the `Wavefront` is currently in. The options are
+#             currently "Pupil", "Focal" and "Intermediate".
+#         """
+#         return self.plane_type
 
 
-    def get_npixels(self : Wavefront) -> int:
+#     def get_npixels(self : Wavefront) -> int:
+#         """
+#         Returns the side length of the arrays currently representing the
+#         wavefront. Taken from the amplitude array.
+
+#         Returns
+#         -------
+#         pixels : int
+#             The number of pixels that represent the `Wavefront`.
+#         """
+#         return self.get_amplitude().shape[-1]
+
+
+    @property
+    def npixels(self : Wavefront) -> int:
         """
         Returns the side length of the arrays currently representing the
         wavefront. Taken from the amplitude array.
@@ -170,22 +204,38 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         pixels : int
             The number of pixels that represent the `Wavefront`.
         """
-        return self.get_amplitude().shape[-1]
+        return self.amplitude.shape[-1]
 
 
-    def get_pixel_scale(self : Wavefront) -> Array:
+    @property
+    def nfields(self : Wavefront) -> int:
         """
-        Getter method for the pixel_scale attribute.
+        Returns the number of polarisation fields currently representing the
+        wavefront. Taken from the amplitude array first dimension.
 
         Returns
         -------
-        pixel scale : float, meters/pixel or radians/pixel
-            The current pixel scale associated with the wavefront.
+        pixels : int
+            The number of polarisation fields that represent the `Wavefront`.
         """
-        return self.pixel_scale
+        return self.amplitude.shape[0]
 
 
-    def get_real(self : Wavefront) -> Array:
+#     def get_pixel_scale(self : Wavefront) -> Array:
+#         """
+#         Getter method for the pixel_scale attribute.
+
+#         Returns
+#         -------
+#         pixel scale : float, meters/pixel or radians/pixel
+#             The current pixel scale associated with the wavefront.
+#         """
+#         return self.pixel_scale
+
+
+    # def get_real(self : Wavefront) -> Array:
+    @property
+    def real(self : Wavefront) -> Array:
         """
         Returns the real component of the `Wavefront`.
 
@@ -194,10 +244,13 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         wavefront : Array
             The real component of the `Wavefront` phasor.
         """
-        return self.get_amplitude() * np.cos(self.get_phase())
+        # return self.get_amplitude() * np.cos(self.get_phase())
+        return self.amplitude * np.cos(self.phase)
 
 
-    def get_imaginary(self : Wavefront) -> Array:
+    # def get_imaginary(self : Wavefront) -> Array:
+    @property
+    def imaginary(self : Wavefront) -> Array:
         """
         Returns the imaginary component of the `Wavefront`.
 
@@ -206,10 +259,13 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         wavefront : Array
             The imaginary component of the `Wavefront` phasor.
         """
-        return self.get_amplitude() * np.sin(self.get_phase())
+        # return self.get_amplitude() * np.sin(self.get_phase())
+        return self.amplitude * np.sin(self.phase)
 
 
-    def get_phasor(self : Wavefront) -> Array:
+    # def get_phasor(self : Wavefront) -> Array:
+    @property
+    def phasor(self : Wavefront) -> Array:
         """
         The electric field phasor described by this Wavefront in complex form.
 
@@ -218,30 +274,61 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         field : Array
             The electric field phasor of the wavefront.
         """
-        return self.get_amplitude() * np.exp(1j * self.get_phase())
+        # return self.get_amplitude() * np.exp(1j * self.get_phase())
+        return self.amplitude * np.exp(1j * self.phase)
+
+
+    @property
+    def psf(self : Wavefront) -> Array:
+        """
+        Calculates the Point Spread Function (PSF), ie the squared modulus
+        of the complex wavefront.
+
+        Returns
+        -------
+        psf : Array
+            The PSF of the wavefront.
+        """
+        return np.sum(self.amplitude ** 2, axis=0)
+
+
+    # def get_pixel_coordinates(self : Wavefront) -> Array:
+    @property
+    def pixel_coordinates(self : Wavefront) -> Array:
+        """
+        Returns the physical positions of the wavefront pixels in meters.
+
+        Returns
+        -------
+        pixel_positions : Array
+            The coordinates of the centers of each pixel representing the
+            wavefront.
+        """
+        return dLux.utils.coordinates.get_pixel_coordinates(self.npixels,
+                                                            self.pixel_scale)
 
 
     ########################
     ### Setter Functions ###
     #########################
-    def set_wavelength(self : Wavefront, wavelength : Array) -> Wavefront:
-        """
-        Mutator for the wavelength attribute.
+#     def set_wavelength(self : Wavefront, wavelength : Array) -> Wavefront:
+#         """
+#         Mutator for the wavelength attribute.
 
-        Parameters
-        ----------
-        wavelength : float, meters
-            The wavelength of the `Wavefront`.
+#         Parameters
+#         ----------
+#         wavelength : float, meters
+#             The wavelength of the `Wavefront`.
 
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` with the updated wavelength.
-        """
-        assert isinstance(wavelength, Array) and wavelength.ndim == 0, \
-        ("wavelength must be a scalar array.")
-        return tree_at(
-            lambda wavefront : wavefront.wavelength, self, wavelength)
+#         Returns
+#         -------
+#         wavefront : Wavefront
+#             The new `Wavefront` with the updated wavelength.
+#         """
+#         assert isinstance(wavelength, Array) and wavelength.ndim == 0, \
+#         ("wavelength must be a scalar array.")
+#         return tree_at(
+#             lambda wavefront : wavefront.wavelength, self, wavelength)
 
 
     def set_amplitude(self : Wavefront, amplitude : Array) -> Wavefront:
@@ -276,7 +363,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         Returns
         -------
         wavefront : Wavefront
-            The new `Wavefront` with the updated phase. 
+            The new `Wavefront` with the updated phase.
         """
         assert isinstance(phase, Array) and phase.ndim == 3, \
         ("phase must be a 3d array.")
@@ -344,10 +431,10 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         wavefront : Wavefront
             The new `Wavefront` with updated amplitude and phase.
         """
-        assert isinstance(amplitude, Array) and amplitude.ndim == 2, \
-        ("amplitude must be a 2d array.")
-        assert isinstance(phase, Array) and phase.ndim == 2, \
-        ("phase must be a 2d array.")
+        assert isinstance(amplitude, Array) and amplitude.ndim == 3, \
+        ("amplitude must be a 3d array.")
+        assert isinstance(phase, Array) and phase.ndim == 3, \
+        ("phase must be a 3d array.")
         assert amplitude.shape == phase.shape, \
         ("amplitude and phase arrays must have the same shape.")
         return tree_at(
@@ -376,11 +463,13 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         ("tilt_angles must be an array with shape (2,) ie. (x, y).")
 
         x_angle, y_angle = tilt_angle
-        x_positions, y_positions = wavefront.get_pixel_coordinates()
-        wavenumber = 2 * np.pi / wavefront.get_wavelength()
+        # x_positions, y_positions = wavefront.get_pixel_coordinates()
+        x_positions, y_positions = self.pixel_coordinates
+        # wavenumber = 2 * np.pi / wavefront.get_wavelength()
+        wavenumber = 2 * np.pi / self.wavelength
         phase = - wavenumber * (x_positions * x_angle + y_positions * y_angle)
 
-        return wavefront.add_phase(phase)
+        return self.add_phase(phase)
 
 
     def multiply_amplitude(self : Wavefront, array_like : Array) -> Wavefront:
@@ -398,7 +487,8 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         wavefront : Wavefront
             The new `Wavefront` with the updated ampltiude.
         """
-        amplitude = self.get_amplitude()
+        # amplitude = self.get_amplitude()
+        amplitude = self.amplitude
         assert isinstance(array_like, Array) and array_like.ndim in (0, 2, 3), \
         ("array_like must be either a scalar array or array with 2 or 3 "
          "dimensions.")
@@ -423,7 +513,8 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         wavefront : Wavefront
             The new `Wavefront` with the updated phase.
         """
-        phase = self.get_phase()
+        # phase = self.get_phase()
+        phase = self.phase
         assert isinstance(array_like, Array) and array_like.ndim in (0, 2, 3), \
         ("array_like must be either a scalar array or array with 2 or 3 "
          "dimensions.")
@@ -450,7 +541,8 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
             The new wavefront with the phases updated according to the supplied
             path_difference
         """
-        phase_difference = 2 * np.pi * path_difference / self.get_wavelength()
+        # phase_difference = 2 * np.pi * path_difference / self.get_wavelength()
+        phase_difference = 2 * np.pi * path_difference / self.wavelength
         return self.add_phase(phase_difference)
 
 
@@ -463,7 +555,8 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         wavefront : Wavefront
             The new wavefront with the normalised electric field amplitudes.
         """
-        total_intensity = np.linalg.norm(self.get_amplitude())
+        # total_intensity = np.linalg.norm(self.get_amplitude())
+        total_intensity = np.linalg.norm(self.amplitude)
         return self.multiply_amplitude(1 / total_intensity)
 
 
@@ -482,21 +575,8 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
             The PSF of the wavefront.
         """
         # Sums the first axis for empty polarisation array
-        return np.sum(self.get_amplitude() ** 2, axis=0)
-
-
-    def get_pixel_coordinates(self : Wavefront) -> Array:
-        """
-        Returns the physical positions of the wavefront pixels in meters.
-
-        Returns
-        -------
-        pixel_positions : Array
-            The coordinates of the centers of each pixel representing the
-            wavefront.
-        """
-        return dLux.utils.coordinates.get_pixel_coordinates( \
-                    self.get_npixels(), self.get_pixel_scale())
+        # return np.sum(self.get_amplitude() ** 2, axis=0)
+        return np.sum(self.amplitude ** 2, axis=0)
 
 
     def invert_x_and_y(self : Wavefront) -> Wavefront:
@@ -574,11 +654,14 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
             The new wavefront interpolated to the size and shape determined by
             npixels_out and pixel_scale_out, with the updated pixel_scale.
         """
-        sampling_ratio = pixel_scale_out / self.get_pixel_scale()
+        # sampling_ratio = pixel_scale_out / self.get_pixel_scale()
+        sampling_ratio = pixel_scale_out / self.pixel_scale
         if real_imaginary:
-            field = np.array([self.get_real(), self.get_imaginary()])
+            # field = np.array([self.get_real(), self.get_imaginary()])
+            field = np.array([self.real, self.imaginary])
         else:
-            field = np.array([self.get_amplitude(), self.get_phase()])
+            # field = np.array([self.get_amplitude(), self.get_phase()])
+            field = np.array([self.amplitude, self.phase])
         new_ampltiude, new_phase = dLux.utils.interpolation.interpolate_field( \
             field, npixels_out, sampling_ratio, real_imaginary=real_imaginary)
 
@@ -591,7 +674,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
     def pad_to(self : Wavefront, npixels_out : int) -> Wavefront:
         """
         Paraxially zero-pads the `Wavefront` to the size determined by
-        npixles_out. Note this only supports padding arrays of even dimension
+        npixels_out. Note this only supports padding arrays of even dimension
         to even dimension, and odd dimension to to odd dimension, ie 2 -> 4 or
         3 -> 5.
 
@@ -605,22 +688,24 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         wavefront : Wavefront
             The new `Wavefront` zero-padded to the size npixels_out.
         """
-        npixels_in  = self.get_npixels()
+        # npixels_in  = self.get_npixels()
+        npixels_in  = self.npixels
         assert npixels_in  % 2 == npixels_out % 2, \
         ("Only supports even -> even or odd -> odd padding")
-        assert npixles_out > npixels_in, ("npixles_out must be larger than the"
+        assert npixels_out > npixels_in, ("npixels_out must be larger than the"
         " current array size: {}".format(npixels_in))
 
+        # nfields = len(self.amplitude)
         new_centre = npixels_out // 2
         centre = npixels_in  // 2
         remainder = npixels_in  % 2
-        padded = np.zeros([npixels_out, npixels_out])
+        padded = np.zeros([self.nfields, npixels_out, npixels_out])
 
-        new_amplitude = padded.at[
+        new_amplitude = padded.at[:,
                 new_centre - centre : centre + new_centre + remainder,
                 new_centre - centre : centre + new_centre + remainder
             ].set(self.amplitude)
-        new_phase = padded.at[
+        new_phase = padded.at[:,
                 new_centre - centre : centre + new_centre + remainder,
                 new_centre - centre : centre + new_centre + remainder
             ].set(self.phase)
@@ -629,7 +714,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
 
     def crop_to(self : Wavefront, npixels_out : int) -> Wavefront:
         """
-        Paraxially crops the `Wavefront` to the size determined by npixles_out.
+        Paraxially crops the `Wavefront` to the size determined by npixels_out.
         Note this only supports padding arrays of even dimension to even
         dimension, and odd dimension to to odd dimension, ie 4 -> 2 or 5 -> 3.
 
@@ -643,20 +728,21 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         wavefront : Wavefront
             The new `Wavefront` cropped to the size npixels_out.
         """
-        npixels_in  = self.get_npixels()
+        # npixels_in  = self.get_npixels()
+        npixels_in  = self.npixels
 
         assert npixels_in %2 == npixels_out%2, \
         ("Only supports even -> even or 0dd -> odd cropping")
-        assert npixles_out < npixels_in, ("npixles_out must be smaller than the"
+        assert npixels_out < npixels_in, ("npixels_out must be smaller than the"
         " current array size: {}".format(npixels_in))
 
         new_centre = npixels_in  // 2
         centre = npixels_out // 2
 
-        new_amplitude = self.amplitude[
+        new_amplitude = self.amplitude[:,
             new_centre - centre : new_centre + centre,
             new_centre - centre : new_centre + centre]
-        new_phase = self.phase[
+        new_phase = self.phase[:,
             new_centre - centre : new_centre + centre,
             new_centre - centre : new_centre + centre]
 
@@ -749,9 +835,9 @@ class FarFieldFresnelWavefront(Wavefront):
     def __init__(self        : Wavefront,
                  wavelength  : Array,
                  pixel_scale : Array,
-                 plane_type  : PlaneType,
                  amplitude   : Array,
-                 phase       : Array) -> Wavefront:
+                 phase       : Array,
+                 plane_type  : PlaneType) -> Wavefront:
         """
         Constructor for FarFieldFresnel wavefronts.
 
@@ -790,5 +876,6 @@ class FarFieldFresnelWavefront(Wavefront):
         phase : Array, radians
             The phase that represents the optical transfer.
         """
-        wavenumber = 2. * np.pi / self.get_wavelength()
+        # wavenumber = 2. * np.pi / self.get_wavelength()
+        wavenumber = 2. * np.pi / self.wavelength
         return np.exp(1.0j * wavenumber * distance)

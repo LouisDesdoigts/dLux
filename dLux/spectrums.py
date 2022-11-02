@@ -59,24 +59,38 @@ class Spectrum(dLux.base.ExtendedBase, ABC):
         return self.wavelengths
 
 
-    def set_wavelengths(self : Spectrum, wavelengths : Array) -> Spectrum:
-        """
-        Setter method for the wavelengths.
+#     @property
+#     def spectrum(self : Spectrum) -> tuple:
+#         """
+#         Gets the (wavelengths, weights) tuple, calling the get_wavelengths and
+#         get_weights methods.
 
-        Parameters
-        ----------
-        wavelengths : Array, meters
-            The new array of wavelengths at which the spectrum is defined.
+#         Returns
+#         -------
+#         (wavelengths, weights) : tuple (meters, )
+#             The wavelengths and weights of the spectrum.
+#         """
+#         return (self.get_wavelengths(), self.get_weights())
 
-        Returns
-        -------
-        spectrum : Specturm
-            The spectrum object with the updated wavelengths.
-        """
-        assert isinstance(wavelengths, Array) and wavelengths.ndim == 1, \
-        ("wavelengths must be a 1d array.")
-        return tree_at(
-            lambda spectrum : spectrum.wavelengths, self, wavelengths)
+
+#     def set_wavelengths(self : Spectrum, wavelengths : Array) -> Spectrum:
+#         """
+#         Setter method for the wavelengths.
+
+#         Parameters
+#         ----------
+#         wavelengths : Array, meters
+#             The new array of wavelengths at which the spectrum is defined.
+
+#         Returns
+#         -------
+#         spectrum : Specturm
+#             The spectrum object with the updated wavelengths.
+#         """
+#         assert isinstance(wavelengths, Array) and wavelengths.ndim == 1, \
+#         ("wavelengths must be a 1d array.")
+#         return tree_at(
+#             lambda spectrum : spectrum.wavelengths, self, wavelengths)
 
 
     @abstractmethod
@@ -155,24 +169,24 @@ class ArraySpectrum(Spectrum):
         return self.weights
 
 
-    def set_weights(self : Spectrum, weights : Array) -> Spectrum:
-        """
-        Setter method for the weights.
+#     def set_weights(self : Spectrum, weights : Array) -> Spectrum:
+#         """
+#         Setter method for the weights.
 
-        Parameters
-        ----------
-        weights : Array
-            The relative weights of each wavelength.
+#         Parameters
+#         ----------
+#         weights : Array
+#             The relative weights of each wavelength.
 
-        Returns
-        -------
-        spectrum : Specturm
-            The spectrum object with the updated weights.
-        """
-        assert isinstance(weights, Array) and weights.ndim == 1, \
-        ("weights must be a 1d array.")
-        return tree_at(
-            lambda spectrum : spectrum.weights, self, weights)
+#         Returns
+#         -------
+#         spectrum : Specturm
+#             The spectrum object with the updated weights.
+#         """
+#         assert isinstance(weights, Array) and weights.ndim == 1, \
+#         ("weights must be a 1d array.")
+#         return tree_at(
+#             lambda spectrum : spectrum.weights, self, weights)
 
 
     def normalise(self : Spectrum) -> Spectrum:
@@ -186,7 +200,9 @@ class ArraySpectrum(Spectrum):
             The spectrum object with the normalised spectrum.
         """
         total_power = self.get_weights().sum()
-        return self.set_weights(self.get_weights()/total_power)
+        norm_weights = self.get_weights()/total_power
+        return tree_at(lambda spectrum: spectrum.weights, self, norm_weights)
+        # return self.set_weights()
 
 
 class PolynomialSpectrum(Spectrum):
@@ -255,43 +271,43 @@ class PolynomialSpectrum(Spectrum):
         weights : Array
             The normalised relative weights of each wavelength.
         """
-        generate_polynomial = vmap(lambda wavelength : 
+        generate_polynomial = vmap(lambda wavelength :
                                 np.array([self.coefficients[i] * wavelength**i 
                                 for i in range(len(self.coefficients))]).sum())
         weights = generate_polynomial(self.wavelengths)
         return weights/weights.sum()
 
 
-    def get_coefficients(self : Spectrum) -> Array:
-        """
-        Getter method for the coefficients.
+#     def get_coefficients(self : Spectrum) -> Array:
+#         """
+#         Getter method for the coefficients.
 
-        Returns
-        -------
-        coefficients : Array
-            The array of polynomial coefficient values.
-        """
-        return self.coefficients
+#         Returns
+#         -------
+#         coefficients : Array
+#             The array of polynomial coefficient values.
+#         """
+#         return self.coefficients
 
 
-    def set_coefficients(self : Spectrum, coefficients : Array) -> Spectrum:
-        """
-        Setter method for the coefficients.
+#     def set_coefficients(self : Spectrum, coefficients : Array) -> Spectrum:
+#         """
+#         Setter method for the coefficients.
 
-        Parameters
-        ----------
-        coefficients : Array
-            The array of polynomial coefficient values.
+#         Parameters
+#         ----------
+#         coefficients : Array
+#             The array of polynomial coefficient values.
 
-        Returns
-        -------
-        spectrum : Specturm
-            The spectrum object with the updated coefficients.
-        """
-        assert isinstance(coefficients, Array) and coefficients.ndim == 1, \
-        ("coefficients must be a 1d array.")
-        return tree_at(
-            lambda spectrum : spectrum.coefficients, self, coefficients)
+#         Returns
+#         -------
+#         spectrum : Specturm
+#             The spectrum object with the updated coefficients.
+#         """
+#         assert isinstance(coefficients, Array) and coefficients.ndim == 1, \
+#         ("coefficients must be a 1d array.")
+#         return tree_at(
+#             lambda spectrum : spectrum.coefficients, self, coefficients)
 
 
     def normalise(self : Spectrum) -> Spectrum:
@@ -311,6 +327,10 @@ class CombinedSpectrum(ArraySpectrum):
     """
     Implements a combined spectrum, in order to have only a single spectrum
     object for parameterised sources such as binary stars.
+
+    TODO: Expand to be arbitrary number of spectrums, store only a single
+    wavelengths array and tile it on the get_wavelengths method. (ie make work
+    for MultiPointSource)
     """
 
 
@@ -318,7 +338,7 @@ class CombinedSpectrum(ArraySpectrum):
                  wavelengths : Array,
                  weights     : Array = None) -> Spectrum:
         """
-        Constructor for the PolynomialSpectrum class. Expects wavelengths and
+        Constructor for the CombinedSpectrum class. Expects wavelengths and
         weights to have the same dimensionality, ie (nsources, nwavelengths).
 
         Parameters
@@ -355,7 +375,7 @@ class CombinedSpectrum(ArraySpectrum):
 
         # Tile single dimension weights inputs
         if self.weights.ndim == 1:
-            self.weights = np.tile(self.weights, (2, 1))
+            self.weights = np.tile(self.weights, (len(self.wavelengths), 1))
 
         # Input checking
         assert self.weights.ndim == 2, \
@@ -372,6 +392,19 @@ class CombinedSpectrum(ArraySpectrum):
         Wavelengths must have the same shape."
 
 
+#     def get_wavelengths(self : Spectrum) -> Array:
+#         """
+#         Getter method for the wavelengths. Tiles the underlying wavelengths to
+#         match the shape of the weights.
+
+#         Returns
+#         -------
+#         wavelengths : Array, meters
+#             The array of wavelengths at which the spectrum is defined.
+#         """
+#         return np.tile(self.wavelengths, 
+
+
     def normalise(self : Spectrum) -> Spectrum:
         """
         Method for returning a new spectrum object with a normalised total
@@ -385,44 +418,45 @@ class CombinedSpectrum(ArraySpectrum):
         weights = self.get_weights()
         total_power = weights.sum(1).reshape((len(weights), 1))
         norm_weights = weights/total_power
-        return self.set_weights(norm_weights)
+        return tree_at(lambda spectrum: spectrum.weights, self, norm_weights)
+        # return self.set_weights(norm_weights)
 
 
-    def set_wavelengths(self : Spectrum, wavelengths : Array) -> Spectrum:
-        """
-        Setter method for the wavelengths.
+#     def set_wavelengths(self : Spectrum, wavelengths : Array) -> Spectrum:
+#         """
+#         Setter method for the wavelengths.
 
-        Parameters
-        ----------
-        wavelengths : Array, meters
-            The new array of wavelengths at which the spectrum is defined.
+#         Parameters
+#         ----------
+#         wavelengths : Array, meters
+#             The new array of wavelengths at which the spectrum is defined.
 
-        Returns
-        -------
-        spectrum : Specturm
-            The spectrum object with the updated wavelengths.
-        """
-        assert isinstance(wavelengths, Array) and wavelengths.ndim == 2, \
-        ("wavelengths must be a 2d array.")
-        return tree_at(
-            lambda spectrum : spectrum.wavelengths, self, wavelengths)
+#         Returns
+#         -------
+#         spectrum : Specturm
+#             The spectrum object with the updated wavelengths.
+#         """
+#         assert isinstance(wavelengths, Array) and wavelengths.ndim == 2, \
+#         ("wavelengths must be a 2d array.")
+#         return tree_at(
+#             lambda spectrum : spectrum.wavelengths, self, wavelengths)
 
 
-    def set_weights(self : Spectrum, weights : Array) -> Spectrum:
-        """
-        Setter method for the weights.
+#     def set_weights(self : Spectrum, weights : Array) -> Spectrum:
+#         """
+#         Setter method for the weights.
 
-        Parameters
-        ----------
-        weights : Array
-            The relative weights of each wavelength.
+#         Parameters
+#         ----------
+#         weights : Array
+#             The relative weights of each wavelength.
 
-        Returns
-        -------
-        spectrum : Specturm
-            The spectrum object with the updated weights.
-        """
-        assert isinstance(weights, Array) and weights.ndim == 2, \
-        ("weights must be a 2d array.")
-        return tree_at(
-            lambda spectrum : spectrum.weights, self, weights)
+#         Returns
+#         -------
+#         spectrum : Specturm
+#             The spectrum object with the updated weights.
+#         """
+#         assert isinstance(weights, Array) and weights.ndim == 2, \
+#         ("weights must be a 2d array.")
+#         return tree_at(
+#             lambda spectrum : spectrum.weights, self, weights)
