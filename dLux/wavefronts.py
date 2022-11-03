@@ -1,10 +1,12 @@
 from __future__ import annotations
 import jax.numpy as np
+from jax import vmap
 from equinox import tree_at
 from enum import IntEnum
 from abc import ABC
+from dLux.utils.coordinates import get_pixel_coordinates
+from dLux.utils.interpolation import interpolate_field
 import dLux
-
 
 __all__ = ["PlaneType", "CartesianWavefront", "AngularWavefront",
            'FarFieldFresnelWavefront']
@@ -210,8 +212,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
             The coordinates of the centers of each pixel representing the
             wavefront.
         """
-        return dLux.utils.coordinates.get_pixel_coordinates(self.npixels,
-                                                            self.pixel_scale)
+        return get_pixel_coordinates(self.npixels, self.pixel_scale)
 
 
     @property
@@ -311,7 +312,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
             lambda wavefront : wavefront.plane_type, self, plane)
 
 
-    def update_phasor(self      : Wavefront,
+    def set_phasor(self      : Wavefront,
                       amplitude : Array,
                       phase     : Array) -> Wavefront:
         """
@@ -358,14 +359,11 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         wavefront : Wavefront
             The new `Wavefront` with the (x, y) tilts applied.
         """
-        assert isinstance(tilt_angles, Array) and tilt_angles.shape == (2,) \
+        assert isinstance(tilt_angles, Array) and tilt_angles.shape == (2,), \
         ("tilt_angles must be an array with shape (2,) ie. (x, y).")
 
-        x_angle, y_angle = tilt_angle
-        x_positions, y_positions = self.pixel_coordinates
-        phase = - self.wavenumber * (x_positions * x_angle + \
-                                     y_positions * y_angle)
-        return self.add_phase(phase)
+        opd = tilt_angles[:, None, None] * self.pixel_coordinates
+        return self.add_phase(- self.wavenumber * opd)
 
 
     def multiply_amplitude(self : Wavefront, array_like : Array) -> Wavefront:
@@ -381,7 +379,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         Returns
         -------
         wavefront : Wavefront
-            The new `Wavefront` with the updated ampltiude.
+            The new `Wavefront` with the updated amplitude.
         """
         amplitude = self.amplitude
         assert isinstance(array_like, Array) and array_like.ndim in (0, 2, 3), \
@@ -435,6 +433,9 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
             The new wavefront with the phases updated according to the supplied
             path_difference
         """
+        assert isinstance(path_difference, Array) and \
+        path_difference.ndim in (0, 2, 3), ("path_difference must be either a "
+        "scalar array or array with 2 or 3 dimensions.")
         phase_difference = self.wavenumber * path_difference
         return self.add_phase(phase_difference)
 
@@ -480,7 +481,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         """
         new_amplitude = np.flip(self.amplitude, axis=(-1, -2))
         new_phase = np.flip(self.phase, axis=(-1, -2))
-        return self.update_phasor(new_amplitude, new_phase)
+        return self.set_phasor(new_amplitude, new_phase)
 
 
     def invert_x(self : Wavefront) -> Wavefront:
@@ -495,7 +496,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         """
         new_amplitude = np.flip(self.amplitude, axis=-1)
         new_phase = np.flip(self.phase, axis=-1)
-        return self.update_phasor(new_amplitude, new_phase)
+        return self.set_phasor(new_amplitude, new_phase)
 
 
     def invert_y(self : Wavefront) -> Wavefront:
@@ -510,7 +511,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         """
         new_amplitude = np.flip(self.amplitude, axis=-2)
         new_phase = np.flip(self.phase, axis=-2)
-        return self.update_phasor(new_amplitude, new_phase)
+        return self.set_phasor(new_amplitude, new_phase)
 
 
     def interpolate(self            : Wavefront,
@@ -548,13 +549,20 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
             field = np.array([self.real, self.imaginary])
         else:
             field = np.array([self.amplitude, self.phase])
-        new_ampltiude, new_phase = dLux.utils.interpolation.interpolate_field( \
-            field, npixels_out, sampling_ratio, real_imaginary=real_imaginary)
+
+        if field.shape[1] == 1:
+            new_amplitude, new_phase = \
+            interpolate_field(field[:, 0], npixels_out, sampling_ratio,
+                              real_imaginary=real_imaginary)[:, None, :, :]
+        else:
+            interpolator = vmap(interpolate_field, in_axes=(1, None, None))
+            new_amplitude, new_phase = interpolator(field, npixels_out,
+                                sampling_ratio, real_imaginary=real_imaginary)
 
         # Update parameters
         return tree_at(lambda wavefront:
                  (wavefront.amplitude, wavefront.phase, wavefront.pixel_scale),
-                        self, (new_ampltiude, new_phase, pixel_scale_out))
+                        self, (new_amplitude, new_phase, pixel_scale_out))
 
 
     def pad_to(self : Wavefront, npixels_out : int) -> Wavefront:
@@ -593,7 +601,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
                 new_centre - centre : centre + new_centre + remainder,
                 new_centre - centre : centre + new_centre + remainder
             ].set(self.phase)
-        return self.update_phasor(new_amplitude, new_phase)
+        return self.set_phasor(new_amplitude, new_phase)
 
 
     def crop_to(self : Wavefront, npixels_out : int) -> Wavefront:
@@ -614,8 +622,8 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         """
         npixels_in  = self.npixels
 
-        assert npixels_in %2 == npixels_out%2, \
-        ("Only supports even -> even or 0dd -> odd cropping")
+        assert npixels_in%2 == npixels_out%2, \
+        ("Only supports even -> even or odd -> odd cropping")
         assert npixels_out < npixels_in, ("npixels_out must be smaller than the"
         " current array size: {}".format(npixels_in))
 
@@ -629,7 +637,7 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
             new_centre - centre : new_centre + centre,
             new_centre - centre : new_centre + centre]
 
-        return self.update_phasor(new_amplitude, new_phase)
+        return self.set_phasor(new_amplitude, new_phase)
 
 
 class CartesianWavefront(Wavefront):
@@ -742,21 +750,3 @@ class FarFieldFresnelWavefront(Wavefront):
         """
         super().__init__(wavelength, pixel_scale,
                          amplitude, phase, plane_type)
-
-
-    def transfer_function(self : Wavefront, distance : Array) -> Array:
-        """
-        The Optical Transfer Function defining the phase evolution of the
-        wavefront when propagating to a non-conjugate plane.
-
-        Parameters
-        ----------
-        distance : Array
-            The distance that is being propagated in meters.
-
-        Returns
-        -------
-        phase : Array, radians
-            The phase that represents the optical transfer.
-        """
-        return np.exp(1.0j * self.wavenumber * distance)
