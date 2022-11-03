@@ -10,7 +10,6 @@ import dLux
 
 # Types
 Array  = np.ndarray
-# Union[str, list]   = Union[list, str]
 Pytree = NewType("Pytree", object)
 Leaf   = Any
 
@@ -728,6 +727,7 @@ class ExtendedBase(Base):
             Whatever object is returned by model_fn.
         """
         return getattr(self.set(paths, values, pmap), model_fn)(*args, **kwargs)
+
 
 
     #######################
