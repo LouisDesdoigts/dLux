@@ -2,6 +2,7 @@ from __future__ import annotations
 import jax.numpy as np
 from equinox import tree_at
 from abc import ABC, abstractmethod
+from dLux.utils.coordinates import get_pixel_coordinates, get_coordinates_vector
 import dLux
 
 
@@ -44,6 +45,7 @@ class Propagator(dLux.optics.OpticalLayer, ABC):
             represents propagation from a focal to a pupil plane.
         """
         super().__init__(**kwargs)
+        assert isinstance(inverse, bool), ("inverse must be a boolean.")
         self.inverse = bool(inverse)
 
 
@@ -183,21 +185,19 @@ class VariableSamplingPropagator(Propagator, ABC):
         pixels_input, npixels_out = npixels
         sign = -1 if self.inverse else 1
 
-        input_coordinates = dLux.utils.coordinates.get_coordinates_vector(
-                                                pixels_input, input_scale,
-                                                pixel_offset/input_scale)
+        input_coordinates = get_coordinates_vector(pixels_input, input_scale,
+                                                   pixel_offset/input_scale)
 
-        output_coordinates = dLux.utils.coordinates.get_coordinates_vector(
-                                                npixels_out, output_scale,
-                                                pixel_offset/output_scale)
+        output_coordinates = get_coordinates_vector(npixels_out, output_scale,
+                                                    pixel_offset/output_scale)
 
         input_to_output = np.outer(input_coordinates, output_coordinates)
 
         return np.exp(-2. * sign * np.pi * 1j * input_to_output)
 
 
-    def propagate(self       : Propagator,
-                   wavefront : Wavefront) -> Array:
+    def propagate(self      : Propagator,
+                  wavefront : Wavefront) -> Array:
         """
         Propagates the wavefront from the input plane to the output plane using
         a Matrix Fourier Transform.
@@ -770,6 +770,28 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         return np.exp(0.5j * wavenumber * radial_coordinates ** 2 / distance)
 
 
+    def transfer_function(self      : Propagator,
+                          wavefront : Wavefront,
+                          distance  : Array) -> Array:
+        """
+        The Optical Transfer Function defining the phase evolution of the
+        wavefront when propagating to a non-conjugate plane.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to propagate.
+        distance : Array, meters
+            The distance that is being propagated in meters.
+
+        Returns
+        -------
+        field : Array
+            The field that represents the optical transfer.
+        """
+        return np.exp(1.0j * wavefront.wavenumber * distance)
+
+
     def propagate(self : Propagator, wavefront : Wavefront) -> Array:
         """
         Propagates the wavefront from the input plane to the output plane using
@@ -791,9 +813,8 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         offsets = self.get_shift()
 
         input_positions = wavefront.pixel_coordinates
-        output_positions = dLux.utils.coordinates.get_pixel_coordinates(
-                                self.npixels_out,
-                                self.pixel_scale_out)
+        output_positions = get_pixel_coordinates(self.npixels_out,
+                                                 self.pixel_scale_out)
 
         propagation_distance = self.focal_length + self.propagation_shift
 
@@ -802,10 +823,10 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
             wavefront.wavelength, - self.focal_length)
         field *= self.quadratic_phase(*input_positions,
             wavefront.wavelength, propagation_distance)
-        wavefront = wavefront.update_phasor(np.abs(field), np.angle(field))
+        wavefront = wavefront.set_phasor(np.abs(field), np.angle(field))
 
         field = super().propagate(wavefront)
-        field *= wavefront.transfer_function(propagation_distance)
+        field *= self.transfer_function(wavefront, propagation_distance)
         field *= self.quadratic_phase(*output_positions,
             wavefront.wavelength, propagation_distance)
         return field
