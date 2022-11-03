@@ -67,7 +67,8 @@ def generate_coordinates(npixels_in     : int,
     """
     old_centre = (npixels_in  - 1) / 2
     new_centre = (npixels_out - 1) / 2
-    pixels = sampling_ratio * (-new_centre, new_centre, npixels_out) + old_centre
+    pixels = sampling_ratio * np.linspace(-new_centre, new_centre,
+                                          npixels_out) + old_centre
     x_pixels, y_pixels = np.meshgrid(pixels + x_shift, pixels + y_shift)
     return np.array([y_pixels, x_pixels])
 
@@ -112,18 +113,16 @@ def interpolate_field(field           : Array,
                                        x_shift, y_shift)
 
     # Interpolate
-    interpolator = vmap(map_coordinates, in_axes=0)
-    new_field = interpolator(field, order=1)
+    interpolator = vmap(map_coordinates, in_axes=(0, None, None))
+    new_field = interpolator(field, coordinates, 1)
 
     # Conserve energy
     if real_imaginary:
         amplitude = np.hypot(new_field[0], new_field[1])
         phase = np.arctan2(new_field[1], new_field[0])
-        amplitude *= sampling_ratio
     else:
         amplitude = new_field[0]
         phase = new_field[1]
-        amplitude *= sampling_ratio
 
     return np.array([amplitude, phase])
 
