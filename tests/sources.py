@@ -184,6 +184,39 @@ class PointSourceUtility(SourceUtility):
         return dLux.sources.PointSource(position, flux, spectrum, name=name)
 
 
+class MultiPointSourceUtility(SourceUtility):
+    """
+    Utility for the MultiPointSource class.
+    """
+
+
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the MultiPointSource Utility.
+        """
+        super().__init__()
+        self.position = np.zeros((3, 2))
+        self.flux     = np.ones(3)
+        self.spectrum = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
+                                                                 600e-9, 10))
+        self.name = "Source"
+
+
+    def construct(self     : Utility,
+                  position : Array    = None,
+                  flux     : Array    = None,
+                  spectrum : Spectrum = None,
+                  name     : str      = None) -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        position = self.position if position is None else position
+        flux     = self.flux     if flux     is None else flux
+        spectrum = self.spectrum if spectrum is None else spectrum
+        name     = self.name     if name     is None else name
+        return dLux.sources.MultiPointSource(position, flux, spectrum, name=name)
+
+
 class ArrayDistributionUtility(SourceUtility):
     """
     Utility for the ArrayDistribution class.
@@ -512,6 +545,72 @@ class TestPointSource(UtilityUser):
     Tests the PointSource class.
     """
     utility : PointSourceUtility = PointSourceUtility()
+
+
+    def test_model(self : UtilityUser) -> None:
+        """
+        Tests the model method.
+        """
+        source = self.utility.construct()
+        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
+        detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        filter_in = dLux.Filter()
+        source.model(optics)
+        source.model(optics, detector)
+        # source.model(optics, detector, filter_in)
+        # source.model(optics, filter_in=filter_in)
+
+
+class TestMultiPointSource(UtilityUser):
+    """
+    Tests the MultiPointSource class.
+    """
+    utility : MultiPointSourceUtility = MultiPointSourceUtility()
+
+
+    def test_constructor(self : UtilityUser) -> None:
+        """
+        Test the constructor class.
+        """
+        # Position
+        # Test string inputs
+        with pytest.raises(ValueError):
+            self.utility.construct(position="")
+
+        # Test zero dimension input
+        with pytest.raises(AssertionError):
+            self.utility.construct(position=5.)
+
+        # Test zero length input
+        with pytest.raises(AssertionError):
+            self.utility.construct(position=[])
+
+        # Test 1 dim input
+        with pytest.raises(AssertionError):
+            self.utility.construct(position=np.ones(2))
+
+        # Flux
+        # Test string inputs
+        with pytest.raises(ValueError):
+            self.utility.construct(flux="")
+
+        # Test zero length input
+        with pytest.raises(AssertionError):
+            self.utility.construct(flux=[])
+
+        # Test 2 dim input
+        with pytest.raises(AssertionError):
+            self.utility.construct(flux=np.ones((2, 2)))
+
+        # Spectrum
+        # Test non-spectrum input
+        with pytest.raises(AssertionError):
+            self.utility.construct(spectrum=[])
+
+        # Name
+        # Test non-string input
+        with pytest.raises(AssertionError):
+            self.utility.construct(name=[])
 
 
     def test_model(self : UtilityUser) -> None:
