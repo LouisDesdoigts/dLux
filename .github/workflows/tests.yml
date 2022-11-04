@@ -49,7 +49,7 @@ jobs:
         run: pytest --quiet tests/optics.py
 
       - name: detector tests
-        run: pytest --quiet tests/detector.py
+        run: pytest --quiet tests/detectors.py
 
 #       - name: utils tests
 #         run: pytest --quiet tests/utils.py
