@@ -41,10 +41,6 @@ class Spectrum(dLux.base.ExtendedBase, ABC):
         ("Wavelengths must be a 1d array.")
         assert len(self.wavelengths) > 0, \
         ("Length of wavelengths must be greater than 1.")
-        assert not np.isnan(self.wavelengths).any(), \
-        ("Wavelengths must not be nan.")
-        assert not np.isinf(self.wavelengths).any(), \
-        ("Wavelengths must be not be infinite.")
 
 
     def get_wavelengths(self : Spectrum) -> Array:
@@ -115,10 +111,6 @@ class ArraySpectrum(Spectrum):
         ("weights must be a 1d array.")
         assert len(self.weights) > 0, \
         ("Length of weights must be greater than 1.")
-        assert not np.isnan(self.weights).any(), \
-        ("weights must not be nan.")
-        assert not np.isinf(self.weights).any(), \
-        ("weights must be not be infinite.")
         assert len(self.wavelengths) == len(self.weights), \
         ("wavelengths and weights must have the same length.")
 
@@ -197,10 +189,6 @@ class PolynomialSpectrum(Spectrum):
         ("coefficients must be a 1d array.")
         assert len(self.coefficients) > 0, \
         ("Length of coefficients must be greater than 1.")
-        assert not np.isnan(self.coefficients).any(), \
-        ("coefficients must not be nan.")
-        assert not np.isinf(self.coefficients).any(), \
-        ("coefficients must be not be infinite.")
 
         self.degree = int(len(coefficients) - 1)
 
@@ -276,10 +264,6 @@ class CombinedSpectrum(ArraySpectrum):
         ("Wavelengths must be a 2d array.")
         assert len(self.wavelengths[0]) > 0, \
         ("Length of wavelengths must be greater than 1.")
-        assert not np.isnan(self.wavelengths).any(), \
-        ("Wavelengths must not be nan.")
-        assert not np.isinf(self.wavelengths).any(), \
-        ("Wavelengths must be not be infinite.")
 
         # Weights
         weights = np.ones(self.wavelengths.shape)/self.wavelengths.shape[1] \
@@ -295,10 +279,6 @@ class CombinedSpectrum(ArraySpectrum):
         ("weights must be a 2d array.")
         assert len(self.weights[0]) > 0, \
         ("Length of weights must be greater than 1.")
-        assert not np.isnan(self.weights).any(), \
-        ("weights must not be nan.")
-        assert not np.isinf(self.weights).any(), \
-        ("weights must be not be infinite.")
 
         # Check consistency between wavelenghts and weights
         assert self.wavelengths.shape == self.weights.shape, "Weights and \

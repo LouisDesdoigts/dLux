@@ -88,19 +88,11 @@ class Source(dLux.base.ExtendedBase, ABC):
             ("position must be a 1d array.")
             assert self.position.shape == (2,), \
             ("positions must be shape (2,), ie (x, y).")
-            assert not np.isnan(self.position).any(), \
-            ("position must not be nan.")
-            assert not np.isinf(self.position).any(), \
-            ("position must be not be infinite.")
 
         # Input flux checking
         if flux is not None:
             assert self.flux.shape == (), \
             ("flux must be a scalar, (shape == ()).")
-            assert not np.isnan(self.flux).any(), \
-            ("flux must not be nan.")
-            assert not np.isinf(self.flux).any(), \
-            ("flux must be not be infinite.")
 
         # Input spectrum checking
         assert isinstance(self.spectrum, dLux.spectrums.Spectrum), \
@@ -308,10 +300,6 @@ class RelativeFluxSource(Source, ABC):
         # Input contrast checking
         assert self.contrast.shape == (), \
         ("Flux ratio must be a scalar, (shape == ()).")
-        assert not np.isnan(self.contrast).any(), \
-        ("contrast must not be nan.")
-        assert not np.isinf(self.contrast).any(), \
-        ("contrast must be not be infinite.")
 
 
     def get_flux(self : Source) -> Array:
@@ -457,18 +445,10 @@ class MultiPointSource(Source):
         ("position must be a 2d array.")
         assert self.position.shape[-1] == 2, \
         ("positions must be shape (nstars, 2), ie [(x0, y0), (x1, y1), ...].")
-        assert not np.isnan(self.position).any(), \
-        ("position must not be nan.")
-        assert not np.isinf(self.position).any(), \
-        ("position must be not be infinite.")
 
         # Input flux checking
         assert self.flux.ndim == 1, \
         ("flux must be a 1d array.")
-        assert not np.isnan(self.flux).any(), \
-        ("flux must not be nan.")
-        assert not np.isinf(self.flux).any(), \
-        ("flux must be not be infinite.")
 
         # Ensure same dimensionality
         assert self.flux.shape[0] == self.position.shape[0], ("position and "
@@ -565,10 +545,6 @@ class ArrayDistribution(ResolvedSource):
         ("distribution must be a 2d array.")
         assert len(self.distribution) > 0, \
         ("Length of distribution must be greater than 1.")
-        assert not np.isnan(self.distribution).any(), \
-        ("distribution must not be nan.")
-        assert not np.isinf(self.distribution).any(), \
-        ("distribution must be not be infinite.")
 
 
     def get_distribution(self : Source) -> Array:
