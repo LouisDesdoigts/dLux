@@ -512,6 +512,27 @@ class TestWavefront(UtilityUser):
         assert np.allclose(new_wf2.amplitude[0], small_ampl)
 
 
+    def test_rotate(self):
+        """
+        Tests the rotate method.
+        """
+        wf = self.utility.construct()
+        wf = dLux.CircularAperture(wf.npixels)(wf)
+        flipped_amplitude = np.flipud(wf.amplitude)
+        flipped_phase = np.flipud(wf.phase)
+
+        new_wf = wf.rotate(np.pi)
+        assert np.allclose(new_wf.amplitude, flipped_amplitude, atol=1e-5)
+        assert np.allclose(new_wf.phase, flipped_phase)
+
+        new_wf = wf.rotate(np.pi, real_imaginary=True)
+        assert np.allclose(new_wf.amplitude, flipped_amplitude, atol=1e-5)
+        assert np.allclose(new_wf.phase, flipped_phase)
+
+        with pytest.raises(NotImplementedError):
+            wf.rotate(np.pi, fourier=True)
+
+
     def test_pad_to(self):
         """
         Tests the pad_to method.
