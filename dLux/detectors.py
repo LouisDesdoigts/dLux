@@ -3,13 +3,14 @@ import jax.numpy as np
 from abc import ABC, abstractmethod
 from jax.scipy.signal import convolve
 from jax.scipy.stats import norm
-from equinox import tree_at
+from equinox import tree_at, static_field
 import dLux
+from dLux.utils.interpolation import rotate, fourier_rotate
 
 
 
 __all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
-           "AddConstant", "IntegerDownsample", "Rotate", "FourierRotate"]
+           "AddConstant", "IntegerDownsample", "Rotate"]
 
 
 Array = np.ndarray
@@ -19,7 +20,26 @@ class DetectorLayer(dLux.base.ExtendedBase, ABC):
     """
     A base Detector layer class to help with type checking throuhgout the rest
     of the software.
+
+    Attributes
+    ----------
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
+    name : str = static_field()
+
+
+    def __init__(self : DetectorLayer,
+                 name : str = 'DetectorLayer') -> DetectorLayer:
+        """
+        Constructor for the DetectorLayer class.
+
+        Parameters
+        ----------
+        name : str = 'DetectorLayer'
+            The name of the layer, which is used to index the layers dictionary.
+        """
+        self.name = str(name)
 
 
     @abstractmethod
@@ -39,10 +59,12 @@ class ApplyPixelResponse(DetectorLayer):
     pixel_response : Array
         The pixel_response to apply to the input image.
     """
-    pixel_response: np.ndarray
+    pixel_response : Array
 
 
-    def __init__(self : DetectorLayer, pixel_response) -> DetectorLayer:
+    def __init__(self           : DetectorLayer,
+                 pixel_response : Array,
+                 name           : str = 'ApplyPixelResponse') -> DetectorLayer:
         """
         Constructor for the ApplyPixelResponse class.
 
@@ -51,7 +73,10 @@ class ApplyPixelResponse(DetectorLayer):
         pixel_response : Array
             The pixel_response to apply to the input image. Must be a 2
             dimensional array equal to size of the image at time of application.
+        name : str = 'ApplyPixelResponse'
+            The name of the layer, which is used to index the layers dictionary.
         """
+        super().__init__(name)
         self.pixel_response = np.asarray(pixel_response, dtype=float)
         assert self.pixel_response.ndim == 2, \
         ("pixel_response must be a 2 dimensional array.")
@@ -83,26 +108,30 @@ class ApplyJitter(DetectorLayer):
     ----------
     kernel_size : int
         The size of the convolution kernel to use.
-    sigma : Array, pixles
-        The standard deviation of the guassian kernel, in units of pixles.
+    sigma : Array, pixels
+        The standard deviation of the guassian kernel, in units of pixels.
     """
-    kernel_size: int
-    sigma: Array
+    kernel_size : int
+    sigma       : Array
 
 
     def __init__(self        : DetectorLayer,
                  sigma       : Array,
-                 kernel_size : int = 10) -> DetectorLayer:
+                 kernel_size : int = 10,
+                 name        : str = 'ApplyJitter') -> DetectorLayer:
         """
         Constructor for the ApplyJitter class.
 
         Parameters
         ----------
+        sigma : Array, pixels
+            The standard deviation of the guassian kernel, in units of pixels.
         kernel_size : int = 10
             The size of the convolution kernel to use.
-        sigma : Array, pixles
-            The standard deviation of the guassian kernel, in units of pixles.
+        name : str = 'ApplyJitter'
+            The name of the layer, which is used to index the layers dictionary.
         """
+        super().__init__(name)
         self.kernel_size = int(kernel_size)
         self.sigma       = np.asarray(sigma, dtype=float)
         assert self.sigma.ndim == 0, ("sigma must be scalar array.")
@@ -121,7 +150,6 @@ class ApplyJitter(DetectorLayer):
         x = np.linspace(-10, 10, self.kernel_size)
         kernel = norm.pdf(x,          scale=self.sigma) * \
                  norm.pdf(x[:, None], scale=self.sigma)
-
         return kernel/np.sum(kernel)
 
 
@@ -153,10 +181,12 @@ class ApplySaturation(DetectorLayer):
     saturation : Array
         The value at which the saturation is applied.
     """
-    saturation: Array
+    saturation : Array
 
 
-    def __init__(self : DetectorLayer, saturation : Array) -> DetectorLayer:
+    def __init__(self       : DetectorLayer,
+                 saturation : Array,
+                 name       : str = 'ApplySaturation') -> DetectorLayer:
         """
         Constructor for the ApplySaturation class.
 
@@ -164,7 +194,10 @@ class ApplySaturation(DetectorLayer):
         ----------
         saturation : Array
             The value at which the saturation is applied.
+        name : str = 'ApplySaturation'
+            The name of the layer, which is used to index the layers dictionary.
         """
+        super().__init__(name)
         self.saturation = np.asarray(saturation, dtype=float)
         assert self.saturation.ndim == 0, ("saturation must be a scalar array.")
 
@@ -197,10 +230,12 @@ class AddConstant(DetectorLayer):
     value : Array
         The value to add to the image.
     """
-    value: Array
+    value : Array
 
 
-    def __init__(self : DetectorLayer, value : Array) -> DetectorLayer:
+    def __init__(self  : DetectorLayer,
+                 value : Array,
+                 name  : str = 'AddConstant') -> DetectorLayer:
         """
         Constructor for the AddConstant class.
 
@@ -208,7 +243,10 @@ class AddConstant(DetectorLayer):
         ----------
         value : Array
             The value to add to the image.
+        name : str = 'AddConstant'
+            The name of the layer, which is used to index the layers dictionary.
         """
+        super().__init__(name)
         self.value = np.asarray(value, dtype=float)
         assert self.value.ndim == 0, ("value must be a scalar array.")
 
@@ -241,10 +279,12 @@ class IntegerDownsample(DetectorLayer):
     kernel_size : int
         The size of the downsampling kernel.
     """
-    kernel_size: int
+    kernel_size : int
 
 
-    def __init__(self : DetectorLayer, kernel_size : int) -> DetectorLayer:
+    def __init__(self        : DetectorLayer,
+                 kernel_size : int,
+                 name        : str = 'IntegerDownsample') -> DetectorLayer:
         """
         Constructor for the IntegerDownsample class.
 
@@ -252,11 +292,14 @@ class IntegerDownsample(DetectorLayer):
         ----------
         kernel_size : int
             The size of the downsampling kernel.
+        name : str = 'IntegerDownsample'
+            The name of the layer, which is used to index the layers dictionary.
         """
+        super().__init__(name)
         self.kernel_size = int(kernel_size)
 
 
-    def downsample(self        : DetectorLAyer,
+    def downsample(self        : DetectorLayer,
                    array       : Array,
                    kernel_size : int) -> Array:
         """
@@ -309,26 +352,42 @@ class Rotate(DetectorLayer):
     Parameters
     ----------
     angle : Array, radians
-        The angle by which to rotate the image in the {}wise direction.
+        The angle by which to rotate the image in the clockwise direction.
+    fourier : bool
+        Should the rotation be done using fourier methods or interpolation.
+    padding : int
+        The amount of padding to use if the fourier method is used.
     """
-    angle : Array
+    angle   : Array
+    fourier : bool
+    padding : int
 
 
-    def __init__(self           : DetectorLayer,
-                 angle          : Array,
-                 name           : str = 'Rotate') -> DetectorLayer:
+    def __init__(self    : DetectorLayer,
+                 angle   : Array,
+                 fourier : bool = False,
+                 padding : int  = None,
+                 name    : str  = 'Rotate') -> DetectorLayer:
         """
         Constructor for the Rotate class.
 
         Parameters
         ----------
         angle: float, radians
-            The angle by which to rotate the image in the {}wise direction.
+            The angle by which to rotate the image in the clockwise direction.
+        fourier : bool = False
+            Should the fourier rotation method be used (True), or regular
+            interpolation method be used (False).
+        padding : int = None
+            The amount of fourier padding to use. Only applies if fourier is
+            True.
         name : str = 'Rotate'
             The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(name)
-        self.angle = np.asarray(angle, dtype=float)
+        self.angle   = np.asarray(angle, dtype=float)
+        self.fourier = bool(fourier)
+        self.padding = padding if padding is None else int(padding)
         assert self.angle.ndim == 0, ("angle must be scalar array.")
 
 
@@ -346,62 +405,7 @@ class Rotate(DetectorLayer):
         image : Array
             The rotated image.
         """
-        return dLux.utils.interpolation.rotate(image, self.angle)
-
-
-class FourierRotate(DetectorLayer):
-    """
-    Applies a rotation to the image using fourier methods. This method is
-    information conserving and can be repeatedly applied without any loss of
-    fidelity, unlike methods that use interpolation.
-
-    Parameters
-    ----------
-    angle : Array, radians
-        The angle by which to rotate the image in the {}wise direction.
-    padding : int
-        A factor by which to pad the array in the Fourier Space Representation.
-    """
-    angle          : Array
-    padding        : int
-
-
-    def __init__(self           : DetectorLayer,
-                 angle          : Array,
-                 padding        : int  = 2,
-                 name           : str  = 'FourierRotate') -> DetectorLayer:
-        """
-        Constructor for the FourierRotation class.
-
-        Parameters
-        ----------
-        angle: float, radians
-            The angle by which to rotate the wavefront in the {}wise direction.
-        padding : int = 2
-            A factor by which to pad the array in the Fourier Space
-            Representation.
-        name : str = 'FourierRotate'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.angle   = np.asarray(angle, dtype=float)
-        self.padding = int(padding)
-        assert self.angle.nidm == 0, ("angle must be scalar array.")
-
-
-    def __call__(self : DetectorLayer, image : Array) -> Array:
-        """
-        Applies the rotation to an image.
-
-        Parameters
-        ----------
-        image : Array
-            The image to rotate.
-
-        Returns
-        -------
-        image : Array
-            The rotated image.
-        """
-        return dLux.utils.interpolation.fourier_rotate(image, self.angle,
-                                                         self.padding)
+        if self.fourier:
+            return fourier_rotate(image, self.angle, self.padding)
+        else:
+            return rotate(image, self.angle)

@@ -3,6 +3,8 @@ from utilities import Utility, UtilityUser
 import jax.numpy as np
 import pytest
 import dLux
+from jax import config
+config.update("jax_debug_nans", True)
 
 
 class SpectrumUtility(Utility):
@@ -132,14 +134,6 @@ class TestSpectrum(UtilityUser):
         with pytest.raises(AssertionError):
             self.utility.construct([])
 
-        # Test nan inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct([np.nan])
-
-        # Test infinite inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct([np.inf])
-
 
     def test_get_wavelengths(self : UtilityUser) -> None:
         """
@@ -147,15 +141,6 @@ class TestSpectrum(UtilityUser):
         """
         spectrum = self.utility.construct()
         assert (spectrum.get_wavelengths() == spectrum.wavelengths).all()
-
-
-    # def test_set_wavelengths(self : UtilityUser) -> None:
-    #     """
-    #     Tests the set_wavelength method.
-    #     """
-    #     new_wavelengths = np.linspace(600e-9, 700e-9, 10)
-    #     new_spectrum = self.utility.construct().set_wavelengths(new_wavelengths)
-    #     assert (new_spectrum.wavelengths == new_wavelengths).all()
 
 
 class TestArraySpectrum(UtilityUser):
@@ -180,14 +165,6 @@ class TestArraySpectrum(UtilityUser):
         with pytest.raises(AssertionError):
             self.utility.construct(weights=[])
 
-        # Test nan inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(weights=[np.nan])
-
-        # Test infinite inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(weights=[np.inf])
-
 
     def test_get_weights(self : UtilityUser) -> None:
         """
@@ -195,15 +172,6 @@ class TestArraySpectrum(UtilityUser):
         """
         spectrum = self.utility.construct()
         assert (spectrum.get_weights() == spectrum.weights).all()
-
-
-    # def test_set_weights(self : UtilityUser) -> None:
-    #     """
-    #     Tests the set_weights method.
-    #     """
-    #     new_weights = np.arange(10)
-    #     new_spectrum = self.utility.construct().set_weights(new_weights)
-    #     assert (new_spectrum.weights == new_weights).all()
 
 
     def test_normalise(self : UtilityUser) -> None:
@@ -252,24 +220,6 @@ class TestPolynomialSpectrum(UtilityUser):
             self.utility.construct(coefficients=[np.inf])
 
 
-    # def test_get_coefficients(self : UtilityUser) -> None:
-    #     """
-    #     Tests the get_coefficents method.
-    #     """
-    #     spectrum = self.utility.construct()
-    #     assert (spectrum.get_coefficients() == spectrum.coefficients).all()
-
-
-    # def test_set_coefficients(self : UtilityUser) -> None:
-    #     """
-    #     Tests the set_coefficents method.
-    #     """
-    #     new_coefficients = np.arange(10)
-    #     new_spectrum = self.utility.construct(). \
-    #                                         set_coefficients(new_coefficients)
-    #     assert (new_spectrum.coefficients == new_coefficients).all()
-
-
     def test_get_weights(self : UtilityUser) -> None:
         """
         Tests the normalisation of the get_weights method.
@@ -301,14 +251,6 @@ class TestCombinedSpectrum(UtilityUser):
         with pytest.raises(AssertionError):
             self.utility.construct(wavelengths=[])
 
-        # Test nan inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(wavelengths=[np.nan])
-
-        # Test infinite inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(wavelengths=[np.inf])
-
         # Weights Testing
         # Test string inputs
         with pytest.raises(ValueError):
@@ -321,14 +263,6 @@ class TestCombinedSpectrum(UtilityUser):
         # Test zero length input
         with pytest.raises(AssertionError):
             self.utility.construct(weights=[])
-
-        # Test nan inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(weights=[np.nan])
-
-        # Test infinite inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(weights=[np.inf])
 
 
     def test_normalise(self : UtilityUser) -> None:
