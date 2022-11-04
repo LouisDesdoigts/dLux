@@ -3,6 +3,8 @@ from utilities import Utility, UtilityUser
 import jax.numpy as np
 import dLux
 from optax import GradientTransformation
+from jax import config
+config.update("jax_debug_nans", True)
 
 
 class BaseUtility(Utility):

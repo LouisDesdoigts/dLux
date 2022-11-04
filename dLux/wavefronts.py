@@ -5,7 +5,7 @@ from equinox import tree_at
 from enum import IntEnum
 from abc import ABC
 from dLux.utils.coordinates import get_pixel_coordinates
-from dLux.utils.interpolation import interpolate_field
+from dLux.utils.interpolation import interpolate_field, rotate_field
 import dLux
 
 __all__ = ["PlaneType", "CartesianWavefront", "AngularWavefront",
@@ -362,8 +362,8 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         assert isinstance(tilt_angles, Array) and tilt_angles.shape == (2,), \
         ("tilt_angles must be an array with shape (2,) ie. (x, y).")
 
-        opd = tilt_angles[:, None, None] * self.pixel_coordinates
-        return self.add_phase(- self.wavenumber * opd)
+        opds = tilt_angles[:, None, None] * self.pixel_coordinates
+        return self.add_phase(- self.wavenumber * opds.sum(0))
 
 
     def multiply_amplitude(self : Wavefront, array_like : Array) -> Wavefront:
@@ -563,6 +563,61 @@ class Wavefront(dLux.base.ExtendedBase, ABC):
         return tree_at(lambda wavefront:
                  (wavefront.amplitude, wavefront.phase, wavefront.pixel_scale),
                         self, (new_amplitude, new_phase, pixel_scale_out))
+
+
+    def rotate(self           : Wavefront,
+               angle          : Array,
+               real_imaginary : bool = False,
+               fourier        : bool = False,
+               padding        : int  = 2) -> Wavefront:
+        """
+        Performs a paraxial rotation on the wavefront, determined by the
+        the angle parameter. By default the rotation is performed using a
+        simple linear interpolation, but an information perserving rotation
+        using fourier methods can be done by setting `fourier = True`. By
+        default rotation is done on the amplitude and phase arrays, however by
+        passing `real_imgainary=True` the rotation is done on the real and
+        imaginary components.
+
+        Parameters
+        ----------
+        angle : Array, radians
+            The angle by which to rotate the wavefront in a clockwise direction.
+        real_imaginary : bool = False
+            Whether to rotate the real and imaginary representation of the
+            wavefront as opposed to the the amplitude and phase representation.
+        fourier : bool = False
+            Should the fourier rotation method be used (True), or regular
+            interpolation method be used (False).
+        padding : int = 2
+            The amount of fourier padding to use. Only applies if fourier is
+            True.
+
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new wavefront rotated by angle in the clockwise direction.
+        """
+        # Get Field
+        if real_imaginary:
+            field = np.array([self.real, self.imaginary])
+        else:
+            field = np.array([self.amplitude, self.phase])
+
+        # Rotate
+        if field.shape[1] == 1:
+            new_amplitude, new_phase = \
+            rotate_field(field[:, 0], angle, fourier=fourier,
+                         real_imaginary=real_imaginary)[:, None, :, :]
+        else:
+            rotator = vmap(rotate_field, in_axes=(1, None))
+            new_amplitude, new_phase = rotator(field, angle, fourier=fourier,
+                                               real_imaginary=real_imaginary)
+
+        # Update parameters
+        return tree_at(lambda wavefront: (wavefront.amplitude, wavefront.phase),
+                                   self, (new_amplitude, new_phase))
 
 
     def pad_to(self : Wavefront, npixels_out : int) -> Wavefront:

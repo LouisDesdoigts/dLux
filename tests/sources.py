@@ -3,6 +3,8 @@ from utilities import Utility, UtilityUser
 import jax.numpy as np
 import pytest
 import dLux
+from jax import config
+config.update("jax_debug_nans", True)
 
 
 Array = np.ndarray
@@ -354,14 +356,6 @@ class TestSource(UtilityUser):
         with pytest.raises(AssertionError):
             self.utility.construct(position=[])
 
-        # Test nan inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(position=[np.nan])
-
-        # Test infinite inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(position=[np.inf])
-
         # Flux
         # Test string inputs
         with pytest.raises(ValueError):
@@ -374,14 +368,6 @@ class TestSource(UtilityUser):
         # Test zero length input
         with pytest.raises(AssertionError):
             self.utility.construct(flux=[])
-
-        # Test nan inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(flux=[np.nan])
-
-        # Test infinite inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(flux=[np.inf])
 
         # Spectrum
         # Test non-spectrum input
@@ -458,14 +444,6 @@ class TestRelativeFluxSource(UtilityUser):
         with pytest.raises(AssertionError):
             self.utility.construct(contrast=[])
 
-        # Test nan inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(contrast=[np.nan])
-
-        # Test infinite inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(contrast=[np.inf])
-
 
     def test_get_flux(self : UtilityUser) -> None:
         """
@@ -501,14 +479,6 @@ class TestRelativePositionSource(UtilityUser):
         with pytest.raises(AssertionError):
             self.utility.construct(separation=[])
 
-        # Test nan inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(separation=[np.nan])
-
-        # Test infinite inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(separation=[np.inf])
-
         # position_angle
         # Test string inputs
         with pytest.raises(ValueError):
@@ -521,14 +491,6 @@ class TestRelativePositionSource(UtilityUser):
         # Test zero length input
         with pytest.raises(AssertionError):
             self.utility.construct(position_angle=[])
-
-        # Test nan inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(position_angle=[np.nan])
-
-        # Test infinite inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(position_angle=[np.inf])
 
 
     def test_get_position(self : UtilityUser) -> None:
@@ -588,14 +550,6 @@ class TestArrayDistribution(UtilityUser):
         # Test zero length input
         with pytest.raises(AssertionError):
             self.utility.construct(distribution=[])
-
-        # Test nan inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(distribution=[np.nan])
-
-        # Test infinite inputs
-        with pytest.raises(AssertionError):
-            self.utility.construct(distribution=[np.inf])
 
 
     def test_get_distribution(self : UtilityUser) -> None:

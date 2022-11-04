@@ -13,7 +13,7 @@ import dLux
 __all__ = ["CreateWavefront", "TiltWavefront", "CircularAperture",
            "NormaliseWavefront", "ApplyBasisOPD", "AddPhase", "AddOPD",
            "TransmissiveOptic", "CompoundAperture", "ApplyBasisCLIMB",
-           "Rotate", "FourierRotate"]
+           "Rotate"]
 
 
 Array = np.ndarray
@@ -114,22 +114,22 @@ class CreateWavefront(OpticalLayer):
     ----------
     npixels : int
         The number of pixels used to represent the wavefront.
-    wavefront_diameter: Array, meters
+    diameter: Array, meters
         The diameter of the wavefront in the Pupil plane.
     wavefront_type: str
         Determines the type of wavefront class to create. Currently supports
         'Cartesian', 'Angular', 'FarFieldFresnel'.
     """
-    npixels            : int
-    wavefront_diameter : Array
-    wavefront_type     : str = static_field()
+    npixels        : int
+    diameter       : Array
+    wavefront_type : str = static_field()
 
 
-    def __init__(self               : OpticalLayer,
-                 npixels            : int,
-                 wavefront_diameter : Array,
-                 wavefront_type     : str = 'Cartesian',
-                 name               : str = 'CreateWavefront') -> OpticalLayer:
+    def __init__(self           : OpticalLayer,
+                 npixels        : int,
+                 diameter       : Array,
+                 wavefront_type : str = 'Cartesian',
+                 name           : str = 'CreateWavefront') -> OpticalLayer:
         """
         Constructor for the CreateWavefront class.
 
@@ -137,7 +137,7 @@ class CreateWavefront(OpticalLayer):
         ----------
         npixels : int
             The number of pixels used to represent the wavefront.
-        wavefront_diameter: Array, meters
+        diameter: Array, meters
             The diameter of the wavefront in the Pupil plane.
         wavefront_type: str = 'Cartesian'
             Determines the type of wavefront class to create. Currently supports
@@ -147,12 +147,12 @@ class CreateWavefront(OpticalLayer):
             Default is 'CreateWavefront'.
         """
         super().__init__(name)
-        self.npixels            = int(npixels)
-        self.wavefront_diameter = np.asarray(wavefront_diameter, dtype=float)
-        self.wavefront_type     = str(wavefront_type)
+        self.npixels        = int(npixels)
+        self.diameter       = np.asarray(diameter, dtype=float)
+        self.wavefront_type = str(wavefront_type)
 
         # Input checks
-        assert self.wavefront_diameter.ndim == 0, ("wavefront_diameter must be "
+        assert self.diameter.ndim == 0, ("diameter must be "
         "a scalar array.")
         assert wavefront_type in ('Cartesian', 'Angular', 'FarFieldFresnel'), \
         ("wavefront_type must be either 'Cartesian', 'Angular' or "
@@ -188,19 +188,14 @@ class CreateWavefront(OpticalLayer):
         wavelength = parameters["wavelength"]
 
         # Determine the pixel scale
-        pixel_scale = self.wavefront_diameter/self.npixels
-
-        # Construct tilted phases for the wavefront based on the source offset
-        x_angle, y_angle = parameters["offset"]
-        x_positions, y_positions = dLux.utils.coordinates \
-                              .get_pixel_coordinates(self.npixels, pixel_scale)
-        phase = - (2 * np.pi / wavelength) * (x_positions * x_angle + \
-                                              y_positions * y_angle)
-        phase = np.expand_dims(phase, 0)
+        pixel_scale = self.diameter/self.npixels
 
         # Construct normalised Amplitude
-        amplitude = np.ones([1, self.npixels, self.npixels])
+        amplitude = np.ones((1, self.npixels, self.npixels))
         amplitude /= np.linalg.norm(amplitude)
+
+        # Construct empty phases
+        phase = np.zeros(((1, self.npixels, self.npixels)))
 
         # Get correct Wavefront type
         wavefront_constructor = getattr(dLux.wavefronts,
@@ -210,13 +205,12 @@ class CreateWavefront(OpticalLayer):
         wavefront = wavefront_constructor(wavelength, pixel_scale, amplitude,
                                       phase, dLux.wavefronts.PlaneType.Pupil)
 
+        # Tilt wavefront from source offset
+        wavefront = wavefront.tilt_wavefront(parameters["offset"])
+
         # Kill PlaneType Gradients
         is_leaf = lambda x: isinstance(x, dLux.wavefronts.PlaneType)
-        def kill_gradient(x):
-            if is_leaf(x):
-                return stop_gradient(x.value)
-            else:
-                return x
+        kill_gradient = lambda x: stop_gradient(x.value) if is_leaf(x) else x
         wavefront = tree_map(kill_gradient, wavefront, is_leaf=is_leaf)
 
         # Update the parameters dictionary with the constructed wavefront
@@ -304,7 +298,6 @@ class CircularAperture(OpticalLayer):
                  npixels : int,
                  rmin    : float = 0.,
                  rmax    : float = 1.,
-                 epsilon : float = 1e-8,
                  name    : str   = 'CircularAperture') -> OpticalLayer:
         """
         Constructor for the CircularAperture class.
@@ -324,10 +317,6 @@ class CircularAperture(OpticalLayer):
             The outer radius of the cirucular aperture. A value of 0.5 will
             have the diameter of the aperture span half of the array. This
             value must be larger than rmax.
-        epsilon : float = 1e-8
-            A small constant that is added to the binary aperture array to
-            stablize gradients. The default value is 1e-8 whic is sufficient for
-            32-bit, but can be lowered to 1e-12 for 64-bit.
         name : str = 'CircularAperture'
             The name of the layer, which is used to index the layers dictionary.
             Default is 'CircularAperture'.
@@ -335,14 +324,13 @@ class CircularAperture(OpticalLayer):
         super().__init__(name)
         self.npixels = int(npixels)
         self.transmission = self.create_aperture(self.npixels, float(rmin),
-                                                 float(rmax), float(epsilon))
+                                                 float(rmax))
 
 
     def create_aperture(self    : OpticalLayer,
                         npixels : int,
                         rmin    : float,
-                        rmax    : float,
-                        epsilon : float) -> Array:
+                        rmax    : float) -> Array:
         """
         Produces the annular aperture array. The coordinate aray upon which the
         radial values are used defines the center of the array as a radius of
@@ -364,10 +352,6 @@ class CircularAperture(OpticalLayer):
             The outer radius of the cirucular aperture. A value of 0.5 will
             have the diameter of the aperture span half of the array. This
             value must be larger than rmax.
-        epsilon : float
-            A small constant that is added to the binary aperture array to
-            stablize gradients. The default value is 1e-8 whic is sufficient for
-            32-bit, but can be lowered to 1e-12 for 64-bit.
 
         Returns
         -------
@@ -381,7 +365,6 @@ class CircularAperture(OpticalLayer):
         radial_coordinates = np.sqrt(np.sum(stacked_grids ** 2, axis = 0))
         aperture = np.logical_and(radial_coordinates <= rmax,
             radial_coordinates > rmin).astype(float)
-        aperture = np.maximum(aperture, epsilon)
         return aperture
 
 
@@ -556,7 +539,7 @@ class AddPhase(OpticalLayer):
 
         # Input checks
         assert self.phase.ndim in (0, 2, 3), ("phase must be either a scalar "
-        "array, or a 2 or 3 dimensional arary.")
+        "array, or a 2 or 3 dimensional array.")
 
 
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
@@ -573,7 +556,7 @@ class AddPhase(OpticalLayer):
         wavefront : Wavefront
             The wavefront with the phase added.
         """
-        return wavefront.add_phase(self.phase_array)
+        return wavefront.add_phase(self.phase)
 
 
 class AddOPD(OpticalLayer):
@@ -608,7 +591,7 @@ class AddOPD(OpticalLayer):
 
         # Input checks
         assert self.opd.ndim in (0, 2, 3), ("opd must be either a scalar "
-        "array, or a 2 or 3 dimensional arary.")
+        "array, or a 2 or 3 dimensional array.")
 
 
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
@@ -663,7 +646,7 @@ class TransmissiveOptic(OpticalLayer):
 
         # Input checks
         assert self.transmission.ndim in (0, 2, 3), ("transmission must be "
-        "either a scalar array, or a 2 or 3 dimensional arary.")
+        "either a scalar array, or a 2 or 3 dimensional array.")
 
 
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
@@ -745,7 +728,7 @@ class CompoundAperture(OpticalLayer):
 
         # Ensure corred dimensionality before using shape
         assert self.occulter_radii.ndim == 1, \
-        ("aperture_radii must be one dimensional.")
+        ("occulter_radii must be one dimensional.")
 
         # Construct at center if no coordinates are supplied
         if aperture_coords is None:
@@ -777,7 +760,7 @@ class CompoundAperture(OpticalLayer):
                       center      : Array,
                       xycoords    : Array,
                       is_aperture : Array,
-                      vmin        : float = 1e-8,
+                      vmin        : float = 0.,
                       vmax        : float = 1.) -> Array:
         """
         Constructs a soft-edged aperture or occulter.
@@ -794,7 +777,7 @@ class CompoundAperture(OpticalLayer):
         is_aperture : bool
             Determines whether an aperture (True) or occulter (False) is
             calculated.
-        vmin : float = 1e-8
+        vmin : float = 0.
             The minimum value to set the transmission to, default is 1e-8 in
             order to keep gradients stable.
         vmax : float = 1.
@@ -975,9 +958,9 @@ class ApplyBasisCLIMB(OpticalLayer):
             The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(name)
-        self.basis  = np.asarray(basis, dtype=float)
+        self.basis            = np.asarray(basis, dtype=float)
         self.ideal_wavelength = np.asarray(ideal_wavelength, dtype=float)
-        self.coefficients = np.array(coefficients).astype(float) \
+        self.coefficients     = np.array(coefficients).astype(float) \
                     if coefficients is not None else np.zeros(len(self.basis))
 
         # Inputs checks
@@ -1007,7 +990,7 @@ class ApplyBasisCLIMB(OpticalLayer):
             The wavefront with the binary OPD applied.
         """
         latent = self.get_opd(self.basis, self.coefficients)
-        binary_phase = np.pi*self.CLIMB(latent)
+        binary_phase = np.pi*self.CLIMB(latent, ppsz=wavefront.npixels)
         opd = self.phase_to_opd(binary_phase, self.ideal_wavelength)
         return wavefront.add_opd(opd)
 
@@ -1096,18 +1079,26 @@ class Rotate(OpticalLayer):
     Parameters
     ----------
     angle : Array, radians
-        The angle by which to rotate the wavefront in the {}wise direction.
+        The angle by which to rotate the wavefront in the clockwise direction.
     real_imaginary : bool
         Should the rotation be performed on the amplitude and phase array
         or the real and imaginary arrays.
+    fourier : bool
+        Should the rotation be done using fourier methods or interpolation.
+    padding : int
+        The amount of padding to use if the fourier method is used.
     """
     angle          : Array
     real_imaginary : bool
+    fourier        : bool
+    padding        : int
 
 
     def __init__(self           : OpticalLayer,
                  angle          : Array,
                  real_imaginary : bool = False,
+                 fourier        : bool = False,
+                 padding        : int  = None,
                  name           : str  = 'Rotate') -> OpticalLayer:
         """
         Constructor for the Rotate class.
@@ -1115,17 +1106,25 @@ class Rotate(OpticalLayer):
         Parameters
         ----------
         angle: float, radians
-            The angle by which to rotate the wavefront in the {}wise direction.
+            The angle by which to rotate the wavefront in the clockwise direction.
         real_imaginary : bool = False
             Should the rotation be performed on the amplitude and phase array
             or the real and imaginary arrays.
+        fourier : bool = False
+            Should the fourier rotation method be used (True), or regular
+            interpolation method be used (False).
+        padding : int = None
+            The amount of fourier padding to use. Only applies if fourier is
+            True.
         name : str = 'Rotate'
             The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(name)
         self.angle          = np.asarray(angle, dtype=float)
         self.real_imaginary = bool(real_imaginary)
-        assert self.angle.nidm == 0, ("angle must be scalar array.")
+        self.fourier        = bool(fourier)
+        self.padding = padding if padding is None else int(padding)
+        assert self.angle.ndim == 0, ("angle must be scalar array.")
 
 
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
@@ -1142,108 +1141,6 @@ class Rotate(OpticalLayer):
         wavefront : Wavefront
             The rotated wavefront.
         """
-        # Get field
-        if real_imaginary:
-            field = np.array([wavefront.real, wavefront.imaginary])
-        else:
-            field = np.array([wavefront.amplitude, wavefront.phase])
-
-        # Rotate
-        rotator = vmap(dLux.utils.interpolation.rotate, in_axes=0)
-        rotated_field = rotator(field, self.angle)
-
-        # Conserve energy
-        if real_imaginary:
-            amplitude = np.hypot(rotated_field[0], rotated_field[1])
-            phase = np.arctan2(rotated_field[1], rotated_field[0])
-        else:
-            amplitude = rotated_field[0]
-            phase = rotated_field[1]
-
-        return tree_at(lambda wavefront: (wavefront.amplitude, wavefront.phase),
-                                          self, (amplitude, phase))
-
-
-class FourierRotate(OpticalLayer):
-    """
-    Applies a rotation to the wavefront using fourier methods. This method is
-    information conserving and can be repeatedly applied without any loss of
-    fidelity, unlike methods that use interpolation.
-
-    Parameters
-    ----------
-    angle : Array, radians
-        The angle by which to rotate the wavefront in the {}wise direction.
-    padding : int
-        A factor by which to pad the array in the Fourier Space Representation.
-    real_imaginary : bool
-        Should the rotation be performed on the amplitude and phase array
-        or the real and imaginary arrays.
-    """
-    angle          : Array
-    padding        : int
-    real_imaginary : bool
-
-
-    def __init__(self           : OpticalLayer,
-                 angle          : Array,
-                 padding        : int  = 2,
-                 real_imaginary : bool = False,
-                 name           : str  = 'FourierRotate') -> OpticalLayer:
-        """
-        Constructor for the FourierRotation class.
-
-        Parameters
-        ----------
-        angle: float, radians
-            The angle by which to rotate the wavefront in the {}wise direction.
-        padding : int = 2
-            A factor by which to pad the array in the Fourier Space
-            Representation.
-        real_imaginary : bool = False
-            Should the rotation be performed on the amplitude and phase array
-            or the real and imaginary arrays.
-        name : str = 'FourierRotate'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.angle          = np.asarray(angle, dtype=float)
-        self.padding        = int(padding)
-        self.real_imaginary = bool(real_imaginary)
-        assert self.angle.nidm == 0, ("angle must be scalar array.")
-
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Applies the Fourier rotation to a wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The rotated wavefront.
-        """
-        # Get field
-        if real_imaginary:
-            field = np.array([wavefront.real, wavefront.imaginary])
-        else:
-            field = np.array([wavefront.amplitude, wavefront.phase])
-
-        # Rotate
-        rotator = vmap(dLux.utils.interpolation.fourier_rotate, in_axes=0)
-        rotated_field = rotator(field, self.angle, self.padding)
-
-        # Conserve energy
-        if real_imaginary:
-            amplitude = np.hypot(rotated_field[0], rotated_field[1])
-            phase = np.arctan2(rotated_field[1], rotated_field[0])
-        else:
-            amplitude = rotated_field[0]
-            phase = rotated_field[1]
-
-        return tree_at(lambda wavefront: (wavefront.amplitude, wavefront.phase),
-                                          self, (amplitude, phase))
+        args = [self.angle, self.real_imaginary, self.fourier]
+        args += [self.padding] if self.padding is not None else []
+        return wavefront.rotate(*args)
