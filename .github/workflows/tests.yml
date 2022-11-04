@@ -45,11 +45,11 @@ jobs:
       - name: propagator tests
         run: pytest --quiet tests/propagators.py
 
-#       - name: optics tests
-#         run: pytest --quiet tests/optics.py
+      - name: optics tests
+        run: pytest --quiet tests/optics.py
 
-#       - name: detector tests
-#         run: pytest --quiet tests/detector.py
+      - name: detector tests
+        run: pytest --quiet tests/detector.py
 
 #       - name: utils tests
 #         run: pytest --quiet tests/utils.py
