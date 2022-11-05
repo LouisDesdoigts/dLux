@@ -25,7 +25,7 @@ def opd_to_phase(opd : Array, wavelength : Array) -> Array:
     phase : Array, radians
         The equivilent phase value for the given opd and wavelength.
     """
-    return 2*np.pi*opd/wavel
+    return 2*np.pi*opd/wavelength
 
 
 def phase_to_opd(phase : Array, wavelength : Array) -> Array:
@@ -45,7 +45,7 @@ def phase_to_opd(phase : Array, wavelength : Array) -> Array:
     opd : Array, meters
         The equivilent opd value for the given phase and wavelength.
     """
-    return phase*wavel/(2*np.pi)
+    return phase*wavelength/(2*np.pi)
 
 
 def get_fringe_size(wavelength : Array, aperture : Array) -> Array:

@@ -386,25 +386,36 @@ class PointSource(Source):
     """
 
 
-    def __init__(self     : Source,
-                 position : Array,
-                 flux     : Array,
-                 spectrum : Spectrum,
-                 name     : str = 'PointSource') -> Source:
+    def __init__(self        : Source,
+                 position    : Array    = np.array([0., 0.]),
+                 flux        : Array    = np.array(1.),
+                 spectrum    : Spectrum = None,
+                 wavelengths : Array    = None,
+                 name        : str      = 'PointSource') -> Source:
         """
         Constructor for the PointSource class.
 
         Parameters
         ----------
-        position : Array, radians
+        position : Array, radians = np.array([0., 0.])
             The (x, y) on-sky position of this object.
-        flux : Array, photons
+        flux : Array, photons = np.array(1.)
             The flux of the object.
-        spectrum : Spectrum
+        spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
+        wavelengths : Array, meters = None
+            The array of wavelengths at which the spectrum is defined.
         name : str = 'PointSource'
             The name for this object.
         """
+        # Check spectrum & wavelengths
+        assert spectrum is not None or wavelengths is not None, \
+        ("Either spectrum or wavelengths must be specified.")
+        if spectrum is not None:
+            assert wavelengths is None, \
+            ("wavelengths can not be specified if spectrum is specified.")
+        else:
+            spectrum = dLux.spectrums.ArraySpectrum(wavelengths)
         super().__init__(position, flux, spectrum, name=name)
 
 
@@ -414,11 +425,12 @@ class MultiPointSource(Source):
     """
 
 
-    def __init__(self     : Source,
-                 position : Array,
-                 flux     : Array,
-                 spectrum : Spectrum,
-                 name     : str = 'MultiPointSource') -> Source:
+    def __init__(self        : Source,
+                 position    : Array,
+                 flux        : Array    = None,
+                 spectrum    : Spectrum = None,
+                 wavelengths : Array    = None,
+                 name        : str      = 'MultiPointSource') -> Source:
         """
         Constructor for the MultiPointSource class.
 
@@ -426,25 +438,39 @@ class MultiPointSource(Source):
         ----------
         position : Array, radians
             The ((x0, y0), (x1, y1), ...) on-sky positions of these sourcese.
-        flux : Array, photons
+        flux : Array, photons = None
             The fluxes of the sources.
-        spectrum : Spectrum
+        spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
             Every source in this class will have an identical spectrum.
+        wavelengths : Array, meters = None
+            The array of wavelengths at which the spectrum is defined.
         name : str = 'MultiPointSource'
             The name for this object.
         """
+        # Check spectrum & wavelengths
+        assert spectrum is not None or wavelengths is not None, \
+        ("Either spectrum or wavelengths must be specified.")
+        if spectrum is not None:
+            assert wavelengths is None, \
+            ("wavelengths can not be specified if spectrum is specified.")
+        else:
+            spectrum = dLux.spectrums.ArraySpectrum(wavelengths)
+
         # Only call super, not __init__ since we are overwriting all the attrs
         super().__init__(spectrum=spectrum, name=name)
 
         self.position = np.asarray(position, dtype=float)
-        self.flux     = np.asarray(flux,     dtype=float)
 
         # Input position checking
         assert self.position.ndim == 2, \
         ("position must be a 2d array.")
         assert self.position.shape[-1] == 2, \
         ("positions must be shape (nstars, 2), ie [(x0, y0), (x1, y1), ...].")
+
+        # Get flux
+        self.flux = np.ones(len(self.positions)) if flux is None else \
+                    np.asarray(flux, dtype=float)
 
         # Input flux checking
         assert self.flux.ndim == 1, \
@@ -514,28 +540,40 @@ class ArrayDistribution(ResolvedSource):
 
 
     def __init__(self         : Source,
-                 position     : Array,
-                 flux         : Array,
-                 spectrum     : Spectrum,
-                 distribution : Array,
-                 name         : str = 'ArrayDistribution',
+                 position     : Array    = np.array([0., 0.]),
+                 flux         : Array    = np.array(1.),
+                 distribution : Array    = np.ones((3, 3)),
+                 spectrum     : Spectrum = None,
+                 wavelengths  : Array    = None,
+                 name         : str      = 'ArrayDistribution',
                  **kwargs) -> Source:
         """
         Constructor for the ArrayDistribution class.
 
         Parameters
         ----------
-        position : Array, radians
+        position : Array, radians = np.array([0., 0.])
             The (x, y) on-sky position of this object.
-        flux : Array, photons
+        flux : Array, photons = np.array(1.)
             The flux of the object.
-        spectrum : Spectrum
-            The spectrum of this object, represented by a Spectrum object.
-        distribution : Array
+        distribution : Array = np.ones((3, 3))
             The array of intensities respresenting the resolved source.
+        spectrum : Spectrum = None
+            The spectrum of this object, represented by a Spectrum object.
+        wavelengths : Array, meters = None
+            The array of wavelengths at which the spectrum is defined.
         name : str = 'ArrayDistribution'
             The name for this object.
         """
+        # Check spectrum & wavelengths
+        assert spectrum is not None or wavelengths is not None, \
+        ("Either spectrum or wavelengths must be specified.")
+        if spectrum is not None:
+            assert wavelengths is None, \
+            ("wavelengths can not be specified if spectrum is specified.")
+        else:
+            spectrum = dLux.spectrums.ArraySpectrum(wavelengths)
+
         super().__init__(position, flux, spectrum, name=name, **kwargs)
         distribution = np.asarray(distribution, dtype=float)
         self.distribution = distribution/distribution.sum()
@@ -583,35 +621,48 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
 
 
     def __init__(self           : Source,
-                 position       : Array,
-                 flux           : Array,
-                 separation     : Array,
-                 position_angle : Array,
-                 contrast       : Array,
-                 spectrum       : Spectrum,
-                 name           : str = 'BinarySource') -> Source:
+                 position       : Array    = np.array([0., 0.]),
+                 flux           : Array    = np.array(1.),
+                 separation     : Array    = None,
+                 position_angle : Array    = np.pi/2,
+                 contrast       : Array    = np.array(1.),
+                 spectrum       : Spectrum = None,
+                 wavelengths    : Array    = None,
+                 name           : str      = 'BinarySource') -> Source:
         """
         Parameters
         ----------
-        position : Array, radians
+        position : Array, radians = np.array([0., 0.])
             The (x, y) on-sky position of this object.
-        flux : Array, photons
+        flux : Array, photons = np.array(1.)
             The mean flux of the sources.
-        spectrum : CombinedSpectrum
-            The spectrum of this object, represented by a CombinedSpectrum \
-            object.
-        separation : Array, radians
+        separation : Array, radians = None
             The separation of the two sources in radians.
-        position_angle : Array, radians
-            The field angle between the two sources measure from the positive
-            x axis.
-        contrast : Array
+        position_angle : Array, radians = np.pi/2
+            The position angle between the two sources measured clockwise from
+            the vertical axis.
+        contrast : Array = np.array(1.)
             The contrast ratio between the two sources.
+        spectrum : CombinedSpectrum = None
+            The spectrum of this object, represented by a CombinedSpectrum.
+        wavelengths : Array, meters = None
+            The array of wavelengths at which the spectrum is defined.
         name : str = 'BinarySource'
             The name for this object.
         """
-        assert isinstance(spectrum, dLux.CombinedSpectrum), \
-        ("The input spectrum must be a CombinedSpectrum object.")
+        # Check spectrum & wavelengths
+        assert spectrum is not None or wavelengths is not None, \
+        ("Either spectrum or wavelengths must be specified.")
+        if spectrum is not None:
+            assert wavelengths is None, \
+            ("wavelengths can not be specified if spectrum is specified.")
+            assert isinstance(spectrum, dLux.CombinedSpectrum), \
+            ("The input spectrum must be a CombinedSpectrum object.")
+        else:
+            spectrum = dLux.spectrums.CombinedSpectrum(wavelengths)
+
+        # Check separation
+        assert separation is not None, ("separation must be provided.")
 
         super().__init__(position=position,
                          flux=flux,
@@ -680,29 +731,41 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
 
 
     def __init__(self         : Source,
-                 position     : Array,
-                 flux         : Array,
-                 spectrum     : Spectrum,
-                 distribution : Array,
-                 contrast     : Array,
-                 name         : str = 'PointExtendedSource') -> Source:
+                 position     : Array    = np.array([0., 0.]),
+                 flux         : Array    = np.array(1.),
+                 distribution : Array    = np.ones((3, 3)),
+                 contrast     : Array    = np.array(1.),
+                 spectrum     : Spectrum = None,
+                 wavelengths  : Array    = None,
+                 name         : str      = 'PointExtendedSource') -> Source:
         """
         Parameters
         ----------
-        position : Array, radians
+        position : Array, radians = np.array([0., 0.])
             The (x, y) on-sky position of this object.
-        flux : Array, photons
+        flux : Array, photons = np.array(1.)
             The flux of the object.
-        spectrum : Spectrum
-            The spectrum of this object, represented by a Spectrum object.
-        distribution : Array
+        distribution : Array = np.ones((3, 3))
             The array of intensities respresenting the resolved source.
-        contrast : Array
+        contrast : Array = np.array(1.)
             The contrast ratio between the point source and the resolved
             source.
+        spectrum : Spectrum = None
+            The spectrum of this object, represented by a Spectrum object.
+        wavelengths : Array, meters = None
+            The array of wavelengths at which the spectrum is defined.
         name : str = 'PointExtendedSource'
             The name for this object.
         """
+        # Check spectrum & wavelengths
+        assert spectrum is not None or wavelengths is not None, \
+        ("Either spectrum or wavelengths must be specified.")
+        if spectrum is not None:
+            assert wavelengths is None, \
+            ("wavelengths can not be specified if spectrum is specified.")
+        else:
+            spectrum = dLux.spectrums.Spectrum(wavelengths)
+
         super().__init__(position=position, flux=flux, spectrum=spectrum, \
                          distribution=distribution, contrast=contrast, \
                          name=name)
@@ -773,32 +836,42 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
 
 
     def __init__(self         : Source,
-                 position     : Array,
-                 flux         : Array,
-                 spectrum     : Spectrum,
-                 distribution : Array,
-                 contrast    : Array,
-                 name         : str = 'PointAndExtendedSource') -> Source:
+                 position     : Array    = np.array([0., 0.]),
+                 flux         : Array    = np.array(1.),
+                 distribution : Array    = np.ones((3, 3)),
+                 contrast     : Array    = np.array(1.),
+                 spectrum     : Spectrum = None,
+                 wavelengths  : Array    = None,
+                 name         : str      = 'PointAndExtendedSource') -> Source:
         """
         Parameters
         ----------
-        position : Array, radians
+        position : Array, radians = np.array([0., 0.])
             The (x, y) on-sky position of this object.
-        flux : Array, photons
+        flux : Array, photons = np.array(1.)
             The flux of the object.
-        spectrum : CombinedSpectrum
-            The spectrum of this object, represented by a CombinedSpectrum \
-            object.
-        distribution : Array
+        distribution : Array = np.ones((3, 3))
             The array of intensities respresenting the resolved source.
-        contrast : Array
+        contrast : Array = np.array(1.)
             The contrast ratio between the point source and the resolved
             source.
+        spectrum : CombinedSpectrum = None
+            The spectrum of this object, represented by a CombinedSpectrum.
+        wavelengths : Array, meters = None
+            The array of wavelengths at which the spectrum is defined.
         name : str = 'PointAndExtendedSource'
             The name for this object.
         """
-        assert isinstance(spectrum, dLux.CombinedSpectrum), \
-        ("The input spectrum must be a CombinedSpectrum object.")
+        # Check spectrum & wavelengths
+        assert spectrum is not None or wavelengths is not None, \
+        ("Either spectrum or wavelengths must be specified.")
+        if spectrum is not None:
+            assert wavelengths is None, \
+            ("wavelengths can not be specified if spectrum is specified.")
+            assert isinstance(spectrum, dLux.CombinedSpectrum), \
+            ("The input spectrum must be a CombinedSpectrum object.")
+        else:
+            spectrum = dLux.spectrums.CombinedSpectrum(wavelengths)
 
         super().__init__(position=position, flux=flux, spectrum=spectrum, \
                          distribution=distribution, contrast=contrast, \

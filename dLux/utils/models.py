@@ -134,7 +134,7 @@ def simple_optical_system(aperture_diameter         : Array,
 
     # Propagator
     if angular:
-        layers += [dLux.AngularMFT(wavefront_npixels,
+        layers += [dLux.AngularMFT(detector_npixels,
                         dLux.utils.arcseconds_to_radians(detector_pixel_size))]
     else:
         layers += [dLux.CartesianMFT(detector_npixels, detector_pixel_size,

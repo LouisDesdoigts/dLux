@@ -42,7 +42,7 @@ def get_RGE(array : Array, epsilon : float = 1e-8) -> Array:
     array : Array
         The array of radial gradient energies.
     """
-    positions = dLux.utils.coordinates.get_polar_positions(array.shape[0])
+    positions = dLux.utils.coordinates.get_pixel_positions(array.shape[0])
     grads_vec = np.gradient(array)
 
     xnorm = positions[1]*grads_vec[0]
@@ -67,10 +67,10 @@ def get_RWGE(array : Array, epsilon : float = 1e-8) -> Array:
     array : Array
         The array of radial radially weighted energies.
     """
-    positions = dLux.utils.coordinates.get_polar_positions(array.shape[0])
-    radii = dLux.utils.coordinates.get_polar_positions(array.shape[0])
+    positions = dLux.utils.coordinates.get_pixel_positions(array.shape[0])
+    radii = dLux.utils.coordinates.get_polar_positions(array.shape[0])[0]
     radii_norm = positions/(radii + epsilon)
-    grads_vec = np.array(np.gradient(positions))
+    grads_vec = np.gradient(array)
 
     xnorm = radii_norm[1]*grads_vec[0]
     ynorm = radii_norm[0]*grads_vec[1]
@@ -98,5 +98,5 @@ def get_radial_mask(npixels : int,
     mask: Array
         A mask with the the values below rmin and above rmax masked out.
     """
-    radii = dLux.utils.coordinates.get_polar_positions(npixels)
+    radii = dLux.utils.coordinates.get_polar_positions(npixels)[0]
     return np.asarray((radii < rmax) & (radii > rmin), dtype=float)
