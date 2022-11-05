@@ -169,11 +169,11 @@ class PointSourceUtility(SourceUtility):
         super().__init__()
 
 
-    def construct(self     : Utility,
-                  position : Array    = None,
-                  flux     : Array    = None,
-                  spectrum : Spectrum = None,
-                  name     : str      = None) -> Source:
+    def construct(self        : Utility,
+                  position    : Array    = None,
+                  flux        : Array    = None,
+                  spectrum    : Spectrum = None,
+                  name        : str      = None) -> Source:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
@@ -248,8 +248,8 @@ class ArrayDistributionUtility(SourceUtility):
         name         = self.name         if name         is None else name
         distribution = self.distribution if distribution is None \
                                                             else distribution
-        return dLux.sources.ArrayDistribution(position, flux, spectrum, \
-                                              distribution, name=name)
+        return dLux.sources.ArrayDistribution(position, flux, distribution,
+                                              spectrum, name=name)
 
 
 class BinarySourceUtility(RelativePositionSourceUtility, \
@@ -323,8 +323,8 @@ class PointExtendedSourceUtility(RelativeFluxSourceUtility, \
         name         = self.name         if name         is None else name
         distribution = self.distribution if distribution is None \
                                                             else distribution
-        return dLux.sources.PointExtendedSource(position, flux, spectrum, \
-                                         distribution, contrast, name=name)
+        return dLux.sources.PointExtendedSource(position, flux, distribution,
+                                                contrast, spectrum, name=name)
 
 
 class PointAndExtendedSourceUtility(RelativeFluxSourceUtility, \
@@ -361,8 +361,8 @@ class PointAndExtendedSourceUtility(RelativeFluxSourceUtility, \
         name         = self.name         if name         is None else name
         distribution = self.distribution if distribution is None \
                                                             else distribution
-        return dLux.sources.PointAndExtendedSource(position, flux, spectrum, \
-                                         distribution, contrast, name=name)
+        return dLux.sources.PointAndExtendedSource(position, flux, distribution,
+                                                contrast, spectrum, name=name)
 
 
 class TestSource(UtilityUser):
