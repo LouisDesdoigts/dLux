@@ -1247,7 +1247,6 @@ class OpticalSystem(dLux.base.ExtendedBase):
     ----------
     layers: list, required
         - A list of layers that defines the tranformaitons and operations of the system (typically optical)
-     
     wavels: ndarray
         - An array of wavelengths in meters to simulate
         - The shape must be 1d - stellar spectrums are controlled through the weights parameter
