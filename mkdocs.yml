@@ -12,7 +12,7 @@ extra_javascript:
   - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-  # - https://cdn.jsdelivr.net/gh/rod2ik/cdn@main/mkdocs/javascripts/mkdocs-graphviz.js
+  - https://cdn.jsdelivr.net/gh/rod2ik/cdn@main/mkdocs/javascripts/mkdocs-graphviz.js
 
 site_name: ∂Lux - Differentiable Optical Simulation
 repo_url: https://github.com/LouisDesdoigts/dLux
@@ -57,13 +57,15 @@ nav:
 
     - Base:
         - Base:      base/base.md
-        - Telescope: base/instrument.md
-        - Optics:    base/optics.md
-        - Scene:     base/scene.md
-        - Detector:  base/detector.md
-        - Filter:    base/filter.md
-        - model:     base/model.md
-        - Optical System (depreceated): base/optical_system.md
+
+    - Core:
+        - Telescope: core/instrument.md
+        - Optics:    core/optics.md
+        - Scene:     core/scene.md
+        - Detector:  core/detector.md
+        - Filter:    core/filter.md
+        - model:     core/model.md
+        - Optical System (depreceated): core/optical_system.md
 
     - Optical Layers:
         - Create Wavefront:    optics/create_wavefront.md
