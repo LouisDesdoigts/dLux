@@ -3,9 +3,9 @@ jax
 jaxlib
 equinox
 optax
-matplotlib
 
 # Extra
+matplotlib
 jupyter
 jupyterlab
 tqdm
