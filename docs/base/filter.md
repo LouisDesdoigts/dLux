@@ -1,1 +1,0 @@
-::: dLux.base.Filter
