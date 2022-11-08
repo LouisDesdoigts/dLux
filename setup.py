@@ -26,6 +26,7 @@ with open('requirements.txt') as f:
 
 
 setuptools.setup(
+    python_requires='>=3.7,<3.10.x'
     name="dLux",
     version=find_version("dLux", "__init__.py"),
     description="A fully differentiable optical simulator build in Jax",
