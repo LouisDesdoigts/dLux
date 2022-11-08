@@ -1,14 +1,12 @@
+# Core
 jax
 jaxlib
 equinox
 optax
-numpy
+
+# Extra
 matplotlib
-tqdm
 jupyter
 jupyterlab
+tqdm
 chainconsumer
-sklearn
-imageio
-
-
