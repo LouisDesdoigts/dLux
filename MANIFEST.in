@@ -1,2 +1,1 @@
-exclude src/model_builder.py
 exclude docs/*
