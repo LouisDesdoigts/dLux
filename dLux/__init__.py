@@ -1,5 +1,5 @@
 name = "dLux"
-__version__ = "0.2"
+__version__ = "0.9.0"
 
 # Import as modules
 from . import base
