@@ -2,7 +2,7 @@ from __future__ import annotations
 from utilities import Utility, UtilityUser
 import jax.numpy as np
 import dLux
-from optax import GradientTransformation
+from optax import GradientTransformation, MultiTransformState, adam
 from jax import config
 config.update("jax_debug_nans", True)
 
@@ -396,11 +396,12 @@ class TestExtendedBase(UtilityUser):
         # Define paths & groups
         p1 = 'param'
         p2 = 'b.param'
-        optimisers = ['group1', 'group2'] # These are actually arbitrary
+        optimisers = [adam(0), adam(1)] # These are actually arbitrary
 
         # Test paths
-        optim = base.get_optimiser([p1, p2], optimisers)
+        optim, opt_state = base.get_optimiser([p1, p2], optimisers)
         assert isinstance(optim, GradientTransformation)
+        assert isinstance(opt_state, MultiTransformState)
 
 
     def test_update_and_model(self):

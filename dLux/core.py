@@ -325,7 +325,7 @@ class Instrument(dLux.base.ExtendedBase):
         self.observation = observation
 
 
-    def observe(self : Instrument) -> Any:
+    def observe(self : Instrument, **kwargs) -> Any:
         """
         Call the function stored within the observation attribute at key 'fn',
         passing in the instrument (self) as the first argument and 'args' as
@@ -337,7 +337,7 @@ class Instrument(dLux.base.ExtendedBase):
             The output of the function store in the observation at 'fn' with
             arguments (instrument, observation['args']).
         """
-        return self.observation['fn'](self, self.observation['args'])
+        return self.observation['fn'](self, self.observation['args'], **kwargs)
 
 
     def dither_position(self : Instrument, dither : Array) -> Instrument:
@@ -367,8 +367,9 @@ class Instrument(dLux.base.ExtendedBase):
                        dithered_sources)
 
 
-    @partial(vmap, in_axes=(None, 0))
-    def dither_and_model(self, dithers):
+    def dither_and_model(self    : Instrument,
+                         dithers : Array,
+                         **kwargs) -> Any:
         """
         Applies a series of dithers to the instrument sources and calls the
         .model() method after applying each dither.
@@ -384,7 +385,9 @@ class Instrument(dLux.base.ExtendedBase):
             The psfs generated after applying the dithers to the source
             positions.
         """
-        return self.dither_position(dithers).model()
+        dith_fn = lambda dither: self.dither_position(dither).model(**kwargs)
+        return vmap(dith_fn, in_axes=(0))(dithers)
+
 
 
     def __getattr__(self : Instrument, key : str) -> object:
@@ -418,8 +421,8 @@ class Instrument(dLux.base.ExtendedBase):
                                         key in self.scene.sources.keys():
             return self.scene.sources[key]
         else:
-            raise ValueError("'{}' object has no attribute '{}'"\
-                             .format(type(self), key))
+            raise AttributeError("'{}' object has no attribute '{}'"\
+                                 .format(type(self), key))
 
 
     def normalise(self : Instrument) -> Instrument:
@@ -546,8 +549,8 @@ class Optics(dLux.base.ExtendedBase):
         if key in self.layers.keys():
             return self.layers[key]
         else:
-            raise ValueError("'{}' object has no attribute '{}'"\
-                             .format(type(self), key))
+            raise AttributeError("'{}' object has no attribute '{}'"\
+                                 .format(type(self), key))
 
 
     def propagate_mono(self       : Optics,
@@ -810,8 +813,8 @@ class Scene(dLux.base.ExtendedBase):
         if key in self.sources.keys():
             return self.sources[key]
         else:
-            raise ValueError("'{}' object has no attribute '{}'"\
-                             .format(type(self), key))
+            raise AttributeError("'{}' object has no attribute '{}'"\
+                                 .format(type(self), key))
 
 
     def normalise(self : Scene) -> Scene:
@@ -928,8 +931,8 @@ class Detector(dLux.base.ExtendedBase):
         if key in self.layers.keys():
             return self.layers[key]
         else:
-            raise ValueError("'{}' object has no attribute '{}'"\
-                             .format(type(self), key))
+            raise AttributeError("'{}' object has no attribute '{}'"\
+                                 .format(type(self), key))
 
 
     def apply_detector(self  : Instrument,
@@ -1034,10 +1037,7 @@ class Detector(dLux.base.ExtendedBase):
 
 class Filter(dLux.base.ExtendedBase):
     """
-    A class for modelling optical filters. Note most of the code used to
-    integrate and interpolate within this class has been taken from the
-    jax-cosmo package. (https://github.com/DifferentiableUniverseInitiative/
-    jax_cosmo/blob/master/jax_cosmo/scipy/interpolate.py)
+    A class for modelling optical filters.
 
     Attributes
     ----------

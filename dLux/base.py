@@ -1,7 +1,7 @@
 from __future__ import annotations
 import jax.numpy as np
 from jax.tree_util import tree_map
-from equinox import tree_at, Module
+from equinox import tree_at, Module, is_array, filter as eqx_filter
 from optax import adam, multi_transform
 from typing import Union, NewType, Any, Callable
 from abc import ABC
@@ -647,7 +647,7 @@ class ExtendedBase(Base):
                       paths      : Union[str, list],
                       optimisers : Union[optax.GradientTransformation, list],
                       get_args   : bool = False,
-                      pmap       : dict = None) -> optax.GradientTransformation:
+                      pmap       : dict = None) -> tuple:
         """
         Returns an Optax.GradientTransformion object, with the optimisers
         specified by optimisers applied to the leaves specified by paths.
@@ -667,13 +667,13 @@ class ExtendedBase(Base):
 
         Returns
         -------
-        optimiser : Optax.GradientTransformion
-            An Optax.GradientTransformion object, with the optimisers
-            specified by optimisers applied to the leaves specified
-            by paths.
+        (optimiser, state) : tuple
+            A tuple of (Optax.GradientTransformion, optax.MultiTransformState)
+            objects, with the optimisers applied to the leaves specified by
+            paths, and the initialised optimisation state.
         """
         # Construct groups and get param_spec
-        groups = [str(i) for i in range(len(paths))]
+        groups = [str(i) for i in range(len(optimisers))]
         param_spec = self.get_param_spec(paths, groups, pmap=pmap)
 
         # Generate optimiser dictionary
@@ -686,8 +686,11 @@ class ExtendedBase(Base):
         # Get optimiser object
         optim = multi_transform(opt_dict, param_spec)
 
-        return optim if not get_args \
-            else (optim, self.get_args(paths, pmap))
+        # Get filtered optimiser
+        opt_state = optim.init(eqx_filter(self, is_array))
+
+        return (optim, opt_state) if not get_args \
+            else (optim, opt_state, self.get_args(paths, pmap))
 
 
     #########################
@@ -698,7 +701,6 @@ class ExtendedBase(Base):
                          paths     : Union[str, list],
                          values    : Union[Any, list],
                          pmap      : dict = None,
-                         *args,
                          **kwargs) -> Any:
         """
         Updates the leaves speficied by paths with values, and then calls the
@@ -726,7 +728,7 @@ class ExtendedBase(Base):
          : Any
             Whatever object is returned by model_fn.
         """
-        return getattr(self.set(paths, values, pmap), model_fn)(*args, **kwargs)
+        return getattr(self.set(paths, values, pmap), model_fn)(**kwargs)
 
 
 
@@ -738,7 +740,6 @@ class ExtendedBase(Base):
                         paths     : Union[str, list],
                         fns       : Union[Callable, list],
                         pmap      : dict = None,
-                        *args,
                         **kwargs) -> object:
         """
         Applies the functions specified by fns to the leaves speficied by
@@ -763,7 +764,7 @@ class ExtendedBase(Base):
          : Any
             Whatever object is returned by model_fn.
         """
-        return getattr(self.apply(paths, fns, pmap), model_fn)(*args, **kwargs)
+        return getattr(self.apply(paths, fns, pmap), model_fn)(**kwargs)
 
 
     # Method 1, get first
