@@ -120,6 +120,8 @@ def get_pixel_scale(sampling_rate : Array,
     sampling_rate : Array
         The rate at which to sample the diffraction fringes. A value of 2 will
         give nyquist sampled pixels.
+    wavelength : Array, meters
+        The observation wavelength.
     aperture : Array, meters
         The size of the aperture.
     focal_length : Array = None
