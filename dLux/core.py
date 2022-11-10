@@ -481,7 +481,11 @@ class Instrument(dLux.base.ExtendedBase):
             single array (if return_tree is false), or a pytree like object
             with matching tree strucutre as the input scene/sources/source.
         """
-        optics = optics if 'optics' in kwargs else self.optics
+        if 'optics' in kwargs:
+            optics = kwargs['optics']
+            kwargs.pop('optics')
+        else:
+            optics = self.optics
         kwargs['detector'] = self.detector if 'detector' not in kwargs \
                                                         else kwargs['detector']
         kwargs['filter']   = self.filter   if 'filter'   not in kwargs \
