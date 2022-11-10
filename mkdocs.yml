@@ -56,7 +56,8 @@ nav:
         - Parameter Inference:      notebooks/HMC.ipynb
 
     - Base:
-        - Base:      base/base.md
+        - Base:         base/base.md
+        - ExtendedBase: base/extended_base.md
 
     - Core:
         - Telescope: core/instrument.md
