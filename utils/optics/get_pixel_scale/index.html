@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../../assets/logo.jpg">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.8">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.9">
     
     
       
@@ -20,7 +20,7 @@
       <link rel="stylesheet" href="../../../assets/stylesheets/main.20d9efc8.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.815d1a91.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.08040f6c.min.css">
         
       
       
@@ -54,7 +54,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent="">
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
   
     
     
@@ -366,6 +366,20 @@
     <li class="md-nav__item">
       <a href="../../../base/base/" class="md-nav__link">
         Base
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../base/extended_base/" class="md-nav__link">
+        ExtendedBase
       </a>
     </li>
   
@@ -2084,6 +2098,16 @@ at the given sampling rate.</p>
           </td>
           <td><p>The rate at which to sample the diffraction fringes. A value of 2 will
 give nyquist sampled pixels.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>wavelength</code></td>
+          <td>
+                <code><span title="dLux.utils.optics.Array">Array</span>, meters</code>
+          </td>
+          <td><p>The observation wavelength.</p></td>
           <td>
               <em>required</em>
           </td>
