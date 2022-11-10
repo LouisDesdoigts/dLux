@@ -410,14 +410,13 @@ class Instrument(dLux.base.ExtendedBase):
         item : object
             The item corresponding to the supplied key in the sub-dictionaries.
         """
-
-        if self.optics is not None and hasattr(self.optics, 'layers') and \
+        if 'optics' in vars(self) and hasattr(self.optics, 'layers') and \
                                         key in self.optics.layers.keys():
             return self.optics.layers[key]
-        elif self.detector is not None and hasattr(self.detector, 'layers') and\
+        elif 'detector' in vars(self) and hasattr(self.detector, 'layers') and \
                                         key in self.detector.layers.keys():
             return self.detector.layers[key]
-        elif self.scene is not None and hasattr(self.scene, 'sources') and \
+        elif 'scene' in vars(self) and hasattr(self.scene, 'sources') and \
                                         key in self.scene.sources.keys():
             return self.scene.sources[key]
         else:
@@ -550,7 +549,7 @@ class Optics(dLux.base.ExtendedBase):
         item : object
             The item corresponding to the supplied key in the layers dictionary.
         """
-        if key in self.layers.keys():
+        if 'layers' in vars(self) and key in self.layers.keys():
             return self.layers[key]
         else:
             raise AttributeError("'{}' object has no attribute '{}'"\
@@ -814,7 +813,7 @@ class Scene(dLux.base.ExtendedBase):
             The item corresponding to the supplied key in the sources
             dictionary.
         """
-        if key in self.sources.keys():
+        if 'sources' in vars(self) and key in self.sources.keys():
             return self.sources[key]
         else:
             raise AttributeError("'{}' object has no attribute '{}'"\
@@ -932,7 +931,7 @@ class Detector(dLux.base.ExtendedBase):
         item : object
             The item corresponding to the supplied key in the layers dictionary.
         """
-        if key in self.layers.keys():
+        if 'layers' in vars(self) and key in self.layers.keys():
             return self.layers[key]
         else:
             raise AttributeError("'{}' object has no attribute '{}'"\
