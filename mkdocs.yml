@@ -48,16 +48,16 @@ plugins:
 nav:
     - Home: index.md
     - Tutorials:
-        - Interfacing with PyTrees: notebooks/PyTree_interface.ipynb
+        # - Interfacing with PyTrees: notebooks/PyTree_interface.ipynb
         - Phase Retrieval:          notebooks/phase_retrieval_demo.ipynb
         - Phase Mask Design:        notebooks/designing_a_mask.ipynb
         - Pixel Level Calibration:  notebooks/flatfield_calibration.ipynb
         - Fisher Information:       notebooks/fisher_information.ipynb
         - Parameter Inference:      notebooks/HMC.ipynb
 
-    - Base:
-        - Base:         base/base.md
-        - ExtendedBase: base/extended_base.md
+    # - Base:
+    #     - Base:         base/base.md
+    #     - ExtendedBase: base/extended_base.md
 
     - Core:
         - Telescope: core/instrument.md

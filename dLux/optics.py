@@ -5,6 +5,7 @@ from jax.scipy.ndimage import map_coordinates
 from jax.tree_util import tree_map
 from jax.lax import stop_gradient
 from equinox import tree_at, static_field
+from zodiax import ExtendedBase
 from abc import ABC, abstractmethod
 from inspect import signature
 import dLux
@@ -19,7 +20,7 @@ __all__ = ["CreateWavefront", "TiltWavefront", "CircularAperture",
 Array = np.ndarray
 
 
-class OpticalLayer(dLux.base.ExtendedBase, ABC):
+class OpticalLayer(ExtendedBase, ABC):
     """
     A base Optical layer class to help with type checking throuhgout the rest
     of the software. Instantiates the apply method which inspects the function

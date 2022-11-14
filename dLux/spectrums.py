@@ -2,6 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import jax.numpy as np
 from equinox import tree_at
+from zodiax import ExtendedBase
 from jax import vmap
 import dLux
 
@@ -12,7 +13,7 @@ __all__ = ["ArraySpectrum", "PolynomialSpectrum", "CombinedSpectrum"]
 Array = np.ndarray
 
 
-class Spectrum(dLux.base.ExtendedBase, ABC):
+class Spectrum(ExtendedBase, ABC):
     """
     Abstract base class for arbitrary spectral parametrisations.
 

@@ -3,6 +3,7 @@ jax
 jaxlib
 equinox
 optax
+zodiax
 
 # Extra
 matplotlib
