@@ -3,6 +3,7 @@ import jax.numpy as np
 from jax.scipy.signal import convolve
 from jax import vmap
 from equinox import tree_at, static_field
+from zodiax import ExtendedBase
 from abc import ABC, abstractmethod
 import dLux
 
@@ -17,7 +18,7 @@ Array = np.ndarray
 ########################
 ### Abstract Classes ###
 ########################
-class Source(dLux.base.ExtendedBase, ABC):
+class Source(ExtendedBase, ABC):
     """
     Base class for source objects. The idea of these source classes is to allow
     an arbitrary parametrisation of the underlying astrophyical objects. Each

@@ -4,6 +4,7 @@ from jax import vmap
 from jax.tree_util import tree_map, tree_flatten
 from jax.scipy.ndimage import map_coordinates
 from equinox import tree_at, static_field
+from zodiax import ExtendedBase
 from collections import OrderedDict
 from copy import deepcopy
 from functools import partial
@@ -174,7 +175,7 @@ def model(optics      : Optics,
         return image.flatten() if flatten else image
 
 
-class Instrument(dLux.base.ExtendedBase):
+class Instrument(ExtendedBase):
     """
     A high level class desgined to model the behaviour of a telescope. It
     stores a series different ∂Lux objects, and primarily passes the relevant
@@ -498,7 +499,7 @@ class Instrument(dLux.base.ExtendedBase):
                      **kwargs)
 
 
-class Optics(dLux.base.ExtendedBase):
+class Optics(ExtendedBase):
     """
     A high level class desgined to model the behaviour of some optical systems
     response to wavefronts.
@@ -762,7 +763,7 @@ class Optics(dLux.base.ExtendedBase):
         return model(self, **kwargs)
 
 
-class Scene(dLux.base.ExtendedBase):
+class Scene(ExtendedBase):
     """
     A high level class representing some 'astrophysical scene', which is
     composed of dLux.sources.Sources.
@@ -878,7 +879,7 @@ class Scene(dLux.base.ExtendedBase):
         return model(optics, scene=self, **kwargs)
 
 
-class Detector(dLux.base.ExtendedBase):
+class Detector(ExtendedBase):
     """
     A high level class desgined to model the behaviour of some detectors
     response to some psf.
@@ -1038,7 +1039,7 @@ class Detector(dLux.base.ExtendedBase):
         return model(optics, detector=self, **kwargs)
 
 
-class Filter(dLux.base.ExtendedBase):
+class Filter(ExtendedBase):
     """
     A class for modelling optical filters.
 
@@ -1220,7 +1221,7 @@ class Filter(dLux.base.ExtendedBase):
 
 
 """Legacy code"""
-class OpticalSystem(dLux.base.ExtendedBase):
+class OpticalSystem(ExtendedBase):
     """ Optical System class, Equinox Modle
     
     DOCSTRING NOT COMPLETE
