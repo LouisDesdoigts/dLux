@@ -27,8 +27,8 @@ jobs:
           pip install --quiet .
 
       # ===== Tests =====
-      - name: base tests
-        run: pytest --quiet tests/base.py
+      # - name: base tests
+      #   run: pytest --quiet tests/base.py
 
       - name: core tests
         run: pytest --quiet tests/core.py

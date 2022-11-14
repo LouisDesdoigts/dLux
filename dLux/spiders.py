@@ -10,14 +10,15 @@ import equinox
 import functools
 import dLux
 import dLux.utils
-import jax.numpy as np 
+import jax.numpy as np
 import matplotlib.pyplot as pyplot
+from zodiax import ExtendedBase
 
 
 Layer = typing.TypeVar("Layer")
 
 
-class Spider(dLux.base.ExtendedBase, abc.ABC):
+class Spider(ExtendedBase, abc.ABC):
     """
     An abstraction on the concept of an optical spider for a space telescope.
     These are the things that hold up the secondary mirrors. For example,
