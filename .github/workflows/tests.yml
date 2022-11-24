@@ -1,26 +1,29 @@
-# Author : Jordan Dennis
-# Date : 29/06/2022
-# Title : tests.yml
-# Description : Automatically runs tests when branches are merged.
-#   The tests that are run can be found in the tests directory.
-
 name: automated tests
 on: [push]
 
 jobs:
+
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+
     steps:
       - name: checkout
         uses: actions/checkout@main
 
-      - name: python
-        uses: actions/setup-python@v1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
+<<<<<<< HEAD
 <<<<<<< HEAD
           python-version: 3.10.7
 =======
           python-version: 3.x
+>>>>>>> main
+=======
+          python-version: ${{ matrix.python-version }}
 >>>>>>> main
           architecture: x64
 
@@ -32,11 +35,29 @@ jobs:
           pip install --quiet .
 
       # ===== Tests =====
+      # - name: base tests
+      #   run: pytest --quiet tests/base.py
+
+      - name: core tests
+        run: pytest --quiet tests/core.py
+
+      - name: spectrum tests
+        run: pytest --quiet tests/spectrums.py
+
+      - name: source tests
+        run: pytest --quiet tests/sources.py
+
       - name: wavefront tests
         run: pytest --quiet tests/wavefronts.py
 
       - name: propagator tests
         run: pytest --quiet tests/propagators.py
 
-#            - name: layer tests
-#              run: pytest --quiet tests/layers.py
+      - name: optics tests
+        run: pytest --quiet tests/optics.py
+
+      - name: detector tests
+        run: pytest --quiet tests/detectors.py
+
+#       - name: utils tests
+#         run: pytest --quiet tests/utils.py
