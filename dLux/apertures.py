@@ -209,7 +209,7 @@ class AnnularAperture(Aperture):
 
     def _metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(coordinates)
-        coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
+        coordinates = dLux.utils.cartesian_to_polar(coordinates)[0]
         return self._soften(coordinates - self.rmin) * \
             self._soften(- coordinates + self.rmax)
       
@@ -244,7 +244,7 @@ class CircularAperture(Aperture):
 
     def _metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(coordinates)
-        coordinates = dLux.utils.cart2polar(coordinates[0], coordinates[1])[0]
+        coordinates = dLux.utils.cartesian_to_polar(coordinates)[0]
         return self._soften(- coordinates + self.radius)
 
 
