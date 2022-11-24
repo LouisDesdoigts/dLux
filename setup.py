@@ -3,11 +3,8 @@ import os
 import codecs
 import re
 
-# with open("README.md", "r", encoding="utf-8") as fh:
-#     long_description = fh.read()
-
 long_description = "Taking derivatives through Light"
-    
+
 here = os.path.abspath(os.path.dirname(__file__))
 def read(*parts):
     with codecs.open(os.path.join(here, *parts), 'r') as fp:
@@ -29,30 +26,26 @@ with open('requirements.txt') as f:
 
 
 setuptools.setup(
+    python_requires='>=3.7,<3.11',
     name="dLux",
     version=find_version("dLux", "__init__.py"),
     description="A fully differentiable optical simulator build in Jax",
     long_description=long_description,
-    # long_description_content_type="text/markdown",
-    
+
     author="Louis Desdoigts",
     author_email="Louis.Desdoigts@sydney.edu.au",
     url="https://github.com/LouisDesdoigts/dLux",
-    
+
     project_urls={
         "Bug Tracker": "https://github.com/LouisDesdoigts/dLux/issues",
     },
-    
-    # package_dir={"": "src"},
-    # packages=["dLux"],
-    
+
     install_requires=install_requires,
-    
+
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
 
-    # packages = ["src"] + setuptools.find_namespace_packages(where = "src")
     packages = ["dLux", "dLux/utils"]
 )

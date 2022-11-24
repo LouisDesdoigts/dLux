@@ -1,0 +1,1 @@
+::: dLux.utils.interpolation.generate_coordinates
