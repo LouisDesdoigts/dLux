@@ -11,6 +11,6 @@ plt.imshow(even_soft_unif_spider._aperture(coordinates))
 plt.colorbar()
 plt.show()
 
-plt.imshow(even_soft_unif_spider._aperture(coordinates))
+plt.imshow(odd_soft_unif_spider._aperture(coordinates))
 plt.colorbar()
 plt.show()
