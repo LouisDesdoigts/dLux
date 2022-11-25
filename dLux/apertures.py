@@ -582,6 +582,13 @@ class UniformSpider(Spider):
         angles += self.rotation
         
         struts = self._strut(angles, coordinates) - self.width_of_struts / 2.
+
+        for i in range(struts.shape[0]):
+            plt.title(angles[i])
+            plt.imshow(struts[i])
+            plt.colorbar()
+            plt.show()
+
         return self._soften(struts).prod(axis=0)
         
  
@@ -615,6 +622,6 @@ coordinates = dLux.utils.get_pixel_coordinates(24, 2. / 24.)
 even_soft_unif_spider = UniformSpider(0., 0., 4., .1, 0., softening=True)
 odd_soft_unif_spider = UniformSpider(0., 0., 3., .1, 0., softening=True)
 
-fig, axes = plt.subplots(2, 2, figsize=(2*4, 1*3))
-axes[0][0].imshow(even_soft_unif_spider._aperture(coordinates))
-plt.show()
+# fig, axes = plt.subplots(2, 2, figsize=(2*4, 1*3))
+even_soft_unif_spider._aperture(coordinates)
+# plt.show()
