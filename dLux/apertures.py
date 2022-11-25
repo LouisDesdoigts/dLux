@@ -495,10 +495,9 @@ class Spider(Aperture, abc.ABC):
         gradient = np.tan(angle)
         full_width = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
         theta = np.arctan2(y, x) + angle + np.pi
-        # TODO:
+        # TODO: This is slow and I want to remove it. 
         theta = np.where(theta > 2 * np.pi, theta - 2 * np.pi, theta)
-        positive = (theta > np.pi / 2) & (theta < 3 * np.pi / 2)
-        strut = full_width * positive
+        strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1., full_width)
         return strut
 
 import matplotlib.pyplot as plt
@@ -584,7 +583,22 @@ class UniformSpider(Spider):
             endpoint=False)
         angles += self.rotation
         struts = self._strut(angles, coordinates) - self.width_of_struts / 2.
-        return self._soften(struts).prod(axis=0)
+
+        for i in range(struts.shape[0]):
+            plt.title(angles[i])
+            plt.imshow(struts[i])
+            plt.colorbar()
+            plt.show()
+
+        softened = self._soften(struts)
+
+        for i in range(struts.shape[0]):
+            plt.title(angles[i])
+            plt.imshow(softened[i])
+            plt.colorbar()
+            plt.show()
+
+        return softened.prod(axis=0)
         
  
     def __call__(self: Layer, params: dict) -> dict:
