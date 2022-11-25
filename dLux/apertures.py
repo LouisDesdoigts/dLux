@@ -369,23 +369,21 @@ class SquareAperture(RotatableAperture):
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
-
 class CompoundAperture(eqx.Module):
     """
     Represents an aperture that contains more than one single 
     aperture. The smaller sub-apertures are stored in a dictionary
     pytree and are so acessible by user defined name. For example:
-
-
     Attributes
     ----------
     apertures : dict(str, Layer)
         The apertures that make up the compound aperture. 
     """
     apertures : dict    
+    use_prod  : bool    
 
 
-    def __init__(self, apertures: dict) -> Layer:
+    def __init__(self, apertures: dict, use_prod : bool) -> Layer:
         """
         Parameters
         ----------
@@ -393,8 +391,11 @@ class CompoundAperture(eqx.Module):
             The aperture objects stored in a dictionary of type
             {str : Layer} where the Layer is a subclass of the 
             Aperture.
+        use_prod : bool
+            A flag to indicate if the product or max should be used to combine multiple apertures
         """
         self.apertures = apertures
+        self.use_prod = use_prod
 
 
     def __getitem__(self, key: str) -> Layer:
@@ -414,7 +415,6 @@ class CompoundAperture(eqx.Module):
     def __setitem__(self, key: str, value: Layer) -> None:
         """
         Assign a new value to one of the aperture mirrors.
-
         Parameters
         ----------
         key : str
@@ -436,20 +436,21 @@ class CompoundAperture(eqx.Module):
         apertures = []
         for aperture in self.apertures.values():
             apertures.append(aperture._aperture(coordinates))
-        return np.stack(apertures).prod(axis=0)
+        if self.use_prod:
+            return np.stack(apertures).prod(axis=0)
+        else:  
+            return np.stack(apertures).max(axis=0)
 
 
     def __call__(self, parameters: dict) -> dict:
         """
         Apply the aperture to an incoming wavefront.
-
         Parameters
         ----------
         parameters : dict
             A dictionary containing the parameters of the model. 
             The dictionary must satisfy `parameters.get("Wavefront")
             != None`. 
-
         Returns
         -------
         parameters : dict
@@ -462,7 +463,6 @@ class CompoundAperture(eqx.Module):
                 wavefront.get_pixel_coordinates()))
         parameters["Wavefront"] = wavefront
         return parameters
-
 
 class Spider(Aperture, abc.ABC):
     """
