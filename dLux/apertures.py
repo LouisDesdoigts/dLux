@@ -614,14 +614,3 @@ class UniformSpider(Spider):
         params["Wavefront"] = wavefront
         return params
 
-import matplotlib.pyplot as plt
-
-coordinates = dLux.utils.get_pixel_coordinates(24, 2. / 24.)
-
-# Uniform Spider Testing
-even_soft_unif_spider = UniformSpider(0., 0., 4., .1, 0., softening=True)
-odd_soft_unif_spider = UniformSpider(0., 0., 3., .1, 0., softening=True)
-
-# fig, axes = plt.subplots(2, 2, figsize=(2*4, 1*3))
-even_soft_unif_spider._aperture(coordinates)
-# plt.show()
