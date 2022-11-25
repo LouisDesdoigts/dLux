@@ -493,15 +493,18 @@ class Spider(Aperture, abc.ABC):
         x, y = coordinates[0], coordinates[1]
         perp = np.tan(angle + np.pi / 2.)
         gradient = np.tan(angle)
-        return np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)    
+        full_width = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
+        theta = np.arctan2(y, x) + angle
+        positive = (theta > 0) & (theta < np.pi)
+        return full_width * positive
 
 
-class EvenUniformSpider(Spider):
+class UniformSpider(Spider):
     """
     A spider with equally-spaced, equal-width struts. This is of course the 
     most common and simplest implementation of a spider. Gradients can be 
     taken with respect to the width of the struts and the global rotation 
-    as well as the centre of the spider inherited from 
+    as well as the centre of the spider.
 
     Parameters
     ----------
