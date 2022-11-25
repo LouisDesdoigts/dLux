@@ -496,7 +496,8 @@ class Spider(Aperture, abc.ABC):
         full_width = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
         theta = np.arctan2(y, x) + angle
         positive = (theta > 0) & (theta < np.pi)
-        return full_width * positive
+        strut = full_width * positive
+        return strut
 
 
 class UniformSpider(Spider):
@@ -606,3 +607,14 @@ class UniformSpider(Spider):
         params["Wavefront"] = wavefront
         return params
 
+import matplotlib.pyplot as plt
+
+coordinates = dLux.utils.get_pixel_coordinates(24, 2. / 24.)
+
+# Uniform Spider Testing
+even_soft_unif_spider = UniformSpider(0., 0., 4., .1, 0., softening=True)
+odd_soft_unif_spider = UniformSpider(0., 0., 3., .1, 0., softening=True)
+
+fig, axes = plt.subplots(2, 2, figsize=(2*4, 1*3))
+axes[0][0].imshow(even_soft_unif_spider._aperture(coordinates))
+plt.show()
