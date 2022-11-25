@@ -29,7 +29,7 @@ plt.subplot(1,2,2)
 plt.imshow(compund_circs._aperture(coordinates))
 plt.show()
 
-
+dl.Basis(nterms=5, aperture=circ1)
 
 # test with overlap
 circ1_pos = [ 0.05,0]

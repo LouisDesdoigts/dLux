@@ -12,6 +12,7 @@ from . import utils
 from . import apertures
 from . import sources
 from . import spectrums
+from . import basis
 
 # Import core functions from modules
 # from .base        import *
@@ -23,11 +24,12 @@ from .propagators import *
 from .apertures   import *
 from .sources     import *
 from .spectrums   import *
+from .basis       import *
 
 # Add to __all__
 __all__ = core.__all__ + detectors.__all__ + optics.__all__ + \
             wavefronts.__all__ + propagators.__all__ + sources.__all__ + \
-            spectrums.__all__ + apertures.__all__
+            spectrums.__all__ + apertures.__all__ + basis.__all__
 
 # Check for 64-bit
 from jax import config
