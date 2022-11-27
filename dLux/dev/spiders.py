@@ -41,21 +41,14 @@ class Spider(dl.Aperture, abc.ABC):
         perp = np.tan(angle)
         gradient = np.tan(angle)
         dist = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
-        theta = np.arctan2(y, x) 
-        
-        plt.title("$\\theta$")
-        plt.imshow(theta)
-        plt.colorbar()
-        plt.show()
-
-        theta = theta + np.pi
+        theta = np.arctan2(y, x) + np.pi 
 
         plt.title("$\\theta + \\pi$")
         plt.imshow(theta)
         plt.colorbar()
         plt.show()
 
-        theta = theta + np.pi + angle
+        theta = np.where(theta > angle, theta - angle, theta + 2 * np.pi - angle)
 
         plt.title("$\\theta + \\pi + \\phi$")
         plt.imshow(theta)
@@ -82,7 +75,13 @@ class Spider(dl.Aperture, abc.ABC):
 
         # This is all a hot mess. That is what this is. So how do I fix it?
         # Well it is obviously not trivial. I to take an array of angles and
-        # essentially rotate it by angle. So I need 
+        # essentially rotate it by angle. So I need to find all of the 
+        # points where theta is greater than angle and then I subtract 
+        # angle from theta in these points. Where theta is less than
+        # angle I want to add two pi - angle. Consider the case of angle equals
+        # three pi on two. The fourth quadrant has three pi on two subtracted 
+        # giving it a range of zero to pi on two. Yes I think that this will 
+        # work. 
 
         return strut
 
