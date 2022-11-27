@@ -148,16 +148,32 @@ class UniformSpider(Spider):
         return params
 
 
-coordinates = dl.utils.get_pixel_coordinates(24, 2. / 24.)
+pixels = 128
+coordinates = dl.utils.get_pixel_coordinates(pixels, 2. / pixels)
 
 # Uniform Spider Testing
 even_soft_unif_spider = UniformSpider(0., 0., 4., .1, 0., softening=True)
-odd_soft_unif_spider = UniformSpider(0., 0., 3., .1, 0., softening=True)
+even_hard_unif_spider = UniformSpider(0., 0., 4., .1, 0., softening=False)
+pos_x_trans_unif_spider = UniformSpider(1., 0., 4., .1, 0., softening=True)
+neg_x_trans_unfi_spider = UniformSpider(-1., 0., 4., .1, 0., softening=False)
+pos_y_trans_unif_spider = UniformSpider(0., 1., 4., .1, 0., softening=True)
 
+odd_soft_unif_spider = UniformSpider(0., 0., 3., .1, 0., softening=True)
+odd_hard_unif_spider = UniformSpider(0., 0., 3., .1, 0., softening=False)
+
+fig, axes = plt.subplots()
+
+plt.title("Even Soft. Unif. Spider")
 plt.imshow(even_soft_unif_spider._aperture(coordinates))
 plt.colorbar()
 plt.show()
 
+plt.title("Even Soft. Unif. Spider")
+plt.imshow(even_soft_unif_spider._aperture(coordinates))
+plt.colorbar()
+plt.show()
+
+plt.title("Odd Soft. Unif. Spider")
 plt.imshow(odd_soft_unif_spider._aperture(coordinates))
 plt.colorbar()
 plt.show()
