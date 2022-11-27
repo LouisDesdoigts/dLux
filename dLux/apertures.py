@@ -491,10 +491,10 @@ class Spider(Aperture, abc.ABC):
             The soft edged strut. 
         """
         x, y = coordinates[0], coordinates[1]
-        perp = np.tan(angle + np.pi / 2.)
+        perp = np.tan(angle)
         gradient = np.tan(angle)
         full_width = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
-        theta = np.arctan2(y, x) + angle + np.pi
+        theta = np.arctan2(y, x) + angle
         # TODO: This is slow and I want to remove it. 
         theta = np.where(theta > 2 * np.pi, theta - 2 * np.pi, theta)
         strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1., full_width)
@@ -554,7 +554,7 @@ class UniformSpider(Spider):
         self.width_of_struts = np.asarray(width_of_struts).astype(float)
 
 
-    @functools.partial(jax.vmap, in_axes=(None, 0, None))
+    # @functools.partial(jax.vmap, in_axes=(None, 0, None))
     def _strut(self, angle: float, coordinates: Array) -> float:
         """
         A vectorised routine for constructing the struts. This has been done 
@@ -582,7 +582,7 @@ class UniformSpider(Spider):
         angles = np.linspace(0, 2 * np.pi, self.number_of_struts, 
             endpoint=False)
         angles += self.rotation
-        struts = self._strut(angles, coordinates) - self.width_of_struts / 2.
+        struts = np.array([self._strut(angle, coordinates) for angle in angles]) - self.width_of_struts / 2.
 
         for i in range(struts.shape[0]):
             plt.title(angles[i])
