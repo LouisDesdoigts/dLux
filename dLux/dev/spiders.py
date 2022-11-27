@@ -37,11 +37,31 @@ class Spider(dl.Aperture, abc.ABC):
         strut: float
             The soft edged strut. 
         """
-        x, y = coordinates[0][:, ::-1], coordinates[1][:, ::-1]
+        x, y = coordinates[0][:, ::-1], coordinates[1][:, :]
         perp = np.tan(angle)
         gradient = np.tan(angle)
-        full_width = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
-        theta = np.arctan2(y, x) + angle + np.pi
+        dist = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
+        theta = np.arctan2(y, x) 
+        
+        plt.title("$\\theta$")
+        plt.imshow(theta)
+        plt.colorbar()
+        plt.show()
+
+        theta = theta + np.pi
+
+        plt.title("$\\theta + \\pi$")
+        plt.imshow(theta)
+        plt.colorbar()
+        plt.show()
+
+        theta = theta + np.pi + angle
+
+        plt.title("$\\theta + \\pi + \\phi$")
+        plt.imshow(theta)
+        plt.colorbar()
+        plt.show()
+
         # TODO: This is slow and I want to remove it. 
         theta = np.where(theta > 2 * np.pi, theta - 2 * np.pi, theta)
 
@@ -53,12 +73,16 @@ class Spider(dl.Aperture, abc.ABC):
         # So the current problem is that I need to translate the coordinates 
         # around by angle and then return them to the range [0, 2 pi].
 
-        strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1., full_width)
+        strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1., dist)
 
-        plt.title("Strut")
+        plt.title(f"$\\theta = {angle}$")
         plt.imshow(strut)
         plt.colorbar()
         plt.show()
+
+        # This is all a hot mess. That is what this is. So how do I fix it?
+        # Well it is obviously not trivial. I to take an array of angles and
+        # essentially rotate it by angle. So I need 
 
         return strut
 
