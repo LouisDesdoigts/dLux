@@ -42,36 +42,13 @@ class Spider(dl.Aperture, abc.ABC):
         gradient = np.tan(angle)
         dist = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
         theta = np.arctan2(y, x) + np.pi 
-
-        plt.title("$\\theta + \\pi$")
-        plt.imshow(theta)
-        plt.colorbar()
-        plt.show()
-
         theta = np.where(theta > angle, theta - angle, theta + 2 * np.pi - angle)
-
-        plt.title("$\\theta + \\pi + \\phi$")
-        plt.imshow(theta)
-        plt.colorbar()
-        plt.show()
-
-        # TODO: This is slow and I want to remove it. 
         theta = np.where(theta > 2 * np.pi, theta - 2 * np.pi, theta)
-
-        plt.title("$0 < \\theta < 2 \\pi$")
-        plt.imshow(theta)
-        plt.colorbar()
-        plt.show()
 
         # So the current problem is that I need to translate the coordinates 
         # around by angle and then return them to the range [0, 2 pi].
 
         strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1., dist)
-
-        plt.title(f"$\\theta = {angle}$")
-        plt.imshow(strut)
-        plt.colorbar()
-        plt.show()
 
         # This is all a hot mess. That is what this is. So how do I fix it?
         # Well it is obviously not trivial. I to take an array of angles and
