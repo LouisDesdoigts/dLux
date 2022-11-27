@@ -1,10 +1,17 @@
 import matplotlib.pyplot as plt
+import matplotlib as mpl 
 import dLux as dl
 import jax.numpy as np
 import abc
+import typing
+
+mpl.rcParams["text.usetex"] = True
+
+Array = typing.TypeVar("Array")
+Layer = typing.TypeVar("Layer")
 
 
-class Spider(Aperture, abc.ABC):
+class Spider(dl.Aperture, abc.ABC):
     """
     An abstraction on the concept of an optical spider for a space telescope.
     These are the things that hold up the secondary mirrors. For example,
@@ -30,17 +37,31 @@ class Spider(Aperture, abc.ABC):
         strut: float
             The soft edged strut. 
         """
-        x, y = coordinates[0], coordinates[1]
+        x, y = coordinates[0][:, ::-1], coordinates[1][:, ::-1]
         perp = np.tan(angle)
         gradient = np.tan(angle)
         full_width = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
-        theta = np.arctan2(y, x) + angle
+        theta = np.arctan2(y, x) + angle + np.pi
         # TODO: This is slow and I want to remove it. 
         theta = np.where(theta > 2 * np.pi, theta - 2 * np.pi, theta)
+
+        plt.title("$0 < \\theta < 2 \\pi$")
+        plt.imshow(theta)
+        plt.colorbar()
+        plt.show()
+
+        # So the current problem is that I need to translate the coordinates 
+        # around by angle and then return them to the range [0, 2 pi].
+
         strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1., full_width)
+
+        plt.title("Strut")
+        plt.imshow(strut)
+        plt.colorbar()
+        plt.show()
+
         return strut
 
-import matplotlib.pyplot as plt
 
 class UniformSpider(Spider):
     """
@@ -94,29 +115,6 @@ class UniformSpider(Spider):
         self.width_of_struts = np.asarray(width_of_struts).astype(float)
 
 
-    # @functools.partial(jax.vmap, in_axes=(None, 0, None))
-    def _strut(self, angle: float, coordinates: Array) -> float:
-        """
-        A vectorised routine for constructing the struts. This has been done 
-        to improve the performance of the program, and simply differs to 
-        the super-class implementation. 
-
-        Parameters
-        ----------
-        angle: float, radians
-            The angle that this strut points as measured from the positive 
-            x-axis in radians. 
-        width: float, meters
-            The width of the strut in meters.
-
-        Returns
-        -------
-        strut: float
-            The soft edged strut.
-        """
-        return super()._strut(angle, coordinates)
-
-
     def _metric(self, coordinates: Array) -> Array:
         coordinates = self._translate(coordinates)
         angles = np.linspace(0, 2 * np.pi, self.number_of_struts, 
@@ -124,19 +122,19 @@ class UniformSpider(Spider):
         angles += self.rotation
         struts = np.array([self._strut(angle, coordinates) for angle in angles]) - self.width_of_struts / 2.
 
-        for i in range(struts.shape[0]):
-            plt.title(angles[i])
-            plt.imshow(struts[i])
-            plt.colorbar()
-            plt.show()
+#        for i in range(struts.shape[0]):
+#            plt.title(angles[i])
+#            plt.imshow(struts[i])
+#            plt.colorbar()
+#            plt.show()
 
         softened = self._soften(struts)
 
-        for i in range(struts.shape[0]):
-            plt.title(angles[i])
-            plt.imshow(softened[i])
-            plt.colorbar()
-            plt.show()
+#        for i in range(struts.shape[0]):
+#            plt.title(angles[i])
+#            plt.imshow(softened[i])
+#            plt.colorbar()
+#            plt.show()
 
         return softened.prod(axis=0)
         
@@ -167,13 +165,13 @@ class UniformSpider(Spider):
 coordinates = dl.utils.get_pixel_coordinates(24, 2. / 24.)
 
 # Uniform Spider Testing
-even_soft_unif_spider = dl.UniformSpider(0., 0., 4., .1, 0., softening=True)
-odd_soft_unif_spider = dl.UniformSpider(0., 0., 3., .1, 0., softening=True)
+even_soft_unif_spider = UniformSpider(0., 0., 4., .1, 0., softening=True)
+odd_soft_unif_spider = UniformSpider(0., 0., 3., .1, 0., softening=True)
 
 plt.imshow(even_soft_unif_spider._aperture(coordinates))
 plt.colorbar()
 plt.show()
 
-plt.imshow(odd_soft_unif_spider._aperture(coordinates))
-plt.colorbar()
-plt.show()
+#plt.imshow(odd_soft_unif_spider._aperture(coordinates))
+#plt.colorbar()
+#plt.show()
