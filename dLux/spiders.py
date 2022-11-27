@@ -1,4 +1,4 @@
-import dLux as dl
+import dLux 
 import jax.numpy as np
 import abc
 import typing
@@ -11,7 +11,7 @@ Layer = typing.TypeVar("Layer")
 __all__ = ["UniformSpider"]
 
 
-class Spider(dl.Aperture, abc.ABC):
+class Spider(dLux.apertures.Aperture, abc.ABC):
     """
     An abstraction on the concept of an optical spider for a space telescope.
     These are the things that hold up the secondary mirrors. For example,
