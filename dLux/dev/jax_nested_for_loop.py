@@ -13,8 +13,6 @@ def jit_nested_for():
             pass
     ```
     """
-    n: int = 5
-    i: int = np.arange(n, dtype=int)
     
     # So now the problem is that the generation of the ragged array.
     # perhaps I can do this by creating a function that "skips" zero 
@@ -57,14 +55,18 @@ def jit_nested_for():
     # for originally was,
     #
     # S = n(n + 1) / 2
-    
-
+    #
+    # Let me see if `n` is even then `n + 1` is odd and `n (n + 1)` is 
+    # even so the division by two is always an integer. 
     # So this is similar to `itertools.starmap` and also reminds me of 
     # damn it ... I had it right on the tip of my tongue. I wonder if 
     # this can be formulated as a tensor product?
 
-    tot_len: int = np.asarray(np.mean(i) * n).astype(int)
-    shape: tuple = np.asarray([2, tot_len], dtype=int) # shape[0] = i, shape[1] = j
+    n: int = 5
+    tot_len: int = int(n * (n + 1) / 2)
+    shape: tuple = (2, tot_len) 
+
+    i: int = np.arange(n, dtype=int)
     j: int = np.zeros(shape, dtype=int)
 
     return j
