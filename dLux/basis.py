@@ -75,22 +75,6 @@ class Basis(eqx.Module):
         self.basis = None
 
 
-    def save(self : Layer, file_name : str, n : int) -> None:
-        """
-        Save the basis to a file.
-
-        Parameters
-        ----------
-        file_name : str
-            The name of the file to save the basis terms to.
-        n : int
-            The number of terms in the basis to generate in the save.
-        """
-        basis = self._basis()
-        with open(file_name, "w") as save:
-            save.write(basis)
-
-
     @functools.partial(jax.vmap, in_axes=(None, 0))
     def _noll_index(self : Layer, j : int) -> tuple:
         """
