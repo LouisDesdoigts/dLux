@@ -4,7 +4,6 @@ import functools
 import jax.numpy as np
 import equinox as eqx
 import jax
-from matplotlib import pyplot as plt
 from dLux.utils import (get_positions_vector, get_pixel_positions)
 
 __all__ = ['Basis', "CompoundBasis"]
@@ -320,14 +319,56 @@ class Basis(eqx.Module):
         
         for j in np.arange(1, self.nterms):
             intermediate = zernikes[j] * aperture
+            coefficient = np.zeros((nterms, 1, 1), dtype=float)
+            important_terms = coefficient.at[
 
-            coefficient = -1 / pixel_area * \
-                (zernikes[j] * basis[1 : j + 1] * aperture)\
-                .sum(axis = (1, 2))\
-                .reshape(j, 1, 1) 
+            # So this problem is inherently poorly suited to \`jax\`. 
+            # How do I go about this? I cannot do 
+            # `coefficient = np.zeros((j, 1, 1), dtype=float)` because 
+            # the shape is not known at compile time. I am thinking 
+            # that a better way of doing this might involve doing 
+            # `coefficient = np.zeros((nterms, 1, 1), dtype=float)`
+            # since then the extra rows are `0.` and adding over them 
+            # will not cause any problems. This will however, waste a 
+            # fair amount of time. I need to work out a better optimisation. 
 
-            intermediate += (coefficient * basis[1 : j + 1])\
-                .sum(axis = 0)
+            # So even doing `for i in np.arange(1, j + 1):` is illegal
+            # in a `jit` compiled function. Funny, I thought that I 
+            # had made this `jit` safe. I guess I was fooling myself. 
+            # I will need to generate "kill factors". When I say this 
+            # I am refering to arrays that are \`1.\` and \`0.\` in 
+            # order to prevent incorrect things from being multiplied. 
+            # Hmmmmmmmmm, so I just thought about it then and even using 
+            # \`jax.lax.dynamic_slice_update` this will not be possible
+            # because the size is not known. 
+
+            # OK so let me think through the problem slowly. We need to 
+            # essentially have a nested for loop where the upper bound 
+            # of the inner loop depends on the loop variable of the 
+            # outer loop. Let me solve this simpler problem first and 
+            # then come back for the more complex one. 
+            for i in np.arange(1, nterms):
+                coefficient[i] = coefficient\
+                    .at[i]\
+                    .add((-1 / pixel_area * zernikes[j] * basis[i] * aperture)\
+                        .sum())
+
+#            coefficient = -1 / pixel_area * \
+#                (zernikes[j] * basis[1 : j + 1] * aperture)\
+#                .sum(axis = (1, 2))\
+#                .reshape(j, 1, 1) 
+
+            # So the difficulty is that `lax.cond` `jit`s the internal 
+            # functions. The slice [1:(j + 1)] is the problem because 
+            # the size is not known at compile time. Perhaps, unrolling 
+            # this internal vectorisation as a `for` loop would improve 
+            # the state of things?
+
+            for i in np.arange(1, j + 1):
+                intermediate += coefficient[i] * basis[i]
+
+#            intermediate += (coefficient * basis[1 : j + 1])\
+#                .sum(axis = 0)
             
             basis = basis\
                 .at[j]\
@@ -418,3 +459,36 @@ class CompoundBasis(eqx.Module):
         """
         return np.sum(np.stack([basis_vector.basis(coordinates) for basis_vector in self.bases]), axis=0)
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt 
+
+mpl.rcParams["text.usetex"] = True
+
+pixels = 128
+nterms = 6
+
+coordinates = dl.utils.get_pixel_coordinates(2., 2. / pixels)
+sq_aperture = dl.SquareAperture(0., 0., 1., 0., False, False)
+sq_basis = Basis(nterms, sq_aperture)
+sq_basis_vecs = sq_basis.basis(coordinates) 
+
+fig, axes = plt.subplots(2, 3)
+axes[0][0].set_title("$j = 0$")
+_map = axes[0][0].imshow(sq_basis_vecs[0])
+fig.colorbar(_map, ax=axes[0][0])
+axes[0][1].set_title("$j = 1$")
+_map = axes[0][1].imshow(sq_basis_vecs[1])
+fig.colorbar(_map, ax=axes[0][1])
+axes[0][2].set_title("$j = 2$")
+_map = axes[0][2].imshow(sq_basis_vecs[2])
+fig.colorbar(_map, ax=axes[0][2])
+axes[1][0].set_title("$j = 3$")
+_map = axes[1][0].imshow(sq_basis_vecs[3])
+fig.colorbar(_map, ax=axes[1][0])
+axes[1][1].set_title("$j = 4$")
+_map = axes[1][1].imshow(sq_basis_vecs[4])
+fig.colorbar(_map, ax=axes[1][1])
+axes[1][2].set_title("$j = 5$")
+_map = axes[1][2].imshow(sq_basis_vecs[5])
+fig.colorbar(_map, ax=axes[1][2])
+plt.show()
