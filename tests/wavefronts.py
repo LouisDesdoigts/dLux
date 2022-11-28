@@ -499,7 +499,7 @@ class TestWavefront(UtilityUser):
         Tests the interpolate method.
         """
         wf = self.utility.construct()
-        wf = dLux.CircularAperture(wf.npixels)(wf)
+        wf = dLux.CircularAperture(0., 0., 1., False, False)({"Wavefront": wf})["Wavefront"]
 
         npix = wf.npixels
         pixscale = wf.pixel_scale
@@ -517,7 +517,7 @@ class TestWavefront(UtilityUser):
         Tests the rotate method.
         """
         wf = self.utility.construct()
-        wf = dLux.CircularAperture(wf.npixels)(wf)
+        wf = dLux.CircularAperture(0., 0., 1., False, False)({"Wavefront": wf})["Wavefront"]
         flipped_amplitude = np.flipud(wf.amplitude)
         flipped_phase = np.flipud(wf.phase)
 

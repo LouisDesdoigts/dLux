@@ -101,6 +101,8 @@ class Aperture(eqx.Module, abc.ABC):
 
 
     def _aperture(self, coordinates: Array) -> Array:
+        """
+        """
         aperture = jax.lax.cond(self.occulting,
             lambda aperture: 1 - aperture,
             lambda aperture: aperture,
@@ -139,6 +141,12 @@ class Aperture(eqx.Module, abc.ABC):
 
 
     def get_y_offset(self) -> float:
+        """
+        Returns:
+        --------
+        y_offset: float, meters
+            
+        """
         return self.y_offset
 
 
@@ -162,7 +170,7 @@ class Aperture(eqx.Module, abc.ABC):
         wavefront = parameters["Wavefront"]
         wavefront = wavefront.multiply_amplitude(
             self._aperture(
-                wavefront.get_pixel_coordinates()))
+                wavefront.pixel_coordinates()))
         parameters["Wavefront"] = wavefront
         return parameters
 
@@ -207,6 +215,19 @@ class AnnularAperture(Aperture):
 
 
     def _metric(self, coordinates: Array) -> Array:
+        """
+        Measures the distance from the edges of the aperture. 
+
+        Parameters:
+        -----------
+        coordinates: Array, meters
+            The paraxial coordinates of the `Wavefront`.
+
+        Returns:
+        --------
+        metric: Array
+            The "distance" from the aperture. 
+        """
         coordinates = self._translate(coordinates)
         coordinates = dLux.utils.cartesian_to_polar(coordinates)[0]
         return self._soften(coordinates - self.rmin) * \
@@ -242,6 +263,19 @@ class CircularAperture(Aperture):
 
 
     def _metric(self, coordinates: Array) -> Array:
+        """
+        Measures the distance from the edges of the aperture. 
+
+        Parameters:
+        -----------
+        coordinates: Array, meters
+            The paraxial coordinates of the `Wavefront`.
+
+        Returns:
+        --------
+        metric: Array
+            The "distance" from the aperture. 
+        """
         coordinates = self._translate(coordinates)
         coordinates = dLux.utils.cartesian_to_polar(coordinates)[0]
         return self._soften(- coordinates + self.radius)
@@ -321,6 +355,19 @@ class RectangularAperture(RotatableAperture):
 
 
     def _metric(self, coordinates: Array) -> Array:
+        """
+        Measures the distance from the edges of the aperture. 
+
+        Parameters:
+        -----------
+        coordinates: Array, meters
+            The paraxial coordinates of the `Wavefront`.
+
+        Returns:
+        --------
+        metric: Array
+            The "distance" from the aperture. 
+        """
         coordinates = self._rotate(self._translate(coordinates))  
         x_mask = self._soften(- np.abs(coordinates[0]) + self.length / 2.)
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
@@ -363,10 +410,24 @@ class SquareAperture(RotatableAperture):
 
 
     def _metric(self, coordinates: Array) -> Array:
+        """
+        Measures the distance from the edges of the aperture. 
+
+        Parameters:
+        -----------
+        coordinates: Array, meters
+            The paraxial coordinates of the `Wavefront`.
+
+        Returns:
+        --------
+        metric: Array
+            The "distance" from the aperture. 
+        """
         coordinates = self._rotate(self._translate(coordinates))
         x_mask = self._soften(- np.abs(coordinates[0]) + self.width / 2.)
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
+
 
 class CompoundAperture(eqx.Module):
     """
@@ -459,7 +520,7 @@ class CompoundAperture(eqx.Module):
         wavefront = parameters["Wavefront"]
         wavefront = wavefront.multiply_amplitude(
             self._aperture(
-                wavefront.get_pixel_coordinates()))
+                wavefront.pixel_coordinates()))
         parameters["Wavefront"] = wavefront
         return parameters
 
