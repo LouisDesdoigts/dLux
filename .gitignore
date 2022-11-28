@@ -1,4 +1,7 @@
 my_hours.txt
+*.swp
+*/*.swp
+*/*/*.swp
 site/
 https:/
 sandbox/
