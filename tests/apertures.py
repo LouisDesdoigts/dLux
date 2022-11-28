@@ -1,3 +1,12 @@
+import dLux as dl
+import jax.numpy as np
+import typing
+from utilities import Utility, UtilityUser
+
+Aperture = typing.TypeVar("Aperture")
+Array = typing.TypeVar("Array")
+
+
 class ApertureUtility(Utility):
     """
     Contains the default constructor values for all of
@@ -28,7 +37,7 @@ class ApertureUtility(Utility):
             A default coordinate array that the aperture can be generated
             over. 
         """
-        return dl.utils.get_coordinates(128, 4. / 128)
+        return dl.utils.get_pixel_coordinates(128, 4. / 128)
 
 
 class SquareApertureUtility(ApertureUtility):
@@ -55,7 +64,7 @@ class SquareApertureUtility(ApertureUtility):
             width: float = None,
             theta: float = None) -> Aperture:
         """
-        Construct's an instance of \`SquareAperture\` making 
+        Construct's an instance of `SquareAperture` making 
         it easy to toggle a single parameter. 
 
         Parameters:
@@ -115,7 +124,7 @@ class RectangularApertureUtility(ApertureUtility):
             length: float = None,
             theta: float = None) -> Aperture:
         """
-        Construct's an instance of \`SquareAperture\` making 
+        Construct's an instance of `SquareAperture` making 
         it easy to toggle a single parameter. 
 
         Parameters:
@@ -139,7 +148,7 @@ class RectangularApertureUtility(ApertureUtility):
         theta: float = None, radians
             The rotation of the aperture.
         """
-        return dl.SquareAperture(
+        return dl.RectangularAperture(
             occulting = self.occulting if not occulting else occulting,
             softening = self.softening if not softening else softening,
             x_offset = self.x_offset if not x_offset else x_offset,
@@ -168,7 +177,7 @@ class CircularApertureUtility(ApertureUtility):
             y_offset: float = None, 
             radius: float = None) -> Aperture:
         """
-        Construct's an instance of \`SquareAperture\` making 
+        Construct's an instance of `CircularAperture` making 
         it easy to toggle a single parameter. 
 
         Parameters:
@@ -188,7 +197,7 @@ class CircularApertureUtility(ApertureUtility):
         radius: float = None, meters
             The radius of the aperture.
         """
-        return dl.SquareAperture(
+        return dl.CircularAperture(
             occulting = self.occulting if not occulting else occulting,
             softening = self.softening if not softening else softening,
             x_offset = self.x_offset if not x_offset else x_offset,
@@ -220,7 +229,7 @@ class AnnularApertureUtility(ApertureUtility):
             rmin: float = None,
             rmax: float = None) -> Aperture:
         """
-        Construct's an instance of \`SquareAperture\` making 
+        Construct's an instance of `AnnularAperture` making 
         it easy to toggle a single parameter. 
 
         Parameters:
@@ -242,7 +251,7 @@ class AnnularApertureUtility(ApertureUtility):
         rmax: float = None, meters
             The outer radius of the aperture.
         """
-        return dl.SquareAperture(
+        return dl.AnnularAperture(
             occulting = self.occulting if not occulting else occulting,
             softening = self.softening if not softening else softening,
             x_offset = self.x_offset if not x_offset else x_offset,
@@ -253,14 +262,14 @@ class AnnularApertureUtility(ApertureUtility):
 
 class TestSquareAperture(UtilityUser):
     """
-    Provides unit tests for the \`Square Aperture\` class. 
+    Provides unit tests for the `Square Aperture` class. 
 
     Parameters:
     -----------
     utility: SquareApertureUtility
         Provides default parameter values and coordinate systems. 
     """
-    utility: SquareApertureUtility = SquareApertureUtility()
+    utility: Utility = SquareApertureUtility()
 
 
     def test_constructor(self) -> None:
@@ -271,7 +280,7 @@ class TestSquareAperture(UtilityUser):
         sq_ap = self.utility.construct()
 
         assert sq_ap.occulting == self.utility.occulting
-        assert sq_ap.softening == self.utility.softening
+        assert sq_ap.softening == np.inf 
         assert sq_ap.x_offset == self.utility.x_offset
         assert sq_ap.y_offset == self.utility.y_offset
         assert sq_ap.width == self.utility.width
@@ -300,7 +309,7 @@ class TestSquareAperture(UtilityUser):
         """
         Checks that the apertures fall into the correct range.
         """
-        coords = self.get_coordinates()
+        coords = self.utility.get_coordinates()
 
         # Case Translated X
         x_offset = 1.
@@ -309,7 +318,7 @@ class TestSquareAperture(UtilityUser):
             .construct(x_offset = x_offset)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Translated Y
         y_offset = 1.
@@ -318,7 +327,7 @@ class TestSquareAperture(UtilityUser):
             .construct(y_offset = y_offset)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Rotated 
         theta = np.pi / 2.
@@ -327,7 +336,7 @@ class TestSquareAperture(UtilityUser):
             .construct(theta = theta)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Occulting
         occulting = True
@@ -336,7 +345,7 @@ class TestSquareAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Not Occulting
         occulting = False
@@ -345,14 +354,14 @@ class TestSquareAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
 
     def test_range_soft(self) -> None:
         """
         Checks that the aperture falls into the correct range.
         """
-        coords = self.get_coordinates()
+        coords = self.utility.get_coordinates()
 
         # Case Translated X
         x_offset = 1.
@@ -361,8 +370,8 @@ class TestSquareAperture(UtilityUser):
             .construct(x_offset = x_offset)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Translated Y
         y_offset = 1.
@@ -371,8 +380,8 @@ class TestSquareAperture(UtilityUser):
             .construct(y_offset = y_offset)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Rotated 
         theta = np.pi / 2.
@@ -381,8 +390,8 @@ class TestSquareAperture(UtilityUser):
             .construct(theta = theta)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Occulting
         occulting = True
@@ -391,8 +400,8 @@ class TestSquareAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Not Occulting
         occulting = False
@@ -401,13 +410,13 @@ class TestSquareAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
 
 class TestRectangularAperture(UtilityUser):
     """
-    Provides unit tests for the \`RectangularAperture\` class. 
+    Provides unit tests for the `RectangularAperture` class. 
 
     Parameters:
     -----------
@@ -425,7 +434,7 @@ class TestRectangularAperture(UtilityUser):
         rect_ap = self.utility.construct()
 
         assert rect_ap.occulting == self.utility.occulting
-        assert rect_ap.softening == self.utility.softening
+        assert rect_ap.softening == np.inf
         assert rect_ap.x_offset == self.utility.x_offset
         assert rect_ap.y_offset == self.utility.y_offset
         assert rect_ap.width == self.utility.width
@@ -455,7 +464,7 @@ class TestRectangularAperture(UtilityUser):
         """
         Checks that the apertures fall into the correct range.
         """
-        coords = self.get_coordinates()
+        coords = self.utility.get_coordinates()
 
         # Case Translated X
         x_offset = 1.
@@ -464,7 +473,7 @@ class TestRectangularAperture(UtilityUser):
             .construct(x_offset = x_offset)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Translated Y
         y_offset = 1.
@@ -473,7 +482,7 @@ class TestRectangularAperture(UtilityUser):
             .construct(y_offset = y_offset)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Rotated 
         theta = np.pi / 2.
@@ -482,7 +491,7 @@ class TestRectangularAperture(UtilityUser):
             .construct(theta = theta)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Occulting
         occulting = True
@@ -491,7 +500,7 @@ class TestRectangularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Not Occulting
         occulting = False
@@ -500,14 +509,14 @@ class TestRectangularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
 
     def test_range_soft(self) -> None:
         """
         Checks that the aperture falls into the correct range.
         """
-        coords = self.get_coordinates()
+        coords = self.utility.get_coordinates()
 
         # Case Translated X
         x_offset = 1.
@@ -516,8 +525,8 @@ class TestRectangularAperture(UtilityUser):
             .construct(x_offset = x_offset)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Translated Y
         y_offset = 1.
@@ -526,8 +535,8 @@ class TestRectangularAperture(UtilityUser):
             .construct(y_offset = y_offset)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Rotated 
         theta = np.pi / 2.
@@ -536,8 +545,8 @@ class TestRectangularAperture(UtilityUser):
             .construct(theta = theta)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Occulting
         occulting = True
@@ -546,8 +555,8 @@ class TestRectangularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Not Occulting
         occulting = False
@@ -556,13 +565,13 @@ class TestRectangularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
 
 class TestCircularAperture(UtilityUser):
     """
-    Provides unit tests for the \`CircularAperture\` class. 
+    Provides unit tests for the `CircularAperture` class. 
 
     Parameters:
     -----------
@@ -580,7 +589,7 @@ class TestCircularAperture(UtilityUser):
         circ_ap = self.utility.construct()
 
         assert circ_ap.occulting == self.utility.occulting
-        assert circ_ap.softening == self.utility.softening
+        assert circ_ap.softening == np.inf
         assert circ_ap.x_offset == self.utility.x_offset
         assert circ_ap.y_offset == self.utility.y_offset
         assert circ_ap.radius == self.utility.radius
@@ -602,7 +611,7 @@ class TestCircularAperture(UtilityUser):
         """
         Checks that the apertures fall into the correct range.
         """
-        coords = self.get_coordinates()
+        coords = self.utility.get_coordinates()
 
         # Case Translated X
         x_offset = 1.
@@ -611,7 +620,7 @@ class TestCircularAperture(UtilityUser):
             .construct(x_offset = x_offset)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Translated Y
         y_offset = 1.
@@ -620,7 +629,7 @@ class TestCircularAperture(UtilityUser):
             .construct(y_offset = y_offset)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Occulting
         occulting = True
@@ -629,7 +638,7 @@ class TestCircularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Not Occulting
         occulting = False
@@ -638,14 +647,14 @@ class TestCircularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
 
     def test_range_soft(self) -> None:
         """
         Checks that the aperture falls into the correct range.
         """
-        coords = self.get_coordinates()
+        coords = self.utility.get_coordinates()
 
         # Case Translated X
         x_offset = 1.
@@ -654,8 +663,8 @@ class TestCircularAperture(UtilityUser):
             .construct(x_offset = x_offset)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Translated Y
         y_offset = 1.
@@ -664,8 +673,8 @@ class TestCircularAperture(UtilityUser):
             .construct(y_offset = y_offset)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Occulting
         occulting = True
@@ -674,8 +683,8 @@ class TestCircularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Not Occulting
         occulting = False
@@ -684,13 +693,13 @@ class TestCircularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
 
 class TestAnnularAperture(UtilityUser):
     """
-    Provides unit tests for the \`AnnularAperture\` class. 
+    Provides unit tests for the `AnnularAperture` class. 
 
     Parameters:
     -----------
@@ -708,7 +717,7 @@ class TestAnnularAperture(UtilityUser):
         circ_ap = self.utility.construct()
 
         assert circ_ap.occulting == self.utility.occulting
-        assert circ_ap.softening == self.utility.softening
+        assert circ_ap.softening == np.inf
         assert circ_ap.x_offset == self.utility.x_offset
         assert circ_ap.y_offset == self.utility.y_offset
         assert circ_ap.rmin == self.utility.rmin
@@ -731,7 +740,7 @@ class TestAnnularAperture(UtilityUser):
         """
         Checks that the apertures fall into the correct range.
         """
-        coords = self.get_coordinates()
+        coords = self.utility.get_coordinates()
 
         # Case Translated X
         x_offset = 1.
@@ -740,7 +749,7 @@ class TestAnnularAperture(UtilityUser):
             .construct(x_offset = x_offset)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Translated Y
         y_offset = 1.
@@ -749,7 +758,7 @@ class TestAnnularAperture(UtilityUser):
             .construct(y_offset = y_offset)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Occulting
         occulting = True
@@ -758,7 +767,7 @@ class TestAnnularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Not Occulting
         occulting = False
@@ -767,14 +776,14 @@ class TestAnnularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert (aperture == 1 || aperture == 0).all()
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
 
     def test_range_soft(self) -> None:
         """
         Checks that the aperture falls into the correct range.
         """
-        coords = self.get_coordinates()
+        coords = self.utility.get_coordinates()
 
         # Case Translated X
         x_offset = 1.
@@ -783,8 +792,8 @@ class TestAnnularAperture(UtilityUser):
             .construct(x_offset = x_offset)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Translated Y
         y_offset = 1.
@@ -793,8 +802,8 @@ class TestAnnularAperture(UtilityUser):
             .construct(y_offset = y_offset)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Occulting
         occulting = True
@@ -803,8 +812,8 @@ class TestAnnularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 
         # Case Not Occulting
         occulting = False
@@ -813,6 +822,6 @@ class TestAnnularAperture(UtilityUser):
             .construct(occulting = occulting)\
             ._aperture(coords)
 
-        assert aperture <= 1.
-        assert aperture >= 0.
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
 

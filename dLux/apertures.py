@@ -33,7 +33,7 @@ class Aperture(eqx.Module, abc.ABC):
         The y coordinate of the centre of the aperture.
     """
     occulting: bool 
-    softening: float 
+    softening: float
     x_offset: float
     y_offset: float
     
