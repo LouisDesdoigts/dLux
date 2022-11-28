@@ -451,7 +451,7 @@ class RectangularAperture(RotatableAperture):
 class SquareAperture(RotatableAperture):
     """
     A square aperture. Note: this can also be created from the rectangular 
-    aperture class, but this obe tracks less parameters.
+    aperture class, but this one tracks less parameters.
 
     Parameters
     ----------
