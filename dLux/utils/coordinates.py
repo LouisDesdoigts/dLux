@@ -206,8 +206,9 @@ def get_polar_coordinates(npixels     : int,
         The (r, phi) coordinate arrays in the square output array with the
         correct offsets
     """
-    return pixel_scale * get_polar_positions(npixels,
-                                             pixel_scale * x_offset,
-                                             pixel_scale * y_offset)
+    pixel_scaler = np.array([pixel_scale, 1.])[:, None, None]
+    return pixel_scaler * dl.utils.get_polar_positions(npixels,
+                                             x_offset / pixel_scale,
+                                             y_offset / pixel_scale)
 
 
