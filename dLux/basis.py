@@ -47,9 +47,14 @@ class Basis(eqx.Module):
     aperture : Layer
         The aperture over which to generate the basis. This should 
         be an implementation of the abstract base class `Aperture`.
+    is_computed: bool
+        A simple caching mechanism. If `is_computed` is `True` then
+        the aperture basis has been calculated and is stored. 
     """
-    nterms : int    
-    aperture : Layer
+    nterms: int    
+    aperture: Layer
+    _is_computed: bool
+    _basis: Array
 
 
     def __init__(self : Layer, nterms : int,
@@ -66,6 +71,8 @@ class Basis(eqx.Module):
         """
         self.nterms = int(nterms)
         self.aperture = aperture
+        self.is_computed = False
+        self.basis = None
 
 
     def save(self : Layer, file_name : str, n : int) -> None:
@@ -241,13 +248,9 @@ class Basis(eqx.Module):
         j = np.arange(1, self.nterms + 1).astype(int)
         n, m = self._noll_index(j)
 
-        x_offset = self.aperture.get_x_offset()
-        y_offset = self.aperture.get_y_offset()
-
         # So the zernikes need to be generated on the smallest circle that contains 
         # the aperture. This code makes a normalised set of coordinates centred 
         # on the centre of the aperture with 1. at the largest extent. 
-        largest_extent = self.aperture.largest_extent(coordinates)
         coordinates = self.aperture.compute_aperture_normalised_coordinates(coordinates)
 
         # NOTE: The idea is to generate them here at the higher level 
@@ -372,13 +375,14 @@ class Basis(eqx.Module):
             each stacked array is a basis term. The final shape is:
             `(n, npix, npix)`
         """
-        aperture = self.aperture._aperture(coordinates)
-        zernikes = self._zernikes(coordinates)
-        # return jax.lax.cond(isinstance(self.aperture, dl.CircularAperture), 
-        #                     lambda : zernikes, 
-        #                     lambda : self._orthonormalise(aperture, zernikes))
-        # return zernikes
-        return self._orthonormalise(aperture, zernikes)
+        def _compute(coordinates: Array) -> Array:
+            aperture = self.aperture._aperture(coordinates)
+            zernikes = self._zernikes(coordinates)
+            orth_basis = self._orthonormalise(aperture, zernikes)
+            
+
+        return lax.cond(is_computed, 
+            lambda: self._basis)
          
 
 
