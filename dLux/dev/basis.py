@@ -249,35 +249,11 @@ class Basis(eqx.Module):
         # on the centre of the aperture with 1. at the largest extent. 
         aperture = self.aperture._aperture(coordinates)
 
-        plt.imshow(aperture)
-        plt.show()
-
         coordinates = coordinates.at[1].set(coordinates[1][::-1,:])# have to flip in y dir for meshgrid to cartesian
 
         x_coords_of_app = coordinates[0][aperture > 0.5] - x_offset
         y_coords_of_app = coordinates[1][aperture > 0.5] - y_offset 
 
-        plt.figure()
-        plt.subplot(1,2,1)
-        debug_x =  coordinates[0] - x_offset
-        plt.imshow(debug_x)
-        plt.colorbar()
-        plt.title('x')
-        plt.subplot(1,2,2)
-        plt.title('y')
-        debug_y =  coordinates[1] - y_offset
-        plt.imshow(debug_y)
-        plt.colorbar()
-        plt.show()
-
-        rho_debug = dl.utils.cartesian_to_polar(np.array([debug_x, debug_y]))[0]
-
-        
-        plt.figure()
-        plt.imshow(rho_debug)
-        plt.colorbar()
-        plt.title('rho')
-        plt.show()
 
         trans_rho = dl.utils.cartesian_to_polar(np.array([x_coords_of_app, y_coords_of_app]))[0]
         largest_extent = np.max(trans_rho)
@@ -289,17 +265,6 @@ class Basis(eqx.Module):
         rad_trans_coords = dl.utils.cartesian_to_polar(trans_coords)
         coordinates = rad_trans_coords.at[0].mul(1. / largest_extent)
 
-        plt.figure()
-        plt.subplot(1,2,1)
-        plt.imshow(coordinates[0])
-        plt.colorbar()
-        plt.title('rho')
-        plt.subplot(1,2,2)
-        plt.imshow(coordinates[1])
-        plt.title('theta')
-        plt.show()
-        # print(coordinates)
-
         # NOTE: The idea is to generate them here at the higher level 
         # where things will not change and we will be done. 
         rho = coordinates[0]
@@ -307,7 +272,6 @@ class Basis(eqx.Module):
 
 
         aperture = (rho <= 1.).astype(int)
-        print(aperture)
 
         # In the calculation of the noll coefficient we must define 
         # between the m == 0 and and the m != 0 case. I have done 
@@ -472,40 +436,4 @@ class CompoundBasis(eqx.Module):
             array
         """
         return np.stack([basis.basis() for basis in self.bases])
-
-
-if __name__ == "__main__":
-    circ1_pos = [ 0.2,0.3]
-    circ2_pos = [-0.2,0]
-
-    circ1_r = 0.1
-    circ2_r = 0.1
-
-    n_pix = 128
-    coordinates = dl.utils.get_pixel_coordinates(n_pix, 1. / n_pix)
-
-
-    # test with normal
-    circ1 = dl.CircularAperture(x_offset=circ1_pos[0], y_offset=circ1_pos[1], radius=circ1_r, occulting=False, softening=True)
-    circ2 = dl.CircularAperture(x_offset=circ2_pos[0], y_offset=circ2_pos[1], radius=circ2_r, occulting=False, softening=True)
-
-    compund_circs = dl.CompoundAperture({'c1' : circ1, 'c2' : circ2}, use_prod=False)
-    plt.figure()
-    plt.subplot(1,2,1)
-    plt.imshow(circ1._aperture(coordinates))
-    plt.subplot(1,2,2)
-    plt.imshow(compund_circs._aperture(coordinates))
-    plt.show()
-
-
-    circ1_basis = Basis(nterms=5, aperture=circ1)
-
-    plt.figure()
-    # b = circ1_basis.basis(coordinates=coordinates)
-    b = circ1_basis._zernikes(coordinates=coordinates)
-    for i in range(b.shape[0]):
-        plt.subplot(1,b.shape[0],i+1)
-        plt.imshow(np.squeeze(b[i,:,:]))
-        
-    plt.show()
 
