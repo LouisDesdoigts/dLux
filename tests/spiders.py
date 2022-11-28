@@ -74,3 +74,149 @@ class TestUniformSpiderUtility(UtilityUser):
         Tests that the state is correctly initialised. 
         """
         spider = self.utility.construct()
+
+        assert spider.number_of_struts == self.utility.number_of_struts
+        assert spider.width_of_struts == self.utility.width_of_struts
+        assert spider.softening == np.inf
+        assert spider.x_offset == self.utility.x_offset
+        assert spider.y_offset == self.utility.y_offset
+        assert spider.theta == self.utility.theta
+
+        # Case: Extra Strut
+        number_of_struts = 5
+        spider = self.utility.construct(number_of_struts = number_of_struts)
+
+        assert spider.number_of_struts == number_of_struts
+
+        # Case: Fatter Struts
+        width_of_struts = .1
+        spider = self.utility.construct(width_of_struts = width_of_struts)
+
+        assert spider.width_of_struts == width_of_struts
+
+        # Case: Rotated
+        theta = np.pi / 4.
+        spider = self.utility.construct(theta = theta)
+
+        assert spider.theta == theta
+
+        # Case: Translated x
+        x_offset = 1.
+        spider = self.utility.construct(x_offset = x_offset)
+
+        assert spider.x_offset == x_offset
+
+        # Case: Translated y
+        y_offset = 1.
+        spider = self.utility.construct(y_offset = y_offset)
+
+        assert spider.y_offset == y_offset
+
+    
+    def test_range_hard(self) -> None:
+        """
+        Checks that the apertures fall into the correct range.
+        """
+        coords = self.utility.get_coordinates()
+
+        # Case Translated X
+        x_offset = 1.
+        aperture = self\
+            .utility\
+            .construct(x_offset = x_offset)\
+            ._aperture(coords)
+
+        assert ((aperture == 1.) | (aperture == 0.)).all()
+
+        # Case Translated Y
+        y_offset = 1.
+        aperture = self\
+            .utility\
+            .construct(y_offset = y_offset)\
+            ._aperture(coords)
+
+        assert ((aperture == 1.) | (aperture == 0.)).all()
+
+        # Case Rotated 
+        theta = np.pi / 2.
+        aperture = self\
+            .utility\
+            .construct(theta = theta)\
+            ._aperture(coords)
+
+        assert ((aperture == 1.) | (aperture == 0.)).all()
+
+        # Case Occulting
+        occulting = True
+        aperture = self\
+            .utility\
+            .construct(occulting = occulting)\
+            ._aperture(coords)
+
+        assert ((aperture == 1.) | (aperture == 0.)).all()
+
+        # Case Not Occulting
+        occulting = False
+        aperture = self\
+            .utility\
+            .construct(occulting = occulting)\
+            ._aperture(coords)
+
+        assert ((aperture == 1.) | (aperture == 0.)).all()
+
+
+    def test_range_soft(self) -> None:
+        """
+        Checks that the aperture falls into the correct range.
+        """
+        coords = self.utility.get_coordinates()
+
+        # Case Translated X
+        x_offset = 1.
+        aperture = self\
+            .utility\
+            .construct(x_offset = x_offset)\
+            ._aperture(coords)
+
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
+
+        # Case Translated Y
+        y_offset = 1.
+        aperture = self\
+            .utility\
+            .construct(y_offset = y_offset)\
+            ._aperture(coords)
+
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
+
+        # Case Rotated 
+        theta = np.pi / 2.
+        aperture = self\
+            .utility\
+            .construct(theta = theta)\
+            ._aperture(coords)
+
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
+
+        # Case Occulting
+        occulting = True
+        aperture = self\
+            .utility\
+            .construct(occulting = occulting)\
+            ._aperture(coords)
+
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
+
+        # Case Not Occulting
+        occulting = False
+        aperture = self\
+            .utility\
+            .construct(occulting = occulting)\
+            ._aperture(coords)
+
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
