@@ -34,6 +34,34 @@ def jit_nested_for():
     # that the mean is going to be only a function of `n`.
 
     # Let me work through some examples,
+    #
+    # n: 2
+    # i: 1, 2
+    # j: 1, 1
+    #       2
+    # (i, j) => ((1, 1), (2, 1), (2, 2))
+    # 
+    # n: 3
+    # i: 1, 2, 3
+    # j: 1, 1, 1
+    #       2, 2
+    #          3
+    # (i, j) => ((1, 1), (2, 1), (2, 2), (3, 1), (3, 2), (3, 3))
+    #
+    # n | length
+    # ----------
+    # 2 | 3
+    # 3 | 6
+    # 
+    # Ahhhh, the internet has provided. The answer that I was looking 
+    # for originally was,
+    #
+    # S = n(n + 1) / 2
+    
+
+    # So this is similar to `itertools.starmap` and also reminds me of 
+    # damn it ... I had it right on the tip of my tongue. I wonder if 
+    # this can be formulated as a tensor product?
 
     tot_len: int = np.asarray(np.mean(i) * n).astype(int)
     shape: tuple = np.asarray([2, tot_len], dtype=int) # shape[0] = i, shape[1] = j
