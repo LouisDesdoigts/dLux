@@ -257,7 +257,6 @@ class Basis(eqx.Module):
 
         trans_rho = dl.utils.cartesian_to_polar(np.array([x_coords_of_app, y_coords_of_app]))[0]
         largest_extent = np.max(trans_rho)
-        print("largest ext:", largest_extent)
         
         # This is the translation and scaling of the normalised coordinate system. 
         # translate and then multiply by 1 / largest_extent.
@@ -425,9 +424,14 @@ class CompoundBasis(eqx.Module):
         self.bases = bases
 
 
-    def basis(self : Layer) -> Tensor:
+    def basis(self : Layer, coordinates : Array) -> Tensor:
         """
         Generate a basis over a compound aperture.
+        
+        Parameters
+        ----------
+        coordinates : Matrix, meters, radians 
+            The coordinate system over which to generate the aperture.
 
         Returns 
         -------
@@ -435,5 +439,5 @@ class CompoundBasis(eqx.Module):
             The basis represented as `(napp, nterms, npix, npix)`
             array
         """
-        return np.stack([basis.basis() for basis in self.bases])
+        return np.sum(np.stack([basis_vector.basis(coordinates) for basis_vector in self.bases]), axis=0)
 
