@@ -174,7 +174,7 @@ class Aperture(eqx.Module, abc.ABC):
         parameters["Wavefront"] = wavefront
         return parameters
 
-    def largest_extent(self, coordinates) -> float:
+    def largest_extent(self, coordinates : Tensor) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre. For inherited classes, consider implementing analytically for speed.
@@ -210,7 +210,7 @@ class Aperture(eqx.Module, abc.ABC):
 
         return largest_extent
 
-    def compute_aperture_normalised_coordinates(self, coordinates) -> Array:
+    def compute_aperture_normalised_coordinates(self, coordinates : Tensor) -> Array:
         """
         Shift a set of wavefront coodinates to be centered on the aperture and scaled such that
         the radial distance is 1 to the edge of the aperture, returned in polar form
@@ -349,6 +349,8 @@ class CircularAperture(Aperture):
         coordinates = dLux.utils.cartesian_to_polar(coordinates)[0]
         return self._soften(- coordinates + self.radius)
 
+    def largest_extent(self, coordinates : Tensor) -> float:
+        return self.radius
 
 class RotatableAperture(Aperture):
     theta: float
@@ -442,6 +444,9 @@ class RectangularAperture(RotatableAperture):
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
+    def largest_extent(self, coordinates: Tensor) -> float:
+        return np.hypot(np.array([self.length, self.width]))
+
 
 class SquareAperture(RotatableAperture):
     """
@@ -497,6 +502,8 @@ class SquareAperture(RotatableAperture):
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
+    def largest_extent(self, coordinates: Tensor) -> float:
+        return np.sqrt(2)*self.width
 
 class CompoundAperture(eqx.Module):
     """
