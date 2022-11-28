@@ -174,6 +174,75 @@ class Aperture(eqx.Module, abc.ABC):
         parameters["Wavefront"] = wavefront
         return parameters
 
+    def largest_extent(self, coordinates) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre. For inherited classes, consider implementing analytically for speed.
+
+        Parameters
+        ----------
+        coordinates : Tensor
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        largest_extent : float
+            The maximum distance from centre to edge of aperture
+        """
+
+        aperture = self._aperture(coordinates)
+
+        #TODO: check between here and basis function where the flipping in y axis should go
+        coordinates = coordinates.at[1].set(coordinates[1][::-1,:])# have to flip in y dir for meshgrid to cartesian
+
+
+        x_offset = self.get_x_offset()
+        y_offset = self.get_y_offset()
+
+
+        x_coords_of_app = coordinates[0][aperture > 0.5] - x_offset
+        y_coords_of_app = coordinates[1][aperture > 0.5] - y_offset 
+
+        trans_rho = dLux.utils.cartesian_to_polar(np.array([x_coords_of_app, y_coords_of_app]))[0]
+        largest_extent = np.max(trans_rho)
+
+        return largest_extent
+
+    def compute_aperture_normalised_coordinates(self, coordinates) -> Array:
+        """
+        Shift a set of wavefront coodinates to be centered on the aperture and scaled such that
+        the radial distance is 1 to the edge of the aperture, returned in polar form
+
+        Parameters
+        ----------
+        coordinates : Tensor
+            The cartesian coordinates to generate the aperture on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+        
+        Returns
+        -------
+        coordinates : Tensor
+            the radial coordinates centered on the centre of the aperture and scaled such that they are 1
+            at the maximum extent of the aperture
+            The dimensions of the tensor are be `(2, npix, npix)`
+        """
+        
+        # TODO: check where flips should go
+        coordinates = coordinates.at[1].set(coordinates[1][::-1,:])
+
+        x_offset = self.get_x_offset()
+        y_offset = self.get_y_offset()
+
+        # This is the translation and scaling of the normalised coordinate system. 
+        # translate and then multiply by 1 / largest_extent.
+        trans_coords = coordinates - np.array([x_offset, y_offset]).reshape((2, 1, 1))
+        rad_trans_coords = dLux.utils.cartesian_to_polar(trans_coords)
+        coordinates = rad_trans_coords.at[0].mul(1. / self.largest_extent(coordinates))
+
+        return coordinates
 
 class AnnularAperture(Aperture):
     """

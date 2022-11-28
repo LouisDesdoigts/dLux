@@ -247,22 +247,8 @@ class Basis(eqx.Module):
         # So the zernikes need to be generated on the smallest circle that contains 
         # the aperture. This code makes a normalised set of coordinates centred 
         # on the centre of the aperture with 1. at the largest extent. 
-        aperture = self.aperture._aperture(coordinates)
-
-        coordinates = coordinates.at[1].set(coordinates[1][::-1,:])# have to flip in y dir for meshgrid to cartesian
-
-        x_coords_of_app = coordinates[0][aperture > 0.5] - x_offset
-        y_coords_of_app = coordinates[1][aperture > 0.5] - y_offset 
-
-
-        trans_rho = dl.utils.cartesian_to_polar(np.array([x_coords_of_app, y_coords_of_app]))[0]
-        largest_extent = np.max(trans_rho)
-        
-        # This is the translation and scaling of the normalised coordinate system. 
-        # translate and then multiply by 1 / largest_extent.
-        trans_coords = coordinates - np.array([x_offset, y_offset]).reshape((2, 1, 1))
-        rad_trans_coords = dl.utils.cartesian_to_polar(trans_coords)
-        coordinates = rad_trans_coords.at[0].mul(1. / largest_extent)
+        largest_extent = self.aperture.largest_extent(coordinates)
+        coordinates = self.aperture.compute_aperture_normalised_coordinates(coordinates)
 
         # NOTE: The idea is to generate them here at the higher level 
         # where things will not change and we will be done. 
