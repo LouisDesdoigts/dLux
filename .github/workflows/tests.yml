@@ -2,7 +2,6 @@ name: automated tests
 on: [push]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -50,6 +49,12 @@ jobs:
 
       - name: detector tests
         run: pytest --quiet tests/detectors.py
+
+      - name: aperture tests
+        run: pytest --quiet tests/apertures.py
+
+      - name: spider tests
+        run: pytest --quiet tests/spiders.py
 
 #       - name: utils tests
 #         run: pytest --quiet tests/utils.py
