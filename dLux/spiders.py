@@ -139,7 +139,7 @@ class UniformSpider(Spider):
         params: dict 
             The same dictionary with the "Wavefront" value updated.
         """
-        aperture = self._spider()
+        aperture = self._aperture()
         wavefront = params["Wavefront"]
         wavefront = wavefront\
             .set_amplitude(wavefront.get_amplitude() * aperture)\
