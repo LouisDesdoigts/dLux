@@ -20,6 +20,17 @@ class ApertureUtility(Utility):
     y_offset: float = 0.
 
 
+    def get_coordinates(self) -> Array:
+        """
+        Returns:
+        --------
+        coords: Array, meters
+            A default coordinate array that the aperture can be generated
+            over. 
+        """
+        return dl.utils.get_coordinates(128, 4. / 128)
+
+
 class SquareApertureUtility(ApertureUtility):
     """
     Contains useful default values for the constructor
@@ -241,36 +252,100 @@ class AnnularApertureUtility(ApertureUtility):
 
 
 class TestSquareAperture(UtilityUser):
-    def test_constructor():
+    """
+    Provides unit tests for the \`Square Aperture\` class. 
+
+    Parameters:
+    -----------
+    utility: SquareApertureUtility
+        Provides default parameter values and coordinate systems. 
+    """
+    utility: SquareApertureUtility = SquareApertureUtility()
+
+
+    def test_constructor(self) -> None:
+        """
+        Checks that all of the fields are correctly set. 
+        """
         # Case default
+        sq_ap = self.utility.construct()
+
+        assert sq_ap.occulting == self.utility.occulting
+        assert sq_ap.softening == self.utility.softening
+        assert sq_ap.x_offset == self.utility.x_offset
+        assert sq_ap.y_offset == self.utility.y_offset
+        assert sq_ap.width == self.utility.width
+        assert sq_ap.theta 
 
         # Case Translated X
+        x_offset = 1.
+        sq_ap = self.utility.construct(x_offset = x_offset)
+
+        assert sq_ap.x_offset == x_offset
 
         # Case Translated Y
+        y_offset = 1.
+        sq_ap = self.utility.construct(y_offset = y_offset)
+
+        assert sq_ap.y_offset == y_offset
 
         # Case Rotated Clockwise
+        theta = np.pi / 2.
+        sq_ap = self.utility.construct(theta = theta)
 
-        # Case Rotated Anticlockwise
-
-        # Case Soft
-
-        # Case Hard 
-
-        # Case Occulting
-
-        # Case Non-occulting
+        assert sq_ap.theta == theta
 
 
-    def test_range_hard():
+    def test_range_hard(self) -> None:
+        """
+        Checks that the apertures fall into the correct range.
+        """
+        coords = self.get_coordinates()
+
         # Case Translated X
+        x_offset = 1.
+        aperture = self\
+            .utility\
+            .construct(x_offset = x_offset)\
+            ._aperture(coords)
+
+        assert (aperture == 1 || aperture == 0).all()
 
         # Case Translated Y
+        y_offset = 1.
+        aperture = self\
+            .utility\
+            .construct(y_offset = y_offset)\
+            ._aperture(coords)
+
+        assert (aperture == 1 || aperture == 0).all()
 
         # Case Rotated 
+        theta = np.pi / 2.
+        aperture = self\
+            .utility\
+            .construct(theta = theta)\
+            ._aperture(coords)
+
+        assert (aperture == 1 || aperture == 0).all()
 
         # Case Occulting
+        occulting = True
+        aperture = self\
+            .utility\
+            .construct(occulting = occulting)\
+            ._aperture(coords)
+
+        assert (aperture == 1 || aperture == 0).all()
 
         # Case Not Occulting
+        occulting = False
+        aperture = self\
+            .utility\
+            .construct(occulting = occulting)\
+            ._aperture(coords)
+
+        assert (aperture == 1 || aperture == 0).all()
 
 
     def test_range_soft():
