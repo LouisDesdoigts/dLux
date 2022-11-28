@@ -1,9 +1,7 @@
 __author__ = "ataras2"
 
 import dLux as dl
-
 import jax.numpy as np
-
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":

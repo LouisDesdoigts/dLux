@@ -71,8 +71,8 @@ class Basis(eqx.Module):
         """
         self.nterms = int(nterms)
         self.aperture = aperture
-        self.is_computed = False
-        self.basis = None
+        self._is_computed = False
+        self._basis = None
 
 
     @functools.partial(jax.vmap, in_axes=(None, 0))
@@ -363,10 +363,13 @@ class Basis(eqx.Module):
             aperture = self.aperture._aperture(coordinates)
             zernikes = self._zernikes(coordinates)
             orth_basis = self._orthonormalise(aperture, zernikes)
+            self.__dict__["_basis"] = orth_basis
+            self._is_computed = True
+            return orth_basis
             
-
-        return lax.cond(is_computed, 
-            lambda: self._basis)
+        return jax.lax.cond(self._is_computed, 
+            lambda: self._basis,
+            lambda: _compute(coordinates))
          
 
 
