@@ -1,7 +1,11 @@
 import jax.numpy as np
 import typing
+import dLux as dl
 from apertures import ApertureUtility 
 from utilities import UtilityUser
+
+Utility = typing.TypeVar("Utility")
+Spider = typing.TypeVar("Spider")
 
 class UniformSpiderUtility(ApertureUtility):
     """
@@ -14,12 +18,12 @@ class UniformSpiderUtility(ApertureUtility):
         The number of supporting struts in the spider. 
     width_of_struts: float, meters
         The thickness of each strut. 
-    theta: float, radians
+    rotation: float, radians
         The global rotation of the struts. 
     """
     number_of_struts: int = 4
     width_of_struts: float = .05
-    theta: float = 0.
+    rotation: float = 0.
 
 
     def construct(self,
@@ -28,7 +32,7 @@ class UniformSpiderUtility(ApertureUtility):
             softening: bool = None,
             x_offset: float = None,
             y_offset: float = None, 
-            theta: float = None) -> Spider:
+            rotation: float = None) -> Spider:
         """
         Return a ready-to-test `UniformSpider` instance. 
 
@@ -44,7 +48,7 @@ class UniformSpiderUtility(ApertureUtility):
             The distance along the x-axis that the spider is to be moved. 
         y_offset: float, meters 
             The distance along the y-axis that the spider is to be moved. 
-        theta: float, radians 
+        rotation: float, radians 
             The global rotation of the spider. 
         """
         return dl.UniformSpider(
@@ -53,7 +57,7 @@ class UniformSpiderUtility(ApertureUtility):
             softening = self.softening if not softening else softening,
             x_offset = self.x_offset if not x_offset else x_offset,
             y_offset = self.y_offset if not y_offset else y_offset,
-            theta = self.theta if not theta else theta)
+            rotation = self.rotation if not rotation else rotation)
 
 
 class TestUniformSpiderUtility(UtilityUser):
@@ -80,7 +84,7 @@ class TestUniformSpiderUtility(UtilityUser):
         assert spider.softening == np.inf
         assert spider.x_offset == self.utility.x_offset
         assert spider.y_offset == self.utility.y_offset
-        assert spider.theta == self.utility.theta
+        assert spider.rotation == self.utility.rotation
 
         # Case: Extra Strut
         number_of_struts = 5
@@ -95,10 +99,10 @@ class TestUniformSpiderUtility(UtilityUser):
         assert spider.width_of_struts == width_of_struts
 
         # Case: Rotated
-        theta = np.pi / 4.
-        spider = self.utility.construct(theta = theta)
+        rotation = np.pi / 4.
+        spider = self.utility.construct(rotation = rotation)
 
-        assert spider.theta == theta
+        assert spider.rotation == rotation
 
         # Case: Translated x
         x_offset = 1.
@@ -138,28 +142,10 @@ class TestUniformSpiderUtility(UtilityUser):
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Rotated 
-        theta = np.pi / 2.
+        rotation = np.pi / 2.
         aperture = self\
             .utility\
-            .construct(theta = theta)\
-            ._aperture(coords)
-
-        assert ((aperture == 1.) | (aperture == 0.)).all()
-
-        # Case Occulting
-        occulting = True
-        aperture = self\
-            .utility\
-            .construct(occulting = occulting)\
-            ._aperture(coords)
-
-        assert ((aperture == 1.) | (aperture == 0.)).all()
-
-        # Case Not Occulting
-        occulting = False
-        aperture = self\
-            .utility\
-            .construct(occulting = occulting)\
+            .construct(rotation = rotation)\
             ._aperture(coords)
 
         assert ((aperture == 1.) | (aperture == 0.)).all()
@@ -192,31 +178,12 @@ class TestUniformSpiderUtility(UtilityUser):
         assert (aperture >= 0.).all()
 
         # Case Rotated 
-        theta = np.pi / 2.
+        rotation = np.pi / 2.
         aperture = self\
             .utility\
-            .construct(theta = theta)\
+            .construct(rotation = rotation)\
             ._aperture(coords)
 
         assert (aperture <= 1.).all()
         assert (aperture >= 0.).all()
 
-        # Case Occulting
-        occulting = True
-        aperture = self\
-            .utility\
-            .construct(occulting = occulting)\
-            ._aperture(coords)
-
-        assert (aperture <= 1.).all()
-        assert (aperture >= 0.).all()
-
-        # Case Not Occulting
-        occulting = False
-        aperture = self\
-            .utility\
-            .construct(occulting = occulting)\
-            ._aperture(coords)
-
-        assert (aperture <= 1.).all()
-        assert (aperture >= 0.).all()
