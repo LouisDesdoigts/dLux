@@ -126,7 +126,11 @@ out: list = jit_safe_slice(arr, (0, 0), (3, 3))
 # %%time
 jit_safe_slice(arr, (0, 0), (2, 2))
 
-# %%time
-jit_safe_slice(arr, (0, 0), (2, 2))
+@jax.jit
+def jitted_func():
+    carry = 0.
+    for length in range(4):
+        carry += jit_safe_slice(arr, (0, 0), (2, 2)).sum()
+    return carry
 
-
+print(jitted_func())

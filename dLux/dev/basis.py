@@ -345,14 +345,14 @@ class Basis(eqx.Module):
         for j in np.arange(1, self.nterms):
             intermediate = zernikes[j] * aperture
             coefficient = np.zeros((nterms, 1, 1), dtype=float)
+            basis_slice = jit_safe_slice(basis, (1,), (j,))
 
             coefficient = -1 / pixel_area * \
-                (zernikes[j] * basis[1 : j + 1] * aperture)\
+                (zernikes[j] * basis_slice * aperture)\
                 .sum(axis = (1, 2))\
                 .reshape(j, 1, 1) 
 
-            intermediate += (coefficient * basis[1 : j + 1])\
-                .sum(axis = 0)
+            intermediate += (coefficient * basis_slice).sum(axis = 0)
             
             basis = basis\
                 .at[j]\
