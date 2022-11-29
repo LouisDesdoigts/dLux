@@ -76,8 +76,6 @@ class Basis(eqx.Module):
     """
     nterms: int    
     aperture: Layer
-    _is_computed: bool
-    _basis: Array
 
 
     def __init__(self : Layer, nterms : int,
@@ -94,8 +92,6 @@ class Basis(eqx.Module):
         """
         self.nterms = int(nterms)
         self.aperture = aperture
-        self._is_computed = False
-        self._basis = None
 
 
     @functools.partial(jax.vmap, in_axes=(None, 0))
@@ -363,13 +359,11 @@ class Basis(eqx.Module):
         return basis
 
 
-    def _empty_basis(self, coordinates: Array):
-        width = coordinates.shape[-1]
-        shape = (self.nterms, width, width)
-        return eqx.tree_at(lambda x: x._basis, 
-            self, np.zeros(shape, dtype=float), is_leaf = lambda x: x is None)
-
-
+    # NOTE: I can tell that this function is not going to be jitable.
+    # I say this because there are side effects from within 
+    # `_compute` that `jax` will block. This destroys the cache 
+    # mechanism, which I can now get rid of anyway.
+    @property
     def basis(self : Layer, coordinates : Array) -> Tensor:
         """
         Generate the basis. Requires a single run after which,
@@ -392,20 +386,9 @@ class Basis(eqx.Module):
             each stacked array is a basis term. The final shape is:
             `(n, npix, npix)`
         """
-        def _compute(coordinates: Array) -> Array:
-            aperture = self.aperture._aperture(coordinates)
-            zernikes = self._zernikes(coordinates)
-            orth_basis = self._orthonormalise(aperture, zernikes)
-            self.__dict__["_basis"] = orth_basis
-            self.__dict__["_is_computed"] = True
-            return orth_basis
-            
-        self = self._empty_basis(coordinates)
-
-        return jax.lax.cond(self._is_computed, 
-            lambda: self._basis,
-            lambda: _compute(coordinates))
-         
+        aperture = self.aperture._aperture(coordinates)
+        zernikes = self._zernikes(coordinates)
+        return self._orthonormalise(aperture, zernikes)
 
 
 class CompoundBasis(eqx.Module):
