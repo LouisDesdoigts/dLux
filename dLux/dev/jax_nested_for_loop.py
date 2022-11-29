@@ -2,7 +2,7 @@ import jax.numpy as np
 import jax 
 
 
-@jax.jit
+#@jax.jit
 def jit_nested_for():
     """
     The problem that this is trying to solve is.
@@ -98,15 +98,15 @@ def jit_nested_for():
     # above. Then I can multiply this row-wise by a vectorised output 
     # of the `len_of_range` and subtract it from `np.arange(len_of_range(n))`
    
-    inds = np.arange(len_of_arange(n)) 
+    inds = np.arange(len_of_arange(n), dtype=int) 
     carry = inds
-    for k in np.arange(1, n + 1):
+    for k in np.arange(1, n + 1, dtype=int):
         first_ind = len_of_arange(k) - k
         last_ind = first_ind + k
         inds_of_int = (inds >= first_ind) & (inds < last_ind)
         carry = np.where(inds_of_int, inds - first_ind + 1, carry)
    
-    print(carry) 
+    j: int = j.at[1].set(carry)
     return j
 
 j: int = jit_nested_for()
