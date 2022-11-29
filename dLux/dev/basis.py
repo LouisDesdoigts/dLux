@@ -33,6 +33,80 @@ def factorial(n : int) -> int:
     return jax.lax.exp(jax.lax.lgamma(n + 1.))
 
 
+# NOTE:
+# I need to think about how I wish to implement this. 
+# Goals for today:
+#   1. Sought out the current code.
+#     a) I think that Zernike needs to be separated from Orthonormalise. 
+#        In general I think these classes perhaps need to be broken down 
+#        into functions. Yes I think have a 
+#        `zernikes(n: int[n], coords: int[m, m]) -> Tensor[n, m, m]` 
+#        function. However, in this case I encounter the same problem 
+#        of the coordinates not been accessible outside of the 
+#        `Wavefront`. This means that this particular set-up must
+#        remain a `Layer`.
+#     b) I also think that I should then have `Basis(aper: Aperture)`
+#        as a class as well. The orthonormalisation again must occur 
+#        during the propagation because I do not have access to the 
+#        coordinates outside of the `Optics`. I need to make a careful 
+#        Github issue that discusses this. I belive that `Basis` should 
+#        take a Zernike basis as an input as well. This will avoid 
+#        recomputation. Now I need to think carefully about how to do 
+#        this so that it is optional in case the `Basis` needs to be 
+#        recomputed. 
+#  2. I need to investigate writing a function generator for the zernikes. 
+#     Such a generator would have the signature 
+#     `zernike(coords: float[m, m]) -> float[m, m]`. Now I need to 
+#     think about ways of doing this because there are many ways that 
+#     I might attempt it. The generator approach defines a generator 
+#     with the following signature, `gen_next_zernike(none) -> 
+#     (callable(float[m, m]) -> float[m, m])`. I do not particularly 
+#     like this approach because it does not feal very functional. 
+#     Some subgoals of this initial approach are:
+#    a) Is it possible to `jit` a generator? It should be easy to 
+#       test this on a very simple `increment(none) -> int` generator. 
+#    b) Is it possible to `jit` a function that returns a function. 
+#       if not then it should still be possible for me to `jit` smaller 
+#       sub-functions making it an "effective" `jit`.
+#      i) I should als be able to test the effect of `jit` compiling 
+#         nested function definitions and closures. This will give us
+#         useful insights into what aspects of python are available to 
+#         us. I fail to see how it is that different from `jit` compiling 
+#         the methods of a class since both occupy a distince scope. 
+#     The second and more functional approach that I might make is 
+#     to attempt a function `zernike_from_noll_index(noll_index: int) 
+#     -> callable[float[m, m] -> float[m, m]]`. This one is better 
+#     because we are not always interested in generating all of the 
+#     zernikes and may just want some specific ones. I might create 
+#     a dictionary mapping of common names to noll indices. 
+#  3. I should investigate the typine mystery.
+#    a) Is there any runtime overhead to typing signatures. 
+#    b) I want to create subscriptable types but `int` ect. are 
+#       already taken. I like `tensor`, but perhaps I do not try 
+#       and push it in this project i.e. dLux. For example, I want
+#       to be able to specify,
+#       ```
+#       tensor[int][m, m]
+#       tensor(int)[m, m]
+#       func(int, int)[tensor[m, m]]
+#       ```
+#       These are all just ideas and should be taken with a grain of 
+#       salt. I should be able to produce the desired affect by 
+#       writing careful `__call__` and `__getitem__` methods that 
+#       return self ect. I need to investigate what `typing` already 
+#       provides in the `generic` interface. The only problem will 
+#       be providing definitions of `m` and `n`. I guess the simplest 
+#       way is just to define them as strings and then they can be used 
+#       this way. Might be handy to have a generator to define new 
+#       ones on the fly. They should take up minimal space. 
+#  4. I need to make a `Binary` PSF through the full TOLIMAN aperture
+#     using the new aperture syntax and launch a well thought out 
+#     pull request. 
+#  5. I need to write unit tests for the `Basis` implementation once 
+#     I have finished it. 
+
+
+
 class Basis(eqx.Module):
     """
     _Abstract_ class representing a basis fixed over an aperture 
