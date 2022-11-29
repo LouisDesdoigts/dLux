@@ -5,7 +5,6 @@ import jax.numpy as np
 import equinox as eqx
 import jax
 from dLux.utils import (get_positions_vector, get_pixel_positions)
-from jax_nested_for_loop import jit_safe_itertools_prod_nested_for
 
 __all__ = ['Basis', "CompoundBasis"]
 
@@ -395,7 +394,48 @@ class Basis(eqx.Module):
         """
         def _compute(coordinates: Array) -> Array:
             aperture = self.aperture._aperture(coordinates)
+
+            plt.title("Aperture")
+            plt.imshow(aperture)
+            plt.colorbar()
+            plt.show()
+
             zernikes = self._zernikes(coordinates)
+
+            fig, axes = plt.subplots(2, 3)
+            fig.suptitle("Zernikes")
+            axes[0][0].set_title("$j = 0$")
+            axes[0][0].set_xticks([])
+            axes[0][0].set_yticks([])
+            _map = axes[0][0].imshow(zernikes[0])
+            fig.colorbar(_map, ax=axes[0][0])
+            axes[0][1].set_title("$j = 1$")
+            axes[0][1].set_xticks([])
+            axes[0][1].set_yticks([])
+            _map = axes[0][1].imshow(zernikes[1])
+            fig.colorbar(_map, ax=axes[0][1])
+            axes[0][2].set_title("$j = 2$")
+            axes[0][2].set_xticks([])
+            axes[0][2].set_yticks([])
+            _map = axes[0][2].imshow(zernikes[2])
+            fig.colorbar(_map, ax=axes[0][2])
+            axes[1][0].set_title("$j = 3$")
+            axes[1][0].set_xticks([])
+            axes[1][0].set_yticks([])
+            _map = axes[1][0].imshow(zernikes[3])
+            fig.colorbar(_map, ax=axes[1][0])
+            axes[1][1].set_title("$j = 4$")
+            axes[1][1].set_xticks([])
+            axes[1][1].set_yticks([])
+            _map = axes[1][1].imshow(zernikes[4])
+            fig.colorbar(_map, ax=axes[1][1])
+            axes[1][2].set_title("$j = 5$")
+            axes[1][2].set_xticks([])
+            axes[1][2].set_yticks([])
+            _map = axes[1][2].imshow(zernikes[5])
+            fig.colorbar(_map, ax=axes[1][2])
+            plt.show()
+
             orth_basis = self._orthonormalise(aperture, zernikes)
             self.__dict__["_basis"] = orth_basis
             self.__dict__["_is_computed"] = True
@@ -403,9 +443,14 @@ class Basis(eqx.Module):
             
         self = self._empty_basis(coordinates)
 
-        return jax.lax.cond(self._is_computed, 
-            lambda: self._basis,
-            lambda: _compute(coordinates))
+        if self._is_computed:
+            return self._basis
+        else:
+            return _compute(coordinates)
+
+#        return jax.lax.cond(self._is_computed, 
+#            lambda: self._basis,
+#            lambda: _compute(coordinates))
          
 
 
@@ -459,36 +504,44 @@ import matplotlib.pyplot as plt
 
 mpl.rcParams["text.usetex"] = True
 
-arr: list = np.zeros((10, 2, 2))
-out: list = jit_safe_slice(arr, (0, 0, 0), (2, 2, 2))
-out: list = jit_safe_slice(arr, (0, 0, 0), (3, 2, 2))
-out: list = jit_safe_slice(arr, (0, 0, 0), (4, 2, 2))
-
 pixels = 128
 nterms = 6
 
-coordinates = dl.utils.get_pixel_coordinates(2., 2. / pixels)
-sq_aperture = dl.SquareAperture(0., 0., 1., 0., False, False)
+coordinates = dl.utils.get_pixel_coordinates(pixels, 2. / pixels)
+print(coordinates.shape)
+sq_aperture = dl.SquareAperture(0., 0., 0., 1., False, False)
 sq_basis = Basis(nterms, sq_aperture)
 sq_basis_vecs = sq_basis.basis(coordinates) 
 
 fig, axes = plt.subplots(2, 3)
 axes[0][0].set_title("$j = 0$")
+axes[0][0].set_xticks([])
+axes[0][0].set_yticks([])
 _map = axes[0][0].imshow(sq_basis_vecs[0])
 fig.colorbar(_map, ax=axes[0][0])
 axes[0][1].set_title("$j = 1$")
+axes[0][1].set_xticks([])
+axes[0][1].set_yticks([])
 _map = axes[0][1].imshow(sq_basis_vecs[1])
 fig.colorbar(_map, ax=axes[0][1])
 axes[0][2].set_title("$j = 2$")
+axes[0][2].set_xticks([])
+axes[0][2].set_yticks([])
 _map = axes[0][2].imshow(sq_basis_vecs[2])
 fig.colorbar(_map, ax=axes[0][2])
 axes[1][0].set_title("$j = 3$")
+axes[1][0].set_xticks([])
+axes[1][0].set_yticks([])
 _map = axes[1][0].imshow(sq_basis_vecs[3])
 fig.colorbar(_map, ax=axes[1][0])
 axes[1][1].set_title("$j = 4$")
+axes[1][1].set_xticks([])
+axes[1][1].set_yticks([])
 _map = axes[1][1].imshow(sq_basis_vecs[4])
 fig.colorbar(_map, ax=axes[1][1])
 axes[1][2].set_title("$j = 5$")
+axes[1][2].set_xticks([])
+axes[1][2].set_yticks([])
 _map = axes[1][2].imshow(sq_basis_vecs[5])
 fig.colorbar(_map, ax=axes[1][2])
 plt.show()
