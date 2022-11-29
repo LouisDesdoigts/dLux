@@ -33,29 +33,6 @@ def factorial(n : int) -> int:
     return jax.lax.exp(jax.lax.lgamma(n + 1.))
 
 
-@functools.partial(jax.jit, static_argnums=2)
-def jit_safe_slice(arr: list, entry: tuple, lengths: tuple) -> list:
-    """
-    Take a slice of the array that has the shape `lengths`.
-    The top left corner of this slice is at `entry` in `arr`.
-    This re-`jit`s the function for each new `lengths` given. 
-
-    Parameters:
-    -----------
-    arr: list
-        The array/tensor to slice.
-    entry: tuple
-        The set of coordinates to enter the array at. 
-    lengths: tuple
-        The length along each dimension to slice. 
-
-    Returns:
-    --------
-    slice: list
-        The requested slice. 
-    """
-    return jax.lax.dynamic_slice(arr, entry, lengths)
-
 class Basis(eqx.Module):
     """
     _Abstract_ class representing a basis fixed over an aperture 
@@ -363,8 +340,7 @@ class Basis(eqx.Module):
     # I say this because there are side effects from within 
     # `_compute` that `jax` will block. This destroys the cache 
     # mechanism, which I can now get rid of anyway.
-    @property
-    def basis(self : Layer, coordinates : Array) -> Tensor:
+    def basis(self, coordinates : Array) -> Tensor:
         """
         Generate the basis. Requires a single run after which,
         the basis is cached and can be used with no computational 
