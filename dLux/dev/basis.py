@@ -5,6 +5,7 @@ import jax.numpy as np
 import equinox as eqx
 import jax
 from dLux.utils import (get_positions_vector, get_pixel_positions)
+from jax_nested_for_loop import jit_safe_itertools_prod_nested_for
 
 __all__ = ['Basis', "CompoundBasis"]
 
@@ -316,7 +317,23 @@ class Basis(eqx.Module):
         """
         pixel_area = aperture.sum()
         basis = np.zeros(zernikes.shape).at[0].set(aperture)
-        
+        inds = jit_safe_itertools_prod_nested_for(self.nterms - 1)
+
+        def func(i: int, j: int, carry: Array) -> Array:
+            return (1. / pixel_area * zernikes[j] * basis[i] * aperture).sum()
+           
+
+        # So now I need a function that takes (i, j) as input 
+        # and returns what I want. 
+
+        coefficient = -1 / pixel_area * \
+            (zernikes[j] * basis[1 : j + 1] * aperture)\
+            .sum(axis = (1, 2))\
+            .reshape(j, 1, 1) 
+
+        intermediate += (coefficient * basis[1 : j + 1])\
+            .sum(axis = 0)
+
         for j in np.arange(1, self.nterms):
             intermediate = zernikes[j] * aperture
             coefficient = np.zeros((nterms, 1, 1), dtype=float)
@@ -347,11 +364,6 @@ class Basis(eqx.Module):
             # of the inner loop depends on the loop variable of the 
             # outer loop. Let me solve this simpler problem first and 
             # then come back for the more complex one. 
-            for i in np.arange(1, nterms):
-                coefficient[i] = coefficient\
-                    .at[i]\
-                    .add((-1 / pixel_area * zernikes[j] * basis[i] * aperture)\
-                        .sum())
 
 #            coefficient = -1 / pixel_area * \
 #                (zernikes[j] * basis[1 : j + 1] * aperture)\
@@ -363,9 +375,6 @@ class Basis(eqx.Module):
             # the size is not known at compile time. Perhaps, unrolling 
             # this internal vectorisation as a `for` loop would improve 
             # the state of things?
-
-            for i in np.arange(1, j + 1):
-                intermediate += coefficient[i] * basis[i]
 
 #            intermediate += (coefficient * basis[1 : j + 1])\
 #                .sum(axis = 0)

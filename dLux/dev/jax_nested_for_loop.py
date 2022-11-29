@@ -1,9 +1,9 @@
 import jax.numpy as np
 import jax 
+import functools as ft
 
-
-#@jax.jit
-def jit_nested_for():
+@ft.partial(jax.jit, static_argnums=0)
+def jit_safe_itertools_prod_nested_for(n: int) -> list:
     """
     The problem that this is trying to solve is.
 
@@ -63,7 +63,6 @@ def jit_nested_for():
     # damn it ... I had it right on the tip of my tongue. I wonder if 
     # this can be formulated as a tensor product?
 
-    n: int = 5
     tot_len: int = int(n * (n + 1) / 2)
     shape: tuple = (2, tot_len) 
 
@@ -106,8 +105,19 @@ def jit_nested_for():
         inds_of_int = (inds >= first_ind) & (inds < last_ind)
         carry = np.where(inds_of_int, inds - first_ind + 1, carry)
    
-    j: int = j.at[1].set(carry)
+    j: int = j.at[1].set(carry.astype(int))
     return j
 
-j: int = jit_nested_for()
+j: int = jit_safe_itertools_prod_nested_for(10)
 print(j)
+
+arr: list = np.zeros((10, 10))
+
+@jax.jit
+def jit_over_array_index(arr: list, i: int, j: int) -> list:
+    return jax.lax.dynamic_slice(arr, (i, 0), (1, j))
+
+out: list = jit_over_array_index(arr, 10, 9)
+print(out)
+# Is it possible to generalise this to where the inner loop 
+# limit is a user defined function of the outer loop limit?
