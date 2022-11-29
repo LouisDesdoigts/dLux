@@ -33,6 +33,30 @@ def factorial(n : int) -> int:
     """
     return jax.lax.exp(jax.lax.lgamma(n + 1.))
 
+
+@functools.partial(jax.jit, static_argnums=2)
+def jit_safe_slice(arr: list, entry: tuple, lengths: tuple) -> list:
+    """
+    Take a slice of the array that has the shape `lengths`.
+    The top left corner of this slice is at `entry` in `arr`.
+    This re-`jit`s the function for each new `lengths` given. 
+
+    Parameters:
+    -----------
+    arr: list
+        The array/tensor to slice.
+    entry: tuple
+        The set of coordinates to enter the array at. 
+    lengths: tuple
+        The length along each dimension to slice. 
+
+    Returns:
+    --------
+    slice: list
+        The requested slice. 
+    """
+    return jax.lax.dynamic_slice(arr, entry, lengths)
+
 class Basis(eqx.Module):
     """
     _Abstract_ class representing a basis fixed over an aperture 
@@ -317,67 +341,18 @@ class Basis(eqx.Module):
         """
         pixel_area = aperture.sum()
         basis = np.zeros(zernikes.shape).at[0].set(aperture)
-        inds = jit_safe_itertools_prod_nested_for(self.nterms - 1)
-
-        def func(i: int, j: int, carry: Array) -> Array:
-            return (1. / pixel_area * zernikes[j] * basis[i] * aperture).sum()
-           
-
-        # So now I need a function that takes (i, j) as input 
-        # and returns what I want. 
-
-        coefficient = -1 / pixel_area * \
-            (zernikes[j] * basis[1 : j + 1] * aperture)\
-            .sum(axis = (1, 2))\
-            .reshape(j, 1, 1) 
-
-        intermediate += (coefficient * basis[1 : j + 1])\
-            .sum(axis = 0)
 
         for j in np.arange(1, self.nterms):
             intermediate = zernikes[j] * aperture
             coefficient = np.zeros((nterms, 1, 1), dtype=float)
-            important_terms = coefficient.at[
 
-            # So this problem is inherently poorly suited to \`jax\`. 
-            # How do I go about this? I cannot do 
-            # `coefficient = np.zeros((j, 1, 1), dtype=float)` because 
-            # the shape is not known at compile time. I am thinking 
-            # that a better way of doing this might involve doing 
-            # `coefficient = np.zeros((nterms, 1, 1), dtype=float)`
-            # since then the extra rows are `0.` and adding over them 
-            # will not cause any problems. This will however, waste a 
-            # fair amount of time. I need to work out a better optimisation. 
+            coefficient = -1 / pixel_area * \
+                (zernikes[j] * basis[1 : j + 1] * aperture)\
+                .sum(axis = (1, 2))\
+                .reshape(j, 1, 1) 
 
-            # So even doing `for i in np.arange(1, j + 1):` is illegal
-            # in a `jit` compiled function. Funny, I thought that I 
-            # had made this `jit` safe. I guess I was fooling myself. 
-            # I will need to generate "kill factors". When I say this 
-            # I am refering to arrays that are \`1.\` and \`0.\` in 
-            # order to prevent incorrect things from being multiplied. 
-            # Hmmmmmmmmm, so I just thought about it then and even using 
-            # \`jax.lax.dynamic_slice_update` this will not be possible
-            # because the size is not known. 
-
-            # OK so let me think through the problem slowly. We need to 
-            # essentially have a nested for loop where the upper bound 
-            # of the inner loop depends on the loop variable of the 
-            # outer loop. Let me solve this simpler problem first and 
-            # then come back for the more complex one. 
-
-#            coefficient = -1 / pixel_area * \
-#                (zernikes[j] * basis[1 : j + 1] * aperture)\
-#                .sum(axis = (1, 2))\
-#                .reshape(j, 1, 1) 
-
-            # So the difficulty is that `lax.cond` `jit`s the internal 
-            # functions. The slice [1:(j + 1)] is the problem because 
-            # the size is not known at compile time. Perhaps, unrolling 
-            # this internal vectorisation as a `for` loop would improve 
-            # the state of things?
-
-#            intermediate += (coefficient * basis[1 : j + 1])\
-#                .sum(axis = 0)
+            intermediate += (coefficient * basis[1 : j + 1])\
+                .sum(axis = 0)
             
             basis = basis\
                 .at[j]\
