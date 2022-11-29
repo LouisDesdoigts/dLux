@@ -71,58 +71,7 @@ def jit_nested_for():
     j: int = np.zeros(shape, dtype=int)
     
     j: int = j.at[0].set(np.repeat(i, i, total_repeat_length=tot_len))
-
-    # Now comes the problem of the inner for loop. I cannot use `for` 
-    # because the loop variable is not static. However, I need to 
-    # apply `np.arange` to multiple different values. Essentially,
-    # I am looking for `np.arange(np.arange())`. This is a folly 
-    # bacause the size of the array is unkown.
-
-    # OK I'm starting to formulate a plan. So if I have an `(n, tot_len)` 
-    # array of ones, I can zero out below the diagonal and then sum 
-    # along the vertical axis to get the values that I need. Haha, yes!
-    # For example,
-    #
-    #     1 1 1 1 1 1 => 63 
-    #     0 0 1 0 1 1 => 11
-    #     0 0 0 0 0 1 =>  1
-    # sum 1 1 2 1 2 3
-    #
-    # Can this be done with `lax.scan`? Or perhaps I can be very clever 
-    # and create the encoding above from a binary image of `n`? 
-    #
-    # n: 0 => b0
-    # n: 1 => b1
-    # n: 2 => b10
-    # n: 3 => b11
-    # n: 4 => b100
-    # 
-    # So b11...1 can be created how? Well it is the sum over `2 >> i`.
-    # I cannot remeber if the `operator` library employs the vectorisable
-    # versions of bitwise operations. It does, nice!
-    #
-    # np.sum(jax.vmap(operator.lshift)(i))
-    # np.sum(jax.vmap(lambda x: 2 << x)(i))
-    # np.sum(jax.vmap(lambda x: 2 ** x)(i))
-    #
-    # I'll use the bottom one for now but the other two present optimisation 
-    # opportunities. 
-
-    # While I hvae made some progress above I do not think that it is 
-    # going to lead to a readable solution soon. Let me write done the 
-    # naive approach. 
-    #
-
     len_of_arange: callable = lambda x: x * (x + 1) / 2
-
-    # Let me work through some examples,
-    #
-    #              1 | 1 2 | 1 2 3 | 1 2 3 4 |
-    # start_index: 0 | 1   | 3     | 6   
-    # length:      1 | 2   | 3     | 4
-    #
-    # God this is a slog. Just think: if I can get it, the reward will 
-    # be worth it. 
 
     # A recursive thought just came to mind. It is a shame that `jax` 
     # cannot handle recursion at all. So there is a stretching of the 
@@ -149,18 +98,15 @@ def jit_nested_for():
     # above. Then I can multiply this row-wise by a vectorised output 
     # of the `len_of_range` and subtract it from `np.arange(len_of_range(n))`
    
-    # This attempt has failed again. I think that I need to use 
-    # the number encoding scheme via binary 
-
     inds = np.arange(len_of_arange(n)) 
     carry = inds
     for k in np.arange(1, n + 1):
         first_ind = len_of_arange(k) - k
         last_ind = first_ind + k
         inds_of_int = (inds >= first_ind) & (inds < last_ind)
-        print(np.array(inds_of_int, dtype=int))
         carry = np.where(inds_of_int, inds - first_ind + 1, carry)
-    
+   
+    print(carry) 
     return j
 
 j: int = jit_nested_for()
