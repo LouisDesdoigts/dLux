@@ -1,6 +1,7 @@
 import jax.numpy as np
 import jax 
 
+
 @jax.jit
 def jit_nested_for():
     """
@@ -148,22 +149,17 @@ def jit_nested_for():
     # above. Then I can multiply this row-wise by a vectorised output 
     # of the `len_of_range` and subtract it from `np.arange(len_of_range(n))`
    
-    kernel = np.zeros((n, 1), dtype=int)
-    collection = kernel
-
-    for k in np.arange(n):
-        k_kernel = kernel.at[k].set(1)
-        collection = np.hstack([collection, np.tile(k_kernel, (1, k + 1))])
-    
-    collection = collection.at[:, 1:].get()
-    print(collection)
-
     # This attempt has failed again. I think that I need to use 
     # the number encoding scheme via binary 
 
-
+    inds = np.arange(len_of_arange(n)) 
+    carry = inds
     for k in np.arange(1, n + 1):
-        np.where(np.arange(1, n + 1) < len_of_arange(k), carry, )
+        first_ind = len_of_arange(k) - k
+        last_ind = first_ind + k
+        inds_of_int = (inds >= first_ind) & (inds < last_ind)
+        print(np.array(inds_of_int, dtype=int))
+        carry = np.where(inds_of_int, inds - first_ind + 1, carry)
     
     return j
 
