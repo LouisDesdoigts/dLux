@@ -394,48 +394,7 @@ class Basis(eqx.Module):
         """
         def _compute(coordinates: Array) -> Array:
             aperture = self.aperture._aperture(coordinates)
-
-            plt.title("Aperture")
-            plt.imshow(aperture)
-            plt.colorbar()
-            plt.show()
-
             zernikes = self._zernikes(coordinates)
-
-            fig, axes = plt.subplots(2, 3)
-            fig.suptitle("Zernikes")
-            axes[0][0].set_title("$j = 0$")
-            axes[0][0].set_xticks([])
-            axes[0][0].set_yticks([])
-            _map = axes[0][0].imshow(zernikes[0])
-            fig.colorbar(_map, ax=axes[0][0])
-            axes[0][1].set_title("$j = 1$")
-            axes[0][1].set_xticks([])
-            axes[0][1].set_yticks([])
-            _map = axes[0][1].imshow(zernikes[1])
-            fig.colorbar(_map, ax=axes[0][1])
-            axes[0][2].set_title("$j = 2$")
-            axes[0][2].set_xticks([])
-            axes[0][2].set_yticks([])
-            _map = axes[0][2].imshow(zernikes[2])
-            fig.colorbar(_map, ax=axes[0][2])
-            axes[1][0].set_title("$j = 3$")
-            axes[1][0].set_xticks([])
-            axes[1][0].set_yticks([])
-            _map = axes[1][0].imshow(zernikes[3])
-            fig.colorbar(_map, ax=axes[1][0])
-            axes[1][1].set_title("$j = 4$")
-            axes[1][1].set_xticks([])
-            axes[1][1].set_yticks([])
-            _map = axes[1][1].imshow(zernikes[4])
-            fig.colorbar(_map, ax=axes[1][1])
-            axes[1][2].set_title("$j = 5$")
-            axes[1][2].set_xticks([])
-            axes[1][2].set_yticks([])
-            _map = axes[1][2].imshow(zernikes[5])
-            fig.colorbar(_map, ax=axes[1][2])
-            plt.show()
-
             orth_basis = self._orthonormalise(aperture, zernikes)
             self.__dict__["_basis"] = orth_basis
             self.__dict__["_is_computed"] = True
@@ -443,14 +402,9 @@ class Basis(eqx.Module):
             
         self = self._empty_basis(coordinates)
 
-        if self._is_computed:
-            return self._basis
-        else:
-            return _compute(coordinates)
-
-#        return jax.lax.cond(self._is_computed, 
-#            lambda: self._basis,
-#            lambda: _compute(coordinates))
+        return jax.lax.cond(self._is_computed, 
+            lambda: self._basis,
+            lambda: _compute(coordinates))
          
 
 
