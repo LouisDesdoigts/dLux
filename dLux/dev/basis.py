@@ -364,6 +364,13 @@ class Basis(eqx.Module):
         return basis
 
 
+    def _empty_basis(self, coordinates: Array):
+        width = coordinates.shape[-1]
+        shape = (self.nterms, width, width)
+        return eqx.tree_at(lambda x: x._basis, 
+            self, np.zeros(shape, dtype=float), is_leaf = lambda x: x is None)
+
+
     def basis(self : Layer, coordinates : Array) -> Tensor:
         """
         Generate the basis. Requires a single run after which,
@@ -394,6 +401,8 @@ class Basis(eqx.Module):
             self.__dict__["_is_computed"] = True
             return orth_basis
             
+        self = self._empty_basis(coordinates)
+
         return jax.lax.cond(self._is_computed, 
             lambda: self._basis,
             lambda: _compute(coordinates))
