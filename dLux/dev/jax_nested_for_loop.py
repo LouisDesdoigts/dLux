@@ -1,7 +1,7 @@
 import jax.numpy as np
 import jax 
 
-
+@jax.jit
 def jit_nested_for():
     """
     The problem that this is trying to solve is.
@@ -113,7 +113,6 @@ def jit_nested_for():
     #
 
     len_of_arange: callable = lambda x: x * (x + 1) / 2
-    vmap_len_of_arange: callable = jax.vmap(len_of_arange)
 
     # Let me work through some examples,
     #
@@ -123,11 +122,49 @@ def jit_nested_for():
     #
     # God this is a slog. Just think: if I can get it, the reward will 
     # be worth it. 
-    for k in np.arange(1, n + 1):
-       l: int = (k * (k + 1) / 2)
-       i: int = i.at[(l):(l + k)].set(np.arange(l))
-    # 
 
+    # A recursive thought just came to mind. It is a shame that `jax` 
+    # cannot handle recursion at all. So there is a stretching of the 
+    # terms in that matrix I started earlier. 
+    #
+    #  i | 1 | 2 2 | 3 3 3 | 4 4 4 4 |  5  5  5  5  5 | 
+    #  k | 0 | 1 2 | 3 4 5 | 6 7 8 9 | 10 11 12 13 14 |
+    #  j | 1 | 1 2 | 1 2 3 | 1 2 3 4 |  1  2  3  4  5 |
+    #    |---|-----|-------|---------|----------------|
+    #    | 1 | 1 1 | 1 1 1 | 1 1 1 1 |  1  1  1  1  1 |
+    #    | 0 | 0 1 | 0 1 1 | 0 1 1 1 |  0  1  1  1  1 |
+    #    | 0 | 0 0 | 0 0 1 | 0 0 1 1 |  0  0  1  1  1 |
+    #    | 0 | 0 0 | 0 0 0 | 0 0 0 1 |  0  0  0  1  1 |
+    #    | 0 | 0 0 | 0 0 0 | 0 0 0 0 |  0  0  0  0  1 |
+    #    |---|-----|-------|---------|----------------|
+    #    | 1 | 0 0 | 0 0 0 | 0 0 0 0 |  0  0  0  0  0 |
+    #    | 0 | 1 1 | 0 0 0 | 0 0 0 0 |  0  0  0  0  0 |
+    #    | 0 | 0 0 | 1 1 1 | 0 0 0 0 |  0  0  0  0  0 |
+    #    | 0 | 0 0 | 0 0 0 | 1 1 1 1 |  0  0  0  0  0 |
+    #    | 0 | 0 0 | 0 0 0 | 0 0 0 0 |  1  1  1  1  1 |
+    # 
+    # So something is beggining to boil up in the back of my mind. 
+    # So I want to generate the following array (bottom of the table)
+    # above. Then I can multiply this row-wise by a vectorised output 
+    # of the `len_of_range` and subtract it from `np.arange(len_of_range(n))`
+   
+    kernel = np.zeros((n, 1), dtype=int)
+    collection = kernel
+
+    for k in np.arange(n):
+        k_kernel = kernel.at[k].set(1)
+        collection = np.hstack([collection, np.tile(k_kernel, (1, k + 1))])
+    
+    collection = collection.at[:, 1:].get()
+    print(collection)
+
+    # This attempt has failed again. I think that I need to use 
+    # the number encoding scheme via binary 
+
+
+    for k in np.arange(1, n + 1):
+        np.where(np.arange(1, n + 1) < len_of_arange(k), carry, )
+    
     return j
 
 j: int = jit_nested_for()
