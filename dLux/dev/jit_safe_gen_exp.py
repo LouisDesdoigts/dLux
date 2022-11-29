@@ -7,6 +7,7 @@ import functools as ft
 import jax.tree_util as jtu
 
 
+@jax.jit
 def count() -> int:
     i: int = 0
     while True:
