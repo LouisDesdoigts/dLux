@@ -108,16 +108,25 @@ def jit_safe_itertools_prod_nested_for(n: int) -> list:
     j: int = j.at[1].set(carry.astype(int))
     return j
 
+# %%time 
+jit_safe_itertools_prod_nested_for(10)
+
+# %%timeit
 j: int = jit_safe_itertools_prod_nested_for(10)
-print(j)
 
 arr: list = np.zeros((10, 10))
 
-@jax.jit
-def jit_over_array_index(arr: list, i: int, j: int) -> list:
-    return jax.lax.dynamic_slice(arr, (i, 0), (1, j))
+@ft.partial(jax.jit, static_argnums=2)
+def jit_safe_slice(arr: list, entry: tuple, lengths: tuple) -> list:
+    return jax.lax.dynamic_slice(arr, entry, lengths)
 
-out: list = jit_over_array_index(arr, 10, 9)
-print(out)
-# Is it possible to generalise this to where the inner loop 
-# limit is a user defined function of the outer loop limit?
+# %%timeit
+out: list = jit_safe_slice(arr, (0, 0), (3, 3))
+
+# %%time
+jit_safe_slice(arr, (0, 0), (2, 2))
+
+# %%time
+jit_safe_slice(arr, (0, 0), (2, 2))
+
+
