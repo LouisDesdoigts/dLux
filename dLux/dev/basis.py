@@ -340,19 +340,21 @@ class Basis(eqx.Module):
             ```
         """
         pixel_area = aperture.sum()
-        basis = np.zeros(zernikes.shape).at[0].set(aperture)
+        shape = zernikes.shape
+        width = shape[-1]
+        basis = np.zeros(shape).at[0].set(aperture)
 
         for j in np.arange(1, self.nterms):
             intermediate = zernikes[j] * aperture
             coefficient = np.zeros((nterms, 1, 1), dtype=float)
-            basis_slice = jit_safe_slice(basis, (1,), (j,))
+            mask = (np.arange(1, self.nterms) > j + 1).reshape((-1, 1, 1))
 
             coefficient = -1 / pixel_area * \
-                (zernikes[j] * basis_slice * aperture)\
+                (zernikes[j] * basis[1:] * aperture * mask)\
                 .sum(axis = (1, 2))\
-                .reshape(j, 1, 1) 
+                .reshape(-1, 1, 1) 
 
-            intermediate += (coefficient * basis_slice).sum(axis = 0)
+            intermediate += (coefficient * basis[1:] * mask).sum(axis = 0)
             
             basis = basis\
                 .at[j]\
@@ -389,7 +391,7 @@ class Basis(eqx.Module):
             zernikes = self._zernikes(coordinates)
             orth_basis = self._orthonormalise(aperture, zernikes)
             self.__dict__["_basis"] = orth_basis
-            self._is_computed = True
+            self.__dict__["_is_computed"] = True
             return orth_basis
             
         return jax.lax.cond(self._is_computed, 
@@ -447,6 +449,11 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt 
 
 mpl.rcParams["text.usetex"] = True
+
+arr: list = np.zeros((10, 2, 2))
+out: list = jit_safe_slice(arr, (0, 0, 0), (2, 2, 2))
+out: list = jit_safe_slice(arr, (0, 0, 0), (3, 2, 2))
+out: list = jit_safe_slice(arr, (0, 0, 0), (4, 2, 2))
 
 pixels = 128
 nterms = 6

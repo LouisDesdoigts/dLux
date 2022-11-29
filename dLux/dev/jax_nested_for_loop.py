@@ -114,23 +114,13 @@ jit_safe_itertools_prod_nested_for(10)
 # %%timeit
 j: int = jit_safe_itertools_prod_nested_for(10)
 
-arr: list = np.zeros((10, 10))
-
 @ft.partial(jax.jit, static_argnums=2)
 def jit_safe_slice(arr: list, entry: tuple, lengths: tuple) -> list:
     return jax.lax.dynamic_slice(arr, entry, lengths)
 
+arr: list = np.zeros((10, 2, 2))
+
 # %%timeit
-out: list = jit_safe_slice(arr, (0, 0), (3, 3))
+out: list = jit_safe_slice(arr, (0, 0, 0), (3, 2, 2))
 
-# %%time
-jit_safe_slice(arr, (0, 0), (2, 2))
-
-@jax.jit
-def jitted_func():
-    carry = 0.
-    for length in range(4):
-        carry += jit_safe_slice(arr, (0, 0), (2, 2)).sum()
-    return carry
-
-print(jitted_func())
+print(out.shape)
