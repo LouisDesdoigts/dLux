@@ -502,8 +502,9 @@ class SquareAperture(RotatableAperture):
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
+
     def largest_extent(self, coordinates: Tensor) -> float:
-        return np.sqrt(2)*self.width
+        return np.sqrt(2) * self.width / 2.
 
 class CompoundAperture(eqx.Module):
     """
