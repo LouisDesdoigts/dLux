@@ -104,10 +104,10 @@ def factorial(n : int) -> int:
 #     pull request. 
 #  5. I need to write unit tests for the `Basis` implementation once 
 #     I have finished it. 
+#  6. See if I can write a useful `@private` and `@public` decorator 
+#     for python. Maybe I also attempt to do `@override`
 
-
-
-class Basis(eqx.Module):
+class Zernike(eqx.Module):
     """
     _Abstract_ class representing a basis fixed over an aperture 
     that is used to optimise and learn aberations in the aperture. 
