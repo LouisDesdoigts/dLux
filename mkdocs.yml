@@ -79,6 +79,7 @@ nav:
         - Add OPD:             optics/add_opd.md
         - Apply Basis OPD:     optics/apply_basis_opd.md
         - Apply Basis CLIMB:   optics/apply_basis_climb.md
+        - Rotate:              optics/rotate.md
 
         - Propagators:
             - Cartesian MFT:     propagators/concrete/cartesian_mft.md
@@ -112,6 +113,7 @@ nav:
         - Apply Saturation:      detectors/apply_saturation.md
         - Add Constant:          detectors/add_constant.md
         - Integer Downsample:    detectors/integer_downsample.md
+        - Rotate:                detectors/rotate.md
 
     - Utils:
         - Models:
