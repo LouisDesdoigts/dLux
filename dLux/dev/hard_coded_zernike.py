@@ -1,10 +1,11 @@
 import jax 
 import jax.numpy as np
 import equinox as eqx
+import dLux as dl
 
 
 zernikes: list = [
-    lambda rho, theta: 1.,
+    lambda rho, theta: np.ones(rho.shape, dtype=float),
     lambda rho, theta: 2. * rho * np.sin(theta),
     lambda rho, theta: 2. * rho * np.cos(theta),
     lambda rho, theta: np.sqrt(6.) * rho ** 2 * np.sin(2. * theta),
@@ -17,7 +18,7 @@ zernikes: list = [
 ]
 
 
-class PreCompZernikeBasis(OpticalLayer):
+class PreCompZernikeBasis(eqx.Module):
     zernikes: list
     coeffs: list
 
