@@ -461,11 +461,7 @@ class CompoundBasis(eqx.Module):
             The compound aperture to generate a basis over. 
         """
         apertures = compound_aperture.apertures.values()
-        if isinstance(nterms, list):
-            bases = [Basis(nterm, aperture) \
-                for nterm, aperture in zip(nterms, apertures)]
-        else:
-            bases = [Basis(nterms, aperture) for aperture in apertures]
+        bases = [Basis(nterms, aperture) for aperture in apertures]
         self.bases = bases
 
 
