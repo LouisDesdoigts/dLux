@@ -15,7 +15,8 @@ Vector = TypeVar("Vector")
 
 
 __all__ = ["Aperture", "CompoundAperture", "SquareAperture", 
-    "RectangularAperture", "CircularAperture", "AnnularAperture"]
+    "RectangularAperture", "CircularAperture", "AnnularAperture",
+    "MultiAperture", "RotatableAperture"]
 
 
 class Aperture(eqx.Module, abc.ABC):

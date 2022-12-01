@@ -1,3 +1,9 @@
+import dLux as dl 
+import jax.numpy as np
+import jax
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
 class HexagonalAperture(RotableAperture):
     """
     Generate a hexagonal aperture, parametrised by rmax. 
@@ -111,5 +117,6 @@ class HexagonalAperture(RotableAperture):
 
         hexagon = rectangle | left_triangle | right_triangle
         return np.asarray(hexagon).astype(float)
+
 
 
