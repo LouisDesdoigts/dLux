@@ -149,6 +149,22 @@ def jth_radial_zernike(n: int, m: int) -> list:
 
 
 def jth_polar_zernike(n: int, m: int) -> list:
+    """
+    Generates a function representing the polar component 
+    of the jth Zernike polynomial.
+
+    Parameters:
+    -----------
+    n: int 
+        The first index number of the Zernike polynomial.
+    m: int 
+        The second index number of the Zernike polynomials.
+
+    Returns:
+    --------
+    polar: Array
+        The polar component of the jth Zernike polynomials.
+    """
     is_m_zero = (m != 0).astype(int)
     norm_coeff = (1 + (np.sqrt(2) - 1) * is_m_zero) * np.sqrt(n + 1)
 
