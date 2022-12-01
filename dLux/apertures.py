@@ -9,7 +9,6 @@ from typing import TypeVar
 
 Array = TypeVar("Array")
 Layer = TypeVar("Layer")
-Array = TypeVar("Tensor")
 Matrix = TypeVar("Matrix")
 Vector = TypeVar("Vector")
 
@@ -298,7 +297,7 @@ class Aperture(eqx.Module, abc.ABC):
         trans_coords = self._translate(coordinates)
         rad_trans_coords = dLux.utils.cartesian_to_polar(trans_coords)
         coordinates = rad_trans_coords.at[0].mul(1. / self.largest_extent(coordinates))
-`
+
         return coordinates
 
 
@@ -526,7 +525,7 @@ class RotatableAperture(Aperture):
         self.theta = np.asarray(theta).astype(float)
 
 
-    def _rotate(self: Layer, coordinates: Array) -> Tensor:
+    def _rotate(self: Layer, coordinates: Array) -> Array:
         """
         Rotate the coordinate system by a pre-specified amount,
         `self._theta`
