@@ -44,7 +44,7 @@ class HexagonalAperture(RotableAperture):
         self.rmax = np.asarray(rmax).astype(float)
 
 
-    def get_rmax(self : Layer) -> float:
+    def get_rmax(self: Layer) -> float:
         """
         Returns
         -------
@@ -55,7 +55,27 @@ class HexagonalAperture(RotableAperture):
         return self.rmax
 
 
-    def _aperture(self : Layer, coords: Array) -> Array:
+    def largest_extent(self: Layer) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre.
+
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        largest_extent : float
+            The maximum distance from centre to edge of aperture
+        """
+        return self.rmax
+
+
+    def _aperture(self: Layer, coords: Array) -> Array:
         """
         Generates an array representing the hard edged hexagonal 
         aperture. 

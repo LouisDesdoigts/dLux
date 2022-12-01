@@ -933,6 +933,13 @@ class MultiAperture(eqx.Module):
 
     def _aperture(self, coordinates: Array) -> Array:
         """
+        Evaluates the aperture. 
+
+        Parameters:
+        -----------
+        coordinates: Array, meters
+            The coordinates of the paraxial array. 
+
         Returns 
         -------
         aperture : Matrix
