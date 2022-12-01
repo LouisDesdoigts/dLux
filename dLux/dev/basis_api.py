@@ -57,14 +57,70 @@ class AbberatedAperture(dl.OpticalLayer, abc.ABC):
 
 
     @abc.abstractmethod
-    def __init__(self, 
-            noll_inds: List[int],
-            aperture: Aperture, 
-            coeffs: Array) -> Layer:
+    def __init__(self   : Layer, 
+            noll_inds   : List[int],
+            aperture    : Aperture, 
+            coeffs      : Array) -> Layer:
         """
+        Parameters:
+        -----------
+        noll_inds: List[int]
+            The noll indices are a scheme for indexing the Zernike
+            polynomials. Normally these polynomials have two 
+            indices but the noll indices prevent an order to 
+            these pairs. All basis can be indexed using the noll
+            indices based on `n` and `m`. 
+        aperture: Aperture
+            The aperture that the basis is defined on. The shape 
+            of this aperture defines what the polynomials are. 
+        coeffs: Array
+            The coefficients of the basis vectors. 
         """
 
 
+    @abc.abstractmethod
+    def _basis(self: Layer, coords: Array) -> Array:
+        """
+        Generate the basis vectors over a set of coordinates.  
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+
+        Returns:
+        --------
+        basis: Array
+            The basis vectors associated with the aperture. 
+            These vectors are stacked in a tensor that is,
+            `(nterms, npix, npix)`. 
+        """
+
+
+    def _opd(self: Layer, coords: Array) -> Array:
+        """
+        Calculate the optical path difference that is caused 
+        by the basis and the aberations that it represents. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+
+        Returns:
+        --------
+        opd: Array
+            The optical path difference associated with much of 
+            the path. 
+        """
+        basis: Array = self._basis(coords)
+        opd: Array = np.dot(basis.T, self.coeffs)
+        return opd
+
+
+    @abc.abstractmethod
     def __call__(self, params_dict: dict) -> dict:
         """
         Apply the aperture and the abberations to the wavefront.  
@@ -79,14 +135,6 @@ class AbberatedAperture(dl.OpticalLayer, abc.ABC):
         params: dict 
             A dictionary containing the key "wavefront".
         """
-        wavefront: object = params_dict["Wavefront"]
-        coords: Array = wavefront.pixel_positions()
-        opd: Array = self._opd(coords)
-        aperture: Array = self.aperture._aperture(coords)
-        params_dict["Wavefront"] = wavefront\
-            .add_opd(opd)\
-            .multiply_amplitude(aperture)
-        return params_dict
 
 
 class AberratedCircularAperture(AberratedAperture):
@@ -164,22 +212,29 @@ class AberratedCircularAperture(AberratedAperture):
         return basis
 
 
-    def _opd(self: Layer, coords: Array) -> Array:
+    def __call__(self, params_dict: dict) -> dict:
         """
+        Apply the aperture and the abberations to the wavefront.  
+
         Parameters:
         -----------
-        coords: Array, meters
-            The paraxial coordinate system on which to generate
-            the array. 
+        params: dict
+            A dictionary containing the key "Wavefront".
 
         Returns:
         --------
-        opd: Array
-            The optical path difference associated with much of 
-            the path. 
+        params: dict 
+            A dictionary containing the key "wavefront".
         """
-        basis: Array = self._basis(coords)
-        opd: Array = np.dot(basis.T, self.coeffs)
-        return opd
+        wavefront: object = params_dict["Wavefront"]
+        coords: Array = wavefront.pixel_positions()
+        opd: Array = self._opd(coords)
+        aperture: Array = self.aperture._aperture(coords)
+        params_dict["Wavefront"] = wavefront\
+            .add_opd(opd)\
+            .multiply_amplitude(aperture)
+        return params_dict
+
+
 
 
