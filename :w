@@ -53,18 +53,7 @@ class ApertureWithBasis(dl.OpticalLayer, abc.ABC):
     """
     basis_funcs: List[callable]
     aperture: Aperture
-    coeffs: Array
-
-
-    def __init__(self, 
-            noll_inds: List[int],
-            aperture: Aperture, 
-            coeffs: Array) -> Layer:
-        """
-        """
-        raise NotImplementedError("The functions referenced" + \
-            "by `noll_inds` depend on the aperture. This is" + \
-            "an *abstract* class and should not be substantianed.")
+    coeffs: List[floats]
 
 class HardCodedLowOrderZernikeBasisAndAperture(eqx.Module):
     """
