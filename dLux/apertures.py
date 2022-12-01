@@ -131,12 +131,39 @@ class Aperture(eqx.Module, abc.ABC):
     @abc.abstractmethod
     def _metric(self: Layer, distances: Array) -> Array:
         """
-        A measure of how far a pixel is from the
+        A measure of how far a pixel is from the aperture.
+        This is a very abstract description that was constructed 
+        when dealing with the soft edging. For a normal binary 
+        representation the metric is zero if it is inside the
+        aperture and one if it is outside the aperture. Notice,
+        we have not attempted to prove that this is a metric 
+        via the axioms, this is just a handy name that brings 
+        to mind the general idea. For a soft edged aperture the 
+        metric is different.
+
+        Parameters:
+        -----------
+        distances: Array
+            The distances of each pixel from the edge of the aperture. 
+            Again, the words distances is designed to aid in 
+            conveying the idea and is not strictly true. We are
+            permitting negative distances when inside the aperture
+            because this was simplest to implement. 
+
+        Returns:
+        --------
+        non_occ_ap: Array 
+            This is essential the final step in processing to produce
+            the aperture. What is returned is the non-occulting 
+            version of the aperture. 
         """
 
 
-    def _aperture(self, coordinates: Array) -> Array:
+    def _aperture(self: Layer, coordinates: Array) -> Array:
         """
+        Compute the array representing the aperture. 
+
+
         """
         aperture = jax.lax.cond(self.occulting,
             lambda aperture: 1 - aperture,
@@ -146,7 +173,6 @@ class Aperture(eqx.Module, abc.ABC):
         return aperture
 
 
-    # TODO: Remove the basis naming convention. 
     def set_x_offset(self, x : float) -> Layer:
         """
         Parameters
@@ -160,7 +186,13 @@ class Aperture(eqx.Module, abc.ABC):
 
 
     def get_x_offset(self: Layer) -> float:
-        
+        """
+        Returns:
+        --------
+        x_offset: float, meters
+            The x centre of the aperture relative to the optical
+            axis. 
+        """
         return self.x_offset
 
 
@@ -168,7 +200,7 @@ class Aperture(eqx.Module, abc.ABC):
         """
         Parameters
         ----------
-        x : float
+        y: float
             The y coordinate of the centre of the hexagonal
             aperture.
         """
@@ -212,6 +244,7 @@ class Aperture(eqx.Module, abc.ABC):
         return parameters
 
 
+    @abc.abstractmethod
     def largest_extent(self, coordinates : Array) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
@@ -231,10 +264,12 @@ class Aperture(eqx.Module, abc.ABC):
         """
 
 
-    def compute_aperture_normalised_coordinates(self, coordinates : Array) -> Array:
+    def compute_aperture_normalised_coordinates(self: Layer, 
+            coordinates : Array) -> Array:
         """
-        Shift a set of wavefront coodinates to be centered on the aperture and scaled such that
-        the radial distance is 1 to the edge of the aperture, returned in polar form
+        Shift a set of wavefront coodinates to be centered on the 
+        aperture and scaled such that the radial distance is 1 to 
+        the edge of the aperture, returned in polar form
 
         Parameters
         ----------
@@ -246,11 +281,11 @@ class Aperture(eqx.Module, abc.ABC):
         Returns
         -------
         coordinates : Array
-            the radial coordinates centered on the centre of the aperture and scaled such that they are 1
+            the radial coordinates centered on the centre of the aperture 
+            and scaled such that they are 1
             at the maximum extent of the aperture
             The dimensions of the tensor are be `(2, npix, npix)`
         """
-        
         # TODO: check where flips should go
         coordinates = coordinates.at[1].set(coordinates[1][::-1,:])
 
@@ -264,6 +299,7 @@ class Aperture(eqx.Module, abc.ABC):
         coordinates = rad_trans_coords.at[0].mul(1. / self.largest_extent(coordinates))
 
         return coordinates
+
 
 class AnnularAperture(Aperture):
     """
