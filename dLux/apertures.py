@@ -9,7 +9,7 @@ from typing import TypeVar
 
 Array = TypeVar("Array")
 Layer = TypeVar("Layer")
-Tensor = TypeVar("Tensor")
+Array = TypeVar("Tensor")
 Matrix = TypeVar("Matrix")
 Vector = TypeVar("Vector")
 
@@ -31,6 +31,18 @@ class Aperture(eqx.Module, abc.ABC):
         The x coordinate of the centre of the aperture.
     y_offset : float, meters
         The y coordinate of the centre of the aperture.
+    occulting: bool
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside.
+        A non-occulting aperture is one inside and zero 
+        outside. 
+    softening: bool 
+        True is the aperture is soft edged. This means that 
+        there is a layer of pixels that is non-binary. The 
+        way that this is implemented (due to the limitations)
+        of `jax` is via a `np.tanh` function. This is good for 
+        derivatives. Use this feature only if encountering 
+        errors when using hard edged apertures. 
     """
     occulting: bool 
     softening: float
@@ -38,8 +50,11 @@ class Aperture(eqx.Module, abc.ABC):
     y_offset: float
     
 
-    def __init__(self, x_offset : float, y_offset : float, 
-            occulting: bool, softening: bool) -> Layer:
+    def __init__(self   : Layer, 
+            x_offset    : float, 
+            y_offset    : float, 
+            occulting   : bool, 
+            softening   : bool) -> Layer:
         """
         Parameters
         ----------
@@ -47,6 +62,13 @@ class Aperture(eqx.Module, abc.ABC):
             The centre of the coordinate system along the x-axis.
         y_offset : float, meters
             The centre of the coordinate system along the y-axis. 
+        softening: bool 
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool 
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
         """
         self.x_offset = np.asarray(x_offset).astype(float)
         self.y_offset = np.asarray(y_offset).astype(float)
@@ -54,7 +76,7 @@ class Aperture(eqx.Module, abc.ABC):
         self.occulting = bool(occulting)
 
 
-    def get_centre(self) -> tuple:
+    def get_centre(self: Layer) -> Array:
         """
         Returns 
         -------
@@ -63,15 +85,27 @@ class Aperture(eqx.Module, abc.ABC):
             element of the tuple is the x coordinate and the second 
             is the y coordinate.
         """
-        return np.array([self.x_offset, -self.y_offset])
+        return np.array([self.x_offset, self.y_offset])
 
 
-    def _translate(self, coordinates: Tensor) -> Tensor:
+    def _translate(self, coordinates: Array) -> Array:
+        """
+        Move the center of the aperture. 
+
+        Parameters:
+        -----------
+        coordinates: Array, meters 
+            The paraxial coordinates of the `Wavefront`.
+
+        Returns:
+        --------
+        coordinates: Array, meters
+            The translated coordinate system. 
+        """
         return coordinates - self.get_centre().reshape((2, 1, 1))
 
 
-
-    def _soften(self, distances: Array) -> Array:
+    def _soften(self: Layer, distances: Array) -> Array:
         """
         Softens an image so that the hard boundaries are not present. 
 
@@ -95,8 +129,9 @@ class Aperture(eqx.Module, abc.ABC):
 
 
     @abc.abstractmethod
-    def _metric(self, distances: Array) -> Array:
+    def _metric(self: Layer, distances: Array) -> Array:
         """
+        A measure of how far a pixel is from the
         """
 
 
@@ -124,11 +159,12 @@ class Aperture(eqx.Module, abc.ABC):
             self, np.asarray(x).astype(float))
 
 
-    def get_x_offset(self) -> float:
+    def get_x_offset(self: Layer) -> float:
+        
         return self.x_offset
 
 
-    def set_y_offset(self, y : float) -> Layer:
+    def set_y_offset(self: Layer, y : float) -> Layer:
         """
         Parameters
         ----------
@@ -140,17 +176,18 @@ class Aperture(eqx.Module, abc.ABC):
             self, np.asarray(y).astype(float))
 
 
-    def get_y_offset(self) -> float:
+    def get_y_offset(self: Layer) -> float:
         """
         Returns:
         --------
         y_offset: float, meters
-            
+            The y centre of the aperture relative to the optical
+            axis. 
         """
         return self.y_offset
 
 
-    def __call__(self, parameters : dict) -> dict:
+    def __call__(self: Layer, parameters : dict) -> dict:
         """
         Apply the aperture to an incoming wavefront.
 
@@ -174,14 +211,15 @@ class Aperture(eqx.Module, abc.ABC):
         parameters["Wavefront"] = wavefront
         return parameters
 
-    def largest_extent(self, coordinates : Tensor) -> float:
+
+    def largest_extent(self, coordinates : Array) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre. For inherited classes, consider implementing analytically for speed.
 
         Parameters
         ----------
-        coordinates : Tensor
+        coordinates : Array
             The cartesian coordinates to generate the hexikes on.
             The dimensions of the tensor should be `(2, npix, npix)`.
             where the leading axis is the x and y dimensions.  
@@ -192,39 +230,22 @@ class Aperture(eqx.Module, abc.ABC):
             The maximum distance from centre to edge of aperture
         """
 
-        aperture = self._aperture(coordinates)
 
-        #TODO: check between here and basis function where the flipping in y axis should go
-        coordinates = coordinates.at[1].set(coordinates[1][::-1,:])# have to flip in y dir for meshgrid to cartesian
-
-
-        x_offset = self.get_x_offset()
-        y_offset = self.get_y_offset()
-
-
-        x_coords_of_app = coordinates[0][aperture > 0.5] - x_offset
-        y_coords_of_app = coordinates[1][aperture > 0.5] - y_offset 
-
-        trans_rho = dLux.utils.cartesian_to_polar(np.array([x_coords_of_app, y_coords_of_app]))[0]
-        largest_extent = np.max(trans_rho)
-
-        return largest_extent
-
-    def compute_aperture_normalised_coordinates(self, coordinates : Tensor) -> Array:
+    def compute_aperture_normalised_coordinates(self, coordinates : Array) -> Array:
         """
         Shift a set of wavefront coodinates to be centered on the aperture and scaled such that
         the radial distance is 1 to the edge of the aperture, returned in polar form
 
         Parameters
         ----------
-        coordinates : Tensor
+        coordinates : Array
             The cartesian coordinates to generate the aperture on.
             The dimensions of the tensor should be `(2, npix, npix)`.
             where the leading axis is the x and y dimensions.  
         
         Returns
         -------
-        coordinates : Tensor
+        coordinates : Array
             the radial coordinates centered on the centre of the aperture and scaled such that they are 1
             at the maximum extent of the aperture
             The dimensions of the tensor are be `(2, npix, npix)`
@@ -349,10 +370,23 @@ class CircularAperture(Aperture):
         coordinates = dLux.utils.cartesian_to_polar(coordinates)[0]
         return self._soften(- coordinates + self.radius)
 
-    def largest_extent(self, coordinates : Tensor) -> float:
+
+    def largest_extent(self, coordinates : Array) -> float:
         return self.radius
 
+
 class RotatableAperture(Aperture):
+    """
+    An abstract class that is used to represent an aperture 
+    that does not have radial symmetry. This class can be 
+    used to learn rotation of the apertures. 
+
+    Parameters:
+    -----------
+    theta: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
+    """
     theta: float
 
     def __init__(self, x_offset, y_offset, theta, occulting, softening):
@@ -360,21 +394,21 @@ class RotatableAperture(Aperture):
         self.theta = np.asarray(theta).astype(float)
 
 
-    def _rotate(self, coordinates: Tensor) -> Tensor:
+    def _rotate(self, coordinates: Array) -> Tensor:
         """
         Rotate the coordinate system by a pre-specified amount,
         `self._theta`
 
         Parameters
         ----------
-        coordinates : Tensor
+        coordinates : Array
             A `(2, npix, npix)` representation of the coordinate 
             system. The leading dimensions specifies the x and then 
             the y coordinates in that order. 
 
         Returns
         -------
-        coordinates : Tensor
+        coordinates : Array
             The rotated coordinate system. 
         """
         x_coordinates, y_coordinates = coordinates[0], coordinates[1]
@@ -444,7 +478,7 @@ class RectangularAperture(RotatableAperture):
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
-    def largest_extent(self, coordinates: Tensor) -> float:
+    def largest_extent(self, coordinates: Array) -> float:
         return np.hypot(np.array([self.length, self.width]))
 
 
@@ -503,7 +537,7 @@ class SquareAperture(RotatableAperture):
         return x_mask * y_mask
 
 
-    def largest_extent(self, coordinates: Tensor) -> float:
+    def largest_extent(self, coordinates: Array) -> float:
         return np.sqrt(2) * self.width / 2.
 
 class CompoundAperture(eqx.Module):

@@ -1,5 +1,4 @@
-
-class HexagonalAperture(Aperture):
+class HexagonalAperture(RotableAperture):
     """
     Generate a hexagonal aperture, parametrised by rmax. 
     
@@ -13,8 +12,13 @@ class HexagonalAperture(Aperture):
     rmax : float
 
 
-    def __init__(self : Layer, x_offset : float, y_offset : float, 
-            theta : float, phi : float, rmax : float) -> Layer:
+    def __init__(self   : Layer, 
+            x_offset    : float, 
+            y_offset    : float, 
+            theta       : float, 
+            rmax        : float,
+            softening   : bool,
+            occulting   : bool) -> Layer:
         """
         Parameters
         ----------
@@ -27,15 +31,16 @@ class HexagonalAperture(Aperture):
             away from the positive x-axis. Due to the symmetry of 
             ring shaped apertures this will not change the final 
             shape and it is recomended that it is just set to zero.
-        phi : float, radians
-            The rotation of the y-axis away from the vertical and 
-            torward the negative x-axis measured from the vertical.
         rmax : float, meters
             The distance from the center of the hexagon to one of
             the vertices. . 
+        softening: bool
+            True if the aperture is soft edged else False.
+        occulting: bool
+            True is the aperture is occulting else False. An occulting 
+            Aperture is zero inside and one outside. 
         """
-        super().__init__(npix, x_offset, y_offset, theta, phi, 
-            magnification, pixel_scale)
+        super().__init__(x_offset, y_offset, theta, rmax, softening, occulting)
         self.rmax = np.asarray(rmax).astype(float)
 
 
@@ -50,10 +55,15 @@ class HexagonalAperture(Aperture):
         return self.rmax
 
 
-    def _aperture(self : Layer) -> Array:
+    def _aperture(self : Layer, coords: Array) -> Array:
         """
         Generates an array representing the hard edged hexagonal 
         aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The coordinates over which to generate the aperture. 
 
         Returns
         -------
@@ -63,11 +73,7 @@ class HexagonalAperture(Aperture):
             respectively.
         """
         x_centre, y_centre = self.get_centre()
-        number_of_pixels = self.get_npix()
         maximum_radius = self.get_rmax()
-
-        x, y = get_pixel_positions(number_of_pixels, -x_centre,
-            -y_centre)
 
         x *= 2 / number_of_pixels
         y *= 2 / number_of_pixels
@@ -85,4 +91,5 @@ class HexagonalAperture(Aperture):
 
         hexagon = rectangle | left_triangle | right_triangle
         return np.asarray(hexagon).astype(float)
+
 
