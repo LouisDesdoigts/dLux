@@ -294,10 +294,10 @@ class Aperture(eqx.Module, abc.ABC):
 
         # This is the translation and scaling of the normalised coordinate system. 
         # translate and then multiply by 1 / largest_extent.
-        trans_coords = coordinates - np.array([x_offset, y_offset]).reshape((2, 1, 1))
+        trans_coords = self._translate(coordinates)
         rad_trans_coords = dLux.utils.cartesian_to_polar(trans_coords)
         coordinates = rad_trans_coords.at[0].mul(1. / self.largest_extent(coordinates))
-
+`
         return coordinates
 
 
@@ -309,20 +309,35 @@ class AnnularAperture(Aperture):
 
     Attributes
     ----------
+    x_offset : float, meters
+        The centre of the coordinate system along the x-axis.
+    y_offset : float, meters
+        The centre of the coordinate system along the y-axis. 
     rmax : float
         The proportion of the pixel vector that is contained within
         the outer ring of the aperture.
     rmin : float
         The proportion of the pixel vector that is contained within
         the inner ring of the aperture. 
+    softening: bool 
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
     """
     rmin : float
     rmax : float
 
 
-    def __init__(self, x_offset : float,  y_offset : float, 
-            rmax : float, rmin : float, occulting: bool, 
-            softening: bool) -> Layer:
+    def __init__(self   : Layer, 
+            x_offset    : float,  
+            y_offset    : float, 
+            rmax        : float, 
+            rmin        : float, 
+            occulting   : bool, 
+            softening   : bool) -> Layer:
         """
         Parameters
         ----------
@@ -330,17 +345,24 @@ class AnnularAperture(Aperture):
             The centre of the coordinate system along the x-axis.
         y_offset : float, meters
             The centre of the coordinate system along the y-axis. 
-       rmax : float, meters
+        rmax : float, meters
             The outer radius of the annular aperture. 
         rmin : float, meters
             The inner radius of the annular aperture. 
+        softening: bool 
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool 
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
         """
         super().__init__(x_offset, y_offset, occulting, softening)
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
 
 
-    def _metric(self, coordinates: Array) -> Array:
+    def _metric(self: Layer, coordinates: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -366,14 +388,29 @@ class CircularAperture(Aperture):
 
     Parameters
     ----------
+    x_offset : float, meters
+        The centre of the coordinate system along the x-axis.
+    y_offset : float, meters
+        The centre of the coordinate system along the y-axis. 
+    softening: bool 
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
     radius: float, meters
         The radius of the opening. 
     """
     radius: float
    
  
-    def __init__(self, x_offset: float, y_offset: float,
-            radius: float, occulting: bool, softening: float) -> Array:
+    def __init__(self   : Layer, 
+            x_offset    : float,
+            y_offset    : float,
+            radius      : float, 
+            occulting   : bool, 
+            softening   : bool) -> Array:
         """
         Parameters
         ----------
@@ -383,6 +420,13 @@ class CircularAperture(Aperture):
             The centre of the coordinate system along the y-axis. 
         radius: float, meters 
             The radius of the aperture.
+        softening: bool 
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool 
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
         """
         super().__init__(x_offset, y_offset, occulting, softening)
         self.radius = np.asarray(radius).astype(float)
@@ -407,7 +451,23 @@ class CircularAperture(Aperture):
         return self._soften(- coordinates + self.radius)
 
 
-    def largest_extent(self, coordinates : Array) -> float:
+    def largest_extent(self: Layer, coordinates : Array) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre.
+
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        largest_extent : float
+            The maximum distance from centre to edge of aperture
+        """
         return self.radius
 
 
@@ -419,18 +479,53 @@ class RotatableAperture(Aperture):
 
     Parameters:
     -----------
+    x_offset : float, meters
+        The centre of the coordinate system along the x-axis.
+    y_offset : float, meters
+        The centre of the coordinate system along the y-axis. 
+    softening: bool 
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
     theta: float, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
-    theta: float
+    theta: float    
 
-    def __init__(self, x_offset, y_offset, theta, occulting, softening):
+
+    def __init__(self   : Layer, 
+            x_offset    : float, 
+            y_offset    : float, 
+            theta       : float, 
+            occulting   : bool, 
+            softening   : bool) -> Layer:
+        """
+        Parameters:
+        -----------
+        x_offset : float, meters
+            The centre of the coordinate system along the x-axis.
+        y_offset : float, meters
+            The centre of the coordinate system along the y-axis. 
+        softening: bool 
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool 
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        theta: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        """
         super().__init__(x_offset, y_offset, occulting, softening)
         self.theta = np.asarray(theta).astype(float)
 
 
-    def _rotate(self, coordinates: Array) -> Tensor:
+    def _rotate(self: Layer, coordinates: Array) -> Tensor:
         """
         Rotate the coordinate system by a pre-specified amount,
         `self._theta`
@@ -461,6 +556,20 @@ class RectangularAperture(RotatableAperture):
 
     Parameters
     ----------
+    x_offset : float, meters
+        The centre of the coordinate system along the x-axis.
+    y_offset : float, meters
+        The centre of the coordinate system along the y-axis. 
+    softening: bool 
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    theta: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
     length: float, meters
         The length of the aperture in the y-direction. 
     width: float, meters
@@ -470,9 +579,14 @@ class RectangularAperture(RotatableAperture):
     width: float
 
 
-    def __init__(self, x_offset: float, y_offset: float,
-            theta: float, length: float, width: float, occulting: bool, 
-            softening: bool): 
+    def __init__(self   : Layer, 
+            x_offset    : float, 
+            y_offset    : float,
+            theta       : float, 
+            length      : float, 
+            width       : float, 
+            occulting   : bool, 
+            softening   : bool) -> Layer: 
         """
         Parameters
         ----------
@@ -485,6 +599,13 @@ class RectangularAperture(RotatableAperture):
             away from the positive x-axis. Due to the symmetry of 
             ring shaped apertures this will not change the final 
             shape and it is recomended that it is just set to zero.
+        softening: bool 
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool 
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
         length: float, meters 
             The length of the aperture in the y-direction.
         width: float, meters
@@ -495,7 +616,7 @@ class RectangularAperture(RotatableAperture):
         self.width = np.asarray(width).astype(float)
 
 
-    def _metric(self, coordinates: Array) -> Array:
+    def _metric(self: Layer, coordinates: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -515,6 +636,22 @@ class RectangularAperture(RotatableAperture):
         return x_mask * y_mask
 
     def largest_extent(self, coordinates: Array) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre.
+
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        largest_extent : float
+            The maximum distance from centre to edge of aperture
+        """
         return np.hypot(np.array([self.length, self.width]))
 
 
@@ -525,6 +662,20 @@ class SquareAperture(RotatableAperture):
 
     Parameters
     ----------
+    x_offset : float, meters
+        The centre of the coordinate system along the x-axis.
+    y_offset : float, meters
+        The centre of the coordinate system along the y-axis. 
+    softening: bool 
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    theta: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
     width: float, meters
         The side length of the square. 
     """
