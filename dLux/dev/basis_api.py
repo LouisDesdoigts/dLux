@@ -24,7 +24,7 @@ zernikes: list = [
 ]
 
 
-class ApertureWithBasis(dl.OpticalLayer, abc.ABC):
+class AbberatedAperture(dl.OpticalLayer, abc.ABC):
     """
     An abstract base class representing an `Aperture` defined
     with a basis. The basis is a set of polynomials that are 
@@ -56,63 +56,13 @@ class ApertureWithBasis(dl.OpticalLayer, abc.ABC):
     coeffs: Array
 
 
+    @abc.abstractmethod
     def __init__(self, 
             noll_inds: List[int],
             aperture: Aperture, 
             coeffs: Array) -> Layer:
         """
         """
-        raise NotImplementedError("The functions referenced" + \
-            "by `noll_inds` depend on the aperture. This is" + \
-            "an *abstract* class and should not be substantianed.")
-
-class HardCodedLowOrderZernikeBasisAndAperture(eqx.Module):
-    """
-    A selection of the low order (< 10) zernike terms. 
-    This class is the fastest when it comes to applying 
-    the basis terms. 
-
-    Parameters:
-    -----------
-    zernikes: Array
-        An array of `jit` compiled zernike basis functions 
-        that operate on a set of coordinates. In particular 
-        these coordinates correspond to a normalised set 
-        of coordinates that are centered at the the centre 
-        of the circular aperture with 1. occuring along the 
-        radius. 
-    coeffs: Array
-        The coefficients of the Zernike terms. 
-    aperture: Layer
-        Must be an instance of `CircularAperture`. This 
-        is applied alongside the basis. 
-    """
-    zernikes: Array
-    coeffs: Array
-    aperture: Layer
-
-
-    def __init__(self, noll_inds: list, coeffs: list, aperture: list):
-        """
-        Parameters:
-        -----------
-        noll_inds: Array 
-            The noll indices of the zernikes that are to be mapped 
-            over the aperture.
-        coeffs: Array 
-            The coefficients associated with the zernikes. These 
-            should be ordered by the noll index of the zernike 
-            that they refer to.
-        aperture: Layer
-            A `CircularAperture` within which the aberrations are 
-            being studied. 
-        """
-        self.zernikes = [zernikes[ind] for ind in noll_inds]
-        self.coeffs = np.asarray(coeffs).astype(float)
-        self.aperture = aperture
-
-        assert len(noll_inds) == len(coeffs)
-        assert isinstance(aperture, dl.CircularAperture)
 
 
     def __call__(self, params_dict: dict) -> dict:
@@ -130,14 +80,106 @@ class HardCodedLowOrderZernikeBasisAndAperture(eqx.Module):
             A dictionary containing the key "wavefront".
         """
         wavefront: object = params_dict["Wavefront"]
-        cart_coords: list = wavefront.pixel_positions()
-        pol_coords: list = dl.cartesian_to_polar(car_coords)
-        rho: list = pol_coords[0]
-        theta: list = pol_coords[1]
-        basis: list = np.stack([z(rho, theta) for z in zernikes])
-        aperture: Array = self.aperture._aperture(cart_coords)
-        opd: list = np.dot(basis.T, self.coeffs) * aperture
+        coords: Array = wavefront.pixel_positions()
+        opd: Array = self._opd(coords)
+        aperture: Array = self.aperture._aperture(coords)
         params_dict["Wavefront"] = wavefront\
             .add_opd(opd)\
             .multiply_amplitude(aperture)
         return params_dict
+
+
+class AberratedCircularAperture(AberratedAperture):
+    """
+    Parameters:
+    -----------
+    zernikes: Array
+        An array of `jit` compiled zernike basis functions 
+        that operate on a set of coordinates. In particular 
+        these coordinates correspond to a normalised set 
+        of coordinates that are centered at the the centre 
+        of the circular aperture with 1. occuring along the 
+        radius. 
+    coeffs: Array
+        The coefficients of the Zernike terms. 
+    aperture: Layer
+        Must be an instance of `CircularAperture`. This 
+        is applied alongside the basis. 
+    """
+    zernikes: Array
+    coeffs: Array
+    aperture: CircularAperture
+
+
+    def __init__(self   : Layer, 
+            noll_inds   : list, 
+            coeffs      : list, 
+            aperture    : CircularAperture):
+        """
+        Parameters:
+        -----------
+        noll_inds: Array 
+            The noll indices of the zernikes that are to be mapped 
+            over the aperture.
+        coeffs: Array 
+            The coefficients associated with the zernikes. These 
+            should be ordered by the noll index of the zernike 
+            that they refer to.
+        aperture: CircularAperture
+            A `CircularAperture` within which the aberrations are 
+            being studied. 
+        """
+        self.zernikes = [zernikes[ind] if ind < 10 
+            for ind in noll_inds else jth_zernike(ind)]
+        self.coeffs = np.asarray(coeffs).astype(float)
+        self.aperture = aperture
+
+        assert len(noll_inds) == len(coeffs)
+        assert isinstance(aperture, dl.CircularAperture)
+
+
+    def _basis(self: Layer, coords: Array) -> Array:
+        """
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+
+        Returns:
+        --------
+        basis: Array
+            The basis vectors associated with the aperture. 
+            These vectors are stacked in a tensor that is,
+            `(nterms, npix, npix)`. Normally the basis is 
+            cropped to be just on the aperture however, this 
+            step is not necessary except for in visualisation. 
+            It has been removed to save some time in the 
+            calculations. 
+        """
+        pol_coords: list = dl.cartesian_to_polar(coords)
+        rho: list = pol_coords[0]
+        theta: list = pol_coords[1]
+        basis: list = np.stack([z(rho, theta) for z in zernikes])
+        return basis
+
+
+    def _opd(self: Layer, coords: Array) -> Array:
+        """
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+
+        Returns:
+        --------
+        opd: Array
+            The optical path difference associated with much of 
+            the path. 
+        """
+        basis: Array = self._basis(coords)
+        opd: Array = np.dot(basis.T, self.coeffs)
+        return opd
+
+
