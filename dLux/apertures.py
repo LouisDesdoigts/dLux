@@ -877,35 +877,22 @@ class HexagonalAperture(RotatableAperture):
         # six lines that are perpendicular to the lines 
         # along multiples of pi on three.   
         coords: Array = self._rotate(self._translate(coords))
-        theta: Array = np.linspace(0, 2 * np.pi, 6, endpoint=False).reshape((6, 1, 1))
+        theta: Array = np.linspace(0, 2 * np.pi, 6, endpoint=False).reshape((6, 1, 1)) + np.pi / 6.
         rmax: float = self.rmax
 
-        m1: Array = np.tan(theta).reshape((6, 1, 1))
-        m2: Array = (-1. / np.tan(theta)).reshape((6, 1, 1))
-
-        # (x1, y1) is in the centre of the segment, whereas the 
-        # (x2, y2) is some point in the coordinate system and 
-        # (x3, y3) is the closest point on the edge to (x2, y2).
-        # See the following figure,
-        #        _
-        #     _-- |
-        #  _--    | (x1, y1)
-        # <_------o 
-        #   --_   | (x3, y3)
-        #      --_o- - - - - -o (x2, y2)
+        m: Array = (-1. / np.tan(theta)).reshape((6, 1, 1))
         
         x1: Array = (rmax * np.cos(theta)).reshape((6, 1, 1))
         y1: Array = (rmax * np.sin(theta)).reshape((6, 1, 1))
         
-        x2: Array = np.tile(coords[0], (6, 1, 1))
-        y2: Array = np.tile(coords[1], (6, 1, 1))
+        x: Array = np.tile(coords[0], (6, 1, 1))
+        y: Array = np.tile(coords[1], (6, 1, 1))
+        
+        dist: Array = (y - y1 - m * (x - x1)) / np.sqrt(1 + m ** 2)
+        dist: Array = (1. - 2. * (theta <= np.pi)) * dist
+        lines: Array = self._soften(dist)
 
-        x3: Array = (y2 + m2 * x2 - y1 - m1 * x1) / (m2 - m1)
-        y3: Array = m1 * (x3 - x1) + y1
-
-        dist: Array = np.sqrt((x3 - x2) ** 2 + (y3 - y2) ** 2)
-
-        return self._soften(dist).prod(axis=0)
+        return lines.prod(axis=0)
 
 
 class CompositeAperture(eqx.Module, abc.ABC):
