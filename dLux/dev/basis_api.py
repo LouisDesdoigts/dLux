@@ -237,6 +237,35 @@ def jth_zernike(j: int) -> list:
     return _jth_zernike 
 
 
+# So the current problem is that I need to find some way of passing 
+# rmax into the hexike dynamically (do I). Haha just worked it out,
+# I normalise the corrdinates first hence I don't need rmax. 
+def jth_hexike(j: int) -> callable:
+    """
+    The jth Hexike as a function. 
+
+    Parameters:
+    -----------
+    j: int
+        The noll index of the requested zernike. 
+
+    Returns:
+    --------
+    hexike: callable
+        A function representing the jth hexike that is evaluated 
+        on a cartesian coordinate grid. 
+    """
+    _jth_zernike = jth_zernike(j)
+
+    def _jth_hexike(rho: Array, phi: Array) -> Array:
+        wedge = np.floor((phi + np.pi / 3.) / (2. * np.pi / 3.))
+        u_alpha = phi - wedge(phi) * (2. * np.pi / 3.)
+        r_alpha = np.cos(np.pi / 3.) / np.cos(u_alpha)
+        return 1 / r_alpha * _jth_zernike(rho / r_alpha, phi)
+
+    return _jth_hexike
+
+
 class AbberatedAperture(dl.OpticalLayer, abc.ABC):
     """
     An abstract base class representing an `Aperture` defined
@@ -428,9 +457,81 @@ class AberratedCircularAperture(AberratedAperture):
         pol_coords: list = dl.cartesian_to_polar(coords)
         rho: list = pol_coords[0]
         theta: list = pol_coords[1]
-        basis: list = np.stack([z(rho, theta) for z in zernikes])
+        basis: list = np.stack([z(rho, theta) for z in self.zernikes])
         return basis
 
 
-class AberratedHexagonalAperture()
+class AberratedHexagonalAperture(AberratedAperture):
+    """
+    Parameters:
+    -----------
+    Hexikes: Array
+        An array of `jit` compiled hexike basis functions 
+        that operate on a set of coordinates. In particular 
+        these coordinates correspond to a normalised set 
+        of coordinates that are centered at the the centre 
+        of the circular aperture with 1. occuring along the 
+        radius. 
+    coeffs: Array
+        The coefficients of the Hexike terms. 
+    aperture: Layer
+        Must be an instance of `HexagonalAperture`. This 
+        is applied alongside the basis. 
+    """
+    hexikes: Array
+    coeffs: Array
+    aperture: HexagonalAperture
+
+
+    def __init__(self   : Layer, 
+            noll_inds   : list, 
+            coeffs      : list, 
+            aperture    : HexagonalAperture):
+        """
+        Parameters:
+        -----------
+        noll_inds: Array 
+            The noll indices of the zernikes that are to be mapped 
+            over the aperture.
+        coeffs: Array 
+            The coefficients associated with the zernikes. These 
+            should be ordered by the noll index of the zernike 
+            that they refer to.
+        aperture: HexagonalAperture
+            A `HexagonalAperture` within which the aberrations are 
+            being studied. 
+        """
+
+        self.hexikes = [jth_hexike(j) for j in noll_indices]
+        self.coeffs = np.asarray(coeffs).astype(float)
+        self.aperture = aperture
+
+        assert len(noll_inds) == len(coeffs)
+        assert isinstance(aperture, dl.HexagonalAperture)
+
+
+    def _basis(self: Layer, coords: Array) -> Array:
+        """
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+
+        Returns:
+        --------
+        basis: Array
+            The basis vectors associated with the aperture. 
+            These vectors are stacked in a tensor that is,
+            `(nterms, npix, npix)`. Normally the basis is 
+            cropped to be just on the aperture however, this 
+            step is not necessary except for in visualisation. 
+            It has been removed to save some time in the 
+            calculations. 
+        """
+        pol_coords: list = dl.cartesian_to_polar(coords)
+        rho: list = pol_coords[0]
+        theta: list = pol_coords[1]
+        basis: list = np.stack([h(rho, theta) for h in self.hexikes])
+        return basis
 
