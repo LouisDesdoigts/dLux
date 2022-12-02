@@ -9,168 +9,88 @@ mpl.rcParams["image.cmap"] = "inferno"
 pixels = 128
 coordinates = dl.utils.get_pixel_coordinates(pixels, 2. / pixels)
 
-# Uniform Spider Testing
-occ_soft_circ_ap = dl.CircularAperture(0., 0., 1., True, True)
-occ_hard_circ_ap = dl.CircularAperture(0., 0., 1., True, False)
-soft_circ_ap = dl.CircularAperture(0., 0., 1., False, True)
-hard_circ_ap = dl.CircularAperture(0., 0., 1., False, False)
-x_trans_circ_ap = dl.CircularAperture(.5, 0., 1., False, False)
-y_trans_circ_ap = dl.CircularAperture(0., .5, 1., False, False)
+# Circular Apertures
+circ_aps = {
+    "Occ. Soft Circ. Ap.": dl.CircularAperture(0., 0., 1., True, True),
+    "Occ. Hard Circ. Ap.": dl.CircularAperture(0., 0., 1., True, False),
+    "Soft Circ. Ap.": dl.CircularAperture(0., 0., 1., False, True),
+    "Hard Circ. Ap.": dl.CircularAperture(0., 0., 1., False, False),
+    "Trans. X Circ. Ap.": dl.CircularAperture(.5, 0., 1., False, False),
+    "Trans. Y Circ. Ap.": dl.CircularAperture(0., .5, 1., False, False)
+}
 
-fig, axes = plt.subplots(2, 3, figsize=(3*4, 2*3))
+# Annular Apertures
+ann_aps = {
+    "Occ. Soft. Circ Ap.": dl.AnnularAperture(0., 0., 1., .5, True, True),
+    "Occ. Hard. Circ Ap.": dl.AnnularAperture(0., 0., 1., .5, True, False),
+    "Soft Circ. Ap.": dl.AnnularAperture(0., 0., 1., .5, False, True),
+    "Hard Circ. Ap.": dl.AnnularAperture(0., 0., 1., .5, False, False),
+    "Trans. X Circ. Ap.": dl.AnnularAperture(.5, 0., 1., .5, False, False),
+    "Trans. Y Circ. Ap.": dl.AnnularAperture(0., .5, 1., .5, False, False)
+}
 
-axes[0][0].set_title("Occ. Soft Circ. Ap.")
-axes[0][0].set_xticks([])
-axes[0][0].set_yticks([])
-_map = axes[0][0].imshow(occ_soft_circ_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][0])
-
-axes[0][1].set_title("Occ. Hard Circ. Ap.")
-axes[0][1].set_xticks([])
-axes[0][1].set_yticks([])
-_map = axes[0][1].imshow(occ_hard_circ_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][1])
-
-axes[0][2].set_title("Soft Circ. Ap.")
-axes[0][2].set_xticks([])
-axes[0][2].set_yticks([])
-_map = axes[0][2].imshow(soft_circ_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][2])
-
-
-axes[1][0].set_title("Hard Circ. Ap.")
-axes[1][0].set_xticks([])
-axes[1][0].set_yticks([])
-_map = axes[1][0].imshow(hard_circ_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[1][0])
-
-axes[1][1].set_title("Trans. x Circ. Ap.")
-axes[1][1].set_xticks([])
-axes[1][1].set_yticks([])
-_map = axes[1][1].imshow(x_trans_circ_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[1][1])
-
-axes[1][2].set_title("Trans. y Circ. Ap.")
-axes[1][2].set_xticks([])
-axes[1][2].set_yticks([])
-_map = axes[1][2].imshow(y_trans_circ_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[1][2])
-plt.show()
-
-
-occ_soft_sq_ap = dl.SquareAperture(0., 0., 0., 1., True, True)
-occ_hard_sq_ap = dl.SquareAperture(0., 0., 0., 1., True, False)
-soft_sq_ap = dl.SquareAperture(0., 0., 0., 1., False, True)
-hard_sq_ap = dl.SquareAperture(0., 0., 0., 1., False, False)
-x_trans_sq_ap = dl.SquareAperture(.5, 0., 0., 1., False, False)
-y_trans_sq_ap = dl.SquareAperture(0., .5, 0., 1., False, False)
-rot_sq_ap = dl.SquareAperture(0., 0., np.pi / 4., 1., False, False)
-
-fig, axes = plt.subplots(2, 4, figsize=(4*4, 2*3))
-
-axes[0][0].set_title("Occ. Soft Sq. Ap.")
-axes[0][0].set_xticks([])
-axes[0][0].set_yticks([])
-_map = axes[0][0].imshow(occ_soft_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][0])
-
-axes[0][1].set_title("Occ. Hard Sq. Ap.")
-axes[0][1].set_xticks([])
-axes[0][1].set_yticks([])
-_map = axes[0][1].imshow(occ_hard_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][1])
-
-axes[0][2].set_title("Soft Sq. Ap.")
-axes[0][2].set_xticks([])
-axes[0][2].set_yticks([])
-_map = axes[0][2].imshow(soft_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][2])
-
-
-axes[1][0].set_title("Hard Sq. Ap.")
-axes[1][0].set_xticks([])
-axes[1][0].set_yticks([])
-_map = axes[1][0].imshow(hard_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[1][0])
-
-axes[1][1].set_title("Trans. x Sq. Ap.")
-axes[1][1].set_xticks([])
-axes[1][1].set_yticks([])
-_map = axes[1][1].imshow(x_trans_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[1][1])
-
-axes[1][2].set_title("Trans. y Sq. Ap.")
-axes[1][2].set_xticks([])
-axes[1][2].set_yticks([])
-_map = axes[1][2].imshow(y_trans_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[1][2])
-
-axes[0][3].set_title("Rot. Sq. Ap.")
-axes[0][3].set_xticks([])
-axes[0][3].set_yticks([])
-_map = axes[0][3].imshow(rot_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][3])
-
-axes[1][3].set_xticks([])
-axes[1][3].set_yticks([])
-axes[1][3].axis("off")
-plt.show()
+# Square Apertures
+sq_aps = {
+    "Occ. Soft Sq. Ap.": dl.SquareAperture(0., 0., 0., 1., True, True),
+    "Occ. Hard Sq. Ap.": dl.SquareAperture(0., 0., 0., 1., True, False),
+    "Soft Sq. Ap.": dl.SquareAperture(0., 0., 0., 1., False, True),
+    "Hard Sq. Ap.": dl.SquareAperture(0., 0., 0., 1., False, False),
+    "Trans. x Sq. Ap.": dl.SquareAperture(.5, 0., 0., 1., False, False),
+    "Trans. y Sq. Ap.": dl.SquareAperture(0., .5, 0., 1., False, False),
+    "Rot. Sq. Ap.": dl.SquareAperture(0., 0., np.pi / 4., 1., False, False)
+}
 
 # Rectangular Aperture
-occ_soft_sq_ap = dl.SquareAperture(0., 0., 0., 1., True, True)
-occ_hard_sq_ap = dl.SquareAperture(0., 0., 0., 1., True, False)
-soft_sq_ap = dl.SquareAperture(0., 0., 0., 1., False, True)
-hard_sq_ap = dl.SquareAperture(0., 0., 0., 1., False, False)
-x_trans_sq_ap = dl.SquareAperture(.5, 0., 0., 1., False, False)
-y_trans_sq_ap = dl.SquareAperture(0., .5, 0., 1., False, False)
-rot_sq_ap = dl.SquareAperture(0., 0., np.pi / 4., 1., False, False)
+rect_aps = {
+    "Occ. Soft. Rect. Ap.": dl.RectangularAperture(0., 0., 0., 1., .5, True, True),
+    "Occ. Hard. Rect. Ap.": dl.RectangularAperture(0., 0., 0., 1., .5, True, False),
+    "Soft Rect. Ap.": dl.RectangularAperture(0., 0., 0., 1., .5, False, True),
+    "Hard Rect. Ap.": dl.RectangularAperture(0., 0., 0., 1., .5, False, False),
+    "Trans x Rect. Ap.": dl.RectangularAperture(.5, 0., 0., 1., .5, False, False),
+    "Trans y Rect. Ap.": dl.RectangularAperture(0., .5, 0., 1., .5, False, False),
+    "Rot. Rect. Ap.": dl.RectangularAperture(0., 0., np.pi / 4., 1., .5, False, False)
+}
 
-fig, axes = plt.subplots(2, 4, figsize=(4*4, 2*3))
+# Hexagonal Apertures
+hex_aps = {
+    "Occ. Soft Sq. Ap.": dl.HexagonalAperture(0., 0., 0., 1., True, True),
+    "Occ. Hard Sq. Ap.": dl.HexagonalAperture(0., 0., 0., 1., True, False),
+    "Soft Sq. Ap.": dl.HexagonalAperture(0., 0., 0., 1., False, True),
+    "Hard Sq. Ap.": dl.HexagonalAperture(0., 0., 0., 1., False, False),
+    "Trans. x Sq. Ap.": dl.HexagonalAperture(.5, 0., 0., 1., False, False),
+    "Trans. y Sq. Ap.": dl.HexagonalAperture(0., .5, 0., 1., False, False),
+    "Rot. Sq. Ap.": dl.HexagonalAperture(0., 0., np.pi / 4., 1., False, False)
+}
 
-axes[0][0].set_title("Occ. Soft Sq. Ap.")
-axes[0][0].set_xticks([])
-axes[0][0].set_yticks([])
-_map = axes[0][0].imshow(occ_soft_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][0])
+# Apertures
+aps = {
+    "Circ. Aps.": circ_aps,
+    "Ann. Aps.": ann_aps,
+    "Rect. Aps.": rect_aps,
+    "Sq. Aps.": sq_aps,
+    "Hex. Aps.": hex_aps
+}
 
-axes[0][1].set_title("Occ. Hard Sq. Ap.")
-axes[0][1].set_xticks([])
-axes[0][1].set_yticks([])
-_map = axes[0][1].imshow(occ_hard_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][1])
+# The massive plotting code that goes into generating the figure. 
+# So I need to make this more streamlined. I could do this by putting 
+# the apertures in a list that I then iterated over. That sounds hella 
+# lit. You know what? Mayber I do each one along a line as well with 
+# subfigures they should all be centered. Alternatively I could 
+# just do this with a massive grid of subplots. 
+fig = plt.figure()
+subfigs = fig.subfigures(5, 1)
 
-axes[0][2].set_title("Soft Sq. Ap.")
-axes[0][2].set_xticks([])
-axes[0][2].set_yticks([])
-_map = axes[0][2].imshow(soft_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][2])
+for subfig, ap in zip(subfigs, aps):
+    _aps = aps[ap]
+    num_aps = len(_aps)
 
+    axes = subfig.subplots(1, num_aps)
+    
+    for i, ap in enumerate(_aps):
+        axes[i].set_title(ap)
+        axes[i].set_xticks([])
+        axes[i].set_yticks([])
+        _map = axes[i].imshow(_aps[ap]._aperture(coordinates))
+        subfig.colorbar(_map, ax=axes[i])
 
-axes[1][0].set_title("Hard Sq. Ap.")
-axes[1][0].set_xticks([])
-axes[1][0].set_yticks([])
-_map = axes[1][0].imshow(hard_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[1][0])
-
-axes[1][1].set_title("Trans. x Sq. Ap.")
-axes[1][1].set_xticks([])
-axes[1][1].set_yticks([])
-_map = axes[1][1].imshow(x_trans_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[1][1])
-
-axes[1][2].set_title("Trans. y Sq. Ap.")
-axes[1][2].set_xticks([])
-axes[1][2].set_yticks([])
-_map = axes[1][2].imshow(y_trans_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[1][2])
-
-axes[0][3].set_title("Rot. Sq. Ap.")
-axes[0][3].set_xticks([])
-axes[0][3].set_yticks([])
-_map = axes[0][3].imshow(rot_sq_ap._aperture(coordinates))
-fig.colorbar(_map, ax=axes[0][3])
-
-axes[1][3].set_xticks([])
-axes[1][3].set_yticks([])
-axes[1][3].axis("off")
 plt.show()

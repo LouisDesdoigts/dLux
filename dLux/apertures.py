@@ -15,7 +15,7 @@ Vector = TypeVar("Vector")
 
 __all__ = ["Aperture", "CompoundAperture", "SquareAperture", 
     "RectangularAperture", "CircularAperture", "AnnularAperture",
-    "MultiAperture", "RotatableAperture"]
+    "MultiAperture", "RotatableAperture", "HexagonalAperture"]
 
 
 class Aperture(eqx.Module, abc.ABC):
@@ -380,6 +380,26 @@ class AnnularAperture(Aperture):
         coordinates = dLux.utils.cartesian_to_polar(coordinates)[0]
         return self._soften(coordinates - self.rmin) * \
             self._soften(- coordinates + self.rmax)
+
+
+    def largest_extent(self: Layer) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre.
+
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        largest_extent : float
+            The maximum distance from centre to edge of aperture
+        """
+        return self.rmax
       
 
 class CircularAperture(Aperture):
@@ -635,6 +655,7 @@ class RectangularAperture(RotatableAperture):
         y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
+
     def largest_extent(self, coordinates: Array) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
@@ -753,6 +774,138 @@ class SquareAperture(RotatableAperture):
             The maximum distance from centre to edge of aperture
         """
         return np.sqrt(2) * self.width / 2.
+
+
+# NOTE: This is not yet ready for deployment. The _metric method needs 
+# to be re-written. 
+class HexagonalAperture(RotatableAperture):
+    """
+    Generate a hexagonal aperture, parametrised by rmax. 
+    
+    Attributes
+    ----------
+    rmax : float, meters
+        The infimum of the radii of the set of circles that fully 
+        enclose the hexagonal aperture. In other words the distance 
+        from the centre to one of the vertices. 
+    """
+    rmax : float
+
+
+    def __init__(self   : Layer, 
+            x_offset    : float, 
+            y_offset    : float, 
+            theta       : float, 
+            rmax        : float,
+            softening   : bool,
+            occulting   : bool) -> Layer:
+        """
+        Parameters
+        ----------
+        x_offset : float, meters
+            The centre of the coordinate system along the x-axis.
+        y_offset : float, meters
+            The centre of the coordinate system along the y-axis. 
+        theta : float, radians
+            The rotation of the coordinate system of the aperture 
+            away from the positive x-axis. Due to the symmetry of 
+            ring shaped apertures this will not change the final 
+            shape and it is recomended that it is just set to zero.
+        rmax : float, meters
+            The distance from the center of the hexagon to one of
+            the vertices. . 
+        softening: bool
+            True if the aperture is soft edged else False.
+        occulting: bool
+            True is the aperture is occulting else False. An occulting 
+            Aperture is zero inside and one outside. 
+        """
+        super().__init__(x_offset, y_offset, theta, softening, occulting)
+        self.rmax = np.asarray(rmax).astype(float)
+
+
+    def get_rmax(self: Layer) -> float:
+        """
+        Returns
+        -------
+        max_radius : float, meters
+            The distance from the centre of the hexagon to one of 
+            the vertices.
+        """
+        return self.rmax
+
+
+    def largest_extent(self: Layer) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre.
+
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        largest_extent : float
+            The maximum distance from centre to edge of aperture
+        """
+        return self.rmax
+
+
+    def _metric(self: Layer, coords: Array) -> Array:
+        """
+        Generates an array representing the hard edged hexagonal 
+        aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The coordinates over which to generate the aperture. 
+
+        Returns
+        -------
+        aperture : Array
+            The aperture represented as a binary float array of 0. and
+            1. representing no transmission and transmission 
+            respectively.
+        """
+        # So the challenge is how to make this soft edgeable. 
+        # Well, I know the formula for a line. I could just do 
+        # six lines that are perpendicular to the lines 
+        # along multiples of pi on three.   
+        coords: Array = self._rotate(self._translate(coords))
+        theta: Array = np.linspace(0, 2 * np.pi, 6, endpoint=False).reshape((6, 1, 1))
+        rmax: float = self.rmax
+
+        m1: Array = np.tan(theta).reshape((6, 1, 1))
+        m2: Array = (-1. / np.tan(theta)).reshape((6, 1, 1))
+
+        # (x1, y1) is in the centre of the segment, whereas the 
+        # (x2, y2) is some point in the coordinate system and 
+        # (x3, y3) is the closest point on the edge to (x2, y2).
+        # See the following figure,
+        #        _
+        #     _-- |
+        #  _--    | (x1, y1)
+        # <_------o 
+        #   --_   | (x3, y3)
+        #      --_o- - - - - -o (x2, y2)
+        
+        x1: Array = (rmax * np.cos(theta)).reshape((6, 1, 1))
+        y1: Array = (rmax * np.sin(theta)).reshape((6, 1, 1))
+        
+        x2: Array = np.tile(coords[0], (6, 1, 1))
+        y2: Array = np.tile(coords[1], (6, 1, 1))
+
+        x3: Array = (y2 + m2 * x2 - y1 - m1 * x1) / (m2 - m1)
+        y3: Array = m1 * (x3 - x1) + y1
+
+        dist: Array = np.sqrt((x3 - x2) ** 2 + (y3 - y2) ** 2)
+
+        return self._soften(dist).prod(axis=0)
 
 
 class CompositeAperture(eqx.Module, abc.ABC):
@@ -948,3 +1101,5 @@ class MultiAperture(eqx.Module):
         """
         return np.stack([ap._aperture(coordinates) 
             for ap in self._apertures.values()]).sum(axis=0)
+
+

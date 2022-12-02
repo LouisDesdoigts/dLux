@@ -3,8 +3,12 @@ import jax.numpy as np
 import jax
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import typing 
 
-class HexagonalAperture(RotableAperture):
+Layer = typing.TypeVar("Layer")
+Array = typing.TypeVar("Array")
+
+class HexagonalAperture(dl.RotatableAperture):
     """
     Generate a hexagonal aperture, parametrised by rmax. 
     
@@ -46,7 +50,7 @@ class HexagonalAperture(RotableAperture):
             True is the aperture is occulting else False. An occulting 
             Aperture is zero inside and one outside. 
         """
-        super().__init__(x_offset, y_offset, theta, rmax, softening, occulting)
+        super().__init__(x_offset, y_offset, theta, softening, occulting)
         self.rmax = np.asarray(rmax).astype(float)
 
 
@@ -81,7 +85,7 @@ class HexagonalAperture(RotableAperture):
         return self.rmax
 
 
-    def _aperture(self: Layer, coords: Array) -> Array:
+    def _metric(self: Layer, coords: Array) -> Array:
         """
         Generates an array representing the hard edged hexagonal 
         aperture. 
@@ -98,25 +102,31 @@ class HexagonalAperture(RotableAperture):
             1. representing no transmission and transmission 
             respectively.
         """
-        x_centre, y_centre = self.get_centre()
-        maximum_radius = self.get_rmax()
+        # So the challenge is how to make this soft edgeable. 
+        # Well, I know the formula for a line. I could just do 
+        # six lines that are perpendicular to the lines 
+        # along multiples of pi on three.   
+        coords: Array = self._rotate(self._translate(coords))
+        theta: Array = np.linspace(0, 2 * np.pi, 6, endpoint=False).reshape((6, 1, 1)) + np.pi / 6.
+        rmax: float = self.rmax
 
-        x *= 2 / number_of_pixels
-        y *= 2 / number_of_pixels
+        m: Array = (-1. / np.tan(theta)).reshape((6, 1, 1))
+        
+        x1: Array = (rmax * np.cos(theta)).reshape((6, 1, 1))
+        y1: Array = (rmax * np.sin(theta)).reshape((6, 1, 1))
+        
+        x: Array = np.tile(coords[0], (6, 1, 1))
+        y: Array = np.tile(coords[1], (6, 1, 1))
+        
+        dist: Array = (y - y1 - m * (x - x1)) / np.sqrt(1 + m ** 2)
+        dist: Array = (1. - 2. * (theta <= np.pi)) * dist
+        lines: Array = self._soften(dist)
 
-        rectangle = (np.abs(x) <= maximum_radius / 2.) \
-            & (np.abs(y) <= (maximum_radius * np.sqrt(3) / 2.))
+        return lines.prod(axis=0)
 
-        left_triangle = (x <= - maximum_radius / 2.) \
-            & (x >= - maximum_radius) \
-            & (np.abs(y) <= (x + maximum_radius) * np.sqrt(3))
+coords = dl.utils.get_pixel_coordinates(128, 2. / 128.)
+hex_ap = HexagonalAperture(0., 0., 0., .5, False, False)
 
-        right_triangle = (x >= maximum_radius / 2.) \
-            & (x <= maximum_radius) \
-            & (np.abs(y) <= (maximum_radius - x) * np.sqrt(3))
-
-        hexagon = rectangle | left_triangle | right_triangle
-        return np.asarray(hexagon).astype(float)
-
-
-
+plt.imshow(hex_ap._aperture(coords))
+plt.colorbar()
+plt.show()
