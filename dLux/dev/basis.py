@@ -664,6 +664,8 @@ class AberratedArbitraryAperture(AberratedAperture):
         return self._orthonormalise(aperture, zernikes)
 
 
+# TODO: I should pre-calculate the _aperture in the init for the 
+# AberratedCircularAperture and the AberratedHexagonalAperture
 # This is so that I can add a note.
 # This is testing code. 
 import jax.numpy as np
@@ -679,18 +681,38 @@ coordinates = dl.utils.get_pixel_coordinates(pixels, 2. / pixels)
 
 num_ikes = 10
 noll_inds = [i + 1 for i in range(num_ikes)]
-sq_ap = dl.SquareAperture(0., 0., 0., 1., False, False)
-squarikes = AberratedArbitraryAperture(noll_inds, np.ones((num_ikes,)), sq_ap)
 
-_basis = squarikes._basis(coordinates)
-_aperture = sq_ap._aperture(coordinates)
+# So the goal here is to perform the tests for all the apertures using the 
+# `AberratedArbitraryAperture`. 
+aps = {
+    "Sq. Ap.": dl.SquareAperture(0., 0., 0., 1., False, False),
+    "Ann. Ap.": dl.AnnularAperture(0., 0., .5, 1., False, False),
+    "Rect. Ap.": dl.RectangularAperture(0., 0., 0., .5, 1., False, False),
+    "Hex. Ap.": dl.HexagonalAperture(0., 0., 0., 1., False, False)
+}
 
-fig, axes = plt.subplots(2, num_ikes // 2, figsize=((num_ikes // 2)*4, 2*3))
-for i in range(num_ikes):
-    row = i // (num_ikes // 2)
-    col = i % (num_ikes // 2)
-    _map = axes[row][col].imshow(_basis[i] * _aperture)
-    fig.colorbar(_map, ax=axes[row][col]) 
+coeffs = np.ones((num_ikes,), dtype=float)
+bases = {
+    "Squarikes": AberratedArbitraryAperture(noll_inds, coeffs, aps["Sq. Ap."]),
+    "Annikes": AberratedArbitraryAperture(noll_inds, coeffs, aps["Ann. Ap."]),
+    "Rectikes": AberratedArbitraryAperture(noll_inds, coeffs, aps["Rect. Ap."]),
+    "Hexikes": AberratedArbitraryAperture(noll_inds, coeffs, aps["Hex. Ap."])
+}
+
+figure = plt.figure()
+figs = figure.subfigures(4, 1)
+for fig, ap, basis in zip(figs, aps, bases):
+    _basis = bases[basis]._basis(coordinates)
+    _ap = aps[ap]._aperture(coordinates)
+
+    axes = fig.subplots(2, num_ikes // 2)
+    for i in range(num_ikes):
+        row = i // (num_ikes // 2)
+        col = i % (num_ikes // 2)
+
+        axes[row][col].set_title(basis)
+        _map = axes[row][col].imshow(_basis[i] * _ap)
+        fig.colorbar(_map, ax=axes[row][col]) 
 plt.show()
 
 #circ_ap = dl.CircularAperture(0., 0., 1., False, False)

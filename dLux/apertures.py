@@ -245,7 +245,7 @@ class Aperture(eqx.Module, abc.ABC):
 
 
     @abc.abstractmethod
-    def largest_extent(self, coordinates : Array) -> float:
+    def largest_extent(self) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre. For inherited classes, consider implementing analytically for speed.
@@ -290,7 +290,7 @@ class Aperture(eqx.Module, abc.ABC):
         coordinates = coordinates.at[1].set(coordinates[1][::-1,:])
 
         trans_coords = self._translate(coordinates)
-        coordinates = coordinates / self.largest_extent(coordinates)
+        coordinates = coordinates / self.largest_extent()
 
         return coordinates
 
@@ -465,7 +465,7 @@ class CircularAperture(Aperture):
         return self._soften(- coordinates + self.radius)
 
 
-    def largest_extent(self: Layer, coordinates : Array) -> float:
+    def largest_extent(self: Layer) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
@@ -650,7 +650,7 @@ class RectangularAperture(RotatableAperture):
         return x_mask * y_mask
 
 
-    def largest_extent(self, coordinates: Array) -> float:
+    def largest_extent(self) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
@@ -750,7 +750,7 @@ class SquareAperture(RotatableAperture):
         return x_mask * y_mask
 
 
-    def largest_extent(self, coordinates: Array) -> float:
+    def largest_extent(self) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
