@@ -581,3 +581,14 @@ for i in range(num_ikes):
     fig.colorbar(_map, ax=axes[row][col]) 
 
 plt.show()
+
+# Show the commit has and message
+# 
+#   `git show -s --format=oneline ref`
+#   
+# Re-apply a reverted commit
+# 
+#   `git cherry-pick ref`
+#
+# Reference commits easily using `HEAD~5`.
+
