@@ -432,8 +432,7 @@ class AberratedCircularAperture(AberratedAperture):
             A `CircularAperture` within which the aberrations are 
             being studied. 
         """
-        self.zernikes = [zernikes[ind] if ind < 10 else jth_zernike(ind)
-            for ind in noll_inds]
+        self.zernikes = [jth_zernike(ind) for ind in noll_inds]
         self.coeffs = np.asarray(coeffs).astype(float)
         self.aperture = aperture
 
@@ -460,11 +459,7 @@ class AberratedCircularAperture(AberratedAperture):
             It has been removed to save some time in the 
             calculations. 
         """
-        pol_coords: list = dl.utils.cartesian_to_polar(coords)
-        rho: list = pol_coords[0]
-        theta: list = pol_coords[1]
-        basis: list = np.stack([z(rho, theta) for z in self.zernikes])
-        return basis
+        return np.stack([z(coords) for z in self.zernikes])
 
 
 class AberratedHexagonalAperture(AberratedAperture):
