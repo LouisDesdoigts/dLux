@@ -667,7 +667,7 @@ class RectangularAperture(RotatableAperture):
         largest_extent : float
             The maximum distance from centre to edge of aperture
         """
-        return np.hypot(np.array([self.length / 2., self.width / 2.]))
+        return np.hypot(self.length / 2., self.width / 2.)
 
 
 class SquareAperture(RotatableAperture):
