@@ -562,20 +562,20 @@ noll_inds = [i for i in range(num_ikes)]
 #
 #plt.show()
 
-hex_ap = dl.HexagonalAperture(0., 0., 0., 1., False, False)
-hex_basis = AberratedHexagonalAperture(noll_inds, np.ones((num_ikes,)), hex_ap)
-
-_basis = hex_basis._basis(coordinates)
-_aperture = hex_ap._aperture(coordinates)
-
-fig, axes = plt.subplots(2, num_ikes // 2, figsize=((num_ikes // 2)*4, 2*3))
-for i in range(num_ikes):
-    row = i // (num_ikes // 2)
-    col = i % (num_ikes // 2)
-    _map = axes[row][col].imshow(_basis[i])
-    fig.colorbar(_map, ax=axes[row][col]) 
-
-plt.show()
+#hex_ap = dl.HexagonalAperture(0., 0., 0., 1., False, False)
+#hex_basis = AberratedHexagonalAperture(noll_inds, np.ones((num_ikes,)), hex_ap)
+#
+#_basis = hex_basis._basis(coordinates)
+#_aperture = hex_ap._aperture(coordinates)
+#
+#fig, axes = plt.subplots(2, num_ikes // 2, figsize=((num_ikes // 2)*4, 2*3))
+#for i in range(num_ikes):
+#    row = i // (num_ikes // 2)
+#    col = i % (num_ikes // 2)
+#    _map = axes[row][col].imshow(_basis[i])
+#    fig.colorbar(_map, ax=axes[row][col]) 
+#
+#plt.show()
 
 # Show the commit has and message
 # 
@@ -587,3 +587,38 @@ plt.show()
 #
 # Reference commits easily using `HEAD~5`.
 
+
+def test_jth_hexike(j: int) -> callable:
+    """
+    The jth Hexike as a function. 
+
+    Parameters:
+    -----------
+    j: int
+        The noll index of the requested zernike. 
+
+    Returns:
+    --------
+    hexike: callable
+        A function representing the jth hexike that is evaluated 
+        on a cartesian coordinate grid. 
+    """
+    _jth_zernike = jth_zernike(j)
+
+    def _jth_hexike(coords: Array) -> Array:
+        polar = dl.utils.cartesian_to_polar(coords)
+        rho, phi = polar[0], polar[1]
+        wedge = np.floor((phi + np.pi / 3.) / (2. * np.pi / 3.))
+        u_alpha = phi - wedge * (2. * np.pi / 3.)
+        r_alpha = np.cos(np.pi / 3.) / np.cos(u_alpha)
+        return 1 / r_alpha * _jth_zernike(coords / r_alpha)
+
+    return _jth_hexike
+
+hexike = test_jth_hexike(5)(coordinates)
+
+fig = plt.figure()
+axes = plt.axes()
+cmap = axes.imshow(hexike)
+fig.colorbar(cmap, ax=axes)
+plt.show()
