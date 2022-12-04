@@ -550,6 +550,8 @@ class AberratedArbitraryAperture(AberratedAperture):
         Must be an instance of `HexagonalAperture`. This 
         is applied alongside the basis. 
     """
+    basis_funcs: list
+    nterms: int
 
 
     def __init__(self   : Layer, 
@@ -574,13 +576,15 @@ class AberratedArbitraryAperture(AberratedAperture):
         self.basis_funcs = [jth_zernike(j) for j in noll_inds]
         self.coeffs = np.asarray(coeffs).astype(float)
         self.aperture = aperture
+        self.nterms = len(noll_inds)
 
         assert len(noll_inds) == len(coeffs)
-        assert isinstance(aperture, dl.HexagonalAperture)
+        assert isinstance(aperture, dl.Aperture)
 
 
-    def _orthonormalise(self : Layer, aperture : Matrix, 
-            zernikes : Tensor) -> Tensor:
+    def _orthonormalise(self: Layer, 
+            aperture: Array, 
+            zernikes: Array) -> Array:
         """
         The hexike polynomials up until `number_of_hexikes` on a square
         array that `number_of_pixels` by `number_of_pixels`. The 
@@ -654,11 +658,10 @@ class AberratedArbitraryAperture(AberratedAperture):
             It has been removed to save some time in the 
             calculations. 
         """
-        zernikes = np.stack([h(coords) for h in self.basis_funcs])
+        zern_coords = self.aperture.compute_aperture_normalised_coordinates(coords)
+        zernikes = np.stack([h(zern_coords) for h in self.basis_funcs])
         aperture = self.aperture._aperture(coords)
         return self._orthonormalise(aperture, zernikes)
-        
-    
 
 
 # This is so that I can add a note.
@@ -676,6 +679,20 @@ coordinates = dl.utils.get_pixel_coordinates(pixels, 2. / pixels)
 
 num_ikes = 10
 noll_inds = [i + 1 for i in range(num_ikes)]
+sq_ap = dl.SquareAperture(0., 0., 0., 1., False, False)
+squarikes = AberratedArbitraryAperture(noll_inds, np.ones((num_ikes,)), sq_ap)
+
+_basis = squarikes._basis(coordinates)
+_aperture = sq_ap._aperture(coordinates)
+
+fig, axes = plt.subplots(2, num_ikes // 2, figsize=((num_ikes // 2)*4, 2*3))
+for i in range(num_ikes):
+    row = i // (num_ikes // 2)
+    col = i % (num_ikes // 2)
+    _map = axes[row][col].imshow(_basis[i] * _aperture)
+    fig.colorbar(_map, ax=axes[row][col]) 
+plt.show()
+
 #circ_ap = dl.CircularAperture(0., 0., 1., False, False)
 #basis = AberratedCircularAperture(noll_inds, np.ones((num_ikes,)), circ_ap)
 #
@@ -691,20 +708,20 @@ noll_inds = [i + 1 for i in range(num_ikes)]
 #
 #plt.show()
 
-hex_ap = dl.HexagonalAperture(0., 0., 0., 1., False, False)
-hex_basis = AberratedHexagonalAperture(noll_inds, np.ones((num_ikes,)), hex_ap)
-
-_basis = hex_basis._basis(coordinates)
-_aperture = hex_ap._aperture(coordinates)
-
-fig, axes = plt.subplots(2, num_ikes // 2, figsize=((num_ikes // 2)*4, 2*3))
-for i in range(num_ikes):
-    row = i // (num_ikes // 2)
-    col = i % (num_ikes // 2)
-    _map = axes[row][col].imshow(_basis[i])
-    fig.colorbar(_map, ax=axes[row][col]) 
-
-plt.show()
+#hex_ap = dl.HexagonalAperture(0., 0., 0., 1., False, False)
+#hex_basis = AberratedHexagonalAperture(noll_inds, np.ones((num_ikes,)), hex_ap)
+#
+#_basis = hex_basis._basis(coordinates)
+#_aperture = hex_ap._aperture(coordinates)
+#
+#fig, axes = plt.subplots(2, num_ikes // 2, figsize=((num_ikes // 2)*4, 2*3))
+#for i in range(num_ikes):
+#    row = i // (num_ikes // 2)
+#    col = i % (num_ikes // 2)
+#    _map = axes[row][col].imshow(_basis[i])
+#    fig.colorbar(_map, ax=axes[row][col]) 
+#
+#plt.show()
 
 # Show the commit has and message
 # 

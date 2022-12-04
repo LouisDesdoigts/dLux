@@ -289,14 +289,8 @@ class Aperture(eqx.Module, abc.ABC):
         # TODO: check where flips should go
         coordinates = coordinates.at[1].set(coordinates[1][::-1,:])
 
-        x_offset = self.get_x_offset()
-        y_offset = self.get_y_offset()
-
-        # This is the translation and scaling of the normalised coordinate system. 
-        # translate and then multiply by 1 / largest_extent.
         trans_coords = self._translate(coordinates)
-        rad_trans_coords = dLux.utils.cartesian_to_polar(trans_coords)
-        coordinates = rad_trans_coords.at[0].mul(1. / self.largest_extent(coordinates))
+        coordinates = coordinates / self.largest_extent(coordinates)
 
         return coordinates
 
