@@ -537,8 +537,6 @@ class AberratedHexagonalAperture(AberratedAperture):
         """
         return np.stack([h(coords) for h in self.hexikes])
 
-<<<<<<< HEAD
-=======
 # This is testing code. 
 import jax.numpy as np
 import matplotlib as mpl 
@@ -582,4 +580,3 @@ for i in range(num_ikes):
     fig.colorbar(_map, ax=axes[row][col]) 
 
 plt.show()
->>>>>>> 2fd3eb5f (The hexikes are now producing output it is just not the correct output. Somehow I got triangles inscribed with the familiar zernike patterns.)
