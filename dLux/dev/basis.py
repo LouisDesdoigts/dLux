@@ -608,9 +608,9 @@ def test_jth_hexike(j: int) -> callable:
     def _jth_hexike(coords: Array) -> Array:
         polar = dl.utils.cartesian_to_polar(coords)
         rho, phi = polar[0], polar[1]
-        wedge = np.floor((phi + np.pi / 3.) / (2. * np.pi / 3.))
-        u_alpha = phi - wedge * (2. * np.pi / 3.)
-        r_alpha = np.cos(np.pi / 3.) / np.cos(u_alpha)
+        wedge = np.floor((phi + np.pi / 6.) / (np.pi / 3.))
+        u_alpha = phi - wedge * (np.pi / 3.)
+        r_alpha = np.cos(np.pi / 6.) / np.cos(u_alpha)
         return 1 / r_alpha * _jth_zernike(coords / r_alpha)
 
     return _jth_hexike
