@@ -265,9 +265,10 @@ def jth_hexike(j: int) -> callable:
     def _jth_hexike(coords: Array) -> Array:
         polar = dl.utils.cartesian_to_polar(coords)
         rho, phi = polar[0], polar[1]
-        wedge = np.floor((phi + np.pi / 3.) / (2. * np.pi / 3.))
-        u_alpha = phi - wedge * (2. * np.pi / 3.)
-        r_alpha = np.cos(np.pi / 3.) / np.cos(u_alpha)
+        alpha = np.pi / 6.
+        wedge = np.floor((phi + alpha) / (2 * alpha))
+        u_alpha = phi - wedge * (2 * alpha)
+        r_alpha = np.cos(alpha) / np.cos(u_alpha)
         return 1 / r_alpha * _jth_zernike(coords / r_alpha)
 
     return _jth_hexike
@@ -532,6 +533,10 @@ class AberratedHexagonalAperture(AberratedAperture):
         """
         return np.stack([h(coords) for h in self.hexikes])
 
+
+class AberratedArbitraryAperture(AberratedAperture):
+    """
+
 # This is so that I can add a note.
 # This is testing code. 
 import jax.numpy as np
@@ -546,7 +551,7 @@ nterms = 6
 coordinates = dl.utils.get_pixel_coordinates(pixels, 2. / pixels)
 
 num_ikes = 10
-noll_inds = [i for i in range(num_ikes)]
+noll_inds = [i + 1 for i in range(num_ikes)]
 #circ_ap = dl.CircularAperture(0., 0., 1., False, False)
 #basis = AberratedCircularAperture(noll_inds, np.ones((num_ikes,)), circ_ap)
 #
@@ -562,20 +567,20 @@ noll_inds = [i for i in range(num_ikes)]
 #
 #plt.show()
 
-#hex_ap = dl.HexagonalAperture(0., 0., 0., 1., False, False)
-#hex_basis = AberratedHexagonalAperture(noll_inds, np.ones((num_ikes,)), hex_ap)
-#
-#_basis = hex_basis._basis(coordinates)
-#_aperture = hex_ap._aperture(coordinates)
-#
-#fig, axes = plt.subplots(2, num_ikes // 2, figsize=((num_ikes // 2)*4, 2*3))
-#for i in range(num_ikes):
-#    row = i // (num_ikes // 2)
-#    col = i % (num_ikes // 2)
-#    _map = axes[row][col].imshow(_basis[i])
-#    fig.colorbar(_map, ax=axes[row][col]) 
-#
-#plt.show()
+hex_ap = dl.HexagonalAperture(0., 0., 0., 1., False, False)
+hex_basis = AberratedHexagonalAperture(noll_inds, np.ones((num_ikes,)), hex_ap)
+
+_basis = hex_basis._basis(coordinates)
+_aperture = hex_ap._aperture(coordinates)
+
+fig, axes = plt.subplots(2, num_ikes // 2, figsize=((num_ikes // 2)*4, 2*3))
+for i in range(num_ikes):
+    row = i // (num_ikes // 2)
+    col = i % (num_ikes // 2)
+    _map = axes[row][col].imshow(_basis[i])
+    fig.colorbar(_map, ax=axes[row][col]) 
+
+plt.show()
 
 # Show the commit has and message
 # 
