@@ -586,39 +586,3 @@ noll_inds = [i for i in range(num_ikes)]
 #   `git cherry-pick ref`
 #
 # Reference commits easily using `HEAD~5`.
-
-
-def test_jth_hexike(j: int) -> callable:
-    """
-    The jth Hexike as a function. 
-
-    Parameters:
-    -----------
-    j: int
-        The noll index of the requested zernike. 
-
-    Returns:
-    --------
-    hexike: callable
-        A function representing the jth hexike that is evaluated 
-        on a cartesian coordinate grid. 
-    """
-    _jth_zernike = jth_zernike(j)
-
-    def _jth_hexike(coords: Array) -> Array:
-        polar = dl.utils.cartesian_to_polar(coords)
-        rho, phi = polar[0], polar[1]
-        wedge = np.floor((phi + np.pi / 6.) / (np.pi / 3.))
-        u_alpha = phi - wedge * (np.pi / 3.)
-        r_alpha = np.cos(np.pi / 6.) / np.cos(u_alpha)
-        return 1 / r_alpha * _jth_zernike(coords / r_alpha)
-
-    return _jth_hexike
-
-hexike = test_jth_hexike(5)(coordinates)
-
-fig = plt.figure()
-axes = plt.axes()
-cmap = axes.imshow(hexike)
-fig.colorbar(cmap, ax=axes)
-plt.show()
