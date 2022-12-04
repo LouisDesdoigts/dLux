@@ -1,33 +1,20 @@
-import jax 
-import abc 
+import dLux as dl
+from typing import TypeVar
+import functools
 import jax.numpy as np
 import equinox as eqx
-import dLux as dl
-import typing 
-from typing import List
+import jax
+from dLux.utils import (get_positions_vector, get_pixel_positions)
 
-__all__ = ["AberratedCircularAperture", "AberratedHexagonalAperture"]
+__all__ = ['Basis', "CompoundBasis"]
 
-Array = typing.TypeVar("Array")
-Layer = typing.TypeVar("Layer")
-Aperture = typing.TypeVar("Aperture")
-CircularAperture = typing.TypeVar("CircularAperture")
-HexagonalAperture = typing.TypeVar("HexagonalAperture")
+Array = TypeVar("Array")
+Layer = TypeVar("Layer")
+Tensor = TypeVar("Tensor")
+Matrix = TypeVar("Matrix")
+Vector = TypeVar("Vector")
 
-
-zernikes: list = [
-    lambda rho, theta: np.ones(rho.shape, dtype=float),
-    lambda rho, theta: 2. * rho * np.sin(theta),
-    lambda rho, theta: 2. * rho * np.cos(theta),
-    lambda rho, theta: np.sqrt(6.) * rho ** 2 * np.sin(2. * theta),
-    lambda rho, theta: np.sqrt(3.) * (2. * rho ** 2 - 1.),
-    lambda rho, theta: np.sqrt(6.) * rho ** 2 * np.cos(2. * theta),
-    lambda rho, theta: np.sqrt(8.) * rho ** 3 * np.sin(3. * theta),
-    lambda rho, theta: np.sqrt(8.) * (3. * rho ** 3 - 2. * rho) * np.sin(theta),
-    lambda rho, theta: np.sqrt(8.) * (3. * rho ** 3 - 2. * rho) * np.sin(theta),
-    lambda rho, theta: np.sqrt(8.) * rho ** 3 * np.cos(3. * theta)
-]
-
+MAX_DIFF = 4
 
 def factorial(n : int) -> int:
     """
@@ -46,496 +33,498 @@ def factorial(n : int) -> int:
     return jax.lax.exp(jax.lax.lgamma(n + 1.))
 
 
-def noll_index(j: int) -> tuple:
+# NOTE:
+# I need to think about how I wish to implement this. 
+# Goals for today:
+#   1. Sought out the current code.
+#     a) I think that Zernike needs to be separated from Orthonormalise. 
+#        In general I think these classes perhaps need to be broken down 
+#        into functions. Yes I think have a 
+#        `zernikes(n: int[n], coords: int[m, m]) -> Tensor[n, m, m]` 
+#        function. However, in this case I encounter the same problem 
+#        of the coordinates not been accessible outside of the 
+#        `Wavefront`. This means that this particular set-up must
+#        remain a `Layer`.
+#     b) I also think that I should then have `Basis(aper: Aperture)`
+#        as a class as well. The orthonormalisation again must occur 
+#        during the propagation because I do not have access to the 
+#        coordinates outside of the `Optics`. I need to make a careful 
+#        Github issue that discusses this. I belive that `Basis` should 
+#        take a Zernike basis as an input as well. This will avoid 
+#        recomputation. Now I need to think carefully about how to do 
+#        this so that it is optional in case the `Basis` needs to be 
+#        recomputed. 
+#  2. I need to investigate writing a function generator for the zernikes. 
+#     Such a generator would have the signature 
+#     `zernike(coords: float[m, m]) -> float[m, m]`. Now I need to 
+#     think about ways of doing this because there are many ways that 
+#     I might attempt it. The generator approach defines a generator 
+#     with the following signature, `gen_next_zernike(none) -> 
+#     (callable(float[m, m]) -> float[m, m])`. I do not particularly 
+#     like this approach because it does not feal very functional. 
+#     Some subgoals of this initial approach are:
+#    a) Is it possible to `jit` a generator? It should be easy to 
+#       test this on a very simple `increment(none) -> int` generator. 
+#    b) Is it possible to `jit` a function that returns a function. 
+#       if not then it should still be possible for me to `jit` smaller 
+#       sub-functions making it an "effective" `jit`.
+#      i) I should als be able to test the effect of `jit` compiling 
+#         nested function definitions and closures. This will give us
+#         useful insights into what aspects of python are available to 
+#         us. I fail to see how it is that different from `jit` compiling 
+#         the methods of a class since both occupy a distince scope. 
+#     The second and more functional approach that I might make is 
+#     to attempt a function `zernike_from_noll_index(noll_index: int) 
+#     -> callable[float[m, m] -> float[m, m]]`. This one is better 
+#     because we are not always interested in generating all of the 
+#     zernikes and may just want some specific ones. I might create 
+#     a dictionary mapping of common names to noll indices. 
+#  3. I should investigate the typine mystery.
+#    a) Is there any runtime overhead to typing signatures. 
+#    b) I want to create subscriptable types but `int` ect. are 
+#       already taken. I like `tensor`, but perhaps I do not try 
+#       and push it in this project i.e. dLux. For example, I want
+#       to be able to specify,
+#       ```
+#       tensor[int][m, m]
+#       tensor(int)[m, m]
+#       func(int, int)[tensor[m, m]]
+#       ```
+#       These are all just ideas and should be taken with a grain of 
+#       salt. I should be able to produce the desired affect by 
+#       writing careful `__call__` and `__getitem__` methods that 
+#       return self ect. I need to investigate what `typing` already 
+#       provides in the `generic` interface. The only problem will 
+#       be providing definitions of `m` and `n`. I guess the simplest 
+#       way is just to define them as strings and then they can be used 
+#       this way. Might be handy to have a generator to define new 
+#       ones on the fly. They should take up minimal space. 
+#  4. I need to make a `Binary` PSF through the full TOLIMAN aperture
+#     using the new aperture syntax and launch a well thought out 
+#     pull request. 
+#  5. I need to write unit tests for the `Basis` implementation once 
+#     I have finished it. 
+#  6. See if I can write a useful `@private` and `@public` decorator 
+#     for python. Maybe I also attempt to do `@override`
+
+class Basis(eqx.Module):
     """
-    Decode the jth noll index of the zernike polynomials. This 
-    arrises because the zernike polynomials are parametrised by 
-    a pair numbers, e.g. n, m, but we want to impose an order.
-    The noll indices are the standard way to do this see [this]
-    (https://oeis.org/A176988) for more detail. The top of the 
-    mapping between the noll index and the pair of numbers is 
-    shown below:
-
-    n, m Indices
-    ------------
-    (0, 0)
-    (1, -1), (1, 1)
-    (2, -2), (2, 0), (2, 2)
-    (3, -3), (3, -1), (3, 1), (3, 3)
-
-    Noll Indices
-    ------------
-    1
-    3, 2
-    5, 4, 6
-    9, 7, 8, 10
-
-    Parameters
-    ----------
-    j : int
-        The noll index to decode.
+    _Abstract_ class representing a basis fixed over an aperture 
+    that is used to optimise and learn aberations in the aperture. 
     
-    Returns
-    -------
-    n, m : tuple
-        The n, m parameters of the zernike polynomial.
-    """
-    # To retrive the row that we are in we use the formula for 
-    # the sum of the integers:
-    #  
-    #  n      n(n + 1)
-    # sum i = -------- = x_{n}
-    # i=0        2
-    # 
-    # However, `j` is a number between x_{n - 1} and x_{n} to 
-    # retrieve the 0th based index we want the upper bound. 
-    # Applying the quadratic formula:
-    # 
-    # n = -1/2 + sqrt(1 + 8x_{n})/2
-    #
-    # We know that n is an integer and hence of x_{n} -> j where 
-    # j is not an exact solution the row can be found by taking 
-    # the floor of the calculation. 
-    #
-    # n = (-1/2 + sqrt(1 + 8j)/2) // 1
-    #
-    # All the odd noll indices map to negative m integers and also 
-    # 0. The sign can therefore be determined by -(j & 1). 
-    # This works because (j & 1) returns the rightmost bit in 
-    # binary representation of j. This is equivalent to -(j % 2).
-    # 
-    # The m indices range from -n to n in increments of 2. The last 
-    # thing to do is work out how many times to add two to -n. 
-    # This can be done by banding j away from the smallest j in 
-    # the row. 
-    #
-    # The smallest j in the row can be calculated using the sum of
-    # integers formula in the comments above with n = (n - 1) and
-    # then adding one. Let this number be (x_{n - 1} + 1). We can 
-    # then subtract j from it to get r = (j - x_{n - 1} + 1)
-    #
-    # The odd and even cases work differently. I have included the 
-    # formula below:
-    # odd : p = (j - x_{n - 1}) // 2 
-   
-    # even: p = (j - x_{n - 1} + 1) // 2
-    # where p represents the number of times 2 needs to be added
-    # to the base case. The 1 required for the even case can be 
-    # generated in place using ~(j & 1) + 2, which is 1 for all 
-    # even numbers and 0 for all odd numbers.
-    #
-    # For odd n the base case is 1 and for even n it is 0. This 
-    # is the result of the bitwise operation j & 1 or alternatively
-    # (j % 2). The final thing is adding the sign to m which is 
-    # determined by whether j is even or odd hence -(j & 1).
-    n = (np.ceil(-1 / 2 + np.sqrt(1 + 8 * j) / 2) - 1).astype(int)
-    smallest_j_in_row = n * (n + 1) / 2 + 1 
-    number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
-    sign_of_shift = -(j & 1) + ~(j & 1) + 2
-    base_case = (n & 1)
-    m = (sign_of_shift * (base_case + number_of_shifts * 2)).astype(int)
-    return n, m
-
-
-def jth_radial_zernike(n: int, m: int) -> list:
-    """
-    The radial zernike polynomial.
-
-    Parameters
+    Attributes
     ----------
-    n : int
-        The first index number of the zernike polynomial to forge
-    m : int 
-        The second index number of the zernike polynomial to forge.
-
-    Returns
-    -------
-    radial : Tensor
-        An npix by npix stack of radial zernike polynomials.
+    nterms : int
+        The number of basis vectors to generate. This is determined
+        by passing along the noll indices until the number is 
+        reached (inclusive).
+    aperture : Layer
+        The aperture over which to generate the basis. This should 
+        be an implementation of the abstract base class `Aperture`.
+    is_computed: bool
+        A simple caching mechanism. If `is_computed` is `True` then
+        the aperture basis has been calculated and is stored. 
     """
-    MAX_DIFF = 5
-    m, n = np.abs(m), np.abs(n)
-    upper = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
+    nterms: int    
+    aperture: Layer
 
-    k = np.arange(MAX_DIFF)
-    mask = (k < upper).reshape(MAX_DIFF, 1, 1)
-    coefficients = (-1) ** k * factorial(n - k) / \
-        (factorial(k) * \
-            factorial(((n + m) / 2).astype(int) - k) * \
-            factorial(((n - m) / 2).astype(int) - k))
 
-    def _jth_radial_zernike(rho: list) -> list:
+    def __init__(self : Layer, nterms : int,
+            aperture : Layer) -> Layer:
+        """
+        Parameters
+        ----------
+        nterms : int
+            The number of basis terms to generate. This determines the
+            length of the leading dimension of the output Tensor.
+        aperture : Layer
+            The aperture to generate the basis over. This must be 
+            an implementation of the abstract subclass `Aperture`. 
+        """
+        self.nterms = int(nterms)
+        self.aperture = aperture
+
+
+    @functools.partial(jax.vmap, in_axes=(None, 0))
+    def _noll_index(self : Layer, j : int) -> tuple:
+        """
+        Decode the jth noll index of the zernike polynomials. This 
+        arrises because the zernike polynomials are parametrised by 
+        a pair numbers, e.g. n, m, but we want to impose an order.
+        The noll indices are the standard way to do this see [this]
+        (https://oeis.org/A176988) for more detail. The top of the 
+        mapping between the noll index and the pair of numbers is 
+        shown below:
+
+        n, m Indices
+        ------------
+        (0, 0)
+        (1, -1), (1, 1)
+        (2, -2), (2, 0), (2, 2)
+        (3, -3), (3, -1), (3, 1), (3, 3)
+
+        Noll Indices
+        ------------
+        1
+        3, 2
+        5, 4, 6
+        9, 7, 8, 10
+
+        Parameters
+        ----------
+        j : int
+            The noll index to decode.
+        
+        Returns
+        -------
+        n, m : tuple
+            The n, m parameters of the zernike polynomial.
+        """
+        # To retrive the row that we are in we use the formula for 
+        # the sum of the integers:
+        #  
+        #  n      n(n + 1)
+        # sum i = -------- = x_{n}
+        # i=0        2
+        # 
+        # However, `j` is a number between x_{n - 1} and x_{n} to 
+        # retrieve the 0th based index we want the upper bound. 
+        # Applying the quadratic formula:
+        # 
+        # n = -1/2 + sqrt(1 + 8x_{n})/2
+        #
+        # We know that n is an integer and hence of x_{n} -> j where 
+        # j is not an exact solution the row can be found by taking 
+        # the floor of the calculation. 
+        #
+        # n = (-1/2 + sqrt(1 + 8j)/2) // 1
+        #
+        # All the odd noll indices map to negative m integers and also 
+        # 0. The sign can therefore be determined by -(j & 1). 
+        # This works because (j & 1) returns the rightmost bit in 
+        # binary representation of j. This is equivalent to -(j % 2).
+        # 
+        # The m indices range from -n to n in increments of 2. The last 
+        # thing to do is work out how many times to add two to -n. 
+        # This can be done by banding j away from the smallest j in 
+        # the row. 
+        #
+        # The smallest j in the row can be calculated using the sum of
+        # integers formula in the comments above with n = (n - 1) and
+        # then adding one. Let this number be (x_{n - 1} + 1). We can 
+        # then subtract j from it to get r = (j - x_{n - 1} + 1)
+        #
+        # The odd and even cases work differently. I have included the 
+        # formula below:
+        # odd : p = (j - x_{n - 1}) // 2 
+       
+        # even: p = (j - x_{n - 1} + 1) // 2
+        # where p represents the number of times 2 needs to be added
+        # to the base case. The 1 required for the even case can be 
+        # generated in place using ~(j & 1) + 2, which is 1 for all 
+        # even numbers and 0 for all odd numbers.
+        #
+        # For odd n the base case is 1 and for even n it is 0. This 
+        # is the result of the bitwise operation j & 1 or alternatively
+        # (j % 2). The final thing is adding the sign to m which is 
+        # determined by whether j is even or odd hence -(j & 1).
+        n = (np.ceil(-1 / 2 + np.sqrt(1 + 8 * j) / 2) - 1).astype(int)
+        smallest_j_in_row = n * (n + 1) / 2 + 1 
+        number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
+        sign_of_shift = -(j & 1) + ~(j & 1) + 2
+        base_case = (n & 1)
+        m = (sign_of_shift * (base_case + number_of_shifts * 2)).astype(int)
+        return n, m
+
+
+    def _radial_zernike(self : Layer, n : int, m : int,
+            rho : Matrix) -> Tensor:
+        """
+        The radial zernike polynomial.
+
+        Parameters
+        ----------
+        n : int
+            The first index number of the zernike polynomial to forge
+        m : int 
+            The second index number of the zernike polynomial to forge.
+        rho : Matrix
+            The radial positions of the aperture. Passed as an argument 
+            for speed.
+
+        Returns
+        -------
+        radial : Tensor
+            An npix by npix stack of radial zernike polynomials.
+        """
+        m, n = np.abs(m), np.abs(n)
+        upper = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
         rho = np.tile(rho, (MAX_DIFF, 1, 1))
-        coeffs = coefficients.reshape(MAX_DIFF, 1, 1)
-        rads = rho ** (n - 2 * k).reshape(MAX_DIFF, 1, 1)
-        return (coeffs * mask * rads).sum(axis = 0)
+
+        murder_weapon = (np.arange(MAX_DIFF) < upper)
+
+        k = np.arange(MAX_DIFF) * murder_weapon
+        coefficients = (-1) ** k * factorial(n - k) / \
+            (factorial(k) * \
+                factorial(((n + m) / 2).astype(int) - k) * \
+                factorial(((n - m) / 2).astype(int) - k))
+        radial = coefficients.reshape(MAX_DIFF, 1, 1) *\
+            rho ** (n - 2 * k).reshape(MAX_DIFF, 1, 1) *\
+            murder_weapon.reshape(MAX_DIFF, 1, 1)
+         
+        return radial.sum(axis=0)
+
+
+    def _zernikes(self : Layer, coordinates : Tensor) -> Tensor:
+        """
+        Calculate the zernike basis on a square pixel grid. 
+
+        Parameters
+        ----------
+        number : int
+            The number of zernike basis terms to calculate.
+            This is a static argument to jit because the array
+            size depends on it.
+        pixels : int
+            The number of pixels along one side of the zernike image
+            for each of the n zernike polynomials.
+        coordinates : Tensor
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        zernike : Tensor 
+            The zernike polynomials evaluated until number. The shape
+            of the output tensor is number by pixels by pixels. 
+        """
+        j = np.arange(1, self.nterms + 1).astype(int)
+        n, m = self._noll_index(j)
+
+        # So the zernikes need to be generated on the smallest circle that contains 
+        # the aperture. This code makes a normalised set of coordinates centred 
+        # on the centre of the aperture with 1. at the largest extent. 
+        coordinates = self.aperture.compute_aperture_normalised_coordinates(coordinates)
+
+        # NOTE: The idea is to generate them here at the higher level 
+        # where things will not change and we will be done. 
+        rho = coordinates[0]
+        theta = coordinates[1]
+
+
+        aperture = (rho <= 1.).astype(int)
+
+        # In the calculation of the noll coefficient we must define 
+        # between the m == 0 and and the m != 0 case. I have done 
+        # this in place by casting the logical operation to an int. 
+
+        normalisation_coefficients = \
+            (1 + (np.sqrt(2) - 1) * (m != 0).astype(int)) \
+            * np.sqrt(n + 1)
+
+        radial_zernikes = np.zeros((self.nterms,) + rho.shape)
+        for i in np.arange(self.nterms):
+            radial_zernikes = radial_zernikes\
+                .at[i]\
+                .set(self._radial_zernike(n[i], m[i], rho))
+
+        # When m < 0 we have the odd zernike polynomials which are 
+        # the radial zernike polynomials multiplied by a sine term.
+        # When m > 0 we have the even sernike polynomials which are 
+        # the radial polynomials multiplies by a cosine term. 
+        # To produce this result without logic we can use the fact
+        # that sine and cosine are separated by a phase of pi / 2
+        # hence by casting int(m < 0) we can add the nessecary phase.
+        out_shape = (self.nterms, 1, 1)
+
+        theta = np.tile(theta, out_shape)
+        m = m.reshape(out_shape)
+        phase_mod = (m < 0).astype(int) * np.pi / 2
+        phase = np.cos(np.abs(m) * theta - phase_mod)
+
+        normalisation_coefficients = \
+            normalisation_coefficients.reshape(out_shape)
+        
+        middle_zernike = normalisation_coefficients * radial_zernikes \
+            * aperture * phase 
+
+        return middle_zernike 
+
+
+    def _orthonormalise(self : Layer, aperture : Matrix, 
+            zernikes : Tensor) -> Tensor:
+        """
+        The hexike polynomials up until `number_of_hexikes` on a square
+        array that `number_of_pixels` by `number_of_pixels`. The 
+        polynomials can be restricted to a smaller subset of the 
+        array by passing an explicit `maximum_radius`. The polynomial
+        will then be defined on the largest hexagon that fits with a 
+        circle of radius `maximum_radius`. 
+        
+        Parameters
+        ----------
+        aperture : Matrix
+            An array representing the aperture. This should be an 
+            `(npix, npix)` array. 
+        number_of_hexikes : int = 15
+            The number of basis terms to generate. 
+        zernikes : Tensor
+            The zernike polynomials to orthonormalise on the aperture.
+            This tensor should be `(nterms, npix, npix)` in size, where 
+            the first axis represents the noll indexes. 
+
+        Returns
+        -------
+        hexikes : Tensor
+            The hexike polynomials evaluated on the square arrays
+            containing the hexagonal apertures until `maximum_radius`.
+            The leading dimension is `number_of_hexikes` long and 
+            each stacked array is a basis term. The final shape is:
+            ```py
+            hexikes.shape == (number_of_hexikes, number_of_pixels, number_of_pixels)
+            ```
+        """
+        pixel_area = aperture.sum()
+        shape = zernikes.shape
+        width = shape[-1]
+        basis = np.zeros(shape).at[0].set(aperture)
+
+        for j in np.arange(1, self.nterms):
+            intermediate = zernikes[j] * aperture
+            coefficient = np.zeros((self.nterms, 1, 1), dtype=float)
+            mask = (np.arange(1, self.nterms) > j + 1).reshape((-1, 1, 1))
+
+            coefficient = -1 / pixel_area * \
+                (zernikes[j] * basis[1:] * aperture * mask)\
+                .sum(axis = (1, 2))\
+                .reshape(-1, 1, 1) 
+
+            intermediate += (coefficient * basis[1:] * mask).sum(axis = 0)
             
-    return _jth_radial_zernike
-
-
-def jth_polar_zernike(n: int, m: int) -> list:
-    """
-    Generates a function representing the polar component 
-    of the jth Zernike polynomial.
-
-    Parameters:
-    -----------
-    n: int 
-        The first index number of the Zernike polynomial.
-    m: int 
-        The second index number of the Zernike polynomials.
-
-    Returns:
-    --------
-    polar: Array
-        The polar component of the jth Zernike polynomials.
-    """
-    is_m_zero = (m != 0).astype(int)
-    norm_coeff = (1 + (np.sqrt(2) - 1) * is_m_zero) * np.sqrt(n + 1)
-
-    # When m < 0 we have the odd zernike polynomials which are 
-    # the radial zernike polynomials multiplied by a sine term.
-    # When m > 0 we have the even sernike polynomials which are 
-    # the radial polynomials multiplies by a cosine term. 
-    # To produce this result without logic we can use the fact
-    # that sine and cosine are separated by a phase of pi / 2
-    # hence by casting int(m < 0) we can add the nessecary phase.
-
-    phase_mod = (m < 0).astype(int) * np.pi / 2
-
-    def _jth_polar_zernike(theta: list) -> list:
-        return norm_coeff * np.cos(np.abs(m) * theta - phase_mod)
-
-    return _jth_polar_zernike  
-
-
-def jth_zernike(j: int) -> list:
-    """
-    Calculate the zernike basis on a square pixel grid. 
-
-    Parameters
-    ----------
-    noll_index: int
-        The noll index corresponding to the zernike to generate.
-        The first ten zernikes have been computed analytically 
-        and are available via the `PreCompZernikeBasis` class. 
-        This is only for doing zernike terms that are of higher 
-        order and not centered.
-
-    Returns
-    -------
-    zernike : Tensor 
-        The zernike polynomials evaluated until number. The shape
-        of the output tensor is number by pixels by pixels. 
-    """
-    n, m = noll_index(j)
-
-    def _jth_zernike(coords: list) -> list:
-        polar_coords = dl.utils.cartesian_to_polar(coords)
-        rho = polar_coords[0]
-        theta = polar_coords[1]
-        aperture = rho <= 1.
-        _jth_rad_zern = jth_radial_zernike(n, m)
-        _jth_pol_zern = jth_polar_zernike(n, m)
-        return aperture * _jth_rad_zern(rho) * _jth_pol_zern(theta)
-    
-    return _jth_zernike 
-
-
-# So the current problem is that I need to find some way of passing 
-# rmax into the hexike dynamically (do I). Haha just worked it out,
-# I normalise the corrdinates first hence I don't need rmax. 
-def jth_hexike(j: int) -> callable:
-    """
-    The jth Hexike as a function. 
-
-    Parameters:
-    -----------
-    j: int
-        The noll index of the requested zernike. 
-
-    Returns:
-    --------
-    hexike: callable
-        A function representing the jth hexike that is evaluated 
-        on a cartesian coordinate grid. 
-    """
-    _jth_zernike = jth_zernike(j)
-
-    def _jth_hexike(rho: Array, phi: Array) -> Array:
-        wedge = np.floor((phi + np.pi / 3.) / (2. * np.pi / 3.))
-        u_alpha = phi - wedge * (2. * np.pi / 3.)
-        r_alpha = np.cos(np.pi / 3.) / np.cos(u_alpha)
-        return 1 / r_alpha * _jth_zernike(rho / r_alpha, phi)
-
-    return _jth_hexike
-
-
-class AberratedAperture(eqx.Module, abc.ABC):
-    """
-    An abstract base class representing an `Aperture` defined
-    with a basis. The basis is a set of polynomials that are 
-    orthonormal over the surface of the aperture (usually). 
-    These can be used to represent any aberation on the surface
-    of the aperture. In general, the basis should only be defined 
-    on apertures that have a surface such as a mirror or phase 
-    plate ect. It isn't really possible to have aberrations on 
-    an opening. This rule may be broken to learn the atmosphere 
-    above a telescope but whether or not this is a good idea 
-    remains to be seen.
-
-    Parameters:
-    -----------
-    basis_funcs: list[callable]
-        A list of functions that represent the basis. The exact
-        polynomials that are represented will depend on the shape
-        of the aperture. 
-    aperture: Aperture
-        The aperture on which the basis is defined. Must be a 
-        subclass of the `Aperture` class.
-    coeffs: list[floats]
-        The coefficients of the basis terms. By learning the 
-        coefficients only the amount of time that is required 
-        for the learning process is significantly reduced.
-    """
-    aperture: Aperture
-    coeffs: Array
-
-
-    @abc.abstractmethod
-    def __init__(self   : Layer, 
-            noll_inds   : List[int],
-            aperture    : Aperture, 
-            coeffs      : Array) -> Layer:
-        """
-        Parameters:
-        -----------
-        noll_inds: List[int]
-            The noll indices are a scheme for indexing the Zernike
-            polynomials. Normally these polynomials have two 
-            indices but the noll indices prevent an order to 
-            these pairs. All basis can be indexed using the noll
-            indices based on `n` and `m`. 
-        aperture: Aperture
-            The aperture that the basis is defined on. The shape 
-            of this aperture defines what the polynomials are. 
-        coeffs: Array
-            The coefficients of the basis vectors. 
-        """
-
-
-    @abc.abstractmethod
-    def _basis(self: Layer, coords: Array) -> Array:
-        """
-        Generate the basis vectors over a set of coordinates.  
-
-        Parameters:
-        -----------
-        coords: Array, meters
-            The paraxial coordinate system on which to generate
-            the array. 
-
-        Returns:
-        --------
-        basis: Array
-            The basis vectors associated with the aperture. 
-            These vectors are stacked in a tensor that is,
-            `(nterms, npix, npix)`. 
-        """
-
-
-    def _opd(self: Layer, coords: Array) -> Array:
-        """
-        Calculate the optical path difference that is caused 
-        by the basis and the aberations that it represents. 
-
-        Parameters:
-        -----------
-        coords: Array, meters
-            The paraxial coordinate system on which to generate
-            the array. 
-
-        Returns:
-        --------
-        opd: Array
-            The optical path difference associated with much of 
-            the path. 
-        """
-        basis: Array = self._basis(coords)
-        opd: Array = np.dot(basis.T, self.coeffs)
-        return opd
-
-
-    def __call__(self, params_dict: dict) -> dict:
-        """
-        Apply the aperture and the abberations to the wavefront.  
-
-        Parameters:
-        -----------
-        params: dict
-            A dictionary containing the key "Wavefront".
-
-        Returns:
-        --------
-        params: dict 
-            A dictionary containing the key "wavefront".
-        """
-        wavefront: object = params_dict["Wavefront"]
-        coords: Array = wavefront.pixel_positions()
-        opd: Array = self._opd(coords)
-        aperture: Array = self.aperture._aperture(coords)
-        params_dict["Wavefront"] = wavefront\
-            .add_opd(opd)\
-            .multiply_amplitude(aperture)
-        return params_dict
-
-
-class AberratedCircularAperture(AberratedAperture):
-    """
-    Parameters:
-    -----------
-    zernikes: Array
-        An array of `jit` compiled zernike basis functions 
-        that operate on a set of coordinates. In particular 
-        these coordinates correspond to a normalised set 
-        of coordinates that are centered at the the centre 
-        of the circular aperture with 1. occuring along the 
-        radius. 
-    coeffs: Array
-        The coefficients of the Zernike terms. 
-    aperture: Layer
-        Must be an instance of `CircularAperture`. This 
-        is applied alongside the basis. 
-    """
-    zernikes: Array
-    coeffs: Array
-    aperture: CircularAperture
-
-
-    def __init__(self   : Layer, 
-            noll_inds   : list, 
-            coeffs      : list, 
-            aperture    : CircularAperture):
-        """
-        Parameters:
-        -----------
-        noll_inds: Array 
-            The noll indices of the zernikes that are to be mapped 
-            over the aperture.
-        coeffs: Array 
-            The coefficients associated with the zernikes. These 
-            should be ordered by the noll index of the zernike 
-            that they refer to.
-        aperture: CircularAperture
-            A `CircularAperture` within which the aberrations are 
-            being studied. 
-        """
-        self.zernikes = [zernikes[ind] if ind < 10 else jth_zernike(ind)
-            for ind in noll_inds]
-        self.coeffs = np.asarray(coeffs).astype(float)
-        self.aperture = aperture
-
-        assert len(noll_inds) == len(coeffs)
-        assert isinstance(aperture, dl.CircularAperture)
-
-
-    def _basis(self: Layer, coords: Array) -> Array:
-        """
-        Parameters:
-        -----------
-        coords: Array, meters
-            The paraxial coordinate system on which to generate
-            the array. 
-
-        Returns:
-        --------
-        basis: Array
-            The basis vectors associated with the aperture. 
-            These vectors are stacked in a tensor that is,
-            `(nterms, npix, npix)`. Normally the basis is 
-            cropped to be just on the aperture however, this 
-            step is not necessary except for in visualisation. 
-            It has been removed to save some time in the 
-            calculations. 
-        """
-        pol_coords: list = dl.utils.cartesian_to_polar(coords)
-        rho: list = pol_coords[0]
-        theta: list = pol_coords[1]
-        basis: list = np.stack([z(rho, theta) for z in self.zernikes])
+            basis = basis\
+                .at[j]\
+                .set(intermediate / \
+                    np.sqrt((intermediate ** 2).sum() / pixel_area))
+        
         return basis
 
 
-class AberratedHexagonalAperture(AberratedAperture):
+    # NOTE: I can tell that this function is not going to be jitable.
+    # I say this because there are side effects from within 
+    # `_compute` that `jax` will block. This destroys the cache 
+    # mechanism, which I can now get rid of anyway.
+    def basis(self, coordinates : Array) -> Tensor:
+        """
+        Generate the basis. Requires a single run after which,
+        the basis is cached and can be used with no computational 
+        cost.  
+
+        Parameters
+        ----------
+        aperture : Matrix
+            The aperture over which the basis is to be generated. 
+        coordinates : Matrix, meters, radians 
+            The coordinate system over which to generate the aperture.
+
+        Returns
+        -------9
+        basis : Tensor
+            The basis polynomials evaluated on the square arrays
+            containing the apertures until `maximum_radius`.
+            The leading dimension is `n` long and 
+            each stacked array is a basis term. The final shape is:
+            `(n, npix, npix)`
+        """
+        aperture = self.aperture._aperture(coordinates)
+        zernikes = self._zernikes(coordinates)
+        return self._orthonormalise(aperture, zernikes)
+
+
+class CompoundBasis(eqx.Module):
     """
-    Parameters:
-    -----------
-    Hexikes: Array
-        An array of `jit` compiled hexike basis functions 
-        that operate on a set of coordinates. In particular 
-        these coordinates correspond to a normalised set 
-        of coordinates that are centered at the the centre 
-        of the circular aperture with 1. occuring along the 
-        radius. 
-    coeffs: Array
-        The coefficients of the Hexike terms. 
-    aperture: Layer
-        Must be an instance of `HexagonalAperture`. This 
-        is applied alongside the basis. 
+    Interfaces with compound apertures to generate basis over them.
     """
-    hexikes: Array
-    coeffs: Array
-    aperture: HexagonalAperture
+    bases : list
 
-
-    def __init__(self   : Layer, 
-            noll_inds   : list, 
-            coeffs      : list, 
-            aperture    : HexagonalAperture):
+ 
+    def __init__(self : Layer, nterms : int, 
+            compound_aperture : Layer) -> Layer:
         """
-        Parameters:
-        -----------
-        noll_inds: Array 
-            The noll indices of the zernikes that are to be mapped 
-            over the aperture.
-        coeffs: Array 
-            The coefficients associated with the zernikes. These 
-            should be ordered by the noll index of the zernike 
-            that they refer to.
-        aperture: HexagonalAperture
-            A `HexagonalAperture` within which the aberrations are 
-            being studied. 
+        Parameters
+        ----------
+        nterms : int
+            The number of basis terms to generate over each mirror.
+            pass a list of integers in the order that the apertures
+            appear in compound_aperture.
+        compound_aperture : Layer
+            The compound aperture to generate a basis over. 
         """
-
-        self.hexikes = [jth_hexike(j) for j in noll_inds]
-        self.coeffs = np.asarray(coeffs).astype(float)
-        self.aperture = aperture
-
-        assert len(noll_inds) == len(coeffs)
-        assert isinstance(aperture, dl.HexagonalAperture)
+        apertures = compound_aperture.apertures.values()
+        bases = [Basis(nterms, aperture) for aperture in apertures]
+        self.bases = bases
 
 
-    def _basis(self: Layer, coords: Array) -> Array:
+    def basis(self : Layer, coordinates : Array) -> Tensor:
         """
-        Parameters:
-        -----------
-        coords: Array, meters
-            The paraxial coordinate system on which to generate
-            the array. 
+        Generate a basis over a compound aperture.
+        
+        Parameters
+        ----------
+        coordinates : Matrix, meters, radians 
+            The coordinate system over which to generate the aperture.
 
-        Returns:
-        --------
-        basis: Array
-            The basis vectors associated with the aperture. 
-            These vectors are stacked in a tensor that is,
-            `(nterms, npix, npix)`. Normally the basis is 
-            cropped to be just on the aperture however, this 
-            step is not necessary except for in visualisation. 
-            It has been removed to save some time in the 
-            calculations. 
+        Returns 
+        -------
+        basis : Tensor
+            The basis represented as `(napp, nterms, npix, npix)`
+            array
         """
-        pol_coords: list = dl.utils.cartesian_to_polar(coords)
-        rho: list = pol_coords[0]
-        theta: list = pol_coords[1]
-        basis: list = np.stack([h(rho, theta) for h in self.hexikes])
-        return basis
+        return np.sum(np.stack([basis_vector.basis(coordinates) for basis_vector in self.bases]), axis=0)
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt 
+
+mpl.rcParams["text.usetex"] = True
+
+pixels = 128
+nterms = 6
+
+coordinates = dl.utils.get_pixel_coordinates(pixels, 2. / pixels)
+print(coordinates.shape)
+sq_aperture = dl.SquareAperture(0., 0., 0., 1., False, False)
+sq_basis = Basis(nterms, sq_aperture)
+sq_basis_vecs = sq_basis.basis(coordinates) 
+
+fig, axes = plt.subplots(2, 3)
+axes[0][0].set_title("$j = 0$")
+axes[0][0].set_xticks([])
+axes[0][0].set_yticks([])
+_map = axes[0][0].imshow(sq_basis_vecs[0])
+fig.colorbar(_map, ax=axes[0][0])
+axes[0][1].set_title("$j = 1$")
+axes[0][1].set_xticks([])
+axes[0][1].set_yticks([])
+_map = axes[0][1].imshow(sq_basis_vecs[1])
+fig.colorbar(_map, ax=axes[0][1])
+axes[0][2].set_title("$j = 2$")
+axes[0][2].set_xticks([])
+axes[0][2].set_yticks([])
+_map = axes[0][2].imshow(sq_basis_vecs[2])
+fig.colorbar(_map, ax=axes[0][2])
+axes[1][0].set_title("$j = 3$")
+axes[1][0].set_xticks([])
+axes[1][0].set_yticks([])
+_map = axes[1][0].imshow(sq_basis_vecs[3])
+fig.colorbar(_map, ax=axes[1][0])
+axes[1][1].set_title("$j = 4$")
+axes[1][1].set_xticks([])
+axes[1][1].set_yticks([])
+_map = axes[1][1].imshow(sq_basis_vecs[4])
+fig.colorbar(_map, ax=axes[1][1])
+axes[1][2].set_title("$j = 5$")
+axes[1][2].set_xticks([])
+axes[1][2].set_yticks([])
+_map = axes[1][2].imshow(sq_basis_vecs[5])
+fig.colorbar(_map, ax=axes[1][2])
+plt.show()
