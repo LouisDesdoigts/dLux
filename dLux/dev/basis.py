@@ -594,8 +594,6 @@ class AberratedArbitraryAperture(AberratedAperture):
         aperture : Matrix
             An array representing the aperture. This should be an 
             `(npix, npix)` array. 
-        number_of_hexikes : int = 15
-            The number of basis terms to generate. 
         zernikes : Tensor
             The zernike polynomials to orthonormalise on the aperture.
             This tensor should be `(nterms, npix, npix)` in size, where 
@@ -657,6 +655,8 @@ class AberratedArbitraryAperture(AberratedAperture):
             calculations. 
         """
         zernikes = np.stack([h(coords) for h in self.basis_funcs])
+        aperture = self.aperture._aperture(coords)
+        return self._orthonormalise(aperture, zernikes)
         
     
 
