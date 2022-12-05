@@ -590,7 +590,7 @@ class ApplyBasisCLIMBUtility(Utility):
         """
         Constructor for the ApplyBasisCLIMB Utility.
         """
-        self.basis            = np.ones((3, 16, 16))
+        self.basis            = np.ones((3, 768, 768))
         self.coefficients     = np.ones(3)
         self.ideal_wavelength = np.array(5e-7)
 
@@ -655,7 +655,10 @@ class TestApplyBasisCLIMB(UtilityUser):
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
+        # Small hack to avert the 768 pixel requirement for the basis
+        amplitude = np.ones((1, 256, 256))
+        phase     = np.zeros((1, 256, 256))
+        wf = WavefrontUtility().construct(amplitude=amplitude, phase=phase)
         npix = wf.npixels
         basis = np.ones((3, 3*npix, 3*npix))
         self.utility.construct(basis=basis)(wf)
