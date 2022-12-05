@@ -1,4 +1,79 @@
-class PolygonalAperture
+class PolygonalAperture(RotatableAperture):
+    """
+    A general representation of a pefect polygonal aperture. 
+    Each side of the aperture should be the same length. There
+    are some pre-existing implementations for some of the more 
+    common cases. This is designed for the exceptions that are 
+    less common. 
+
+    Parameters:
+    -----------
+    nsides: Int
+        The number of sides.
+    rmax: Float
+        The radius of the smallest circle that can fully contain the 
+        aperture. 
+    x_offset : float, meters
+        The centre of the coordinate system along the x-axis.
+    y_offset : float, meters
+        The centre of the coordinate system along the y-axis. 
+    softening: bool 
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    theta: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
+    """
+    nsides: Int
+    rmax: Float
+
+
+    def __init__(
+            self        : Layer,
+            x_offset    : Float,
+            y_offset    : Float,
+            theta       : Float,
+            rmax        : Float,
+            nsides      : Int,
+            occulting   : bool,
+            softening   : bool) -> Layer:
+        """
+        """
+        self.rmax = np.asarray(rmax).astype(float)
+        self.nsides = int(nsides)
+        super().__init__(x_offset, y_offset, theta, occulting, softening)
+
+
+    def _perp_dist_from_line(
+            self    : Layer, 
+            point   : Array, 
+            grad    : Float, 
+            coords  : Array) -> Array:
+        """
+        """
+        x, y = coords[0], coords[1]
+        x1, y1 = point[0], point[1]
+        return (y - y1 - grad * (x - x1)) / np.sqrt(1 + grad ** 2)
+
+
+    def _grad_from_two_points(
+            self    : Layer,
+            point_1 : Array,
+            point_2 : Array)-> Array:
+        """
+        """
+        x1, y1 = point_1[0], point_1[1]
+        x2, y2 = point_2[0], point_2[1]
+        return (y2 - y1) / (x2 - x1)
+
+
+    def _aperture(self: Layer, coords: Array) -> Array:
+        """
+        """
 
 #class PolygonalAperture(Aperture):
 #    """
