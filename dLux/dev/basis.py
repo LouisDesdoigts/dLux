@@ -661,7 +661,7 @@ class AberratedArbitraryAperture(AberratedAperture):
         return self._orthonormalise(aperture, zernikes)
 
 
-class MultiAberratedAperture(AberratedAperture):
+class MultiAberratedAperture(eqx.Module):
     """
     This is for disjoint apertures that have multiple components. 
     For example, the James Webb Space Telescope and the Heimdellr
@@ -671,12 +671,11 @@ class MultiAberratedAperture(AberratedAperture):
     -----------
     aperture: MutliAperture
         The aperture over which to generate each of the basis. 
-    basis_funcs: list
-        A list of `callable` functions that can be used 
-        to produce the basis. 
-    coeffs: Array
-        The coefficients of the Hexike terms. 
+    bases: List[Layer]
+        A list of `AberratedAperture` objects.
     """
+    aperture: Layer
+    bases: List[Layer]
 
 
     def __init__(self   : Layer, 
@@ -698,17 +697,90 @@ class MultiAberratedAperture(AberratedAperture):
             The noll indices of the zernikes that are to be mapped 
             over the aperture.
         """
-        self.nterms = int(nterms)
-        basis_funcs: list = []
-        for ap in aperture.to_list:
+        for ap, coeff in zip(aperture.to_list(), coeffs):
             if isinstance(ap, dl.HexagonalAperture):
-                basis_funcs.append([jth_hexike(j) for j in noll_inds])
+                self.bases.append(AberratedHexagonalAperture(
+                    noll_inds, ap, coeff))
             elif isinstance(ap, dl.CircularAperture):
-                basis_funcs.append([jth_zernike(j) for j in noll_inds])
+                self.bases.append(AberratedCircularAperture(
+                    noll_inds, ap, coeffs))
             else:
-        self.basis_funcs = [jth_hexike(j) if isinstance(ap, dl.HexagonalAperture) apaperture.to_list() 
-        super().__init__(aperture, coeffs)
+                self.bases.append(AberratedArbitraryAperture(
+                    noll_inds, ap, coeffs))
+
+        self.aperture = aperture
         assert isinstance(self.aperture, dl.MultiAperture)
+
+
+    def _basis(self: Layer, coords: Array) -> Array:
+        """
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+
+        Returns:
+        --------
+        basis: Array
+            The basis vectors associated with the aperture. 
+            These vectors are stacked in a tensor that is,
+            `(nterms, npix, npix)`. Normally the basis is 
+            cropped to be just on the aperture however, this 
+            step is not necessary except for in visualisation. 
+            It has been removed to save some time in the 
+            calculations. 
+        """
+        return np.stack([h(coords) for h in self.basis_funcs])
+
+
+    def _opd(self: Layer, coords: Array) -> Array:
+        """
+        Calculate the optical path difference that is caused 
+        by the basis and the aberations that it represents. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+
+        Returns:
+        --------
+        opd: Array
+            The optical path difference associated with much of 
+            the path. 
+        """
+        basis: Array = self._basis(coords)
+        opd: Array = np.dot(basis.T, self.coeffs)
+        return opd
+
+
+    def __call__(self, params_dict: dict) -> dict:
+        """
+        Apply the aperture and the abberations to the wavefront.  
+
+        Parameters:
+        -----------
+        params: dict
+            A dictionary containing the key "Wavefront".
+
+        Returns:
+        --------
+        params: dict 
+            A dictionary containing the key "wavefront".
+        """
+        wavefront: object = params_dict["Wavefront"]
+        coords: Array = wavefront.pixel_positions()
+        opd: Array = self._opd(coords)
+        aperture: Array = self.aperture._aperture(coords)
+        params_dict["Wavefront"] = wavefront\
+            .add_opd(opd)\
+            .multiply_amplitude(aperture)
+        return params_dict
+
+
+
 
 
 
