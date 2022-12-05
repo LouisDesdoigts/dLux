@@ -85,6 +85,9 @@ class HexagonalAperture(Aperture):
         hexagon = rectangle | left_triangle | right_triangle
         return np.asarray(hexagon).astype(float)
 
+# Now how do I want to do this? Do I want to make it perfect. 
+# Yes I do. 
+class PolygonalAperture
 
 #class PolygonalAperture(Aperture):
 #    """
