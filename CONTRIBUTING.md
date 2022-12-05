@@ -4,11 +4,13 @@
 ---
 
 ## Typing conventions
-So we have worked out a general typing convetion for the software. There are two main data-types we care about, Jax data types and others. We denote any jax-types with the `Array` typing hint. This is simply defined as as a`jax.numpy.ndarray`, so at the start of any files one should have `Array = np.ndarray`. *Any* jax arrays should use this type-hit, regardless of data-type. All other type-hints for dLux type objects should refer to the *base* object type, ie:
+So we have worked out a general typing convetion for the software. There are two main data-types we care about, Jax data types and others. We denote any jax-types with the `Array` typing hint. This is simply defined as as a`jax.numpy.ndarray`, so at the start of any files one should have `Array = np.ndarray`. *Any* jax arrays should use this type-hit, regardless of data-type. All other type-hints for dLux type objects should refer to the *base* object type assuming it is not defined inside that script, ie:
 > dLux.wavefronts.Wavefront
 > dLux.propagators.Propagator
 > dLux.optics.OpticalLayer
 > dLux.base.Instrument
+
+For classes defined in the script, add `from __future__ import annotations` to the first line of the script in order to be able to reference these types within the script.
 
 
 ---
