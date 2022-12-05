@@ -330,11 +330,8 @@ class AberratedAperture(eqx.Module, abc.ABC):
         self.coeffs = np.asarray(coeffs).astype(float)
 
 
-    @abc.abstractmethod
     def _basis(self: Layer, coords: Array) -> Array:
         """
-        Generate the basis vectors over a set of coordinates.  
-
         Parameters:
         -----------
         coords: Array, meters
@@ -346,8 +343,14 @@ class AberratedAperture(eqx.Module, abc.ABC):
         basis: Array
             The basis vectors associated with the aperture. 
             These vectors are stacked in a tensor that is,
-            `(nterms, npix, npix)`. 
+            `(nterms, npix, npix)`. Normally the basis is 
+            cropped to be just on the aperture however, this 
+            step is not necessary except for in visualisation. 
+            It has been removed to save some time in the 
+            calculations. 
         """
+        coords: Array = self.aperture.compute_aperture_normalised_coordinates(coords)
+        return np.stack([h(coords) for h in self.basis_funcs])
 
 
     def _opd(self: Layer, coords: Array) -> Array:
@@ -440,29 +443,6 @@ class AberratedCircularAperture(AberratedAperture):
         assert isinstance(aperture, dl.CircularAperture)
 
 
-    def _basis(self: Layer, coords: Array) -> Array:
-        """
-        Parameters:
-        -----------
-        coords: Array, meters
-            The paraxial coordinate system on which to generate
-            the array. 
-
-        Returns:
-        --------
-        basis: Array
-            The basis vectors associated with the aperture. 
-            These vectors are stacked in a tensor that is,
-            `(nterms, npix, npix)`. Normally the basis is 
-            cropped to be just on the aperture however, this 
-            step is not necessary except for in visualisation. 
-            It has been removed to save some time in the 
-            calculations. 
-        """
-        coords: Array = self.aperture.compute_aperture_normalised_coordinates(coords)
-        return np.stack([z(coords) for z in self.basis_funcs])
-
-
 class AberratedHexagonalAperture(AberratedAperture):
     """
     Parameters:
@@ -506,29 +486,6 @@ class AberratedHexagonalAperture(AberratedAperture):
 
         assert len(noll_inds) == len(coeffs)
         assert isinstance(aperture, dl.HexagonalAperture)
-
-
-    def _basis(self: Layer, coords: Array) -> Array:
-        """
-        Parameters:
-        -----------
-        coords: Array, meters
-            The paraxial coordinate system on which to generate
-            the array. 
-
-        Returns:
-        --------
-        basis: Array
-            The basis vectors associated with the aperture. 
-            These vectors are stacked in a tensor that is,
-            `(nterms, npix, npix)`. Normally the basis is 
-            cropped to be just on the aperture however, this 
-            step is not necessary except for in visualisation. 
-            It has been removed to save some time in the 
-            calculations. 
-        """
-        coords: Array = self.aperture.compute_aperture_normalised_coordinates(coords)
-        return np.stack([h(coords) for h in self.basis_funcs])
 
 
 class AberratedArbitraryAperture(AberratedAperture):
