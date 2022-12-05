@@ -916,6 +916,8 @@ class ApplyBasisCLIMB(OpticalLayer):
     anti-phase relationship given by the Optical Path Difference.
 
     Note: Many of the methods in the class still need doccumentation.
+    Note: This currently only outputs 256 pixel arrays and uses a 3x oversample,
+    therefore requiring a 768 pixel basis array.
 
     Parameters
     ----------
@@ -946,7 +948,8 @@ class ApplyBasisCLIMB(OpticalLayer):
             Arrays holding the continous pre-calculated basis vectors. This must
             be a 3d array of shape (nterms, npixels, npixels), with the final
             two dimensions matching that of the wavefront at time of
-            application.
+            application. This is currently required to be a nx768x768 shaped
+            array. 
         ideal_wavelength : Array
             The target wavelength at which a perfect anti-phase relationship is
             applied via the OPD.
@@ -967,6 +970,8 @@ class ApplyBasisCLIMB(OpticalLayer):
         # Inputs checks
         assert self.basis.ndim == 3, \
         ("basis must be a 3 dimensional array, ie (nterms, npixels, npixels).")
+        assert self.basis.shape[-1] == 768, \
+        ("Basis must have shape (n, 768, 768).")
         assert self.coefficients.ndim == 1 and \
         self.coefficients.shape[0] == self.basis.shape[0], \
         ("coefficients must be a 1 dimensional array with length equal to the "
