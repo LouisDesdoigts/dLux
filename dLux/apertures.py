@@ -286,13 +286,7 @@ class Aperture(eqx.Module, abc.ABC):
             at the maximum extent of the aperture
             The dimensions of the tensor are be `(2, npix, npix)`
         """
-        # TODO: check where flips should go
-        coordinates = coordinates.at[1].set(coordinates[1][::-1,:])
-
-        trans_coords = self._translate(coordinates)
-        coordinates = coordinates / self.largest_extent()
-
-        return coordinates
+        return self._translate(coordinates) / self.largest_extent()
 
 
 class AnnularAperture(Aperture):

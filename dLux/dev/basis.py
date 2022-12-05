@@ -663,12 +663,17 @@ class AberratedArbitraryAperture(AberratedAperture):
         fig, axes = plt.subplots(1, 2)
         fig.suptitle("Zernike Coordinates")
         axes[0].set_title("x")
-        axes[0].imshow(zern_coords[0])
+        _map = axes[0].imshow(zern_coords[0])
+        fig.colorbar(_map, ax=axes[0])
         axes[1].set_title("y")
-        axes[1].imshow(zern_coords[1])
+        _map = axes[1].imshow(zern_coords[1])
+        fig.colorbar(_map, ax=axes[1])
         plt.show()
 
         zernikes = np.stack([h(zern_coords) for h in self.basis_funcs])
+
+
+
         aperture = self.aperture._aperture(coords)
         return self._orthonormalise(aperture, zernikes)
 
@@ -682,7 +687,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 mpl.rcParams["text.usetex"] = True
-mpl.rcParams["image.cmap"] = "inferno"
+mpl.rcParams["image.cmap"] = "seismic"
 
 pixels = 128
 nterms = 6
