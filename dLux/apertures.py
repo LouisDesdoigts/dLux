@@ -558,6 +558,31 @@ class RotatableAperture(Aperture):
         return np.array([new_x_coordinates, new_y_coordinates])
 
 
+    def compute_aperture_normalised_coordinates(self: Layer, 
+            coords : Array) -> Array:
+        """
+        Shift a set of wavefront coodinates to be centered on the 
+        aperture and scaled such that the radial distance is 1 to 
+        the edge of the aperture, returned in polar form
+
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the aperture on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+        
+        Returns
+        -------
+        coordinates : Array
+            the radial coordinates centered on the centre of the aperture 
+            and scaled such that they are 1
+            at the maximum extent of the aperture
+            The dimensions of the tensor are be `(2, npix, npix)`
+        """
+        return self._rotate(super().compute_aperture_normalised_coordinates(coords))
+
+
 class RectangularAperture(RotatableAperture):
     """
     A rectangular aperture.

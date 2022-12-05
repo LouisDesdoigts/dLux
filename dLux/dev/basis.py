@@ -734,26 +734,26 @@ noll_inds = [i + 1 for i in range(num_ikes)]
 #plt.show()
 
 aps = {
-#    "Default": dl.SquareAperture(0., 0., 0., 1., False, False),
+    "Default": dl.SquareAperture(0., 0., 0., 1., False, False),
     "Trans. x": dl.SquareAperture(.5, 0., 0., 1., False, False),
     "Trans. y": dl.SquareAperture(0., .5, 0., 1., False, False),
-#    "Rot.": dl.SquareAperture(0., 0., np.pi / 4., 1., False, False),
+    "Rot.": dl.SquareAperture(0., 0., np.pi / 4., 1., False, False),
 #    "Soft": dl.SquareAperture(0., 0., 0., 1., False, True),
 #    "Occ.": dl.SquareAperture(0., 0., 0., 1., True, False)
 }
 
 coeffs = np.ones((num_ikes,), dtype=float)
 bases = {
-#    "Default": AberratedArbitraryAperture(noll_inds, coeffs, aps["Default"]),
+    "Default": AberratedArbitraryAperture(noll_inds, coeffs, aps["Default"]),
     "Trans. x": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. x"]),
     "Trans. y": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. y"]),
-#    "Rot.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Rot."]),
+    "Rot.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Rot."]),
 #    "Soft": AberratedArbitraryAperture(noll_inds, coeffs, aps["Soft"]),
 #    "Occ.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Occ."])
 }
 
 figure = plt.figure()
-figs = figure.subfigures(2, 1)
+figs = figure.subfigures(len(bases), 1)
 for fig, ap, basis in zip(figs, aps, bases):
     _basis = bases[basis]._basis(coordinates)
     _ap = aps[ap]._aperture(coordinates)
@@ -764,7 +764,7 @@ for fig, ap, basis in zip(figs, aps, bases):
         col = i % (num_ikes // 2)
 
         fig.suptitle(basis)
-        _map = axes[row][col].imshow(_basis[i] * _ap)
+        _map = axes[row][col].imshow(_basis[i] * _ap, cmap=plt.cm.seismic, vmin=-3, vmax=3)
         axes[row][col].set_xticks([])
         axes[row][col].set_yticks([])
         fig.colorbar(_map, ax=axes[row][col]) 
