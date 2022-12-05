@@ -734,42 +734,42 @@ noll_inds = [i + 1 for i in range(num_ikes)]
 #plt.show()
 
 aps = {
-    "Default": dl.SquareAperture(0., 0., 0., 1., False, False),
+#    "Default": dl.SquareAperture(0., 0., 0., 1., False, False),
     "Trans. x": dl.SquareAperture(.5, 0., 0., 1., False, False),
     "Trans. y": dl.SquareAperture(0., .5, 0., 1., False, False),
-    "Rot.": dl.SquareAperture(0., 0., np.pi / 4., 1., False, False),
-    "Soft": dl.SquareAperture(0., 0., 0., 1., False, True),
-    "Occ.": dl.SquareAperture(0., 0., 0., 1., True, False)
+#    "Rot.": dl.SquareAperture(0., 0., np.pi / 4., 1., False, False),
+#    "Soft": dl.SquareAperture(0., 0., 0., 1., False, True),
+#    "Occ.": dl.SquareAperture(0., 0., 0., 1., True, False)
 }
 
 coeffs = np.ones((num_ikes,), dtype=float)
 bases = {
-    "Default": AberratedArbitraryAperture(noll_inds, coeffs, aps["Default"]),
+#    "Default": AberratedArbitraryAperture(noll_inds, coeffs, aps["Default"]),
     "Trans. x": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. x"]),
     "Trans. y": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. y"]),
-    "Rot.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Rot."]),
-    "Soft": AberratedArbitraryAperture(noll_inds, coeffs, aps["Soft"]),
-    "Occ.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Occ."])
+#    "Rot.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Rot."]),
+#    "Soft": AberratedArbitraryAperture(noll_inds, coeffs, aps["Soft"]),
+#    "Occ.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Occ."])
 }
 
-figure = plt.figure()
-figs = figure.subfigures(6, 1)
-for fig, ap, basis in zip(figs, aps, bases):
+#figure = plt.figure()
+#figs = figure.subfigures(6, 1)
+for ap, basis in zip(aps, bases):
     _basis = bases[basis]._basis(coordinates)
     _ap = aps[ap]._aperture(coordinates)
 
-    axes = fig.subplots(2, num_ikes // 2)
-    for i in range(num_ikes):
-        row = i // (num_ikes // 2)
-        col = i % (num_ikes // 2)
-
-        fig.suptitle(basis)
-        _map = axes[row][col].imshow(_basis[i] * _ap)
-        axes[row][col].set_xticks([])
-        axes[row][col].set_yticks([])
-        axes[row][col].axis("off")
-        fig.colorbar(_map, ax=axes[row][col]) 
-plt.show()
+#    axes = fig.subplots(2, num_ikes // 2)
+#    for i in range(num_ikes):
+#        row = i // (num_ikes // 2)
+#        col = i % (num_ikes // 2)
+#
+#        fig.suptitle(basis)
+#        _map = axes[row][col].imshow(_basis[i] * _ap)
+#        axes[row][col].set_xticks([])
+#        axes[row][col].set_yticks([])
+#        axes[row][col].axis("off")
+#        fig.colorbar(_map, ax=axes[row][col]) 
+#plt.show()
 
 #circ_ap = dl.CircularAperture(0., 0., 1., False, False)
 #basis = AberratedCircularAperture(noll_inds, np.ones((num_ikes,)), circ_ap)
