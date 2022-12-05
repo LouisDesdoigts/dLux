@@ -661,6 +661,20 @@ class AberratedArbitraryAperture(AberratedAperture):
         return self._orthonormalise(aperture, zernikes)
 
 
+class MultiAberratedAperture(eqx.Module):
+    """
+    This is for disjoint apertures that have multiple components. 
+    For example, the James Webb Space Telescope and the Heimdellr
+    array. 
+
+    Parameters:
+    -----------
+    aperture: MutliAperture
+        The aperture over which to generate each of the basis. 
+    """
+    
+
+
 # TODO: I should pre-calculate the _aperture in the init for the 
 # AberratedCircularAperture and the AberratedHexagonalAperture
 # This is so that I can add a note.

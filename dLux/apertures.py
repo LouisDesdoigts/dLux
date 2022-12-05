@@ -919,6 +919,7 @@ class CompositeAperture(eqx.Module, abc.ABC):
     """
     apertures: dict
 
+
     def __init__(self: Layer, apertures: dict) -> Layer:
         """
         Parameters
