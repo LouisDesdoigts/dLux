@@ -301,13 +301,12 @@ class AberratedAperture(eqx.Module, abc.ABC):
         coefficients only the amount of time that is required 
         for the learning process is significantly reduced.
     """
+    basis_funcs: list
     aperture: Aperture
     coeffs: Array
 
 
-    @abc.abstractmethod
     def __init__(self   : Layer, 
-            noll_inds   : List[int],
             aperture    : Aperture, 
             coeffs      : Array) -> Layer:
         """
@@ -325,6 +324,10 @@ class AberratedAperture(eqx.Module, abc.ABC):
         coeffs: Array
             The coefficients of the basis vectors. 
         """
+        assert not aperture.occulting
+        assert isinstance(aperture, dl.Aperture)
+        self.aperture = aperture
+        self.coeffs = np.asarray(coeffs).astype(float)
 
 
     @abc.abstractmethod
@@ -410,7 +413,6 @@ class AberratedCircularAperture(AberratedAperture):
         Must be an instance of `CircularAperture`. This 
         is applied alongside the basis. 
     """
-    zernikes: Array
 
 
     def __init__(self   : Layer, 
@@ -431,9 +433,8 @@ class AberratedCircularAperture(AberratedAperture):
             A `CircularAperture` within which the aberrations are 
             being studied. 
         """
-        self.zernikes = [jth_zernike(ind) for ind in noll_inds]
-        self.coeffs = np.asarray(coeffs).astype(float)
-        self.aperture = aperture
+        self.basis_funcs = [jth_zernike(ind) for ind in noll_inds]
+        super().__init__(aperture, coeffs)
 
         assert len(noll_inds) == len(coeffs)
         assert isinstance(aperture, dl.CircularAperture)
@@ -478,7 +479,6 @@ class AberratedHexagonalAperture(AberratedAperture):
         Must be an instance of `HexagonalAperture`. This 
         is applied alongside the basis. 
     """
-    hexikes: Array
 
 
     def __init__(self   : Layer, 
@@ -500,9 +500,8 @@ class AberratedHexagonalAperture(AberratedAperture):
             being studied. 
         """
 
-        self.hexikes = [jth_hexike(j) for j in noll_inds]
-        self.coeffs = np.asarray(coeffs).astype(float)
-        self.aperture = aperture
+        self.basis_funcs = [jth_hexike(j) for j in noll_inds]
+        super().__init__(coeffs, aperture)
 
         assert len(noll_inds) == len(coeffs)
         assert isinstance(aperture, dl.HexagonalAperture)
@@ -550,7 +549,6 @@ class AberratedArbitraryAperture(AberratedAperture):
         Must be an instance of `HexagonalAperture`. This 
         is applied alongside the basis. 
     """
-    basis_funcs: list
     nterms: int
 
 
@@ -574,8 +572,7 @@ class AberratedArbitraryAperture(AberratedAperture):
         """
 
         self.basis_funcs = [jth_zernike(j) for j in noll_inds]
-        self.coeffs = np.asarray(coeffs).astype(float)
-        self.aperture = aperture
+        super().__init__(coeffs, aperture)
         self.nterms = len(noll_inds)
 
         assert len(noll_inds) == len(coeffs)
@@ -724,8 +721,8 @@ aps = {
     "Trans. x": dl.SquareAperture(.5, 0., 0., 1., False, False),
     "Trans. y": dl.SquareAperture(0., .5, 0., 1., False, False),
     "Rot.": dl.SquareAperture(0., 0., np.pi / 4., 1., False, False),
-#    "Soft": dl.SquareAperture(0., 0., 0., 1., False, True),
-#    "Occ.": dl.SquareAperture(0., 0., 0., 1., True, False)
+    "Soft": dl.SquareAperture(0., 0., 0., 1., False, True),
+    "Occ.": dl.SquareAperture(0., 0., 0., 1., True, False)
 }
 
 coeffs = np.ones((num_ikes,), dtype=float)
@@ -734,8 +731,8 @@ bases = {
     "Trans. x": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. x"]),
     "Trans. y": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. y"]),
     "Rot.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Rot."]),
-#    "Soft": AberratedArbitraryAperture(noll_inds, coeffs, aps["Soft"]),
-#    "Occ.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Occ."])
+    "Soft": AberratedArbitraryAperture(noll_inds, coeffs, aps["Soft"]),
+    "Occ.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Occ."])
 }
 
 figure = plt.figure()
