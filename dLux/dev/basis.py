@@ -793,9 +793,10 @@ mpl.rcParams["image.cmap"] = "seismic"
 pixels = 128
 nterms = 6
 
-coordinates = dl.utils.get_pixel_coordinates(pixels, 2. / pixels)
+coordinates = dl.utils.get_pixel_coordinates(pixels, 3. / pixels)
 
 num_ikes = 10
+num_basis = 3
 noll_inds = [i + 1 for i in range(num_ikes)]
 
 # So now I need to test the MultiAberratedAperture 
@@ -810,19 +811,44 @@ basis = MultiAberratedAperture(noll_inds, aper, np.ones((3, num_ikes), float))
 
 _aper = aper._aperture(coordinates)
 _basis = basis._basis(coordinates)
-_comb_basis = _basis.sum(axis=0)
+#_comb_basis = _basis.sum(axis=0)
+#
+#fig, axes = plt.subplots(2, 5)
+#for i in range(num_ikes):
+#    col = i % (num_ikes // 2)
+#    row = i // (num_ikes // 2)
+#
+#    axes[row][col].set_title(noll_inds[i])
+#    _map = axes[row][col].imshow(_comb_basis[i] * _aper)
+#    axes[row][col].set_xticks([])
+#    axes[row][col].set_yticks([])
+#    axes[row][col].axis("off")
+#    fig.colorbar(_map, ax=axes[row][col])
+#plt.show()
 
-fig, axes = plt.subplots(2, 5)
-for i in range(num_ikes):
-    col = i % (num_ikes // 2)
-    row = i // (num_ikes // 2)
+fig = plt.figure()
+figs = fig.subfigures(num_basis, 1)
+for _basis, _fig, _aper in zip(basis.bases, figs, aper.apertures):
+    _fig.suptitle(f"{_basis.__class__.__name__}")
+    __basis = _basis._basis(coordinates)
+    __aper = aper[_aper]._aperture(coordinates)
+    axes = _fig.subplots(2, (num_ikes // 2))
 
-    axes[row][col].set_title(noll_inds[i])
-    _map = axes[row][col].imshow(_comb_basis[i] * _aper)
-    axes[row][col].set_xticks([])
-    axes[row][col].set_yticks([])
-    axes[row][col].axis("off")
-    fig.colorbar(_map, ax=axes[row][col])
+    for i in range(num_ikes):
+        col = i % (num_ikes // 2)
+        row = i // (num_ikes // 2)
+
+        axes[row][col].set_title(noll_inds[i])
+        _map = axes[row][col].imshow(__basis[i] * __aper)
+        axes[row][col].set_xticks([])
+        axes[row][col].set_yticks([])
+        axes[row][col].axis("off")
+        _fig.colorbar(_map, ax=axes[row][col])
+
+    # TODO: I need some better way of interfacing with these 
+    # things. I think that I need to use an `OrderedDict` or 
+    # something along those lines. I could implement this 
+    # myself of course. 
 plt.show()
 
 
