@@ -1099,7 +1099,7 @@ class MultiAperture(CompositeAperture):
             apertures that were stored. 
         """
         return np.stack([ap._aperture(coordinates) 
-            for ap in self._apertures.values()]).sum(axis=0)
+            for ap in self.apertures.values()]).sum(axis=0)
 
 
     def to_list(self: Layer) -> list:
