@@ -699,7 +699,14 @@ class MultiAberratedAperture(AberratedAperture):
             over the aperture.
         """
         self.nterms = int(nterms)
-        self.basis_funcs = [jth_hexike(j) if aperture.get_aperture_list() 
+        basis_funcs: list = []
+        for ap in aperture.to_list:
+            if isinstance(ap, dl.HexagonalAperture):
+                basis_funcs.append([jth_hexike(j) for j in noll_inds])
+            elif isinstance(ap, dl.CircularAperture):
+                basis_funcs.append([jth_zernike(j) for j in noll_inds])
+            else:
+        self.basis_funcs = [jth_hexike(j) if isinstance(ap, dl.HexagonalAperture) apaperture.to_list() 
         super().__init__(aperture, coeffs)
         assert isinstance(self.aperture, dl.MultiAperture)
 
