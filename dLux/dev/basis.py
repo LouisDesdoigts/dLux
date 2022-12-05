@@ -459,6 +459,7 @@ class AberratedCircularAperture(AberratedAperture):
             It has been removed to save some time in the 
             calculations. 
         """
+        coords: Array = self.aperture.compute_aperture_normalised_coordinates(coords)
         return np.stack([z(coords) for z in self.basis_funcs])
 
 
@@ -680,8 +681,8 @@ class MultiAberratedAperture(eqx.Module):
 
     def __init__(self   : Layer, 
             noll_inds   : Array, 
-            aperture    : Layer, 
-            coeffs      : Array) -> Layer:
+            coeffs      : Array,
+            aperture    : Layer) -> Layer: 
         """
         Parameters:
         -----------
@@ -799,18 +800,39 @@ num_ikes = 10
 num_basis = 3
 noll_inds = [i + 1 for i in range(num_ikes)]
 
-# So now I need to test the MultiAberratedAperture 
-aps = {
-    "Right Circ.": dl.CircularAperture(-1., 0., .5, False, False),
-    "Centre Hex.": dl.HexagonalAperture(0., 0., 0., .5, False, False),
-    "Left Rect.":  dl.SquareAperture(1., 0., 0., .5, False, False)
-}
+# Testing the AberratedCircularAperture specifically
+coeffs = np.ones((num_ikes,), float)
+aper = dl.CircularAperture(1., 0., .5, False, False)
+basis = AberratedCircularAperture(noll_inds, coeffs, aper)
 
-aper = dl.MultiAperture(aps)
-basis = MultiAberratedAperture(noll_inds, aper, np.ones((3, num_ikes), float))
-
-_aper = aper._aperture(coordinates)
 _basis = basis._basis(coordinates)
+_aper = aper._aperture(coordinates)
+
+fig, axes = plt.subplots(2, 5)
+for i in range(num_ikes):
+    col = i % (num_ikes // 2)
+    row = i // (num_ikes // 2)
+
+    axes[row][col].set_title(noll_inds[i])
+    _map = axes[row][col].imshow(_basis[i] * _aper)
+    axes[row][col].set_xticks([])
+    axes[row][col].set_yticks([])
+    axes[row][col].axis("off")
+    fig.colorbar(_map, ax=axes[row][col])
+plt.show()
+
+# So now I need to test the MultiAberratedAperture 
+#aps = {
+#    "Right Circ.": dl.CircularAperture(-1., 0., .5, False, False),
+#    "Centre Hex.": dl.HexagonalAperture(0., 0., 0., .5, False, False),
+#    "Left Rect.":  dl.SquareAperture(1., 0., 0., .5, False, False)
+#}
+#
+#aper = dl.MultiAperture(aps)
+#basis = MultiAberratedAperture(noll_inds, aper, np.ones((3, num_ikes), float))
+#
+#_aper = aper._aperture(coordinates)
+#_basis = basis._basis(coordinates)
 #_comb_basis = _basis.sum(axis=0)
 #
 #fig, axes = plt.subplots(2, 5)
@@ -825,31 +847,31 @@ _basis = basis._basis(coordinates)
 #    axes[row][col].axis("off")
 #    fig.colorbar(_map, ax=axes[row][col])
 #plt.show()
-
-fig = plt.figure()
-figs = fig.subfigures(num_basis, 1)
-for _basis, _fig, _aper in zip(basis.bases, figs, aper.apertures):
-    _fig.suptitle(f"{_basis.__class__.__name__}")
-    __basis = _basis._basis(coordinates)
-    __aper = aper[_aper]._aperture(coordinates)
-    axes = _fig.subplots(2, (num_ikes // 2))
-
-    for i in range(num_ikes):
-        col = i % (num_ikes // 2)
-        row = i // (num_ikes // 2)
-
-        axes[row][col].set_title(noll_inds[i])
-        _map = axes[row][col].imshow(__basis[i] * __aper)
-        axes[row][col].set_xticks([])
-        axes[row][col].set_yticks([])
-        axes[row][col].axis("off")
-        _fig.colorbar(_map, ax=axes[row][col])
-
-    # TODO: I need some better way of interfacing with these 
-    # things. I think that I need to use an `OrderedDict` or 
-    # something along those lines. I could implement this 
-    # myself of course. 
-plt.show()
+#
+#fig = plt.figure()
+#figs = fig.subfigures(num_basis, 1)
+#for _basis, _fig, _aper in zip(basis.bases, figs, aper.apertures):
+#    _fig.suptitle(f"{_basis.__class__.__name__}")
+#    __basis = _basis._basis(coordinates)
+#    __aper = aper[_aper]._aperture(coordinates)
+#    axes = _fig.subplots(2, (num_ikes // 2))
+#
+#    for i in range(num_ikes):
+#        col = i % (num_ikes // 2)
+#        row = i // (num_ikes // 2)
+#
+#        axes[row][col].set_title(noll_inds[i])
+#        _map = axes[row][col].imshow(__basis[i] * __aper)
+#        axes[row][col].set_xticks([])
+#        axes[row][col].set_yticks([])
+#        axes[row][col].axis("off")
+#        _fig.colorbar(_map, ax=axes[row][col])
+#
+#    # TODO: I need some better way of interfacing with these 
+#    # things. I think that I need to use an `OrderedDict` or 
+#    # something along those lines. I could implement this 
+#    # myself of course. 
+#plt.show()
 
 
 # So the goal here is to perform the tests for all the apertures using the 
