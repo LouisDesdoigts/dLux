@@ -1102,3 +1102,14 @@ class MultiAperture(eqx.Module):
             for ap in self._apertures.values()]).sum(axis=0)
 
 
+    def to_list(self: Layer) -> list:
+        """
+        Returns:
+        --------
+        layers: list
+            A list of `Aperture` objects that comprise the 
+            `MultiAperture`.
+        """
+        return list(self.apertures.values())
+
+
