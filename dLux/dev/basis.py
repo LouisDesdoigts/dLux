@@ -660,15 +660,15 @@ class AberratedArbitraryAperture(AberratedAperture):
         """
         zern_coords = self.aperture.compute_aperture_normalised_coordinates(coords)
 
-        fig, axes = plt.subplots(1, 2)
-        fig.suptitle("Zernike Coordinates")
-        axes[0].set_title("x")
-        _map = axes[0].imshow(zern_coords[0])
-        fig.colorbar(_map, ax=axes[0])
-        axes[1].set_title("y")
-        _map = axes[1].imshow(zern_coords[1])
-        fig.colorbar(_map, ax=axes[1])
-        plt.show()
+#        fig, axes = plt.subplots(1, 2)
+#        fig.suptitle("Zernike Coordinates")
+#        axes[0].set_title("x")
+#        _map = axes[0].imshow(zern_coords[0])
+#        fig.colorbar(_map, ax=axes[0])
+#        axes[1].set_title("y")
+#        _map = axes[1].imshow(zern_coords[1])
+#        fig.colorbar(_map, ax=axes[1])
+#        plt.show()
 
         zernikes = np.stack([h(zern_coords) for h in self.basis_funcs])
 
@@ -752,24 +752,23 @@ bases = {
 #    "Occ.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Occ."])
 }
 
-#figure = plt.figure()
-#figs = figure.subfigures(6, 1)
-for ap, basis in zip(aps, bases):
+figure = plt.figure()
+figs = figure.subfigures(2, 1)
+for fig, ap, basis in zip(figs, aps, bases):
     _basis = bases[basis]._basis(coordinates)
     _ap = aps[ap]._aperture(coordinates)
 
-#    axes = fig.subplots(2, num_ikes // 2)
-#    for i in range(num_ikes):
-#        row = i // (num_ikes // 2)
-#        col = i % (num_ikes // 2)
-#
-#        fig.suptitle(basis)
-#        _map = axes[row][col].imshow(_basis[i] * _ap)
-#        axes[row][col].set_xticks([])
-#        axes[row][col].set_yticks([])
-#        axes[row][col].axis("off")
-#        fig.colorbar(_map, ax=axes[row][col]) 
-#plt.show()
+    axes = fig.subplots(2, num_ikes // 2)
+    for i in range(num_ikes):
+        row = i // (num_ikes // 2)
+        col = i % (num_ikes // 2)
+
+        fig.suptitle(basis)
+        _map = axes[row][col].imshow(_basis[i] * _ap)
+        axes[row][col].set_xticks([])
+        axes[row][col].set_yticks([])
+        fig.colorbar(_map, ax=axes[row][col]) 
+plt.show()
 
 #circ_ap = dl.CircularAperture(0., 0., 1., False, False)
 #basis = AberratedCircularAperture(noll_inds, np.ones((num_ikes,)), circ_ap)
