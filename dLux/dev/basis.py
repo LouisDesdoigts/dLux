@@ -810,14 +810,15 @@ basis = MultiAberratedAperture(noll_inds, aper, np.ones((3, num_ikes), float))
 
 _aper = aper._aperture(coordinates)
 _basis = basis._basis(coordinates)
+_comb_basis = _basis.sum(axis=0)
 
 fig, axes = plt.subplots(2, 5)
 for i in range(num_ikes):
-    row = i % (num_ikes // 2)
-    col = i // (num_ikes // 2)
+    col = i % (num_ikes // 2)
+    row = i // (num_ikes // 2)
 
     axes[row][col].set_title(noll_inds[i])
-    _map = axes[row][col].imshow(basis[i] * _aper)
+    _map = axes[row][col].imshow(_comb_basis[i] * _aper)
     axes[row][col].set_xticks([])
     axes[row][col].set_yticks([])
     axes[row][col].axis("off")
