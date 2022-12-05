@@ -265,6 +265,7 @@ def jth_hexike(j: int) -> callable:
     def _jth_hexike(coords: Array) -> Array:
         polar = dl.utils.cartesian_to_polar(coords)
         rho, phi = polar[0], polar[1]
+        phi = phi + np.pi / 2.
         alpha = np.pi / 6.
         wedge = np.floor((phi + alpha) / (2 * alpha))
         u_alpha = phi - wedge * (2 * alpha)
