@@ -459,7 +459,7 @@ class AberratedCircularAperture(AberratedAperture):
             It has been removed to save some time in the 
             calculations. 
         """
-        return np.stack([z(coords) for z in self.zernikes])
+        return np.stack([z(coords) for z in self.basis_funcs])
 
 
 class AberratedHexagonalAperture(AberratedAperture):
@@ -526,7 +526,7 @@ class AberratedHexagonalAperture(AberratedAperture):
             It has been removed to save some time in the 
             calculations. 
         """
-        return np.stack([h(coords) for h in self.hexikes])
+        return np.stack([h(coords) for h in self.basis_funcs])
 
 
 class AberratedArbitraryAperture(AberratedAperture):
@@ -572,7 +572,7 @@ class AberratedArbitraryAperture(AberratedAperture):
         """
 
         self.basis_funcs = [jth_zernike(j) for j in noll_inds]
-        super().__init__(coeffs, aperture)
+        super().__init__(aperture, coeffs)
         self.nterms = len(noll_inds)
 
         assert len(noll_inds) == len(coeffs)
@@ -722,7 +722,6 @@ aps = {
     "Trans. y": dl.SquareAperture(0., .5, 0., 1., False, False),
     "Rot.": dl.SquareAperture(0., 0., np.pi / 4., 1., False, False),
     "Soft": dl.SquareAperture(0., 0., 0., 1., False, True),
-    "Occ.": dl.SquareAperture(0., 0., 0., 1., True, False)
 }
 
 coeffs = np.ones((num_ikes,), dtype=float)
@@ -732,7 +731,6 @@ bases = {
     "Trans. y": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. y"]),
     "Rot.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Rot."]),
     "Soft": AberratedArbitraryAperture(noll_inds, coeffs, aps["Soft"]),
-    "Occ.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Occ."])
 }
 
 figure = plt.figure()
