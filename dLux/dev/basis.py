@@ -791,6 +791,12 @@ aper = dl.MultiAperture(aps)
 basis = MultiAberratedAperture(noll_inds, coeffs, aper)
 
 _aper = aper._aperture(coordinates)
+
+plt.title("MultiAperture")
+plt.imshow(_aper)
+plt.colorbar()
+plt.show()
+
 _basis = basis._basis(coordinates)
 _comb_basis = _basis.sum(axis=0)
 
@@ -819,7 +825,7 @@ for _basis, _fig, _aper in zip(basis.bases, figs, aper.apertures):
         row = i // (num_ikes // 2)
 
         axes[row][col].set_title(noll_inds[i])
-        _map = axes[row][col].imshow(__basis[i], vmin=-2, vmax=2)
+        _map = axes[row][col].imshow(__basis[i] * __aper, vmin=-2, vmax=2)
         axes[row][col].set_xticks([])
         axes[row][col].set_yticks([])
         _fig.colorbar(_map, ax=axes[row][col])
