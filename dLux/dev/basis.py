@@ -780,11 +780,6 @@ class MultiAberratedAperture(eqx.Module):
         return params_dict
 
 
-
-
-
-
-
 # TODO: I should pre-calculate the _aperture in the init for the 
 # AberratedCircularAperture and the AberratedHexagonalAperture
 # This is so that I can add a note.
@@ -803,6 +798,33 @@ coordinates = dl.utils.get_pixel_coordinates(pixels, 2. / pixels)
 
 num_ikes = 10
 noll_inds = [i + 1 for i in range(num_ikes)]
+
+# So now I need to test the MultiAberratedAperture 
+aps = {
+    "Right Circ.": dl.CircularAperture(-1., 0., .5, False, False),
+    "Centre Hex.": dl.HexagonalAperture(0., 0., 0., .5, False, False),
+    "Left Rect.":  dl.SquareAperture(1., 0., 0., .5, False, False)
+}
+
+aper = dl.MultiAperture(aps)
+basis = dl.MultiAberratedAperture(noll_inds, aper, np.ones(3, num_ikes))
+
+_aper = aper._aperture(coordinates)
+_basis = basis._basis(coordinates)
+
+fig, axes = plt.subplots(2, 5)
+for i in range(num_ikes):
+    row = i % (num_ikes // 2)
+    col = i // (num_ikes // 2)
+
+    axes[row][col].set_title(noll_inds[i])
+    _map = axes[row][col].imshow(basis[i] * _aper)
+    axes[row][col].set_xticks([])
+    axes[row][col].set_yticks([])
+    axes[row][col].axis("off")
+    fig.colorbar(_map, ax=axes[row][col])
+plt.show()
+
 
 # So the goal here is to perform the tests for all the apertures using the 
 # `AberratedArbitraryAperture`. 
@@ -840,40 +862,40 @@ noll_inds = [i + 1 for i in range(num_ikes)]
 #        fig.colorbar(_map, ax=axes[row][col]) 
 #plt.show()
 
-aps = {
-    "Default": dl.SquareAperture(0., 0., 0., 1., False, False),
-    "Trans. x": dl.SquareAperture(.5, 0., 0., 1., False, False),
-    "Trans. y": dl.SquareAperture(0., .5, 0., 1., False, False),
-    "Rot.": dl.SquareAperture(0., 0., np.pi / 4., 1., False, False),
-    "Soft": dl.SquareAperture(0., 0., 0., 1., False, True),
-}
-
-coeffs = np.ones((num_ikes,), dtype=float)
-bases = {
-    "Default": AberratedArbitraryAperture(noll_inds, coeffs, aps["Default"]),
-    "Trans. x": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. x"]),
-    "Trans. y": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. y"]),
-    "Rot.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Rot."]),
-    "Soft": AberratedArbitraryAperture(noll_inds, coeffs, aps["Soft"]),
-}
-
-figure = plt.figure()
-figs = figure.subfigures(len(bases), 1)
-for fig, ap, basis in zip(figs, aps, bases):
-    _basis = bases[basis]._basis(coordinates)
-    _ap = aps[ap]._aperture(coordinates)
-
-    axes = fig.subplots(2, num_ikes // 2)
-    for i in range(num_ikes):
-        row = i // (num_ikes // 2)
-        col = i % (num_ikes // 2)
-
-        fig.suptitle(basis)
-        _map = axes[row][col].imshow(_basis[i] * _ap, cmap=plt.cm.seismic, vmin=-3, vmax=3)
-        axes[row][col].set_xticks([])
-        axes[row][col].set_yticks([])
-        fig.colorbar(_map, ax=axes[row][col]) 
-plt.show()
+#aps = {
+#    "Default": dl.SquareAperture(0., 0., 0., 1., False, False),
+#    "Trans. x": dl.SquareAperture(.5, 0., 0., 1., False, False),
+#    "Trans. y": dl.SquareAperture(0., .5, 0., 1., False, False),
+#    "Rot.": dl.SquareAperture(0., 0., np.pi / 4., 1., False, False),
+#    "Soft": dl.SquareAperture(0., 0., 0., 1., False, True),
+#}
+#
+#coeffs = np.ones((num_ikes,), dtype=float)
+#bases = {
+#    "Default": AberratedArbitraryAperture(noll_inds, coeffs, aps["Default"]),
+#    "Trans. x": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. x"]),
+#    "Trans. y": AberratedArbitraryAperture(noll_inds, coeffs, aps["Trans. y"]),
+#    "Rot.": AberratedArbitraryAperture(noll_inds, coeffs, aps["Rot."]),
+#    "Soft": AberratedArbitraryAperture(noll_inds, coeffs, aps["Soft"]),
+#}
+#
+#figure = plt.figure()
+#figs = figure.subfigures(len(bases), 1)
+#for fig, ap, basis in zip(figs, aps, bases):
+#    _basis = bases[basis]._basis(coordinates)
+#    _ap = aps[ap]._aperture(coordinates)
+#
+#    axes = fig.subplots(2, num_ikes // 2)
+#    for i in range(num_ikes):
+#        row = i // (num_ikes // 2)
+#        col = i % (num_ikes // 2)
+#
+#        fig.suptitle(basis)
+#        _map = axes[row][col].imshow(_basis[i] * _ap, cmap=plt.cm.seismic, vmin=-3, vmax=3)
+#        axes[row][col].set_xticks([])
+#        axes[row][col].set_yticks([])
+#        fig.colorbar(_map, ax=axes[row][col]) 
+#plt.show()
 
 #circ_ap = dl.CircularAperture(0., 0., 1., False, False)
 #basis = AberratedCircularAperture(noll_inds, np.ones((num_ikes,)), circ_ap)
