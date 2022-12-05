@@ -731,7 +731,7 @@ class MultiAberratedAperture(eqx.Module):
             It has been removed to save some time in the 
             calculations. 
         """
-        return np.stack([h(coords) for h in self.basis_funcs])
+        return np.stack([b._basis(coords) for b in self.bases])
 
 
     def _opd(self: Layer, coords: Array) -> Array:
