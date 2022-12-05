@@ -659,6 +659,15 @@ class AberratedArbitraryAperture(AberratedAperture):
             calculations. 
         """
         zern_coords = self.aperture.compute_aperture_normalised_coordinates(coords)
+
+        fig, axes = plt.subplots(1, 2)
+        fig.suptitle("Zernike Coordinates")
+        axes[0].set_title("x")
+        axes[0].imshow(zern_coords[0])
+        axes[1].set_title("y")
+        axes[1].imshow(zern_coords[1])
+        plt.show()
+
         zernikes = np.stack([h(zern_coords) for h in self.basis_funcs])
         aperture = self.aperture._aperture(coords)
         return self._orthonormalise(aperture, zernikes)
