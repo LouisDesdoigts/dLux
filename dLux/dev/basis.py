@@ -307,8 +307,8 @@ class AberratedAperture(eqx.Module, abc.ABC):
 
 
     def __init__(self   : Layer, 
-            aperture    : Aperture, 
-            coeffs      : Array) -> Layer:
+            coeffs      : Array,
+            aperture    : Aperture) -> Layer: 
         """
         Parameters:
         -----------
@@ -434,7 +434,7 @@ class AberratedCircularAperture(AberratedAperture):
             being studied. 
         """
         self.basis_funcs = [jth_zernike(ind) for ind in noll_inds]
-        super().__init__(aperture, coeffs)
+        super().__init__(coeffs, aperture)
 
         assert len(noll_inds) == len(coeffs)
         assert isinstance(aperture, dl.CircularAperture)
@@ -572,7 +572,7 @@ class AberratedArbitraryAperture(AberratedAperture):
         """
 
         self.basis_funcs = [jth_zernike(j) for j in noll_inds]
-        super().__init__(aperture, coeffs)
+        super().__init__(coeffs, aperture)
         self.nterms = len(noll_inds)
 
         assert len(noll_inds) == len(coeffs)
@@ -697,18 +697,17 @@ class MultiAberratedAperture(eqx.Module):
             The noll indices of the zernikes that are to be mapped 
             over the aperture.
         """
+        bases = []
         for ap, coeff in zip(aperture.to_list(), coeffs):
             if isinstance(ap, dl.HexagonalAperture):
-                self.bases.append(AberratedHexagonalAperture(
-                    noll_inds, ap, coeff))
+                bases.append(AberratedHexagonalAperture(noll_inds, coeff, ap))
             elif isinstance(ap, dl.CircularAperture):
-                self.bases.append(AberratedCircularAperture(
-                    noll_inds, ap, coeffs))
+                bases.append(AberratedCircularAperture(noll_inds, coeff, ap))
             else:
-                self.bases.append(AberratedArbitraryAperture(
-                    noll_inds, ap, coeffs))
+                bases.append(AberratedArbitraryAperture(noll_inds, coeff, ap))
 
         self.aperture = aperture
+        self.bases = bases
         assert isinstance(self.aperture, dl.MultiAperture)
 
 
@@ -807,7 +806,7 @@ aps = {
 }
 
 aper = dl.MultiAperture(aps)
-basis = MultiAberratedAperture(noll_inds, aper, np.ones(3, num_ikes))
+basis = MultiAberratedAperture(noll_inds, aper, np.ones((3, num_ikes), float))
 
 _aper = aper._aperture(coordinates)
 _basis = basis._basis(coordinates)
