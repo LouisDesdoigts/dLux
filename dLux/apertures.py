@@ -770,8 +770,6 @@ class SquareAperture(RotatableAperture):
         return np.sqrt(2) * self.width / 2.
 
 
-# NOTE: This is not yet ready for deployment. The _metric method needs 
-# to be re-written. 
 class HexagonalAperture(RotatableAperture):
     """
     Generate a hexagonal aperture, parametrised by rmax. 
@@ -872,7 +870,7 @@ class HexagonalAperture(RotatableAperture):
         # along multiples of pi on three.   
         coords: Array = self._rotate(self._translate(coords))
         theta: Array = np.linspace(0, 2 * np.pi, 6, endpoint=False).reshape((6, 1, 1)) + np.pi / 6.
-        rmax: float = self.rmax
+        rmax: float = np.sqrt(3.) / 2. * self.rmax
 
         m: Array = (-1. / np.tan(theta)).reshape((6, 1, 1))
         

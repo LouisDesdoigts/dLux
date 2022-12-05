@@ -673,6 +673,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 mpl.rcParams["text.usetex"] = True
+mpl.rcParams["image.cmap"] = "inferno"
 
 pixels = 128
 nterms = 6
@@ -686,7 +687,7 @@ noll_inds = [i + 1 for i in range(num_ikes)]
 # `AberratedArbitraryAperture`. 
 aps = {
     "Sq. Ap.": dl.SquareAperture(0., 0., 0., 1., False, False),
-    "Ann. Ap.": dl.AnnularAperture(0., 0., .5, 1., False, False),
+    "Ann. Ap.": dl.AnnularAperture(0., 0., 1., .5, False, False),
     "Rect. Ap.": dl.RectangularAperture(0., 0., 0., .5, 1., False, False),
     "Hex. Ap.": dl.HexagonalAperture(0., 0., 0., 1., False, False)
 }
@@ -710,8 +711,11 @@ for fig, ap, basis in zip(figs, aps, bases):
         row = i // (num_ikes // 2)
         col = i % (num_ikes // 2)
 
-        axes[row][col].set_title(basis)
+        fig.suptitle(basis)
         _map = axes[row][col].imshow(_basis[i] * _ap)
+        axes[row][col].set_xticks([])
+        axes[row][col].set_yticks([])
+        axes[row][col].axis("off")
         fig.colorbar(_map, ax=axes[row][col]) 
 plt.show()
 
