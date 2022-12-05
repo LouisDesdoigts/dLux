@@ -825,7 +825,7 @@ noll_inds = [i + 1 for i in range(num_ikes)]
 aps = {
     "Right Circ.": dl.CircularAperture(-1., 0., .5, False, False),
     "Centre Hex.": dl.HexagonalAperture(0., 0., 0., .5, False, False),
-    "Left Rect.":  dl.SquareAperture(1., 0., 0., .5, False, False)
+    "Left Rect.":  dl.SquareAperture(1., 0., 0., 1., False, False)
 }
 
 coeffs = np.ones((3, num_ikes), float) 
@@ -845,7 +845,6 @@ for i in range(num_ikes):
     _map = axes[row][col].imshow(_comb_basis[i] * _aper)
     axes[row][col].set_xticks([])
     axes[row][col].set_yticks([])
-    axes[row][col].axis("off")
     fig.colorbar(_map, ax=axes[row][col])
 plt.show()
 
@@ -862,10 +861,9 @@ for _basis, _fig, _aper in zip(basis.bases, figs, aper.apertures):
         row = i // (num_ikes // 2)
 
         axes[row][col].set_title(noll_inds[i])
-        _map = axes[row][col].imshow(__basis[i] * __aper)
+        _map = axes[row][col].imshow(__basis[i], vmin=-2, vmax=2)
         axes[row][col].set_xticks([])
         axes[row][col].set_yticks([])
-        axes[row][col].axis("off")
         _fig.colorbar(_map, ax=axes[row][col])
 
     # TODO: I need some better way of interfacing with these 
