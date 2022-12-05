@@ -1033,7 +1033,7 @@ class CompoundAperture(eqx.Module):
             {str : Layer} where the Layer is a subclass of the 
             Aperture.
         """
-        super.__init__(apertures)
+        super().__init__(apertures)
 
 
     def _aperture(self, coordinates: Array) -> Array:
@@ -1055,7 +1055,7 @@ class CompoundAperture(eqx.Module):
             for ap in self._apertures.values()]).prod(axis=0)
 
 
-class MultiAperture(eqx.Module):
+class MultiAperture(CompositeAperture):
     """
     Represents an aperture that contains more than one single 
     aperture. The smaller sub-apertures are stored in a dictionary
@@ -1080,7 +1080,7 @@ class MultiAperture(eqx.Module):
             {str : Layer} where the Layer is a subclass of the 
             Aperture.
         """
-        super.__init__(apertures)
+        super().__init__(apertures)
 
 
     def _aperture(self, coordinates: Array) -> Array:

@@ -807,7 +807,7 @@ aps = {
 }
 
 aper = dl.MultiAperture(aps)
-basis = dl.MultiAberratedAperture(noll_inds, aper, np.ones(3, num_ikes))
+basis = MultiAberratedAperture(noll_inds, aper, np.ones(3, num_ikes))
 
 _aper = aper._aperture(coordinates)
 _basis = basis._basis(coordinates)
