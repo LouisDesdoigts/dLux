@@ -661,7 +661,7 @@ class AberratedArbitraryAperture(AberratedAperture):
         return self._orthonormalise(aperture, zernikes)
 
 
-class MultiAberratedAperture(eqx.Module):
+class MultiAberratedAperture(AberratedAperture):
     """
     This is for disjoint apertures that have multiple components. 
     For example, the James Webb Space Telescope and the Heimdellr
@@ -671,8 +671,39 @@ class MultiAberratedAperture(eqx.Module):
     -----------
     aperture: MutliAperture
         The aperture over which to generate each of the basis. 
+    basis_funcs: list
+        A list of `callable` functions that can be used 
+        to produce the basis. 
+    coeffs: Array
+        The coefficients of the Hexike terms. 
     """
-    
+
+
+    def __init__(self   : Layer, 
+            noll_inds   : Array, 
+            aperture    : Layer, 
+            coeffs      : Array) -> Layer:
+        """
+        Parameters:
+        -----------
+        aperture: Layer
+            A `MultiAperture` over which the basis will be generated. 
+            Each `Aperture` in the `MultiAperture` will be bequeathed
+            it's own basis. 
+        coeffs: Array
+            The coefficients of the basis terms in each aperture.
+            The coefficients should be a matrix that is 
+            `(nterms, napps)`.
+        noll_inds: Array 
+            The noll indices of the zernikes that are to be mapped 
+            over the aperture.
+        """
+        self.nterms = int(nterms)
+        self.basis_funcs = [jth_hexike(j) if aperture.get_aperture_list() 
+        super().__init__(aperture, coeffs)
+        assert isinstance(self.aperture, dl.MultiAperture)
+
+
 
 
 # TODO: I should pre-calculate the _aperture in the init for the 
