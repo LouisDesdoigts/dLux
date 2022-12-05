@@ -527,6 +527,7 @@ class AberratedHexagonalAperture(AberratedAperture):
             It has been removed to save some time in the 
             calculations. 
         """
+        coords: Array = self.aperture.compute_aperture_normalised_coordinates(coords)
         return np.stack([h(coords) for h in self.basis_funcs])
 
 
