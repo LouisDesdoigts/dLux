@@ -93,7 +93,10 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         is a constant. 
     """
     occulting: bool 
-    softening: float
+    compressing: bool
+    translating: bool
+    straining: bool
+    softening: Array
     centre: Array
     shear: Array
     compression: Array
@@ -109,21 +112,28 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
             straining   : bool = False,
             compressing : bool = False) -> Aperture:
         """
+        The default aperture is dis-allows the learning of all 
+        parameters. 
+
         Parameters
         ----------
         centre: float, meters
             The centre of the coordinate system along the x-axis.
-        softening: bool 
+        softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool 
+        occulting: bool = False
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
         """
         self.centre = np.asarray(centre).astype(float)
         self.softening = 1. if softening else np.inf
         self.occulting = bool(occulting)
+        self.compressing = bool(compressing)
+        self.straining = bool(straining)
+        self.translating = bool(translating)
+
 
 
     def _translate(self, coordinates: Array) -> Array:
@@ -192,25 +202,17 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         coords: Array, meters
             The coordinates of the `Aperture`.
         """
-        is_compressed = self.compression != np.ones((2, 1), float)
-        coords = jax.lax.cond(is_compressed, 
-            lambda: self._compress(coords)
-            lambda: coords) 
+        if self.translating:
+            coords: Array = self._translate(coords)
 
-        is_strained = self.strain = np.zeros((2, 1), float)
-        coords = jax.lax.cond(is_strained,
-            lambda: self._strain(coords).
-            lambda: coords)
+        if self.compressing:
+            coords: Array = self._compress(coords)
 
-        is_rotated = self.theta != 0.
-        coords = jax.lax.cond(is_rotated,
-            lambda: self._rotate(coords),
-            lambda: coords)
+        if self.straining:
+            coords: Array = self._strain(coords)
 
-        is_translated = self.centre != np.zeros((2, 1), float)
-        coords = jax.lax.cond(is_rotated, 
-            lambda: self._translate(coords),
-            lambda: coords)
+        if self.rotating:
+            coords: Array = self._rotate(coords)
 
         return coords
 
