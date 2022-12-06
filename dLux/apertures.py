@@ -17,7 +17,25 @@ __all__ = ["Aperture", "CompoundAperture", "SquareAperture",
     "MultiAperture", "RotatableAperture", "HexagonalAperture"]
 
 
-class Aperture(dLux.optics.OpticalLayer, abc.ABC):
+class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
+    """
+    """
+
+
+class AbstractDynamicAperture(ApertureLayer, abc.ABC):
+    """
+    """
+    # NOTE: Is this where the x_offset and the y_offset belong?
+    # Well let me imagine that it is thus, then we encounter
+    # problems with the AberratedAperture. Hmmm,
+
+
+class StaticAperture(StaticAperture, abc.ABC):
+    """
+    """
+
+
+class DynamicAperture(DynamicAperture, abc.ABC):
     """
     An abstract class that defines the structure of all the concrete
     apertures. An aperture is represented by an array, usually in the
@@ -913,7 +931,7 @@ class CompositeAperture(eqx.Module, abc.ABC):
         self.apertures[key] = value
 
 
-    def __call__(self, parameters: dict) -> dict:
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
         """
         Apply the aperture to an incoming wavefront.
         Parameters
@@ -928,11 +946,9 @@ class CompositeAperture(eqx.Module, abc.ABC):
             The parameter, parameters, with the "Wavefront"; key
             value updated. 
         """
-        wavefront = parameters["Wavefront"]
         wavefront = wavefront.multiply_amplitude(
             self._aperture(
                 wavefront.pixel_coordinates()))
-        parameters["Wavefront"] = wavefront
         return parameters
 
 
