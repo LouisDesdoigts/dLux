@@ -101,8 +101,13 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
 
     def __init__(self   : Aperture, 
             centre      : Array, 
-            occulting   : bool, 
-            softening   : bool) -> Aperture:
+            shear       : Array,
+            compression : Array
+            occulting   : bool = False, 
+            softening   : bool = False,
+            translating : bool = False,
+            straining   : bool = False,
+            compressing : bool = False) -> Aperture:
         """
         Parameters
         ----------
