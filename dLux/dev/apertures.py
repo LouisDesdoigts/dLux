@@ -19,8 +19,27 @@ __all__ = ["Aperture", "CompoundAperture", "SquareAperture",
 
 class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
     """
+    The ApertureLayer groups together all of the functionality 
+    that is associated with the apertures. Very little of this
+    functionality is actually implemented by itself because 
+    implementation varies amongst the subclasses. It is a 
+    layer within the class Heirachy that exists almost purely 
+    as a classification.
+
+    Parameters:
+    -----------
+    name: String
+        The address of this ApertureLayer within the optical 
+        system. 
     """
 
+    
+    def __init__(self: ApertureLayer) -> ApertureLayer:
+        """
+        Automatically assigns the name of the layer to be the 
+        class name. 
+        """
+        self.name = self.__class__.__name__
 
 class AbstractDynamicAperture(ApertureLayer, abc.ABC):
     """
