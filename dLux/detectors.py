@@ -9,7 +9,6 @@ import dLux
 from dLux.utils.interpolation import rotate, fourier_rotate
 
 
-
 __all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
            "AddConstant", "IntegerDownsample", "Rotate"]
 
@@ -59,6 +58,8 @@ class ApplyPixelResponse(DetectorLayer):
     ----------
     pixel_response : Array
         The pixel_response to apply to the input image.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     pixel_response : Array
 
@@ -111,6 +112,8 @@ class ApplyJitter(DetectorLayer):
         The size of the convolution kernel to use.
     sigma : Array, pixels
         The standard deviation of the guassian kernel, in units of pixels.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     kernel_size : int
     sigma       : Array
@@ -181,6 +184,8 @@ class ApplySaturation(DetectorLayer):
     ----------
     saturation : Array
         The value at which the saturation is applied.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     saturation : Array
 
@@ -230,6 +235,8 @@ class AddConstant(DetectorLayer):
     ----------
     value : Array
         The value to add to the image.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     value : Array
 
@@ -279,6 +286,8 @@ class IntegerDownsample(DetectorLayer):
     ----------
     kernel_size : int
         The size of the downsampling kernel.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     kernel_size : int
 
@@ -358,6 +367,8 @@ class Rotate(DetectorLayer):
         Should the rotation be done using fourier methods or interpolation.
     padding : int
         The amount of padding to use if the fourier method is used.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     angle   : Array
     fourier : bool

@@ -120,6 +120,8 @@ class CreateWavefront(OpticalLayer):
     wavefront_type: str
         Determines the type of wavefront class to create. Currently supports
         'Cartesian', 'Angular', 'FarFieldFresnel'.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     npixels        : int
     diameter       : Array
@@ -232,6 +234,8 @@ class TiltWavefront(OpticalLayer):
     ----------
     tilt_angles : Array, radians
         The (x, y) angles by which to tilt the wavefront.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     tilt_angles : Array
 
@@ -290,6 +294,8 @@ class CircularAperture(OpticalLayer):
         error.
     transmission : Array, transmission
         A binary array describing the transmission of the apertures location.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     npixels      : int
     transmission : Array
@@ -390,6 +396,11 @@ class NormaliseWavefront(OpticalLayer):
     """
     Normalises the input wavefront using the in-built wavefront normalisation
     method.
+
+    Attributes
+    ----------
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
 
 
@@ -431,12 +442,14 @@ class ApplyBasisOPD(OpticalLayer):
     arrays, and weighted by the coefficients, and converted to phases by the
     wavefront methods.
 
-    Parameters
+    Attributes
     ----------
     basis: Array, meters
         Arrays holding the pre-calculated basis vectors.
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     basis        : Array
     coefficients : Array
@@ -512,10 +525,12 @@ class AddPhase(OpticalLayer):
     """
     Adds an array of phase values to the wavefront.
 
-    Parameters
+    Attributes
     ----------
     phase: Array, radians
         The Array of phase values to be applied to the input wavefront.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     phase : Array
 
@@ -564,10 +579,12 @@ class AddOPD(OpticalLayer):
     """
     Adds an Optical Path Difference (OPD) to the wavefront.
 
-    Parameters
+    Attributes
     ----------
     opd : Array, meters
         Array of OPD values to be applied to the input wavefront.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     opd : Array
 
@@ -623,6 +640,8 @@ class TransmissiveOptic(OpticalLayer):
     ----------
     transmission : Array
         An array representing the transmission of the optic.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     transmission: Array
 
@@ -683,6 +702,8 @@ class CompoundAperture(OpticalLayer):
         The array of radii of the occulters.
     occulter_coords : Array, meters
         The array of (x, y) coordinates of the centers of the occulters.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     aperture_radii  : Array
     aperture_coords : Array
@@ -919,7 +940,7 @@ class ApplyBasisCLIMB(OpticalLayer):
     Note: This currently only outputs 256 pixel arrays and uses a 3x oversample,
     therefore requiring a 768 pixel basis array.
 
-    Parameters
+    Attributes
     ----------
     basis: Array
         Arrays holding the continous pre-calculated basis vectors.
@@ -928,6 +949,8 @@ class ApplyBasisCLIMB(OpticalLayer):
     ideal_wavelength : Array
         The target wavelength at which a perfect anti-phase relationship is
         applied via the OPD.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     basis            : Array
     coefficients     : Array
@@ -1082,7 +1105,7 @@ class Rotate(OpticalLayer):
     """
     Applies a rotation to the wavefront using interpolation methods.
 
-    Parameters
+    Attributes
     ----------
     angle : Array, radians
         The angle by which to rotate the wavefront in the clockwise direction.
@@ -1093,6 +1116,8 @@ class Rotate(OpticalLayer):
         Should the rotation be done using fourier methods or interpolation.
     padding : int
         The amount of padding to use if the fourier method is used.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     angle          : Array
     real_imaginary : bool

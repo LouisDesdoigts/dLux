@@ -81,6 +81,8 @@ class ArraySpectrum(Spectrum):
 
     Attributes
     ----------
+    wavelengths : Array, meters
+        The array of wavelengths at which the spectrum is defined.
     weights : Array
         The relative weights of each wavelength.
     """
@@ -153,6 +155,8 @@ class PolynomialSpectrum(Spectrum):
 
     Attributes
     ----------
+    wavelengths : Array, meters
+        The array of wavelengths at which the spectrum is defined.
     degree : int
         The degree of the polynomial.
     coefficients : Array
@@ -233,6 +237,15 @@ class CombinedSpectrum(ArraySpectrum):
     TODO: Expand to be arbitrary number of spectrums, store only a single
     wavelengths array and tile it on the get_wavelengths method. (ie make work
     for MultiPointSource)
+
+    Attributes
+    ----------
+    wavelengths : Array, meters
+        The (2, n) array of wavelengths at which the spectrum is defined.
+        Input can also be a 1d
+    weights : Array
+        The (2, n) relative weights of each wavelength. Defaults to uniform
+        throughput.
     """
 
 
