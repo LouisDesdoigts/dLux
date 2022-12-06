@@ -41,15 +41,28 @@ class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
         """
         self.name = self.__class__.__name__
 
+
 class AbstractDynamicAperture(ApertureLayer, abc.ABC):
     """
+    AbstractDynamicAperture:
+    ------------------------
+    This class also provides a level of classification without 
+    implementing any functionality. It was created so that 
+    `DynamicAberratedAperture` and `DynamicAperture` could 
+    inherit from a common base. 
     """
-    # NOTE: Is this where the x_offset and the y_offset belong?
-    # Well let me imagine that it is thus, then we encounter
-    # problems with the AberratedAperture. Hmmm,
+    # Now I am regretting this structure and think that I will 
+    # just go with another structure that does make use 
+    # of mutliple inheritance 
+    #
+    # The thinking is that we have `StaticAperture`, `ShapedAperture` and 
+    # `AberratedAperture` then we can combine these as we wish to the 
+    # correct affect
+    #
+    # Let's just stick to the plan. 
 
 
-class StaticAperture(StaticAperture, abc.ABC):
+class StaticAperture(ApertureLayer, abc.ABC):
     """
     """
 
