@@ -27,6 +27,8 @@ class Propagator(dLux.optics.OpticalLayer, ABC):
         Is this an 'inverse' propagation. Non-inverse propagations represents
         propagation from a pupil to a focal plane, and inverse represents
         propagation from a focal to a pupil plane.
+    name : str
+        The name for this propagator.
     """
     inverse : bool
 
@@ -87,6 +89,12 @@ class VariableSamplingPropagator(Propagator, ABC):
         Should the shift value be considered in units of pixels, or in the
         physical units of the output plane (ie pixels or meters, radians). True
         interprets the shift value in pixel units.
+    inverse : bool
+        Is this an 'inverse' propagation. Non-inverse propagations represents
+        propagation from a pupil to a focal plane, and inverse represents
+        propagation from a focal to a pupil plane.
+    name : str
+        The name for this propagator.
     """
     npixels_out     : int
     pixel_scale_out : Array
@@ -280,6 +288,15 @@ class FixedSamplingPropagator(Propagator, ABC):
 
     These propagators are implemented using the jax.numpy.fft package, with the
     appropriate normalisations and pixel sizes tracked for optical propagation.
+
+    Attributes
+    ----------
+    inverse : bool
+        Is this an 'inverse' propagation. Non-inverse propagations represents
+        propagation from a pupil to a focal plane, and inverse represents
+        propagation from a focal to a pupil plane.
+    name : str
+        The name for this propagator.
     """
 
 
@@ -379,6 +396,12 @@ class CartesianPropagator(Propagator, ABC):
     ----------
     focal_length : Array, meters
         The focal_length of the lens/mirror this propagator represents.
+    inverse : bool
+        Is this an 'inverse' propagation. Non-inverse propagations represents
+        propagation from a pupil to a focal plane, and inverse represents
+        propagation from a focal to a pupil plane.
+    name : str
+        The name for this propagator.
     """
     focal_length : Array
 
@@ -403,6 +426,15 @@ class AngularPropagator(Propagator, ABC):
     """
     A simple propagator class designed to be inhereited by propagators that
     operate on wavefronts defined in angular units in focal planes.
+
+    Attributes
+    ----------
+    inverse : bool
+        Is this an 'inverse' propagation. Non-inverse propagations represents
+        propagation from a pupil to a focal plane, and inverse represents
+        propagation from a focal to a pupil plane.
+    name : str
+        The name for this propagator.
     """
 
 
@@ -424,6 +456,12 @@ class FarFieldFresnel(Propagator, ABC):
     ----------
     propagation_shift : Array, meters
         The shift in the propagation distance of the wavefront.
+    inverse : bool
+        Is this an 'inverse' propagation. Non-inverse propagations represents
+        propagation from a pupil to a focal plane, and inverse represents
+        propagation from a focal to a pupil plane.
+    name : str
+        The name for this propagator.
     """
     propagation_shift : Array
 
@@ -451,6 +489,27 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
     A Propagator class designed to propagate a wavefront to a plane that is
     defined in cartesian units (ie meters/pixel), with a variable output
     sampling in that plane.
+
+    Attributes
+    ----------
+    npixels_out : int
+        The number of pixels in the output plane.
+    pixel_scale_out : Array, meters/pixel
+        The pixel scale in the output plane, measured in meters per pixel.
+    focal_length : Array, meters
+        The focal_length of the lens/mirror this propagator represents.
+    inverse : bool
+        Is this an 'inverse' propagation. Non-inverse propagations represents
+        propagation from a pupil to a focal plane, and inverse represents
+        propagation from a focal to a pupil plane.
+    shift : Array
+        The (x, y) shift to apply to the wavefront in the output plane.
+    pixel_shift : bool
+        Should the shift value be considered in units of pixels, or in the
+        physical units of the output plane (ie pixels or meters, radians). True
+        interprets the shift value in pixel units.
+    name : str
+        The name for this propagator.
     """
 
 
@@ -517,6 +576,26 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
     A Propagator class designed to propagate wavefronts, with pixel scale units
     defined in meters per pixel in pupil planes and radians/pixel in focal
     planes, with a variable output sampling in the output plane.
+
+    Attributes
+    ----------
+    npixels_out : int
+        The number of pixels in the output plane.
+    pixel_scale_out : Array, meters/pixel or radians/pixel
+        The pixel scale in the output plane, measured in meters per pixel in
+        pupil plane and radians per pixel in focal planes.
+    inverse : bool
+        Is this an 'inverse' propagation. Non-inverse propagations represents
+        propagation from a pupil to a focal plane, and inverse represents
+        propagation from a focal to a pupil plane.
+    shift : Array
+        The (x, y) shift to apply to the wavefront in the output plane.
+    pixel_shift : bool
+        Should the shift value be considered in units of pixels, or in the
+        physical units of the output plane (ie pixels or meters, radians). True
+        interprets the shift value in pixel units.
+    name : str
+        The name for this propagator.
     """
 
 
@@ -579,6 +658,17 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
     """
     A Propagator class designed to propagate a wavefront to a plane using a
     Fast Fourier Transfrom, with the pixel scale units defined in meters/pixel.
+
+    Attributes
+    ----------
+    focal_length : Array, meters
+        The focal_length of the lens/mirror this propagator represents.
+    inverse : bool
+        Is this an 'inverse' propagation. Non-inverse propagations represents
+        propagation from a pupil to a focal plane, and inverse represents
+        propagation from a focal to a pupil plane.
+    name : str
+        The name for this propagator.
     """
 
 
@@ -625,6 +715,15 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
     A Propagator class designed to propagate a wavefront to a plane using a
     Fast Fourier Transfrom, with the pixel scale units defined in meters/pixel
     in pupil planes and radians/pixel in focal planes.
+
+    Attributes
+    ----------
+    inverse : bool
+        Is this an 'inverse' propagation. Non-inverse propagations represents
+        propagation from a pupil to a focal plane, and inverse represents
+        propagation from a focal to a pupil plane.
+    name : str
+        The name for this propagator.
     """
 
 
@@ -666,11 +765,34 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
 
 class CartesianFresnel(FarFieldFresnel, CartesianMFT):
     """
-    A propagator class to for Far-Field fresnel propagations. This classes
+    A propagator class to for Far-Field fresnel propagations. This classes
     implements algorithms that use quadratic phase factors to better represent
     out-of-plane behaviour of wavefronts, close to the focal plane. This class
     is designed to work on Cartesian wavefronts, ie pixel units are in
     meters/pixel in the output plane.
+
+    Attributes
+    ----------
+    npixels_out : int
+        The number of pixels in the output plane.
+    pixel_scale_out : Array, meters/pixel
+        The pixel scale in the output plane, measured in meters per pixel.
+    focal_length : Array, meters
+        The focal_length of the lens/mirror this propagator represents.
+    propagation_shift : Array, meters
+        The shift in the propagation distance of the wavefront.
+    inverse : bool
+        Is this an 'inverse' propagation. Non-inverse propagations represents
+        propagation from a pupil to a focal plane, and inverse represents
+        propagation from a focal to a pupil plane.
+    shift : Array
+        The (x, y) shift to apply to the wavefront in the output plane.
+    pixel_shift : bool
+        Should the shift value be considered in units of pixels, or in the
+        physical units of the output plane (ie pixels or meters, radians). True
+        interprets the shift value in pixel units.
+    name : str
+        The name for this propagator.
     """
 
 
