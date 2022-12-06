@@ -77,7 +77,13 @@ class PolygonalAperture(RotatableAperture):
         coords: Array = self._rotate(self._translate(coords))
         theta: Array = np.linspace(0., 2. * np.pi, self.nsides, endpoint=False)
 
-        m: Array = (-1. / np.tan(theta)).reshape()
+        m: Array = (-1. / np.tan(theta)).reshape((self.nsides, 1, 1))
+        x1: Array = (rmax * np.cos(theta)).reshape((6, 1, 1))
+        y1: Array = (rmax * np.sin(theta)).reshape((6, 1, 1))
+
+        dist: Array = (y - y1 - m * (x - x1)) / np.sqrt(1 + m ** 2)
+        dist: Array = (1. - 2. * (theta <= np.pi)) * dist
+        
 
 #class PolygonalAperture(Aperture):
 #    """
