@@ -62,12 +62,7 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
     # Let's just stick to the plan. 
 
 
-class StaticAperture(ApertureLayer, abc.ABC):
-    """
-    """
-
-
-class DynamicAperture(DynamicAperture, abc.ABC):
+class DynamicAperture(AbstactDynamicAperture, abc.ABC):
     """
     An abstract class that defines the structure of all the concrete
     apertures. An aperture is represented by an array, usually in the
@@ -76,10 +71,8 @@ class DynamicAperture(DynamicAperture, abc.ABC):
 
     Attributes
     ----------
-    x_offset : float, meters
+    centre: float, meters
         The x coordinate of the centre of the aperture.
-    y_offset : float, meters
-        The y coordinate of the centre of the aperture.
     occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside.
@@ -92,25 +85,29 @@ class DynamicAperture(DynamicAperture, abc.ABC):
         of `jax` is via a `np.tanh` function. This is good for 
         derivatives. Use this feature only if encountering 
         errors when using hard edged apertures. 
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
     """
     occulting: bool 
     softening: float
-    x_offset: float
-    y_offset: float
+    centre: Array
+    shear: Array
+    compression: Array
     
 
     def __init__(self   : Aperture, 
-            x_offset    : float, 
-            y_offset    : float, 
+            centre      : Array, 
             occulting   : bool, 
             softening   : bool) -> Aperture:
         """
         Parameters
         ----------
-        x_offset : float, meters
+        centre: float, meters
             The centre of the coordinate system along the x-axis.
-        y_offset : float, meters
-            The centre of the coordinate system along the y-axis. 
         softening: bool 
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -119,22 +116,9 @@ class DynamicAperture(DynamicAperture, abc.ABC):
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
         """
-        self.x_offset = np.asarray(x_offset).astype(float)
-        self.y_offset = np.asarray(y_offset).astype(float)
+        self.centre = np.asarray(centre).astype(float)
         self.softening = 1. if softening else np.inf
         self.occulting = bool(occulting)
-
-
-    def get_centre(self: Aperture) -> Array:
-        """
-        Returns 
-        -------
-        x, y : tuple(float, float) meters
-            The coodinates of the centre of the aperture. The first 
-            element of the tuple is the x coordinate and the second 
-            is the y coordinate.
-        """
-        return np.array([self.x_offset, self.y_offset])
 
 
     def _translate(self, coordinates: Array) -> Array:
@@ -151,7 +135,24 @@ class DynamicAperture(DynamicAperture, abc.ABC):
         coordinates: Array, meters
             The translated coordinate system. 
         """
-        return coordinates - self.get_centre().reshape((2, 1, 1))
+        return coordinates[:, None, None] - self.centre
+
+
+    def _strain(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Apply a strain to the coordinate system. 
+
+        Parameters:
+        -----------
+        coords: Array
+            The coordinates to apply the strain to. 
+
+        Returns:
+        --------
+        coords: Array 
+            The strained coordinate system. 
+        """
+        return coordinates[:, None, None] * (1. + strain)
 
 
     def _soften(self: Aperture, distances: Array) -> Array:
