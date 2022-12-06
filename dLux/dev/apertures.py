@@ -172,6 +172,45 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         return coordinates[:, None, None] * self.compression
 
 
+    def _coordinates(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Transform the paraxial coordinates into the coordinate
+        system of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the `Wavefront`. 
+
+        Returns:
+        --------
+        coords: Array, meters
+            The coordinates of the `Aperture`.
+        """
+        is_compressed = self.compression != np.ones((2, 1), float)
+        coords = jax.lax.cond(is_compressed, 
+            lambda: self._compress(coords)
+            lambda: coords) 
+
+        is_strained = self.strain = np.zeros((2, 1), float)
+        coords = jax.lax.cond(is_strained,
+            lambda: self._strain(coords).
+            lambda: coords)
+
+        is_rotated = self.theta != 0.
+        coords = jax.lax.cond(is_rotated,
+            lambda: self._rotate(coords),
+            lambda: coords)
+
+        is_translated = self.centre != np.zeros((2, 1), float)
+        coords = jax.lax.cond(is_rotated, 
+            lambda: self._translate(coords),
+            lambda: coords)
+
+        return coords
+
+
+
     def _soften(self: Aperture, distances: Array) -> Array:
         """
         Softens an image so that the hard boundaries are not present. 
