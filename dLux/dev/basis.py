@@ -270,6 +270,12 @@ def jth_hexike(j: int) -> callable:
         wedge = np.floor((phi + alpha) / (2 * alpha))
         u_alpha = phi - wedge * (2 * alpha)
         r_alpha = np.cos(alpha) / np.cos(u_alpha)
+
+#        plt.title("$R_{\\alpha}$")
+#        plt.imshow(r_alpha)
+#        plt.colorbar()
+#        plt.show()
+
         return 1 / r_alpha * _jth_zernike(coords / r_alpha)
 
     return _jth_hexike
