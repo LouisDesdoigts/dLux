@@ -152,7 +152,24 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         coords: Array 
             The strained coordinate system. 
         """
-        return coordinates[:, None, None] * (1. + strain)
+        return coordinates[:, None, None] * (1. + self.strain)
+
+
+    def _compress(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Apply a compression to the coordinates.
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The uncompressed coordinates. 
+
+        Returns:
+        --------
+        coords: Array, meters
+            The compressed coordinates. 
+        """
+        return coordinates[:, None, None] * self.compression
 
 
     def _soften(self: Aperture, distances: Array) -> Array:
