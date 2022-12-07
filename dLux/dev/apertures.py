@@ -771,7 +771,7 @@ class RectangularAperture(DynamicAperture):
 
         Returns
         -------
-        _extent : float
+        extent : float
             The maximum distance from centre to edge of aperture
         """
         return np.hypot(self.length / 2., self.width / 2.)
@@ -787,17 +787,24 @@ test_plots_of_aps({
     "Rot.": RectangularAperture(1., .5, rotation=np.pi / 4.)
 })
 
-class SquareAperture(RotatableAperture):
+class SquareAperture(DynamicAperture):
     """
     A square aperture. Note: this can also be created from the rectangular 
     aperture class, but this one tracks less parameters.
 
     Parameters
     ----------
-    x_offset : float, meters
-        The centre of the coordinate system along the x-axis.
-    y_offset : float, meters
-        The centre of the coordinate system along the y-axis. 
+    centre: float, meters
+        The centre of the coordinate system in the paraxial coordinates.
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
     softening: bool 
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -814,20 +821,28 @@ class SquareAperture(RotatableAperture):
     width: float
    
  
-    def __init__(self   : Aperture, 
-            x_offset    : float, 
-            y_offset    : float,
-            theta       : float, 
-            width       : float, 
-            occulting   : bool, 
-            softening   : bool) -> Aperture:
+    def __init__(self   : ApertureLayer, 
+            width       : Array, 
+            centre      : Array = [0., 0.],
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer: 
         """
         Parameters
         ----------
-        x_offset : float, meters
-            The centre of the coordinate system along the x-axis.
-        y_offset : float, meters
-            The centre of the coordinate system along the y-axis. 
+        centre: float, meters
+            The centre of the coordinate system in the paraxial coordinates.
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
         softening: bool 
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -835,25 +850,26 @@ class SquareAperture(RotatableAperture):
         occulting: bool 
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
-        theta : float, radians
-            The rotation of the coordinate system of the aperture 
-            away from the positive x-axis. Due to the symmetry of 
-            ring shaped apertures this will not change the final 
-            shape and it is recomended that it is just set to zero.
         width: float, meters
-            The side length of the square. 
+            The length of the aperture in the x-direction.
         """
-        super().__init__(x_offset, y_offset, theta, occulting, softening)
+        super().__init__(
+            centre = centre, 
+            strain = strain,
+            compression = compression,
+            rotation = rotation, 
+            occulting = occulting, 
+            softening = softening)
         self.width = np.asarray(width).astype(float)
 
 
-    def _metric(self: Aperture, coordinates: Array) -> Array:
+    def _metric(self: ApertureLayer, coords: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
         Parameters:
         -----------
-        coordinates: Array, meters
+        coords: Array, meters
             The paraxial coordinates of the `Wavefront`.
 
         Returns:
@@ -861,31 +877,33 @@ class SquareAperture(RotatableAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        coordinates = self._rotate(self._translate(coordinates))
-        x_mask = self._soften(- np.abs(coordinates[0]) + self.width / 2.)
-        y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
+        x_mask = self._soften(- np.abs(coords[0]) + self.width / 2.)
+        y_mask = self._soften(- np.abs(coords[1]) + self.width / 2.)
         return x_mask * y_mask
 
 
-    def _extent(self) -> float:
+    def _extent(self: ApertureLayer) -> Array:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
 
-        Parameters
-        ----------
-        coordinates : Array
-            The cartesian coordinates to generate the hexikes on.
-            The dimensions of the tensor should be `(2, npix, npix)`.
-            where the leading axis is the x and y dimensions.  
-
         Returns
         -------
-        _extent : float
+        extent : float
             The maximum distance from centre to edge of aperture
         """
         return np.sqrt(2) * self.width / 2.
 
+test_plots_of_aps({
+   "Occ. Soft": SquareAperture(1., occulting=True, softening=True),
+   "Occ. Hard": SquareAperture(1., occulting=True),
+   "Soft": SquareAperture(1., softening=True),
+   "Hard": SquareAperture(1.),
+   "Trans.": SquareAperture(1., centre=[.5, .5]),
+   "Strain": SquareAperture(1., strain=[.5, 0.]),
+   "Compr.": SquareAperture(1., compression=[.5, 1.]),
+   "Rot.": SquareAperture(1., rotation=np.pi / 4.)
+})
 
 class HexagonalAperture(RotatableAperture):
     """
