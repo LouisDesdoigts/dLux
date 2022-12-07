@@ -584,7 +584,7 @@ class CircularAperture(DynamicAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        coords = self._coordinates(coords)
+        # TODO: Optimisation here.
         coords = dLux.utils.cartesian_to_polar(coords)[0]
         return self._soften(- coords + self.radius)
 
