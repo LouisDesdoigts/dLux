@@ -117,18 +117,23 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
     """
     occulting: bool 
     softening: Array
     centre: Array
     strain: Array
     compression: Array
+    rotation: Array
     
 
     def __init__(self   : ApertureLayer, 
             centre      : Array = [0., 0.], 
-            strain       : Array = [0., 0.],
+            strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
+            rotation    : Array = 0.,
             occulting   : bool = False, 
             softening   : bool = False) -> Aperture:
         """
@@ -152,11 +157,15 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
         """
         super().__init__()
         self.centre = np.asarray(centre).astype(float)
         self.strain = np.asarray(strain).astype(float)
         self.compression = np.asarray(compression).astype(float)
+        self.rotation = np.asarray(rotation).astype(float)
         self.softening = 1. if softening else np.inf
         self.occulting = bool(occulting)
 
@@ -232,6 +241,29 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
             the aperture. What is returned is the non-occulting 
             version of the aperture. 
         """
+
+
+    def _rotate(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Rotate the coordinate system by a pre-specified amount,
+        `self._theta`
+
+        Parameters
+        ----------
+        coords : Array
+            A `(2, npix, npix)` representation of the coordinate 
+            system. The leading dimensions specifies the x and then 
+            the y coordinates in that order. 
+
+        Returns
+        -------
+        coordinates : Array
+            The rotated coordinate system. 
+        """
+        x, y = coords[0], coords[1]
+        new_x = np.cos(self.rotation) * x + np.sin(self.rotation) * y
+        new_y = -np.sin(self.rotation) * x + np.cos(self.rotation) * y
+        return np.array([new_x, new_y])
 
 
     def _translate(self, coordinates: Array) -> Array:
@@ -314,6 +346,11 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         is_strain: bool = (self.strain != np.zeros((2,), float)).any()
         coords: Array = jax.lax.cond(is_strain,
             lambda: self._strain(coords),
+            lambda: coords)
+
+        is_rot: bool = (self.rotation != 0.)
+        coords: Array = jax.lax.cond(is_rot,
+            lambda: self._rotate(coords),
             lambda: coords)
 
         return coords
@@ -456,7 +493,12 @@ class AnnularAperture(DynamicAperture):
             The x and y compression of the coordinate system. This 
             is a constant. 
         """
-        super().__init__(centre, strain, compression, occulting, softening)
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            compression = compression, 
+            occulting = occulting, 
+            softening = softening)
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
 
@@ -566,7 +608,12 @@ class CircularAperture(DynamicAperture):
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
         """
-        super().__init__(centre, strain, compression, occulting, softening)
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            compression = compression, 
+            occulting = occulting, 
+            softening = softening)
         self.radius = np.asarray(radius).astype(float)
 
 
