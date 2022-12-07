@@ -99,10 +99,10 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
     compression: Array
     
 
-    def __init__(self   : Aperture, 
-            centre      : Array, 
-            shear       : Array,
-            compression : Array
+    def __init__(self   : ApertureLayer, 
+            centre      : Array = [0., 0.], 
+            shear       : Array = [0., 0.],
+            compression : Array = [1., 1.],
             occulting   : bool = False, 
             softening   : bool = False) -> Aperture:
         """
@@ -472,7 +472,26 @@ class AnnularAperture(DynamicAperture):
         """
         return self.rmax
       
+      
+ann_aps = {
+    "Occ. Soft. Circ Ap.": dl.AnnularAperture([0., 0.], [0., 0.], [1., 1.], 1., .5, True, True),
+    "Occ. Hard. Circ Ap.": dl.AnnularAperture(0., 0., 1., .5, True, False),
+    "Soft Circ. Ap.": dl.AnnularAperture(0., 0., 1., .5, False, True),
+    "Hard Circ. Ap.": dl.AnnularAperture(0., 0., 1., .5, False, False),
+    "Trans. X Circ. Ap.": dl.AnnularAperture(.5, 0., 1., .5, False, False),
+    "Trans. Y Circ. Ap.": dl.AnnularAperture(0., .5, 1., .5, False, False)
+}
 
+for i, ap in enumerate(ann_aps):
+    axes[i].set_title(ap)
+    axes[i].set_xticks([])
+    axes[i].set_yticks([])
+    _map = axes[i].imshow(_aps[ap]._aperture(coordinates))
+    subfig.colorbar(_map, ax=axes[i])
+
+plt.show()
+
+# TODO: 
 class CircularAperture(Aperture):
     """
     A circular aperture represented as a binary array.
