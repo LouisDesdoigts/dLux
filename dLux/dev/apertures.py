@@ -484,7 +484,7 @@ ann_aps = {
     "Hard": AnnularAperture(1., .5),
     "Trans.": AnnularAperture(1., .5, centre=[.5, .5]),
     "Strain": AnnularAperture(1., .5, strain=[.5, 0.]),
-    "Compr.": AnnularAperture(1., .5, compression=[.5, 0.])
+    "Compr.": AnnularAperture(1., .5, compression=[.5, 1.])
 }
 
 npix = 128
