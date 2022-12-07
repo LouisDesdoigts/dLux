@@ -91,6 +91,16 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
+    straining: bool
+        True if the strain is to be applied at runtime. This is 
+        an optimisation that reduces the runtime cost of parameters
+        that are not getting learned.
+    compressing: bool
+        True if the compression is to be applied at runtime. This 
+        is an optimisation that reduces the runtime cost. 
+    translating: bool
+        True if the translation is to be applied at runtime. This 
+        is an optimisation that reduces the runtime cost. 
     """
     occulting: bool 
     compressing: bool
@@ -98,7 +108,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
     straining: bool
     softening: Array
     centre: Array
-    shear: Array
+    strain: Array
     compression: Array
     
 
@@ -126,14 +136,31 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         occulting: bool = False
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        straining: bool
+            True if the strain is to be applied at runtime. This is 
+            an optimisation that reduces the runtime cost of parameters
+            that are not getting learned.
+        compressing: bool
+            True if the compression is to be applied at runtime. This 
+            is an optimisation that reduces the runtime cost. 
+        translating: bool
+            True if the translation is to be applied at runtime. This 
+            is an optimisation that reduces the runtime cost. 
         """
         self.centre = np.asarray(centre).astype(float)
+        self.strain = np.asarray(strain).astype(float)
+        self.compression = np.asarray(compression).astype(float)
         self.softening = 1. if softening else np.inf
         self.occulting = bool(occulting)
         self.compressing = bool(compressing)
         self.straining = bool(straining)
         self.translating = bool(translating)
-
 
 
     def _translate(self, coordinates: Array) -> Array:
@@ -329,7 +356,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         """
 
 
-    def compute_aperture_normalised_coordinates(self: Aperture, 
+    def _normalised_coordinates(self: Aperture, 
             coordinates : Array) -> Array:
         """
         Shift a set of wavefront coodinates to be centered on the 
@@ -623,7 +650,7 @@ class RotatableAperture(Aperture):
         return np.array([new_x_coordinates, new_y_coordinates])
 
 
-    def compute_aperture_normalised_coordinates(self: Aperture, 
+    def _normalised_coordinates(self: Aperture, 
             coords : Array) -> Array:
         """
         Shift a set of wavefront coodinates to be centered on the 
@@ -645,7 +672,7 @@ class RotatableAperture(Aperture):
             at the maximum extent of the aperture
             The dimensions of the tensor are be `(2, npix, npix)`
         """
-        return self._rotate(super().compute_aperture_normalised_coordinates(coords))
+        return self._rotate(super()._normalised_coordinates(coords))
 
 
 class RectangularAperture(RotatableAperture):
@@ -1902,7 +1929,7 @@ class AberratedAperture(eqx.Module, abc.ABC):
             It has been removed to save some time in the 
             calculations. 
         """
-        coords: Array = self.aperture.compute_aperture_normalised_coordinates(coords)
+        coords: Array = self.aperture._normalised_coordinates(coords)
         return np.stack([h(coords) for h in self.basis_funcs])
 
 
@@ -2167,7 +2194,7 @@ class AberratedArbitraryAperture(AberratedAperture):
             It has been removed to save some time in the 
             calculations. 
         """
-        zern_coords = self.aperture.compute_aperture_normalised_coordinates(coords)
+        zern_coords = self.aperture._normalised_coordinates(coords)
         zernikes = np.stack([h(zern_coords) for h in self.basis_funcs])
         aperture = self.aperture._aperture(coords)
         return self._orthonormalise(aperture, zernikes)
