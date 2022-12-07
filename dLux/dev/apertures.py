@@ -272,15 +272,17 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         """
 
 
-    def _aperture(self: Aperture, coordinates: Array) -> Array:
+    def _aperture(self: Aperture, coords: Array) -> Array:
         """
         Compute the array representing the aperture. 
 
 
         """
-        aperture = self._metric(coordinates)
+        coords: Array = self._coordinates(coords) 
+        aperture: Array = self._metric(coords)
+
         if self.occulting:
-            aperture = (1 - aperture)
+            aperture: Array = (1. - aperture)
 
         return aperture
 
@@ -308,7 +310,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
 
 
     @abc.abstractmethod
-    def largest_extent(self) -> float:
+    def _extent(self: ApertureLayer) -> Array:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre. For inherited classes, consider implementing analytically for speed.
