@@ -6,7 +6,7 @@ import jax
 import dLux
 import abc
 import functools
-from typing import TypeVar
+from typing import TypeVar, Int
 
 
 Array = np.ndarray
@@ -921,10 +921,17 @@ class PolygonalAperture(DynamicAperture):
     rmax: Float
         The radius of the smallest circle that can fully contain the 
         aperture. 
-    x_offset : float, meters
-        The centre of the coordinate system along the x-axis.
-    y_offset : float, meters
-        The centre of the coordinate system along the y-axis. 
+    centre: float, meters
+        The centre of the coordinate system in the paraxial coordinates.
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
     softening: bool 
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -932,28 +939,57 @@ class PolygonalAperture(DynamicAperture):
     occulting: bool 
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
-    theta: float, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
     """
     nsides: Int
     rmax: Float
 
 
     def __init__(
-            self        : Layer,
-            x_offset    : Float,
-            y_offset    : Float,
-            theta       : Float,
-            rmax        : Float,
+            self        : ApertureLayer,
+            rmax        : Array,
             nsides      : Int,
-            occulting   : bool,
-            softening   : bool) -> Layer:
+            centre      : Array = [0., 0.],
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer: 
         """
+        Parameters:
+        -----------
+        nsides: Int
+            The number of sides.
+        rmax: Float
+            The radius of the smallest circle that can fully contain the 
+            aperture. 
+        centre: float, meters
+            The centre of the coordinate system in the paraxial coordinates.
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        softening: bool 
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool 
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
         """
+        super().__init__(
+            centre = centre,
+            strain = strain,
+            compression = compression,
+            rotation = rotation,
+            occulting = occulting, 
+            softening = softening)
         self.rmax = np.asarray(rmax).astype(float)
         self.nsides = int(nsides)
-        super().__init__(x_offset, y_offset, theta, occulting, softening)
 
 
     def _perp_dist_from_line(
