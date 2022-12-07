@@ -163,6 +163,79 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         self.translating = bool(translating)
 
 
+    def __call__(self: Aperture, wavefront: Wavefront) -> Wavefront:
+        """
+        Apply the aperture to an incoming wavefront.
+
+        Parameters
+        ----------
+        parameters : dict
+            A dictionary containing the parameters of the model. 
+            The dictionary must satisfy `parameters.get("Wavefront")
+            != None`. 
+
+        Returns
+        -------
+        parameters : dict
+            The parameter, parameters, with the "Wavefront"; key
+            value updated. 
+        """
+        coords = wavefront.pixel_coordinates()
+        aperture = self._aperture(coords)
+        return wavefront.multiply_amplitude(aperture)
+
+
+    @abc.abstractmethod
+    def _extent(self: ApertureLayer) -> Array:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre. For inherited classes, consider implementing analytically for speed.
+
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        _extent : float
+            The maximum distance from centre to edge of aperture
+        """
+
+
+    @abc.abstractmethod
+    def _metric(self: Aperture, distances: Array) -> Array:
+        """
+        A measure of how far a pixel is from the aperture.
+        This is a very abstract description that was constructed 
+        when dealing with the soft edging. For a normal binary 
+        representation the metric is zero if it is inside the
+        aperture and one if it is outside the aperture. Notice,
+        we have not attempted to prove that this is a metric 
+        via the axioms, this is just a handy name that brings 
+        to mind the general idea. For a soft edged aperture the 
+        metric is different.
+
+        Parameters:
+        -----------
+        distances: Array
+            The distances of each pixel from the edge of the aperture. 
+            Again, the words distances is designed to aid in 
+            conveying the idea and is not strictly true. We are
+            permitting negative distances when inside the aperture
+            because this was simplest to implement. 
+
+        Returns:
+        --------
+        non_occ_ap: Array 
+            This is essential the final step in processing to produce
+            the aperture. What is returned is the non-occulting 
+            version of the aperture. 
+        """
+
+
     def _translate(self, coordinates: Array) -> Array:
         """
         Move the center of the aperture. 
@@ -244,7 +317,6 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         return coords
 
 
-
     def _soften(self: Aperture, distances: Array) -> Array:
         """
         Softens an image so that the hard boundaries are not present. 
@@ -268,37 +340,6 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
-    @abc.abstractmethod
-    def _metric(self: Aperture, distances: Array) -> Array:
-        """
-        A measure of how far a pixel is from the aperture.
-        This is a very abstract description that was constructed 
-        when dealing with the soft edging. For a normal binary 
-        representation the metric is zero if it is inside the
-        aperture and one if it is outside the aperture. Notice,
-        we have not attempted to prove that this is a metric 
-        via the axioms, this is just a handy name that brings 
-        to mind the general idea. For a soft edged aperture the 
-        metric is different.
-
-        Parameters:
-        -----------
-        distances: Array
-            The distances of each pixel from the edge of the aperture. 
-            Again, the words distances is designed to aid in 
-            conveying the idea and is not strictly true. We are
-            permitting negative distances when inside the aperture
-            because this was simplest to implement. 
-
-        Returns:
-        --------
-        non_occ_ap: Array 
-            This is essential the final step in processing to produce
-            the aperture. What is returned is the non-occulting 
-            version of the aperture. 
-        """
-
-
     def _aperture(self: Aperture, coords: Array) -> Array:
         """
         Compute the array representing the aperture. 
@@ -312,48 +353,6 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
             aperture: Array = (1. - aperture)
 
         return aperture
-
-
-    def __call__(self: Aperture, wavefront: Wavefront) -> Wavefront:
-        """
-        Apply the aperture to an incoming wavefront.
-
-        Parameters
-        ----------
-        parameters : dict
-            A dictionary containing the parameters of the model. 
-            The dictionary must satisfy `parameters.get("Wavefront")
-            != None`. 
-
-        Returns
-        -------
-        parameters : dict
-            The parameter, parameters, with the "Wavefront"; key
-            value updated. 
-        """
-        coords = wavefront.pixel_coordinates()
-        aperture = self._aperture(coords)
-        return wavefront.multiply_amplitude(aperture)
-
-
-    @abc.abstractmethod
-    def _extent(self: ApertureLayer) -> Array:
-        """
-        Returns the largest distance to the outer edge of the aperture from the
-        centre. For inherited classes, consider implementing analytically for speed.
-
-        Parameters
-        ----------
-        coordinates : Array
-            The cartesian coordinates to generate the hexikes on.
-            The dimensions of the tensor should be `(2, npix, npix)`.
-            where the leading axis is the x and y dimensions.  
-
-        Returns
-        -------
-        _extent : float
-            The maximum distance from centre to edge of aperture
-        """
 
 
     def _normalised_coordinates(self: Aperture, 
@@ -378,7 +377,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
             at the maximum extent of the aperture
             The dimensions of the tensor are be `(2, npix, npix)`
         """
-        return self._translate(coordinates) / self._extent()
+        return self._coordinates(coordinates) / self._extent()
 
 
 class AnnularAperture(Aperture):
