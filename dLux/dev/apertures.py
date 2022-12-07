@@ -324,7 +324,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
 
         Returns
         -------
-        largest_extent : float
+        _extent : float
             The maximum distance from centre to edge of aperture
         """
 
@@ -351,7 +351,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
             at the maximum extent of the aperture
             The dimensions of the tensor are be `(2, npix, npix)`
         """
-        return self._translate(coordinates) / self.largest_extent()
+        return self._translate(coordinates) / self._extent()
 
 
 class AnnularAperture(Aperture):
@@ -435,7 +435,7 @@ class AnnularAperture(Aperture):
             self._soften(- coordinates + self.rmax)
 
 
-    def largest_extent(self: Aperture) -> float:
+    def _extent(self: Aperture) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
@@ -449,7 +449,7 @@ class AnnularAperture(Aperture):
 
         Returns
         -------
-        largest_extent : float
+        _extent : float
             The maximum distance from centre to edge of aperture
         """
         return self.rmax
@@ -524,7 +524,7 @@ class CircularAperture(Aperture):
         return self._soften(- coordinates + self.radius)
 
 
-    def largest_extent(self: Aperture) -> float:
+    def _extent(self: Aperture) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
@@ -538,7 +538,7 @@ class CircularAperture(Aperture):
 
         Returns
         -------
-        largest_extent : float
+        _extent : float
             The maximum distance from centre to edge of aperture
         """
         return self.radius
@@ -734,7 +734,7 @@ class RectangularAperture(RotatableAperture):
         return x_mask * y_mask
 
 
-    def largest_extent(self) -> float:
+    def _extent(self) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
@@ -748,7 +748,7 @@ class RectangularAperture(RotatableAperture):
 
         Returns
         -------
-        largest_extent : float
+        _extent : float
             The maximum distance from centre to edge of aperture
         """
         return np.hypot(self.length / 2., self.width / 2.)
@@ -834,7 +834,7 @@ class SquareAperture(RotatableAperture):
         return x_mask * y_mask
 
 
-    def largest_extent(self) -> float:
+    def _extent(self) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
@@ -848,7 +848,7 @@ class SquareAperture(RotatableAperture):
 
         Returns
         -------
-        largest_extent : float
+        _extent : float
             The maximum distance from centre to edge of aperture
         """
         return np.sqrt(2) * self.width / 2.
@@ -911,7 +911,7 @@ class HexagonalAperture(RotatableAperture):
         return self.rmax
 
 
-    def largest_extent(self: Aperture) -> float:
+    def _extent(self: Aperture) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
@@ -925,7 +925,7 @@ class HexagonalAperture(RotatableAperture):
 
         Returns
         -------
-        largest_extent : float
+        _extent : float
             The maximum distance from centre to edge of aperture
         """
         return self.rmax
