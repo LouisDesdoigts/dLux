@@ -376,6 +376,12 @@ class AnnularAperture(DynamicAperture):
     ----------
     centre: float, meters
         The centre of the coordinate system in the paraxial coordinates.
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
     rmax : float
         The proportion of the pixel vector that is contained within
         the outer ring of the aperture.
@@ -389,12 +395,6 @@ class AnnularAperture(DynamicAperture):
     occulting: bool 
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
-    strain: Array
-        Linear stretching of the x and y axis representing a 
-        strain of the coordinate system.
-    compression: Array 
-        The x and y compression of the coordinate system. This 
-        is a constant. 
     """
     rmin : float
     rmax : float
@@ -500,17 +500,20 @@ for i, ap in enumerate(ann_aps):
 
 plt.show()
 
-# TODO: 
-class CircularAperture(Aperture):
+class CircularAperture(DynamicAperture):
     """
     A circular aperture represented as a binary array.
 
     Parameters
     ----------
-    x_offset : float, meters
-        The centre of the coordinate system along the x-axis.
-    y_offset : float, meters
-        The centre of the coordinate system along the y-axis. 
+    centre: float, meters
+        The centre of the coordinate system in the paraxial coordinates.
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
     softening: bool 
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -524,19 +527,24 @@ class CircularAperture(Aperture):
     radius: float
    
  
-    def __init__(self   : Aperture, 
-            x_offset    : float,
-            y_offset    : float,
-            radius      : float, 
+    def __init__(self   : ApertureLayer, 
+            radius      : Array, 
+            centre      : Array = [0., 0.],
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
             occulting   : bool, 
             softening   : bool) -> Array:
         """
         Parameters
         ----------
-        x_offset : float, meters
-            The centre of the coordinate system along the x-axis.
-        y_offset : float, meters
-            The centre of the coordinate system along the y-axis. 
+        centre: float, meters
+            The centre of the coordinate system in the paraxial coordinates.
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
         radius: float, meters 
             The radius of the aperture.
         softening: bool 
@@ -547,11 +555,11 @@ class CircularAperture(Aperture):
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
         """
-        super().__init__(x_offset, y_offset, occulting, softening)
+        super().__init__(centre, strain, compression, occulting, softening)
         self.radius = np.asarray(radius).astype(float)
 
 
-    def _metric(self, coordinates: Array) -> Array:
+    def _metric(self: ApertureLayer, coords: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -565,12 +573,12 @@ class CircularAperture(Aperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        coordinates = self._translate(coordinates)
-        coordinates = dLux.utils.cartesian_to_polar(coordinates)[0]
-        return self._soften(- coordinates + self.radius)
+        coords = self._coords(coords)
+        coords = dLux.utils.cartesian_to_polar(coords)[0]
+        return self._soften(- coords + self.radius)
 
 
-    def _extent(self: Aperture) -> float:
+    def _extent(self: ApertureLayer) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
