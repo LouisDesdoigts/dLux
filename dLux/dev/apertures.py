@@ -91,21 +91,8 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    straining: bool
-        True if the strain is to be applied at runtime. This is 
-        an optimisation that reduces the runtime cost of parameters
-        that are not getting learned.
-    compressing: bool
-        True if the compression is to be applied at runtime. This 
-        is an optimisation that reduces the runtime cost. 
-    translating: bool
-        True if the translation is to be applied at runtime. This 
-        is an optimisation that reduces the runtime cost. 
     """
     occulting: bool 
-    compressing: bool
-    translating: bool
-    straining: bool
     softening: Array
     centre: Array
     strain: Array
@@ -117,10 +104,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
             shear       : Array,
             compression : Array
             occulting   : bool = False, 
-            softening   : bool = False,
-            translating : bool = False,
-            straining   : bool = False,
-            compressing : bool = False) -> Aperture:
+            softening   : bool = False) -> Aperture:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
@@ -142,25 +126,12 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        straining: bool
-            True if the strain is to be applied at runtime. This is 
-            an optimisation that reduces the runtime cost of parameters
-            that are not getting learned.
-        compressing: bool
-            True if the compression is to be applied at runtime. This 
-            is an optimisation that reduces the runtime cost. 
-        translating: bool
-            True if the translation is to be applied at runtime. This 
-            is an optimisation that reduces the runtime cost. 
         """
         self.centre = np.asarray(centre).astype(float)
         self.strain = np.asarray(strain).astype(float)
         self.compression = np.asarray(compression).astype(float)
         self.softening = 1. if softening else np.inf
         self.occulting = bool(occulting)
-        self.compressing = bool(compressing)
-        self.straining = bool(straining)
-        self.translating = bool(translating)
 
 
     def __call__(self: Aperture, wavefront: Wavefront) -> Wavefront:
@@ -302,17 +273,20 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         coords: Array, meters
             The coordinates of the `Aperture`.
         """
-        if self.translating:
-            coords: Array = self._translate(coords)
+        is_trans = (self.centre != np.zeros((2,), float)).all()
+        coords: Array = jax.lax.cond(is_trans,
+            lambda: self._translate(coords),
+            lambda: coords)
 
-        if self.compressing:
-            coords: Array = self._compress(coords)
+        is_compr: bool = (self.compression != np.ones((2,), float)).all()
+        coords: Array = jax.lax.cond(is_compr,
+            lambda: self._compress(coords),
+            lambda: coords)
 
-        if self.straining:
-            coords: Array = self._strain(coords)
-
-        if self.rotating:
-            coords: Array = self._rotate(coords)
+        is_strain: bool = (self.strain != np.zeros((2,), float).all()
+        coords: Array = jax.lax.cond(is_strain,
+            lambda: self._strain(coords),
+            lambda: coords)
 
         return coords
 
