@@ -1,4 +1,6 @@
 import equinox as eqx
+import matplotlib as mpl 
+import matplotlib.pyplot as plt
 import jax.numpy as np
 import jax 
 import dLux
@@ -34,7 +36,7 @@ class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
     """
 
     
-    def __init__(self: ApertureLayer) -> ApertureLayer:
+    def __init__(self: dLux.optics.OpticalLayer) -> dLux.optics.OpticalLayer:
         """
         Automatically assigns the name of the layer to be the 
         class name. 
@@ -62,7 +64,7 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
     # Let's just stick to the plan. 
 
 
-class DynamicAperture(AbstactDynamicAperture, abc.ABC):
+class DynamicAperture(AbstractDynamicAperture, abc.ABC):
     """
     An abstract class that defines the structure of all the concrete
     apertures. An aperture is represented by an array, usually in the
@@ -101,7 +103,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
 
     def __init__(self   : ApertureLayer, 
             centre      : Array = [0., 0.], 
-            shear       : Array = [0., 0.],
+            strain       : Array = [0., 0.],
             compression : Array = [1., 1.],
             occulting   : bool = False, 
             softening   : bool = False) -> Aperture:
@@ -127,6 +129,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
             The x and y compression of the coordinate system. This 
             is a constant. 
         """
+        super().__init__()
         self.centre = np.asarray(centre).astype(float)
         self.strain = np.asarray(strain).astype(float)
         self.compression = np.asarray(compression).astype(float)
@@ -221,7 +224,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         coordinates: Array, meters
             The translated coordinate system. 
         """
-        return coordinates[:, None, None] - self.centre
+        return coordinates - self.centre.reshape(2, 1, 1)
 
 
     def _strain(self: ApertureLayer, coords: Array) -> Array:
@@ -238,7 +241,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         coords: Array 
             The strained coordinate system. 
         """
-        return coordinates[:, None, None] * (1. + self.strain)
+        return coords * (1. + self.strain).reshape(2, 1, 1)
 
 
     def _compress(self: ApertureLayer, coords: Array) -> Array:
@@ -255,7 +258,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
         coords: Array, meters
             The compressed coordinates. 
         """
-        return coordinates[:, None, None] * self.compression
+        return coords * self.compression.reshape(2, 1, 1)
 
 
     def _coordinates(self: ApertureLayer, coords: Array) -> Array:
@@ -283,7 +286,7 @@ class DynamicAperture(AbstactDynamicAperture, abc.ABC):
             lambda: self._compress(coords),
             lambda: coords)
 
-        is_strain: bool = (self.strain != np.zeros((2,), float).all()
+        is_strain: bool = (self.strain != np.zeros((2,), float)).all()
         coords: Array = jax.lax.cond(is_strain,
             lambda: self._strain(coords),
             lambda: coords)
@@ -397,13 +400,13 @@ class AnnularAperture(DynamicAperture):
 
 
     def __init__(self   : ApertureLayer, 
-            centre      : Array,
-            strain      : Array,
-            compression : Array
             rmax        : Array, 
             rmin        : Array, 
-            occulting   : bool, 
-            softening   : bool) -> ApertureLayer:
+            centre      : Array = [0., 0.],
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer:
         """
         Parameters
         ----------
@@ -474,20 +477,26 @@ class AnnularAperture(DynamicAperture):
       
       
 ann_aps = {
-    "Occ. Soft. Circ Ap.": dl.AnnularAperture([0., 0.], [0., 0.], [1., 1.], 1., .5, True, True),
-    "Occ. Hard. Circ Ap.": dl.AnnularAperture(0., 0., 1., .5, True, False),
-    "Soft Circ. Ap.": dl.AnnularAperture(0., 0., 1., .5, False, True),
-    "Hard Circ. Ap.": dl.AnnularAperture(0., 0., 1., .5, False, False),
-    "Trans. X Circ. Ap.": dl.AnnularAperture(.5, 0., 1., .5, False, False),
-    "Trans. Y Circ. Ap.": dl.AnnularAperture(0., .5, 1., .5, False, False)
+    "Occ. Soft. Ann.Ap.": 
+        AnnularAperture(1., .5, occulting=True, softening=True),
+    "Occ. Hard. Ann.Ap.": 
+        AnnularAperture(1., .5, occulting=True, softening=False),
+    "Soft Ann. Ap.": 
+        AnnularAperture(1., .5, occulting=False, softening=True),
+    "Hard Ann. Ap.": 
+        AnnularAperture(1., .5, occulting=False, softening=False),
 }
 
+npix = 128
+width = 2.
+coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+fig, axes = plt.subplots(1, len(ann_aps))
 for i, ap in enumerate(ann_aps):
     axes[i].set_title(ap)
     axes[i].set_xticks([])
     axes[i].set_yticks([])
-    _map = axes[i].imshow(_aps[ap]._aperture(coordinates))
-    subfig.colorbar(_map, ax=axes[i])
+    _map = axes[i].imshow(ann_aps[ap]._aperture(coords))
+    fig.colorbar(_map, ax=axes[i])
 
 plt.show()
 
