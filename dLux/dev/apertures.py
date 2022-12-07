@@ -19,6 +19,30 @@ __all__ = ["Aperture", "CompoundAperture", "SquareAperture",
     "MultiAperture", "RotatableAperture", "HexagonalAperture"]
 
 
+def test_plots_of_aps(aps: dict) -> None:
+    """
+    A formalisation of the common testing routine that I have
+    been using. This will be removed from the production code. 
+
+    Parameters:
+    -----------
+    aps: dict
+        The apertures with descriptive titles.
+    """
+    npix = 128
+    width = 2.
+    coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+    fig, axes = plt.subplots(1, len(ann_aps))
+    for i, ap in enumerate(ann_aps):
+        axes[i].set_title(ap)
+        axes[i].set_xticks([])
+        axes[i].set_yticks([])
+        _map = axes[i].imshow(ann_aps[ap]._aperture(coords))
+        fig.colorbar(_map, ax=axes[i])
+
+    plt.show()
+
+
 class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
     """
     The ApertureLayer groups together all of the functionality 
@@ -486,19 +510,7 @@ ann_aps = {
     "Strain": AnnularAperture(1., .5, strain=[.5, 0.]),
     "Compr.": AnnularAperture(1., .5, compression=[.5, 1.])
 }
-
-npix = 128
-width = 2.
-coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
-fig, axes = plt.subplots(1, len(ann_aps))
-for i, ap in enumerate(ann_aps):
-    axes[i].set_title(ap)
-    axes[i].set_xticks([])
-    axes[i].set_yticks([])
-    _map = axes[i].imshow(ann_aps[ap]._aperture(coords))
-    fig.colorbar(_map, ax=axes[i])
-
-plt.show()
+test_plots_of_aps(ann_aps)
 
 class CircularAperture(DynamicAperture):
     """
@@ -532,8 +544,8 @@ class CircularAperture(DynamicAperture):
             centre      : Array = [0., 0.],
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
-            occulting   : bool, 
-            softening   : bool) -> Array:
+            occulting   : bool = False, 
+            softening   : bool = False) -> Array:
         """
         Parameters
         ----------
