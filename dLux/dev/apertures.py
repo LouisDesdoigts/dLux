@@ -32,12 +32,12 @@ def test_plots_of_aps(aps: dict) -> None:
     npix = 128
     width = 2.
     coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
-    fig, axes = plt.subplots(1, len(ann_aps))
-    for i, ap in enumerate(ann_aps):
+    fig, axes = plt.subplots(1, len(aps))
+    for i, ap in enumerate(aps):
         axes[i].set_title(ap)
         axes[i].set_xticks([])
         axes[i].set_yticks([])
-        _map = axes[i].imshow(ann_aps[ap]._aperture(coords))
+        _map = axes[i].imshow(aps[ap]._aperture(coords))
         fig.colorbar(_map, ax=axes[i])
 
     plt.show()
@@ -501,7 +501,7 @@ class AnnularAperture(DynamicAperture):
         return self.rmax
       
       
-ann_aps = {
+test_plots_of_aps({
     "Occ. Soft": AnnularAperture(1., .5, occulting=True, softening=True),
     "Occ. Hard": AnnularAperture(1., .5, occulting=True),
     "Soft": AnnularAperture(1., .5, softening=True),
@@ -509,8 +509,7 @@ ann_aps = {
     "Trans.": AnnularAperture(1., .5, centre=[.5, .5]),
     "Strain": AnnularAperture(1., .5, strain=[.5, 0.]),
     "Compr.": AnnularAperture(1., .5, compression=[.5, 1.])
-}
-test_plots_of_aps(ann_aps)
+})
 
 class CircularAperture(DynamicAperture):
     """
@@ -585,7 +584,7 @@ class CircularAperture(DynamicAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        coords = self._coords(coords)
+        coords = self._coordinates(coords)
         coords = dLux.utils.cartesian_to_polar(coords)[0]
         return self._soften(- coords + self.radius)
 
@@ -609,6 +608,16 @@ class CircularAperture(DynamicAperture):
         """
         return self.radius
 
+
+test_plots_of_aps({
+    "Occ. Soft": CircularAperture(1., occulting=True, softening=True),
+    "Occ. Hard": CircularAperture(1., occulting=True),
+    "Soft": CircularAperture(1., softening=True),
+    "Hard": CircularAperture(1.),
+    "Trans.": CircularAperture(1., centre=[.5, .5]),
+    "Strain": CircularAperture(1., strain=[.5, 0.]),
+    "Compr.": CircularAperture(1., compression=[.5, 1.])
+})
 
 class RotatableAperture(Aperture):
     """
