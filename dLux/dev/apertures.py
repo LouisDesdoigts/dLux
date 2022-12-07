@@ -241,7 +241,8 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         coords: Array 
             The strained coordinate system. 
         """
-        return coords * (1. + self.strain).reshape(2, 1, 1)
+        trans_coords: Array = np.transpose(coords, (0, 2, 1))
+        return coords + trans_coords * self.strain.reshape(2, 1, 1)
 
 
     def _compress(self: ApertureLayer, coords: Array) -> Array:
@@ -276,17 +277,17 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         coords: Array, meters
             The coordinates of the `Aperture`.
         """
-        is_trans = (self.centre != np.zeros((2,), float)).all()
+        is_trans = (self.centre != np.zeros((2,), float)).any()
         coords: Array = jax.lax.cond(is_trans,
             lambda: self._translate(coords),
             lambda: coords)
 
-        is_compr: bool = (self.compression != np.ones((2,), float)).all()
+        is_compr: bool = (self.compression != np.ones((2,), float)).any()
         coords: Array = jax.lax.cond(is_compr,
             lambda: self._compress(coords),
             lambda: coords)
 
-        is_strain: bool = (self.strain != np.zeros((2,), float)).all()
+        is_strain: bool = (self.strain != np.zeros((2,), float)).any()
         coords: Array = jax.lax.cond(is_strain,
             lambda: self._strain(coords),
             lambda: coords)
@@ -477,14 +478,13 @@ class AnnularAperture(DynamicAperture):
       
       
 ann_aps = {
-    "Occ. Soft. Ann.Ap.": 
-        AnnularAperture(1., .5, occulting=True, softening=True),
-    "Occ. Hard. Ann.Ap.": 
-        AnnularAperture(1., .5, occulting=True, softening=False),
-    "Soft Ann. Ap.": 
-        AnnularAperture(1., .5, occulting=False, softening=True),
-    "Hard Ann. Ap.": 
-        AnnularAperture(1., .5, occulting=False, softening=False),
+    "Occ. Soft": AnnularAperture(1., .5, occulting=True, softening=True),
+    "Occ. Hard": AnnularAperture(1., .5, occulting=True),
+    "Soft": AnnularAperture(1., .5, softening=True),
+    "Hard": AnnularAperture(1., .5),
+    "Trans.": AnnularAperture(1., .5, centre=[.5, .5]),
+    "Strain": AnnularAperture(1., .5, strain=[.5, 0.]),
+    "Compr.": AnnularAperture(1., .5, compression=[.5, 0.])
 }
 
 npix = 128
