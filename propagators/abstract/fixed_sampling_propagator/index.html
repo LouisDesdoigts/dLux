@@ -1999,6 +1999,35 @@ diameter.</p>
 <p>These propagators are implemented using the jax.numpy.fft package, with the
 appropriate normalisations and pixel sizes tracked for optical propagation.</p>
 
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>inverse</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Is this an 'inverse' propagation. Non-inverse propagations represents
+propagation from a pupil to a focal plane, and inverse represents
+propagation from a focal to a pupil plane.</p></td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>The name for this propagator.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
 
 
   

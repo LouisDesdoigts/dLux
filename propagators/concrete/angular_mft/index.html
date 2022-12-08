@@ -2036,6 +2036,66 @@
 defined in meters per pixel in pupil planes and radians/pixel in focal
 planes, with a variable output sampling in the output plane.</p>
 
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>npixels_out</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The number of pixels in the output plane.</p></td>
+        </tr>
+        <tr>
+          <td><code>pixel_scale_out</code></td>
+          <td>
+                <code>Array, meters/pixel or radians/pixel</code>
+          </td>
+          <td><p>The pixel scale in the output plane, measured in meters per pixel in
+pupil plane and radians per pixel in focal planes.</p></td>
+        </tr>
+        <tr>
+          <td><code>inverse</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Is this an 'inverse' propagation. Non-inverse propagations represents
+propagation from a pupil to a focal plane, and inverse represents
+propagation from a focal to a pupil plane.</p></td>
+        </tr>
+        <tr>
+          <td><code>shift</code></td>
+          <td>
+                <code><span title="dLux.propagators.Array">Array</span></code>
+          </td>
+          <td><p>The (x, y) shift to apply to the wavefront in the output plane.</p></td>
+        </tr>
+        <tr>
+          <td><code>pixel_shift</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Should the shift value be considered in units of pixels, or in the
+physical units of the output plane (ie pixels or meters, radians). True
+interprets the shift value in pixel units.</p></td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>The name for this propagator.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
 
 
   

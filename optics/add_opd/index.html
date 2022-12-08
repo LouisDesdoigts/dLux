@@ -2046,14 +2046,13 @@
   
       <p>Adds an Optical Path Difference (OPD) to the wavefront.</p>
 
-  <p><strong>Parameters:</strong></p>
+  <p><strong>Attributes:</strong></p>
   <table>
     <thead>
       <tr>
         <th>Name</th>
         <th>Type</th>
         <th>Description</th>
-        <th>Default</th>
       </tr>
     </thead>
     <tbody>
@@ -2063,9 +2062,13 @@
                 <code><span title="dLux.optics.Array">Array</span>, meters</code>
           </td>
           <td><p>Array of OPD values to be applied to the input wavefront.</p></td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
           <td>
-              <em>required</em>
+                <code>str</code>
           </td>
+          <td><p>The name of the layer, which is used to index the layers dictionary.</p></td>
         </tr>
     </tbody>
   </table>

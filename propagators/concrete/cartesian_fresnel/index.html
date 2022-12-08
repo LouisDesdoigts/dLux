@@ -2074,11 +2074,84 @@
         Bases: <code><a class="autorefs autorefs-internal" title="dLux.propagators.FarFieldFresnel" href="../../abstract/far_field_fresnel/#dLux.propagators.FarFieldFresnel">FarFieldFresnel</a></code>, <code><a class="autorefs autorefs-internal" title="dLux.propagators.CartesianMFT" href="../cartesian_mft/#dLux.propagators.CartesianMFT">CartesianMFT</a></code></p>
 
   
-      <p>A propagator class to for Far-Field fresnel propagations. This classes
+      <p>A propagator class to for Far-Field fresnel propagations. This classes
 implements algorithms that use quadratic phase factors to better represent
 out-of-plane behaviour of wavefronts, close to the focal plane. This class
 is designed to work on Cartesian wavefronts, ie pixel units are in
 meters/pixel in the output plane.</p>
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>npixels_out</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The number of pixels in the output plane.</p></td>
+        </tr>
+        <tr>
+          <td><code>pixel_scale_out</code></td>
+          <td>
+                <code>Array, meters/pixel</code>
+          </td>
+          <td><p>The pixel scale in the output plane, measured in meters per pixel.</p></td>
+        </tr>
+        <tr>
+          <td><code>focal_length</code></td>
+          <td>
+                <code><span title="dLux.propagators.Array">Array</span>, meters</code>
+          </td>
+          <td><p>The focal_length of the lens/mirror this propagator represents.</p></td>
+        </tr>
+        <tr>
+          <td><code>propagation_shift</code></td>
+          <td>
+                <code><span title="dLux.propagators.Array">Array</span>, meters</code>
+          </td>
+          <td><p>The shift in the propagation distance of the wavefront.</p></td>
+        </tr>
+        <tr>
+          <td><code>inverse</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Is this an 'inverse' propagation. Non-inverse propagations represents
+propagation from a pupil to a focal plane, and inverse represents
+propagation from a focal to a pupil plane.</p></td>
+        </tr>
+        <tr>
+          <td><code>shift</code></td>
+          <td>
+                <code><span title="dLux.propagators.Array">Array</span></code>
+          </td>
+          <td><p>The (x, y) shift to apply to the wavefront in the output plane.</p></td>
+        </tr>
+        <tr>
+          <td><code>pixel_shift</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Should the shift value be considered in units of pixels, or in the
+physical units of the output plane (ie pixels or meters, radians). True
+interprets the shift value in pixel units.</p></td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>The name for this propagator.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
 
 
