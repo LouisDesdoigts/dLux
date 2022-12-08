@@ -1012,6 +1012,8 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
 # TODO: Implement PolygonalAperture as the abstract base class 
 #       with the subclasses RegularPolygonalAperture and 
 #       IrregularPolygonalAperture.
+#
+# TODO: OK This is going nowhere.
 class RegularPolygonalAperture(PolygonalAperture):
     """
     A general representation of a polygonal aperture. 
@@ -1096,6 +1098,17 @@ class RegularPolygonalAperture(PolygonalAperture):
             softening = softening)
         self.rmax = np.asarray(rmax).astype(float)
         self.nsides = int(nsides)
+
+
+    def _vert_coords(self: ApertureLayer) -> Array:
+        """
+        """
+        offset = np.pi / self.nsides
+        offset_angles = np.linspace(0, 2. * np.pi, self.nsides, endpoint=False)
+        angles = offset_angles - offset
+        x_pos_of_verts = self.rmax * np.cos(angles)
+        y_pos_of_verts = self.rmax * np.sin(angles)
+        return np.stack([x_pos_of_verts, y_pos_of_verts]) 
 
 
     def _extent(self: ApertureLayer) -> Array:
