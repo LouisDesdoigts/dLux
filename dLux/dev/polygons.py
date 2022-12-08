@@ -14,15 +14,23 @@ coords: float = np.meshgrid(grid, grid)
 phi: float = np.arctan2(coords[1], coords[0])
 r: float = np.hypot(coords[0], coords[1])
 
+wedges: float = np.floor((phi + alpha) / (2. * alpha))
+
 abs_max = lambda arr: np.abs(arr).max()
-plt.title("$r$")
-plt.imshow(r, vmin=-abs_max(r), vmax=abs_max(r))
+
+plt.title("$\\phi_{w}$")
+plt.imshow(wedges, vmin=-abs_max(wedges), vmax=abs_max(wedges))
 plt.colorbar()
 plt.show()
 
-plt.title("$\\phi$")
-plt.imshow(phi, vmin=-abs_max(phi), vmax=abs_max(phi))
-plt.colorbar()
-plt.show()
+#plt.title("$r$")
+#plt.imshow(r, vmin=-abs_max(r), vmax=abs_max(r))
+#plt.colorbar()
+#plt.show()
+#
+#plt.title("$\\phi$")
+#plt.imshow(phi, vmin=-abs_max(phi), vmax=abs_max(phi))
+#plt.colorbar()
+#plt.show()
 
 
