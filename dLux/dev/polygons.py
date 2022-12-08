@@ -6,9 +6,10 @@ mpl.rcParams["text.usetex"] = True
 mpl.rcParams["image.cmap"] = "seismic"
 
 n: int = 5
+rmax: float = 1.
 alpha: float = np.pi / n # Half the angular disp of one wedge
 
-grid: float = np.linspace(0, 1., 100) - .5
+grid: float = np.linspace(0, 2., 100) - 1.
 coords: float = np.meshgrid(grid, grid)
 
 neg_pi_to_pi_phi: float = np.arctan2(coords[1], coords[0]) 
@@ -19,12 +20,21 @@ i: int = 2
 low_bound: float = 2. * i * alpha
 top_bound: float = 2. * (i + 1.) * alpha
 
-wedge = ((low_bound < phi) & (phi < top_bound)).astype(float)
+x: float = coords[0]
+wedge: float = ((low_bound < phi) & (phi < top_bound)).astype(float)
+dist_from_rad: float = rmax * np.cos(alpha)
+
+print(dist_from_rad)
+
+dist: float = x + dist_from_rad
+
+# NOTE: The distance of the edge from the circle is going to be
+#       given by the 
 
 abs_max = lambda arr: np.abs(arr).max()
 
 plt.title(f"$\\phi_{i}$")
-plt.imshow(wedge, vmin=-abs_max(wedge), vmax=abs_max(wedge))
+plt.imshow(dist * wedge, vmin=-abs_max(dist), vmax=abs_max(dist))
 plt.colorbar()
 plt.show()
 
