@@ -2082,7 +2082,7 @@ class AberratedAperture(eqx.Module, abc.ABC):
         self.coeffs = np.asarray(coeffs).astype(float)
 
 
-    def _basis(self: Layer, coords: Array) -> Array:
+    def _basis(self: ApertureLayer, coords: Array) -> Array:
         """
         Parameters:
         -----------
@@ -2105,7 +2105,7 @@ class AberratedAperture(eqx.Module, abc.ABC):
         return np.stack([h(coords) for h in self.basis_funcs])
 
 
-    def _opd(self: Layer, coords: Array) -> Array:
+    def _opd(self: ApertureLayer, coords: Array) -> Array:
         """
         Calculate the optical path difference that is caused 
         by the basis and the aberations that it represents. 
@@ -2290,7 +2290,7 @@ class AberratedArbitraryAperture(AberratedAperture):
         assert isinstance(aperture, dl.Aperture)
 
 
-    def _orthonormalise(self: Layer, 
+    def _orthonormalise(self: ApertureLayer, 
             aperture: Array, 
             zernikes: Array) -> Array:
         """
@@ -2347,7 +2347,7 @@ class AberratedArbitraryAperture(AberratedAperture):
         return basis
 
 
-    def _basis(self: Layer, coords: Array) -> Array:
+    def _basis(self: ApertureLayer, coords: Array) -> Array:
         """
         Parameters:
         -----------
@@ -2422,7 +2422,7 @@ class MultiAberratedAperture(eqx.Module):
         assert isinstance(self.aperture, dl.MultiAperture)
 
 
-    def _basis(self: Layer, coords: Array) -> Array:
+    def _basis(self: ApertureLayer, coords: Array) -> Array:
         """
         Parameters:
         -----------
@@ -2444,7 +2444,7 @@ class MultiAberratedAperture(eqx.Module):
         return np.stack([b._basis(coords) for b in self.bases])
 
 
-    def _opd(self: Layer, coords: Array) -> Array:
+    def _opd(self: ApertureLayer, coords: Array) -> Array:
         """
         Calculate the optical path difference that is caused 
         by the basis and the aberations that it represents. 
@@ -2787,7 +2787,7 @@ class UniformSpider(Spider):
 
 
     def __init__(
-            self: Layer,
+            self: ApertureLayer,
             x_offset: float,
             y_offset: float, 
             number_of_struts: int, 
@@ -2826,7 +2826,7 @@ class UniformSpider(Spider):
         return softened.prod(axis=0)
         
  
-    def __call__(self: Layer, params: dict) -> dict:
+    def __call__(self: ApertureLayer, params: dict) -> dict:
         """
         Apply the spider to a wavefront, as it propagates through the spider. 
 
