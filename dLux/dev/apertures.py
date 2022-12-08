@@ -1136,8 +1136,8 @@ class RegularPolygonalAperture(PolygonalAperture):
 
         n: int = self.nsides # Abreviation for line length 
         r: float = self.rmax # Abreviation for line length
-        theta: Array = np.linspace(0., 2. * np.pi, n, endpoint=False)
-        theta: Array = theta.reshape((n, 1, 1))
+        theta: Array = np.linspace(0., 2. * np.pi, n, endpoint=False) 
+        theta: Array = theta.reshape((n, 1, 1)) + np.pi / n
 
         m: Array = (-1. / np.tan(theta)).reshape((n, 1, 1))
         x1: Array = (r * np.cos(theta)).reshape((n, 1, 1))
