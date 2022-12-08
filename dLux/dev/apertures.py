@@ -6,7 +6,7 @@ import jax
 import dLux
 import abc
 import functools
-from typing import TypeVar, Int
+from typing import TypeVar 
 
 
 Array = np.ndarray
@@ -134,7 +134,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
             compression : Array = [1., 1.],
             rotation    : Array = 0.,
             occulting   : bool = False, 
-            softening   : bool = False) -> Aperture:
+            softening   : bool = False) -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
@@ -169,7 +169,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         self.occulting = bool(occulting)
 
 
-    def __call__(self: Aperture, wavefront: Wavefront) -> Wavefront:
+    def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
         """
         Apply the aperture to an incoming wavefront.
 
@@ -212,7 +212,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
 
 
     @abc.abstractmethod
-    def _metric(self: Aperture, distances: Array) -> Array:
+    def _metric(self: ApertureLayer, distances: Array) -> Array:
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -355,7 +355,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         return coords
 
 
-    def _soften(self: Aperture, distances: Array) -> Array:
+    def _soften(self: ApertureLayer, distances: Array) -> Array:
         """
         Softens an image so that the hard boundaries are not present. 
 
@@ -401,7 +401,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         return aperture
 
 
-    def _normalised_coordinates(self: Aperture, 
+    def _normalised_coordinates(self: ApertureLayer, 
             coordinates : Array) -> Array:
         """
         Shift a set of wavefront coodinates to be centered on the 
@@ -1052,7 +1052,7 @@ class RegularPolygonalAperture(PolygonalAperture):
     def __init__(
             self        : ApertureLayer,
             rmax        : Array,
-            nsides      : Int,
+            nsides      : int,
             centre      : Array = [0., 0.],
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
@@ -1096,7 +1096,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         self.rmax = np.asarray(rmax).astype(float)
         self.nsides = int(nsides)
 
-    `
+    
     # TODO: Work out some clever way of doing this so that the vertical 
     #       gradient problem is not well, a problem. I think that this 
     #       will have to be done using a `lax.cond`.
@@ -1116,7 +1116,6 @@ class RegularPolygonalAperture(PolygonalAperture):
         --------
         aperture: Array
             The aperture as an array of values.
-
         """
         n: int = self.nsides # Abrreviation for line length 
         theta: Array = np.linspace(0., 2. * np.pi, n, endpoint=False)
@@ -1130,6 +1129,16 @@ class RegularPolygonalAperture(PolygonalAperture):
 
         return self._soften(dist)
         
+test_plots_of_aps({
+   "Occ. Soft": PolygonalAperture(1., 5, occulting=True, softening=True),
+   "Occ. Hard": PolygonalAperture(1., 5, occulting=True),
+   "Soft": PolygonalAperture(1., 5, softening=True),
+   "Hard": PolygonalAperture(1., 5),
+   "Trans.": PolygonalAperture(1., 5, centre=[.5, .5]),
+   "Strain": PolygonalAperture(1., 5, strain=[.5, 0.]),
+   "Compr.": PolygonalAperture(1., 5, compression=[.5, 1.]),
+   "Rot.": PolygonalAperture(1., 5, rotation=np.pi / 4.)
+})
 
 class HexagonalAperture(RotatableAperture):
     """
@@ -1177,7 +1186,7 @@ class HexagonalAperture(RotatableAperture):
         self.rmax = np.asarray(rmax).astype(float)
 
 
-    def get_rmax(self: Aperture) -> float:
+    def get_rmax(self: ApertureLayer) -> float:
         """
         Returns
         -------
@@ -1188,7 +1197,7 @@ class HexagonalAperture(RotatableAperture):
         return self.rmax
 
 
-    def _extent(self: Aperture) -> float:
+    def _extent(self: ApertureLayer) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
@@ -1208,7 +1217,7 @@ class HexagonalAperture(RotatableAperture):
         return self.rmax
 
 
-    def _metric(self: Aperture, coords: Array) -> Array:
+    def _metric(self: ApertureLayer, coords: Array) -> Array:
         """
         Generates an array representing the hard edged hexagonal 
         aperture. 
@@ -1262,7 +1271,7 @@ class CompositeAperture(eqx.Module, abc.ABC):
     apertures: dict
 
 
-    def __init__(self: Aperture, apertures: dict) -> Aperture:
+    def __init__(self: ApertureLayer, apertures: dict) -> ApertureLayer:
         """
         Parameters
         ----------
@@ -1274,7 +1283,7 @@ class CompositeAperture(eqx.Module, abc.ABC):
         self.apertures = apertures
 
 
-    def __getitem__(self: Aperture, key: str) -> Aperture:
+    def __getitem__(self: ApertureLayer, key: str) -> ApertureLayer:
         """
         Get one of the apertures from the collection using a name 
         based lookup.
@@ -1293,14 +1302,14 @@ class CompositeAperture(eqx.Module, abc.ABC):
         return self.apertures[key]
 
 
-    def __setitem__(self, key: str, value: Aperture) -> None:
+    def __setitem__(self, key: str, value: ApertureLayer) -> None:
         """
         Assign a new value to one of the aperture mirrors.
         Parameters
         ----------
         key : str
             The name of the segement to replace for example "B1-7".
-        value : Aperture
+        value : ApertureLayer
             The new value to assign to that segement.
         """
         self.apertures[key] = value
@@ -1328,7 +1337,7 @@ class CompositeAperture(eqx.Module, abc.ABC):
 
 
     @abc.abstractmethod
-    def _aperture(self: Aperture, coordinates: Array) -> Array:
+    def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Evaluates the aperture. 
 
@@ -1359,19 +1368,19 @@ class CompoundAperture(eqx.Module):
 
     Parameters:
     -----------
-    apertures: dict(str, Aperture)
+    apertures: dict(str, ApertureLayer)
         The apertures that make up the compound aperture. 
     """
 
 
-    def __init__(self: Aperture, apertures: dict) -> Aperture:
+    def __init__(self: ApertureLayer, apertures: dict) -> ApertureLayer:
         """
         Parameters
         ----------
         apertures : dict
             The aperture objects stored in a dictionary of type
-            {str : Aperture} where the Aperture is a subclass of the 
-            Aperture.
+            {str : ApertureLayer} where the ApertureLayer is a subclass of the 
+            ApertureLayer.
         """
         super().__init__(apertures)
 
@@ -1406,19 +1415,19 @@ class MultiAperture(CompositeAperture):
 
     Attributes
     ----------
-    apertures : dict(str, Aperture)
+    apertures : dict(str, ApertureLayer)
         The apertures that make up the compound aperture. 
     """
 
 
-    def __init__(self: Aperture, apertures: dict) -> Aperture:
+    def __init__(self: ApertureLayer, apertures: dict) -> ApertureLayer:
         """
         Parameters
         ----------
         apertures : dict
             The aperture objects stored in a dictionary of type
-            {str : Aperture} where the Aperture is a subclass of the 
-            Aperture.
+            {str : ApertureLayer} where the ApertureLayer is a subclass of the 
+            ApertureLayer.
         """
         super().__init__(apertures)
 
@@ -1442,7 +1451,7 @@ class MultiAperture(CompositeAperture):
             for ap in self.apertures.values()]).sum(axis=0)
 
 
-    def to_list(self: Aperture) -> list:
+    def to_list(self: ApertureLayer) -> list:
         """
         Returns:
         --------
@@ -2036,7 +2045,7 @@ class AberratedAperture(eqx.Module, abc.ABC):
         A list of functions that represent the basis. The exact
         polynomials that are represented will depend on the shape
         of the aperture. 
-    aperture: Aperture
+    aperture: ApertureLayer
         The aperture on which the basis is defined. Must be a 
         subclass of the `Aperture` class.
     coeffs: list[floats]
@@ -2045,13 +2054,13 @@ class AberratedAperture(eqx.Module, abc.ABC):
         for the learning process is significantly reduced.
     """
     basis_funcs: list
-    aperture: Aperture
+    aperture: ApertureLayer
     coeffs: Array
 
 
     def __init__(self   : Layer, 
             coeffs      : Array,
-            aperture    : Aperture) -> Layer: 
+            aperture    : ApertureLayer) -> Layer: 
         """
         Parameters:
         -----------
@@ -2061,7 +2070,7 @@ class AberratedAperture(eqx.Module, abc.ABC):
             indices but the noll indices prevent an order to 
             these pairs. All basis can be indexed using the noll
             indices based on `n` and `m`. 
-        aperture: Aperture
+        aperture: ApertureLayer
             The aperture that the basis is defined on. The shape 
             of this aperture defines what the polynomials are. 
         coeffs: Array
