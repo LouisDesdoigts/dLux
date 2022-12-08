@@ -908,12 +908,11 @@ test_plots_of_aps({
 class PolygonalAperture(DynamicAperture, abc.ABC):
     """
     A general representation of a polygonal aperture. 
-    Each side of the aperture should be the same length. There
-    are some pre-existing implementations for some of the more 
-    common cases. This is designed for the exceptions that are 
-    less common. 
+    This class defines some useful parameters for working
+    with the lines and points, that were not needed above where 
+    additional optimisations where necessary.
 
-    Par
+    Parameters:
     -----------
     nsides: Int
         The number of sides.
@@ -1098,18 +1097,38 @@ class RegularPolygonalAperture(PolygonalAperture):
         self.nsides = int(nsides)
 
     `
-    def _aperture(self: Layer, coords: Array) -> Array:
+    # TODO: Work out some clever way of doing this so that the vertical 
+    #       gradient problem is not well, a problem. I think that this 
+    #       will have to be done using a `lax.cond`.
+    def _aperture(self: ApertureLayer, coords: Array) -> Array:
         """
-        """
-        coords: Array = self._rotate(self._translate(coords))
-        theta: Array = np.linspace(0., 2. * np.pi, self.nsides, endpoint=False)
+        Generates a regular polygon with nsides. The zero rotation 
+        of the aperture avoids vertical sides as this creates infinite 
+        gradients. 
 
-        m: Array = (-1. / np.tan(theta)).reshape((self.nsides, 1, 1))
-        x1: Array = (rmax * np.cos(theta)).reshape((6, 1, 1))
-        y1: Array = (rmax * np.sin(theta)).reshape((6, 1, 1))
+        Parameters:
+        -----------
+        coords: Array, meters
+            The aperture coordinates (already transformed from the 
+            wavefront coordinates).
+            
+        Returns:
+        --------
+        aperture: Array
+            The aperture as an array of values.
+
+        """
+        n: int = self.nsides # Abrreviation for line length 
+        theta: Array = np.linspace(0., 2. * np.pi, n, endpoint=False)
+
+        m: Array = (-1. / np.tan(theta)).reshape((n, 1, 1))
+        x1: Array = (rmax * np.cos(theta)).reshape((n, 1, 1))
+        y1: Array = (rmax * np.sin(theta)).reshape((n, 1, 1))
 
         dist: Array = (y - y1 - m * (x - x1)) / np.sqrt(1 + m ** 2)
         dist: Array = (1. - 2. * (theta <= np.pi)) * dist
+
+        return self._soften(dist)
         
 
 class HexagonalAperture(RotatableAperture):
