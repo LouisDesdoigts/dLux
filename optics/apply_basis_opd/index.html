@@ -2077,26 +2077,22 @@ Optical Path Difference (OPD). The OPDs are calculated from the basis
 arrays, and weighted by the coefficients, and converted to phases by the
 wavefront methods.</p>
 
-  <p><strong>Parameters:</strong></p>
+  <p><strong>Attributes:</strong></p>
   <table>
     <thead>
       <tr>
         <th>Name</th>
         <th>Type</th>
         <th>Description</th>
-        <th>Default</th>
       </tr>
     </thead>
     <tbody>
         <tr>
           <td><code>basis</code></td>
           <td>
-                <code><span title="dLux.optics.Array">Array</span></code>
+                <code><span title="dLux.optics.Array">Array</span>, meters</code>
           </td>
           <td><p>Arrays holding the pre-calculated basis vectors.</p></td>
-          <td>
-              <em>required</em>
-          </td>
         </tr>
         <tr>
           <td><code>coefficients</code></td>
@@ -2104,9 +2100,13 @@ wavefront methods.</p>
                 <code><span title="dLux.optics.Array">Array</span></code>
           </td>
           <td><p>The Array of coefficients to be applied to each basis vector.</p></td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
           <td>
-                <code>None</code>
+                <code>str</code>
           </td>
+          <td><p>The name of the layer, which is used to index the layers dictionary.</p></td>
         </tr>
     </tbody>
   </table>

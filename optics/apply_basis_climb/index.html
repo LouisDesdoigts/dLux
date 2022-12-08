@@ -2209,14 +2209,13 @@ anti-phase relationship given by the Optical Path Difference.</p>
 Note: This currently only outputs 256 pixel arrays and uses a 3x oversample,
 therefore requiring a 768 pixel basis array.</p>
 
-  <p><strong>Parameters:</strong></p>
+  <p><strong>Attributes:</strong></p>
   <table>
     <thead>
       <tr>
         <th>Name</th>
         <th>Type</th>
         <th>Description</th>
-        <th>Default</th>
       </tr>
     </thead>
     <tbody>
@@ -2226,9 +2225,6 @@ therefore requiring a 768 pixel basis array.</p>
                 <code><span title="dLux.optics.Array">Array</span></code>
           </td>
           <td><p>Arrays holding the continous pre-calculated basis vectors.</p></td>
-          <td>
-              <em>required</em>
-          </td>
         </tr>
         <tr>
           <td><code>coefficients</code></td>
@@ -2236,9 +2232,6 @@ therefore requiring a 768 pixel basis array.</p>
                 <code><span title="dLux.optics.Array">Array</span></code>
           </td>
           <td><p>The Array of coefficients to be applied to each basis vector.</p></td>
-          <td>
-                <code>None</code>
-          </td>
         </tr>
         <tr>
           <td><code>ideal_wavelength</code></td>
@@ -2247,9 +2240,13 @@ therefore requiring a 768 pixel basis array.</p>
           </td>
           <td><p>The target wavelength at which a perfect anti-phase relationship is
 applied via the OPD.</p></td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
           <td>
-              <em>required</em>
+                <code>str</code>
           </td>
+          <td><p>The name of the layer, which is used to index the layers dictionary.</p></td>
         </tr>
     </tbody>
   </table>

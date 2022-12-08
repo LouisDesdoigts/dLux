@@ -2064,6 +2064,35 @@ object for parameterised sources such as binary stars.</p>
 wavelengths array and tile it on the get_wavelengths method. (ie make work
 for MultiPointSource)</p>
 
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wavelengths</code></td>
+          <td>
+                <code><span title="dLux.spectrums.Array">Array</span>, meters</code>
+          </td>
+          <td><p>The (2, n) array of wavelengths at which the spectrum is defined.
+Input can also be a 1d</p></td>
+        </tr>
+        <tr>
+          <td><code>weights</code></td>
+          <td>
+                <code><span title="dLux.spectrums.Array">Array</span></code>
+          </td>
+          <td><p>The (2, n) relative weights of each wavelength. Defaults to uniform
+throughput.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
 
 
   

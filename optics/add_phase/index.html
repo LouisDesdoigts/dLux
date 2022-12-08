@@ -2046,26 +2046,29 @@
   
       <p>Adds an array of phase values to the wavefront.</p>
 
-  <p><strong>Parameters:</strong></p>
+  <p><strong>Attributes:</strong></p>
   <table>
     <thead>
       <tr>
         <th>Name</th>
         <th>Type</th>
         <th>Description</th>
-        <th>Default</th>
       </tr>
     </thead>
     <tbody>
         <tr>
           <td><code>phase</code></td>
           <td>
-                <code><span title="dLux.optics.Array">Array</span></code>
+                <code><span title="dLux.optics.Array">Array</span>, radians</code>
           </td>
           <td><p>The Array of phase values to be applied to the input wavefront.</p></td>
+        </tr>
+        <tr>
+          <td><code>name</code></td>
           <td>
-              <em>required</em>
+                <code>str</code>
           </td>
+          <td><p>The name of the layer, which is used to index the layers dictionary.</p></td>
         </tr>
     </tbody>
   </table>

@@ -2022,6 +2022,57 @@ a helper parmeter, plane_type. AngularWavefronts have pixel scales in
 units of meters per pixel in Pupil planes and radians per pixel in Focal
 planes.</p>
 
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wavelength</code></td>
+          <td>
+                <code>float, meters</code>
+          </td>
+          <td><p>The wavelength of the <code>Wavefront</code>.</p></td>
+        </tr>
+        <tr>
+          <td><code>amplitude</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, power</code>
+          </td>
+          <td><p>The electric field amplitude of the <code>Wavefront</code>.</p></td>
+        </tr>
+        <tr>
+          <td><code>phase</code></td>
+          <td>
+                <code><span title="dLux.wavefronts.Array">Array</span>, radians</code>
+          </td>
+          <td><p>The electric field phase of the <code>Wavefront</code>.</p></td>
+        </tr>
+        <tr>
+          <td><code>pixel_scale</code></td>
+          <td>
+                <code>float, meters/pixel or radians/pixel</code>
+          </td>
+          <td><p>The physical dimensions of the pixels representing the wavefront. This
+is in units of meters per pixel in pupil planes and radians per pixel
+in focal planes.</p></td>
+        </tr>
+        <tr>
+          <td><code>plane_type</code></td>
+          <td>
+                <code>enum.<span title="enum.IntEnum">IntEnum</span>.<span title="enum.IntEnum.PlaneType">PlaneType</span></code>
+          </td>
+          <td><p>The current plane type of wavefront, can be Pupil, Focal or
+Intermediate.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
 
 
   
