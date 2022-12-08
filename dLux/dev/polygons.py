@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 mpl.rcParams["text.usetex"] = True
 mpl.rcParams["image.cmap"] = "seismic"
 
+# So what information do I have? You know, this would be 
+# much better done on paper. 
+def _dist_from_line()
+
 n: int = 5
 rmax: float = 1.
 alpha: float = np.pi / n # Half the angular disp of one wedge
@@ -26,15 +30,20 @@ dist_from_rad: float = rmax * np.cos(alpha)
 
 print(dist_from_rad)
 
-dist: float = x + dist_from_rad
-
 # NOTE: The distance of the edge from the circle is going to be
 #       given by the 
+
+# TODO: OK So the first thing on the books today is to sort out 
+# my timesheets and then to get the distance from a line cooking. 
+# I also need to think about how to test if something is inside. 
+# Many things TODO.
+
+
 
 abs_max = lambda arr: np.abs(arr).max()
 
 for _i in i:
-    plt.title(f"$\\phi_{i}$")
+    plt.title(f"$\\phi_{_i}$")
     plt.imshow(wedge[_i], vmin=-abs_max(dist), vmax=abs_max(dist))
     plt.colorbar()
     plt.show()
