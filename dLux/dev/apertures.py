@@ -980,7 +980,7 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
 
 
     def _grad_from_two_points(
-            self    : Layer,
+            self    : ApertureLayer,
             point_1 : Array,
             point_2 : Array)-> Array:
         """
@@ -1045,8 +1045,8 @@ class RegularPolygonalAperture(PolygonalAperture):
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
     """
-    nsides: Int
-    rmax: Float
+    nsides: int
+    rmax: Array
 
 
     def __init__(
@@ -1096,11 +1096,24 @@ class RegularPolygonalAperture(PolygonalAperture):
         self.rmax = np.asarray(rmax).astype(float)
         self.nsides = int(nsides)
 
+
+    def _extent(self: ApertureLayer) -> Array:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre.
+
+        Returns
+        -------
+        extent : float
+            The maximum distance from centre to edge of aperture
+        """
+        return self.rmax
+
     
     # TODO: Work out some clever way of doing this so that the vertical 
     #       gradient problem is not well, a problem. I think that this 
     #       will have to be done using a `lax.cond`.
-    def _aperture(self: ApertureLayer, coords: Array) -> Array:
+    def _metric(self: ApertureLayer, coords: Array) -> Array:
         """
         Generates a regular polygon with nsides. The zero rotation 
         of the aperture avoids vertical sides as this creates infinite 
@@ -1130,14 +1143,14 @@ class RegularPolygonalAperture(PolygonalAperture):
         return self._soften(dist)
         
 test_plots_of_aps({
-   "Occ. Soft": PolygonalAperture(1., 5, occulting=True, softening=True),
-   "Occ. Hard": PolygonalAperture(1., 5, occulting=True),
-   "Soft": PolygonalAperture(1., 5, softening=True),
-   "Hard": PolygonalAperture(1., 5),
-   "Trans.": PolygonalAperture(1., 5, centre=[.5, .5]),
-   "Strain": PolygonalAperture(1., 5, strain=[.5, 0.]),
-   "Compr.": PolygonalAperture(1., 5, compression=[.5, 1.]),
-   "Rot.": PolygonalAperture(1., 5, rotation=np.pi / 4.)
+   "Occ. Soft": RegularPolygonalAperture(1., 5, occulting=True, softening=True),
+   "Occ. Hard": RegularPolygonalAperture(1., 5, occulting=True),
+   "Soft": RegularPolygonalAperture(1., 5, softening=True),
+   "Hard": RegularPolygonalAperture(1., 5),
+   "Trans.": RegularPolygonalAperture(1., 5, centre=[.5, .5]),
+   "Strain": RegularPolygonalAperture(1., 5, strain=[.5, 0.]),
+   "Compr.": RegularPolygonalAperture(1., 5, compression=[.5, 1.]),
+   "Rot.": RegularPolygonalAperture(1., 5, rotation=np.pi / 4.)
 })
 
 class HexagonalAperture(RotatableAperture):
