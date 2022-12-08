@@ -1036,6 +1036,8 @@ class PolygonalAperture(DynamicAperture):
             point_1 : Array,
             point_2 : Array)-> Array:
         """
+        A convinient helper function that calculates the 
+        gradient of a chord connecting two points.
         """
         x1, y1 = point_1[0], point_1[1]
         x2, y2 = point_2[0], point_2[1]
