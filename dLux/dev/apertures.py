@@ -905,8 +905,7 @@ test_plots_of_aps({
 })
 
 
-# TODO:
-class PolygonalAperture(DynamicAperture):
+class PolygonalAperture(DynamicAperture, abc.ABC):
     """
     A general representation of a pefect polygonal aperture. 
     Each side of the aperture should be the same length. There
@@ -1037,11 +1036,29 @@ class PolygonalAperture(DynamicAperture):
             point_2 : Array)-> Array:
         """
         A convinient helper function that calculates the 
-        gradient of a chord connecting two points.
+        gradient of a chord connecting two points. The formula 
+        that is used is,
+
+            m = (y2 - y1) / (x2 - x1) (1)
+
+        Parameters:
+        -----------
+        point_1: Array, meters
+            (x1, y1) in eq (1)
+        point_2: Array, meters
+            (x2, y2) in eq (2)
+
+        Returns:
+        --------
+        m: Array
+            The gradient of the line connecting (x1, y1) and 
+            (x2, y2).
         """
         x1, y1 = point_1[0], point_1[1]
         x2, y2 = point_2[0], point_2[1]
         return (y2 - y1) / (x2 - x1)
+
+
 
 
     def _aperture(self: Layer, coords: Array) -> Array:
