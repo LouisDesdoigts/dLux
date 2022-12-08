@@ -34,8 +34,8 @@ def scale_array(array    : Array,
     """
     assert order in (0, 1), ("order must be 0 or 1.")
     xs = np.linspace(0, array.shape[0], size_out)
-    ys, xs = np.meshgrid(xs, xs)
-    return map_coordinates(array, np.array([xs, ys]), order=order)
+    xs, ys = np.meshgrid(xs, xs)
+    return map_coordinates(array, np.array([ys, xs]), order=order)
 
 
 def generate_coordinates(npixels_in     : int,
