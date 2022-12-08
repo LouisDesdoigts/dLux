@@ -907,13 +907,120 @@ test_plots_of_aps({
 
 class PolygonalAperture(DynamicAperture, abc.ABC):
     """
-    A general representation of a pefect polygonal aperture. 
+    A general representation of a polygonal aperture. 
     Each side of the aperture should be the same length. There
     are some pre-existing implementations for some of the more 
     common cases. This is designed for the exceptions that are 
     less common. 
 
-    Parameters:
+    Par
+    -----------
+    nsides: Int
+        The number of sides.
+    rmax: Float
+        The radius of the smallest circle that can fully contain the 
+        aperture. 
+    centre: float, meters
+        The centre of the coordinate system in the paraxial coordinates.
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
+    softening: bool 
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    """
+
+
+    def _perp_dist_from_line(
+            self    : ApertureLayer, 
+            point   : Array, 
+            grad    : Array, 
+            coords  : Array) -> Array:
+        """
+        Calculate the distance from a line parametrised by a
+        gradient and a point. The mathematical formula for the
+        line based on this parametrisation is,
+
+            y - y1 = m(x - x1) (1)
+
+        where m is the gradient and (x1, y1) is the point. The 
+        distance perpendicular from the line works out to be,
+
+            d = (y - y1 - m(x - x1)) / (1 + m**2) (2)
+
+        Parameters:
+        -----------
+        point: Array, meters
+            The location of the point that lines on the line and 
+            partialy defines it. That is (x1, y1) see (1).
+        grad: Array, None (meters / meter)
+            The gradient of the line.
+        coords: Array, meters
+            The point (x, y) in (2). This can be a two dimensional
+            array for speed.
+
+        Returns:
+        --------
+        dist: Array, meters
+            The distance of each point in coords from the line 
+            given by eq (1)
+        """
+        x, y = coords[0], coords[1]
+        x1, y1 = point[0], point[1]
+        return (y - y1 - grad * (x - x1)) / np.sqrt(1 + grad ** 2)
+
+
+    def _grad_from_two_points(
+            self    : Layer,
+            point_1 : Array,
+            point_2 : Array)-> Array:
+        """
+        A convinient helper function that calculates the 
+        gradient of a chord connecting two points. The formula 
+        that is used is,
+
+            m = (y2 - y1) / (x2 - x1) (1)
+
+        Parameters:
+        -----------
+        point_1: Array, meters
+            (x1, y1) in eq (1)
+        point_2: Array, meters
+            (x2, y2) in eq (2)
+
+        Returns:
+        --------
+        m: Array
+            The gradient of the line connecting (x1, y1) and 
+            (x2, y2).
+        """
+        x1, y1 = point_1[0], point_1[1]
+        x2, y2 = point_2[0], point_2[1]
+        return (y2 - y1) / (x2 - x1)
+
+
+# TODO: Implement PolygonalAperture as the abstract base class 
+#       with the subclasses RegularPolygonalAperture and 
+#       IrregularPolygonalAperture.
+class RegularPolygonalAperture(PolygonalAperture):
+    """
+    A general representation of a polygonal aperture. 
+    Each side of the aperture should be the same length. There
+    are some pre-existing implementations for some of the more 
+    common cases. This is designed for the exceptions that are 
+    less common. 
+
+    Par
     -----------
     nsides: Int
         The number of sides.
@@ -990,77 +1097,7 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
         self.rmax = np.asarray(rmax).astype(float)
         self.nsides = int(nsides)
 
-
-    def _perp_dist_from_line(
-            self    : ApertureLayer, 
-            point   : Array, 
-            grad    : Array, 
-            coords  : Array) -> Array:
-        """
-        Calculate the distance from a line parametrised by a
-        gradient and a point. The mathematical formula for the
-        line based on this parametrisation is,
-
-            y - y1 = m(x - x1) (1)
-
-        where m is the gradient and (x1, y1) is the point. The 
-        distance perpendicular from the line works out to be,
-
-            d = (y - y1 - m(x - x1)) / (1 + m**2) (2)
-
-        Parameters:
-        -----------
-        point: Array, meters
-            The location of the point that lines on the line and 
-            partialy defines it. That is (x1, y1) see (1).
-        grad: Array, None (meters / meter)
-            The gradient of the line.
-        coords: Array, meters
-            The point (x, y) in (2). This can be a two dimensional
-            array for speed.
-
-        Returns:
-        --------
-        dist: Array, meters
-            The distance of each point in coords from the line 
-            given by eq (1)
-        """
-        x, y = coords[0], coords[1]
-        x1, y1 = point[0], point[1]
-        return (y - y1 - grad * (x - x1)) / np.sqrt(1 + grad ** 2)
-
-
-    def _grad_from_two_points(
-            self    : Layer,
-            point_1 : Array,
-            point_2 : Array)-> Array:
-        """
-        A convinient helper function that calculates the 
-        gradient of a chord connecting two points. The formula 
-        that is used is,
-
-            m = (y2 - y1) / (x2 - x1) (1)
-
-        Parameters:
-        -----------
-        point_1: Array, meters
-            (x1, y1) in eq (1)
-        point_2: Array, meters
-            (x2, y2) in eq (2)
-
-        Returns:
-        --------
-        m: Array
-            The gradient of the line connecting (x1, y1) and 
-            (x2, y2).
-        """
-        x1, y1 = point_1[0], point_1[1]
-        x2, y2 = point_2[0], point_2[1]
-        return (y2 - y1) / (x2 - x1)
-
-
-
-
+    `
     def _aperture(self: Layer, coords: Array) -> Array:
         """
         """
