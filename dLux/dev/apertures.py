@@ -11,7 +11,6 @@ from typing import TypeVar, Int
 
 Array = np.ndarray
 Wavefront = dLux.wavefronts.Wavefront
-Aperture = TypeVar("Aperture")
 
 
 __all__ = ["Aperture", "CompoundAperture", "SquareAperture", 
@@ -905,6 +904,7 @@ test_plots_of_aps({
    "Rot.": SquareAperture(1., rotation=np.pi / 4.)
 })
 
+
 # TODO:
 class PolygonalAperture(DynamicAperture):
     """
@@ -993,11 +993,38 @@ class PolygonalAperture(DynamicAperture):
 
 
     def _perp_dist_from_line(
-            self    : Layer, 
+            self    : ApertureLayer, 
             point   : Array, 
-            grad    : Float, 
+            grad    : Array, 
             coords  : Array) -> Array:
         """
+        Calculate the distance from a line parametrised by a
+        gradient and a point. The mathematical formula for the
+        line based on this parametrisation is,
+
+            y - y1 = m(x - x1) (1)
+
+        where m is the gradient and (x1, y1) is the point. The 
+        distance perpendicular from the line works out to be,
+
+            d = (y - y1 - m(x - x1)) / (1 + m**2) (2)
+
+        Parameters:
+        -----------
+        point: Array, meters
+            The location of the point that lines on the line and 
+            partialy defines it. That is (x1, y1) see (1).
+        grad: Array, None (meters / meter)
+            The gradient of the line.
+        coords: Array, meters
+            The point (x, y) in (2). This can be a two dimensional
+            array for speed.
+
+        Returns:
+        --------
+        dist: Array, meters
+            The distance of each point in coords from the line 
+            given by eq (1)
         """
         x, y = coords[0], coords[1]
         x1, y1 = point[0], point[1]
