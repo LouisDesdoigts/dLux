@@ -31,7 +31,8 @@ def test_plots_of_aps(aps: dict) -> None:
     npix = 128
     width = 2.
     coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
-    fig, axes = plt.subplots(1, len(aps))
+    num = len(aps)
+    fig, axes = plt.subplots(1, num, figsize=(4*num, 3))
     for i, ap in enumerate(aps):
         axes[i].set_title(ap)
         axes[i].set_xticks([])
@@ -1130,17 +1131,22 @@ class RegularPolygonalAperture(PolygonalAperture):
         aperture: Array
             The aperture as an array of values.
         """
-        n: int = self.nsides # Abrreviation for line length 
+        x: Array = coords[0]
+        y: Array = coords[1]
+
+        n: int = self.nsides # Abreviation for line length 
+        r: float = self.rmax # Abreviation for line length
         theta: Array = np.linspace(0., 2. * np.pi, n, endpoint=False)
+        theta: Array = theta.reshape((n, 1, 1))
 
         m: Array = (-1. / np.tan(theta)).reshape((n, 1, 1))
-        x1: Array = (rmax * np.cos(theta)).reshape((n, 1, 1))
-        y1: Array = (rmax * np.sin(theta)).reshape((n, 1, 1))
+        x1: Array = (r * np.cos(theta)).reshape((n, 1, 1))
+        y1: Array = (r * np.sin(theta)).reshape((n, 1, 1))
 
         dist: Array = (y - y1 - m * (x - x1)) / np.sqrt(1 + m ** 2)
         dist: Array = (1. - 2. * (theta <= np.pi)) * dist
 
-        return self._soften(dist)
+        return self._soften(dist).prod(axis=0)
         
 test_plots_of_aps({
    "Occ. Soft": RegularPolygonalAperture(1., 5, occulting=True, softening=True),
