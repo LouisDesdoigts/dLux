@@ -9,7 +9,8 @@ n: int = 5
 rmax: float = 1.
 alpha: float = np.pi / n # Half the angular disp of one wedge
 
-grid: float = np.linspace(0, 2., 100) - 1.
+npix: int = 100
+grid: float = np.linspace(0, 2., npix) - 1.
 coords: float = np.meshgrid(grid, grid)
 
 neg_pi_to_pi_phi: float = np.arctan2(coords[1], coords[0]) 
@@ -39,18 +40,28 @@ dist: float = (rho - r)
 
 fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
 for _i in i:
-    axes[_i].set_title("$\\rho$")
-    _map = axes[_i].imshow(dist[_i], cmap=plt.cm.inferno)
+    axes[_i].set_title("$r$")
+    _map = axes[_i].imshow(dist[_i] * wedge[_i])
     fig.colorbar(_map, ax=axes[_i])
 plt.show()
 
+dist: float = (dist * wedge).sum(axis=0)
+amax: callable = lambda arr: np.abs(arr).max()
+smooth: callable = lambda arr: .5 * (np.tanh(npix * arr) + 1.)
+
 fig = plt.figure()
 axes = plt.axes()
-_map = axes.imshow((dist * wedge).sum(axis=0))
+_map = axes.imshow(dist, cmap=plt.cm.seismic, vmin=-amax(dist), vmax=amax(dist))
 fig.colorbar(_map, ax=axes)
 plt.show()
 
-abs_max = lambda arr: np.abs(arr).max()
+
+fig = plt.figure()
+axes = plt.axes()
+_map = axes.imshow(smooth(dist))
+fig.colorbar(_map, ax=axes)
+plt.show()
+
 # OK I am stuck again. Well the positive side is always on the right.
 # At least that is for a vertical line. I am not so sure how to 
 # discuss this for a line that is not nessecarily ... Actually I 
