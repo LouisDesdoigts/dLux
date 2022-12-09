@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 mpl.rcParams["text.usetex"] = True
 mpl.rcParams["image.cmap"] = "inferno"
 
-n: int = 8
+n: int = 4
 rmax: float = 1.
 alpha: float = np.pi / n # Half the angular disp of one wedge
 
@@ -30,8 +30,6 @@ plt.show()
 i: int = np.arange(n)
 low_bound: float = 2. * i * alpha
 top_bound: float = 2. * (i + 1.) * alpha
-
-phi = np.where(np.tan(phi) * np.tan((2. * i + 1.) *  alpha)[:, None, None] == -1., phi - .005, phi)
 
 wedge: float = ((low_bound[:, None, None] < phi) & (phi < top_bound[:, None, None])).astype(float)
 min_inv_m: float = np.tan((2. * i + 1.) * alpha)
