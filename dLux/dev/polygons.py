@@ -17,17 +17,6 @@ neg_pi_to_pi_phi: float = np.arctan2(coords[1], coords[0])
 phi: float = neg_pi_to_pi_phi + 2. * (neg_pi_to_pi_phi < 0.) * np.pi
 rho: float = np.hypot(coords[0], coords[1])
 
-
-fig, axes = plt.subplots(1, 2, figsize=(2 * 4, 3))
-axes[0].set_title("$\\rho$")
-_map = axes[0].imshow(rho, cmap=plt.cm.inferno)
-fig.colorbar(_map, ax=axes[0])
-axes[1].set_title("$\\phi$")
-_map = axes[1].imshow(phi, cmap=plt.cm.inferno)
-fig.colorbar(_map, ax=axes[1])
-plt.show()
-
-epsilon: float = .05
 i: int = np.arange(n)
 low_bound: float = 2. * i * alpha
 top_bound: float = 2. * (i + 1.) * alpha  
