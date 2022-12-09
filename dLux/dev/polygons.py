@@ -71,27 +71,3 @@ _map = axes.imshow(smooth(dist))
 fig.colorbar(_map, ax=axes)
 plt.show()
 
-# OK I am stuck again. Well the positive side is always on the right.
-# At least that is for a vertical line. I am not so sure how to 
-# discuss this for a line that is not nessecarily ... Actually I 
-# think that I just do this with abs and then check that if 
-# r < my_line then multiply by negative one.
-
-# I can also just check that the line is negative on the inside 
-# how? 
-
-# So I need to decipher what this does.
-# phi + alpha rotates the whole thing backwards so that zero is 
-# now along the spoke connecting the bottom of the right-most 
-# edge. By dividing by the angular width of the edge it is 
-# then able to enumerate the edges. This implies that I 
-# probably want to add pi so that I am working on the 
-# range zero two pi. 
-
-
-#plt.title("$r$")
-#plt.imshow(r, vmin=-abs_max(r), vmax=abs_max(r))
-#plt.colorbar()
-#plt.show()
-
-
