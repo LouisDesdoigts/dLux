@@ -14,14 +14,14 @@ coords: float = np.meshgrid(grid, grid)
 
 neg_pi_to_pi_phi: float = np.arctan2(coords[1], coords[0]) 
 phi: float = neg_pi_to_pi_phi + 2. * (neg_pi_to_pi_phi < 0.) * np.pi
-r: float = np.hypot(coords[0], coords[1])
+rho: float = np.hypot(coords[0], coords[1])
 
 fig, axes = plt.subplots(1, 2, figsize=(2 * 4, 3))
-axes[0].set_title("$r$")
-_map = axes[0].imshow(r, cm=plt.cm.Iferno)
+axes[0].set_title("$\\rho$")
+_map = axes[0].imshow(rho, cmap=plt.cm.inferno)
 fig.colorbar(_map, ax=axes[0])
 axes[1].set_title("$\\phi$")
-_map = axes[1].imshow(phi, cm=plt.cm.Inferno)
+_map = axes[1].imshow(phi, cmap=plt.cm.inferno)
 fig.colorbar(_map, ax=axes[1])
 plt.show()
 
@@ -30,15 +30,28 @@ low_bound: float = 2. * i * alpha
 top_bound: float = 2. * (i + 1.) * alpha
 
 wedge: float = ((low_bound[:, None, None] < phi) & (phi < top_bound[:, None, None])).astype(float)
+min_inv_m: float = np.tan((2. * i + 1.) * alpha)
+x_proj: float = np.cos(2. * i * alpha)
+y_proj: float = np.sin(2. * i * alpha)
+r: float = rmax * (min_inv_m * y_proj + x_proj)[:, None, None] / (min_inv_m[:, None, None] * np.sin(phi) + np.cos(phi))
+
+dist: float = wedge * (rho - r)
+np.where()
+
+fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
+for _i in i:
+    axes[_i].set_title("$\\rho$")
+    _map = axes[_i].imshow(dist[_i] * wedge[_i], cmap=plt.cm.inferno)
+    fig.colorbar(_map, ax=axes[_i])
+plt.show()
+
+fig = plt.figure()
+axes = plt.axes()
+_map = axes.imshow((dist * wedge).sum(axis=0))
+fig.colorbar(_map, ax=axes)
+plt.show()
 
 abs_max = lambda arr: np.abs(arr).max()
-
-for _i in i:
-    plt.title(f"$\\phi_{_i}$")
-    plt.imshow(wedge[_i], vmin=-abs_max(dist), vmax=abs_max(dist))
-    plt.colorbar()
-    plt.show()
-
 # OK I am stuck again. Well the positive side is always on the right.
 # At least that is for a vertical line. I am not so sure how to 
 # discuss this for a line that is not nessecarily ... Actually I 
