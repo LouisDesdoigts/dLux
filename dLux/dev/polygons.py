@@ -35,13 +35,12 @@ x_proj: float = np.cos(2. * i * alpha)
 y_proj: float = np.sin(2. * i * alpha)
 r: float = rmax * (min_inv_m * y_proj + x_proj)[:, None, None] / (min_inv_m[:, None, None] * np.sin(phi) + np.cos(phi))
 
-dist: float = wedge * (rho - r)
-np.where()
+dist: float = (rho - r)
 
 fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
 for _i in i:
     axes[_i].set_title("$\\rho$")
-    _map = axes[_i].imshow(dist[_i] * wedge[_i], cmap=plt.cm.inferno)
+    _map = axes[_i].imshow(dist[_i], cmap=plt.cm.inferno)
     fig.colorbar(_map, ax=axes[_i])
 plt.show()
 
