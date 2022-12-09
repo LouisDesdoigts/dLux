@@ -3,11 +3,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 mpl.rcParams["text.usetex"] = True
-mpl.rcParams["image.cmap"] = "seismic"
-
-# So what information do I have? You know, this would be 
-# much better done on paper. 
-def _dist_from_line()
+mpl.rcParams["image.cmap"] = "inferno"
 
 n: int = 5
 rmax: float = 1.
@@ -20,25 +16,20 @@ neg_pi_to_pi_phi: float = np.arctan2(coords[1], coords[0])
 phi: float = neg_pi_to_pi_phi + 2. * (neg_pi_to_pi_phi < 0.) * np.pi
 r: float = np.hypot(coords[0], coords[1])
 
+fig, axes = plt.subplots(1, 2, figsize=(2 * 4, 3))
+axes[0].set_title("$r$")
+_map = axes[0].imshow(r, cm=plt.cm.Iferno)
+fig.colorbar(_map, ax=axes[0])
+axes[1].set_title("$\\phi$")
+_map = axes[1].imshow(phi, cm=plt.cm.Inferno)
+fig.colorbar(_map, ax=axes[1])
+plt.show()
+
 i: int = np.arange(n)
 low_bound: float = 2. * i * alpha
 top_bound: float = 2. * (i + 1.) * alpha
 
-x: float = coords[0]
 wedge: float = ((low_bound[:, None, None] < phi) & (phi < top_bound[:, None, None])).astype(float)
-dist_from_rad: float = rmax * np.cos(alpha)
-
-print(dist_from_rad)
-
-# NOTE: The distance of the edge from the circle is going to be
-#       given by the 
-
-# TODO: OK So the first thing on the books today is to sort out 
-# my timesheets and then to get the distance from a line cooking. 
-# I also need to think about how to test if something is inside. 
-# Many things TODO.
-
-
 
 abs_max = lambda arr: np.abs(arr).max()
 
