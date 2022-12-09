@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 mpl.rcParams["text.usetex"] = True
 mpl.rcParams["image.cmap"] = "inferno"
 
-n: int = 5
+n: int = 6
 rmax: float = 1.
 alpha: float = np.pi / n # Half the angular disp of one wedge
 
