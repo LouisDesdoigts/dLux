@@ -29,34 +29,34 @@ r: float = rmax * (min_inv_m * y_proj + x_proj)[:, None, None] / (min_inv_m[:, N
 
 dist: float = (rho - r)
 
-fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
-for _i in i:
-    axes[_i].set_title("$r$")
-    _map = axes[_i].imshow(dist[_i], vmax=50, vmin=-50)
-    fig.colorbar(_map, ax=axes[_i])
-plt.show()    
-
-fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
-for _i in i:
-    axes[_i].set_title("$r$")
-    _map = axes[_i].imshow(dist[_i] * wedge[_i])
-    fig.colorbar(_map, ax=axes[_i])
-plt.show()
+#fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
+#for _i in i:
+#    axes[_i].set_title("$r$")
+#    _map = axes[_i].imshow(dist[_i], vmax=50, vmin=-50)
+#    fig.colorbar(_map, ax=axes[_i])
+#plt.show()    
+#
+#fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
+#for _i in i:
+#    axes[_i].set_title("$r$")
+#    _map = axes[_i].imshow(dist[_i] * wedge[_i])
+#    fig.colorbar(_map, ax=axes[_i])
+#plt.show()
 
 dist: float = (dist * wedge).sum(axis=0)
 amax: callable = lambda arr: np.abs(arr).max()
 smooth: callable = lambda arr: .5 * (np.tanh(npix * arr) + 1.)
 
-fig = plt.figure()
-axes = plt.axes()
-_map = axes.imshow(dist, cmap=plt.cm.seismic, vmin=-amax(dist), vmax=amax(dist))
-fig.colorbar(_map, ax=axes)
-plt.show()
-
-
-fig = plt.figure()
-axes = plt.axes()
-_map = axes.imshow(smooth(dist))
-fig.colorbar(_map, ax=axes)
-plt.show()
+#fig = plt.figure()
+#axes = plt.axes()
+#_map = axes.imshow(dist, cmap=plt.cm.seismic, vmin=-amax(dist), vmax=amax(dist))
+#fig.colorbar(_map, ax=axes)
+#plt.show()
+#
+#
+#fig = plt.figure()
+#axes = plt.axes()
+#_map = axes.imshow(smooth(dist))
+#fig.colorbar(_map, ax=axes)
+#plt.show()
 
