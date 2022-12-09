@@ -635,6 +635,7 @@ class ArrayDistribution(ResolvedSource):
 
         super().__init__(position, flux, spectrum, name=name, **kwargs)
         distribution = np.asarray(distribution, dtype=float)
+        distribution = np.maximum(distribution, 0.)
         self.distribution = distribution/distribution.sum()
 
         # Input checking
@@ -667,7 +668,8 @@ class ArrayDistribution(ResolvedSource):
             The source object with the normalised spectrum and distribution.
         """
         normalised_spectrum = self.spectrum.normalise()
-        normalised_distribution = self.distribution/self.distribution.sum()
+        distribution_floor = np.maximum(self.distribution, 0.)
+        normalised_distribution = distribution_floor/distribution_floor.sum()
         return tree_at(
             lambda source : (source.spectrum, source.distribution), self, \
                             (normalised_spectrum, normalised_distribution))
