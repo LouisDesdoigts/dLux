@@ -64,8 +64,13 @@ smooth: callable = lambda arr: .5 * (np.tanh(npix * arr) + 1.)
 # this is going to give me infinite values. 
 vertices: float = np.array([[.5, .5], [.5, -.5], [-.5, -.5], [-.5, .5]], float)
 diffs: float = vertices - np.roll(vertices, (1, 1))
-m: float = (diffs[:, 1] / diffs[:, 0]).reshape((4, 1, 1))
+m: float = diffs[:, 1] / diffs[:, 0]
 
-x1: float = vertices[:, 0].reshape((4, 1, 1))
-y1: float = vertices[:, 1].reshape((4, 1, 1))
+x1: float = vertices[:, 0]
+y1: float = vertices[:, 1]
+
+x: float = coords[0][:, :, None]
+y: float = coords[1][:, :, None]
+
+d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
 
