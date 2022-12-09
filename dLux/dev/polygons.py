@@ -60,3 +60,12 @@ smooth: callable = lambda arr: .5 * (np.tanh(npix * arr) + 1.)
 #fig.colorbar(_map, ax=axes)
 #plt.show()
 
+# OK so attempting to generate the vertices for a square. 
+# this is going to give me infinite values. 
+vertices: float = np.array([[.5, .5], [.5, -.5], [-.5, -.5], [-.5, .5]], float)
+diffs: float = vertices - np.roll(vertices, (1, 1))
+m: float = (diffs[:, 1] / diffs[:, 0]).reshape((4, 1, 1))
+
+x1: float = vertices[:, 0].reshape((4, 1, 1))
+y1: float = vertices[:, 1].reshape((4, 1, 1))
+
