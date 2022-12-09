@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 mpl.rcParams["text.usetex"] = True
 mpl.rcParams["image.cmap"] = "inferno"
 
-n: int = 16
+n: int = 7
 rmax: float = 1.
 alpha: float = np.pi / n # Half the angular disp of one wedge
 
@@ -27,17 +27,25 @@ _map = axes[1].imshow(phi, cmap=plt.cm.inferno)
 fig.colorbar(_map, ax=axes[1])
 plt.show()
 
+epsilon: float = .05
 i: int = np.arange(n)
 low_bound: float = 2. * i * alpha
-top_bound: float = 2. * (i + 1.) * alpha
+top_bound: float = 2. * (i + 1.) * alpha  
 
-wedge: float = ((low_bound[:, None, None] < phi) & (phi < top_bound[:, None, None])).astype(float)
+wedge: float = ((low_bound[:, None, None] < phi) & (phi <= top_bound[:, None, None])).astype(float)
 min_inv_m: float = np.tan((2. * i + 1.) * alpha)
 x_proj: float = np.cos(2. * i * alpha)
 y_proj: float = np.sin(2. * i * alpha)
 r: float = rmax * (min_inv_m * y_proj + x_proj)[:, None, None] / (min_inv_m[:, None, None] * np.sin(phi) + np.cos(phi))
 
 dist: float = (rho - r)
+
+fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
+for _i in i:
+    axes[_i].set_title("$r$")
+    _map = axes[_i].imshow(dist[_i], vmax=50, vmin=-50)
+    fig.colorbar(_map, ax=axes[_i])
+plt.show()    
 
 fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
 for _i in i:
