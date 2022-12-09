@@ -73,5 +73,5 @@ x: float = coords[0][:, :, None]
 y: float = coords[1][:, :, None]
 
 d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
-theta: float = np.arctan(m)
+theta: float = np.arctan2(y1, x1)
 print(theta)
