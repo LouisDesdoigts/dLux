@@ -1,4 +1,4 @@
-![alt text](docs/assets/logo.jpg?raw=true)
+![Logo](assets/logo.jpg?raw=true)
 
 # ∂Lux
 ## Differentiable Light - _Optical systems as a neural network_
