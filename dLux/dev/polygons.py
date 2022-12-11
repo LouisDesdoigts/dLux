@@ -81,31 +81,27 @@ x: float = coords[0][:, :, None]
 y: float = coords[1][:, :, None]
 
 d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
-
 theta: float = np.arctan2(y1, x1)
-comps: bool = theta > 0.
+
 two_pi: float = 2. * np.pi
-offset_theta: float = theta + comps * two_pi
+offset_theta: float = offset(theta, 0.)
 
 
 @jax.jit
-def offset(theta: float) -> float:
-    comps: float = np.array(theta < 0., float)
+def offset(theta: float, threshold: float) -> float:
+    comps: float = np.array(theta < threshold, float)
     return theta + comps * two_pi
 
 
-sorted_inds: int = np.argsort(theta)
+sorted_inds: int = np.argsort(offset_theta)
 
 sorted_x1: float = x1[sorted_inds]
 sorted_y1: float = y1[sorted_inds]
-sorted_theta: float = theta[sorted_inds]
-next_sorted_theta: float = np.roll(sorted_theta, -1)
+sorted_theta: float = offset_theta[sorted_inds]
+next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
 
-
-phi: float = np.arctan2(y, x)
+phi: float = offset(np.arctan2(y, x), sorted_theta[0])
 w: float = ((phi > sorted_theta) & (phi < next_sorted_theta)).astype(float)
-
-next_sorted_theta
 
 # +
 fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
