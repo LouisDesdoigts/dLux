@@ -67,9 +67,9 @@ plt.show()
 
 # # Vertex Generation of Polygons.
 # So this is very challenging. I have made extensive notes but little progress. 
-
 # OK so attempting to generate the vertices for a square. 
-# this is going to give me infinite values. 
+# This is going to give me infinite values. 
+
 vertices: float = np.array([[.5, .5], [.5, -.5], [-.5, -.5], [-.5, .5]], float)
 diffs: float = vertices - np.roll(vertices, (1, 1))
 m: float = diffs[:, 1] / diffs[:, 0]
@@ -82,39 +82,17 @@ y: float = coords[1][:, :, None]
 
 d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
 
-theta: float = np.arctan2(y1, x1).repeat(10000)
-
+theta: float = np.arctan2(y1, x1)
 comps: bool = theta > 0.
-
-# %%timeit
-convert_jax_type(comps)
-
-# %%timeit
-convert_jax_type_and_create_array(comps)
+two_pi: float = 2. * np.pi
+offset_theta: float = theta + comps * two_pi
 
 
 @jax.jit
-def test_offset_method_one(theta: float) -> float:
+def offset(theta: float) -> float:
     comps: float = np.array(theta < 0., float)
-    return theta + comps * 2. * np.pi
+    return theta + comps * two_pi
 
-
-@jax.jit
-def test_offset_method_two(theta: float) -> float:
-    return np.where(theta < 0., theta + 2. * np.pi, theta)
-
-
-jax.make_jaxpr(test_offset_method_one)(theta)
-
-jax.make_jaxpr(test_offset_method_two)(theta)
-
-# %%timeit
-test_offset_method_one(theta)
-
-# %%timeit
-test_offset_method_two(theta)
-
-offset_theta
 
 sorted_inds: int = np.argsort(theta)
 
