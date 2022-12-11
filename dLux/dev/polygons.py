@@ -84,21 +84,6 @@ d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
 
 theta: float = np.arctan2(y1, x1).repeat(10000)
 
-
-@jax.jit
-def convert_jax_type_and_create_array(comps: bool) -> float:
-    return np.array(comps, dtype=float)
-
-
-@jax.jit
-def convert_jax_type(comps: bool) -> float:
-    return (comps).astype(float)
-
-
-jax.make_jaxpr(convert_jax_type)(theta > 0.)
-
-jax.make_jaxpr(convert_jax_type_and_create_array)(theta > 0.)
-
 comps: bool = theta > 0.
 
 # %%timeit
@@ -110,7 +95,8 @@ convert_jax_type_and_create_array(comps)
 
 @jax.jit
 def test_offset_method_one(theta: float) -> float:
-    return theta + (theta < 0.) * 2. * np.pi
+    comps: float = np.array(theta < 0., float)
+    return theta + comps * 2. * np.pi
 
 
 @jax.jit
@@ -127,12 +113,6 @@ test_offset_method_one(theta)
 
 # %%timeit
 test_offset_method_two(theta)
-
-# %%timeit
-offset_theta: float = theta + (theta < 0.) * 2. * np.pi 
-
-# %%timeit 
-offset_theta: float = np.where(theta < 0., theta + 2. * np.pi, theta)
 
 offset_theta
 
