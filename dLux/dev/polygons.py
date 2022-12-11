@@ -74,4 +74,13 @@ y: float = coords[1][:, :, None]
 
 d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
 theta: float = np.arctan2(y1, x1)
+
+phi: float = np.arctan2(y, x)
+# TODO: From here I need to get this working. 
+w: float = ((phi < theta) & (phi > np.roll(theta, 1))).astype(float)
+
+plt.imshow(w[:, :, 0])
+plt.colorbar()
+plt.show()
 print(theta)
+
