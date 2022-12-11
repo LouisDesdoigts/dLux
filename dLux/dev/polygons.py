@@ -82,23 +82,17 @@ y: float = coords[1][:, :, None]
 d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
 theta: float = np.arctan2(y1, x1)
 
-phi: float = np.arctan2(y, x)
-# TODO: From here I need to get this working. 
-w: float = ((phi < theta) & (phi > np.roll(theta, 1))).astype(float)
-
 sorted_inds: int = np.argsort(theta)
 
 sorted_x1: float = x1[sorted_inds]
 sorted_y1: float = y1[sorted_inds]
 sorted_theta: float = theta[sorted_inds]
+next_sorted_theta: float = np.roll(sorted_theta, 1)
 
-sorted_x1
-
-sorted_y1
+phi: float = np.arctan2(y, x)
+w: float = ((phi > sorted_theta) & (phi < next_sorted_theta)).astype(float)
 
 sorted_theta
-
-np.roll(theta, 1)
 
 plt.imshow(w[:, :, 0])
 plt.colorbar()
