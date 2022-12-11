@@ -86,14 +86,26 @@ theta: float = np.arctan2(y1, x1).repeat(10000)
 
 
 @jax.jit
+def convert_jax_type_and_create_array(comps: bool) -> float:
+    return np.array(comps, dtype=float)
+
+
+@jax.jit
 def convert_jax_type(comps: bool) -> float:
     return (comps).astype(float)
 
 
 jax.make_jaxpr(convert_jax_type)(theta > 0.)
 
+jax.make_jaxpr(convert_jax_type_and_create_array)(theta > 0.)
+
+comps: bool = theta > 0.
+
 # %%timeit
-convert_jax_type(theta > 0.)
+convert_jax_type(comps)
+
+# %%timeit
+convert_jax_type_and_create_array(comps)
 
 
 @jax.jit
