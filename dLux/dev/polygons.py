@@ -87,15 +87,20 @@ sorted_inds: int = np.argsort(theta)
 sorted_x1: float = x1[sorted_inds]
 sorted_y1: float = y1[sorted_inds]
 sorted_theta: float = theta[sorted_inds]
-next_sorted_theta: float = np.roll(sorted_theta, 1)
+next_sorted_theta: float = np.roll(sorted_theta, -1)
 
 phi: float = np.arctan2(y, x)
 w: float = ((phi > sorted_theta) & (phi < next_sorted_theta)).astype(float)
 
-sorted_theta
+next_sorted_theta
 
-plt.imshow(w[:, :, 0])
-plt.colorbar()
+# +
+fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
+
+for i in range(4):
+    _map = axes[i].imshow(w[:, :, i])
+    fig.colorbar(_map, ax=axes[i])
+# -
 
 
 print(theta)
