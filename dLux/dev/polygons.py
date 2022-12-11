@@ -1,3 +1,4 @@
+import jax
 import jax.numpy as np
 import matplotlib as mpl 
 import matplotlib.pyplot as plt
@@ -80,7 +81,48 @@ x: float = coords[0][:, :, None]
 y: float = coords[1][:, :, None]
 
 d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
-theta: float = np.arctan2(y1, x1)
+
+theta: float = np.arctan2(y1, x1).repeat(10000)
+
+
+@jax.jit
+def convert_jax_type(comps: bool) -> float:
+    return (comps).astype(float)
+
+
+jax.make_jaxpr(convert_jax_type)(theta > 0.)
+
+# %%timeit
+convert_jax_type(theta > 0.)
+
+
+@jax.jit
+def test_offset_method_one(theta: float) -> float:
+    return theta + (theta < 0.) * 2. * np.pi
+
+
+@jax.jit
+def test_offset_method_two(theta: float) -> float:
+    return np.where(theta < 0., theta + 2. * np.pi, theta)
+
+
+jax.make_jaxpr(test_offset_method_one)(theta)
+
+jax.make_jaxpr(test_offset_method_two)(theta)
+
+# %%timeit
+test_offset_method_one(theta)
+
+# %%timeit
+test_offset_method_two(theta)
+
+# %%timeit
+offset_theta: float = theta + (theta < 0.) * 2. * np.pi 
+
+# %%timeit 
+offset_theta: float = np.where(theta < 0., theta + 2. * np.pi, theta)
+
+offset_theta
 
 sorted_inds: int = np.argsort(theta)
 
@@ -88,6 +130,7 @@ sorted_x1: float = x1[sorted_inds]
 sorted_y1: float = y1[sorted_inds]
 sorted_theta: float = theta[sorted_inds]
 next_sorted_theta: float = np.roll(sorted_theta, -1)
+
 
 phi: float = np.arctan2(y, x)
 w: float = ((phi > sorted_theta) & (phi < next_sorted_theta)).astype(float)
