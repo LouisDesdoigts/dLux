@@ -109,7 +109,16 @@ fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
 for i in range(4):
     _map = axes[i].imshow(w[:, :, i])
     fig.colorbar(_map, ax=axes[i])
+
+
+# +
+fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
+
+for i in range(4):
+    _map = axes[i].imshow(d[:, :, i])
+    fig.colorbar(_map, ax=axes[i])
 # -
+
 
 
 print(theta)
