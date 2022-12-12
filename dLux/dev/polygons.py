@@ -81,6 +81,8 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     
     bc_m: float = calc_edge_grad_from_vert(vertices)[:, None, None]
     
+    print("M: ", bc_m)
+    
     bc_x1: float = vertices[:, 0][:, None, None]
     bc_y1: float = vertices[:, 1][:, None, None]
 
@@ -120,7 +122,7 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
 
 
 def calc_edge_grad_from_vert(vertices: float) -> float:
-    diffs: float = vertices - np.roll(vertices, (1, 1))
+    diffs: float = vertices - np.roll(vertices, (-1, -1))
     return diffs[:, 1] / diffs[:, 0]
 
 
@@ -160,6 +162,10 @@ def reg_pol_verts(n: int, r: float) -> float:
 
 
 hex_verts
+
+np.roll(hex_verts, (-1, -1))
+
+calc_edge_grad_from_vert(hex_verts)
 
 sq_verts: float = reg_pol_verts(4, .5)
 pent_verts: float = reg_pol_verts(5, .5)
