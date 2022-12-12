@@ -73,31 +73,51 @@ plt.show()
 # This is going to give me infinite values. 
 #
 # A note on conventions. I am using `bc` to represent broadcastable. This is just a copy that has had expanded dimensions ect.
+#
+# Hang on: I think that I just worked out a better way to do this. If I can generate the distance from a line parallel to the edge and passing through the origin then I just need to subtract the distance to the edge from the origin. I will finish the current implementation and then I will try this. 
 
 def draw_from_vertices(vertices: float, coords: float) -> float:
     two_pi: float = 2. * np.pi
     
     bc_m: float = calc_edge_grad_from_vert(vertices)[:, None, None]
-        
+    
+    print("BCM: ", bc_m.shape)
+    
     bc_x1: float = vertices[:, 0][:, None, None]
     bc_y1: float = vertices[:, 1][:, None, None]
         
+    print("BCX1: ", bc_x1.shape)
+
     bc_x: float = coords[0][None, :, :]
     bc_y: float = coords[1][None, :, :]
+        
+    print("BCX: ", bc_x.shape)
         
     theta: float = np.arctan2(y1, x1)
     offset_theta: float = offset(theta, 0.)
         
-    sorted_inds: int = np.argsort(offset_theta)
+    sorted_inds: int = np.argsort(offset_theta).flatten()
+        
+    print("SI: ", sorted_inds.shape)
+        
     sorted_x1: float = bc_x1[sorted_inds]
     sorted_y1: float = bc_y1[sorted_inds]
     sorted_m: float = bc_m[sorted_inds]
     sorted_theta: float = offset_theta[sorted_inds]
         
+    print("SM: ", sorted_m.shape)
+        
     dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
         
+    print("DFE: ", dist_from_edges.shape)
+    
     phi: float = offset(np.arctan2(y, x), sorted_theta[0])
+        
+    print("P: ", phi.shape)
+    
     wedges: float = make_wedges(phi, sorted_theta)
+        
+    print("W: ", wedges.shape)
         
     dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
@@ -128,29 +148,19 @@ def is_inside(sm: float, sx1: float, sy1) -> int:
 
 
 def make_wedges(off_phi: float, sorted_theta: float) -> float:
-    bc_phi: float = off_phi[None, :, :]
-    bc_sort_theta: float = sorted_theta[:, None, None]
+    bc_phi: float = off_phi
+    bc_sort_theta: float = sorted_theta
     next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
-    bc_next_sort_theta: float = next_sorted_theta[:, None, None]
+    bc_next_sort_theta: float = next_sorted_theta
     greater_than: bool = (bc_phi >= bc_sort_theta)
     less_than: bool = (bc_phi < bc_next_sort_theta)
     wedges: bool = greater_than & less_than
     return wedges.astype(float)
 
 
-polygon: float = 
+polygon: float = draw_from_vertices(vertices, coords)
 
 plt.imshow(polygon)
 plt.colorbar()
-
-# +
-# I should just be able to multiply by the sign of the distance from zero 
-# -
-
-dist_sgn: int = np.sign(perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, np.array([[0.]]), np.array([[0.]])))
-
-dist_sgn.shape
-
-dist_sgn
 
 
