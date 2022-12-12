@@ -80,42 +80,30 @@ def calc_edge_grad_from_vert(vertices: float) -> float:
 
 
 m: float = calc_edge_grad_from_vert(vertices)[:, None, None]
-# m: float = calc_edge_grad_from_vert(vertices)
 
-x1: float = vertices[:, 0][:, None, None]
-y1: float = vertices[:, 1][:, None, None]
-# x1: float = vertices[:, 0]
-# y1: float = vertices[:, 1]
+    y1: float = vertices[:, 1][:, None, None]
+
+
+def slice_v1()
+    x1: float = vertices[:, 0][:, None, None]
+
+    return x1
+
+
+# %%timeit
+x1: float = vertices[:, 0]
+y1: float = vertices[:, 1]
 
 x: float = coords[0][None, :, :]
 y: float = coords[1][None, :, :]
-# x: float = coords[0]
-# y: float = coords[1]
-
-vcond: callable = jax.vmap(jax.lax.cond, in_axes=(0, None, None, 0, 0, 0))
 
 
 @jax.jit
-def perp_dist_from_line_v1(m: float, x1: float, y1: float, x: float, y: float) -> float:
-    inf_case: callable = lambda m, x1, y1: (x - x1)
-    gen_case: callable = lambda m, x1, y1: (m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
-    return vcond(np.isinf(m), inf_case, gen_case, m, x1, y1)
-
-
-@jax.jit
-def perp_dist_from_line_v2(m: float, x1: float, y1: float, x: float, y: float) -> float:
+def perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
     inf_case: float = (x - x1)
     gen_case: float = (m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
     return np.where(np.isinf(m), inf_case, gen_case)
 
-
-# %%timeit
-perp_dist_from_line_v1(m, x1, y1, x, y)
-
-# %%timeit
-perp_dist_from_line_v2(m, x1, y1, x, y)
-
-jax.make_jaxpr(perp_dist_from_line_v2)(m, x1, y1, x, y)
 
 theta: float = np.arctan2(y1, x1)
 
