@@ -106,13 +106,24 @@ def offset(theta: float, threshold: float) -> float:
     return theta + comps * two_pi
 
 
+@jax.jit
 def is_inside_v1(sm: float, sx1: float, sy1) -> int:
     return np.sign(perp_dist_from_line(sm, sx1, sy1, np.array([[0.]]), np.array([[0.]])))
 
 
+@jax.jit
+def is_inside_v2(sm: float, sx1: float, sy1) -> int:
+    bc_origin: float = np.array([[0.]])
+    return np.sign(perp_dist_from_line(sm, sx1, sy1, bc_origin, bc_origin))
+
+
 # %%timeit
+is_inside_v1(sorted_m, sorted_x1, sorted_y1)
 
 sorted_inds: int = np.argsort(offset_theta)
+
+# %%timeit
+is_inside_v2(sorted_m, sorted_x1, sorted_y1)
 
 sorted_x1: float = x1[sorted_inds]
 sorted_y1: float = y1[sorted_inds]
