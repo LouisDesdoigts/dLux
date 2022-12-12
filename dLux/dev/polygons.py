@@ -149,10 +149,17 @@ sq_verts: float = reg_pol_verts(4, .5)
 pent_verts: float = reg_pol_verts(5, .5)
 hex_verts: float = reg_pol_verts(6, .5)
 
-polygon: float = draw_from_vertices(hex_verts, coords)
+hexagon: float = draw_from_vertices(hex_verts, coords)
+pentagon: float = draw_from_vertices(pent_verts, coords)
+square: float = draw_from_vertices(sq_verts, coords)
 
-plt.imshow(polygon)
-plt.colorbar()
+fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
+cmap = axes[0].imshow(hexagon)
+fig.colorbar(cmap, ax=axes[0])
+cmap = axes[1].imshow(pentagon)
+fig.colorbar(cmap, ax=axes[1])
+cmap = axes[2].imshow(square)
+fig.colorbar(cmap, ax=axes[2])
 
 # # Testing against alternate implementations
 #
