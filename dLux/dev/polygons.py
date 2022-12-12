@@ -79,10 +79,6 @@ plt.show()
 def draw_from_vertices(vertices: float, coords: float) -> float:
     two_pi: float = 2. * np.pi
     
-    bc_m: float = calc_edge_grad_from_vert(vertices)[:, None, None]
-    
-    print("M: ", bc_m)
-    
     bc_x1: float = vertices[:, 0][:, None, None]
     bc_y1: float = vertices[:, 1][:, None, None]
 
@@ -96,15 +92,11 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
         
     sorted_x1: float = bc_x1[sorted_inds]
     sorted_y1: float = bc_y1[sorted_inds]
-    sorted_m: float = bc_m[sorted_inds]
-    sorted_theta: float = offset_theta[sorted_inds]
+    sorted_theta: float = offset_theta[sorted_inds]   
+    sorted_m: float = calc_edge_grad_from_vert(sorted_x1, sorted_y1)
         
     phi: float = offset(np.arctan2(y, x), sorted_theta[0])
         
-    print("ST: ", sorted_theta)
-    print("SX1: ", sorted_x1)
-    print("SY1: ", sorted_y1)
-    print("SM: ", sorted_m)
         
     dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
     wedges: float = make_wedges(phi, sorted_theta)
@@ -121,9 +113,10 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
 
 
-def calc_edge_grad_from_vert(vertices: float) -> float:
-    diffs: float = vertices - np.roll(vertices, (-1, -1))
-    return diffs[:, 1] / diffs[:, 0]
+def calc_edge_grad_from_vert(x1: float, y1: float) -> float:
+    x_diffs: float = x1 - np.roll(x1, -1)
+    y_diffs: float = y1 - np.roll(y1, -1)
+    return y_diffs / x_diffs
 
 
 def perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
