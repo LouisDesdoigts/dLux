@@ -147,6 +147,39 @@ class PolygonalAperture(DynamicAperture):
             rotation = rotation,
             occulting = occulting,
             softening = softening)
+    
+    
+    def _perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
+        """
+        Calculate the perpendicular distance of a set of points (x, y) from
+        a line parametrised by a gradient m and a point (x1, y1). Notice, 
+        I am using x and y separately because the instructions cannot be vectorised
+        accross them.
+        
+        Parameters:
+        -----------
+        m: float, None (meters / meter)
+            The gradient of the line.
+        x1: float, meters
+            The x coordinate of a single point that lies on the line.
+        y1: float, meters
+            The y coordinate of a single point that lies on the line. 
+        x: float, meters
+            A set of coordinates that you wish to calculate the distance to 
+            from the line. 
+        y: float, meters
+            A set of coordinates that you wish to calculate the distance to 
+            from the line. Must have the same dimensions as x.
+        
+        Returns:
+        --------
+        dists: float, meters
+            The distance of the points (x, y) from the line. Has the same 
+            shape as x and y.
+        """
+        inf_case: float = (x - x1)
+        gen_case: float = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
+        return np.where(np.isinf(m), inf_case, gen_case)
         
     
 
