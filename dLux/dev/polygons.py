@@ -106,32 +106,27 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
 vertices: float = np.array([[.5, .5], [.5, -.5], [-.5, -.5], [-.5, .5]], float)
 
 
-@jax.jit
 def calc_edge_grad_from_vert(vertices: float) -> float:
     diffs: float = vertices - np.roll(vertices, (1, 1))
     return diffs[:, 1] / diffs[:, 0]
 
 
-@jax.jit
 def perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
     inf_case: float = (x - x1)
     gen_case: float = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
     return np.where(np.isinf(m), inf_case, gen_case)
 
 
-@jax.jit
 def offset(theta: float, threshold: float) -> float:
     comps: float = (theta < threshold).astype(float)
     return theta + comps * two_pi
 
 
-@jax.jit
 def is_inside(sm: float, sx1: float, sy1) -> int:
     bc_origin: float = np.array([[0.]])
     return np.sign(perp_dist_from_line(sm, sx1, sy1, bc_origin, bc_origin))
 
 
-@jax.jit
 def make_wedges(off_phi: float, sorted_theta: float) -> float:
     bc_phi: float = off_phi[None, :, :]
     bc_sort_theta: float = sorted_theta[:, None, None]
@@ -141,21 +136,6 @@ def make_wedges(off_phi: float, sorted_theta: float) -> float:
     less_than: bool = (bc_phi < bc_next_sort_theta)
     wedges: bool = greater_than & less_than
     return wedges.astype(float)
-
-
-# +
-fig, axes = plt.subplots(3, 4, figsize=(4*4, 9))
-
-for i in range(4):
-    _map = axes[0][i].imshow(w[i, :, :])
-    fig.colorbar(_map, ax=axes[0][i])
-    
-    _map = axes[1][i].imshow(d[i, :, :])
-    fig.colorbar(_map, ax=axes[1][i])
-    
-    _map = axes[2][i].imshow(d[i, :, :] * w[i, :, :])
-    fig.colorbar(_map, ax=axes[2][i])
-# -
 
 
 polygon: float = 
