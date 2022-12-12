@@ -76,7 +76,6 @@ plt.show()
 #
 # Hang on: I think that I just worked out a better way to do this. If I can generate the distance from a line parallel to the edge and passing through the origin then I just need to subtract the distance to the edge from the origin. I will finish the current implementation and then I will try this. 
 
-@jax.jit
 def draw_from_vertices(vertices: float, coords: float) -> float:
     two_pi: float = 2. * np.pi
     
@@ -103,6 +102,12 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
     wedges: float = make_wedges(phi, sorted_theta)
     dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
+        
+    fig, axes = plt.subplots(1, 6, figsize=(6*4, 3))
+    for i in range(6):
+        cmap = axes[i].imshow(wedges[i])
+        fig.colorbar(cmap, ax=axes[i])
+    plt.show() 
         
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
 
@@ -144,14 +149,19 @@ def make_wedges(off_phi: float, sorted_theta: float) -> float:
 
 def reg_pol_verts(n: int, r: float) -> float:
     thetas: float = np.linspace(0., two_pi, n, endpoint=False)
-    return r * np.array([np.cos(thetas), np.sin(thetas)])
+    return np.transpose(r * np.array([np.cos(thetas), np.sin(thetas)]))
 
+
+hex_verts.shape
 
 sq_verts: float = reg_pol_verts(4, .5)
+pent_verts: float = reg_pol_verts(5, .5)
+hex_verts: float = reg_pol_verts(6, .5)
 
-polygon: float = draw_from_vertices(sq_verts, coords)
+polygon: float = draw_from_vertices(hex_verts, coords)
 
 plt.imshow(polygon)
+plt.colorbar()
 
 # # Testing against alternate implementations
 #
