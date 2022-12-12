@@ -141,6 +141,8 @@ def make_wedges(off_phi: float, sorted_theta: float) -> float:
 #
 # The point of this will be to test many regular polygons as well as a few aditional shapes.
 
+smooth: callable = jax.jit(smooth)
+
 two_pi: float = 2. * np.pi
 
 
@@ -153,17 +155,22 @@ sq_verts: float = reg_pol_verts(4, .5)
 pent_verts: float = reg_pol_verts(5, .5)
 hex_verts: float = reg_pol_verts(6, .5)
 
+rand_verts: float = np.array([[.5, .5], [-.3, .4], [0., -.2]])
+
 hexagon: float = draw_from_vertices(hex_verts, coords)
 pentagon: float = draw_from_vertices(pent_verts, coords)
 square: float = draw_from_vertices(sq_verts, coords)
+rand: float = draw_from_vertices(rand_verts, coords)
 
-fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
-cmap = axes[0].imshow(hexagon)
+fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
+cmap = axes[0].imshow(smooth(hexagon))
 fig.colorbar(cmap, ax=axes[0])
-cmap = axes[1].imshow(pentagon)
+cmap = axes[1].imshow(smooth(pentagon))
 fig.colorbar(cmap, ax=axes[1])
-cmap = axes[2].imshow(square)
+cmap = axes[2].imshow(smooth(square))
 fig.colorbar(cmap, ax=axes[2])
+cmap = axes[3].imshow(smooth(rand))
+fig.colorbar(cmap, ax=axes[3])
 
 # # Testing against alternate implementations
 #
