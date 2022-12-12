@@ -71,7 +71,6 @@ plt.show()
 # This is going to give me infinite values. 
 
 vertices: float = np.array([[.5, .5], [.5, -.5], [-.5, -.5], [-.5, .5]], float)
-vertices: float = np.tile(vertices, (1000, 1))
 
 
 def calc_edge_grad_from_vert(vertices: float) -> float:
@@ -81,18 +80,8 @@ def calc_edge_grad_from_vert(vertices: float) -> float:
 
 m: float = calc_edge_grad_from_vert(vertices)[:, None, None]
 
-    y1: float = vertices[:, 1][:, None, None]
-
-
-def slice_v1()
-    x1: float = vertices[:, 0][:, None, None]
-
-    return x1
-
-
-# %%timeit
-x1: float = vertices[:, 0]
-y1: float = vertices[:, 1]
+x1: float = vertices[:, 0][:, None, None]
+y1: float = vertices[:, 1][:, None, None]
 
 x: float = coords[0][None, :, :]
 y: float = coords[1][None, :, :]
@@ -101,7 +90,7 @@ y: float = coords[1][None, :, :]
 @jax.jit
 def perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
     inf_case: float = (x - x1)
-    gen_case: float = (m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
+    gen_case: float = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
     return np.where(np.isinf(m), inf_case, gen_case)
 
 
@@ -113,9 +102,15 @@ offset_theta: float = offset(theta, 0.)
 
 @jax.jit
 def offset(theta: float, threshold: float) -> float:
-    comps: float = np.array(theta < threshold, float)
+    comps: float = (theta < threshold).astype(float)
     return theta + comps * two_pi
 
+
+def is_inside_v1(sm: float, sx1: float, sy1) -> int:
+    return np.sign(perp_dist_from_line(sm, sx1, sy1, np.array([[0.]]), np.array([[0.]])))
+
+
+# %%timeit
 
 sorted_inds: int = np.argsort(offset_theta)
 
