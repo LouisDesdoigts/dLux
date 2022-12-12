@@ -97,30 +97,12 @@ theta: float = np.arctan2(y1, x1)
 two_pi: float = 2. * np.pi
 offset_theta: float = offset(theta, 0.)
 
-comps: bool = theta.repeat(10000) > 0.
-
-
-@jax.jit
-def convert(comps: bool) -> float:
-    return comps.astype(int)
-
-
-@jax.jit
-def convert_and_create_array(comps: bool) -> float:
-    return np.array(comps, int)
-
 
 @jax.jit
 def offset(theta: float, threshold: float) -> float:
     comps: float = np.array(theta < threshold, float)
     return theta + comps * two_pi
 
-
-# %%timeit
-convert_and_create_array(comps).block_until_ready()
-
-# %%timeit
-convert(comps).block_until_ready()
 
 sorted_inds: int = np.argsort(offset_theta)
 
