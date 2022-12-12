@@ -71,6 +71,8 @@ plt.show()
 # This is going to give me infinite values. 
 
 vertices: float = np.array([[.5, .5], [.5, -.5], [-.5, -.5], [-.5, .5]], float)
+diffs: float = vertices - np.roll(vertices, (1, 1))
+m: float = diffs[:, 1] / diffs[:, 0]
 
 x1: float = vertices[:, 0]
 y1: float = vertices[:, 1]
@@ -106,18 +108,12 @@ sorted_x1: float = x1[sorted_inds]
 sorted_y1: float = y1[sorted_inds]
 sorted_theta: float = offset_theta[sorted_inds]
 next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
+sorted_m: float = m[sorted_inds]
 
 d: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
 
 phi: float = offset(np.arctan2(y, x), sorted_theta[0])
-w: float = ((phi[:, :, None] > sorted_theta) & (phi[:, :, None] < next_sorted_theta)).astype(float)
-
-sorted_theta
-
-next_sorted_theta
-
-plt.imshow(phi)
-plt.colorbar()
+w: float = ((phi.expand_dims() > sorted_theta) & (phi[:, :, None] < next_sorted_theta)).astype(float)
 
 # +
 fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
@@ -141,6 +137,16 @@ for i in range(4):
     _map = axes[i].imshow(d[i, :, :] * w[:, :, i])
     fig.colorbar(_map, ax=axes[i])
 # -
+
+
+polygon: float = (d[None, :, :] * w[:, :, None]).sum(axis=0)
+
+d.shape
+
+w.shape
+
+plt.imshow(polygon)
+plt.colorbar()
 
 
 
