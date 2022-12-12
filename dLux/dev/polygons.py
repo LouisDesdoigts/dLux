@@ -80,6 +80,19 @@ y1: float = vertices[:, 1]
 x: float = coords[0][:, :, None]
 y: float = coords[1][:, :, None]
 
+vcond: callable = jax.vmap(jax.lax.cond, in_axes=(0, None, None, 0, 0))
+
+
+def dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
+    inf_case: callable = lambda: np.abs(x - x1)
+    gen_case: callable = lambda: np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
+    return vcond(np.isinf(m), inf_case, gen_case)
+
+
+d:float = dist_from_line(m, x1, y1, x, y)
+
+vcond(np.isinf(m), lambda: m, lambda: )
+
 d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
 theta: float = np.arctan2(y1, x1)
 
