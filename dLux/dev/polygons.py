@@ -63,8 +63,6 @@ axes = plt.axes()
 _map = axes.imshow(smooth(dist))
 fig.colorbar(_map, ax=axes)
 plt.show()
-
-
 # -
 
 # # Vertex Generation of Polygons.
@@ -75,6 +73,9 @@ plt.show()
 # A note on conventions. I am using `bc` to represent broadcastable. This is just a copy that has had expanded dimensions ect.
 #
 # Hang on: I think that I just worked out a better way to do this. If I can generate the distance from a line parallel to the edge and passing through the origin then I just need to subtract the distance to the edge from the origin. I will finish the current implementation and then I will try this. 
+
+from apertures import DynamicAperture
+
 
 @jax.jit
 def draw_from_vertices(vertices: float, coords: float) -> float:
