@@ -107,38 +107,33 @@ def offset(theta: float, threshold: float) -> float:
 
 
 @jax.jit
-def is_inside_v1(sm: float, sx1: float, sy1) -> int:
-    return np.sign(perp_dist_from_line(sm, sx1, sy1, np.array([[0.]]), np.array([[0.]])))
-
-
-@jax.jit
-def is_inside_v2(sm: float, sx1: float, sy1) -> int:
+def is_inside(sm: float, sx1: float, sy1) -> int:
     bc_origin: float = np.array([[0.]])
     return np.sign(perp_dist_from_line(sm, sx1, sy1, bc_origin, bc_origin))
 
 
-# %%timeit
-is_inside_v1(sorted_m, sorted_x1, sorted_y1)
-
 sorted_inds: int = np.argsort(offset_theta)
-
-# %%timeit
-is_inside_v2(sorted_m, sorted_x1, sorted_y1)
-
 sorted_x1: float = x1[sorted_inds]
 sorted_y1: float = y1[sorted_inds]
-sorted_theta: float = offset_theta[sorted_inds]
-next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
 sorted_m: float = m[sorted_inds]
+sorted_theta: float = offset_theta[sorted_inds]
 
 d: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
 
-bc_phi: float = phi[None, :, :]
-bc_sort_theta: float = sorted_theta[:, None, None]
-bc_next_sort_theta: float = next_sorted_theta[:, None, None]
+
+@jax.jit
+def make_wedges(phi: float, stheta: float) -> float:
+    bc_phi: float = phi[None, :, :]
+    bc_sort_theta: float = sorted_theta[:, None, None]
+    bc_next_sort_theta: float = next_sorted_theta[:, None, None]
+    greater_than: float = 
+    return ( & (bc_phi < bc_next_sort_theta)).astype(float)
+
+
+next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
 
 phi: float = offset(np.arctan2(y, x), sorted_theta[0])
-w: float = ((bc_phi >= bc_sort_theta) & (bc_phi < bc_next_sort_theta)).astype(float)
+
 
 # +
 fig, axes = plt.subplots(3, 4, figsize=(4*4, 9))
