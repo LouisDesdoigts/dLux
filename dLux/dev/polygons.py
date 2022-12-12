@@ -71,8 +71,6 @@ plt.show()
 # This is going to give me infinite values. 
 
 vertices: float = np.array([[.5, .5], [.5, -.5], [-.5, -.5], [-.5, .5]], float)
-diffs: float = vertices - np.roll(vertices, (1, 1))
-m: float = diffs[:, 1] / diffs[:, 0]
 
 x1: float = vertices[:, 0]
 y1: float = vertices[:, 1]
@@ -89,8 +87,6 @@ def perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> f
     gen_case: callable = lambda m, x1, y1: np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
     return vcond(np.isinf(m), inf_case, gen_case, m, x1, y1)
 
-
-d: float = perp_dist_from_line(m, x1, y1, x, y)  
 
 theta: float = np.arctan2(y1, x1)
 
@@ -111,8 +107,17 @@ sorted_y1: float = y1[sorted_inds]
 sorted_theta: float = offset_theta[sorted_inds]
 next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
 
+d: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
+
 phi: float = offset(np.arctan2(y, x), sorted_theta[0])
 w: float = ((phi[:, :, None] > sorted_theta) & (phi[:, :, None] < next_sorted_theta)).astype(float)
+
+sorted_theta
+
+next_sorted_theta
+
+plt.imshow(phi)
+plt.colorbar()
 
 # +
 fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
