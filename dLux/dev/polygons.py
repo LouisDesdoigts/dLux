@@ -63,28 +63,53 @@ axes = plt.axes()
 _map = axes.imshow(smooth(dist))
 fig.colorbar(_map, ax=axes)
 plt.show()
+
+
 # -
 
 # # Vertex Generation of Polygons.
 # So this is very challenging. I have made extensive notes but little progress. 
 # OK so attempting to generate the vertices for a square. 
 # This is going to give me infinite values. 
+#
+# A note on conventions. I am using `bc` to represent broadcastable. This is just a copy that has had expanded dimensions ect.
+
+def draw_from_vertices(vertices: float, coords: float) -> float:
+    two_pi: float = 2. * np.pi
+    
+    bc_m: float = calc_edge_grad_from_vert(vertices)[:, None, None]
+        
+    bc_x1: float = vertices[:, 0][:, None, None]
+    bc_y1: float = vertices[:, 1][:, None, None]
+        
+    bc_x: float = coords[0][None, :, :]
+    bc_y: float = coords[1][None, :, :]
+        
+    theta: float = np.arctan2(y1, x1)
+    offset_theta: float = offset(theta, 0.)
+        
+    sorted_inds: int = np.argsort(offset_theta)
+    sorted_x1: float = bc_x1[sorted_inds]
+    sorted_y1: float = bc_y1[sorted_inds]
+    sorted_m: float = bc_m[sorted_inds]
+    sorted_theta: float = offset_theta[sorted_inds]
+        
+    dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
+        
+    phi: float = offset(np.arctan2(y, x), sorted_theta[0])
+    wedges: float = make_wedges(phi, sorted_theta)
+        
+    dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
+    return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
+
 
 vertices: float = np.array([[.5, .5], [.5, -.5], [-.5, -.5], [-.5, .5]], float)
 
 
+@jax.jit
 def calc_edge_grad_from_vert(vertices: float) -> float:
     diffs: float = vertices - np.roll(vertices, (1, 1))
     return diffs[:, 1] / diffs[:, 0]
-
-
-m: float = calc_edge_grad_from_vert(vertices)[:, None, None]
-
-x1: float = vertices[:, 0][:, None, None]
-y1: float = vertices[:, 1][:, None, None]
-
-x: float = coords[0][None, :, :]
-y: float = coords[1][None, :, :]
 
 
 @jax.jit
@@ -92,12 +117,6 @@ def perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> f
     inf_case: float = (x - x1)
     gen_case: float = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
     return np.where(np.isinf(m), inf_case, gen_case)
-
-
-theta: float = np.arctan2(y1, x1)
-
-two_pi: float = 2. * np.pi
-offset_theta: float = offset(theta, 0.)
 
 
 @jax.jit
@@ -112,27 +131,16 @@ def is_inside(sm: float, sx1: float, sy1) -> int:
     return np.sign(perp_dist_from_line(sm, sx1, sy1, bc_origin, bc_origin))
 
 
-sorted_inds: int = np.argsort(offset_theta)
-sorted_x1: float = x1[sorted_inds]
-sorted_y1: float = y1[sorted_inds]
-sorted_m: float = m[sorted_inds]
-sorted_theta: float = offset_theta[sorted_inds]
-
-d: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
-
-
 @jax.jit
-def make_wedges(phi: float, stheta: float) -> float:
-    bc_phi: float = phi[None, :, :]
+def make_wedges(off_phi: float, sorted_theta: float) -> float:
+    bc_phi: float = off_phi[None, :, :]
     bc_sort_theta: float = sorted_theta[:, None, None]
+    next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
     bc_next_sort_theta: float = next_sorted_theta[:, None, None]
-    greater_than: float = 
-    return ( & (bc_phi < bc_next_sort_theta)).astype(float)
-
-
-next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
-
-phi: float = offset(np.arctan2(y, x), sorted_theta[0])
+    greater_than: bool = (bc_phi >= bc_sort_theta)
+    less_than: bool = (bc_phi < bc_next_sort_theta)
+    wedges: bool = greater_than & less_than
+    return wedges.astype(float)
 
 
 # +
@@ -150,7 +158,7 @@ for i in range(4):
 # -
 
 
-polygon: float = (dist_sgn * d * w).sum(axis=0)
+polygon: float = 
 
 plt.imshow(polygon)
 plt.colorbar()
