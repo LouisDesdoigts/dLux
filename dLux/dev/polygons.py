@@ -80,6 +80,7 @@ from typing import TypeVar
 ApertureLayer = TypeVar("ApertureLayer")
 
 
+# +
 class PolygonalAperture(DynamicAperture):
     """
     The default aperture is dis-allows the learning of all 
@@ -139,9 +140,17 @@ class PolygonalAperture(DynamicAperture):
             The rotation of the aperture away from the positive 
             x-axis. 
         """
-        super().__init__()
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            comression = compression,
+            rotation = rotation,
+            occulting = occulting,
+            softening = softening)
+        
+    
 
-
+# -
 
 @jax.jit
 def draw_from_vertices(vertices: float, coords: float) -> float:
