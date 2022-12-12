@@ -90,9 +90,7 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     theta: float = np.arctan2(y1, x1)
     offset_theta: float = offset(theta, 0.)
         
-    sorted_inds: int = np.argsort(offset_theta).flatten()
-        
-    print("SI: ", sorted_inds.shape)
+    sorted_inds: int = np.argsort(offset_theta.flatten())
         
     sorted_x1: float = bc_x1[sorted_inds]
     sorted_y1: float = bc_y1[sorted_inds]
