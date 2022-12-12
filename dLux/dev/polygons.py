@@ -112,6 +112,10 @@ sorted_m: float = m[sorted_inds]
 
 d: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
 
+(np.expand_dims(phi, -1) > sorted_theta).shape
+
+(phi[None, :, :] > sorted_theta[:, None, None]).shape
+
 phi: float = offset(np.arctan2(y, x), sorted_theta[0])
 w: float = ((phi.expand_dims() > sorted_theta) & (phi[:, :, None] < next_sorted_theta)).astype(float)
 
