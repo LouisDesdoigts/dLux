@@ -103,10 +103,12 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     wedges: float = make_wedges(phi, sorted_theta)
     dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
         
-    fig, axes = plt.subplots(1, 6, figsize=(6*4, 3))
+    fig, axes = plt.subplots(2, 6, figsize=(6*4, 2*3))
     for i in range(6):
-        cmap = axes[i].imshow(wedges[i])
-        fig.colorbar(cmap, ax=axes[i])
+        cmap = axes[0][i].imshow(wedges[i])
+        fig.colorbar(cmap, ax=axes[0][i])
+        cmap = axes[1][i].imshow(dist_from_edges[i])
+        fig.colorbar(cmap, ax=axes[1][i])
     plt.show() 
         
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
