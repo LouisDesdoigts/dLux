@@ -134,9 +134,19 @@ for i in range(4):
 # -
 
 
-polygon: float = (d * w).sum(axis=0)
+polygon: float = (dist_sgn * d * w).sum(axis=0)
 
 plt.imshow(polygon)
 plt.colorbar()
+
+# +
+# I should just be able to multiply by the sign of the distance from zero 
+# -
+
+dist_sgn: int = np.sign(perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, np.array([[0.]]), np.array([[0.]])))
+
+dist_sgn.shape
+
+dist_sgn
 
 
