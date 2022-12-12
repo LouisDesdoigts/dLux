@@ -85,8 +85,8 @@ vcond: callable = jax.vmap(jax.lax.cond, in_axes=(0, None, None, 0, 0, 0))
 
 @jax.jit
 def perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
-    inf_case: callable = lambda m, x1, y1: np.abs(x - x1)
-    gen_case: callable = lambda m, x1, y1: np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
+    inf_case: callable = lambda m, x1, y1: (x - x1)
+    gen_case: callable = lambda m, x1, y1: (m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
     return vcond(np.isinf(m), inf_case, gen_case, m, x1, y1)
 
 
@@ -112,45 +112,31 @@ sorted_m: float = m[sorted_inds]
 
 d: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
 
-(np.expand_dims(phi, -1) > sorted_theta).shape
-
-(phi[None, :, :] > sorted_theta[:, None, None]).shape
+bc_phi: float = phi[None, :, :]
+bc_sort_theta: float = sorted_theta[:, None, None]
+bc_next_sort_theta: float = next_sorted_theta[:, None, None]
 
 phi: float = offset(np.arctan2(y, x), sorted_theta[0])
-w: float = ((phi.expand_dims() > sorted_theta) & (phi[:, :, None] < next_sorted_theta)).astype(float)
+w: float = ((bc_phi >= bc_sort_theta) & (bc_phi < bc_next_sort_theta)).astype(float)
 
 # +
-fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
+fig, axes = plt.subplots(3, 4, figsize=(4*4, 9))
 
 for i in range(4):
-    _map = axes[i].imshow(w[:, :, i])
-    fig.colorbar(_map, ax=axes[i])
-
-
-# +
-fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
-
-for i in range(4):
-    _map = axes[i].imshow(d[i, :, :])
-    fig.colorbar(_map, ax=axes[i])
-
-# +
-fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
-
-for i in range(4):
-    _map = axes[i].imshow(d[i, :, :] * w[:, :, i])
-    fig.colorbar(_map, ax=axes[i])
+    _map = axes[0][i].imshow(w[i, :, :])
+    fig.colorbar(_map, ax=axes[0][i])
+    
+    _map = axes[1][i].imshow(d[i, :, :])
+    fig.colorbar(_map, ax=axes[1][i])
+    
+    _map = axes[2][i].imshow(d[i, :, :] * w[i, :, :])
+    fig.colorbar(_map, ax=axes[2][i])
 # -
 
 
-polygon: float = (d[None, :, :] * w[:, :, None]).sum(axis=0)
-
-d.shape
-
-w.shape
+polygon: float = (d * w).sum(axis=0)
 
 plt.imshow(polygon)
 plt.colorbar()
-
 
 
