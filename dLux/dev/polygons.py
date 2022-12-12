@@ -77,8 +77,8 @@ m: float = diffs[:, 1] / diffs[:, 0]
 x1: float = vertices[:, 0]
 y1: float = vertices[:, 1]
 
-    x: float = coords[0]
-y: float = coords[1][:, :, None]
+x: float = coords[0]
+y: float = coords[1]
 
 vcond: callable = jax.vmap(jax.lax.cond, in_axes=(0, None, None, 0, 0, 0))
 
@@ -91,15 +91,23 @@ def dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
 
 d:float = dist_from_line(m, x1, y1, x, y)
 
-d.shape
-
-vcond(np.isinf(m), lambda: m, lambda: )
-
 d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
 theta: float = np.arctan2(y1, x1)
 
 two_pi: float = 2. * np.pi
 offset_theta: float = offset(theta, 0.)
+
+comps: bool = theta.repeat(10000) > 0.
+
+
+@jax.jit
+def convert(comps: bool) -> float:
+    return comps.astype(int)
+
+
+@jax.jit
+def convert_and_create_array(comps: bool) -> float:
+    return np.array(comps, int)
 
 
 @jax.jit
@@ -107,6 +115,12 @@ def offset(theta: float, threshold: float) -> float:
     comps: float = np.array(theta < threshold, float)
     return theta + comps * two_pi
 
+
+# %%timeit
+convert_and_create_array(comps).block_until_ready()
+
+# %%timeit
+convert(comps).block_until_ready()
 
 sorted_inds: int = np.argsort(offset_theta)
 
@@ -130,7 +144,7 @@ for i in range(4):
 fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
 
 for i in range(4):
-    _map = axes[i].imshow(d[:, :, i])
+    _map = axes[i].imshow(d[i, :, :])
     fig.colorbar(_map, ax=axes[i])
 # -
 
