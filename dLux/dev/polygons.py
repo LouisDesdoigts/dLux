@@ -107,9 +107,6 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
 
 
-vertices: float = np.array([[.5, .5], [.5, -.5], [-.5, -.5], [-.5, .5]], float)
-
-
 def calc_edge_grad_from_vert(vertices: float) -> float:
     diffs: float = vertices - np.roll(vertices, (1, 1))
     return diffs[:, 1] / diffs[:, 0]
@@ -140,6 +137,25 @@ def make_wedges(off_phi: float, sorted_theta: float) -> float:
     wedges: bool = greater_than & less_than
     return wedges.astype(float)
 
+
+# # Testing against different scenarios
+#
+# The point of this will be to test many regular polygons as well as a few aditional shapes.
+
+def reg_pol_verts(n: int, r: float) -> float:
+    thetas: float = np.linspace(0., two_pi, n, endpoint=False)
+    return r * np.array([np.cos(thetas), np.sin(thetas)])
+
+
+sq_verts: float = reg_pol_verts(4, .5)
+
+polygon: float = draw_from_vertices(sq_verts, coords)
+
+plt.imshow(polygon)
+
+# # Testing against alternate implementations
+#
+# This is testing against my pre-existing simple square implementation. 
 
 # %%timeit
 polygon: float = smooth(draw_from_vertices(vertices, coords))
