@@ -93,38 +93,14 @@ vcond: callable = jax.vmap(jax.lax.cond, in_axes=(0, None, None, 0, 0, 0))
 
 
 @jax.jit
-def dist_from_line_v1(m: float, x1: float, y1: float, x: float, y: float) -> float:
+def perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
     inf_case: callable = lambda m, x1, y1: np.abs(x - x1)
     gen_case: callable = lambda m, x1, y1: np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
     return vcond(np.isinf(m), inf_case, gen_case, m, x1, y1)
 
 
-@jax.jit
-def dist_from_line_v2(m: float, x1: float, y1: float, x: float, y: float) -> float:
-    inf_case: callable = lambda m, x1: np.abs(x - x1)
-    gen_case: callable = lambda m, x1, y1: np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
-    
-    dists: float = np.zeros(m.shape + x.shape, dtype=float)
-    
-    for i in range(m.size):
-        jax.lax.cond(np.isinf(m[i]), 
-            lambda: dists.at[i].set(inf_case(m[i], x1[i])),
-            lambda: dists.at[i].set(gen_case(m[i], x1[i], y1[i])))
-            
-    
-    return dists
+d: float = perp_dist_from_line(m, x1, y1, x, y)  
 
-# %%timeit
-dist_from_line_v1(test_m, test_x1, test_y1, x, y).block_until_ready()
-
-# %%timeit
-dist_from_line_v2(test_m, test_x1, test_y1, x, y).block_until_ready()
-
-jax.make_jaxpr(dist_from_line_v2)(m, x1, y1, x, y)
-
-d:float = dist_from_line(m, x1, y1, x, y)
-
-d: float = np.abs(m * (x - x1) - (y - y1)) / np.sqrt(1 + m ** 2)
 theta: float = np.arctan2(y1, x1)
 
 two_pi: float = 2. * np.pi
