@@ -155,7 +155,7 @@ sq_verts: float = reg_pol_verts(4, .5)
 pent_verts: float = reg_pol_verts(5, .5)
 hex_verts: float = reg_pol_verts(6, .5)
 
-rand_verts: float = np.array([[.5, .5], [-.3, .4], [0., -.2]])
+rand_verts: float = np.array([[.5, .5], [-.3, .4], [0., -.2], [.2, -.1], [.5, -.5]])
 
 hexagon: float = draw_from_vertices(hex_verts, coords)
 pentagon: float = draw_from_vertices(pent_verts, coords)
