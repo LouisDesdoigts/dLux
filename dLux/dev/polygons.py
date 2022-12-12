@@ -76,6 +76,7 @@ plt.show()
 #
 # Hang on: I think that I just worked out a better way to do this. If I can generate the distance from a line parallel to the edge and passing through the origin then I just need to subtract the distance to the edge from the origin. I will finish the current implementation and then I will try this. 
 
+@jax.jit
 def draw_from_vertices(vertices: float, coords: float) -> float:
     two_pi: float = 2. * np.pi
     
@@ -95,9 +96,9 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     sorted_theta: float = offset_theta[sorted_inds]   
     sorted_m: float = calc_edge_grad_from_vert(sorted_x1, sorted_y1)
         
-    phi: float = offset(np.arctan2(y, x), sorted_theta[0])
+    phi: float = offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
            
-    dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
+    dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
     wedges: float = make_wedges(phi, sorted_theta)
     dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
         
@@ -140,6 +141,9 @@ def make_wedges(off_phi: float, sorted_theta: float) -> float:
 #
 # The point of this will be to test many regular polygons as well as a few aditional shapes.
 
+two_pi: float = 2. * np.pi
+
+
 def reg_pol_verts(n: int, r: float) -> float:
     thetas: float = np.linspace(0., two_pi, n, endpoint=False)
     return np.transpose(r * np.array([np.cos(thetas), np.sin(thetas)]))
@@ -166,9 +170,9 @@ fig.colorbar(cmap, ax=axes[2])
 # This is testing against my pre-existing simple square implementation. 
 
 # %%timeit
-polygon: float = smooth(draw_from_vertices(vertices, coords))
+polygon: float = smooth(draw_from_vertices(sq_verts, coords))
 
-polygon_v1: float = smooth(draw_from_vertices(vertices, coords))
+polygon_v1: float = smooth(draw_from_vertices(sq_verts, coords))
 
 
 @jax.jit
@@ -176,6 +180,8 @@ def simp_square(coords: float, width: float) -> float:
     mask: float = - np.abs(coords) + width / 2.       
     return np.prod(smooth(mask), axis=0)
 
+
+coords: float = np.array(coords)
 
 # %%timeit
 polygon: float = simp_square(coords, 1.)
