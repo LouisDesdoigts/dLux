@@ -141,20 +141,7 @@ def make_wedges(off_phi: float, sorted_theta: float) -> float:
     return wedges.astype(float)
 
 
-# %%timeit
 polygon: float = draw_from_vertices(vertices, coords)
-
-
-@jax.jit
-def simp_square(coords: float, width: float) -> float:
-    mask: float = - np.abs(coords) + width / 2.       
-    return np.prod(mask, axis=0)
-
-
-coords: float = np.array(coords)
-
-# %%timeit
-polygon: float = simp_square(coords, 1.)
 
 plt.imshow(polygon)
 plt.colorbar()
