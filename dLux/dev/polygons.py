@@ -96,19 +96,10 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     sorted_m: float = calc_edge_grad_from_vert(sorted_x1, sorted_y1)
         
     phi: float = offset(np.arctan2(y, x), sorted_theta[0])
-        
-        
+           
     dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
     wedges: float = make_wedges(phi, sorted_theta)
     dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
-        
-    fig, axes = plt.subplots(2, 6, figsize=(6*4, 2*3))
-    for i in range(6):
-        cmap = axes[0][i].imshow(wedges[i])
-        fig.colorbar(cmap, ax=axes[0][i])
-        cmap = axes[1][i].imshow(dist_from_edges[i])
-        fig.colorbar(cmap, ax=axes[1][i])
-    plt.show() 
         
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
 
@@ -153,12 +144,6 @@ def reg_pol_verts(n: int, r: float) -> float:
     thetas: float = np.linspace(0., two_pi, n, endpoint=False)
     return np.transpose(r * np.array([np.cos(thetas), np.sin(thetas)]))
 
-
-hex_verts
-
-np.roll(hex_verts, (-1, -1))
-
-calc_edge_grad_from_vert(hex_verts)
 
 sq_verts: float = reg_pol_verts(4, .5)
 pent_verts: float = reg_pol_verts(5, .5)
