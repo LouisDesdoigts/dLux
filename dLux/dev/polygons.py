@@ -78,6 +78,7 @@ from apertures import DynamicAperture
 from typing import TypeVar
 
 ApertureLayer = TypeVar("ApertureLayer")
+Array = TypeVar("Array")
 
 
 # +
@@ -149,12 +150,12 @@ class PolygonalAperture(DynamicAperture):
             softening = softening)
     
     
-    def _perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
+    def _perp_dists_from_lines(m: float, x1: float, y1: float, x: float, y: float) -> float:
         """
         Calculate the perpendicular distance of a set of points (x, y) from
         a line parametrised by a gradient m and a point (x1, y1). Notice, 
         I am using x and y separately because the instructions cannot be vectorised
-        accross them.
+        accross them combined. This function can take any number of points.
         
         Parameters:
         -----------
@@ -180,10 +181,58 @@ class PolygonalAperture(DynamicAperture):
         inf_case: float = (x - x1)
         gen_case: float = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
         return np.where(np.isinf(m), inf_case, gen_case)
+    
+    
+    def _grad_from_two_points(xs: float, ys: float) -> float:
+    
+    
+    def _grads_from_many_points(x1: float, y1: float) -> float:
+        """
+        Given a set of points, calculate the gradient of the line that 
+        connects those points. This function assumes that the points are 
+        provided in the order they are to be connected together. Notice 
+        that we also assume there are more than two points, but more can 
+        be provided in which case the shape is assumed to be closed. The 
+        output has the same shape as the input and does not check for 
+        infinite (vertical) gradients.
         
+        Due to the intensly vectorised nature of this code it is ofen 
+        necessary to provided the parameters with expanded dimensions. 
+        This may be achieved using `x1[:, None, None]` or 
+        `x1.reshape((-1, 1, 1))` or `np.expand_dims(x1, (1, 2))`.
+        
+        Parameters:
+        -----------
+        x1: float, meters
+            The x coordinates of the points that are to be connected. 
+        y1: float, meters
+            The y coordinates of the points that are to be connected. 
+            Must have the same shape as x. 
+        """
+        x_diffs: float = x1 - np.roll(x1, -1)
+        y_diffs: float = y1 - np.roll(y1, -1)
+        return y_diffs / x_diffs
+
     
 
 # -
+
+test: float = np.array([1., 2., 3.])
+
+
+@jax.jit
+def reshape_v1
+
+
+# %%timeit
+np.expand_dims(test, (1, 2)).shape
+
+# %%timeit
+test.reshape((-1, 1, 1))
+
+# %%timeit 
+test[:, None, None]
+
 
 @jax.jit
 def draw_from_vertices(vertices: float, coords: float) -> float:
@@ -213,11 +262,6 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
         
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
 
-
-def calc_edge_grad_from_vert(x1: float, y1: float) -> float:
-    x_diffs: float = x1 - np.roll(x1, -1)
-    y_diffs: float = y1 - np.roll(y1, -1)
-    return y_diffs / x_diffs
 
 
 def perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
