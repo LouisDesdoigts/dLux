@@ -77,6 +77,10 @@ plt.show()
 from apertures import DynamicAperture
 
 
+class PolygonalAperture(DynamicAperture):
+    def __init__(self, ):
+
+
 @jax.jit
 def draw_from_vertices(vertices: float, coords: float) -> float:
     two_pi: float = 2. * np.pi
