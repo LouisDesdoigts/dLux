@@ -121,7 +121,7 @@ sorted_theta: float = offset_theta[sorted_inds]
 next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
 
 phi: float = offset(np.arctan2(y, x), sorted_theta[0])
-w: float = ((phi > sorted_theta) & (phi < next_sorted_theta)).astype(float)
+w: float = ((phi[:, :, None] > sorted_theta) & (phi[:, :, None] < next_sorted_theta)).astype(float)
 
 # +
 fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
@@ -137,11 +137,14 @@ fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
 for i in range(4):
     _map = axes[i].imshow(d[i, :, :])
     fig.colorbar(_map, ax=axes[i])
+
+# +
+fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
+
+for i in range(4):
+    _map = axes[i].imshow(d[i, :, :] * w[:, :, i])
+    fig.colorbar(_map, ax=axes[i])
 # -
-
-
-
-print(theta)
 
 
 
