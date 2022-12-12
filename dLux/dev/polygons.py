@@ -87,7 +87,7 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     bc_x: float = coords[0][None, :, :]
     bc_y: float = coords[1][None, :, :]
         
-    theta: float = np.arctan2(y1, x1)
+    theta: float = np.arctan2(bc_y1, bc_x1)
     offset_theta: float = offset(theta, 0.)
         
     sorted_inds: int = np.argsort(offset_theta.flatten())
@@ -137,8 +137,8 @@ def is_inside(sm: float, sx1: float, sy1) -> int:
 def make_wedges(off_phi: float, sorted_theta: float) -> float:
     next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
     bc_next_sort_theta: float = next_sorted_theta
-    greater_than: bool = (bc_phi >= bc_sort_theta)
-    less_than: bool = (bc_phi < bc_next_sort_theta)
+    greater_than: bool = (off_phi >= sorted_theta)
+    less_than: bool = (off_phi < bc_next_sort_theta)
     wedges: bool = greater_than & less_than
     return wedges.astype(float)
 
@@ -152,7 +152,7 @@ def reg_pol_verts(n: int, r: float) -> float:
     return np.transpose(r * np.array([np.cos(thetas), np.sin(thetas)]))
 
 
-hex_verts.shape
+hex_verts
 
 sq_verts: float = reg_pol_verts(4, .5)
 pent_verts: float = reg_pol_verts(5, .5)
