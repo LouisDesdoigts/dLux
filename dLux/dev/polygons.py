@@ -81,17 +81,11 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     
     bc_m: float = calc_edge_grad_from_vert(vertices)[:, None, None]
     
-    print("BCM: ", bc_m.shape)
-    
     bc_x1: float = vertices[:, 0][:, None, None]
     bc_y1: float = vertices[:, 1][:, None, None]
-        
-    print("BCX1: ", bc_x1.shape)
 
     bc_x: float = coords[0][None, :, :]
     bc_y: float = coords[1][None, :, :]
-        
-    print("BCX: ", bc_x.shape)
         
     theta: float = np.arctan2(y1, x1)
     offset_theta: float = offset(theta, 0.)
@@ -105,18 +99,16 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     sorted_m: float = bc_m[sorted_inds]
     sorted_theta: float = offset_theta[sorted_inds]
         
-    print("SM: ", sorted_m.shape)
-        
     dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
-        
-    print("DFE: ", dist_from_edges.shape)
-    
+
     phi: float = offset(np.arctan2(y, x), sorted_theta[0])
-        
-    print("P: ", phi.shape)
     
     wedges: float = make_wedges(phi, sorted_theta)
-        
+    
+    print("SI: ", sorted_inds)
+    print("OT: ", offset_theta)
+    print("ST: ", sorted_theta)
+
     fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
     for i in range(4):
         cmap = axes[i].imshow(wedges[i])
@@ -152,8 +144,6 @@ def is_inside(sm: float, sx1: float, sy1) -> int:
 
 
 def make_wedges(off_phi: float, sorted_theta: float) -> float:
-    bc_phi: float = off_phi
-    bc_sort_theta: float = sorted_theta
     next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
     bc_next_sort_theta: float = next_sorted_theta
     greater_than: bool = (bc_phi >= bc_sort_theta)
@@ -161,6 +151,10 @@ def make_wedges(off_phi: float, sorted_theta: float) -> float:
     wedges: bool = greater_than & less_than
     return wedges.astype(float)
 
+
+sample: float = np.array([[[0.5]], [[0.5]], [[-0.5]], [[-.5]]])
+
+sample[4]
 
 polygon: float = draw_from_vertices(vertices, coords)
 
