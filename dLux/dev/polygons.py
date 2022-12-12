@@ -74,17 +74,8 @@ vertices: float = np.array([[.5, .5], [.5, -.5], [-.5, -.5], [-.5, .5]], float)
 diffs: float = vertices - np.roll(vertices, (1, 1))
 m: float = diffs[:, 1] / diffs[:, 0]
 
-test_size: int = 100
-
-test_verts: float = np.tile(vertices, (1000, 1))
-test_diffs: float = test_verts - np.roll(test_verts, (1, 1))
-test_m: float = test_diffs[:, 1] / test_diffs[:, 0]
-
 x1: float = vertices[:, 0]
 y1: float = vertices[:, 1]
-
-test_x1: float = test_verts[:, 0]
-test_y1: float = test_verts[:, 1]
 
 x: float = coords[0]
 y: float = coords[1]
