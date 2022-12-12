@@ -117,7 +117,11 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     
     wedges: float = make_wedges(phi, sorted_theta)
         
+    fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
     for i in range(4):
+        cmap = axes[i].imshow(wedges[i])
+        fig.colorbar(cmap, ax=axes[i])
+    plt.show()
         
     dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
