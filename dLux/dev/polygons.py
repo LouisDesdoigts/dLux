@@ -99,6 +99,11 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
         
     phi: float = offset(np.arctan2(y, x), sorted_theta[0])
         
+    print("ST: ", sorted_theta)
+    print("SX1: ", sorted_x1)
+    print("SY1: ", sorted_y1)
+    print("SM: ", sorted_m)
+        
     dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
     wedges: float = make_wedges(phi, sorted_theta)
     dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
