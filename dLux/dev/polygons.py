@@ -102,16 +102,6 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     phi: float = offset(np.arctan2(y, x), sorted_theta[0])
     
     wedges: float = make_wedges(phi, sorted_theta)
-    
-    print("SI: ", sorted_inds)
-    print("OT: ", offset_theta)
-    print("ST: ", sorted_theta)
-
-    fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
-    for i in range(4):
-        cmap = axes[i].imshow(wedges[i])
-        fig.colorbar(cmap, ax=axes[i])
-    plt.show()
         
     dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
@@ -149,10 +139,6 @@ def make_wedges(off_phi: float, sorted_theta: float) -> float:
     wedges: bool = greater_than & less_than
     return wedges.astype(float)
 
-
-sample: float = np.array([[[0.5]], [[0.5]], [[-0.5]], [[-.5]]])
-
-sample[4]
 
 polygon: float = draw_from_vertices(vertices, coords)
 
