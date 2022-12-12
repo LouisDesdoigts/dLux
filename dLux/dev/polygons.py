@@ -97,13 +97,12 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     sorted_m: float = bc_m[sorted_inds]
     sorted_theta: float = offset_theta[sorted_inds]
         
-    dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
-
     phi: float = offset(np.arctan2(y, x), sorted_theta[0])
-    
-    wedges: float = make_wedges(phi, sorted_theta)
         
+    dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, x, y)  
+    wedges: float = make_wedges(phi, sorted_theta)
     dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
+        
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
 
 
@@ -127,8 +126,9 @@ def offset(theta: float, threshold: float) -> float:
 
 
 def is_inside(sm: float, sx1: float, sy1) -> int:
-    bc_origin: float = np.array([[0.]])
-    return np.sign(perp_dist_from_line(sm, sx1, sy1, bc_origin, bc_origin))
+    bc_orig: float = np.array([[0.]])
+    dist_from_orig: float = perp_dist_from_line(sm, sx1, sy1, bc_orig, bc_orig)
+    return np.sign(dist_from_orig)
 
 
 def make_wedges(off_phi: float, sorted_theta: float) -> float:
