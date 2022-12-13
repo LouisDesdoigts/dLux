@@ -370,7 +370,16 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
             the prozed soft edges.
         """
         steepness = self.softening * distances.shape[-1]
-        return (np.tanh(steepness * distances) + 1.) / 2.
+
+        if np.isnan(distances).any():
+            print("The nans occurred in distances.")
+
+        unnormed_aper: float = np.tanh(steepness * distances)
+
+        if np.isnan(distances).any():
+            print("The nans occurred in tanh.")
+
+        return (unnormed_aper + 1.) / 2.
 
 
     def _aperture(self: ApertureLayer, coords: Array) -> Array:
@@ -1350,6 +1359,7 @@ width = 2.
 coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
 aper: float = ireg_aper._aperture(coords)
+print(np.isnan(aper).any())
 plt.imshow(aper)
 plt.colorbar()
 plt.show()
