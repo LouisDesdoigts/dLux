@@ -1335,18 +1335,30 @@ class IrregularPolygonalAperture(PolygonalAperture):
 #})
 
 
-vert_angs: float = np.linspace(0., 2. * np.pi, 5, endpoint=False)
+vert_angs: float = np.linspace(0., 2. * np.pi, 4, endpoint=False)
 verts: float = np.array([np.cos(vert_angs), np.sin(vert_angs)])
-test_plots_of_aps({
-   "Occ. Soft": IrregularPolygonalAperture(verts, occulting=True, softening=True),
-   "Occ. Hard": IrregularPolygonalAperture(verts, occulting=True),
-   "Soft": IrregularPolygonalAperture(verts, softening=True),
-   "Hard": IrregularPolygonalAperture(verts),
-   "Trans.": IrregularPolygonalAperture(verts, centre=[.5, .5]),
-   "Strain": IrregularPolygonalAperture(verts, strain=[.5, 0.]),
-   "Compr.": IrregularPolygonalAperture(verts, compression=[.5, 1.]),
-   "Rot.": IrregularPolygonalAperture(verts, rotation=np.pi / 4.)
-})
+trans_verts: float = np.transpose(verts)
+
+ireg_aper: ApertureLayer = IrregularPolygonalAperture(trans_verts)
+npix = 128
+width = 2.
+coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+
+aper: float = ireg_aper._aperture(coords)
+plt.imshow(aper)
+plt.colorbar()
+plt.show()
+
+#test_plots_of_aps({
+#   "Occ. Soft": IrregularPolygonalAperture(verts, occulting=True, softening=True),
+#   "Occ. Hard": IrregularPolygonalAperture(verts, occulting=True),
+#   "Soft": IrregularPolygonalAperture(verts, softening=True),
+#   "Hard": IrregularPolygonalAperture(verts),
+#   "Trans.": IrregularPolygonalAperture(verts, centre=[.5, .5]),
+#   "Strain": IrregularPolygonalAperture(verts, strain=[.5, 0.]),
+#   "Compr.": IrregularPolygonalAperture(verts, compression=[.5, 1.]),
+#   "Rot.": IrregularPolygonalAperture(verts, rotation=np.pi / 4.)
+#})
 
 
 class RegularPolygonalAperture(PolygonalAperture):
