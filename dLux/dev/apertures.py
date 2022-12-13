@@ -1284,6 +1284,13 @@ class IrregularPolygonalAperture(PolygonalAperture):
         dist_sgn: float = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
 
         flat_dists: float = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
+
+        plt.imshow(flat_dists)
+        plt.colorbar()
+        plt.show()
+
+        print(np.isnan(flat_dists).any())
+
         return self._soften(flat_dists)
 
 
