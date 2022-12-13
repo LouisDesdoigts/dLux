@@ -217,45 +217,6 @@ class PolygonalAperture(DynamicAperture):
 
 # -
 
-test: float = np.arange(10000.)
-
-
-# +
-@jax.jit
-def reshape_v1(arr: float) -> float:
-    return np.expand_dims(arr, (1, 2))
-
-jax.make_jaxpr(reshape_v1)(test)
-# -
-
-# %%timeit
-reshape_v1(test).block_until_ready()
-
-
-# +
-@jax.jit
-def reshape_v2(arr: float) -> float:
-    return arr.reshape((-1, 1, 1))
-
-jax.make_jaxpr(reshape_v2)(test)
-# -
-
-# %%timeit
-reshape_v2(test).block_until_ready()
-
-
-# +
-@jax.jit
-def reshape_v3(arr: float) -> float:
-    return arr[:, None, None]
-
-jax.make_jaxpr(reshape_v3)(test)
-# -
-
-# %%timeit 
-reshape_v3(test)
-
-
 @jax.jit
 def draw_from_vertices(vertices: float, coords: float) -> float:
     two_pi: float = 2. * np.pi
