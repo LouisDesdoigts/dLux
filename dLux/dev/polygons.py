@@ -142,7 +142,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         rho: float = np.hypot(coords[0], coords[1])
         alpha: float = np.pi / self.nsides
             
-        i: int = np.arange(self.nsides) # Dummy index
+        i: int = np.arange(self.nsides)[:, None, None] # Dummy index
         low_bound: float = 2. * i * alpha 
         
         wedge: float = self._make_wedges(phi, low_bound)
@@ -150,7 +150,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         min_inv_m: float = np.tan((2. * i + 1.) * alpha)
         x_proj: float = np.cos(2. * i * alpha)
         y_proj: float = np.sin(2. * i * alpha)
-        r: float = rmax * (min_inv_m * y_proj + x_proj)[:, None, None] / (min_inv_m[:, None, None] * np.sin(phi) + np.cos(phi))
+        r: float = rmax * (min_inv_m * y_proj + x_proj) / (min_inv_m * np.sin(phi) + np.cos(phi))
 
         dist: float = (rho - r)
         dist: float = (dist * wedge).sum(axis=0)
@@ -197,9 +197,6 @@ from abc import ABC
 
 ApertureLayer = TypeVar("ApertureLayer")
 Array = TypeVar("Array")
-
-
-class 
 
 
 class PolygonalAperture(DynamicAperture, ABC):
