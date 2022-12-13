@@ -10,6 +10,44 @@ n: int = 7
 rmax: float = 1.
 alpha: float = np.pi / n # Half the angular disp of one wedge
 
+
+class RegularPolygonalAperture(PolygonalAperture):
+    """
+    An optiisation that can be applied to generate
+    regular polygonal apertures without using their 
+    vertices. 
+    
+    Parameters:
+    -----------
+    centre: float, meters
+        The centre of the coordinate system along the x-axis.
+    softening: bool = False
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool = False
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
+    nsides: int
+        The number of sides that the aperture has. 
+    rmax: float, meters
+        The radius of the smallest circle that can completely 
+        enclose the aperture. 
+    """
+    nsides: int
+    rmax: float
+
+
+
 npix: int = 100
 grid: float = np.linspace(0, 2., npix) - 1.
 coords: float = np.array(np.meshgrid(grid, grid))
@@ -509,17 +547,9 @@ class IrregularPolygonalAperture(PolygonalAperture):
         return self._soften(flat_dists)
     
 
-sq_ireg_aper: ApertureLayer = IrregularPolygonalAperture(sq_verts)
-
-sq_aper: float = sq_ireg_aper._aperture(coords)
-
-plt.imshow(sq_aper)
-
 # # Testing against different scenarios
 #
 # The point of this will be to test many regular polygons as well as a few aditional shapes.
-
-smooth: callable = jax.jit(smooth)
 
 two_pi: float = 2. * np.pi
 
@@ -532,7 +562,6 @@ def reg_pol_verts(n: int, r: float) -> float:
 sq_verts: float = reg_pol_verts(4, .5)
 pent_verts: float = reg_pol_verts(5, .5)
 hex_verts: float = reg_pol_verts(6, .5)
-
 rand_verts: float = np.array([[.5, .5], [-.3, .4], [0., -.2], [.2, -.1], [.5, -.5]])
 
 hexagon: float = draw_from_vertices(hex_verts, coords)
@@ -540,14 +569,24 @@ pentagon: float = draw_from_vertices(pent_verts, coords)
 square: float = draw_from_vertices(sq_verts, coords)
 rand: float = draw_from_vertices(rand_verts, coords)
 
+sq_ireg_aper: ApertureLayer = IrregularPolygonalAperture(sq_verts)
+hex_ireg_aper: ApertureLayer = IrregularPolygonalAperture(hex_verts)
+pent_ireg_aper: ApertureLayer = IrregularPolygonalAperture(pent_verts)
+rand_ireg_aper: ApertureLayer = IrregularPolygonalAperture(rand_verts)
+
+sq_aper: float = sq_ireg_aper._aperture(coords)
+hex_aper: float = hex_ireg_aper._aperture(coords)
+pent_aper: float = pent_ireg_aper._aperture(coords)
+rand_aper: float = rand_ireg_aper._aperture(coords)
+
 fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
-cmap = axes[0].imshow(smooth(hexagon))
+cmap = axes[0].imshow(sq_aper)
 fig.colorbar(cmap, ax=axes[0])
-cmap = axes[1].imshow(smooth(pentagon))
+cmap = axes[1].imshow(pent_aper)
 fig.colorbar(cmap, ax=axes[1])
-cmap = axes[2].imshow(smooth(square))
+cmap = axes[2].imshow(hex_aper)
 fig.colorbar(cmap, ax=axes[2])
-cmap = axes[3].imshow(smooth(rand))
+cmap = axes[3].imshow(rand_aper)
 fig.colorbar(cmap, ax=axes[3])
 
 # # Testing against alternate implementations
