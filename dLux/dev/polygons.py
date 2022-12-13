@@ -204,6 +204,29 @@ class PolygonalAperture(DynamicAperture):
         return (ys[1] - ys[0]) / (xs[1] - xs[0])
     
     
+    def offset(theta: float, threshold: float) -> float:
+        """
+        Transform the angular range of polar coordinates so that 
+        the new lowest angle is offset. The final range should be 
+        $[\\phi, \\phi + 2 \\pi]$ where $\\phi$ represents the 
+        `threshold`. 
+        
+        Parameters:
+        -----------
+        theta: float, radians
+            The angular coordinates.
+        threshold: float
+            The amount to offset the coordinates by.
+        
+        Returns:
+        --------
+        theta: float, radians 
+            The offset coordinate system.
+        """
+        comps: float = (theta < threshold).astype(float)
+        return theta + comps * two_pi
+    
+    
 # -
 
 class IrregularPolygonalAperture(PolygonalAperture):
@@ -246,11 +269,10 @@ class IrregularPolygonalAperture(PolygonalAperture):
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        The default aperture is dis-allows the learning of all 
-        parameters. 
-
         Parameters
         ----------
+        vertices: Array, meters
+            The location of the vertices of the aperture.
         centre: float, meters
             The centre of the coordinate system along the x-axis.
         softening: bool = False
@@ -346,10 +368,6 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
         
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
 
-
-def offset(theta: float, threshold: float) -> float:
-    comps: float = (theta < threshold).astype(float)
-    return theta + comps * two_pi
 
 
 def is_inside(sm: float, sx1: float, sy1) -> int:
