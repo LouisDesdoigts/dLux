@@ -370,14 +370,13 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
             the prozed soft edges.
         """
         steepness = self.softening * distances.shape[-1]
-        stretched_dists: float = steepness * distances
 
-        if np.isnan(stretched_dists).any():
+        if np.isnan(distances).any():
             print("The nans occurred in distances.")
 
-        unnormed_aper: float = np.tanh(stretched_dists)
+        unnormed_aper: float = np.tanh(steepness * distances)
 
-        if np.isnan(unnormed_aper).any():
+        if np.isnan(distances).any():
             print("The nans occurred in tanh.")
 
         return (unnormed_aper + 1.) / 2.
