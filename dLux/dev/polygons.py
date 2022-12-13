@@ -649,36 +649,3 @@ cmap = axes[2].imshow(hex_aper)
 fig.colorbar(cmap, ax=axes[2])
 cmap = axes[3].imshow(rand_aper)
 fig.colorbar(cmap, ax=axes[3])
-
-# # Testing against alternate implementations
-#
-# This is testing against my pre-existing simple square implementation. 
-
-# %%timeit
-polygon: float = smooth(draw_from_vertices(sq_verts, coords))
-
-polygon_v1: float = smooth(draw_from_vertices(sq_verts, coords))
-
-
-@jax.jit
-def simp_square(coords: float, width: float) -> float:
-    mask: float = - np.abs(coords) + width / 2.       
-    return np.prod(smooth(mask), axis=0)
-
-
-coords: float = np.array(coords)
-
-# %%timeit
-polygon: float = simp_square(coords, 1.)
-
-polygon_v2: float = simp_square(coords, 1.)
-
-fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
-cmap = axes[0].imshow(polygon_v1)
-fig.colorbar(cmap, ax=axes[0])
-cmap = axes[1].imshow(polygon_v2)
-fig.colorbar(cmap, ax=axes[1])
-cmap = axes[2].imshow(polygon_v1 - polygon_v2)
-fig.colorbar(cmap, ax=axes[2])
-
-
