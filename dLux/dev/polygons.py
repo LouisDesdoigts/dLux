@@ -579,13 +579,13 @@ class RegularPolygonalAperture(PolygonalAperture):
         alpha: float = np.pi / self.nsides
             
         i: int = np.arange(self.nsides)[:, None, None] # Dummy index
-        bounds: float = 2. * (i + 1.) * alpha 
+        bounds: float = 2. * i * alpha 
         phi: float = self._offset(neg_pi_to_pi_phi, bounds[0])
             
         wedges: float = self._make_wedges(phi, bounds)
-        ms: float = np.tan((2. * i + 1.) * alpha)
-        xs: float = np.cos(2. * i * alpha)
-        ys: float = np.sin(2. * i * alpha)
+        ms: float = -1 / np.tan(2. * (i + 1.) * alpha)
+        xs: float = self.rmax * np.cos(2. * i * alpha)
+        ys: float = self.rmax * np.sin(2. * i * alpha)
         dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
         inside: float = self._is_orig_left_of_edge(ms, xs, ys)
          
