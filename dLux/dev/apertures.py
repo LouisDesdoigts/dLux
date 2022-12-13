@@ -18,6 +18,9 @@ __all__ = ["Aperture", "CompoundAperture", "SquareAperture",
     "MultiAperture", "RotatableAperture", "HexagonalAperture"]
 
 
+two_pi: float = 2. * np.pi
+
+
 def test_plots_of_aps(aps: dict) -> None:
     """
     A formalisation of the common testing routine that I have
