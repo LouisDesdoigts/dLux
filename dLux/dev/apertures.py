@@ -1435,50 +1435,76 @@ class RegularPolygonalAperture(PolygonalAperture):
         dist: float = (inside * dists * wedges)
         return self._soften(dist.sum(axis=0))
 
-class HexagonalAperture(RotatableAperture):
-   """
-   Generate a hexagonal aperture, parametrised by rmax. 
+
+class HexagonalAperture(DynamicAperture):
+    """
+    Generate a hexagonal aperture, parametrised by rmax. 
    
-   Attributes
-   ----------
-   rmax : float, meters
+    Parameters
+    ----------
+    centre: float, meters
+        The centre of the coordinate system along the x-axis.
+    softening: bool = False
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool = False
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
+    rmax : float, meters
        The infimum of the radii of the set of circles that fully 
        enclose the hexagonal aperture. In other words the distance 
        from the centre to one of the vertices. 
-   """
-   rmax : float
-
-
-   def __init__(self   : Aperture, 
-           x_offset    : float, 
-           y_offset    : float, 
-           theta       : float, 
-           rmax        : float,
-           softening   : bool,
-           occulting   : bool) -> Aperture:
-       """
-       Parameters
-       ----------
-       x_offset : float, meters
-           The centre of the coordinate system along the x-axis.
-       y_offset : float, meters
-           The centre of the coordinate system along the y-axis. 
-       theta : float, radians
-           The rotation of the coordinate system of the aperture 
-           away from the positive x-axis. Due to the symmetry of 
-           ring shaped apertures this will not change the final 
-           shape and it is recomended that it is just set to zero.
-       rmax : float, meters
-           The distance from the center of the hexagon to one of
-           the vertices. . 
-       softening: bool
-           True if the aperture is soft edged else False.
-       occulting: bool
-           True is the aperture is occulting else False. An occulting 
-           Aperture is zero inside and one outside. 
-       """
-       super().__init__(x_offset, y_offset, theta, softening, occulting)
-       self.rmax = np.asarray(rmax).astype(float)
+    """
+    rmax : float
+    
+    
+    def __init__(self   : ApertureLayer, 
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer:
+        """
+        Parameters
+        ----------
+        centre: float, meters
+            The centre of the coordinate system along the x-axis.
+        softening: bool = False
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        """
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            compression = compression,
+            rotation = rotation,
+            occulting = occulting,
+            softening = softening)
+        self.rmax = np.asarray(rmax).astype(float)
 
 
    def get_rmax(self: ApertureLayer) -> float:
