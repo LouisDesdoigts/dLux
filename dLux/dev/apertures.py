@@ -3194,6 +3194,7 @@ vert_angs: float = np.linspace(0., 2. * np.pi, 4, endpoint=False)
 verts: float = np.array([np.cos(vert_angs), np.sin(vert_angs)])
 trans_verts: float = np.transpose(verts)
 
+
 test_plots_of_aps({
    "Occ. Soft": IrregularPolygonalAperture(trans_verts, occulting=True, softening=True),
    "Occ. Hard": IrregularPolygonalAperture(trans_verts, occulting=True),
@@ -3203,4 +3204,16 @@ test_plots_of_aps({
    "Strain": IrregularPolygonalAperture(trans_verts, strain=[.5, 0.]),
    "Compr.": IrregularPolygonalAperture(trans_verts, compression=[.5, 1.]),
    "Rot.": IrregularPolygonalAperture(trans_verts, rotation=np.pi / 4.)
+})
+
+
+test_plots_of_aps({
+   "Occ. Soft": RegularPolygonalAperture(4, 1., occulting=True, softening=True),
+   "Occ. Hard": RegularPolygonalAperture(4, 1., occulting=True),
+   "Soft": RegularPolygonalAperture(4, 1., softening=True),
+   "Hard": RegularPolygonalAperture(4, 1.),
+   "Trans.": RegularPolygonalAperture(4, 1., centre=[.5, .5]),
+   "Strain": RegularPolygonalAperture(4, 1., strain=[.5, 0.]),
+   "Compr.": RegularPolygonalAperture(4, 1., compression=[.5, 1.]),
+   "Rot.": RegularPolygonalAperture(4, 1., rotation=np.pi / 4.)
 })
