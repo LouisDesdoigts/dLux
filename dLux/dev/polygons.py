@@ -620,7 +620,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
 
         flat_dists: float = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
         return self._soften(flat_dists)
-    
+
 
 # # Testing against different scenarios
 #
