@@ -906,22 +906,38 @@ class SquareAperture(DynamicAperture):
 #})
 
 
-class PolygonalAperture(DynamicAperture, abc.ABC):
+class PolygonalAperture(DynamicAperture, ABC):
     """
-    A general representation of a polygonal aperture. 
-    This class defines some useful parameters for working
-    with the lines and points, that were not needed above where 
-    additional optimisations where necessary.
+    An abstract class that represents all `PolygonalApertures`.
+    The structure here is more than a little strange. Most of 
+    the pre-implemented `PolygonalApertures` do **not** inherit
+    from `PolygonalAperture`. This is because most of the
+    behaviour that is defined by `PolygonalAperture` is related
+    to general cases. For apertures, the generality results in 
+    a loss of speed. For example, this may be caused because
+    a specific symmetry of the shape cannot be exploited. As 
+    a result, more optimal implementations could be created 
+    directly. Since, the pre-implemented `Aperture` classes 
+    that are polygonal share no behaviour with the 
+    `PolygonalAperture` it made more sense to separate them 
+    out. 
+    
+    Implementation Notes: A lot of the code that is provided 
+    was carefully hand vectorised. In general, where a shape 
+    change is applied to an array the new array is given the 
+    prefix `bc` standing for "broadcastable".
 
-    Parameters:
-    -----------
-    nsides: Int
-        The number of sides.
-    rmax: Float
-        The radius of the smallest circle that can fully contain the 
-        aperture. 
+    Parameters
+    ----------
     centre: float, meters
-        The centre of the coordinate system in the paraxial coordinates.
+        The centre of the coordinate system along the x-axis.
+    softening: bool = False
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool = False
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -931,246 +947,388 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
     rotation: float, radians
         The rotation of the aperture away from the positive 
         x-axis. 
-    softening: bool 
+    """
+    
+    def __init__(self   : ApertureLayer, 
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer:
+        """
+        Parameters
+        ----------
+        centre: float, meters
+            The centre of the coordinate system along the x-axis.
+        softening: bool = False
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        """
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            compression = compression,
+            rotation = rotation,
+            occulting = occulting,
+            softening = softening)
+    
+    
+    def _perp_dists_from_lines(
+            self: ApertureLayer, 
+            m   : float, 
+            x1  : float, 
+            y1  : float,
+            x   : float, 
+            y   : float) -> float:
+        """
+        Calculate the perpendicular distance of a set of points (x, y) from
+        a line parametrised by a gradient m and a point (x1, y1). Notice, 
+        I am using x and y separately because the instructions cannot be vectorised
+        accross them combined. This function can take any number of points.
+        
+        Parameters:
+        -----------
+        m: float, None (meters / meter)
+            The gradient of the line.
+        x1: float, meters
+            The x coordinate of a single point that lies on the line.
+        y1: float, meters
+            The y coordinate of a single point that lies on the line. 
+        x: float, meters
+            A set of coordinates that you wish to calculate the distance to 
+            from the line. 
+        y: float, meters
+            A set of coordinates that you wish to calculate the distance to 
+            from the line. Must have the same dimensions as x.
+        
+        Returns:
+        --------
+        dists: float, meters
+            The distance of the points (x, y) from the line. Has the same 
+            shape as x and y.
+        """
+        inf_case: float = (x - x1)
+        gen_case: float = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
+        return np.where(np.isinf(m), inf_case, gen_case)
+    
+    
+    def _grad_from_two_points(
+            self: ApertureLayer, 
+            xs  : float, 
+            ys  : float) -> float:
+        """
+        Calculate the gradient of the chord that connects two points. 
+        Note: This is distinct from `_grads_from_many_points` in that
+        it does not wrap arround.
+        
+        Parameters:
+        -----------
+        xs: float, meters
+            The x coordinates of the points.
+        ys: float, meters
+            The y coordinates of the points.
+            
+        Returns:
+        --------
+        m: float, None (meters / meter)
+            The gradient of the chord that connects the two points.
+        """
+        return (ys[1] - ys[0]) / (xs[1] - xs[0])
+    
+    
+    def _offset(
+            self        : ApertureLayer, 
+            theta       : float, 
+            threshold   : float) -> float:
+        """
+        Transform the angular range of polar coordinates so that 
+        the new lowest angle is offset. The final range should be 
+        $[\\phi, \\phi + 2 \\pi]$ where $\\phi$ represents the 
+        `threshold`. 
+        
+        Parameters:
+        -----------
+        theta: float, radians
+            The angular coordinates.
+        threshold: float
+            The amount to offset the coordinates by.
+        
+        Returns:
+        --------
+        theta: float, radians 
+            The offset coordinate system.
+        """
+        comps: float = (theta < threshold).astype(float)
+        return theta + comps * two_pi
+    
+    
+    def _is_orig_left_of_edge(
+            self: ApertureLayer, 
+            ms  : float, 
+            xs  : float, 
+            ys  : float) -> int:
+        """
+        Determines whether the origin is to the left or the right of 
+        the edge. The edge(s) in this case are defined by a set of 
+        gradients, m and points (xs, ys).
+        
+        Parameters:
+        -----------
+        ms: float, None (meters / meter)
+            The gradient of the edge(s).
+        xs: float, meters
+            A set of x coordinates that lie along the edges. 
+            Must have the same shape as ms. 
+        ys: float, meters
+            A set of y coordinates that lie along the edges.
+            Must have the same shape as ms.
+            
+        Returns:
+        --------
+        is_left: int
+            1 if the origin is to the left else -1.
+        """
+        bc_orig: float = np.array([[0.]])
+        dist_from_orig: float = self._perp_dists_from_lines(ms, xs, ys, bc_orig, bc_orig)
+        return np.sign(dist_from_orig)
+    
+    
+    def _make_wedges(self: ApertureLayer, off_phi: float, sorted_theta: float) -> float:
+        """
+        Wedges are used to isolate the space between two vertices in the 
+        angular plane. 
+        
+        Parameters:
+        -----------
+        off_phi: float, radians
+            The angular coordinates that have been correctly offset so 
+            that the minimum angle corresponds to the first vertex.
+            Note that this particular offset is not unique as any offset
+            that is two pi greater will also work.
+        sorted_theta: float, radians
+            The angles of the vertices sorted from lowest to highest. 
+            Implementation Note: The sorting is required for other 
+            functions that are typically called together. As a result 
+            it has not been internalised. This is a helper function 
+            that is not designed to be called in general. This should 
+            have the correct shape to be braodcast. This usually involves 
+            expanding it to have two extra dimensions. 
+            
+        Returns:
+        --------
+        wedges: float
+            A stack of binary (float) arrays that represent the angles 
+            bounded by each consecutive pair of vertices.
+        """
+        next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
+        greater_than: bool = (off_phi >= sorted_theta)
+        less_than: bool = (off_phi < next_sorted_theta)
+        wedges: bool = greater_than & less_than
+        return wedges.astype(float)
+
+
+class IrregularPolygonalAperture(PolygonalAperture):
+    """
+    The default aperture is dis-allows the learning of all 
+    parameters. 
+
+    Parameters
+    ----------
+    centre: float, meters
+        The centre of the coordinate system along the x-axis.
+    softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
-    occulting: bool 
+    occulting: bool = False
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
+    vertices: Array, meters
+        The location of the vertices of the aperture.
     """
-
-
-    def _perp_dist_from_line(
-            self    : ApertureLayer, 
-            point   : Array, 
-            grad    : Array, 
-            coords  : Array) -> Array:
+    vertices: Array
+    
+    
+    def __init__(self   : ApertureLayer, 
+            vertices    : Array,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer:
         """
-        Calculate the distance from a line parametrised by a
-        gradient and a point. The mathematical formula for the
-        line based on this parametrisation is,
+        Parameters
+        ----------
+        vertices: Array, meters
+            The location of the vertices of the aperture.
+        centre: float, meters
+            The centre of the coordinate system along the x-axis.
+        softening: bool = False
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        """
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            compression = compression,
+            rotation = rotation,
+            occulting = occulting,
+            softening = softening)
+        self.vertices = np.array(vertices).astype(float)
 
-            y - y1 = m(x - x1) (1)
+    
+    
+    def _grads_from_many_points(self: ApertureLayer, x1: float, y1: float) -> float:
+        """
+        Given a set of points, calculate the gradient of the line that 
+        connects those points. This function assumes that the points are 
+        provided in the order they are to be connected together. Notice 
+        that we also assume there are more than two points, but more can 
+        be provided in which case the shape is assumed to be closed. The 
+        output has the same shape as the input and does not check for 
+        infinite (vertical) gradients.
+        
+        Due to the intensly vectorised nature of this code it is ofen 
+        necessary to provided the parameters with expanded dimensions. 
+        This may be achieved using `x1[:, None, None]` or 
+        `x1.reshape((-1, 1, 1))` or `np.expand_dims(x1, (1, 2))`.
+        There is no major performance difference between the different
+        methods of reshaping. 
+        
+        Parameters:
+        -----------
+        x1: float, meters
+            The x coordinates of the points that are to be connected. 
+        y1: float, meters
+            The y coordinates of the points that are to be connected. 
+            Must have the same shape as x. 
+            
+        Returns:
+        --------
+        ms: float, None (meters / meter)
+            The gradients of the lines that connect the vertices. The 
+            vertices wrap around to form a closed shape whatever it 
+            may look like. 
+        """
+        x_diffs: float = x1 - np.roll(x1, -1)
+        y_diffs: float = y1 - np.roll(y1, -1)
+        return y_diffs / x_diffs
+    
+    
+    def _extent(self: ApertureLayer) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre. For inherited classes, consider implementing analytically for speed.
 
-        where m is the gradient and (x1, y1) is the point. The 
-        distance perpendicular from the line works out to be,
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
 
-            d = (y - y1 - m(x - x1)) / (1 + m**2) (2)
+        Returns
+        -------
+        extent : float
+            The maximum distance from centre to edge of aperture
+        """
+        verts: float = self.vertices
+        dist_to_verts: float = np.hypot(verts[:, 1], verts[:, 0])
+        return np.max(dist_to_verts)
+    
+    
+    def _metric(self: ApertureLayer, coords: float) -> float:
+        """
+        A measure of how far a pixel is from the aperture.
+        This is a very abstract description that was constructed 
+        when dealing with the soft edging. For a normal binary 
+        representation the metric is zero if it is inside the
+        aperture and one if it is outside the aperture. Notice,
+        we have not attempted to prove that this is a metric 
+        via the axioms, this is just a handy name that brings 
+        to mind the general idea. For a soft edged aperture the 
+        metric is different.
 
         Parameters:
         -----------
-        point: Array, meters
-            The location of the point that lines on the line and 
-            partialy defines it. That is (x1, y1) see (1).
-        grad: Array, None (meters / meter)
-            The gradient of the line.
-        coords: Array, meters
-            The point (x, y) in (2). This can be a two dimensional
-            array for speed.
+        distances: Array
+            The distances of each pixel from the edge of the aperture. 
+            Again, the words distances is designed to aid in 
+            conveying the idea and is not strictly true. We are
+            permitting negative distances when inside the aperture
+            because this was simplest to implement. 
 
         Returns:
         --------
-        dist: Array, meters
-            The distance of each point in coords from the line 
-            given by eq (1)
+        non_occ_ap: Array 
+            This is essential the final step in processing to produce
+            the aperture. What is returned is the non-occulting 
+            version of the aperture. 
         """
-        x, y = coords[0], coords[1]
-        x1, y1 = point[0], point[1]
-        return (y - y1 - grad * (x - x1)) / np.sqrt(1 + grad ** 2)
+        two_pi: float = 2. * np.pi
 
+        bc_x1: float = self.vertices[:, 0][:, None, None]
+        bc_y1: float = self.vertices[:, 1][:, None, None]
 
-    def _grad_from_two_points(
-            self    : ApertureLayer,
-            point_1 : Array,
-            point_2 : Array)-> Array:
-        """
-        A convinient helper function that calculates the 
-        gradient of a chord connecting two points. The formula 
-        that is used is,
+        bc_x: float = coords[0][None, :, :]
+        bc_y: float = coords[1][None, :, :]
 
-            m = (y2 - y1) / (x2 - x1) (1)
+        theta: float = np.arctan2(bc_y1, bc_x1)
+        offset_theta: float = self._offset(theta, 0.)
 
-        Parameters:
-        -----------
-        point_1: Array, meters
-            (x1, y1) in eq (1)
-        point_2: Array, meters
-            (x2, y2) in eq (2)
+        sorted_inds: int = np.argsort(offset_theta.flatten())
 
-        Returns:
-        --------
-        m: Array
-            The gradient of the line connecting (x1, y1) and 
-            (x2, y2).
-        """
-        x1, y1 = point_1[0], point_1[1]
-        x2, y2 = point_2[0], point_2[1]
-        return (y2 - y1) / (x2 - x1)
+        sorted_x1: float = bc_x1[sorted_inds]
+        sorted_y1: float = bc_y1[sorted_inds]
+        sorted_theta: float = offset_theta[sorted_inds]   
+        sorted_m: float = self._grads_from_many_points(sorted_x1, sorted_y1)
 
+        phi: float = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
 
-# TODO: Implement PolygonalAperture as the abstract base class 
-#       with the subclasses RegularPolygonalAperture and 
-#       IrregularPolygonalAperture.
-#
-# TODO: OK This is going nowhere.
-#lass RegularPolygonalAperture(PolygonalAperture):
-#   """
-#   A general representation of a polygonal aperture. 
-#   Each side of the aperture should be the same length. There
-#   are some pre-existing implementations for some of the more 
-#   common cases. This is designed for the exceptions that are 
-#   less common. 
+        dist_from_edges: float = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
+        wedges: float = self._make_wedges(phi, sorted_theta)
+        dist_sgn: float = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
 
-#   Par
-#   -----------
-#   nsides: Int
-#       The number of sides.
-#   rmax: Float
-#       The radius of the smallest circle that can fully contain the 
-#       aperture. 
-#   centre: float, meters
-#       The centre of the coordinate system in the paraxial coordinates.
-#   strain: Array
-#       Linear stretching of the x and y axis representing a 
-#       strain of the coordinate system.
-#   compression: Array 
-#       The x and y compression of the coordinate system. This 
-#       is a constant. 
-#   rotation: float, radians
-#       The rotation of the aperture away from the positive 
-#       x-axis. 
-#   softening: bool 
-#       True if the aperture is soft edged otherwise False. A
-#       soft edged aperture has a small layer of non-binary 
-#       pixels. This is to prevent undefined gradients. 
-#   occulting: bool 
-#       True if the aperture is occulting else False. An 
-#       occulting aperture is zero inside and one outside. 
-#   """
-#   nsides: int
-#   rmax: Array
+        flat_dists: float = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
+        return self._soften(flat_dists)
 
-
-#   def __init__(
-#           self        : ApertureLayer,
-#           rmax        : Array,
-#           nsides      : int,
-#           centre      : Array = [0., 0.],
-#           strain      : Array = [0., 0.],
-#           compression : Array = [1., 1.],
-#           rotation    : Array = 0.,
-#           occulting   : bool = False, 
-#           softening   : bool = False) -> ApertureLayer: 
-#       """
-#       Parameters:
-#       -----------
-#       nsides: Int
-#           The number of sides.
-#       rmax: Float
-#           The radius of the smallest circle that can fully contain the 
-#           aperture. 
-#       centre: float, meters
-#           The centre of the coordinate system in the paraxial coordinates.
-#       strain: Array
-#           Linear stretching of the x and y axis representing a 
-#           strain of the coordinate system.
-#       compression: Array 
-#           The x and y compression of the coordinate system. This 
-#           is a constant. 
-#       rotation: float, radians
-#           The rotation of the aperture away from the positive 
-#           x-axis. 
-#       softening: bool 
-#           True if the aperture is soft edged otherwise False. A
-#           soft edged aperture has a small layer of non-binary 
-#           pixels. This is to prevent undefined gradients. 
-#       occulting: bool 
-#           True if the aperture is occulting else False. An 
-#           occulting aperture is zero inside and one outside. 
-#       """
-#       super().__init__(
-#           centre = centre,
-#           strain = strain,
-#           compression = compression,
-#           rotation = rotation,
-#           occulting = occulting, 
-#           softening = softening)
-#       self.rmax = np.asarray(rmax).astype(float)
-#       self.nsides = int(nsides)
-
-
-#   def _vert_coords(self: ApertureLayer) -> Array:
-#       """
-#       """
-#       offset = np.pi / self.nsides
-#       offset_angles = np.linspace(0, 2. * np.pi, self.nsides, endpoint=False)
-#       angles = offset_angles - offset
-#       x_pos_of_verts = self.rmax * np.cos(angles)
-#       y_pos_of_verts = self.rmax * np.sin(angles)
-#       return np.stack([x_pos_of_verts, y_pos_of_verts]) 
-
-
-#   def _extent(self: ApertureLayer) -> Array:
-#       """
-#       Returns the largest distance to the outer edge of the aperture from the
-#       centre.
-
-#       Returns
-#       -------
-#       extent : float
-#           The maximum distance from centre to edge of aperture
-#       """
-#       return self.rmax
-
-#   
-#   # TODO: Work out some clever way of doing this so that the vertical 
-#   #       gradient problem is not well, a problem. I think that this 
-#   #       will have to be done using a `lax.cond`.
-#   def _metric(self: ApertureLayer, coords: Array) -> Array:
-#       """
-#       Generates a regular polygon with nsides. The zero rotation 
-#       of the aperture avoids vertical sides as this creates infinite 
-#       gradients. 
-
-#       Parameters:
-#       -----------
-#       coords: Array, meters
-#           The aperture coordinates (already transformed from the 
-#           wavefront coordinates).
-#           
-#       Returns:
-#       --------
-#       aperture: Array
-#           The aperture as an array of values.
-#       """
-#       x: Array = coords[0]
-#       y: Array = coords[1]
-
-#       n: int = self.nsides # Abreviation for line length 
-#       r: float = self.rmax # Abreviation for line length
-#       theta: Array = np.linspace(0., 2. * np.pi, n, endpoint=False) 
-#       theta: Array = theta.reshape((n, 1, 1)) + np.pi / n
-
-#       m: Array = (-1. / np.tan(theta)).reshape((n, 1, 1))
-#       x1: Array = (r * np.cos(theta)).reshape((n, 1, 1))
-#       y1: Array = (r * np.sin(theta)).reshape((n, 1, 1))
-
-#       dist: Array = (y - y1 - m * (x - x1)) / np.sqrt(1 + m ** 2)
-#       dist: Array = (1. - 2. * (theta <= np.pi)) * dist
-
-#       return self._soften(dist).prod(axis=0)
-#       
-#est_plots_of_aps({
-#  "Occ. Soft": RegularPolygonalAperture(1., 5, occulting=True, softening=True),
-#  "Occ. Hard": RegularPolygonalAperture(1., 5, occulting=True),
-#  "Soft": RegularPolygonalAperture(1., 5, softening=True),
-#  "Hard": RegularPolygonalAperture(1., 5),
-#  "Trans.": RegularPolygonalAperture(1., 5, centre=[.5, .5]),
-#  "Strain": RegularPolygonalAperture(1., 5, strain=[.5, 0.]),
-#  "Compr.": RegularPolygonalAperture(1., 5, compression=[.5, 1.]),
-#  "Rot.": RegularPolygonalAperture(1., 5, rotation=np.pi / 4.)
-#)
 
 #lass HexagonalAperture(RotatableAperture):
 #   """
