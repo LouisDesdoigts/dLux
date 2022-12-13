@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 from apertures import DynamicAperture
 from typing import TypeVar
 from abc import ABC
+from jax import config
+
+config.update("jax_enable_x64", True)
 
 mpl.rcParams["text.usetex"] = True
 mpl.rcParams["image.cmap"] = "inferno"
@@ -590,10 +593,6 @@ class RegularPolygonalAperture(PolygonalAperture):
         inside: float = self._is_orig_left_of_edge(ms, xs, ys)
          
         dist: float = (inside * dists * wedges)
-            
-        print("M: ", ms)
-        print("XS: ", xs)
-        print("YS: ", ys)
         
         fig, axes = plt.subplots(1, self.nsides, figsize=(self.nsides*4, 1*3))
         for i in np.arange(self.nsides):
