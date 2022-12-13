@@ -591,10 +591,12 @@ class RegularPolygonalAperture(PolygonalAperture):
         
         inside: float = self._is_orig_left_of_edge(ms, xs, ys)
             
-        fig, axes = plt.subplots(1, self.nsides, figsize=(self.nsides*4, 3))
+        fig, axes = plt.subplots(2, self.nsides, figsize=(self.nsides*4, 2*3))
         for i in np.arange(self.nsides):
-            cmap = axes[i].imshow(dists[i])
-            fig.colorbar(cmap)
+            cmap = axes[0][i].imshow(inside[i] * dists[i])
+            fig.colorbar(cmap, ax=axes[0][i])
+            cmap = axes[1][i].imshow(wedges[i])
+            fig.colorbar(cmap, ax=axes[1][i])
         plt.show()
 
         dist: float = (inside * dists * wedges).sum(axis=0)
