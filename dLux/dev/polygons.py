@@ -25,6 +25,7 @@ ApertureLayer = TypeVar("ApertureLayer")
 Array = TypeVar("Array")
 
 
+# +
 class PolygonalAperture(DynamicAperture, ABC):
     """
     An abstract class that represents all `PolygonalApertures`.
@@ -143,14 +144,13 @@ class PolygonalAperture(DynamicAperture, ABC):
         inf_case: float = (x - x1)
         gen_case: float = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
             
-        fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
-        for i in np.arange(4):
-            axes[i].set_title(f"{round(float(m[i]), 2), round(float(x1[i]), 2), round(float(y1[i]), 2)}")
-            cmap = axes[i].imshow(gen_case[i])
-            fig.colorbar(cmap, ax=axes[i])
-        plt.show()
+#         fig, axes = plt.subplots(1, 4, figsize=(4*4, 3))
+#         for i in np.arange(4):
+#             axes[i].set_title(f"{round(float(m[i]), 2), round(float(x1[i]), 2), round(float(y1[i]), 2)}")
+#             cmap = axes[i].imshow(gen_case[i])
+#             fig.colorbar(cmap, ax=axes[i])
+#         plt.show()
             
-        
         return np.where(np.isinf(m), inf_case, gen_case)
     
     
@@ -268,6 +268,8 @@ class PolygonalAperture(DynamicAperture, ABC):
         wedges: bool = greater_than & less_than
         return wedges.astype(float)
 
+
+# -
 
 class IrregularPolygonalAperture(PolygonalAperture):
     """
@@ -604,15 +606,19 @@ class RegularPolygonalAperture(PolygonalAperture):
          
         dist: float = (inside * dists * wedges)
 
+        print("ms: ", ms.flatten())
+        print("xs: ", xs.flatten())
+        print("ys: ", ys.flatten())
+            
 #         fig, axes = plt.subplots(1, self.nsides, figsize=(self.nsides*4, 1*3))
 #         for i in np.arange(self.nsides):
 #             cmap = axes[i].imshow(dists[i])
 #             fig.colorbar(cmap, ax=axes[i])
 #         plt.show()
         
-        plt.imshow(dist.sum(axis=0))
-        plt.colorbar()
-        plt.show()
+#         plt.imshow(dist.sum(axis=0))
+#         plt.colorbar()
+#         plt.show()
 
         return self._soften(dist.sum(axis=0))
 # -
@@ -674,9 +680,9 @@ sq_aper: float = sq_reg_aper._aperture(coords)
 # hex_aper: float = hex_reg_aper._aperture(coords)
 # pent_aper: float = pent_reg_aper._aperture(coords)
 
-fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
-cmap = axes[0].imshow(sq_aper)
-fig.colorbar(cmap, ax=axes[0])
+# fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
+# cmap = axes[0].imshow(sq_aper)
+# fig.colorbar(cmap, ax=axes[0])
 # cmap = axes[1].imshow(pent_aper)
 # fig.colorbar(cmap, ax=axes[1])
 # cmap = axes[2].imshow(hex_aper)
