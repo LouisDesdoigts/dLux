@@ -579,7 +579,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         alpha: float = np.pi / self.nsides
             
         i: int = np.arange(self.nsides)[:, None, None] # Dummy index
-        bounds: float = 2. * i * alpha + alpha 
+        bounds: float = 2. * i * alpha + alpha
         phi: float = self._offset(neg_pi_to_pi_phi, bounds[0])
             
         wedges: float = self._make_wedges(phi, bounds)
@@ -590,10 +590,14 @@ class RegularPolygonalAperture(PolygonalAperture):
         inside: float = self._is_orig_left_of_edge(ms, xs, ys)
          
         dist: float = (inside * dists * wedges)
+            
+        print("M: ", ms)
+        print("XS: ", xs)
+        print("YS: ", ys)
         
         fig, axes = plt.subplots(1, self.nsides, figsize=(self.nsides*4, 1*3))
         for i in np.arange(self.nsides):
-            cmap = axes[i].imshow(dist[i])
+            cmap = axes[i].imshow(dists[i])
             fig.colorbar(cmap, ax=axes[i])
         plt.show()
         
