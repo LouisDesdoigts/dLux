@@ -162,7 +162,24 @@ coords: float = np.array(np.meshgrid(grid, grid))
 
 amax: callable = lambda arr: np.abs(arr).max()
 
+# +
+sq_reg_aper: ApertureLayer = RegularPolygonalAperture(4, 1.)
+hex_reg_aper: ApertureLayer = RegularPolygonalAperture(6, 1.)
+pent_reg_aper: ApertureLayer = RegularPolygonalAperture(5, 1.)
 
+sq_aper: float = sq_ireg_aper._aperture(coords)
+hex_aper: float = hex_ireg_aper._aperture(coords)
+pent_aper: float = pent_ireg_aper._aperture(coords)
+
+fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
+cmap = axes[0].imshow(sq_aper)
+fig.colorbar(cmap, ax=axes[0])
+cmap = axes[1].imshow(pent_aper)
+fig.colorbar(cmap, ax=axes[1])
+cmap = axes[2].imshow(hex_aper)
+fig.colorbar(cmap, ax=axes[2])
+
+# -
 
 # # Vertex Generation of Polygons.
 # So this is very challenging. I have made extensive notes but little progress. 
@@ -625,11 +642,7 @@ pent_verts: float = reg_pol_verts(5, .5)
 hex_verts: float = reg_pol_verts(6, .5)
 rand_verts: float = np.array([[.5, .5], [-.3, .4], [0., -.2], [.2, -.1], [.5, -.5]])
 
-hexagon: float = draw_from_vertices(hex_verts, coords)
-pentagon: float = draw_from_vertices(pent_verts, coords)
-square: float = draw_from_vertices(sq_verts, coords)
-rand: float = draw_from_vertices(rand_verts, coords)
-
+# +
 sq_ireg_aper: ApertureLayer = IrregularPolygonalAperture(sq_verts)
 hex_ireg_aper: ApertureLayer = IrregularPolygonalAperture(hex_verts)
 pent_ireg_aper: ApertureLayer = IrregularPolygonalAperture(pent_verts)
