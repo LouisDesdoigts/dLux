@@ -81,6 +81,7 @@ ApertureLayer = TypeVar("ApertureLayer")
 Array = TypeVar("Array")
 
 
+# +
 class PolygonalAperture(DynamicAperture):
     """
     The default aperture is dis-allows the learning of all 
@@ -201,6 +202,39 @@ class PolygonalAperture(DynamicAperture):
             The gradient of the chord that connects the two points.
         """
         return (ys[1] - ys[0]) / (xs[1] - xs[0])
+    
+    
+# -
+
+class IrregularPolygonalAperture(PolygonalAperture):
+    """
+    The default aperture is dis-allows the learning of all 
+    parameters. 
+
+    Parameters
+    ----------
+    centre: float, meters
+        The centre of the coordinate system along the x-axis.
+    softening: bool = False
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool = False
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
+    vertices: Array, meters
+        The location of the vertices of the aperture.
+    """
+    vertices: Array
     
     
     def _grads_from_many_points(x1: float, y1: float) -> float:
