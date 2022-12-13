@@ -2,16 +2,12 @@ import jax
 import jax.numpy as np
 import matplotlib as mpl 
 import matplotlib.pyplot as plt
+from apertures import DynamicAperture
+from typing import TypeVar
+from abc import ABC
 
 mpl.rcParams["text.usetex"] = True
 mpl.rcParams["image.cmap"] = "inferno"
-
-n: int = 7
-rmax: float = 1.
-alpha: float = np.pi / n # Half the angular disp of one wedge
-
-
-
 
 # # Vertex Generation of Polygons.
 # So this is very challenging. I have made extensive notes but little progress. 
@@ -21,10 +17,6 @@ alpha: float = np.pi / n # Half the angular disp of one wedge
 # A note on conventions. I am using `bc` to represent broadcastable. This is just a copy that has had expanded dimensions ect.
 #
 # Hang on: I think that I just worked out a better way to do this. If I can generate the distance from a line parallel to the edge and passing through the origin then I just need to subtract the distance to the edge from the origin. I will finish the current implementation and then I will try this. 
-
-from apertures import DynamicAperture
-from typing import TypeVar
-from abc import ABC
 
 ApertureLayer = TypeVar("ApertureLayer")
 Array = TypeVar("Array")
@@ -339,7 +331,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
 
     
     
-    def _grads_from_many_points(x1: float, y1: float) -> float:
+    def _grads_from_many_points(self: ApertureLayer, x1: float, y1: float) -> float:
         """
         Given a set of points, calculate the gradient of the line that 
         connects those points. This function assumes that the points are 
@@ -435,18 +427,18 @@ class IrregularPolygonalAperture(PolygonalAperture):
         bc_y: float = coords[1][None, :, :]
 
         theta: float = np.arctan2(bc_y1, bc_x1)
-        offset_theta: float = offset(theta, 0.)
+        offset_theta: float = self._offset(theta, 0.)
 
         sorted_inds: int = np.argsort(offset_theta.flatten())
 
         sorted_x1: float = bc_x1[sorted_inds]
         sorted_y1: float = bc_y1[sorted_inds]
         sorted_theta: float = offset_theta[sorted_inds]   
-        sorted_m: float = calc_edge_grad_from_vert(sorted_x1, sorted_y1)
+        sorted_m: float = self._grads_from_many_points(sorted_x1, sorted_y1)
 
-        phi: float = offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
+        phi: float = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
 
-        dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
+        dist_from_edges: float = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
         wedges: float = self._make_wedges(phi, sorted_theta)
         dist_sgn: float = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
 
