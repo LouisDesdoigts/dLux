@@ -588,7 +588,14 @@ class RegularPolygonalAperture(PolygonalAperture):
         xs: float = np.cos(2. * i * alpha)
         ys: float = np.sin(2. * i * alpha)
         dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
+        
         inside: float = self._is_orig_left_of_edge(ms, xs, ys)
+            
+        fig, axes = plt.subplots(1, self.nsides, figsize=(self.nsides*4, 3))
+        for i in np.arange(self.nsides):
+            cmap = axes[i].imshow(dists[i])
+            fig.colorbar(cmap)
+        plt.show()
 
         dist: float = (inside * dists * wedges).sum(axis=0)
         return self._soften(dist)
@@ -657,4 +664,7 @@ cmap = axes[1].imshow(pent_aper)
 fig.colorbar(cmap, ax=axes[1])
 cmap = axes[2].imshow(hex_aper)
 fig.colorbar(cmap, ax=axes[2])
+# -
+
+
 
