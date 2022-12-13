@@ -11,7 +11,6 @@ rmax: float = 1.
 alpha: float = np.pi / n # Half the angular disp of one wedge
 
 
-# +
 class RegularPolygonalAperture(PolygonalAperture):
     """
     An optiisation that can be applied to generate
@@ -89,51 +88,59 @@ class RegularPolygonalAperture(PolygonalAperture):
         self.nsides = int(nsides)
         self.rmax = np.array(rmax).astype(float)
         
-        
     
-# -
+    def _metric(self: ApertureLayer, coords: float) -> float:
+        """
+        A measure of how far a pixel is from the aperture.
+        This is a very abstract description that was constructed 
+        when dealing with the soft edging. For a normal binary 
+        representation the metric is zero if it is inside the
+        aperture and one if it is outside the aperture. Notice,
+        we have not attempted to prove that this is a metric 
+        via the axioms, this is just a handy name that brings 
+        to mind the general idea. For a soft edged aperture the 
+        metric is different.
 
+        Parameters:
+        -----------
+        distances: Array
+            The distances of each pixel from the edge of the aperture. 
+            Again, the words distances is designed to aid in 
+            conveying the idea and is not strictly true. We are
+            permitting negative distances when inside the aperture
+            because this was simplest to implement. 
 
+        Returns:
+        --------
+        non_occ_ap: Array 
+            This is essential the final step in processing to produce
+            the aperture. What is returned is the non-occulting 
+            version of the aperture. 
+        """
+        neg_pi_to_pi_phi: float = np.arctan2(coords[1], coords[0]) 
+        phi: float = neg_pi_to_pi_phi + 2. * (neg_pi_to_pi_phi < 0.) * np.pi
+        rho: float = np.hypot(coords[0], coords[1])
+            
+        i: int = np.arange(n) # Dummy index
+        low_bound: float = 2. * i * alpha
+        top_bound: float = 2. * (i + 1.) * alpha 
+            
+        wedge: float = ((low_bound[:, None, None] < phi) & (phi <= top_bound[:, None, None])).astype(float)
+        min_inv_m: float = np.tan((2. * i + 1.) * alpha)
+        x_proj: float = np.cos(2. * i * alpha)
+        y_proj: float = np.sin(2. * i * alpha)
+        r: float = rmax * (min_inv_m * y_proj + x_proj)[:, None, None] / (min_inv_m[:, None, None] * np.sin(phi) + np.cos(phi))
+
+        dist: float = (rho - r)
+        dist: float = (dist * wedge).sum(axis=0)
+            
+        return self._soften(dist)
 
 npix: int = 100
 grid: float = np.linspace(0, 2., npix) - 1.
 coords: float = np.array(np.meshgrid(grid, grid))
 
-neg_pi_to_pi_phi: float = np.arctan2(coords[1], coords[0]) 
-phi: float = neg_pi_to_pi_phi + 2. * (neg_pi_to_pi_phi < 0.) * np.pi
-rho: float = np.hypot(coords[0], coords[1])
-
-i: int = np.arange(n)
-low_bound: float = 2. * i * alpha
-top_bound: float = 2. * (i + 1.) * alpha  
-
-wedge: float = ((low_bound[:, None, None] < phi) & (phi <= top_bound[:, None, None])).astype(float)
-min_inv_m: float = np.tan((2. * i + 1.) * alpha)
-x_proj: float = np.cos(2. * i * alpha)
-y_proj: float = np.sin(2. * i * alpha)
-r: float = rmax * (min_inv_m * y_proj + x_proj)[:, None, None] / (min_inv_m[:, None, None] * np.sin(phi) + np.cos(phi))
-
-dist: float = (rho - r)
-
-# +
-fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
-for _i in i:
-   axes[_i].set_title("$r$")
-   _map = axes[_i].imshow(dist[_i], vmax=50, vmin=-50)
-   fig.colorbar(_map, ax=axes[_i])
-plt.show()    
-
-fig, axes = plt.subplots(1, n, figsize=(n * 4, 3))
-for _i in i:
-   axes[_i].set_title("$r$")
-   _map = axes[_i].imshow(dist[_i] * wedge[_i])
-   fig.colorbar(_map, ax=axes[_i])
-plt.show()
-# -
-
-dist: float = (dist * wedge).sum(axis=0)
 amax: callable = lambda arr: np.abs(arr).max()
-smooth: callable = lambda arr: .5 * (np.tanh(npix * arr) + 1.)
 
 # +
 fig = plt.figure()
