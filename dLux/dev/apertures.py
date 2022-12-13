@@ -309,7 +309,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         coords: Array, meters
             The compressed coordinates. 
         """
-        return coords * self.compression.reshape(2, 1, 1)
+        return coords * self.compression[:, None, None]
 
 
     def _coordinates(self: ApertureLayer, coords: Array) -> Array:
