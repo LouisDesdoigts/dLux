@@ -282,6 +282,30 @@ class PolygonalAperture(DynamicAperture, ABC):
     
     
     def _make_wedges(off_phi: float, sorted_theta: float) -> float:
+        """
+        Wedges are used to isolate the space between two vertices in the 
+        angular plane. 
+        
+        Parameters:
+        -----------
+        off_phi: float, radians
+            The angular coordinates that have been correctly offset so 
+            that the minimum angle corresponds to the first vertex.
+            Note that this particular offset is not unique as any offset
+            that is two pi greater will also work.
+        sorted_theta: float, radians
+            The angles of the vertices sorted from lowest to highest. 
+            Implementation Note: The sorting is required for other 
+            functions that are typically called together. As a result 
+            it has not been internalised. This is a helper function 
+            that is not designed to be called in general. 
+            
+        Returns:
+        --------
+        wedges: float
+            A stack of binary (float) arrays that represent the angles 
+            bounded by each consecutive pair of vertices.
+        """
         next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
         bc_next_sort_theta: float = next_sorted_theta
         greater_than: bool = (off_phi >= sorted_theta)
