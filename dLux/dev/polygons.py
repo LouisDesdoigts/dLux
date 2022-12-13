@@ -237,6 +237,50 @@ class IrregularPolygonalAperture(PolygonalAperture):
     vertices: Array
     
     
+    def __init__(self   : ApertureLayer, 
+            vertices    : Array,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer:
+        """
+        The default aperture is dis-allows the learning of all 
+        parameters. 
+
+        Parameters
+        ----------
+        centre: float, meters
+            The centre of the coordinate system along the x-axis.
+        softening: bool = False
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        """
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            comression = compression,
+            rotation = rotation,
+            occulting = occulting,
+            softening = softening)
+        self.vertices = np.array(vertices).astype(float)
+
+    
+    
     def _grads_from_many_points(x1: float, y1: float) -> float:
         """
         Given a set of points, calculate the gradient of the line that 
