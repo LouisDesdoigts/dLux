@@ -1284,13 +1284,6 @@ class IrregularPolygonalAperture(PolygonalAperture):
         dist_sgn: float = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
 
         flat_dists: float = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
-
-        plt.imshow(flat_dists)
-        plt.colorbar()
-        plt.show()
-
-        print(np.isnan(flat_dists).any())
-
         return self._soften(flat_dists)
 
 
@@ -1343,16 +1336,6 @@ class IrregularPolygonalAperture(PolygonalAperture):
 vert_angs: float = np.linspace(0., 2. * np.pi, 4, endpoint=False)
 verts: float = np.array([np.cos(vert_angs), np.sin(vert_angs)])
 trans_verts: float = np.transpose(verts)
-
-ireg_aper: ApertureLayer = IrregularPolygonalAperture(trans_verts)
-npix = 128
-width = 2.
-coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
-
-aper: float = ireg_aper._aperture(coords)
-plt.imshow(aper)
-plt.colorbar()
-plt.show()
 
 #test_plots_of_aps({
 #   "Occ. Soft": IrregularPolygonalAperture(verts, occulting=True, softening=True),
