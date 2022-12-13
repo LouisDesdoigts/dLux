@@ -100,6 +100,11 @@ class PolygonalAperture(DynamicAperture, ABC):
     that are polygonal share no behaviour with the 
     `PolygonalAperture` it made more sense to separate them 
     out. 
+    
+    Implementation Notes: A lot of the code that is provided 
+    was carefully hand vectorised. In general, where a shape 
+    change is applied to an array the new array is given the 
+    prefix `bc` standing for "broadcastable".
 
     Parameters
     ----------
@@ -277,7 +282,7 @@ class PolygonalAperture(DynamicAperture, ABC):
             1 if the origin is to the left else -1.
         """
         bc_orig: float = np.array([[0.]])
-        dist_from_orig: float = perp_dist_from_line(sm, sx1, sy1, bc_orig, bc_orig)
+        dist_from_orig: float = self._perp_dists_from_lines(sm, sx1, sy1, bc_orig, bc_orig)
         return np.sign(dist_from_orig)
     
     
@@ -298,7 +303,9 @@ class PolygonalAperture(DynamicAperture, ABC):
             Implementation Note: The sorting is required for other 
             functions that are typically called together. As a result 
             it has not been internalised. This is a helper function 
-            that is not designed to be called in general. 
+            that is not designed to be called in general. This should 
+            have the correct shape to be braodcast. This usually involves 
+            expanding it to have two extra dimensions. 
             
         Returns:
         --------
@@ -307,7 +314,6 @@ class PolygonalAperture(DynamicAperture, ABC):
             bounded by each consecutive pair of vertices.
         """
         next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
-        bc_next_sort_theta: float = next_sorted_theta
         greater_than: bool = (off_phi >= sorted_theta)
         less_than: bool = (off_phi < bc_next_sort_theta)
         wedges: bool = greater_than & less_than
@@ -424,36 +430,60 @@ class IrregularPolygonalAperture(PolygonalAperture):
         y_diffs: float = y1 - np.roll(y1, -1)
         return y_diffs / x_diffs
     
+    def _metric(self: ApertureLayer, coords : float) -> float:
+        """
+        A measure of how far a pixel is from the aperture.
+        This is a very abstract description that was constructed 
+        when dealing with the soft edging. For a normal binary 
+        representation the metric is zero if it is inside the
+        aperture and one if it is outside the aperture. Notice,
+        we have not attempted to prove that this is a metric 
+        via the axioms, this is just a handy name that brings 
+        to mind the general idea. For a soft edged aperture the 
+        metric is different.
 
-@jax.jit
-def draw_from_vertices(vertices: float, coords: float) -> float:
-    two_pi: float = 2. * np.pi
+        Parameters:
+        -----------
+        distances: Array
+            The distances of each pixel from the edge of the aperture. 
+            Again, the words distances is designed to aid in 
+            conveying the idea and is not strictly true. We are
+            permitting negative distances when inside the aperture
+            because this was simplest to implement. 
+
+        Returns:
+        --------
+        non_occ_ap: Array 
+            This is essential the final step in processing to produce
+            the aperture. What is returned is the non-occulting 
+            version of the aperture. 
+        """
+        two_pi: float = 2. * np.pi
+
+        bc_x1: float = vertices[:, 0][:, None, None]
+        bc_y1: float = vertices[:, 1][:, None, None]
+
+        bc_x: float = coords[0][None, :, :]
+        bc_y: float = coords[1][None, :, :]
+
+        theta: float = np.arctan2(bc_y1, bc_x1)
+        offset_theta: float = offset(theta, 0.)
+
+        sorted_inds: int = np.argsort(offset_theta.flatten())
+
+        sorted_x1: float = bc_x1[sorted_inds]
+        sorted_y1: float = bc_y1[sorted_inds]
+        sorted_theta: float = offset_theta[sorted_inds]   
+        sorted_m: float = calc_edge_grad_from_vert(sorted_x1, sorted_y1)
+
+        phi: float = offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
+
+        dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
+        wedges: float = make_wedges(phi, sorted_theta)
+        dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
+
+        return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
     
-    bc_x1: float = vertices[:, 0][:, None, None]
-    bc_y1: float = vertices[:, 1][:, None, None]
-
-    bc_x: float = coords[0][None, :, :]
-    bc_y: float = coords[1][None, :, :]
-        
-    theta: float = np.arctan2(bc_y1, bc_x1)
-    offset_theta: float = offset(theta, 0.)
-        
-    sorted_inds: int = np.argsort(offset_theta.flatten())
-        
-    sorted_x1: float = bc_x1[sorted_inds]
-    sorted_y1: float = bc_y1[sorted_inds]
-    sorted_theta: float = offset_theta[sorted_inds]   
-    sorted_m: float = calc_edge_grad_from_vert(sorted_x1, sorted_y1)
-        
-    phi: float = offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
-           
-    dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
-    wedges: float = make_wedges(phi, sorted_theta)
-    dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
-        
-    return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
-
-
 
 # # Testing against different scenarios
 #
