@@ -146,7 +146,6 @@ class RegularPolygonalAperture(PolygonalAperture):
         low_bound: float = 2. * i * alpha 
         
         wedge: float = self._make_wedges(phi, low_bound)
-        # wedge: float = ((low_bound[:, None, None] < phi) & (phi <= top_bound[:, None, None])).astype(float)
         min_inv_m: float = np.tan((2. * i + 1.) * alpha)
         x_proj: float = np.cos(2. * i * alpha)
         y_proj: float = np.sin(2. * i * alpha)
