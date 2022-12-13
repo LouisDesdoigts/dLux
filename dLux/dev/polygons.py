@@ -11,6 +11,7 @@ rmax: float = 1.
 alpha: float = np.pi / n # Half the angular disp of one wedge
 
 
+# +
 class RegularPolygonalAperture(PolygonalAperture):
     """
     An optiisation that can be applied to generate
@@ -45,6 +46,52 @@ class RegularPolygonalAperture(PolygonalAperture):
     """
     nsides: int
     rmax: float
+        
+    
+    def __init__(self   : ApertureLayer, 
+            nsides      : int,
+            rmax        : float,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer:
+        """
+        Parameters
+        ----------
+        centre: float, meters
+            The centre of the coordinate system along the x-axis.
+        softening: bool = False
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        """
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            compression = compression,
+            rotation = rotation,
+            occulting = occulting,
+            softening = softening)
+        self.nsides = int(nsides)
+        self.rmax = np.array(rmax).astype(float)
+        
+        
+    
+# -
 
 
 
