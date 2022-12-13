@@ -160,7 +160,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         self.strain = np.asarray(strain).astype(float)
         self.compression = np.asarray(compression).astype(float)
         self.rotation = np.asarray(rotation).astype(float)
-        self.softening = 1. if softening else np.inf
+        self.softening = 1. if softening else 1e32
         self.occulting = bool(occulting)
 
 
