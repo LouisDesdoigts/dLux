@@ -534,15 +534,15 @@ class AnnularAperture(DynamicAperture):
         return self.rmax
       
       
-#test_plots_of_aps({
-#    "Occ. Soft": AnnularAperture(1., .5, occulting=True, softening=True),
-#    "Occ. Hard": AnnularAperture(1., .5, occulting=True),
-#    "Soft": AnnularAperture(1., .5, softening=True),
-#    "Hard": AnnularAperture(1., .5),
-#    "Trans.": AnnularAperture(1., .5, centre=[.5, .5]),
-#    "Strain": AnnularAperture(1., .5, strain=[.5, 0.]),
-#    "Compr.": AnnularAperture(1., .5, compression=[.5, 1.])
-#})
+test_plots_of_aps({
+    "Occ. Soft": AnnularAperture(1., .5, occulting=True, softening=True),
+    "Occ. Hard": AnnularAperture(1., .5, occulting=True),
+    "Soft": AnnularAperture(1., .5, softening=True),
+    "Hard": AnnularAperture(1., .5),
+    "Trans.": AnnularAperture(1., .5, centre=[.5, .5]),
+    "Strain": AnnularAperture(1., .5, strain=[.5, 0.]),
+    "Compr.": AnnularAperture(1., .5, compression=[.5, 1.])
+})
 
 class CircularAperture(DynamicAperture):
     """
@@ -647,15 +647,15 @@ class CircularAperture(DynamicAperture):
         return self.radius
 
 
-#test_plots_of_aps({
-#    "Occ. Soft": CircularAperture(1., occulting=True, softening=True),
-#    "Occ. Hard": CircularAperture(1., occulting=True),
-#    "Soft": CircularAperture(1., softening=True),
-#    "Hard": CircularAperture(1.),
-#    "Trans.": CircularAperture(1., centre=[.5, .5]),
-#    "Strain": CircularAperture(1., strain=[.5, 0.]),
-#    "Compr.": CircularAperture(1., compression=[.5, 1.])
-#})
+test_plots_of_aps({
+    "Occ. Soft": CircularAperture(1., occulting=True, softening=True),
+    "Occ. Hard": CircularAperture(1., occulting=True),
+    "Soft": CircularAperture(1., softening=True),
+    "Hard": CircularAperture(1.),
+    "Trans.": CircularAperture(1., centre=[.5, .5]),
+    "Strain": CircularAperture(1., strain=[.5, 0.]),
+    "Compr.": CircularAperture(1., compression=[.5, 1.])
+})
 
 class RectangularAperture(DynamicAperture):
     """
@@ -767,16 +767,16 @@ class RectangularAperture(DynamicAperture):
         """
         return np.hypot(self.length / 2., self.width / 2.)
 
-#test_plots_of_aps({
-#    "Occ. Soft": RectangularAperture(1., .5, occulting=True, softening=True),
-#    "Occ. Hard": RectangularAperture(1., .5, occulting=True),
-#    "Soft": RectangularAperture(1., .5, softening=True),
-#    "Hard": RectangularAperture(1., .5),
-#    "Trans.": RectangularAperture(1., .5, centre=[.5, .5]),
-#    "Strain": RectangularAperture(1., .5, strain=[.5, 0.]),
-#    "Compr.": RectangularAperture(1., .5, compression=[.5, 1.]),
-#    "Rot.": RectangularAperture(1., .5, rotation=np.pi / 4.)
-#})
+test_plots_of_aps({
+    "Occ. Soft": RectangularAperture(1., .5, occulting=True, softening=True),
+    "Occ. Hard": RectangularAperture(1., .5, occulting=True),
+    "Soft": RectangularAperture(1., .5, softening=True),
+    "Hard": RectangularAperture(1., .5),
+    "Trans.": RectangularAperture(1., .5, centre=[.5, .5]),
+    "Strain": RectangularAperture(1., .5, strain=[.5, 0.]),
+    "Compr.": RectangularAperture(1., .5, compression=[.5, 1.]),
+    "Rot.": RectangularAperture(1., .5, rotation=np.pi / 4.)
+})
 
 class SquareAperture(DynamicAperture):
     """
@@ -885,16 +885,16 @@ class SquareAperture(DynamicAperture):
         """
         return np.sqrt(2) * self.width / 2.
 
-#test_plots_of_aps({
-#   "Occ. Soft": SquareAperture(1., occulting=True, softening=True),
-#   "Occ. Hard": SquareAperture(1., occulting=True),
-#   "Soft": SquareAperture(1., softening=True),
-#   "Hard": SquareAperture(1.),
-#   "Trans.": SquareAperture(1., centre=[.5, .5]),
-#   "Strain": SquareAperture(1., strain=[.5, 0.]),
-#   "Compr.": SquareAperture(1., compression=[.5, 1.]),
-#   "Rot.": SquareAperture(1., rotation=np.pi / 4.)
-#})
+test_plots_of_aps({
+   "Occ. Soft": SquareAperture(1., occulting=True, softening=True),
+   "Occ. Hard": SquareAperture(1., occulting=True),
+   "Soft": SquareAperture(1., softening=True),
+   "Hard": SquareAperture(1.),
+   "Trans.": SquareAperture(1., centre=[.5, .5]),
+   "Strain": SquareAperture(1., strain=[.5, 0.]),
+   "Compr.": SquareAperture(1., compression=[.5, 1.]),
+   "Rot.": SquareAperture(1., rotation=np.pi / 4.)
+})
 
 
 class PolygonalAperture(DynamicAperture, ABC):
