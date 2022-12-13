@@ -1164,7 +1164,15 @@ class IrregularPolygonalAperture(PolygonalAperture):
             rotation = rotation,
             occulting = occulting,
             softening = softening)
-        self.vertices = np.array(vertices).astype(float)
+        
+        vertices: float = np.array(vertices).astype(float)
+        shape: tuple = vertices.shape
+        is_corr_shape: bool = (shape[0] > shape[1]) and (shape[1] == 2)
+
+        assert is_corr_shape, "Make sure that the vertices are (n, 2)"
+
+        self.vertices: float = vertices
+        
 
     
     
