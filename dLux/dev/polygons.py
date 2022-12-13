@@ -161,7 +161,13 @@ class PolygonalAperture(DynamicAperture, ABC):
             softening = softening)
     
     
-    def _perp_dists_from_lines(m: float, x1: float, y1: float, x: float, y: float) -> float:
+    def _perp_dists_from_lines(
+            self: ApertureLayer, 
+            m   : float, 
+            x1  : float, 
+            y1  : float,
+            x   : float, 
+            y   : float) -> float:
         """
         Calculate the perpendicular distance of a set of points (x, y) from
         a line parametrised by a gradient m and a point (x1, y1). Notice, 
@@ -194,7 +200,10 @@ class PolygonalAperture(DynamicAperture, ABC):
         return np.where(np.isinf(m), inf_case, gen_case)
     
     
-    def _grad_from_two_points(xs: float, ys: float) -> float:
+    def _grad_from_two_points(
+            self: ApertureLayer, 
+            xs  : float, 
+            ys  : float) -> float:
         """
         Calculate the gradient of the chord that connects two points. 
         Note: This is distinct from `_grads_from_many_points` in that
@@ -215,7 +224,10 @@ class PolygonalAperture(DynamicAperture, ABC):
         return (ys[1] - ys[0]) / (xs[1] - xs[0])
     
     
-    def offset(theta: float, threshold: float) -> float:
+    def _offset(
+            self        : ApertureLayer, 
+            theta       : float, 
+            threshold   : float) -> float:
         """
         Transform the angular range of polar coordinates so that 
         the new lowest angle is offset. The final range should be 
@@ -238,7 +250,11 @@ class PolygonalAperture(DynamicAperture, ABC):
         return theta + comps * two_pi
     
     
-    def _is_orig_left_of_edge(ms: float, xs: float, ys: float) -> int:
+    def _is_orig_left_of_edge(
+            self: ApertureLayer, 
+            ms  : float, 
+            xs  : float, 
+            ys  : float) -> int:
         """
         Determines whether the origin is to the left or the right of 
         the edge. The edge(s) in this case are defined by a set of 
@@ -263,6 +279,15 @@ class PolygonalAperture(DynamicAperture, ABC):
         bc_orig: float = np.array([[0.]])
         dist_from_orig: float = perp_dist_from_line(sm, sx1, sy1, bc_orig, bc_orig)
         return np.sign(dist_from_orig)
+    
+    
+    def _make_wedges(off_phi: float, sorted_theta: float) -> float:
+        next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
+        bc_next_sort_theta: float = next_sorted_theta
+        greater_than: bool = (off_phi >= sorted_theta)
+        less_than: bool = (off_phi < bc_next_sort_theta)
+        wedges: bool = greater_than & less_than
+        return wedges.astype(float)
 
 
 class IrregularPolygonalAperture(PolygonalAperture):
@@ -404,15 +429,6 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
         
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
 
-
-
-def make_wedges(off_phi: float, sorted_theta: float) -> float:
-    next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
-    bc_next_sort_theta: float = next_sorted_theta
-    greater_than: bool = (off_phi >= sorted_theta)
-    less_than: bool = (off_phi < bc_next_sort_theta)
-    wedges: bool = greater_than & less_than
-    return wedges.astype(float)
 
 
 # # Testing against different scenarios
