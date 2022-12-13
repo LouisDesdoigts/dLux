@@ -579,7 +579,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         alpha: float = np.pi / self.nsides
             
         i: int = np.arange(self.nsides)[:, None, None] # Dummy index
-        bounds: float = 2. * i * alpha 
+        bounds: float = 2. * i * alpha + alpha 
         phi: float = self._offset(neg_pi_to_pi_phi, bounds[0])
             
         wedges: float = self._make_wedges(phi, bounds)
