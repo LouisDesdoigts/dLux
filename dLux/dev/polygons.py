@@ -76,16 +76,30 @@ plt.show()
 
 from apertures import DynamicAperture
 from typing import TypeVar
+from abc import ABC
 
 ApertureLayer = TypeVar("ApertureLayer")
 Array = TypeVar("Array")
 
 
-# +
-class PolygonalAperture(DynamicAperture):
+class 
+
+
+class PolygonalAperture(DynamicAperture, ABC):
     """
-    The default aperture is dis-allows the learning of all 
-    parameters. 
+    An abstract class that represents all `PolygonalApertures`.
+    The structure here is more than a little strange. Most of 
+    the pre-implemented `PolygonalApertures` do **not** inherit
+    from `PolygonalAperture`. This is because most of the
+    behaviour that is defined by `PolygonalAperture` is related
+    to general cases. For apertures, the generality results in 
+    a loss of speed. For example, this may be caused because
+    a specific symmetry of the shape cannot be exploited. As 
+    a result, more optimal implementations could be created 
+    directly. Since, the pre-implemented `Aperture` classes 
+    that are polygonal share no behaviour with the 
+    `PolygonalAperture` it made more sense to separate them 
+    out. 
 
     Parameters
     ----------
@@ -117,9 +131,6 @@ class PolygonalAperture(DynamicAperture):
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        The default aperture is dis-allows the learning of all 
-        parameters. 
-
         Parameters
         ----------
         centre: float, meters
@@ -227,7 +238,32 @@ class PolygonalAperture(DynamicAperture):
         return theta + comps * two_pi
     
     
-# -
+    def _is_orig_left_of_edge(ms: float, xs: float, ys: float) -> int:
+        """
+        Determines whether the origin is to the left or the right of 
+        the edge. The edge(s) in this case are defined by a set of 
+        gradients, m and points (xs, ys).
+        
+        Parameters:
+        -----------
+        ms: float, None (meters / meter)
+            The gradient of the edge(s).
+        xs: float, meters
+            A set of x coordinates that lie along the edges. 
+            Must have the same shape as ms. 
+        ys: float, meters
+            A set of y coordinates that lie along the edges.
+            Must have the same shape as ms.
+            
+        Returns:
+        --------
+        is_left: int
+            1 if the origin is to the left else -1.
+        """
+        bc_orig: float = np.array([[0.]])
+        dist_from_orig: float = perp_dist_from_line(sm, sx1, sy1, bc_orig, bc_orig)
+        return np.sign(dist_from_orig)
+
 
 class IrregularPolygonalAperture(PolygonalAperture):
     """
@@ -338,7 +374,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
         x_diffs: float = x1 - np.roll(x1, -1)
         y_diffs: float = y1 - np.roll(y1, -1)
         return y_diffs / x_diffs
-
+    
 
 @jax.jit
 def draw_from_vertices(vertices: float, coords: float) -> float:
@@ -368,12 +404,6 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
         
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
 
-
-
-def is_inside(sm: float, sx1: float, sy1) -> int:
-    bc_orig: float = np.array([[0.]])
-    dist_from_orig: float = perp_dist_from_line(sm, sx1, sy1, bc_orig, bc_orig)
-    return np.sign(dist_from_orig)
 
 
 def make_wedges(off_phi: float, sorted_theta: float) -> float:
