@@ -430,6 +430,29 @@ class IrregularPolygonalAperture(PolygonalAperture):
         y_diffs: float = y1 - np.roll(y1, -1)
         return y_diffs / x_diffs
     
+    
+    def _extent(self: ApertureLayer) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre. For inherited classes, consider implementing analytically for speed.
+
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        extent : float
+            The maximum distance from centre to edge of aperture
+        """
+        verts: float = self.vertices
+        dist_to_verts: float = np.hypot(verts[:, 1], verts[:, 0])
+        return np.max(dist_to_verts)
+    
+    
     def _metric(self: ApertureLayer, coords : float) -> float:
         """
         A measure of how far a pixel is from the aperture.
@@ -484,6 +507,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
 
         return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
     
+
+IrregularPolygonalAperture()
 
 # # Testing against different scenarios
 #
