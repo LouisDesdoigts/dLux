@@ -11,177 +11,7 @@ rmax: float = 1.
 alpha: float = np.pi / n # Half the angular disp of one wedge
 
 
-class RegularPolygonalAperture(PolygonalAperture):
-    """
-    An optiisation that can be applied to generate
-    regular polygonal apertures without using their 
-    vertices. 
-    
-    Parameters:
-    -----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
-    softening: bool = False
-        True if the aperture is soft edged otherwise False. A
-        soft edged aperture has a small layer of non-binary 
-        pixels. This is to prevent undefined gradients. 
-    occulting: bool = False
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside. 
-    strain: Array
-        Linear stretching of the x and y axis representing a 
-        strain of the coordinate system.
-    compression: Array 
-        The x and y compression of the coordinate system. This 
-        is a constant. 
-    rotation: float, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
-    nsides: int
-        The number of sides that the aperture has. 
-    rmax: float, meters
-        The radius of the smallest circle that can completely 
-        enclose the aperture. 
-    """
-    nsides: int
-    rmax: float
-        
-    
-    def __init__(self   : ApertureLayer, 
-            nsides      : int,
-            rmax        : float,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
-            occulting   : bool = False, 
-            softening   : bool = False) -> ApertureLayer:
-        """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
-        softening: bool = False
-            True if the aperture is soft edged otherwise False. A
-            soft edged aperture has a small layer of non-binary 
-            pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        strain: Array
-            Linear stretching of the x and y axis representing a 
-            strain of the coordinate system.
-        compression: Array 
-            The x and y compression of the coordinate system. This 
-            is a constant. 
-        rotation: float, radians
-            The rotation of the aperture away from the positive 
-            x-axis. 
-        """
-        super().__init__(
-            centre = centre, 
-            strain = strain, 
-            compression = compression,
-            rotation = rotation,
-            occulting = occulting,
-            softening = softening)
-        self.nsides = int(nsides)
-        self.rmax = np.array(rmax).astype(float)
-        
-        
-    def _extent(self: ApertureLayer) -> float:
-        """
-        Returns the largest distance to the outer edge of the aperture from the
-        centre. For inherited classes, consider implementing analytically for speed.
 
-        Parameters
-        ----------
-        coordinates : Array
-            The cartesian coordinates to generate the hexikes on.
-            The dimensions of the tensor should be `(2, npix, npix)`.
-            where the leading axis is the x and y dimensions.  
-
-        Returns
-        -------
-        extent : float
-            The maximum distance from centre to edge of aperture
-        """
-        return self.rmax
-        
-    
-    def _metric(self: ApertureLayer, coords: float) -> float:
-        """
-        A measure of how far a pixel is from the aperture.
-        This is a very abstract description that was constructed 
-        when dealing with the soft edging. For a normal binary 
-        representation the metric is zero if it is inside the
-        aperture and one if it is outside the aperture. Notice,
-        we have not attempted to prove that this is a metric 
-        via the axioms, this is just a handy name that brings 
-        to mind the general idea. For a soft edged aperture the 
-        metric is different.
-
-        Parameters:
-        -----------
-        distances: Array
-            The distances of each pixel from the edge of the aperture. 
-            Again, the words distances is designed to aid in 
-            conveying the idea and is not strictly true. We are
-            permitting negative distances when inside the aperture
-            because this was simplest to implement. 
-
-        Returns:
-        --------
-        non_occ_ap: Array 
-            This is essential the final step in processing to produce
-            the aperture. What is returned is the non-occulting 
-            version of the aperture. 
-        """
-        x: float = coords[0]
-        y: float = coords[1]
-
-        neg_pi_to_pi_phi: float = np.arctan2(y, x) 
-        phi: float = self._offset(neg_pi_to_pi_phi, 0.)
-        # rho: float = np.hypot(coords[0], coords[1])
-        alpha: float = np.pi / self.nsides
-            
-        i: int = np.arange(self.nsides)[:, None, None] # Dummy index
-        low_bound: float = 2. * i * alpha 
-        
-        wedges: float = self._make_wedges(phi, low_bound)
-        ms: float = np.tan((2. * i + 1.) * alpha)
-        xs: float = np.cos(2. * i * alpha)
-        ys: float = np.sin(2. * i * alpha)
-        dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
-        inside: float = self._is_orig_left_of_edge(ms, xs, ys)
-
-        dist: float = (inside * dists * wedges).sum(axis=0)
-        return self._soften(dist)
-
-npix: int = 100
-grid: float = np.linspace(0, 2., npix) - 1.
-coords: float = np.array(np.meshgrid(grid, grid))
-
-amax: callable = lambda arr: np.abs(arr).max()
-
-# +
-sq_reg_aper: ApertureLayer = RegularPolygonalAperture(4, 1.)
-hex_reg_aper: ApertureLayer = RegularPolygonalAperture(6, 1.)
-pent_reg_aper: ApertureLayer = RegularPolygonalAperture(5, 1.)
-
-sq_aper: float = sq_reg_aper._aperture(coords)
-hex_aper: float = hex_reg_aper._aperture(coords)
-pent_aper: float = pent_reg_aper._aperture(coords)
-
-fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
-cmap = axes[0].imshow(sq_aper)
-fig.colorbar(cmap, ax=axes[0])
-cmap = axes[1].imshow(pent_aper)
-fig.colorbar(cmap, ax=axes[1])
-cmap = axes[2].imshow(hex_aper)
-fig.colorbar(cmap, ax=axes[2])
-
-# -
 
 # # Vertex Generation of Polygons.
 # So this is very challenging. I have made extensive notes but little progress. 
@@ -624,12 +454,164 @@ class IrregularPolygonalAperture(PolygonalAperture):
         return self._soften(flat_dists)
 
 
+class RegularPolygonalAperture(PolygonalAperture):
+    """
+    An optiisation that can be applied to generate
+    regular polygonal apertures without using their 
+    vertices. 
+    
+    Parameters:
+    -----------
+    centre: float, meters
+        The centre of the coordinate system along the x-axis.
+    softening: bool = False
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool = False
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
+    nsides: int
+        The number of sides that the aperture has. 
+    rmax: float, meters
+        The radius of the smallest circle that can completely 
+        enclose the aperture. 
+    """
+    nsides: int
+    rmax: float
+        
+    
+    def __init__(self   : ApertureLayer, 
+            nsides      : int,
+            rmax        : float,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer:
+        """
+        Parameters
+        ----------
+        centre: float, meters
+            The centre of the coordinate system along the x-axis.
+        softening: bool = False
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        """
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            compression = compression,
+            rotation = rotation,
+            occulting = occulting,
+            softening = softening)
+        self.nsides = int(nsides)
+        self.rmax = np.array(rmax).astype(float)
+        
+        
+    def _extent(self: ApertureLayer) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre. For inherited classes, consider implementing analytically for speed.
+
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        extent : float
+            The maximum distance from centre to edge of aperture
+        """
+        return self.rmax
+        
+    
+    def _metric(self: ApertureLayer, coords: float) -> float:
+        """
+        A measure of how far a pixel is from the aperture.
+        This is a very abstract description that was constructed 
+        when dealing with the soft edging. For a normal binary 
+        representation the metric is zero if it is inside the
+        aperture and one if it is outside the aperture. Notice,
+        we have not attempted to prove that this is a metric 
+        via the axioms, this is just a handy name that brings 
+        to mind the general idea. For a soft edged aperture the 
+        metric is different.
+
+        Parameters:
+        -----------
+        distances: Array
+            The distances of each pixel from the edge of the aperture. 
+            Again, the words distances is designed to aid in 
+            conveying the idea and is not strictly true. We are
+            permitting negative distances when inside the aperture
+            because this was simplest to implement. 
+
+        Returns:
+        --------
+        non_occ_ap: Array 
+            This is essential the final step in processing to produce
+            the aperture. What is returned is the non-occulting 
+            version of the aperture. 
+        """
+        x: float = coords[0]
+        y: float = coords[1]
+
+        neg_pi_to_pi_phi: float = np.arctan2(y, x) 
+        phi: float = self._offset(neg_pi_to_pi_phi, 0.)
+        # rho: float = np.hypot(coords[0], coords[1])
+        alpha: float = np.pi / self.nsides
+            
+        i: int = np.arange(self.nsides)[:, None, None] # Dummy index
+        low_bound: float = 2. * i * alpha 
+        
+        wedges: float = self._make_wedges(phi, low_bound)
+        ms: float = np.tan((2. * i + 1.) * alpha)
+        xs: float = np.cos(2. * i * alpha)
+        ys: float = np.sin(2. * i * alpha)
+        dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
+        inside: float = self._is_orig_left_of_edge(ms, xs, ys)
+
+        dist: float = (inside * dists * wedges).sum(axis=0)
+        return self._soften(dist)
+
 # # Testing against different scenarios
 #
 # The point of this will be to test many regular polygons as well as a few aditional shapes.
 
+npix: int = 100
+grid: float = np.linspace(0, 2., npix) - 1.
+coords: float = np.array(np.meshgrid(grid, grid))
 two_pi: float = 2. * np.pi
 
+
+# ## IrregularPolygonalAperture
 
 def reg_pol_verts(n: int, r: float) -> float:
     thetas: float = np.linspace(0., two_pi, n, endpoint=False)
@@ -662,5 +644,25 @@ fig.colorbar(cmap, ax=axes[2])
 cmap = axes[3].imshow(rand_aper)
 fig.colorbar(cmap, ax=axes[3])
 # -
+# ## RegularPolygonalAperture
 
+amax: callable = lambda arr: np.abs(arr).max()
+
+
+# +
+sq_reg_aper: ApertureLayer = RegularPolygonalAperture(4, 1.)
+hex_reg_aper: ApertureLayer = RegularPolygonalAperture(6, 1.)
+pent_reg_aper: ApertureLayer = RegularPolygonalAperture(5, 1.)
+
+sq_aper: float = sq_reg_aper._aperture(coords)
+hex_aper: float = hex_reg_aper._aperture(coords)
+pent_aper: float = pent_reg_aper._aperture(coords)
+
+fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
+cmap = axes[0].imshow(sq_aper)
+fig.colorbar(cmap, ax=axes[0])
+cmap = axes[1].imshow(pent_aper)
+fig.colorbar(cmap, ax=axes[1])
+cmap = axes[2].imshow(hex_aper)
+fig.colorbar(cmap, ax=axes[2])
 
