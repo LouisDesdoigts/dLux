@@ -138,14 +138,15 @@ class RegularPolygonalAperture(PolygonalAperture):
             version of the aperture. 
         """
         neg_pi_to_pi_phi: float = np.arctan2(coords[1], coords[0]) 
-        phi: float = neg_pi_to_pi_phi + 2. * (neg_pi_to_pi_phi < 0.) * np.pi
+        phi: float = self._offset(neg_pi_to_pi_phi, 0.)
         rho: float = np.hypot(coords[0], coords[1])
+        alpha: float = np.pi / self.nsides
             
-        i: int = np.arange(n) # Dummy index
-        low_bound: float = 2. * i * alpha
-        top_bound: float = 2. * (i + 1.) * alpha 
-            
-        wedge: float = ((low_bound[:, None, None] < phi) & (phi <= top_bound[:, None, None])).astype(float)
+        i: int = np.arange(self.nsides) # Dummy index
+        low_bound: float = 2. * i * alpha 
+        
+        wedge: float = self._make_wedges(phi, low_bound)
+        # wedge: float = ((low_bound[:, None, None] < phi) & (phi <= top_bound[:, None, None])).astype(float)
         min_inv_m: float = np.tan((2. * i + 1.) * alpha)
         x_proj: float = np.cos(2. * i * alpha)
         y_proj: float = np.sin(2. * i * alpha)
@@ -167,9 +168,9 @@ sq_reg_aper: ApertureLayer = RegularPolygonalAperture(4, 1.)
 hex_reg_aper: ApertureLayer = RegularPolygonalAperture(6, 1.)
 pent_reg_aper: ApertureLayer = RegularPolygonalAperture(5, 1.)
 
-sq_aper: float = sq_ireg_aper._aperture(coords)
-hex_aper: float = hex_ireg_aper._aperture(coords)
-pent_aper: float = pent_ireg_aper._aperture(coords)
+sq_aper: float = sq_reg_aper._aperture(coords)
+hex_aper: float = hex_reg_aper._aperture(coords)
+pent_aper: float = pent_reg_aper._aperture(coords)
 
 fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
 cmap = axes[0].imshow(sq_aper)
@@ -398,11 +399,11 @@ class PolygonalAperture(DynamicAperture, ABC):
             1 if the origin is to the left else -1.
         """
         bc_orig: float = np.array([[0.]])
-        dist_from_orig: float = self._perp_dists_from_lines(sm, sx1, sy1, bc_orig, bc_orig)
+        dist_from_orig: float = self._perp_dists_from_lines(ms, xs, ys, bc_orig, bc_orig)
         return np.sign(dist_from_orig)
     
     
-    def _make_wedges(off_phi: float, sorted_theta: float) -> float:
+    def _make_wedges(self: ApertureLayer, off_phi: float, sorted_theta: float) -> float:
         """
         Wedges are used to isolate the space between two vertices in the 
         angular plane. 
@@ -431,7 +432,7 @@ class PolygonalAperture(DynamicAperture, ABC):
         """
         next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
         greater_than: bool = (off_phi >= sorted_theta)
-        less_than: bool = (off_phi < bc_next_sort_theta)
+        less_than: bool = (off_phi < next_sorted_theta)
         wedges: bool = greater_than & less_than
         return wedges.astype(float)
 
@@ -618,8 +619,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         phi: float = offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
 
         dist_from_edges: float = perp_dist_from_line(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
-        wedges: float = make_wedges(phi, sorted_theta)
-        dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
+        wedges: float = self._make_wedges(phi, sorted_theta)
+        dist_sgn: float = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
 
         flat_dists: float = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
         return self._soften(flat_dists)
@@ -662,3 +663,6 @@ cmap = axes[2].imshow(hex_aper)
 fig.colorbar(cmap, ax=axes[2])
 cmap = axes[3].imshow(rand_aper)
 fig.colorbar(cmap, ax=axes[3])
+# -
+
+
