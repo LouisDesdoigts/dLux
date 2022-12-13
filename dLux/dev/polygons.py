@@ -594,11 +594,11 @@ class RegularPolygonalAperture(PolygonalAperture):
         alpha: float = np.pi / self.nsides
             
         i: int = np.arange(self.nsides)[:, None, None] # Dummy index
-        bounds: float = 2. * i * alpha + alpha
+        bounds: float = 2. * i * alpha
         phi: float = self._offset(neg_pi_to_pi_phi, bounds[0])
             
         wedges: float = self._make_wedges(phi, bounds)
-        ms: float = -1 / np.tan(2. * (i + 1.) * alpha)
+        ms: float = -1 / np.tan(2. * i * alpha + alpha)
         xs: float = self.rmax * np.cos(2. * i * alpha)
         ys: float = self.rmax * np.sin(2. * i * alpha)
         dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
@@ -610,11 +610,11 @@ class RegularPolygonalAperture(PolygonalAperture):
         print("xs: ", xs.flatten())
         print("ys: ", ys.flatten())
             
-#         fig, axes = plt.subplots(1, self.nsides, figsize=(self.nsides*4, 1*3))
-#         for i in np.arange(self.nsides):
-#             cmap = axes[i].imshow(dists[i])
-#             fig.colorbar(cmap, ax=axes[i])
-#         plt.show()
+        fig, axes = plt.subplots(1, self.nsides, figsize=(self.nsides*4, 1*3))
+        for i in np.arange(self.nsides):
+            cmap = axes[i].imshow(dists[i] * wedges[i])
+            fig.colorbar(cmap, ax=axes[i])
+        plt.show()
         
 #         plt.imshow(dist.sum(axis=0))
 #         plt.colorbar()
@@ -677,16 +677,16 @@ hex_reg_aper: ApertureLayer = RegularPolygonalAperture(6, 1.)
 pent_reg_aper: ApertureLayer = RegularPolygonalAperture(5, 1.)
 
 sq_aper: float = sq_reg_aper._aperture(coords)
-# hex_aper: float = hex_reg_aper._aperture(coords)
-# pent_aper: float = pent_reg_aper._aperture(coords)
+hex_aper: float = hex_reg_aper._aperture(coords)
+pent_aper: float = pent_reg_aper._aperture(coords)
 
-# fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
-# cmap = axes[0].imshow(sq_aper)
-# fig.colorbar(cmap, ax=axes[0])
-# cmap = axes[1].imshow(pent_aper)
-# fig.colorbar(cmap, ax=axes[1])
-# cmap = axes[2].imshow(hex_aper)
-# fig.colorbar(cmap, ax=axes[2])
+fig, axes = plt.subplots(1, 3, figsize=(3*4, 3))
+cmap = axes[0].imshow(sq_aper)
+fig.colorbar(cmap, ax=axes[0])
+cmap = axes[1].imshow(pent_aper)
+fig.colorbar(cmap, ax=axes[1])
+cmap = axes[2].imshow(hex_aper)
+fig.colorbar(cmap, ax=axes[2])
 # -
 
 
