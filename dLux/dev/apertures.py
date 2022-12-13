@@ -1255,8 +1255,6 @@ class IrregularPolygonalAperture(PolygonalAperture):
             the aperture. What is returned is the non-occulting 
             version of the aperture. 
         """
-        two_pi: float = 2. * np.pi
-
         bc_x1: float = self.vertices[:, 0][:, None, None]
         bc_y1: float = self.vertices[:, 1][:, None, None]
 
@@ -1278,6 +1276,14 @@ class IrregularPolygonalAperture(PolygonalAperture):
         dist_from_edges: float = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
         wedges: float = self._make_wedges(phi, sorted_theta)
         dist_sgn: float = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
+
+        fig, axes = plt.subplots(2, 4, figsize=(4*4, 2*3))
+        for i in range(4):
+            cbar_cmap = axes[0][i].imshow(dist_from_edges[i] * dist_sgn[i])
+            fig.colorbar(cbar_cmap, ax=axes[0][i])
+            cbar_cmap = axes[1][i].imshow(wedges[i])
+            fig.colorbar(cbar_cmap, ax=axes[1][i])
+        plt.show()
 
         flat_dists: float = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
         return self._soften(flat_dists)
