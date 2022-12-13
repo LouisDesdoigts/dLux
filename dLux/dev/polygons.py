@@ -137,23 +137,25 @@ class RegularPolygonalAperture(PolygonalAperture):
             the aperture. What is returned is the non-occulting 
             version of the aperture. 
         """
-        neg_pi_to_pi_phi: float = np.arctan2(coords[1], coords[0]) 
+        x: float = coords[0]
+        y: float = coords[1]
+
+        neg_pi_to_pi_phi: float = np.arctan2(y, x) 
         phi: float = self._offset(neg_pi_to_pi_phi, 0.)
-        rho: float = np.hypot(coords[0], coords[1])
+        # rho: float = np.hypot(coords[0], coords[1])
         alpha: float = np.pi / self.nsides
             
         i: int = np.arange(self.nsides)[:, None, None] # Dummy index
         low_bound: float = 2. * i * alpha 
         
-        wedge: float = self._make_wedges(phi, low_bound)
-        min_inv_m: float = np.tan((2. * i + 1.) * alpha)
-        x_proj: float = np.cos(2. * i * alpha)
-        y_proj: float = np.sin(2. * i * alpha)
-        r: float = rmax * (min_inv_m * y_proj + x_proj) / (min_inv_m * np.sin(phi) + np.cos(phi))
+        wedges: float = self._make_wedges(phi, low_bound)
+        ms: float = np.tan((2. * i + 1.) * alpha)
+        xs: float = np.cos(2. * i * alpha)
+        ys: float = np.sin(2. * i * alpha)
+        dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
+        inside: float = self._is_orig_left_of_edge(ms, xs, ys)
 
-        dist: float = (rho - r)
-        dist: float = (dist * wedge).sum(axis=0)
-            
+        dist: float = (inside * dists * wedges).sum(axis=0)
         return self._soften(dist)
 
 npix: int = 100
