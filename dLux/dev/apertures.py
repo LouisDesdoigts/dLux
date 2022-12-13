@@ -77,15 +77,6 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
     `DynamicAberratedAperture` and `DynamicAperture` could 
     inherit from a common base. 
     """
-    # Now I am regretting this structure and think that I will 
-    # just go with another structure that does make use 
-    # of mutliple inheritance 
-    #
-    # The thinking is that we have `StaticAperture`, `ShapedAperture` and 
-    # `AberratedAperture` then we can combine these as we wish to the 
-    # correct affect
-    #
-    # Let's just stick to the plan. 
 
 
 class DynamicAperture(AbstractDynamicAperture, abc.ABC):
