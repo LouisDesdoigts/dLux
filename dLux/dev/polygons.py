@@ -81,7 +81,6 @@ ApertureLayer = TypeVar("ApertureLayer")
 Array = TypeVar("Array")
 
 
-# +
 class PolygonalAperture(DynamicAperture):
     """
     The default aperture is dis-allows the learning of all 
@@ -184,6 +183,24 @@ class PolygonalAperture(DynamicAperture):
     
     
     def _grad_from_two_points(xs: float, ys: float) -> float:
+        """
+        Calculate the gradient of the chord that connects two points. 
+        Note: This is distinct from `_grads_from_many_points` in that
+        it does not wrap arround.
+        
+        Parameters:
+        -----------
+        xs: float, meters
+            The x coordinates of the points.
+        ys: float, meters
+            The y coordinates of the points.
+            
+        Returns:
+        --------
+        m: float, None (meters / meter)
+            The gradient of the chord that connects the two points.
+        """
+        return (ys[1] - ys[0]) / (xs[1] - xs[0])
     
     
     def _grads_from_many_points(x1: float, y1: float) -> float:
@@ -200,6 +217,8 @@ class PolygonalAperture(DynamicAperture):
         necessary to provided the parameters with expanded dimensions. 
         This may be achieved using `x1[:, None, None]` or 
         `x1.reshape((-1, 1, 1))` or `np.expand_dims(x1, (1, 2))`.
+        There is no major performance difference between the different
+        methods of reshaping. 
         
         Parameters:
         -----------
@@ -208,14 +227,18 @@ class PolygonalAperture(DynamicAperture):
         y1: float, meters
             The y coordinates of the points that are to be connected. 
             Must have the same shape as x. 
+            
+        Returns:
+        --------
+        ms: float, None (meters / meter)
+            The gradients of the lines that connect the vertices. The 
+            vertices wrap around to form a closed shape whatever it 
+            may look like. 
         """
         x_diffs: float = x1 - np.roll(x1, -1)
         y_diffs: float = y1 - np.roll(y1, -1)
         return y_diffs / x_diffs
 
-    
-
-# -
 
 @jax.jit
 def draw_from_vertices(vertices: float, coords: float) -> float:
@@ -244,13 +267,6 @@ def draw_from_vertices(vertices: float, coords: float) -> float:
     dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
         
     return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
-
-
-
-def perp_dist_from_line(m: float, x1: float, y1: float, x: float, y: float) -> float:
-    inf_case: float = (x - x1)
-    gen_case: float = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
-    return np.where(np.isinf(m), inf_case, gen_case)
 
 
 def offset(theta: float, threshold: float) -> float:
