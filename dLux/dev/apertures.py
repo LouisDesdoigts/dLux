@@ -3207,13 +3207,13 @@ class RegularPolygonalAperture(PolygonalAperture):
 #})
 
 
-test_plots_of_aps({
-   "Occ. Soft": RegularPolygonalAperture(5, 1., occulting=True, softening=True),
-   "Occ. Hard": RegularPolygonalAperture(5, 1., occulting=True),
-   "Soft": RegularPolygonalAperture(5, 1., softening=True),
-   "Hard": RegularPolygonalAperture(5, 1.),
-   "Trans.": RegularPolygonalAperture(5, 1., centre=[.5, .5]),
-   "Strain": RegularPolygonalAperture(5, 1., strain=[.5, 0.]),
-   "Compr.": RegularPolygonalAperture(5, 1., compression=[.5, 1.]),
-   "Rot.": RegularPolygonalAperture(5, 1., rotation=np.pi / 4.)
-})
+#test_plots_of_aps({
+#   "Occ. Soft": RegularPolygonalAperture(5, 1., occulting=True, softening=True),
+#   "Occ. Hard": RegularPolygonalAperture(5, 1., occulting=True),
+#   "Soft": RegularPolygonalAperture(5, 1., softening=True),
+#   "Hard": RegularPolygonalAperture(5, 1.),
+#   "Trans.": RegularPolygonalAperture(5, 1., centre=[.5, .5]),
+#   "Strain": RegularPolygonalAperture(5, 1., strain=[.5, 0.]),
+#   "Compr.": RegularPolygonalAperture(5, 1., compression=[.5, 1.]),
+#   "Rot.": RegularPolygonalAperture(5, 1., rotation=np.pi / 4.)
+#})
