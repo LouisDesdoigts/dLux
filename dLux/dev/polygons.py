@@ -162,20 +162,7 @@ coords: float = np.array(np.meshgrid(grid, grid))
 
 amax: callable = lambda arr: np.abs(arr).max()
 
-# +
-fig = plt.figure()
-axes = plt.axes()
-_map = axes.imshow(dist, cmap=plt.cm.seismic, vmin=-amax(dist), vmax=amax(dist))
-fig.colorbar(_map, ax=axes)
-plt.show()
 
-
-fig = plt.figure()
-axes = plt.axes()
-_map = axes.imshow(smooth(dist))
-fig.colorbar(_map, ax=axes)
-plt.show()
-# -
 
 # # Vertex Generation of Polygons.
 # So this is very challenging. I have made extensive notes but little progress. 
