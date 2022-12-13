@@ -88,6 +88,26 @@ class RegularPolygonalAperture(PolygonalAperture):
         self.nsides = int(nsides)
         self.rmax = np.array(rmax).astype(float)
         
+        
+    def _extent(self: ApertureLayer) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre. For inherited classes, consider implementing analytically for speed.
+
+        Parameters
+        ----------
+        coordinates : Array
+            The cartesian coordinates to generate the hexikes on.
+            The dimensions of the tensor should be `(2, npix, npix)`.
+            where the leading axis is the x and y dimensions.  
+
+        Returns
+        -------
+        extent : float
+            The maximum distance from centre to edge of aperture
+        """
+        return self.rmax
+        
     
     def _metric(self: ApertureLayer, coords: float) -> float:
         """
