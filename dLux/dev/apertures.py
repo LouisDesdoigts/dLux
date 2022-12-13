@@ -1321,6 +1321,20 @@ class IrregularPolygonalAperture(PolygonalAperture):
         return self._soften(flat_dists)
 
 
+vert_angs: float = np.linspace(0., 2. * np.pi, 5, endpoint=False)
+verts: float = np.array([np.cos(vert_angs), np.sin(vert_ands)])
+test_plots_of_aps({
+   "Occ. Soft": IrregularPolygonalAperture(verts, occulting=True, softening=True),
+   "Occ. Hard": IrregularPolygonalAperture(verts, occulting=True),
+   "Soft": IrregularPolygonalAperture(verts, softening=True),
+   "Hard": IrregularPolygonalAperture(verts),
+   "Trans.": IrregularPolygonalAperture(verts, centre=[.5, .5]),
+   "Strain": IrregularPolygonalAperture(verts, strain=[.5, 0.]),
+   "Compr.": IrregularPolygonalAperture(verts, compression=[.5, 1.]),
+   "Rot.": IrregularPolygonalAperture(verts, rotation=np.pi / 4.)
+})
+
+
 class RegularPolygonalAperture(PolygonalAperture):
     """
     An optiisation that can be applied to generate
