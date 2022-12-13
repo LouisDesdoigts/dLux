@@ -12,7 +12,7 @@ alpha: float = np.pi / n # Half the angular disp of one wedge
 
 npix: int = 100
 grid: float = np.linspace(0, 2., npix) - 1.
-coords: float = np.meshgrid(grid, grid)
+coords: float = np.array(np.meshgrid(grid, grid))
 
 neg_pi_to_pi_phi: float = np.arctan2(coords[1], coords[0]) 
 phi: float = neg_pi_to_pi_phi + 2. * (neg_pi_to_pi_phi < 0.) * np.pi
@@ -160,7 +160,7 @@ class PolygonalAperture(DynamicAperture, ABC):
         super().__init__(
             centre = centre, 
             strain = strain, 
-            comression = compression,
+            compression = compression,
             rotation = rotation,
             occulting = occulting,
             softening = softening)
@@ -386,7 +386,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
         super().__init__(
             centre = centre, 
             strain = strain, 
-            comression = compression,
+            compression = compression,
             rotation = rotation,
             occulting = occulting,
             softening = softening)
@@ -453,7 +453,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
         return np.max(dist_to_verts)
     
     
-    def _metric(self: ApertureLayer, coords : float) -> float:
+    def _metric(self: ApertureLayer, coords: float) -> float:
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -483,8 +483,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         """
         two_pi: float = 2. * np.pi
 
-        bc_x1: float = vertices[:, 0][:, None, None]
-        bc_y1: float = vertices[:, 1][:, None, None]
+        bc_x1: float = self.vertices[:, 0][:, None, None]
+        bc_y1: float = self.vertices[:, 1][:, None, None]
 
         bc_x: float = coords[0][None, :, :]
         bc_y: float = coords[1][None, :, :]
@@ -505,10 +505,15 @@ class IrregularPolygonalAperture(PolygonalAperture):
         wedges: float = make_wedges(phi, sorted_theta)
         dist_sgn: float = is_inside(sorted_m, sorted_x1, sorted_y1)
 
-        return (dist_sgn * dist_from_edges * wedges).sum(axis=0)
+        flat_dists: float = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
+        return self._soften(flat_dists)
     
 
-IrregularPolygonalAperture()
+sq_ireg_aper: ApertureLayer = IrregularPolygonalAperture(sq_verts)
+
+sq_aper: float = sq_ireg_aper._aperture(coords)
+
+plt.imshow(sq_aper)
 
 # # Testing against different scenarios
 #
