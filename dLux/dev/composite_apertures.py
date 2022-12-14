@@ -359,6 +359,7 @@ class MultiAperture(CompositeAperture):
             rotation = rotation)
 
 
+
     def _aperture(self, coords: Array) -> Array:
         """
         Evaluates the aperture. 
@@ -377,5 +378,42 @@ class MultiAperture(CompositeAperture):
         coords: float = self._coordinates(coords)
         aps: float = np.stack([ap._aperture(coords) for ap in self.apertures.values()])
         return aps.sum(axis=0)
+
+test_plots_of_aps({
+    "Comp. Trans.": MultiAperture(
+        centre = [.5, .5],
+        apertures = {
+            "pupil": CircularAperture(1., centre=[-.5, 0.]),
+            "obstruction": CircularAperture(1., centre=[.5, 0.]),
+        }
+    ),
+    "Circ. Trans.": CompoundAperture(
+        apertures = {
+            "pupil": CircularAperture(1., centre=[-.5, .5]),
+            "obstruction": CircularAperture(1., centre=[.5, 0.]),
+        }
+    ),
+    "Comp. Rot.": CompoundAperture(
+        rotation = np.pi / 4.,
+        apertures = {
+            "pupil": CircularAperture(1., centre=[-.5, 0.]),
+            "obstruction": CircularAperture(1., centre=[.5, 0.]),
+        }
+    ),
+    "Comp. Strain": CompoundAperture(
+        strain = [.05, .05],
+        apertures = {
+            "pupil": CircularAperture(1., centre=[-.5, 0.]),
+            "obstruction": CircularAperture(1., centre=[.5, 0.]),
+        }
+    ),
+    "Comp. Compr.": CompoundAperture(
+        compression = [1., .5],
+        apertures = {
+            "pupil": CircularAperture(1., centre=[-.5, 0.]),
+            "obstruction": CircularAperture(1., centre=[.5, 0.]),
+        }
+    )
+})
 
 
