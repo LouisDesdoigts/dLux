@@ -1,3 +1,11 @@
+import jax.numpy as np
+import dLux
+import abc
+import typing
+
+
+ApertureLayer = typing.TypeVar("ApertureLayer")
+Array = typing.TypeVar("Array")
 
 
 class CompositeAperture(dLux.optics.OpticalLayer, abc.ABC):
