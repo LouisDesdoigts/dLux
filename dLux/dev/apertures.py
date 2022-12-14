@@ -2116,9 +2116,9 @@ class UniformSpider(Spider):
         return softened.prod(axis=0)
 
 
-class AberratedAperture(DynamicAperture):
+class AberratedAperture(ApertureLayer):
     """
-    An abstract base cclass representing an `Aperture` defined
+    An class representing an `Aperture` defined
     with a basis. The basis is a set of polynomials that are 
     orthonormal over the surface of the aperture (usually). 
     These can be used to represent any aberation on the surface
@@ -2148,9 +2148,9 @@ class AberratedAperture(DynamicAperture):
     coeffs: Array
  
  
-    def __init__(self   : Layer, 
+    def __init__(self   : ApertureLayer, 
             coeffs      : Array,
-            aperture    : ApertureLayer) -> Layer: 
+            aperture    : ApertureLayer) -> ApertureLayer: 
         """
         Parameters:
         -----------
@@ -2172,7 +2172,7 @@ class AberratedAperture(DynamicAperture):
         self.coeffs = np.asarray(coeffs).astype(float)
 
 
-    def noll_index(j: int) -> tuple:
+    def noll_index(self: ApertureLayer, j: int) -> tuple:
         """
         Decode the jth noll index of the zernike polynomials. This 
         arrises because the zernike polynomials are parametrised by 
@@ -2263,7 +2263,7 @@ class AberratedAperture(DynamicAperture):
         return n, m
 
 
-    def jth_radial_zernike(n: int, m: int) -> list:
+    def jth_radial_zernike(self: ApertureLayer, n: int, m: int) -> callable:
        """
        The radial zernike polynomial.
 
@@ -2299,7 +2299,7 @@ class AberratedAperture(DynamicAperture):
        return _jth_radial_zernike
 
 
-    def jth_polar_zernike(n: int, m: int) -> list:
+    def jth_polar_zernike(self: ApertureLayer, n: int, m: int) -> callable:
        """
        Generates a function representing the polar component 
        of the jth Zernike polynomial.
@@ -2335,7 +2335,7 @@ class AberratedAperture(DynamicAperture):
        return _jth_polar_zernike  
 
 
-    def jth_zernike(j: int) -> list:
+    def jth_zernike(self: ApertureLayer, j: int) -> callable:
         """
         Calculate the zernike basis on a square pixel grid. 
      
@@ -2368,7 +2368,7 @@ class AberratedAperture(DynamicAperture):
         return _jth_zernike 
 
 
-    def jth_hexike(j: int) -> callable:
+    def jth_polike(j: int) -> callable:
         """
         The jth Hexike as a function. 
      
