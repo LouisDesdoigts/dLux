@@ -74,7 +74,63 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
     implementing any functionality. It was created so that 
     `DynamicAberratedAperture` and `DynamicAperture` could 
     inherit from a common base. 
+
+    Parameters:
+    -----------
+    centre: float, meters
+        The x coordinate of the centre of the aperture.
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
     """
+    centre: Array
+    strain: Array
+    compression: Array
+    rotation: Array
+    
+
+    def __init__(
+            self        : ApertureLayer, 
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.) -> ApertureLayer:
+        """
+        The default aperture is dis-allows the learning of all 
+        parameters. 
+
+        Parameters
+        ----------
+        centre: float, meters
+            The centre of the coordinate system along the x-axis.
+        softening: bool = False
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        """
+        super().__init__()
+        self.centre = np.asarray(centre).astype(float)
+        self.strain = np.asarray(strain).astype(float)
+        self.compression = np.asarray(compression).astype(float)
+        self.rotation = np.asarray(rotation).astype(float)
 
 
 class DynamicAperture(AbstractDynamicAperture, abc.ABC):
@@ -1282,8 +1338,6 @@ class IrregularPolygonalAperture(PolygonalAperture):
         return self._soften(flat_dists)
 
 
-
-
 class RegularPolygonalAperture(PolygonalAperture):
     """
     An optiisation that can be applied to generate
@@ -1556,8 +1610,7 @@ class CompositeAperture(ApertureLayer):
     """
     
 
-    def __init__(
-            self        : ApertureLayer, 
+    def __init__(self   : ApertureLayer, 
             apertures   : dict,
             centre      : Array = [0., 0.], 
             strain      : Array = [0., 0.],
@@ -1571,13 +1624,6 @@ class CompositeAperture(ApertureLayer):
         ----------
         centre: float, meters
             The centre of the coordinate system along the x-axis.
-        softening: bool = False
-            True if the aperture is soft edged otherwise False. A
-            soft edged aperture has a small layer of non-binary 
-            pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
@@ -1592,11 +1638,11 @@ class CompositeAperture(ApertureLayer):
            {str : Aperture} where the Aperture is a subclass of the 
            Aperture.
         """
-        super().__init__()
-        self.centre = np.asarray(centre).astype(float)
-        self.strain = np.asarray(strain).astype(float)
-        self.compression = np.asarray(compression).astype(float)
-        self.rotation = np.asarray(rotation).astype(float)
+        super().__init__(
+            centre = centre,
+            strain = strain, 
+            compression = compression,
+            rotation = rotation)
         self.apertures = apertures
 
 
