@@ -2057,6 +2057,29 @@ class UniformSpider(Spider):
  
  
     def _metric(self: ApertureLayer, coords: Array) -> Array:
+        """
+        A measure of how far a pixel is from the aperture.
+        This is a very abstract description that was constructed 
+        when dealing with the soft edging. For a normal binary 
+        representation the metric is zero if it is inside the
+        aperture and one if it is outside the aperture. Notice,
+        we have not attempted to prove that this is a metric 
+        via the axioms, this is just a handy name that brings 
+        to mind the general idea. For a soft edged aperture the 
+        metric is different.
+
+        Parameters:
+        -----------
+        coords: Array
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        non_occ_ap: Array 
+            This is essential the final step in processing to produce
+            the aperture. What is returned is the non-occulting 
+            version of the aperture. 
+        """
         coords = self._coordinates(coords)
         angles = np.linspace(0, 2 * np.pi, self.number_of_struts, endpoint=False)
         angles += self.rotation
