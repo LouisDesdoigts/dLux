@@ -252,55 +252,11 @@ class CompoundAperture(CompositeAperture):
         return np.array([new_x, new_y])
 
 
-    def _translate(self, coordinates: Array) -> Array:
-        """
-        Move the center of the aperture. 
+        return coordinates - self.centre[:, None, None]
 
-        Parameters:
-        -----------
-        coordinates: Array, meters 
-            The paraxial coordinates of the `Wavefront`.
-
-        Returns:
-        --------
-        coordinates: Array, meters
-            The translated coordinate system. 
-        """
-        return coordinates - self.centre.reshape(2, 1, 1)
-
-
-    def _strain(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Apply a strain to the coordinate system. 
-
-        Parameters:
-        -----------
-        coords: Array
-            The coordinates to apply the strain to. 
-
-        Returns:
-        --------
-        coords: Array 
-            The strained coordinate system. 
-        """
         trans_coords: Array = np.transpose(coords, (0, 2, 1))
-        return coords + trans_coords * self.strain.reshape(2, 1, 1)
+        return coords + trans_coords * self.strain[:, None, None]
 
-
-    def _compress(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Apply a compression to the coordinates.
-
-        Parameters:
-        -----------
-        coords: Array, meters
-            The uncompressed coordinates. 
-
-        Returns:
-        --------
-        coords: Array, meters
-            The compressed coordinates. 
-        """
         return coords * self.compression[:, None, None]
 
 
@@ -360,6 +316,16 @@ class CompoundAperture(CompositeAperture):
         coords: float = self.apertures.values[]
         return np.stack([ap._aperture(coordinates) 
            for ap in self._apertures.values()]).prod(axis=0)
+
+test: None = None
+
+test
+
+arr: float = np.arange(5)
+
+arr.shape
+
+arr[:, test, test].shape
 
 comp_ap: ApertureLayer = CompoundAperture(
     apertures = {
