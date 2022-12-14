@@ -2131,94 +2131,94 @@ def factorial(n : int) -> int:
 
 
 def noll_index(j: int) -> tuple:
-   """
-   Decode the jth noll index of the zernike polynomials. This 
-   arrises because the zernike polynomials are parametrised by 
-   a pair numbers, e.g. n, m, but we want to impose an order.
-   The noll indices are the standard way to do this see [this]
-   (https://oeis.org/A176988) for more detail. The top of the 
-   mapping between the noll index and the pair of numbers is 
-   shown below:
-
-   n, m Indices
-   ------------
-   (0, 0)
-   (1, -1), (1, 1)
-   (2, -2), (2, 0), (2, 2)
-   (3, -3), (3, -1), (3, 1), (3, 3)
-
-   Noll Indices
-   ------------
-   1
-   3, 2
-   5, 4, 6
-   9, 7, 8, 10
-
-   Parameters
-   ----------
-   j : int
-       The noll index to decode.
+    """
+    Decode the jth noll index of the zernike polynomials. This 
+    arrises because the zernike polynomials are parametrised by 
+    a pair numbers, e.g. n, m, but we want to impose an order.
+    The noll indices are the standard way to do this see [this]
+    (https://oeis.org/A176988) for more detail. The top of the 
+    mapping between the noll index and the pair of numbers is 
+    shown below:
+ 
+    n, m Indices
+    ------------
+    (0, 0)
+    (1, -1), (1, 1)
+    (2, -2), (2, 0), (2, 2)
+    (3, -3), (3, -1), (3, 1), (3, 3)
+ 
+    Noll Indices
+    ------------
+    1
+    3, 2
+    5, 4, 6
+    9, 7, 8, 10
+ 
+    Parameters
+    ----------
+    j : int
+        The noll index to decode.
+    
+    Returns
+    -------
+    n, m : tuple
+        The n, m parameters of the zernike polynomial.
+    """
+    # To retrive the row that we are in we use the formula for 
+    # the sum of the integers:
+    #  
+    #  n      n(n + 1)
+    # sum i = -------- = x_{n}
+    # i=0        2
+    # 
+    # However, `j` is a number between x_{n - 1} and x_{n} to 
+    # retrieve the 0th based index we want the upper bound. 
+    # Applying the quadratic formula:
+    # 
+    # n = -1/2 + sqrt(1 + 8x_{n})/2
+    #
+    # We know that n is an integer and hence of x_{n} -> j where 
+    # j is not an exact solution the row can be found by taking 
+    # the floor of the calculation. 
+    #
+    # n = (-1/2 + sqrt(1 + 8j)/2) // 1
+    #
+    # All the odd noll indices map to negative m integers and also 
+    # 0. The sign can therefore be determined by -(j & 1). 
+    # This works because (j & 1) returns the rightmost bit in 
+    # binary representation of j. This is equivalent to -(j % 2).
+    # 
+    # The m indices range from -n to n in increments of 2. The last 
+    # thing to do is work out how many times to add two to -n. 
+    # This can be done by banding j away from the smallest j in 
+    # the row. 
+    #
+    # The smallest j in the row can be calculated using the sum of
+    # integers formula in the comments above with n = (n - 1) and
+    # then adding one. Let this number be (x_{n - 1} + 1). We can 
+    # then subtract j from it to get r = (j - x_{n - 1} + 1)
+    #
+    # The odd and even cases work differently. I have included the 
+    # formula below:
+    # odd : p = (j - x_{n - 1}) // 2 
    
-   Returns
-   -------
-   n, m : tuple
-       The n, m parameters of the zernike polynomial.
-   """
-   # To retrive the row that we are in we use the formula for 
-   # the sum of the integers:
-   #  
-   #  n      n(n + 1)
-   # sum i = -------- = x_{n}
-   # i=0        2
-   # 
-   # However, `j` is a number between x_{n - 1} and x_{n} to 
-   # retrieve the 0th based index we want the upper bound. 
-   # Applying the quadratic formula:
-   # 
-   # n = -1/2 + sqrt(1 + 8x_{n})/2
-   #
-   # We know that n is an integer and hence of x_{n} -> j where 
-   # j is not an exact solution the row can be found by taking 
-   # the floor of the calculation. 
-   #
-   # n = (-1/2 + sqrt(1 + 8j)/2) // 1
-   #
-   # All the odd noll indices map to negative m integers and also 
-   # 0. The sign can therefore be determined by -(j & 1). 
-   # This works because (j & 1) returns the rightmost bit in 
-   # binary representation of j. This is equivalent to -(j % 2).
-   # 
-   # The m indices range from -n to n in increments of 2. The last 
-   # thing to do is work out how many times to add two to -n. 
-   # This can be done by banding j away from the smallest j in 
-   # the row. 
-   #
-   # The smallest j in the row can be calculated using the sum of
-   # integers formula in the comments above with n = (n - 1) and
-   # then adding one. Let this number be (x_{n - 1} + 1). We can 
-   # then subtract j from it to get r = (j - x_{n - 1} + 1)
-   #
-   # The odd and even cases work differently. I have included the 
-   # formula below:
-   # odd : p = (j - x_{n - 1}) // 2 
-  
-   # even: p = (j - x_{n - 1} + 1) // 2
-   # where p represents the number of times 2 needs to be added
-   # to the base case. The 1 required for the even case can be 
-   # generated in place using ~(j & 1) + 2, which is 1 for all 
-   # even numbers and 0 for all odd numbers.
-   #
-   # For odd n the base case is 1 and for even n it is 0. This 
-   # is the result of the bitwise operation j & 1 or alternatively
-   # (j % 2). The final thing is adding the sign to m which is 
-   # determined by whether j is even or odd hence -(j & 1).
-   n = (np.ceil(-1 / 2 + np.sqrt(1 + 8 * j) / 2) - 1).astype(int)
-   smallest_j_in_row = n * (n + 1) / 2 + 1 
-   number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
-   sign_of_shift = -(j & 1) + ~(j & 1) + 2
-   base_case = (n & 1)
-   m = (sign_of_shift * (base_case + number_of_shifts * 2)).astype(int)
-   return n, m
+    # even: p = (j - x_{n - 1} + 1) // 2
+    # where p represents the number of times 2 needs to be added
+    # to the base case. The 1 required for the even case can be 
+    # generated in place using ~(j & 1) + 2, which is 1 for all 
+    # even numbers and 0 for all odd numbers.
+    #
+    # For odd n the base case is 1 and for even n it is 0. This 
+    # is the result of the bitwise operation j & 1 or alternatively
+    # (j % 2). The final thing is adding the sign to m which is 
+    # determined by whether j is even or odd hence -(j & 1).
+    n = (np.ceil(-1 / 2 + np.sqrt(1 + 8 * j) / 2) - 1).astype(int)
+    smallest_j_in_row = n * (n + 1) / 2 + 1 
+    number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
+    sign_of_shift = -(j & 1) + ~(j & 1) + 2
+    base_case = (n & 1)
+    m = (sign_of_shift * (base_case + number_of_shifts * 2)).astype(int)
+    return n, m
 
 
 def jth_radial_zernike(n: int, m: int) -> list:
