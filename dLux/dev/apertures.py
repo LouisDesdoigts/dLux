@@ -1822,22 +1822,6 @@ class MultiAperture(CompositeAperture):
             strain = strain,
             compression = compression,
             rotation = rotation)
-    
-    
-    def _coordinates(self: ApertureLayer, coords: Array) -> Array:
-        x: float = coords[0]
-        y: float = coords[1] 
-            
-        rotation: float = self.rotation # Shorter reference.
-        new_x: float = np.cos(rotation) * x + np.sin(rotation) * y
-        new_y: float = -np.sin(rotation) * x + np.cos(rotation) * y
-        
-        coords: float = np.array([new_x, new_y])
-        coords: float = coords - self.centre[:, None, None]
-        coords: float = coords + np.transpose(coords, (0, 2, 1)) * self.strain[:, None, None]
-        coords: float = coords * self.compression[:, None, None]
-
-        return coords
 
 
     def _aperture(self, coords: Array) -> Array:
