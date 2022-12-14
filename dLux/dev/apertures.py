@@ -3227,13 +3227,13 @@ class UniformSpider(Spider):
 #    )
 #})
 
-test_plots_of_aps({
-    "Van.": UniformSpider(3, .1),
-    "Trans.": UniformSpider(3, .1, centre=[.25, .25]),
-    "Strain.": UniformSpider(3, .1, strain=[.05, .05]),
-    "Compr.": UniformSpider(3, .1, compression=[1., .5]),
-    "Rot.": UniformSpider(3, .1, rotation=np.pi / 2.),
-    "Soft": UniformSpider(3, .1, softening=True),
-    "More": UniformSpider(6, .1)
-})
+#test_plots_of_aps({
+#    "Van.": UniformSpider(3, .1),
+#    "Trans.": UniformSpider(3, .1, centre=[.25, .25]),
+#    "Strain.": UniformSpider(3, .1, strain=[.05, .05]),
+#    "Compr.": UniformSpider(3, .1, compression=[1., .5]),
+#    "Rot.": UniformSpider(3, .1, rotation=np.pi / 2.),
+#    "Soft": UniformSpider(3, .1, softening=True),
+#    "More": UniformSpider(6, .1)
+#})
 
