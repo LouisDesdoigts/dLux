@@ -1436,7 +1436,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         return self._soften(dist.sum(axis=0))
 
 
-class HexagonalAperture(DynamicAperture):
+class HexagonalAperture(RegularPolygonalAperture):
     """
     Generate a hexagonal aperture, parametrised by rmax. 
    
@@ -1469,6 +1469,7 @@ class HexagonalAperture(DynamicAperture):
     
     
     def __init__(self   : ApertureLayer, 
+            rmax        : float,
             centre      : Array = [0., 0.], 
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
@@ -1498,73 +1499,33 @@ class HexagonalAperture(DynamicAperture):
             x-axis. 
         """
         super().__init__(
+            nsides = 6,
+            rmax = rmax,
             centre = centre, 
             strain = strain, 
             compression = compression,
             rotation = rotation,
             occulting = occulting,
             softening = softening)
-        self.rmax = np.asarray(rmax).astype(float)
 
 
-    def _extent(self: ApertureLayer) -> float:
-        """
-        Returns the largest distance to the outer edge of the aperture from the
-        centre.
- 
-        Parameters
-        ----------
-        coordinates : Array
-            The cartesian coordinates to generate the hexikes on.
-            The dimensions of the tensor should be `(2, npix, npix)`.
-            where the leading axis is the x and y dimensions.  
- 
-        Returns
-        -------
-        _extent : float
-            The maximum distance from centre to edge of aperture
-        """
-        return self.rmax
- 
- 
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Generates an array representing the hard edged hexagonal 
-        aperture. 
- 
-        Parameters:
-        -----------
-        coords: Array, meters
-            The coordinates over which to generate the aperture. 
- 
-        Returns
-        -------
-        aperture : Array
-            The aperture represented as a binary float array of 0. and
-            1. representing no transmission and transmission 
-            respectively.
-        """
-        # So the challenge is how to make this soft edgeable. 
-        # Well, I know the formula for a line. I could just do 
-        # six lines that are perpendicular to the lines 
-        # along multiples of pi on three.   
-        coords: Array = self._rotate(self._translate(coords))
-        theta: Array = np.linspace(0, 2 * np.pi, 6, endpoint=False).reshape((6, 1, 1)) + np.pi / 6.
-        rmax: float = np.sqrt(3.) / 2. * self.rmax
- 
-        m: Array = (-1. / np.tan(theta)).reshape((6, 1, 1))
-        
-        x1: Array = (rmax * np.cos(theta)).reshape((6, 1, 1))
-        y1: Array = (rmax * np.sin(theta)).reshape((6, 1, 1))
-        
-        x: Array = np.tile(coords[0], (6, 1, 1))
-        y: Array = np.tile(coords[1], (6, 1, 1))
-        
-        dist: Array = (y - y1 - m * (x - x1)) / np.sqrt(1 + m ** 2)
-        dist: Array = (1. - 2. * (theta <= np.pi)) * dist
-        lines: Array = self._soften(dist)
- 
-        return lines.prod(axis=0)
+#coords: Array = self._rotate(self._translate(coords))
+#theta: Array = np.linspace(0, 2 * np.pi, 6, endpoint=False).reshape((6, 1, 1)) + np.pi / 6.
+#rmax: float = np.sqrt(3.) / 2. * self.rmax
+
+#m: Array = (-1. / np.tan(theta)).reshape((6, 1, 1))
+
+#x1: Array = (rmax * np.cos(theta)).reshape((6, 1, 1))
+#y1: Array = (rmax * np.sin(theta)).reshape((6, 1, 1))
+
+#x: Array = np.tile(coords[0], (6, 1, 1))
+#y: Array = np.tile(coords[1], (6, 1, 1))
+
+#dist: Array = (y - y1 - m * (x - x1)) / np.sqrt(1 + m ** 2)
+#dist: Array = (1. - 2. * (theta <= np.pi)) * dist
+#lines: Array = self._soften(dist)
+
+#return lines.prod(axis=0)
 
 
 #lass CompositeAperture(eqx.Module, abc.abc.ABC):
