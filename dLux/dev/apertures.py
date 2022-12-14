@@ -156,7 +156,7 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
         return np.array([new_x, new_y])
 
 
-    def _translate(self, coordinates: Array) -> Array:
+    def _translate(self, coords: Array) -> Array:
         """
         Move the center of the aperture. 
 
@@ -170,7 +170,7 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
         coordinates: Array, meters
             The translated coordinate system. 
         """
-        return coordinates - self.centre.reshape(2, 1, 1)
+        return coords - self.centre[:, None, None]
 
 
     def _strain(self: ApertureLayer, coords: Array) -> Array:
@@ -188,7 +188,7 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
             The strained coordinate system. 
         """
         trans_coords: Array = np.transpose(coords, (0, 2, 1))
-        return coords + trans_coords * self.strain.reshape(2, 1, 1)
+        return coords + trans_coords * self.strain[:, None, None]
 
 
     def _compress(self: ApertureLayer, coords: Array) -> Array:
@@ -244,7 +244,6 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
             lambda: coords)
 
         return coords
-
 
 
 class DynamicAperture(AbstractDynamicAperture, abc.ABC):
