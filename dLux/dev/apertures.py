@@ -1417,13 +1417,6 @@ class RegularPolygonalAperture(PolygonalAperture):
         Returns the largest distance to the outer edge of the aperture from the
         centre. For inherited classes, consider implementing analytically for speed.
 
-        Parameters
-        ----------
-        coordinates : Array
-            The cartesian coordinates to generate the hexikes on.
-            The dimensions of the tensor should be `(2, npix, npix)`.
-            where the leading axis is the x and y dimensions.  
-
         Returns
         -------
         extent : float
@@ -1975,6 +1968,23 @@ class Spider(DynamicAperture, abc.ABC):
         theta = np.where(theta > 2 * np.pi, theta - 2 * np.pi, theta)
         strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1., dist)
         return strut
+
+
+    def _extent(self: ApertureLayer) -> float:
+        """
+        Returns the largest distance to the outer edge of the aperture from the
+        centre. For inherited classes, consider implementing analytically for speed.
+
+        Returns
+        -------
+        extent : float
+            The maximum distance from centre to edge of aperture
+        """
+        raise NotImplementedError("The `Spider` class and its derivatives" +\
+            "are not designed to be used with the `AberatedAperture` class." +\
+            "If this is part of a `CompoundAperture` place the " +\
+            "`AberratedAperture`s into the `CompoundAperture` not the " +\
+            "other way arround.")
 
 
 class UniformSpider(Spider):
