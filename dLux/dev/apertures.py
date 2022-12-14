@@ -1887,12 +1887,75 @@ class Spider(DynamicAperture, abc.ABC):
 
     Parameters:
     -----------
+    centre: float, meters
+        The centre of the coordinate system along the x-axis.
+    softening: bool = False
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    occulting: bool = False
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
+    rmax : float, meters
+       The infimum of the radii of the set of circles that fully 
+       enclose the hexagonal aperture. In other words the distance 
+       from the centre to one of the vertices. 
     """
-    def __init__(self, x_offset: float, y_offset: float, softening: bool):
-        super().__init__(x_offset, y_offset, False, softening)
+    
+    
+    def __init__(self   : ApertureLayer, 
+            rmax        : float,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer:
+        """
+        Parameters
+        ----------
+        centre: float, meters
+            The centre of the coordinate system along the x-axis.
+        softening: bool = False
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        """
+        super().__init__(
+            rmax = rmax,
+            centre = centre, 
+            strain = strain, 
+            compression = compression,
+            rotation = rotation,
+            occulting = True,
+            softening = softening)
  
  
-    def _strut(self, angle: float, coordinates: Array) -> Array:
+    def _strut(
+            self    : ApertureLayer, 
+            angle   : float, 
+            coords  : Array) -> Array:
         """
         Generates a representation of a single strut in the spider. This is 
         more complex than you might imagine since the strut can point in 
