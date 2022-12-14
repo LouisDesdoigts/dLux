@@ -2571,135 +2571,135 @@ class AberratedHexagonalAperture(AberratedAperture):
 
 
 class AberratedArbitraryAperture(AberratedAperture):
-   """
-   This cclass is an alternative form of generating a 
-   basis over an aperture of any shape. Although not 
-   incredibly slow, it is slower than the other methods
-   but does not have the shortcomings of numerical 
-   instability. It is recomended that this method is 
-   used with the `StaticBasis` cclass.
-
-   Parameters:
-   -----------
-   basis_funcs: list
-       A list of `callable` functions that can be used 
-       to produce the basis. 
-   coeffs: Array
-       The coefficients of the Hexike terms. 
-   aperture: Layer
-       Must be an instance of `HexagonalAperture`. This 
-       is applied alongside the basis. 
-   """
-   nterms: int
-
-
-   def __init__(self   : Layer, 
-           noll_inds   : list, 
-           coeffs      : list, 
-           aperture    : HexagonalAperture):
-       """
-       Parameters:
-       -----------
-       noll_inds: Array 
-           The noll indices of the zernikes that are to be mapped 
-           over the aperture.
-       coeffs: Array 
-           The coefficients associated with the zernikes. These 
-           should be ordered by the noll index of the zernike 
-           that they refer to.
-       aperture: HexagonalAperture
-           A `HexagonalAperture` within which the aberrations are 
-           being studied. 
-       """
-
-       self.basis_funcs = [jth_zernike(j) for j in noll_inds]
-       super().__init__(coeffs, aperture)
-       self.nterms = len(noll_inds)
-
-       assert len(noll_inds) == len(coeffs)
-       assert isinstance(aperture, dl.Aperture)
-
-
-   def _orthonormalise(self: ApertureLayer, 
-           aperture: Array, 
-           zernikes: Array) -> Array:
-       """
-       The hexike polynomials up until `number_of_hexikes` on a square
-       array that `number_of_pixels` by `number_of_pixels`. The 
-       polynomials can be restricted to a smaller subset of the 
-       array by passing an explicit `maximum_radius`. The polynomial
-       will then be defined on the largest hexagon that fits with a 
-       circle of radius `maximum_radius`. 
-       
-       Parameters
-       ----------
-       aperture : Matrix
-           An array representing the aperture. This should be an 
-           `(npix, npix)` array. 
-       zernikes : Tensor
-           The zernike polynomials to orthonormalise on the aperture.
-           This tensor should be `(nterms, npix, npix)` in size, where 
-           the first axis represents the noll indexes. 
-
-       Returns
-       -------
-       hexikes : Tensor
-           The hexike polynomials evaluated on the square arrays
-           containing the hexagonal apertures until `maximum_radius`.
-           The leading dimension is `number_of_hexikes` long and 
-           each stacked array is a basis term. The final shape is:
-           ```py
-           hexikes.shape == (number_of_hexikes, number_of_pixels, number_of_pixels)
-           ```
-       """
-       pixel_area = aperture.sum()
-       shape = zernikes.shape
-       width = shape[-1]
-       basis = np.zeros(shape).at[0].set(aperture)
-
-       for j in np.arange(1, self.nterms):
-           intermediate = zernikes[j] * aperture
-           coefficient = np.zeros((self.nterms, 1, 1), dtype=float)
-           mask = (np.arange(1, self.nterms) > j + 1).reshape((-1, 1, 1))
-
-           coefficient = -1 / pixel_area * \
-               (zernikes[j] * basis[1:] * aperture * mask)\
-               .sum(axis = (1, 2))\
-               .reshape(-1, 1, 1) 
-
-           intermediate += (coefficient * basis[1:] * mask).sum(axis = 0)
-           
-           basis = basis\
-               .at[j]\
-               .set(intermediate / \
-                   np.sqrt((intermediate ** 2).sum() / pixel_area))
-       
-       return basis
-
-
-   def _basis(self: ApertureLayer, coords: Array) -> Array:
-       """
-       Parameters:
-       -----------
-       coords: Array, meters
-           The paraxial coordinate system on which to generate
-           the array. 
-
-       Returns:
-       --------
-       basis: Array
-           The basis vectors associated with the aperture. 
-           These vectors are stacked in a tensor that is,
-           `(nterms, npix, npix)`. Normally the basis is 
-           cropped to be just on the aperture however, this 
-           step is not necessary except for in visualisation. 
-           It has been removed to save some time in the 
-           calculations. 
-       """
-       zern_coords = self.aperture._normalised_coordinates(coords)
-       zernikes = np.stack([h(zern_coords) for h in self.basis_funcs])
-       aperture = self.aperture._aperture(coords)
-       return self._orthonormalise(aperture, zernikes)
+    """
+    This cclass is an alternative form of generating a 
+    basis over an aperture of any shape. Although not 
+    incredibly slow, it is slower than the other methods
+    but does not have the shortcomings of numerical 
+    instability. It is recomended that this method is 
+    used with the `StaticBasis` cclass.
+ 
+    Parameters:
+    -----------
+    basis_funcs: list
+        A list of `callable` functions that can be used 
+        to produce the basis. 
+    coeffs: Array
+        The coefficients of the Hexike terms. 
+    aperture: Layer
+        Must be an instance of `HexagonalAperture`. This 
+        is applied alongside the basis. 
+    """
+    nterms: int
+ 
+ 
+    def __init__(self   : Layer, 
+            noll_inds   : list, 
+            coeffs      : list, 
+            aperture    : HexagonalAperture):
+        """
+        Parameters:
+        -----------
+        noll_inds: Array 
+            The noll indices of the zernikes that are to be mapped 
+            over the aperture.
+        coeffs: Array 
+            The coefficients associated with the zernikes. These 
+            should be ordered by the noll index of the zernike 
+            that they refer to.
+        aperture: HexagonalAperture
+            A `HexagonalAperture` within which the aberrations are 
+            being studied. 
+        """
+ 
+        self.basis_funcs = [jth_zernike(j) for j in noll_inds]
+        super().__init__(coeffs, aperture)
+        self.nterms = len(noll_inds)
+ 
+        assert len(noll_inds) == len(coeffs)
+        assert isinstance(aperture, dl.Aperture)
+ 
+ 
+    def _orthonormalise(self: ApertureLayer, 
+            aperture: Array, 
+            zernikes: Array) -> Array:
+        """
+        The hexike polynomials up until `number_of_hexikes` on a square
+        array that `number_of_pixels` by `number_of_pixels`. The 
+        polynomials can be restricted to a smaller subset of the 
+        array by passing an explicit `maximum_radius`. The polynomial
+        will then be defined on the largest hexagon that fits with a 
+        circle of radius `maximum_radius`. 
+        
+        Parameters
+        ----------
+        aperture : Matrix
+            An array representing the aperture. This should be an 
+            `(npix, npix)` array. 
+        zernikes : Tensor
+            The zernike polynomials to orthonormalise on the aperture.
+            This tensor should be `(nterms, npix, npix)` in size, where 
+            the first axis represents the noll indexes. 
+ 
+        Returns
+        -------
+        hexikes : Tensor
+            The hexike polynomials evaluated on the square arrays
+            containing the hexagonal apertures until `maximum_radius`.
+            The leading dimension is `number_of_hexikes` long and 
+            each stacked array is a basis term. The final shape is:
+            ```py
+            hexikes.shape == (number_of_hexikes, number_of_pixels, number_of_pixels)
+            ```
+        """
+        pixel_area = aperture.sum()
+        shape = zernikes.shape
+        width = shape[-1]
+        basis = np.zeros(shape).at[0].set(aperture)
+ 
+        for j in np.arange(1, self.nterms):
+            intermediate = zernikes[j] * aperture
+            coefficient = np.zeros((self.nterms, 1, 1), dtype=float)
+            mask = (np.arange(1, self.nterms) > j + 1).reshape((-1, 1, 1))
+ 
+            coefficient = -1 / pixel_area * \
+                (zernikes[j] * basis[1:] * aperture * mask)\
+                .sum(axis = (1, 2))\
+                .reshape(-1, 1, 1) 
+ 
+            intermediate += (coefficient * basis[1:] * mask).sum(axis = 0)
+            
+            basis = basis\
+                .at[j]\
+                .set(intermediate / \
+                    np.sqrt((intermediate ** 2).sum() / pixel_area))
+        
+        return basis
+ 
+ 
+    def _basis(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+ 
+        Returns:
+        --------
+        basis: Array
+            The basis vectors associated with the aperture. 
+            These vectors are stacked in a tensor that is,
+            `(nterms, npix, npix)`. Normally the basis is 
+            cropped to be just on the aperture however, this 
+            step is not necessary except for in visualisation. 
+            It has been removed to save some time in the 
+            calculations. 
+        """
+        zern_coords = self.aperture._normalised_coordinates(coords)
+        zernikes = np.stack([h(zern_coords) for h in self.basis_funcs])
+        aperture = self.aperture._aperture(coords)
+        return self._orthonormalise(aperture, zernikes)
 
 
 class MultiAberratedAperture(eqx.Module):
