@@ -2099,23 +2099,6 @@ class UniformSpider(Spider):
         return softened.prod(axis=0)
         
  
-#mport jax 
-#mport abc 
-#mport jax.numpy as np
-#mport equinox as eqx
-#mport dLux as dl
-#mport typing 
-#rom typing import List
-
-#_all__ = ["AberratedCircularAperture", "AberratedHexagonalAperture"]
-
-#rray = typing.TypeVar("Array")
-#ayer = typing.TypeVar("Layer")
-#perture = typing.TypeVar("Aperture")
-#ircularAperture = typing.TypeVar("CircularAperture")
-#exagonalAperture = typing.TypeVar("HexagonalAperture")
-
-
 #ernikes: list = [
 #   lambda rho, theta: np.ones(rho.shape, dtype=float),
 #   lambda rho, theta: 2. * rho * np.sin(theta),
