@@ -1972,29 +1972,14 @@ class Spider(DynamicAperture, abc.ABC):
         strut: float
             The soft edged strut. 
         """
-        x, y = coordinates[0][:, ::-1], coordinates[1][:, :]
+        x, y = coors[0], coors[1]
         perp = np.tan(angle)
         gradient = np.tan(angle)
         dist = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
         theta = np.arctan2(y, x) + np.pi 
         theta = np.where(theta > angle, theta - angle, theta + 2 * np.pi - angle)
         theta = np.where(theta > 2 * np.pi, theta - 2 * np.pi, theta)
- 
-        # So the current problem is that I need to translate the coordinates 
-        # around by angle and then return them to the range [0, 2 pi].
- 
         strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1., dist)
- 
-        # This is all a hot mess. That is what this is. So how do I fix it?
-        # Well it is obviously not trivial. I to take an array of angles and
-        # essentially rotate it by angle. So I need to find all of the 
-        # points where theta is greater than angle and then I subtract 
-        # angle from theta in these points. Where theta is less than
-        # angle I want to add two pi - angle. Consider the case of angle equals
-        # three pi on two. The fourth quadrant has three pi on two subtracted 
-        # giving it a range of zero to pi on two. Yes I think that this will 
-        # work. 
- 
         return strut
 
 
