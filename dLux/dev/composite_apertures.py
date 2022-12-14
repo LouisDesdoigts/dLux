@@ -229,27 +229,12 @@ class CompoundAperture(CompositeAperture):
             compression = compression,
             rotation = rotation)
 
-    def _rotate(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Rotate the coordinate system by a pre-specified amount,
-        `self._theta`
-
-        Parameters
-        ----------
-        coords : Array
-            A `(2, npix, npix)` representation of the coordinate 
-            system. The leading dimensions specifies the x and then 
-            the y coordinates in that order. 
-
-        Returns
-        -------
-        coordinates : Array
-            The rotated coordinate system. 
-        """
+    def _coordinates(self: ApertureLayer, coords: Array) -> Array:
         x, y = coords[0], coords[1]
-        new_x = np.cos(self.rotation) * x + np.sin(self.rotation) * y
-        new_y = -np.sin(self.rotation) * x + np.cos(self.rotation) * y
-        return np.array([new_x, new_y])
+        
+        new_x: float = np.cos(self.rotation) * x + np.sin(self.rotation) * y
+        new_y: float = -np.sin(self.rotation) * x + np.cos(self.rotation) * y
+        coords: float = np.array([new_x, new_y])
 
 
         return coordinates - self.centre[:, None, None]
@@ -259,22 +244,6 @@ class CompoundAperture(CompositeAperture):
 
         return coords * self.compression[:, None, None]
 
-
-    def _coordinates(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Transform the paraxial coordinates into the coordinate
-        system of the aperture. 
-
-        Parameters:
-        -----------
-        coords: Array, meters
-            The paraxial coordinates of the `Wavefront`. 
-
-        Returns:
-        --------
-        coords: Array, meters
-            The coordinates of the `Aperture`.
-        """
         is_trans = (self.centre != np.zeros((2,), float)).any()
         coords: Array = jax.lax.cond(is_trans,
             lambda: self._translate(coords),
