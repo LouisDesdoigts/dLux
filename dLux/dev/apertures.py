@@ -133,6 +133,120 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
         self.rotation = np.asarray(rotation).astype(float)
 
 
+    def _rotate(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Rotate the coordinate system by a pre-specified amount,
+        `self._theta`
+
+        Parameters
+        ----------
+        coords : Array
+            A `(2, npix, npix)` representation of the coordinate 
+            system. The leading dimensions specifies the x and then 
+            the y coordinates in that order. 
+
+        Returns
+        -------
+        coordinates : Array
+            The rotated coordinate system. 
+        """
+        x, y = coords[0], coords[1]
+        new_x = np.cos(self.rotation) * x + np.sin(self.rotation) * y
+        new_y = -np.sin(self.rotation) * x + np.cos(self.rotation) * y
+        return np.array([new_x, new_y])
+
+
+    def _translate(self, coordinates: Array) -> Array:
+        """
+        Move the center of the aperture. 
+
+        Parameters:
+        -----------
+        coordinates: Array, meters 
+            The paraxial coordinates of the `Wavefront`.
+
+        Returns:
+        --------
+        coordinates: Array, meters
+            The translated coordinate system. 
+        """
+        return coordinates - self.centre.reshape(2, 1, 1)
+
+
+    def _strain(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Apply a strain to the coordinate system. 
+
+        Parameters:
+        -----------
+        coords: Array
+            The coordinates to apply the strain to. 
+
+        Returns:
+        --------
+        coords: Array 
+            The strained coordinate system. 
+        """
+        trans_coords: Array = np.transpose(coords, (0, 2, 1))
+        return coords + trans_coords * self.strain.reshape(2, 1, 1)
+
+
+    def _compress(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Apply a compression to the coordinates.
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The uncompressed coordinates. 
+
+        Returns:
+        --------
+        coords: Array, meters
+            The compressed coordinates. 
+        """
+        return coords * self.compression[:, None, None]
+
+
+    def _coordinates(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Transform the paraxial coordinates into the coordinate
+        system of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the `Wavefront`. 
+
+        Returns:
+        --------
+        coords: Array, meters
+            The coordinates of the `Aperture`.
+        """
+        is_trans = (self.centre != np.zeros((2,), float)).any()
+        coords: Array = jax.lax.cond(is_trans,
+            lambda: self._translate(coords),
+            lambda: coords)
+
+        is_compr: bool = (self.compression != np.ones((2,), float)).any()
+        coords: Array = jax.lax.cond(is_compr,
+            lambda: self._compress(coords),
+            lambda: coords)
+
+        is_strain: bool = (self.strain != np.zeros((2,), float)).any()
+        coords: Array = jax.lax.cond(is_strain,
+            lambda: self._strain(coords),
+            lambda: coords)
+
+        is_rot: bool = (self.rotation != 0.)
+        coords: Array = jax.lax.cond(is_rot,
+            lambda: self._rotate(coords),
+            lambda: coords)
+
+        return coords
+
+
+
 class DynamicAperture(AbstractDynamicAperture, abc.ABC):
     """
     An abstract class that defines the structure of all the concrete
@@ -282,119 +396,6 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
             the aperture. What is returned is the non-occulting 
             version of the aperture. 
         """
-
-
-    def _rotate(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Rotate the coordinate system by a pre-specified amount,
-        `self._theta`
-
-        Parameters
-        ----------
-        coords : Array
-            A `(2, npix, npix)` representation of the coordinate 
-            system. The leading dimensions specifies the x and then 
-            the y coordinates in that order. 
-
-        Returns
-        -------
-        coordinates : Array
-            The rotated coordinate system. 
-        """
-        x, y = coords[0], coords[1]
-        new_x = np.cos(self.rotation) * x + np.sin(self.rotation) * y
-        new_y = -np.sin(self.rotation) * x + np.cos(self.rotation) * y
-        return np.array([new_x, new_y])
-
-
-    def _translate(self, coordinates: Array) -> Array:
-        """
-        Move the center of the aperture. 
-
-        Parameters:
-        -----------
-        coordinates: Array, meters 
-            The paraxial coordinates of the `Wavefront`.
-
-        Returns:
-        --------
-        coordinates: Array, meters
-            The translated coordinate system. 
-        """
-        return coordinates - self.centre.reshape(2, 1, 1)
-
-
-    def _strain(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Apply a strain to the coordinate system. 
-
-        Parameters:
-        -----------
-        coords: Array
-            The coordinates to apply the strain to. 
-
-        Returns:
-        --------
-        coords: Array 
-            The strained coordinate system. 
-        """
-        trans_coords: Array = np.transpose(coords, (0, 2, 1))
-        return coords + trans_coords * self.strain.reshape(2, 1, 1)
-
-
-    def _compress(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Apply a compression to the coordinates.
-
-        Parameters:
-        -----------
-        coords: Array, meters
-            The uncompressed coordinates. 
-
-        Returns:
-        --------
-        coords: Array, meters
-            The compressed coordinates. 
-        """
-        return coords * self.compression[:, None, None]
-
-
-    def _coordinates(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Transform the paraxial coordinates into the coordinate
-        system of the aperture. 
-
-        Parameters:
-        -----------
-        coords: Array, meters
-            The paraxial coordinates of the `Wavefront`. 
-
-        Returns:
-        --------
-        coords: Array, meters
-            The coordinates of the `Aperture`.
-        """
-        is_trans = (self.centre != np.zeros((2,), float)).any()
-        coords: Array = jax.lax.cond(is_trans,
-            lambda: self._translate(coords),
-            lambda: coords)
-
-        is_compr: bool = (self.compression != np.ones((2,), float)).any()
-        coords: Array = jax.lax.cond(is_compr,
-            lambda: self._compress(coords),
-            lambda: coords)
-
-        is_strain: bool = (self.strain != np.zeros((2,), float)).any()
-        coords: Array = jax.lax.cond(is_strain,
-            lambda: self._strain(coords),
-            lambda: coords)
-
-        is_rot: bool = (self.rotation != 0.)
-        coords: Array = jax.lax.cond(is_rot,
-            lambda: self._rotate(coords),
-            lambda: coords)
-
-        return coords
 
 
     def _soften(self: ApertureLayer, distances: Array) -> Array:
