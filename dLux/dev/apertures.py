@@ -1526,6 +1526,154 @@ class HexagonalAperture(RegularPolygonalAperture):
 #return lines.prod(axis=0)
 
 
+class CompositeAperture(ApertureLayer):
+    """
+    Represents an aperture that contains more than one single 
+    aperture. The smaller sub-apertures are stored in a dictionary
+    pytree and are so acessible by user defined name.
+    
+    This class should be used if you want to learn the parameters
+    of the entire aperture without learning the individual components.
+    This is often going to be useful for pupils with spiders since 
+    the connection implies that changes to once are likely to 
+    affect one another.
+
+    Parameters:
+    -----------
+    apertures: dict(str, Aperture)
+       The apertures that make up the compound aperture. 
+    centre: float, meters
+        The x coordinate of the centre of the aperture.
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
+    """
+    centre: Array
+    strain: Array
+    compression: Array
+    rotation: Array
+    apertures: dict
+    
+
+    def __init__(self   : ApertureLayer, 
+            apertures   : dict,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.) -> ApertureLayer:
+        """
+        The default aperture is dis-allows the learning of all 
+        parameters. 
+
+        Parameters
+        ----------
+        centre: float, meters
+            The centre of the coordinate system along the x-axis.
+        softening: bool = False
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        apertures : dict
+           The aperture objects stored in a dictionary of type
+           {str : Aperture} where the Aperture is a subclass of the 
+           Aperture.
+        """
+        super().__init__()
+        self.centre = np.asarray(centre).astype(float)
+        self.strain = np.asarray(strain).astype(float)
+        self.compression = np.asarray(compression).astype(float)
+        self.rotation = np.asarray(rotation).astype(float)
+        self.apertures = apertures
+
+
+    def __getitem__(self: ApertureLayer, key: str) -> ApertureLayer:
+        """
+        Get one of the apertures from the collection using a name 
+        based lookup.
+
+        Parameters:
+        -----------
+        key: str
+           The name of the aperture to lookup. See the class doc
+           string for more information.
+
+        Returns:
+        --------
+        layer: Aperture
+           The layer that was stored under the name `key`. 
+        """
+        return self.apertures[key]
+
+
+    def __setitem__(self, key: str, value: ApertureLayer) -> None:
+        """
+        Assign a new value to one of the aperture mirrors.
+        Parameters
+        ----------
+        key : str
+           The name of the segement to replace for example "B1-7".
+        value : ApertureLayer
+           The new value to assign to that segement.
+        """
+        self.apertures[key] = value
+
+
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """
+        Apply the aperture to an incoming wavefront.
+        Parameters
+        ----------
+        parameters : dict
+           A dictionary containing the parameters of the model. 
+           The dictionary must satisfy `parameters.get("Wavefront")
+           != None`. 
+        Returns
+        -------
+        parameters : dict
+           The parameter, parameters, with the "Wavefront"; key
+           value updated. 
+        """
+        wavefront = wavefront.multiply_amplitude(
+           self._aperture(
+               wavefront.pixel_coordinates()))
+        return parameters
+
+
+    @abc.abstractmethod
+    def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
+        """
+        Evaluates the aperture. 
+
+        Parameters:
+        -----------
+        coordinates: Array, meters
+           The coordinates of the paraxial array. 
+
+        Returns 
+        -------
+        aperture : Matrix
+           An aperture generated by combining all of the sub 
+           apertures that were stored. 
+        """
+
 
 #mport jax 
 #mport abc 
