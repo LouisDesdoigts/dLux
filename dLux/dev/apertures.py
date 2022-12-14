@@ -2294,41 +2294,38 @@ def jth_polar_zernike(n: int, m: int) -> list:
 
 
 def jth_zernike(j: int) -> list:
-   """
-   Calculate the zernike basis on a square pixel grid. 
+    """
+    Calculate the zernike basis on a square pixel grid. 
+ 
+    Parameters
+    ----------
+    noll_index: int
+        The noll index corresponding to the zernike to generate.
+        The first ten zernikes have been computed analytically 
+        and are available via the `PreCompZernikeBasis` class. 
+        This is only for doing zernike terms that are of higher 
+        order and not centered.
+ 
+    Returns
+    -------
+    zernike : Tensor 
+        The zernike polynomials evaluated until number. The shape
+        of the output tensor is number by pixels by pixels. 
+    """
+    n, m = noll_index(j)
+ 
+    def _jth_zernike(coords: list) -> list:
+        polar_coords = dl.utils.cartesian_to_polar(coords)
+        rho = polar_coords[0]
+        theta = polar_coords[1]
+        aperture = rho <= 1.
+        _jth_rad_zern = jth_radial_zernike(n, m)
+        _jth_pol_zern = jth_polar_zernike(n, m)
+        return aperture * _jth_rad_zern(rho) * _jth_pol_zern(theta)
+    
+    return _jth_zernike 
 
-   Parameters
-   ----------
-   noll_index: int
-       The noll index corresponding to the zernike to generate.
-       The first ten zernikes have been computed analytically 
-       and are available via the `PreCompZernikeBasis` class. 
-       This is only for doing zernike terms that are of higher 
-       order and not centered.
 
-   Returns
-   -------
-   zernike : Tensor 
-       The zernike polynomials evaluated until number. The shape
-       of the output tensor is number by pixels by pixels. 
-   """
-   n, m = noll_index(j)
-
-   def _jth_zernike(coords: list) -> list:
-       polar_coords = dl.utils.cartesian_to_polar(coords)
-       rho = polar_coords[0]
-       theta = polar_coords[1]
-       aperture = rho <= 1.
-       _jth_rad_zern = jth_radial_zernike(n, m)
-       _jth_pol_zern = jth_polar_zernike(n, m)
-       return aperture * _jth_rad_zern(rho) * _jth_pol_zern(theta)
-   
-   return _jth_zernike 
-
-
-#So the current problem is that I need to find some way of passing 
-#rmax into the hexike dynamically (do I). Haha just worked it out,
-#I normalise the corrdinates first hence I don't need rmax. 
 def jth_hexike(j: int) -> callable:
     """
     The jth Hexike as a function. 
