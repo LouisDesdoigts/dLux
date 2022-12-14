@@ -2330,39 +2330,33 @@ def jth_zernike(j: int) -> list:
 #rmax into the hexike dynamically (do I). Haha just worked it out,
 #I normalise the corrdinates first hence I don't need rmax. 
 def jth_hexike(j: int) -> callable:
-   """
-   The jth Hexike as a function. 
-
-   Parameters:
-   -----------
-   j: int
-       The noll index of the requested zernike. 
-
-   Returns:
-   --------
-   hexike: callable
-       A function representing the jth hexike that is evaluated 
-       on a cartesian coordinate grid. 
-   """
-   _jth_zernike = jth_zernike(j)
-
-   def _jth_hexike(coords: Array) -> Array:
-       polar = dl.utils.cartesian_to_polar(coords)
-       rho, phi = polar[0], polar[1]
-       phi = phi + np.pi / 2.
-       alpha = np.pi / 6.
-       wedge = np.floor((phi + alpha) / (2 * alpha))
-       u_alpha = phi - wedge * (2 * alpha)
-       r_alpha = np.cos(alpha) / np.cos(u_alpha)
-
-#       plt.title("$R_{\\alpha}$")
-#       plt.imshow(r_alpha)
-#       plt.colorbar()
-#       plt.show()
-
-       return 1 / r_alpha * _jth_zernike(coords / r_alpha)
-
-   return _jth_hexike
+    """
+    The jth Hexike as a function. 
+ 
+    Parameters:
+    -----------
+    j: int
+        The noll index of the requested zernike. 
+ 
+    Returns:
+    --------
+    hexike: callable
+        A function representing the jth hexike that is evaluated 
+        on a cartesian coordinate grid. 
+    """
+    _jth_zernike = jth_zernike(j)
+ 
+    def _jth_hexike(coords: Array) -> Array:
+        polar = dl.utils.cartesian_to_polar(coords)
+        rho, phi = polar[0], polar[1]
+        phi = phi + np.pi / 2.
+        alpha = np.pi / 6.
+        wedge = np.floor((phi + alpha) / (2 * alpha))
+        u_alpha = phi - wedge * (2 * alpha)
+        r_alpha = np.cos(alpha) / np.cos(u_alpha)
+        return 1 / r_alpha * _jth_zernike(coords / r_alpha)
+ 
+    return _jth_hexike
 
 
 lass AberratedAperture(eqx.Module, abc.ABC):
