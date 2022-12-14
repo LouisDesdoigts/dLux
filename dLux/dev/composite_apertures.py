@@ -268,20 +268,42 @@ class CompoundAperture(CompositeAperture):
         aps: float = np.stack([ap._aperture(coords) for ap in self.apertures.values()])
         return aps.prod(axis=0)
 
-comp_ap: ApertureLayer = CompoundAperture(
-    apertures = {
-        "pupil": CircularAperture(1.),
-        "obstruction": CircularAperture(.5, occulting=True),
-    })
-
-grid: float = np.linspace(-1., 1., 128)
-coords: float = np.array(np.meshgrid(grid, grid))
-
-aper: float = comp_ap._aperture(coords)
-
-plt.imshow(aper)
-
 test_plots_of_aps({
+    "Comp. Trans.": CompoundAperture(
+        centre = [.5, .5],
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": CircularAperture(.5, occulting=True),
+    }),
+    "Circ. Trans.": CompoundAperture(
+        apertures = {
+            "pupil": CircularAperture(1., centre=[.1, .1]),
+            "obstruction": CircularAperture(.5, occulting=True),
+    }),
+    "": CompoundAperture(
+        centre = [.5, .5],
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": CircularAperture(.5, occulting=True),
+    }),
+    "Trans. x": CompoundAperture(
+        centre = [.5, 0.],
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": CircularAperture(.5, occulting=True),
+    })
+    "Trans.": CompoundAperture(
+        centre = [.5, .5],
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": CircularAperture(.5, occulting=True),
+    }),
+    "Trans. x": CompoundAperture(
+        centre = [.5, 0.],
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": CircularAperture(.5, occulting=True),
+    })
     "Trans.": CompoundAperture(
         centre = [.5, .5],
         apertures = {
