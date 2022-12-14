@@ -1576,7 +1576,7 @@ class HexagonalAperture(RegularPolygonalAperture):
 #return lines.prod(axis=0)
 
 
-class CompositeAperture(ApertureLayer):
+class CompositeAperture(AbstractDynamicAperture):
     """
     Represents an aperture that contains more than one single 
     aperture. The smaller sub-apertures are stored in a dictionary
@@ -1604,6 +1604,7 @@ class CompositeAperture(ApertureLayer):
         The rotation of the aperture away from the positive 
         x-axis. 
     """
+    apertures: dict
     
 
     def __init__(self   : ApertureLayer, 
