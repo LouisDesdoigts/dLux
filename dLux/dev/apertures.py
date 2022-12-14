@@ -3216,3 +3216,9 @@ class UniformSpider(Spider):
 #        }
 #    )
 #})
+
+test_plots_of_aps({
+    "Van.": UniformSpider(3, .1),
+    "Trans.": UniformSpider(3, .1, centre=[.5, .5])
+})
+
