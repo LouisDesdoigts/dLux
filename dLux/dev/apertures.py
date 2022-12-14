@@ -1959,7 +1959,7 @@ class Spider(DynamicAperture, abc.ABC):
         strut: float
             The soft edged strut. 
         """
-        x, y = coors[0], coors[1]
+        x, y = coords[0], coords[1]
         perp = np.tan(angle)
         gradient = np.tan(angle)
         dist = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
