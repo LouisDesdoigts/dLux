@@ -168,10 +168,6 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
     """
     occulting: bool 
     softening: Array
-    centre: Array
-    strain: Array
-    compression: Array
-    rotation: Array
     
 
     def __init__(self   : ApertureLayer, 
@@ -206,11 +202,11 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
             The rotation of the aperture away from the positive 
             x-axis. 
         """
-        super().__init__()
-        self.centre = np.asarray(centre).astype(float)
-        self.strain = np.asarray(strain).astype(float)
-        self.compression = np.asarray(compression).astype(float)
-        self.rotation = np.asarray(rotation).astype(float)
+        super().__init__(
+            centre = centre,
+            strain = strain,
+            compression = compression,
+            rotation = rotation)
         self.softening = 1. if softening else 1e32
         self.occulting = bool(occulting)
 
