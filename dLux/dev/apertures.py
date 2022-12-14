@@ -3193,3 +3193,15 @@ class HexagonalAperture(RegularPolygonalAperture):
 #   "Compr.": RegularPolygonalAperture(5, 1., compression=[.5, 1.]),
 #   "Rot.": RegularPolygonalAperture(5, 1., rotation=np.pi / 4.)
 #})
+
+
+test_plots_of_aps({
+   "Occ. Soft": HexagonalAperture(1., occulting=True, softening=True),
+   "Occ. Hard": HexagonalAperture(1., occulting=True),
+   "Soft": HexagonalAperture(1., softening=True),
+   "Hard": HexagonalAperture(1.),
+   "Trans.": HexagonalAperture(1., centre=[.5, .5]),
+   "Strain": HexagonalAperture(1., strain=[.5, 0.]),
+   "Compr.": HexagonalAperture(1., compression=[.5, 1.]),
+   "Rot.": HexagonalAperture(1., rotation=np.pi / 4.)
+})
