@@ -2526,48 +2526,48 @@ class AberratedCircularAperture(AberratedAperture):
 
 
 class AberratedHexagonalAperture(AberratedAperture):
-   """
-   Parameters:
-   -----------
-   Hexikes: Array
-       An array of `jit` compiled hexike basis functions 
-       that operate on a set of coordinates. In particular 
-       these coordinates correspond to a normalised set 
-       of coordinates that are centered at the the centre 
-       of the circular aperture with 1. occuring along the 
-       radius. 
-   coeffs: Array
-       The coefficients of the Hexike terms. 
-   aperture: Layer
-       Must be an instance of `HexagonalAperture`. This 
-       is applied alongside the basis. 
-   """
-
-
-   def __init__(self   : Layer, 
-           noll_inds   : list, 
-           coeffs      : list, 
-           aperture    : HexagonalAperture):
-       """
-       Parameters:
-       -----------
-       noll_inds: Array 
-           The noll indices of the zernikes that are to be mapped 
-           over the aperture.
-       coeffs: Array 
-           The coefficients associated with the zernikes. These 
-           should be ordered by the noll index of the zernike 
-           that they refer to.
-       aperture: HexagonalAperture
-           A `HexagonalAperture` within which the aberrations are 
-           being studied. 
-       """
-
-       self.basis_funcs = [jth_hexike(j) for j in noll_inds]
-       super().__init__(coeffs, aperture)
-
-       assert len(noll_inds) == len(coeffs)
-       assert isinstance(aperture, dl.HexagonalAperture)
+    """
+    Parameters:
+    -----------
+    Hexikes: Array
+        An array of `jit` compiled hexike basis functions 
+        that operate on a set of coordinates. In particular 
+        these coordinates correspond to a normalised set 
+        of coordinates that are centered at the the centre 
+        of the circular aperture with 1. occuring along the 
+        radius. 
+    coeffs: Array
+        The coefficients of the Hexike terms. 
+    aperture: Layer
+        Must be an instance of `HexagonalAperture`. This 
+        is applied alongside the basis. 
+    """
+ 
+ 
+    def __init__(self   : Layer, 
+            noll_inds   : list, 
+            coeffs      : list, 
+            aperture    : HexagonalAperture):
+        """
+        Parameters:
+        -----------
+        noll_inds: Array 
+            The noll indices of the zernikes that are to be mapped 
+            over the aperture.
+        coeffs: Array 
+            The coefficients associated with the zernikes. These 
+            should be ordered by the noll index of the zernike 
+            that they refer to.
+        aperture: HexagonalAperture
+            A `HexagonalAperture` within which the aberrations are 
+            being studied. 
+        """
+ 
+        self.basis_funcs = [jth_hexike(j) for j in noll_inds]
+        super().__init__(coeffs, aperture)
+ 
+        assert len(noll_inds) == len(coeffs)
+        assert isinstance(aperture, dl.HexagonalAperture)
 
 
 class AberratedArbitraryAperture(AberratedAperture):
