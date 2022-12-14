@@ -1554,14 +1554,10 @@ class CompositeAperture(ApertureLayer):
         The rotation of the aperture away from the positive 
         x-axis. 
     """
-    centre: Array
-    strain: Array
-    compression: Array
-    rotation: Array
-    apertures: dict
     
 
-    def __init__(self   : ApertureLayer, 
+    def __init__(
+            self        : ApertureLayer, 
             apertures   : dict,
             centre      : Array = [0., 0.], 
             strain      : Array = [0., 0.],
@@ -1736,9 +1732,6 @@ class CompoundAperture(CompositeAperture):
             The rotation of the aperture away from the positive 
             x-axis. 
         """
-        # NOTE: This is not a safe way of doing it and the shapes 
-        # should be officially checked. I think that this should 
-        # be a function. `ravel_arg` or something like that.
         super().__init__(apertures,
             centre = centre,
             strain = strain,
