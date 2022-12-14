@@ -2357,128 +2357,128 @@ def jth_hexike(j: int) -> callable:
 
 
 class AberratedAperture(eqx.Module, abc.ABC):
-   """
-   An abstract base cclass representing an `Aperture` defined
-   with a basis. The basis is a set of polynomials that are 
-   orthonormal over the surface of the aperture (usually). 
-   These can be used to represent any aberation on the surface
-   of the aperture. In general, the basis should only be defined 
-   on apertures that have a surface such as a mirror or phase 
-   plate ect. It isn't really possible to have aberrations on 
-   an opening. This rule may be broken to learn the atmosphere 
-   above a telescope but whether or not this is a good idea 
-   remains to be seen.
-
-   Parameters:
-   -----------
-   basis_funcs: list[callable]
-       A list of functions that represent the basis. The exact
-       polynomials that are represented will depend on the shape
-       of the aperture. 
-   aperture: ApertureLayer
-       The aperture on which the basis is defined. Must be a 
-       subcclass of the `Aperture` class.
-   coeffs: list[floats]
-       The coefficients of the basis terms. By learning the 
-       coefficients only the amount of time that is required 
-       for the learning process is significantly reduced.
-   """
-   basis_funcs: list
-   aperture: ApertureLayer
-   coeffs: Array
-
-
-   def __init__(self   : Layer, 
-           coeffs      : Array,
-           aperture    : ApertureLayer) -> Layer: 
-       """
-       Parameters:
-       -----------
-       noll_inds: List[int]
-           The noll indices are a scheme for indexing the Zernike
-           polynomials. Normally these polynomials have two 
-           indices but the noll indices prevent an order to 
-           these pairs. All basis can be indexed using the noll
-           indices based on `n` and `m`. 
-       aperture: ApertureLayer
-           The aperture that the basis is defined on. The shape 
-           of this aperture defines what the polynomials are. 
-       coeffs: Array
-           The coefficients of the basis vectors. 
-       """
-       assert not aperture.occulting
-       assert isinstance(aperture, dl.Aperture)
-       self.aperture = aperture
-       self.coeffs = np.asarray(coeffs).astype(float)
-
-
-   def _basis(self: ApertureLayer, coords: Array) -> Array:
-       """
-       Parameters:
-       -----------
-       coords: Array, meters
-           The paraxial coordinate system on which to generate
-           the array. 
-
-       Returns:
-       --------
-       basis: Array
-           The basis vectors associated with the aperture. 
-           These vectors are stacked in a tensor that is,
-           `(nterms, npix, npix)`. Normally the basis is 
-           cropped to be just on the aperture however, this 
-           step is not necessary except for in visualisation. 
-           It has been removed to save some time in the 
-           calculations. 
-       """
-       coords: Array = self.aperture._normalised_coordinates(coords)
-       return np.stack([h(coords) for h in self.basis_funcs])
-
-
-   def _opd(self: ApertureLayer, coords: Array) -> Array:
-       """
-       Calculate the optical path difference that is caused 
-       by the basis and the aberations that it represents. 
-
-       Parameters:
-       -----------
-       coords: Array, meters
-           The paraxial coordinate system on which to generate
-           the array. 
-
-       Returns:
-       --------
-       opd: Array
-           The optical path difference associated with much of 
-           the path. 
-       """
-       basis: Array = self._basis(coords)
-       opd: Array = np.dot(basis.T, self.coeffs)
-       return opd
-
-
-   def __call__(self, params_dict: dict) -> dict:
-       """
-       Apply the aperture and the abberations to the wavefront.  
-
-       Parameters:
-       -----------
-       params: dict
-           A dictionary containing the key "Wavefront".
-
-       Returns:
-       --------
-       params: dict 
-           A dictionary containing the key "wavefront".
-       """
-       wavefront: object = params_dict["Wavefront"]
-       coords: Array = wavefront.pixel_positions()
-       opd: Array = self._opd(coords)
-       aperture: Array = self.aperture._aperture(coords)
-       params_dict["Wavefront"] = wavefront\
-           .add_opd(opd)\
-           .multiply_amplitude(aperture)
-       return params_dict
+    """
+    An abstract base cclass representing an `Aperture` defined
+    with a basis. The basis is a set of polynomials that are 
+    orthonormal over the surface of the aperture (usually). 
+    These can be used to represent any aberation on the surface
+    of the aperture. In general, the basis should only be defined 
+    on apertures that have a surface such as a mirror or phase 
+    plate ect. It isn't really possible to have aberrations on 
+    an opening. This rule may be broken to learn the atmosphere 
+    above a telescope but whether or not this is a good idea 
+    remains to be seen.
+ 
+    Parameters:
+    -----------
+    basis_funcs: list[callable]
+        A list of functions that represent the basis. The exact
+        polynomials that are represented will depend on the shape
+        of the aperture. 
+    aperture: ApertureLayer
+        The aperture on which the basis is defined. Must be a 
+        subcclass of the `Aperture` class.
+    coeffs: list[floats]
+        The coefficients of the basis terms. By learning the 
+        coefficients only the amount of time that is required 
+        for the learning process is significantly reduced.
+    """
+    basis_funcs: list
+    aperture: ApertureLayer
+    coeffs: Array
+ 
+ 
+    def __init__(self   : Layer, 
+            coeffs      : Array,
+            aperture    : ApertureLayer) -> Layer: 
+        """
+        Parameters:
+        -----------
+        noll_inds: List[int]
+            The noll indices are a scheme for indexing the Zernike
+            polynomials. Normally these polynomials have two 
+            indices but the noll indices prevent an order to 
+            these pairs. All basis can be indexed using the noll
+            indices based on `n` and `m`. 
+        aperture: ApertureLayer
+            The aperture that the basis is defined on. The shape 
+            of this aperture defines what the polynomials are. 
+        coeffs: Array
+            The coefficients of the basis vectors. 
+        """
+        assert not aperture.occulting
+        assert isinstance(aperture, dl.Aperture)
+        self.aperture = aperture
+        self.coeffs = np.asarray(coeffs).astype(float)
+ 
+ 
+    def _basis(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+ 
+        Returns:
+        --------
+        basis: Array
+            The basis vectors associated with the aperture. 
+            These vectors are stacked in a tensor that is,
+            `(nterms, npix, npix)`. Normally the basis is 
+            cropped to be just on the aperture however, this 
+            step is not necessary except for in visualisation. 
+            It has been removed to save some time in the 
+            calculations. 
+        """
+        coords: Array = self.aperture._normalised_coordinates(coords)
+        return np.stack([h(coords) for h in self.basis_funcs])
+ 
+ 
+    def _opd(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Calculate the optical path difference that is caused 
+        by the basis and the aberations that it represents. 
+ 
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+ 
+        Returns:
+        --------
+        opd: Array
+            The optical path difference associated with much of 
+            the path. 
+        """
+        basis: Array = self._basis(coords)
+        opd: Array = np.dot(basis.T, self.coeffs)
+        return opd
+ 
+ 
+    def __call__(self, params_dict: dict) -> dict:
+        """
+        Apply the aperture and the abberations to the wavefront.  
+ 
+        Parameters:
+        -----------
+        params: dict
+            A dictionary containing the key "Wavefront".
+ 
+        Returns:
+        --------
+        params: dict 
+            A dictionary containing the key "wavefront".
+        """
+        wavefront: object = params_dict["Wavefront"]
+        coords: Array = wavefront.pixel_positions()
+        opd: Array = self._opd(coords)
+        aperture: Array = self.aperture._aperture(coords)
+        params_dict["Wavefront"] = wavefront\
+            .add_opd(opd)\
+            .multiply_amplitude(aperture)
+        return params_dict
 
 
 class AberratedCircularAperture(AberratedAperture):
