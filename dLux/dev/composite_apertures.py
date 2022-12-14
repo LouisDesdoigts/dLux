@@ -5,7 +5,7 @@ import abc
 import typing
 
 
-from apertures import ApertureLayer
+from apertures import ApertureLayer, CircularAperture, test_plots_of_aps
 
 jax.config.update("jax_enable_x64", True)
 
@@ -161,6 +161,18 @@ class CompoundAperture(CompositeAperture):
         return np.stack([ap._aperture(coordinates) 
            for ap in self._apertures.values()]).prod(axis=0)
 
+comp_ap: ApertureLayer = CompoundAperture({
+    "pupil": CircularAperture(1.),
+    "obstruction": CircularAperture(.5, occulting=True),
+})
+
+# +
+test_plots_of_aps({
+    
+})
+
+
+# -
 
 class MultiAperture(CompositeAperture):
     """
