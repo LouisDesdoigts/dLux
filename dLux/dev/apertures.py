@@ -14,6 +14,23 @@ Wavefront = dLux.wavefronts.Wavefront
 
 
 two_pi: float = 2. * np.pi
+        
+ 
+def factorial(n : int) -> int:
+    """
+    Calculate n! in a jax friendly way. Note that n == 0 is not a 
+    safe case.  
+ 
+    Parameters
+    ----------
+    n : int
+        The integer to calculate the factorial of.
+ 
+    Returns
+    n! : int
+        The factorial of the integer
+    """
+    return jax.lax.exp(jax.lax.lgamma(n + 1.))
 
 
 def test_plots_of_aps(aps: dict) -> None:
@@ -2097,23 +2114,6 @@ class UniformSpider(Spider):
         struts = np.array([self._strut(angle, coords) for angle in angles]) - self.width_of_struts / 2.
         softened = self._soften(struts)
         return softened.prod(axis=0)
-        
- 
-def factorial(n : int) -> int:
-    """
-    Calculate n! in a jax friendly way. Note that n == 0 is not a 
-    safe case.  
- 
-    Parameters
-    ----------
-    n : int
-        The integer to calculate the factorial of.
- 
-    Returns
-    n! : int
-        The factorial of the integer
-    """
-    return jax.lax.exp(jax.lax.lgamma(n + 1.))
 
 
 def noll_index(j: int) -> tuple:
