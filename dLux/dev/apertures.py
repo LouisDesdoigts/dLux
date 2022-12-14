@@ -1531,7 +1531,7 @@ class HexagonalAperture(RegularPolygonalAperture):
 #return lines.prod(axis=0)
 
 
-class CompositeAperture(eqx.Module, abc.abc.ABC):
+class CompositeAperture(dLux.optics.OpticalLayer, abc.ABC):
    """
    Represents an aperture that contains more than one single 
    aperture. The smaller sub-apertures are stored in a dictionary
