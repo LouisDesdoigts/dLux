@@ -2100,16 +2100,16 @@ class UniformSpider(Spider):
         
  
 zernikes: list = [
-   lambda rho, theta: np.ones(rho.shape, dtype=float),
-   lambda rho, theta: 2. * rho * np.sin(theta),
-   lambda rho, theta: 2. * rho * np.cos(theta),
-   lambda rho, theta: np.sqrt(6.) * rho ** 2 * np.sin(2. * theta),
-   lambda rho, theta: np.sqrt(3.) * (2. * rho ** 2 - 1.),
-   lambda rho, theta: np.sqrt(6.) * rho ** 2 * np.cos(2. * theta),
-   lambda rho, theta: np.sqrt(8.) * rho ** 3 * np.sin(3. * theta),
-   lambda rho, theta: np.sqrt(8.) * (3. * rho ** 3 - 2. * rho) * np.sin(theta),
-   lambda rho, theta: np.sqrt(8.) * (3. * rho ** 3 - 2. * rho) * np.sin(theta),
-   lambda rho, theta: np.sqrt(8.) * rho ** 3 * np.cos(3. * theta)
+    lambda rho, theta: np.ones(rho.shape, dtype=float),
+    lambda rho, theta: 2. * rho * np.sin(theta),
+    lambda rho, theta: 2. * rho * np.cos(theta),
+    lambda rho, theta: np.sqrt(6.) * rho ** 2 * np.sin(2. * theta),
+    lambda rho, theta: np.sqrt(3.) * (2. * rho ** 2 - 1.),
+    lambda rho, theta: np.sqrt(6.) * rho ** 2 * np.cos(2. * theta),
+    lambda rho, theta: np.sqrt(8.) * rho ** 3 * np.sin(3. * theta),
+    lambda rho, theta: np.sqrt(8.) * (3. * rho ** 3 - 2. * rho) * np.sin(theta),
+    lambda rho, theta: np.sqrt(8.) * (3. * rho ** 3 - 2. * rho) * np.sin(theta),
+    lambda rho, theta: np.sqrt(8.) * rho ** 3 * np.cos(3. * theta)
 ]
 
 
