@@ -1746,22 +1746,6 @@ class CompoundAperture(CompositeAperture):
             rotation = rotation)
         
 
-    def _coordinates(self: ApertureLayer, coords: Array) -> Array:
-        x: float = coords[0]
-        y: float = coords[1] 
-            
-        rotation: float = self.rotation # Shorter reference.
-        new_x: float = np.cos(rotation) * x + np.sin(rotation) * y
-        new_y: float = -np.sin(rotation) * x + np.cos(rotation) * y
-        
-        coords: float = np.array([new_x, new_y])
-        coords: float = coords - self.centre[:, None, None]
-        coords: float = coords + np.transpose(coords, (0, 2, 1)) * self.strain[:, None, None]
-        coords: float = coords * self.compression[:, None, None]
-
-        return coords
-
-
     def _aperture(self, coords: Array) -> Array:
         """
         Evaluates the aperture. 
@@ -1874,6 +1858,8 @@ class MultiAperture(CompositeAperture):
         coords: float = self._coordinates(coords)
         aps: float = np.stack([ap._aperture(coords) for ap in self.apertures.values()])
         return aps.sum(axis=0)
+
+
 #mport jax 
 #mport abc 
 #mport jax.numpy as np
