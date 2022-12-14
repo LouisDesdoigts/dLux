@@ -1905,15 +1905,10 @@ class Spider(DynamicAperture, abc.ABC):
     rotation: float, radians
         The rotation of the aperture away from the positive 
         x-axis. 
-    rmax : float, meters
-       The infimum of the radii of the set of circles that fully 
-       enclose the hexagonal aperture. In other words the distance 
-       from the centre to one of the vertices. 
     """
     
     
     def __init__(self   : ApertureLayer, 
-            rmax        : float,
             centre      : Array = [0., 0.], 
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
