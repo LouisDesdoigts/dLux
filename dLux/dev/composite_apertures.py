@@ -288,40 +288,6 @@ class CompoundAperture(CompositeAperture):
         return np.stack([ap._aperture(coordinates) 
            for ap in self._apertures.values()]).prod(axis=0)
 
-grid: float = np.linspace(0., 1., 128) - .5
-coords: float = np.array(np.meshgrid(grid, grid))
-
-
-@jax.jit
-def rotate_v1(rotation: float, coords: float) -> float:
-    x: float = coords[0]
-    y: float = coords[1]
-    new_x: float = np.cos(rotation) * x + np.sin(rotation) * y
-    new_y: float = -np.sin(rotation) * x + np.cos(rotation) * y
-    coords: float = np.array([new_x, new_y])
-    return coords
-
-
-jax.make_jaxpr(rotate_v1)(np.pi / 2., coords)
-
-# %%timeit
-rotate_v1(np.pi / 2., coords)
-
-
-@jax.jit
-def rotate_v2(rotation: float, coords: float) -> float:
-    x_trans: float = np.array([np.cos(rotation), np.sin(rotation)])
-    y_trans: float = np.array([-np.sin(rotation), np.cos(rotation)])
-    new_x: float = (x_trans[:, None, None] * coords).sum(axis=0)
-    new_y: float = (y_trans[:, None, None] * coords).sum(axis=0)
-    coords: float = np.array([new_x, new_y])
-
-
-jax.make_jaxpr(rotate_v2)(np.pi / 2., coords)
-
-# %%timeit
-rotate_v2(np.pi / 2., coords)
-
 comp_ap: ApertureLayer = CompoundAperture(
     apertures = {
         "pupil": CircularAperture(1.),
