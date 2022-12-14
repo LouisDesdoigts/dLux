@@ -317,16 +317,6 @@ class CompoundAperture(CompositeAperture):
         return np.stack([ap._aperture(coordinates) 
            for ap in self._apertures.values()]).prod(axis=0)
 
-test: None = None
-
-test
-
-arr: float = np.arange(5)
-
-arr.shape
-
-arr[:, test, test].shape
-
 comp_ap: ApertureLayer = CompoundAperture(
     apertures = {
         "pupil": CircularAperture(1.),
