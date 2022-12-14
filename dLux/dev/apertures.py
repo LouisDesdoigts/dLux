@@ -2356,9 +2356,9 @@ def jth_hexike(j: int) -> callable:
     return _jth_hexike
 
 
-lass AberratedAperture(eqx.Module, abc.ABC):
+class AberratedAperture(eqx.Module, abc.ABC):
    """
-   An abstract base class representing an `Aperture` defined
+   An abstract base cclass representing an `Aperture` defined
    with a basis. The basis is a set of polynomials that are 
    orthonormal over the surface of the aperture (usually). 
    These can be used to represent any aberation on the surface
@@ -2377,7 +2377,7 @@ lass AberratedAperture(eqx.Module, abc.ABC):
        of the aperture. 
    aperture: ApertureLayer
        The aperture on which the basis is defined. Must be a 
-       subclass of the `Aperture` class.
+       subcclass of the `Aperture` class.
    coeffs: list[floats]
        The coefficients of the basis terms. By learning the 
        coefficients only the amount of time that is required 
@@ -2481,7 +2481,7 @@ lass AberratedAperture(eqx.Module, abc.ABC):
        return params_dict
 
 
-lass AberratedCircularAperture(AberratedAperture):
+class AberratedCircularAperture(AberratedAperture):
    """
    Parameters:
    -----------
@@ -2525,7 +2525,7 @@ lass AberratedCircularAperture(AberratedAperture):
        assert isinstance(aperture, dl.CircularAperture)
 
 
-lass AberratedHexagonalAperture(AberratedAperture):
+class AberratedHexagonalAperture(AberratedAperture):
    """
    Parameters:
    -----------
@@ -2570,14 +2570,14 @@ lass AberratedHexagonalAperture(AberratedAperture):
        assert isinstance(aperture, dl.HexagonalAperture)
 
 
-lass AberratedArbitraryAperture(AberratedAperture):
+class AberratedArbitraryAperture(AberratedAperture):
    """
-   This class is an alternative form of generating a 
+   This cclass is an alternative form of generating a 
    basis over an aperture of any shape. Although not 
    incredibly slow, it is slower than the other methods
    but does not have the shortcomings of numerical 
    instability. It is recomended that this method is 
-   used with the `StaticBasis` class.
+   used with the `StaticBasis` cclass.
 
    Parameters:
    -----------
@@ -2702,7 +2702,7 @@ lass AberratedArbitraryAperture(AberratedAperture):
        return self._orthonormalise(aperture, zernikes)
 
 
-lass MultiAberratedAperture(eqx.Module):
+class MultiAberratedAperture(eqx.Module):
    """
    This is for disjoint apertures that have multiple components. 
    For example, the James Webb Space Telescope and the Heimdellr
