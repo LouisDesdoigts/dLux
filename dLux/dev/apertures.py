@@ -1675,6 +1675,7 @@ class CompositeAperture(AbstractDynamicAperture):
         self.apertures[key] = value
 
 
+    # TODO: I should be able to remove this.
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         """
         Apply the aperture to an incoming wavefront.
@@ -2088,27 +2089,6 @@ class UniformSpider(Spider):
         return softened.prod(axis=0)
         
  
-    def __call__(self: ApertureLayer, params: dict) -> dict:
-        """
-        Apply the spider to a wavefront, as it propagates through the spider. 
- 
-        Parameters
-        ----------
-        params: dict
-            A dictionary of parameters that contains a "Wavefront" key. 
- 
-        Returns 
-        -------
-        params: dict 
-            The same dictionary with the "Wavefront" value updated.
-        """
-        aperture = self._aperture()
-        wavefront = params["Wavefront"]
-        wavefront = wavefront\
-            .set_amplitude(wavefront.get_amplitude() * aperture)\
-            .set_phase(wavefront.get_phase() * aperture)
-        params["Wavefront"] = wavefront
-        return params
 #mport jax 
 #mport abc 
 #mport jax.numpy as np
