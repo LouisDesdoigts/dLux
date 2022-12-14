@@ -310,23 +310,53 @@ class MultiAperture(CompositeAperture):
     not overlapping. We can add `CompoundAperture`s into 
     `MultiAperture` to create a combination of the two affects.
 
-    Attributes
-    ----------
-    apertures : dict(str, ApertureLayer)
+    Parameters:
+    -----------
+    apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
+    centre: float, meters
+        The x coordinate of the centre of the aperture.
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
     """
 
 
-    def __init__(self: ApertureLayer, apertures: dict) -> ApertureLayer:
+    def __init__(
+            self        : ApertureLayer,
+            apertures   : dict,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        apertures : dict
-           The aperture objects stored in a dictionary of type
-           {str : ApertureLayer} where the ApertureLayer is a subclass of the 
-           ApertureLayer.
+        Parameters:
+        -----------
+        apertures: dict(str, Aperture)
+           The apertures that make up the compound aperture. 
+        centre: float, meters
+            The x coordinate of the centre of the aperture.
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
         """
-        super().__init__(apertures)
+        super().__init__(apertures,
+            centre = centre,
+            strain = strain,
+            compression = compression,
+            rotation = rotation)
 
 
     def _aperture(self, coordinates: Array) -> Array:
