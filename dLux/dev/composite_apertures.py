@@ -379,14 +379,3 @@ class MultiAperture(CompositeAperture):
         return aps.sum(axis=0)
 
 
-    def to_list(self: ApertureLayer) -> list:
-        """
-        Returns:
-        --------
-        layers: list
-           A list of `Aperture` objects that comprise the 
-           `MultiAperture`.
-        """
-        return list(self.apertures.values())
-
-
