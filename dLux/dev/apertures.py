@@ -3065,3 +3065,36 @@ class MultiAperture(CompositeAperture):
 #   "Compr.": HexagonalAperture(1., compression=[.5, 1.]),
 #   "Rot.": HexagonalAperture(1., rotation=np.pi / 4.)
 #})
+
+
+test_plots_of_aps({
+    "Comp. Trans.": CompoundAperture(
+        centre = [.5, .5],
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": SquareAperture(.5, occulting=True),
+    }),
+    "Circ. Trans.": CompoundAperture(
+        apertures = {
+            "pupil": CircularAperture(1., centre=[.1, .1]),
+            "obstruction": SquareAperture(.5, occulting=True),
+    }),
+    "Comp. Rot.": CompoundAperture(
+        rotation = np.pi / 4.,
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": SquareAperture(.5, occulting=True),
+    }),
+    "Comp. Strain": CompoundAperture(
+        strain = [.05, .05],
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": SquareAperture(.5, occulting=True),
+    }),
+    "Comp. Compr.": CompoundAperture(
+        compression = [1., .5],
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": SquareAperture(.5, occulting=True),
+    })
+})
