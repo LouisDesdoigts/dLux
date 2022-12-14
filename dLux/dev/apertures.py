@@ -1508,7 +1508,10 @@ class HexagonalAperture(RegularPolygonalAperture):
             occulting = occulting,
             softening = softening)
 
-
+# TODO: See if this code can be used to fix the bugs that 
+#       I am encountering with the rotations. I believe 
+#       that it will and is probably faster. For now forge
+#       ahead. 
 #coords: Array = self._rotate(self._translate(coords))
 #theta: Array = np.linspace(0, 2 * np.pi, 6, endpoint=False).reshape((6, 1, 1)) + np.pi / 6.
 #rmax: float = np.sqrt(3.) / 2. * self.rmax
@@ -1528,101 +1531,101 @@ class HexagonalAperture(RegularPolygonalAperture):
 #return lines.prod(axis=0)
 
 
-#lass CompositeAperture(eqx.Module, abc.abc.ABC):
-#   """
-#   Represents an aperture that contains more than one single 
-#   aperture. The smaller sub-apertures are stored in a dictionary
-#   pytree and are so acessible by user defined name.
+class CompositeAperture(eqx.Module, abc.abc.ABC):
+   """
+   Represents an aperture that contains more than one single 
+   aperture. The smaller sub-apertures are stored in a dictionary
+   pytree and are so acessible by user defined name.
 
-#   Parameters:
-#   -----------
-#   apertures: dict(str, Aperture)
-#       The apertures that make up the compound aperture. 
-#   """
-#   apertures: dict
-
-
-#   def __init__(self: ApertureLayer, apertures: dict) -> ApertureLayer:
-#       """
-#       Parameters
-#       ----------
-#       apertures : dict
-#           The aperture objects stored in a dictionary of type
-#           {str : Aperture} where the Aperture is a subclass of the 
-#           Aperture.
-#       """
-#       self.apertures = apertures
+   Parameters:
+   -----------
+   apertures: dict(str, Aperture)
+       The apertures that make up the compound aperture. 
+   """
+   apertures: dict
 
 
-#   def __getitem__(self: ApertureLayer, key: str) -> ApertureLayer:
-#       """
-#       Get one of the apertures from the collection using a name 
-#       based lookup.
-#       
-#       Parameters:
-#       -----------
-#       key: str
-#           The name of the aperture to lookup. See the class doc
-#           string for more information.
-#       
-#       Returns:
-#       --------
-#       layer: Aperture
-#           The layer that was stored under the name `key`. 
-#       """
-#       return self.apertures[key]
+   def __init__(self: ApertureLayer, apertures: dict) -> ApertureLayer:
+       """
+       Parameters
+       ----------
+       apertures : dict
+           The aperture objects stored in a dictionary of type
+           {str : Aperture} where the Aperture is a subclass of the 
+           Aperture.
+       """
+       self.apertures = apertures
 
 
-#   def __setitem__(self, key: str, value: ApertureLayer) -> None:
-#       """
-#       Assign a new value to one of the aperture mirrors.
-#       Parameters
-#       ----------
-#       key : str
-#           The name of the segement to replace for example "B1-7".
-#       value : ApertureLayer
-#           The new value to assign to that segement.
-#       """
-#       self.apertures[key] = value
+   def __getitem__(self: ApertureLayer, key: str) -> ApertureLayer:
+       """
+       Get one of the apertures from the collection using a name 
+       based lookup.
+       
+       Parameters:
+       -----------
+       key: str
+           The name of the aperture to lookup. See the class doc
+           string for more information.
+       
+       Returns:
+       --------
+       layer: Aperture
+           The layer that was stored under the name `key`. 
+       """
+       return self.apertures[key]
 
 
-#   def __call__(self, wavefront: Wavefront) -> Wavefront:
-#       """
-#       Apply the aperture to an incoming wavefront.
-#       Parameters
-#       ----------
-#       parameters : dict
-#           A dictionary containing the parameters of the model. 
-#           The dictionary must satisfy `parameters.get("Wavefront")
-#           != None`. 
-#       Returns
-#       -------
-#       parameters : dict
-#           The parameter, parameters, with the "Wavefront"; key
-#           value updated. 
-#       """
-#       wavefront = wavefront.multiply_amplitude(
-#           self._aperture(
-#               wavefront.pixel_coordinates()))
-#       return parameters
+   def __setitem__(self, key: str, value: ApertureLayer) -> None:
+       """
+       Assign a new value to one of the aperture mirrors.
+       Parameters
+       ----------
+       key : str
+           The name of the segement to replace for example "B1-7".
+       value : ApertureLayer
+           The new value to assign to that segement.
+       """
+       self.apertures[key] = value
 
 
-#   @abc.abstractmethod
-#   def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
-#       """
-#       Evaluates the aperture. 
+   def __call__(self, wavefront: Wavefront) -> Wavefront:
+       """
+       Apply the aperture to an incoming wavefront.
+       Parameters
+       ----------
+       parameters : dict
+           A dictionary containing the parameters of the model. 
+           The dictionary must satisfy `parameters.get("Wavefront")
+           != None`. 
+       Returns
+       -------
+       parameters : dict
+           The parameter, parameters, with the "Wavefront"; key
+           value updated. 
+       """
+       wavefront = wavefront.multiply_amplitude(
+           self._aperture(
+               wavefront.pixel_coordinates()))
+       return parameters
 
-#       Parameters:
-#       -----------
-#       coordinates: Array, meters
-#           The coordinates of the paraxial array. 
 
-#       Returns 
-#       -------
-#       aperture : Matrix
-#           An aperture generated by combining all of the sub 
-#           apertures that were stored. 
-#       """
+   @abc.abstractmethod
+   def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
+       """
+       Evaluates the aperture. 
+
+       Parameters:
+       -----------
+       coordinates: Array, meters
+           The coordinates of the paraxial array. 
+
+       Returns 
+       -------
+       aperture : Matrix
+           An aperture generated by combining all of the sub 
+           apertures that were stored. 
+       """
 
 
 #lass CompoundAperture(eqx.Module):
