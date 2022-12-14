@@ -1880,10 +1880,13 @@ class MultiAperture(CompositeAperture):
         return aps.sum(axis=0)
 
 
-class Spider(dLux.apertures.Aperture, abc.ABC):
+class Spider(DynamicAperture, abc.ABC):
     """
     An abstraction on the concept of an optical spider for a space telescope.
-    These are the things that hold up the secondary mirrors. For example,
+    These are the things that hold up the secondary mirrors. 
+
+    Parameters:
+    -----------
     """
     def __init__(self, x_offset: float, y_offset: float, softening: bool):
         super().__init__(x_offset, y_offset, False, softening)
