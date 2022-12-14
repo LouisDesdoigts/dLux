@@ -63,12 +63,11 @@ class CompositeAperture(ApertureLayer):
     
 
     def __init__(self   : ApertureLayer, 
+            apertures   : dict,
             centre      : Array = [0., 0.], 
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
-            rotation    : Array = 0.,
-            occulting   : bool = False, 
-            softening   : bool = False) -> ApertureLayer:
+            rotation    : Array = 0.) -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
@@ -103,8 +102,6 @@ class CompositeAperture(ApertureLayer):
         self.strain = np.asarray(strain).astype(float)
         self.compression = np.asarray(compression).astype(float)
         self.rotation = np.asarray(rotation).astype(float)
-        self.softening = 1. if softening else 1e32
-        self.occulting = bool(occulting)
         self.apertures = apertures
 
 
@@ -178,8 +175,6 @@ class CompositeAperture(ApertureLayer):
            apertures that were stored. 
         """
 
-help(DynamicAperture)
-
 
 class CompoundAperture(CompositeAperture):
     """
@@ -192,22 +187,73 @@ class CompoundAperture(CompositeAperture):
     class should not be used to represent multiple apertures 
     that are not connected. Doing so will result in a zero 
     output.
+    
+        
+    This class should be used if you want to learn the parameters
+    of the entire aperture without learning the individual components.
+    This is often going to be useful for pupils with spiders since 
+    the connection implies that changes to once are likely to 
+    affect one another.
 
     Parameters:
     -----------
-    apertures: dict(str, ApertureLayer)
+    apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
+    centre: float, meters
+        The x coordinate of the centre of the aperture.
+    occulting: bool
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside.
+        A non-occulting aperture is one inside and zero 
+        outside. 
+    softening: bool 
+        True is the aperture is soft edged. This means that 
+        there is a layer of pixels that is non-binary. The 
+        way that this is implemented (due to the limitations)
+        of `jax` is via a `np.tanh` function. This is good for 
+        derivatives. Use this feature only if encountering 
+        errors when using hard edged apertures. 
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
     """
 
 
     def __init__(self: ApertureLayer, apertures: dict) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        apertures : dict
-           The aperture objects stored in a dictionary of type
-           {str : ApertureLayer} where the ApertureLayer is a subclass of the 
-           ApertureLayer.
+        Parameters:
+        -----------
+        apertures: dict(str, Aperture)
+           The apertures that make up the compound aperture. 
+        centre: float, meters
+            The x coordinate of the centre of the aperture.
+        occulting: bool
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside.
+            A non-occulting aperture is one inside and zero 
+            outside. 
+        softening: bool 
+            True is the aperture is soft edged. This means that 
+            there is a layer of pixels that is non-binary. The 
+            way that this is implemented (due to the limitations)
+            of `jax` is via a `np.tanh` function. This is good for 
+            derivatives. Use this feature only if encountering 
+            errors when using hard edged apertures. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
         """
         super().__init__(apertures)
 
@@ -230,10 +276,11 @@ class CompoundAperture(CompositeAperture):
         return np.stack([ap._aperture(coordinates) 
            for ap in self._apertures.values()]).prod(axis=0)
 
-comp_ap: ApertureLayer = CompoundAperture({
-    "pupil": CircularAperture(1.),
-    "obstruction": CircularAperture(.5, occulting=True),
-})
+comp_ap: ApertureLayer = CompoundAperture(
+    apertures = {
+        "pupil": CircularAperture(1.),
+        "obstruction": CircularAperture(.5, occulting=True),
+    })
 
 # +
 test_plots_of_aps({
