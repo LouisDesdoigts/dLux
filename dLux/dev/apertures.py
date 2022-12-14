@@ -2056,12 +2056,11 @@ class UniformSpider(Spider):
         self.width_of_struts = np.asarray(strut_width).astype(float)
  
  
-    def _metric(self, coordinates: Array) -> Array:
-        coordinates = self._translate(coordinates)
-        angles = np.linspace(0, 2 * np.pi, self.number_of_struts, 
-            endpoint=False)
+    def _metric(self: ApertureLayer, coords: Array) -> Array:
+        coords = self._coordinates(coords)
+        angles = np.linspace(0, 2 * np.pi, self.number_of_struts, endpoint=False)
         angles += self.rotation
-        struts = np.array([self._strut(angle, coordinates) for angle in angles]) - self.width_of_struts / 2.
+        struts = np.array([self._strut(angle, coords) for angle in angles]) - self.width_of_struts / 2.
         softened = self._soften(struts)
         return softened.prod(axis=0)
         
