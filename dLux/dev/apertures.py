@@ -2113,7 +2113,7 @@ zernikes: list = [
 ]
 
 
-ef factorial(n : int) -> int:
+def factorial(n : int) -> int:
    """
    Calculate n! in a jax friendly way. Note that n == 0 is not a 
    safe case.  
@@ -2130,7 +2130,7 @@ ef factorial(n : int) -> int:
    return jax.lax.exp(jax.lax.lgamma(n + 1.))
 
 
-ef noll_index(j: int) -> tuple:
+def noll_index(j: int) -> tuple:
    """
    Decode the jth noll index of the zernike polynomials. This 
    arrises because the zernike polynomials are parametrised by 
@@ -2221,7 +2221,7 @@ ef noll_index(j: int) -> tuple:
    return n, m
 
 
-ef jth_radial_zernike(n: int, m: int) -> list:
+def jth_radial_zernike(n: int, m: int) -> list:
    """
    The radial zernike polynomial.
 
@@ -2257,7 +2257,7 @@ ef jth_radial_zernike(n: int, m: int) -> list:
    return _jth_radial_zernike
 
 
-ef jth_polar_zernike(n: int, m: int) -> list:
+def jth_polar_zernike(n: int, m: int) -> list:
    """
    Generates a function representing the polar component 
    of the jth Zernike polynomial.
@@ -2293,7 +2293,7 @@ ef jth_polar_zernike(n: int, m: int) -> list:
    return _jth_polar_zernike  
 
 
-ef jth_zernike(j: int) -> list:
+def jth_zernike(j: int) -> list:
    """
    Calculate the zernike basis on a square pixel grid. 
 
@@ -2329,7 +2329,7 @@ ef jth_zernike(j: int) -> list:
 #So the current problem is that I need to find some way of passing 
 #rmax into the hexike dynamically (do I). Haha just worked it out,
 #I normalise the corrdinates first hence I don't need rmax. 
-ef jth_hexike(j: int) -> callable:
+def jth_hexike(j: int) -> callable:
    """
    The jth Hexike as a function. 
 
