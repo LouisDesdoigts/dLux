@@ -273,48 +273,30 @@ test_plots_of_aps({
         centre = [.5, .5],
         apertures = {
             "pupil": CircularAperture(1.),
-            "obstruction": CircularAperture(.5, occulting=True),
+            "obstruction": SquareAperture(.5, occulting=True),
     }),
     "Circ. Trans.": CompoundAperture(
         apertures = {
             "pupil": CircularAperture(1., centre=[.1, .1]),
-            "obstruction": CircularAperture(.5, occulting=True),
+            "obstruction": SquareAperture(.5, occulting=True),
     }),
-    "": CompoundAperture(
-        centre = [.5, .5],
+    "Comp. Rot.": CompoundAperture(
+        rotation = np.pi / 4.,
         apertures = {
             "pupil": CircularAperture(1.),
-            "obstruction": CircularAperture(.5, occulting=True),
+            "obstruction": SquareAperture(.5, occulting=True),
     }),
-    "Trans. x": CompoundAperture(
-        centre = [.5, 0.],
+    "Comp. Strain": CompoundAperture(
+        strain = [.05, .05],
         apertures = {
             "pupil": CircularAperture(1.),
-            "obstruction": CircularAperture(.5, occulting=True),
-    })
-    "Trans.": CompoundAperture(
-        centre = [.5, .5],
-        apertures = {
-            "pupil": CircularAperture(1.),
-            "obstruction": CircularAperture(.5, occulting=True),
+            "obstruction": SquareAperture(.5, occulting=True),
     }),
-    "Trans. x": CompoundAperture(
-        centre = [.5, 0.],
+    "Comp. Compr.": CompoundAperture(
+        compression = [1., .5],
         apertures = {
             "pupil": CircularAperture(1.),
-            "obstruction": CircularAperture(.5, occulting=True),
-    })
-    "Trans.": CompoundAperture(
-        centre = [.5, .5],
-        apertures = {
-            "pupil": CircularAperture(1.),
-            "obstruction": CircularAperture(.5, occulting=True),
-    }),
-    "Trans. x": CompoundAperture(
-        centre = [.5, 0.],
-        apertures = {
-            "pupil": CircularAperture(1.),
-            "obstruction": CircularAperture(.5, occulting=True),
+            "obstruction": SquareAperture(.5, occulting=True),
     })
 })
 
