@@ -31,18 +31,6 @@ class CompositeAperture(ApertureLayer):
        The apertures that make up the compound aperture. 
     centre: float, meters
         The x coordinate of the centre of the aperture.
-    occulting: bool
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside.
-        A non-occulting aperture is one inside and zero 
-        outside. 
-    softening: bool 
-        True is the aperture is soft edged. This means that 
-        there is a layer of pixels that is non-binary. The 
-        way that this is implemented (due to the limitations)
-        of `jax` is via a `np.tanh` function. This is good for 
-        derivatives. Use this feature only if encountering 
-        errors when using hard edged apertures. 
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -53,8 +41,6 @@ class CompositeAperture(ApertureLayer):
         The rotation of the aperture away from the positive 
         x-axis. 
     """
-    occulting: bool 
-    softening: Array
     centre: Array
     strain: Array
     compression: Array
@@ -201,18 +187,6 @@ class CompoundAperture(CompositeAperture):
        The apertures that make up the compound aperture. 
     centre: float, meters
         The x coordinate of the centre of the aperture.
-    occulting: bool
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside.
-        A non-occulting aperture is one inside and zero 
-        outside. 
-    softening: bool 
-        True is the aperture is soft edged. This means that 
-        there is a layer of pixels that is non-binary. The 
-        way that this is implemented (due to the limitations)
-        of `jax` is via a `np.tanh` function. This is good for 
-        derivatives. Use this feature only if encountering 
-        errors when using hard edged apertures. 
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -225,7 +199,13 @@ class CompoundAperture(CompositeAperture):
     """
 
 
-    def __init__(self: ApertureLayer, apertures: dict) -> ApertureLayer:
+    def __init__(
+            self        : ApertureLayer,
+            apertures   : dict,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.) -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -233,18 +213,6 @@ class CompoundAperture(CompositeAperture):
            The apertures that make up the compound aperture. 
         centre: float, meters
             The x coordinate of the centre of the aperture.
-        occulting: bool
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside.
-            A non-occulting aperture is one inside and zero 
-            outside. 
-        softening: bool 
-            True is the aperture is soft edged. This means that 
-            there is a layer of pixels that is non-binary. The 
-            way that this is implemented (due to the limitations)
-            of `jax` is via a `np.tanh` function. This is good for 
-            derivatives. Use this feature only if encountering 
-            errors when using hard edged apertures. 
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
@@ -255,7 +223,11 @@ class CompoundAperture(CompositeAperture):
             The rotation of the aperture away from the positive 
             x-axis. 
         """
-        super().__init__(apertures)
+        super().__init__(apertures,
+            centre = centre,
+            strain = strain,
+            compression = compression,
+            rotation = rotation)
 
 
     def _aperture(self, coordinates: Array) -> Array:
