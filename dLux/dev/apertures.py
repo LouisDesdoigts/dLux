@@ -2703,121 +2703,121 @@ class AberratedArbitraryAperture(AberratedAperture):
 
 
 class MultiAberratedAperture(eqx.Module):
-   """
-   This is for disjoint apertures that have multiple components. 
-   For example, the James Webb Space Telescope and the Heimdellr
-   array. 
-
-   Parameters:
-   -----------
-   aperture: MutliAperture
-       The aperture over which to generate each of the basis. 
-   bases: List[Layer]
-       A list of `AberratedAperture` objects.
-   """
-   aperture: Layer
-   bases: List[Layer]
-
-
-   def __init__(self   : Layer, 
-           noll_inds   : Array, 
-           coeffs      : Array,
-           aperture    : Layer) -> Layer: 
-       """
-       Parameters:
-       -----------
-       aperture: Layer
-           A `MultiAperture` over which the basis will be generated. 
-           Each `Aperture` in the `MultiAperture` will be bequeathed
-           it's own basis. 
-       coeffs: Array
-           The coefficients of the basis terms in each aperture.
-           The coefficients should be a matrix that is 
-           `(nterms, napps)`.
-       noll_inds: Array 
-           The noll indices of the zernikes that are to be mapped 
-           over the aperture.
-       """
-       bases = []
-       for ap, coeff in zip(aperture.to_list(), coeffs):
-           if isinstance(ap, dl.HexagonalAperture):
-               bases.append(AberratedHexagonalAperture(noll_inds, coeff, ap))
-           elif isinstance(ap, dl.CircularAperture):
-               bases.append(AberratedCircularAperture(noll_inds, coeff, ap))
-           else:
-               bases.append(AberratedArbitraryAperture(noll_inds, coeff, ap))
-
-       self.aperture = aperture
-       self.bases = bases
-       assert isinstance(self.aperture, dl.MultiAperture)
-
-
-   def _basis(self: ApertureLayer, coords: Array) -> Array:
-       """
-       Parameters:
-       -----------
-       coords: Array, meters
-           The paraxial coordinate system on which to generate
-           the array. 
-
-       Returns:
-       --------
-       basis: Array
-           The basis vectors associated with the aperture. 
-           These vectors are stacked in a tensor that is,
-           `(nterms, npix, npix)`. Normally the basis is 
-           cropped to be just on the aperture however, this 
-           step is not necessary except for in visualisation. 
-           It has been removed to save some time in the 
-           calculations. 
-       """
-       return np.stack([b._basis(coords) for b in self.bases])
-
-
-   def _opd(self: ApertureLayer, coords: Array) -> Array:
-       """
-       Calculate the optical path difference that is caused 
-       by the basis and the aberations that it represents. 
-
-       Parameters:
-       -----------
-       coords: Array, meters
-           The paraxial coordinate system on which to generate
-           the array. 
-
-       Returns:
-       --------
-       opd: Array
-           The optical path difference associated with much of 
-           the path. 
-       """
-       basis: Array = self._basis(coords)
-       opd: Array = np.dot(basis.T, self.coeffs)
-       return opd
-
-
-   def __call__(self, params_dict: dict) -> dict:
-       """
-       Apply the aperture and the abberations to the wavefront.  
-
-       Parameters:
-       -----------
-       params: dict
-           A dictionary containing the key "Wavefront".
-
-       Returns:
-       --------
-       params: dict 
-           A dictionary containing the key "wavefront".
-       """
-       wavefront: object = params_dict["Wavefront"]
-       coords: Array = wavefront.pixel_positions()
-       opd: Array = self._opd(coords)
-       aperture: Array = self.aperture._aperture(coords)
-       params_dict["Wavefront"] = wavefront\
-           .add_opd(opd)\
-           .multiply_amplitude(aperture)
-       return params_dict
+    """
+    This is for disjoint apertures that have multiple components. 
+    For example, the James Webb Space Telescope and the Heimdellr
+    array. 
+ 
+    Parameters:
+    -----------
+    aperture: MutliAperture
+        The aperture over which to generate each of the basis. 
+    bases: List[Layer]
+        A list of `AberratedAperture` objects.
+    """
+    aperture: Layer
+    bases: List[Layer]
+ 
+ 
+    def __init__(self   : Layer, 
+            noll_inds   : Array, 
+            coeffs      : Array,
+            aperture    : Layer) -> Layer: 
+        """
+        Parameters:
+        -----------
+        aperture: Layer
+            A `MultiAperture` over which the basis will be generated. 
+            Each `Aperture` in the `MultiAperture` will be bequeathed
+            it's own basis. 
+        coeffs: Array
+            The coefficients of the basis terms in each aperture.
+            The coefficients should be a matrix that is 
+            `(nterms, napps)`.
+        noll_inds: Array 
+            The noll indices of the zernikes that are to be mapped 
+            over the aperture.
+        """
+        bases = []
+        for ap, coeff in zip(aperture.to_list(), coeffs):
+            if isinstance(ap, dl.HexagonalAperture):
+                bases.append(AberratedHexagonalAperture(noll_inds, coeff, ap))
+            elif isinstance(ap, dl.CircularAperture):
+                bases.append(AberratedCircularAperture(noll_inds, coeff, ap))
+            else:
+                bases.append(AberratedArbitraryAperture(noll_inds, coeff, ap))
+ 
+        self.aperture = aperture
+        self.bases = bases
+        assert isinstance(self.aperture, dl.MultiAperture)
+ 
+ 
+    def _basis(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+ 
+        Returns:
+        --------
+        basis: Array
+            The basis vectors associated with the aperture. 
+            These vectors are stacked in a tensor that is,
+            `(nterms, npix, npix)`. Normally the basis is 
+            cropped to be just on the aperture however, this 
+            step is not necessary except for in visualisation. 
+            It has been removed to save some time in the 
+            calculations. 
+        """
+        return np.stack([b._basis(coords) for b in self.bases])
+ 
+ 
+    def _opd(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Calculate the optical path difference that is caused 
+        by the basis and the aberations that it represents. 
+ 
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system on which to generate
+            the array. 
+ 
+        Returns:
+        --------
+        opd: Array
+            The optical path difference associated with much of 
+            the path. 
+        """
+        basis: Array = self._basis(coords)
+        opd: Array = np.dot(basis.T, self.coeffs)
+        return opd
+ 
+ 
+    def __call__(self, params_dict: dict) -> dict:
+        """
+        Apply the aperture and the abberations to the wavefront.  
+ 
+        Parameters:
+        -----------
+        params: dict
+            A dictionary containing the key "Wavefront".
+ 
+        Returns:
+        --------
+        params: dict 
+            A dictionary containing the key "wavefront".
+        """
+        wavefront: object = params_dict["Wavefront"]
+        coords: Array = wavefront.pixel_positions()
+        opd: Array = self._opd(coords)
+        aperture: Array = self.aperture._aperture(coords)
+        params_dict["Wavefront"] = wavefront\
+            .add_opd(opd)\
+            .multiply_amplitude(aperture)
+        return params_dict
 
 
 ##TODO: I should pre-calculate the _aperture in the init for the 
