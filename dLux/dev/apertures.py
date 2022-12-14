@@ -1912,8 +1912,7 @@ class Spider(DynamicAperture, abc.ABC):
             centre      : Array = [0., 0.], 
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
-            rotation    : Array = 0.,
-            occulting   : bool = False, 
+            rotation    : Array = 0., 
             softening   : bool = False) -> ApertureLayer:
         """
         Parameters
@@ -1938,7 +1937,6 @@ class Spider(DynamicAperture, abc.ABC):
             x-axis. 
         """
         super().__init__(
-            rmax = rmax,
             centre = centre, 
             strain = strain, 
             compression = compression,
@@ -1987,47 +1985,75 @@ class UniformSpider(Spider):
  
     Parameters
     ----------
+    centre: float, meters
+        The centre of the coordinate system along the x-axis.
+    softening: bool = False
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
+    strain: Array
+        Linear stretching of the x and y axis representing a 
+        strain of the coordinate system.
+    compression: Array 
+        The x and y compression of the coordinate system. This 
+        is a constant. 
+    rotation: float, radians
+        The rotation of the aperture away from the positive 
+        x-axis. 
     number_of_struts: int 
         The number of struts to equally space around the circle. This is not 
         a differentiable parameter. 
     width_of_struts: float, meters
         The width of each strut. 
-    rotation: float, radians
-        A global rotation to apply to the entire spider. 
     """
     number_of_struts: int
     width_of_struts: float
-    rotation: float
- 
- 
-    def __init__(
-            self: ApertureLayer,
-            x_offset: float,
-            y_offset: float, 
-            number_of_struts: int, 
-            width_of_struts: float, 
-            rotation: float,
-            softening: bool) -> Layer:
+
+
+    def __init__(self   : ApertureLayer, 
+            num_struts  : int,
+            strut_width : float,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> ApertureLayer:
         """
         Parameters
         ----------
-        radius_of_spider: float, meters
-            The physical width of the spider. For the moment it is assumed to 
-            be embedded within a circular aperture.         
-        center_of_spicer: Array, meters 
-            The [x, y] center of the spider.
+        centre: float, meters
+            The centre of the coordinate system along the x-axis.
+        softening: bool = False
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
         number_of_struts: int 
             The number of struts to equally space around the circle. This is not 
             a differentiable parameter. 
         width_of_struts: float, meters
             The width of each strut. 
-        rotation: float, radians
-            A global rotation to apply to the entire spider.
         """ 
-        super().__init__(x_offset, y_offset, softening)
-        self.number_of_struts = int(number_of_struts)
-        self.rotation = np.asarray(rotation).astype(float)
-        self.width_of_struts = np.asarray(width_of_struts).astype(float)
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            compression = compression,
+            rotation = rotation,
+            softening = softening)
+        self.number_of_struts = int(num_struts)
+        self.width_of_struts = np.asarray(strut_width).astype(float)
  
  
     def _metric(self, coordinates: Array) -> Array:
