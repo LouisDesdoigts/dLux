@@ -2467,56 +2467,6 @@ class AberratedAperture(DynamicAperture):
         return params_dict
 
 
-class AberratedArbitraryAperture(AberratedAperture):
-    """
-    This cclass is an alternative form of generating a 
-    basis over an aperture of any shape. Although not 
-    incredibly slow, it is slower than the other methods
-    but does not have the shortcomings of numerical 
-    instability. It is recomended that this method is 
-    used with the `StaticBasis` cclass.
- 
-    Parameters:
-    -----------
-    basis_funcs: list
-        A list of `callable` functions that can be used 
-        to produce the basis. 
-    coeffs: Array
-        The coefficients of the Hexike terms. 
-    aperture: Layer
-        Must be an instance of `HexagonalAperture`. This 
-        is applied alongside the basis. 
-    """
-    nterms: int
- 
- 
-    def __init__(self   : Layer, 
-            noll_inds   : list, 
-            coeffs      : list, 
-            aperture    : HexagonalAperture):
-        """
-        Parameters:
-        -----------
-        noll_inds: Array 
-            The noll indices of the zernikes that are to be mapped 
-            over the aperture.
-        coeffs: Array 
-            The coefficients associated with the zernikes. These 
-            should be ordered by the noll index of the zernike 
-            that they refer to.
-        aperture: HexagonalAperture
-            A `HexagonalAperture` within which the aberrations are 
-            being studied. 
-        """
- 
-        self.basis_funcs = [jth_zernike(j) for j in noll_inds]
-        super().__init__(coeffs, aperture)
-        self.nterms = len(noll_inds)
- 
-        assert len(noll_inds) == len(coeffs)
-        assert isinstance(aperture, dl.Aperture)
- 
- 
     def _orthonormalise(self: ApertureLayer, 
             aperture: Array, 
             zernikes: Array) -> Array:
