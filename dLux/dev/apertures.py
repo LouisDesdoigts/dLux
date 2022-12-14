@@ -3098,3 +3098,41 @@ test_plots_of_aps({
             "obstruction": SquareAperture(.5, occulting=True),
     })
 })
+
+
+test_plots_of_aps({
+    "Comp. Trans.": MultiAperture(
+        centre = [.5, .5],
+        apertures = {
+            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
+            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
+        }
+    ),
+    "Circ. Trans.": MultiAperture(
+        apertures = {
+            "pupil": CircularAperture(.5, centre=[-.5, .5]),
+            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
+        }
+    ),
+    "Comp. Rot.": MultiAperture(
+        rotation = np.pi / 4.,
+        apertures = {
+            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
+            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
+        }
+    ),
+    "Comp. Strain": MultiAperture(
+        strain = [.05, .05],
+        apertures = {
+            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
+            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
+        }
+    ),
+    "Comp. Compr.": MultiAperture(
+        compression = [1., .5],
+        apertures = {
+            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
+            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
+        }
+    )
+})
