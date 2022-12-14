@@ -1507,17 +1507,6 @@ class HexagonalAperture(DynamicAperture):
         self.rmax = np.asarray(rmax).astype(float)
 
 
-    def get_rmax(self: ApertureLayer) -> float:
-        """
-        Returns
-        -------
-        max_radius : float, meters
-            The distance from the centre of the hexagon to one of 
-            the vertices.
-        """
-        return self.rmax
- 
- 
     def _extent(self: ApertureLayer) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
