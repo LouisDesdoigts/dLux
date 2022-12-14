@@ -281,13 +281,21 @@ aper: float = comp_ap._aperture(coords)
 
 plt.imshow(aper)
 
-# +
 test_plots_of_aps({
-    
+    "Trans.": CompoundAperture(
+        centre = [.5, .5],
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": CircularAperture(.5, occulting=True),
+    }),
+    "Trans. x": CompoundAperture(
+        centre = [.5, 0.],
+        apertures = {
+            "pupil": CircularAperture(1.),
+            "obstruction": CircularAperture(.5, occulting=True),
+    })
 })
 
-
-# -
 
 class MultiAperture(CompositeAperture):
     """
