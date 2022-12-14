@@ -398,35 +398,35 @@ test_plots_of_aps({
     "Comp. Trans.": MultiAperture(
         centre = [.5, .5],
         apertures = {
-            "pupil": CircularAperture(1., centre=[-.5, 0.]),
-            "obstruction": CircularAperture(1., centre=[.5, 0.]),
+            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
+            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
         }
     ),
-    "Circ. Trans.": CompoundAperture(
+    "Circ. Trans.": MultiAperture(
         apertures = {
-            "pupil": CircularAperture(1., centre=[-.5, .5]),
-            "obstruction": CircularAperture(1., centre=[.5, 0.]),
+            "pupil": CircularAperture(.5, centre=[-.5, .5]),
+            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
         }
     ),
-    "Comp. Rot.": CompoundAperture(
+    "Comp. Rot.": MultiAperture(
         rotation = np.pi / 4.,
         apertures = {
-            "pupil": CircularAperture(1., centre=[-.5, 0.]),
-            "obstruction": CircularAperture(1., centre=[.5, 0.]),
+            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
+            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
         }
     ),
-    "Comp. Strain": CompoundAperture(
+    "Comp. Strain": MultiAperture(
         strain = [.05, .05],
         apertures = {
-            "pupil": CircularAperture(1., centre=[-.5, 0.]),
-            "obstruction": CircularAperture(1., centre=[.5, 0.]),
+            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
+            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
         }
     ),
-    "Comp. Compr.": CompoundAperture(
+    "Comp. Compr.": MultiAperture(
         compression = [1., .5],
         apertures = {
-            "pupil": CircularAperture(1., centre=[-.5, 0.]),
-            "obstruction": CircularAperture(1., centre=[.5, 0.]),
+            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
+            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
         }
     )
 })
