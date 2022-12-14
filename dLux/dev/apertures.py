@@ -2368,14 +2368,16 @@ class AberratedAperture(ApertureLayer):
         return _jth_zernike 
 
 
-    def jth_polike(j: int) -> callable:
+    def jth_polike(self: ApertureLayer, j: int, n: int) -> callable:
         """
-        The jth Hexike as a function. 
+        The jth polike as a function. 
      
         Parameters:
         -----------
         j: int
-            The noll index of the requested zernike. 
+            The noll index of the requested zernike.
+        n: int
+            The number of sides on the regular polygon.
      
         Returns:
         --------
@@ -2386,13 +2388,13 @@ class AberratedAperture(ApertureLayer):
         _jth_zernike = jth_zernike(j)
      
         def _jth_hexike(coords: Array) -> Array:
-            polar = dl.utils.cartesian_to_polar(coords)
-            rho, phi = polar[0], polar[1]
-            phi = phi + np.pi / 2.
-            alpha = np.pi / 6.
-            wedge = np.floor((phi + alpha) / (2 * alpha))
-            u_alpha = phi - wedge * (2 * alpha)
-            r_alpha = np.cos(alpha) / np.cos(u_alpha)
+            polar: float = dl.utils.cartesian_to_polar(coords)
+            rho: float = polar[0]
+            phi: float = polar[1] + np.pi / 2. # TODO:
+            alpha: float = np.pi / n
+            wedge: float = np.floor((phi + alpha) / (2. * alpha))
+            u_alpha: float = phi - wedge * (2 * alpha)
+            r_alpha: float = np.cos(alpha) / np.cos(u_alpha)
             return 1 / r_alpha * _jth_zernike(coords / r_alpha)
      
         return _jth_hexike
