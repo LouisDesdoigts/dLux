@@ -2495,13 +2495,11 @@ class AberratedAperture(ApertureLayer):
         is_reg_pol: bool = isinstance(self.aperture, RegularPolygonalAperture)
         is_circ: bool = isinstance(self.aperture, CircularAperture)
 
-        print(is_reg_pol)
+        if is_circ or is_reg_pol:
+            return ikes
 
-        if not is_reg_pol: 
-            if not is_circ:
-                print("Othornormalising")
-                aperture: float = self.aperture._aperture(coords)
-                ikes: float = self._orthonormalise(aperture, ikes)
+        aperture: float = self.aperture._aperture(coords)
+        ikes: float = self._orthonormalise(aperture, ikes)
 
         return ikes 
  
