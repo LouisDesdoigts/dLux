@@ -2658,35 +2658,33 @@ class MultiAberratedAperture(eqx.Module):
         return params_dict
 
 
-#ixels = 128
-#terms = 6
+pixels: float = 128
+nterms: float = 6
+coords: float = dl.utils.get_pixel_coordinates(pixels, 3. / pixels)
 
-#oordinates = dl.utils.get_pixel_coordinates(pixels, 3. / pixels)
+num_ikes: int = 10
+num_basis: int = 3
+noll_inds: list = [i + 1 for i in range(num_ikes)]
 
-#um_ikes = 10
-#um_basis = 3
-#oll_inds = [i + 1 for i in range(num_ikes)]
+coeffs: float = np.ones((num_ikes,), float)
+aper: ApertureLayer = CircularAperture(1.)
+basis: ApertureLayer = AberratedCircularAperture(noll_inds, coeffs, aper)
 
-##Testing the AberratedCircularAperture specifically
-##oeffs = np.ones((num_ikes,), float)
-##per = dl.CircularAperture(1., 0., .5, False, False)
-##asis = AberratedCircularAperture(noll_inds, coeffs, aper)
-#
-##basis = basis._basis(coordinates)
-##aper = aper._aperture(coordinates)
-#
-##ig, axes = plt.subplots(2, 5)
-##or i in range(num_ikes):
-##   col = i % (num_ikes // 2)
-##   row = i // (num_ikes // 2)
-#
-##   axes[row][col].set_title(noll_inds[i])
-##   _map = axes[row][col].imshow(_basis[i] * _aper)
-##   axes[row][col].set_xticks([])
-##   axes[row][col].set_yticks([])
-##   axes[row][col].axis("off")
-##   fig.colorbar(_map, ax=axes[row][col])
-##lt.show()
+basis: float = basis._basis(coords)
+aper: float = aper._aperture(coords)
+
+fig, axes = plt.subplots(2, 5)
+for i in range(num_ikes):
+    col = i % (num_ikes // 2)
+    row = i // (num_ikes // 2)
+ 
+    axes[row][col].set_title(noll_inds[i])
+    _map = axes[row][col].imshow(_basis[i] * _aper)
+    axes[row][col].set_xticks([])
+    axes[row][col].set_yticks([])
+    axes[row][col].axis("off")
+    fig.colorbar(_map, ax=axes[row][col])
+plt.show()
 
 ##So now I need to test the MultiAberratedAperture 
 #ps = {
