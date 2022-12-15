@@ -2585,7 +2585,18 @@ class AberratedAperture(ApertureLayer):
 
 class StaticAperture(ApertureLayer):
     """
+    This layer is designed to increase the speed, when parameters 
+    are not getting learned. It pre-calculates the aperture array 
+    which is stored and then simply applies it. 
+
+    Parameters:
+    -----------
+    aperture: Array
+        The aperture represented as an array.
     """
+    aperture: Array
+    
+
 ################################## tests ######################################
 #test_plots_of_aps({
 #    "Occ. Soft": RectangularAperture(1., .5, occulting=True, softening=True),
