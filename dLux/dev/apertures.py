@@ -137,7 +137,7 @@ def test_plots_of_stat_aber_aps(aber_aps: dict):
         basis: float = aber_aps[aber_ap].basis
         aper: float = aber_aps[aber_ap].aperture
         
-        num: int = aper.shape[0]
+        num: int = basis.shape[0]
         axes = subfigs[i].subplots(1, num)
 
         for j in range(num):
@@ -2706,6 +2706,7 @@ class StaticAberratedAperture(ApertureLayer):
         The basis represented as an array.
     """
     aperture: Array
+    basis: Array
 
 
     def __init__(
