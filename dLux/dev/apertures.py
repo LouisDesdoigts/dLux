@@ -95,8 +95,8 @@ def test_plots_of_aber_aps(aber_aps: dict):
     plt.show()
 
 
-def test_plots_of_static_aps(aps: dict):
-    length: int = len(aber_aps.keys())
+def test_plots_of_stat_aps(aps: dict):
+    length: int = len(aps.keys())
     fig: object = plt.figure(figsize=(length*4, 3))
     axes: object = fig.subplots(1, length)
 
@@ -2626,9 +2626,10 @@ class StaticAperture(ApertureLayer):
         pixel_scale: float, meters / pixel
             The pixel scale of the wavefront coordinate system.
         """
-        assert isinstance(DynamicAperture, aperture)
+        assert isinstance(aperture, DynamicAperture)
 
-        coords: float = dLux.utils.get_pixel_coordinates(npix, pixel_scale)
+        super().__init__()
+        coords: float = dLux.utils.get_pixel_coordinates(npix, pix_scale)
         self.aperture: float = aperture._aperture(coords)
 
 
