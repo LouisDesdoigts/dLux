@@ -2595,6 +2595,28 @@ class StaticAperture(ApertureLayer):
         The aperture represented as an array.
     """
     aperture: Array
+
+
+    def __init__(
+            self        : ApertureLayer, 
+            aperture    : ApertureLayer, 
+            npix        : int, 
+            pix_scale   : float) -> ApertureLayer:
+        """
+        Parameters:
+        -----------
+        aperture: ApertureLayer
+            An instance of DynamicAperture. 
+        npix: int
+            The number of pixels used to represent the wavefront 
+            coordinate system.
+        pixel_scale: float, meters / pixel
+            The pixel scale of the wavefront coordinate system.
+        """
+        assert isinstance(DynamicAperture, aperture)
+
+        coords: float = dLux.utils.get_pixel_coordinates(npix, pixel_scale)
+        self.aperture: float = aperture._aperture(coords)
     
 
 ################################## tests ######################################
