@@ -2749,6 +2749,8 @@ class StaticAberratedAperture(ApertureLayer):
         return wavefront\
             .multiply_amplitude(self.aperture)\
             .add_phase(self.basis)
+
+
 ################################## tests ######################################
 #test_plots_of_aps({
 #    "Occ. Soft": RectangularAperture(1., .5, occulting=True, softening=True),
@@ -2939,3 +2941,16 @@ class StaticAberratedAperture(ApertureLayer):
 #   "Reg. Pol. 4": StaticAperture(RegularPolygonalAperture(4, 1.), 128, 2. / 128),
 #   "Circ.": StaticAperture(CircularAperture(1.), 128, 2. / 128)
 #})
+
+nolls: int = [i for i in range(3, 10)]
+coeffs: float = np.ones((len(nolls),), float)
+
+test_plots_of_stat_aber_aps({
+    "Sq.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, SquareAperture(np.sqrt(2.))), 128, 2. / 128),
+    "Ann.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, AnnularAperture(1., .5)), 128, 2. / 128),
+    "Rect.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, RectangularAperture(1., 2.)), 128, 2. / 128),
+    "Hex.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, HexagonalAperture(1.)), 128, 2. / 128),
+    "Reg. Pol. 5": StaticAberratedAperture(AberratedAperture(nolls, coeffs, RegularPolygonalAperture(5, 1.)), 128, 2. / 128),
+    "Reg. Pol. 4": StaticAberratedAperture(AberratedAperture(nolls, coeffs, RegularPolygonalAperture(4, 1.)), 128, 2. / 128),
+    "Circ.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, CircularAperture(1.)), 128, 2. / 128)
+})
