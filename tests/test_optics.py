@@ -1,7 +1,7 @@
 from __future__ import annotations
 from utilities import Utility, UtilityUser
 import jax.numpy as np
-from wavefronts import WavefrontUtility
+from test_wavefronts import WavefrontUtility
 import pytest
 import dLux
 from jax import config

@@ -275,115 +275,115 @@ class TiltWavefront(OpticalLayer):
         return wavefront.tilt_wavefront(self.tilt_angles)
 
 
-class CircularAperture(OpticalLayer):
-    """
-    Multiplies the input wavefront amplitude by a pre calculated circular binary
-    (float) mask that extents to the edge of the wavefront. Supports an inner
-    occuulting mask as would be seen for typical optical systems using a
-    seconday mirror.
+# class CircularAperture(OpticalLayer):
+#     """
+#     Multiplies the input wavefront amplitude by a pre calculated circular binary
+#     (float) mask that extents to the edge of the wavefront. Supports an inner
+#     occuulting mask as would be seen for typical optical systems using a
+#     seconday mirror.
 
-    Attributes
-    ----------
-    npixels : int
-        The number of pixels along one side of the aperture. This must match the
-        size of the wavefront when it is applied to it or it will throw an
-        error.
-    transmission : Array, transmission
-        A binary array describing the transmission of the apertures location.
-    """
-    npixels      : int
-    transmission : Array
-
-
-    def __init__(self    : OpticalLayer,
-                 npixels : int,
-                 rmin    : float = 0.,
-                 rmax    : float = 1.,
-                 name    : str   = 'CircularAperture') -> OpticalLayer:
-        """
-        Constructor for the CircularAperture class.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels along one side of the aperture. This must
-            match the size of the wavefront when it is applied to it or it will
-            throw an error.
-        rmin : float = 0.
-            The inner radius of the cirucular aperture, ie the radius of the
-            secondary mirror obscuration. A value of 0.5 will have the diameter
-            of the obscuration span half of the array. This value must be
-            smaller than rmax.
-        rmax : float = 1.
-            The outer radius of the cirucular aperture. A value of 0.5 will
-            have the diameter of the aperture span half of the array. This
-            value must be larger than rmax.
-        name : str = 'CircularAperture'
-            The name of the layer, which is used to index the layers dictionary.
-            Default is 'CircularAperture'.
-        """
-        super().__init__(name)
-        self.npixels = int(npixels)
-        self.transmission = self.create_aperture(self.npixels, float(rmin),
-                                                 float(rmax))
+#     Attributes
+#     ----------
+#     npixels : int
+#         The number of pixels along one side of the aperture. This must match the
+#         size of the wavefront when it is applied to it or it will throw an
+#         error.
+#     transmission : Array, transmission
+#         A binary array describing the transmission of the apertures location.
+#     """
+#     npixels      : int
+#     transmission : Array
 
 
-    def create_aperture(self    : OpticalLayer,
-                        npixels : int,
-                        rmin    : float,
-                        rmax    : float) -> Array:
-        """
-        Produces the annular aperture array. The coordinate aray upon which the
-        radial values are used defines the center of the array as a radius of
-        zero, and the central edges a radial value of one, therefore the corners
-        of the array have a radial value of 2**0.5.
+#     def __init__(self    : OpticalLayer,
+#                  npixels : int,
+#                  rmin    : float = 0.,
+#                  rmax    : float = 1.,
+#                  name    : str   = 'CircularAperture') -> OpticalLayer:
+#         """
+#         Constructor for the CircularAperture class.
 
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels along one side of the aperture. This must
-            match the size of the wavefront when it is applied to it or it will
-            throw an error.
-        rmin : float
-            The inner radius of the cirucular aperture, ie the radius of the
-            secondary mirror obscuration. A value of 0.5 will have the diameter
-            of the obscuration span half of the array. This value must be
-            smaller than rmax.
-        rmax : float
-            The outer radius of the cirucular aperture. A value of 0.5 will
-            have the diameter of the aperture span half of the array. This
-            value must be larger than rmax.
-
-        Returns
-        -------
-        aperture : Array
-            The array representing the tranmission of the aperture.
-        """
-        centre = (npixels - 1.) / 2.
-        normalised_coordinates = (np.arange(npixels) - centre) / centre
-        stacked_grids = np.array(np.meshgrid(normalised_coordinates,
-            normalised_coordinates))
-        radial_coordinates = np.sqrt(np.sum(stacked_grids ** 2, axis = 0))
-        aperture = np.logical_and(radial_coordinates <= rmax,
-            radial_coordinates > rmin).astype(float)
-        return aperture
+#         Parameters
+#         ----------
+#         npixels : int
+#             The number of pixels along one side of the aperture. This must
+#             match the size of the wavefront when it is applied to it or it will
+#             throw an error.
+#         rmin : float = 0.
+#             The inner radius of the cirucular aperture, ie the radius of the
+#             secondary mirror obscuration. A value of 0.5 will have the diameter
+#             of the obscuration span half of the array. This value must be
+#             smaller than rmax.
+#         rmax : float = 1.
+#             The outer radius of the cirucular aperture. A value of 0.5 will
+#             have the diameter of the aperture span half of the array. This
+#             value must be larger than rmax.
+#         name : str = 'CircularAperture'
+#             The name of the layer, which is used to index the layers dictionary.
+#             Default is 'CircularAperture'.
+#         """
+#         super().__init__(name)
+#         self.npixels = int(npixels)
+#         self.transmission = self.create_aperture(self.npixels, float(rmin),
+#                                                  float(rmax))
 
 
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Apply the aperture transmisson to the wavefront.
+#     def create_aperture(self    : OpticalLayer,
+#                         npixels : int,
+#                         rmin    : float,
+#                         rmax    : float) -> Array:
+#         """
+#         Produces the annular aperture array. The coordinate aray upon which the
+#         radial values are used defines the center of the array as a radius of
+#         zero, and the central edges a radial value of one, therefore the corners
+#         of the array have a radial value of 2**0.5.
 
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
+#         Parameters
+#         ----------
+#         npixels : int
+#             The number of pixels along one side of the aperture. This must
+#             match the size of the wavefront when it is applied to it or it will
+#             throw an error.
+#         rmin : float
+#             The inner radius of the cirucular aperture, ie the radius of the
+#             secondary mirror obscuration. A value of 0.5 will have the diameter
+#             of the obscuration span half of the array. This value must be
+#             smaller than rmax.
+#         rmax : float
+#             The outer radius of the cirucular aperture. A value of 0.5 will
+#             have the diameter of the aperture span half of the array. This
+#             value must be larger than rmax.
 
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the aperture tranmission applied.
-        """
-        return wavefront.multiply_amplitude(self.transmission)
+#         Returns
+#         -------
+#         aperture : Array
+#             The array representing the tranmission of the aperture.
+#         """
+#         centre = (npixels - 1.) / 2.
+#         normalised_coordinates = (np.arange(npixels) - centre) / centre
+#         stacked_grids = np.array(np.meshgrid(normalised_coordinates,
+#             normalised_coordinates))
+#         radial_coordinates = np.sqrt(np.sum(stacked_grids ** 2, axis = 0))
+#         aperture = np.logical_and(radial_coordinates <= rmax,
+#             radial_coordinates > rmin).astype(float)
+#         return aperture
+
+
+#     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+#         """
+#         Apply the aperture transmisson to the wavefront.
+
+#         Parameters
+#         ----------
+#         wavefront : Wavefront
+#             The wavefront to operate on.
+
+#         Returns
+#         -------
+#         wavefront : Wavefront
+#             The wavefront with the aperture tranmission applied.
+#         """
+#         return wavefront.multiply_amplitude(self.transmission)
 
 
 class NormaliseWavefront(OpticalLayer):

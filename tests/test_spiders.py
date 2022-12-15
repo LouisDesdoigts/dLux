@@ -1,7 +1,7 @@
 import jax.numpy as np
 import typing
 import dLux as dl
-from apertures import ApertureUtility 
+from test_apertures import ApertureUtility 
 from utilities import UtilityUser
 
 Utility = typing.TypeVar("Utility")
