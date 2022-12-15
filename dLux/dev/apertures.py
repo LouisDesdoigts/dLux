@@ -2617,6 +2617,23 @@ class StaticAperture(ApertureLayer):
 
         coords: float = dLux.utils.get_pixel_coordinates(npix, pixel_scale)
         self.aperture: float = aperture._aperture(coords)
+
+
+    def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Apply the aperture to the wavefront.
+
+        Parameters:
+        -----------
+        wavefront: Wavefront
+            The wavefront that is passing through the aperture.
+
+        Returns:
+        --------
+        wavefront: Wavefront
+            The wavefront after passing through the aperture
+        """
+        return wavefront.multiply_amplitude(self.aperture)
     
 
 ################################## tests ######################################
