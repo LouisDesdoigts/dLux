@@ -2804,8 +2804,8 @@ class StaticAperture(ApertureLayer):
 #    "More": UniformSpider(6, .1)
 #})
 
-nolls: int = [i for i in range(3, 10)]
-coeffs: float = np.ones((len(nolls),), float)
+#nolls: int = [i for i in range(3, 10)]
+#coeffs: float = np.ones((len(nolls),), float)
 
 #test_plots_of_aber_aps({
 #   "Squarikes": AberratedAperture(nolls, coeffs, SquareAperture(np.sqrt(2.))),
@@ -2816,3 +2816,13 @@ coeffs: float = np.ones((len(nolls),), float)
 #   "Reg. Pol. 4": AberratedAperture(nolls, coeffs, RegularPolygonalAperture(4, 1.)),
 #   "Circ.": AberratedAperture(nolls, coeffs, CircularAperture(1.))
 #})
+
+test_plots_of_stat_aps({
+   "Sq.": StaticAperture(SquareAperture(np.sqrt(2.)), 128, 2. / 128),
+   "Ann.": StaticAperture(AnnularAperture(1., .5), 128, 2. / 128),
+   "Rect.": StaticAperture(RectangularAperture(1., 2.), 128, 2. / 128),
+   "Hex.": StaticAperture(HexagonalAperture(1.), 128, 2. / 128),
+   "Reg. Pol. 5": StaticAperture(RegularPolygonalAperture(5, 1.), 128, 2. / 128),
+   "Reg. Pol. 4": StaticAperture(RegularPolygonalAperture(4, 1.), 128, 2. / 128),
+   "Circ.": StaticAperture(CircularAperture(1.), 128, 2. / 128)
+})
