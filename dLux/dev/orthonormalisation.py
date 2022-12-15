@@ -46,19 +46,19 @@ def projection(f1: float, f2: float) -> float:
 
 
 vecs: float = zernikes * aperture
-bvecs: float = np.zeros_like(vecs)
 
-for k in range(nterms):
-    u_k: float = vecs[k]
-    for j in range(1, k):
-        u_k -= projection(vecs[j], u_k) 
-        plt.imshow(projection(vecs[j], u_k))
-        plt.colorbar()
-        plt.show()
-    bvecs: float = bvecs.at[k].set(u_k)  
 
-plot_basis(bvecs)
-
-plot_basis(vecs)
+def gram_schmidt(vecs: float) -> float:
+    bvecs: float = np.zeros_like(vecs)
+    nterms: int = vecs.shape[0]
+        
+    for k in range(nterms):
+        u_k: float = vecs[k]
+            
+        for j in range(1, k):
+            u_k -= projection(vecs[j], u_k) 
+            
+        bvecs: float = bvecs.at[k].set(u_k) 
+    return bvecs 
 
 
