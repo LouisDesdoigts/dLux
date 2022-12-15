@@ -12,8 +12,6 @@ from . import utils
 from . import apertures
 from . import sources
 from . import spectrums
-from . import basis
-from . import spiders
 
 # Import core functions from modules
 # from .base        import *
