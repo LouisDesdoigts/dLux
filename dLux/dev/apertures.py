@@ -117,6 +117,39 @@ def test_plots_of_stat_aps(aps: dict):
     plt.show()
 
 
+def test_plots_of_aber_aps(aber_aps: dict):
+    """
+    A formalisation of the common testing routine that I have
+    been using. This will be removed from the production code. 
+
+    Parameters:
+    -----------
+    aber_aps: dict
+        The apertures with descriptive titles.
+    """
+    length: int = len(aber_aps.keys())
+    fig = plt.figure()
+    subfigs = fig.subfigures(length, 1)
+
+    for i, aber_ap in enumerate(aber_aps):
+        subfigs[i].suptitle(aber_ap)
+
+        basis: float = aber_aps[aber_ap].basis
+        aper: float = aber_aps[aber_ap].aperture
+        
+        num: int = aper.shape[0]
+        axes = subfigs[i].subplots(1, num)
+
+        for j in range(num):
+            _map = axes[j].imshow(basis[j] * aper)
+            axes[j].set_xticks([])
+            axes[j].set_yticks([])
+            axes[j].axis("off")
+            subfigs[i].colorbar(_map, ax=axes[j])
+            
+    plt.show()
+
+
 class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
     """
     The ApertureLayer groups together all of the functionality 
