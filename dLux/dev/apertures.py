@@ -59,6 +59,15 @@ def test_plots_of_aps(aps: dict) -> None:
 
 
 def test_plots_of_aber_aps(aber_aps: dict):
+    """
+    A formalisation of the common testing routine that I have
+    been using. This will be removed from the production code. 
+
+    Parameters:
+    -----------
+    aber_aps: dict
+        The apertures with descriptive titles.
+    """
     pixels: float = 128
     nterms: float = 6
     coords: float = dLux.utils.get_pixel_coordinates(pixels, 3. / pixels)
