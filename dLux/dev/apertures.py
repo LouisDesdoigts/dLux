@@ -2171,6 +2171,28 @@ class AberratedAperture(ApertureLayer):
 
         self.aperture = aperture
         self.coeffs = np.asarray(coeffs).astype(float)
+ 
+ 
+    def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Apply the aperture and the abberations to the wavefront.  
+ 
+        Parameters:
+        -----------
+        params: dict
+            A dictionary containing the key "Wavefront".
+ 
+        Returns:
+        --------
+        params: dict 
+            A dictionary containing the key "wavefront".
+        """
+        coords: Array = wavefront.pixel_positions()
+        opd: Array = self._opd(coords)
+        aperture: Array = self.aperture._aperture(coords)
+        return wavefront\
+            .add_opd(opd)\
+            .multiply_amplitude(aperture)
 
 
     def noll_index(self: ApertureLayer, j: int) -> tuple:
@@ -2453,30 +2475,6 @@ class AberratedAperture(ApertureLayer):
         basis: Array = self._basis(coords)
         opd: Array = np.dot(basis.T, self.coeffs)
         return opd
- 
- 
-    def __call__(self, params_dict: dict) -> dict:
-        """
-        Apply the aperture and the abberations to the wavefront.  
- 
-        Parameters:
-        -----------
-        params: dict
-            A dictionary containing the key "Wavefront".
- 
-        Returns:
-        --------
-        params: dict 
-            A dictionary containing the key "wavefront".
-        """
-        wavefront: object = params_dict["Wavefront"]
-        coords: Array = wavefront.pixel_positions()
-        opd: Array = self._opd(coords)
-        aperture: Array = self.aperture._aperture(coords)
-        params_dict["Wavefront"] = wavefront\
-            .add_opd(opd)\
-            .multiply_amplitude(aperture)
-        return params_dict
 
 
     def _orthonormalise(self: ApertureLayer, 
