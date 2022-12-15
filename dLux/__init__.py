@@ -25,14 +25,11 @@ from .propagators import *
 from .apertures   import *
 from .sources     import*
 from .spectrums   import *
-from .basis       import *
-from .spiders     import *
 
 # Add to __all__
 __all__ = core.__all__ + detectors.__all__ + optics.__all__ + \
             wavefronts.__all__ + propagators.__all__ + sources.__all__ + \
-            spectrums.__all__ + apertures.__all__ + \
-            spiders.__all__ + basis.__all__ 
+            spectrums.__all__ + apertures.__all__ 
 
 # Check for 64-bit
 from jax import config

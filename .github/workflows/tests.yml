@@ -30,31 +30,31 @@ jobs:
       #   run: pytest --quiet tests/base.py
 
       - name: core tests
-        run: pytest --quiet tests/core.py
+        run: pytest --quiet tests/test_core.py
 
       - name: spectrum tests
-        run: pytest --quiet tests/spectrums.py
+        run: pytest --quiet tests/test_spectrums.py
 
       - name: source tests
-        run: pytest --quiet tests/sources.py
+        run: pytest --quiet tests/test_sources.py
 
       - name: wavefront tests
-        run: pytest --quiet tests/wavefronts.py
+        run: pytest --quiet tests/test_wavefronts.py
 
       - name: propagator tests
-        run: pytest --quiet tests/propagators.py
+        run: pytest --quiet tests/test_propagators.py
 
       - name: optics tests
-        run: pytest --quiet tests/optics.py
+        run: pytest --quiet tests/test_optics.py
 
       - name: detector tests
-        run: pytest --quiet tests/detectors.py
+        run: pytest --quiet tests/test_detectors.py
 
       - name: aperture tests
         run: pytest --quiet tests/apertures.py
 
       - name: spider tests
-        run: pytest --quiet tests/spiders.py
+        run: pytest --quiet tests/test_spiders.py
 
 #       - name: utils tests
 #         run: pytest --quiet tests/utils.py
