@@ -73,13 +73,9 @@ _basis = _basis\
 
 plot_basis(_basis)
 
-# +
-if aperture is None:
-    aperture = hex_aperture(npix=npix, rho=rho, theta=theta, vertical=vertical, outside=0)
+apmask: float = aperture
 
-# any pixels with zero or NaN in the aperture are outside the area
-apmask = (np.isfinite(aperture) & (aperture > 0))
-apmask_float = np.asarray(apmask, float)
+# +
 A = apmask.sum()
 
 # precompute zernikes
