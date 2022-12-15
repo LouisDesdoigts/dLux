@@ -96,6 +96,15 @@ def test_plots_of_aber_aps(aber_aps: dict):
 
 
 def test_plots_of_stat_aps(aps: dict):
+    """
+    A formalisation of the common testing routine that I have
+    been using. This will be removed from the production code. 
+
+    Parameters:
+    -----------
+    aps: dict
+        The apertures with descriptive titles.
+    """
     length: int = len(aps.keys())
     fig: object = plt.figure(figsize=(length*4, 3))
     axes: object = fig.subplots(1, length)
