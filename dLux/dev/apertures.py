@@ -77,22 +77,20 @@ def test_plots_of_aber_aps(aber_aps: dict):
     subfigs = fig.subfigures(length, 1)
 
     for i, aber_ap in enumerate(aber_aps):
-        subfigs[i].title(aber_ap)
+        subfigs[i].suptitle(aber_ap)
 
         basis: float = aber_aps[aber_ap]._basis(coords)
         aper: float = aber_aps[aber_ap].aperture._aperture(coords)
+        
+        num: int = aber_aps[aber_ap].nterms
+        axes = subfigs[i].subplots(1, num)
 
-        axes = subfigs[i].subplots(2, 5)
-        for i in range(num_ikes):
-            col = i % (num_ikes // 2)
-            row = i // (num_ikes // 2)
-         
-            axes[row][col].set_title(noll_inds[i])
-            _map = axes[row][col].imshow(basis[i] * aper)
-            axes[row][col].set_xticks([])
-            axes[row][col].set_yticks([])
-            axes[row][col].axis("off")
-            subfigs[i].colorbar(_map, ax=axes[row][col])
+        for j in range(num):
+            _map = axes[j].imshow(basis[j] * aper)
+            axes[j].set_xticks([])
+            axes[j].set_yticks([])
+            axes[j].axis("off")
+            subfigs[i].colorbar(_map, ax=axes[j])
             
     plt.show()
 
@@ -2211,7 +2209,8 @@ class AberratedAperture(ApertureLayer):
         assert isinstance(aperture, AbstractDynamicAperture)
 
         if isinstance(aperture, RegularPolygonalAperture):
-            self.basis_funcs = [self.jth_polike(j) for j in noll_inds]
+            n: int = aperture.nsides
+            self.basis_funcs = [self.jth_polike(j, n) for j in noll_inds]
         else:
             self.basis_funcs = [self.jth_zernike(j) for j in noll_inds]
 
@@ -3016,7 +3015,7 @@ class MultiAberratedAperture(ApertureLayer):
 #})
 
 nolls: int = [i for i in range(3, 10)]
-coeffs: float = np.ones((len(nolls,) float)
+coeffs: float = np.ones((len(nolls),), float)
 
 test_plots_of_aber_aps({
    "Squarikes": AberratedAperture(nolls, coeffs, SquareAperture(1.)),
