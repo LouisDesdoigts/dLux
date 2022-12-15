@@ -95,6 +95,19 @@ def test_plots_of_aber_aps(aber_aps: dict):
     plt.show()
 
 
+def test_plots_of_static_aps(aps: dict):
+    length: int = len(aber_aps.keys())
+    fig: object = plt.figure(figsize=(length*4, 3))
+    axes: object = fig.subplots(1, length)
+
+    for i, ap in enumerate(aps):
+        axes[i].set_title(aps)
+        cmap = axes[i].imshow(aps[ap].aperture)
+        fig.colorbar(cmap, ax=axes[i])
+
+    plt.show()
+
+
 class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
     """
     The ApertureLayer groups together all of the functionality 
