@@ -2669,26 +2669,31 @@ def test_plots_of_aber_aps(aber_aps: dict):
     num_ikes: int = 10
     num_basis: int = 3
     noll_inds: list = [i + 1 for i in range(num_ikes)]
-
     coeffs: float = np.ones((num_ikes,), float)
-    aper: ApertureLayer = CircularAperture(1.)
-    basis: ApertureLayer = AberratedAperture(noll_inds, coeffs, aper)
 
-    basis: float = basis._basis(coords)
-    aper: float = aper._aperture(coords)
+    length: int = len(aber_aps.keys())
+    fig = plt.figure()
+    subfigs = fig.subfigures(length, 1)
 
-    fig, axes = plt.subplots(2, 5)
-    for i in range(num_ikes):
-        col = i % (num_ikes // 2)
-        row = i // (num_ikes // 2)
-     
-        axes[row][col].set_title(noll_inds[i])
-        _map = axes[row][col].imshow(basis[i] * aper)
-        axes[row][col].set_xticks([])
-        axes[row][col].set_yticks([])
-        axes[row][col].axis("off")
-        fig.colorbar(_map, ax=axes[row][col])
-    plt.show()
+    for i, aber_ap in enumerate(aber_aps):
+        subfigs[i].title(aber_ap)
+
+        basis: float = aber_aps[aber_ap]._basis(coords)
+        aper: float = aber_aps[aber_ap].aperture._aperture(coords)
+
+        axes = subfigs[i].subplots(2, 5)
+        for i in range(num_ikes):
+            col = i % (num_ikes // 2)
+            row = i // (num_ikes // 2)
+         
+            axes[row][col].set_title(noll_inds[i])
+            _map = axes[row][col].imshow(basis[i] * aper)
+            axes[row][col].set_xticks([])
+            axes[row][col].set_yticks([])
+            axes[row][col].axis("off")
+            subfigs[i].colorbar(_map, ax=axes[row][col])
+            
+     plt.show()
 
 ##So now I need to test the MultiAberratedAperture 
 #ps = {
