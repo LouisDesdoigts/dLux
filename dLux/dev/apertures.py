@@ -2149,6 +2149,7 @@ class AberratedAperture(ApertureLayer):
  
  
     def __init__(self   : ApertureLayer, 
+            noll_inds   : Array,
             coeffs      : Array,
             aperture    : ApertureLayer) -> ApertureLayer: 
         """
@@ -2167,7 +2168,12 @@ class AberratedAperture(ApertureLayer):
             The coefficients of the basis vectors. 
         """
         assert not aperture.occulting
-        assert isinstance(aperture, dl.Aperture)
+        assert isinstance(aperture, AbstractDynamicAperture)
+
+        if isinstance(aperture, RegularPolygonalAperture):
+            self.basis_funcs = [self.jth_polike(j) for j in noll_inds]
+        else:
+            self.basis_funcs = [self.jth_zernike(j) for j in noll_inds]
 
         self.aperture = aperture
         self.coeffs = np.asarray(coeffs).astype(float)
@@ -2410,7 +2416,7 @@ class AberratedAperture(ApertureLayer):
         """
         _jth_zernike = jth_zernike(j)
      
-        def _jth_hexike(coords: Array) -> Array:
+        def _jth_polike(coords: Array) -> Array:
             polar: float = dl.utils.cartesian_to_polar(coords)
             rho: float = polar[0]
             phi: float = polar[1] + np.pi / 2. # TODO:
@@ -2420,7 +2426,7 @@ class AberratedAperture(ApertureLayer):
             r_alpha: float = np.cos(alpha) / np.cos(u_alpha)
             return 1 / r_alpha * _jth_zernike(coords / r_alpha)
      
-        return _jth_hexike
+        return _jth_polike
  
  
     def _basis(self: ApertureLayer, coords: Array) -> Array:
