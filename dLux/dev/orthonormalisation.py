@@ -7,7 +7,29 @@ jax.config.update("jax_enable_x64", True)
 
 from apertures import *
 
-aperture: ApertureLayer = SquareAperture
+nolls: int = [i for i in range(3, 10)]
+coeffs: float = np.ones((len(nolls),), float)
+
+npix: int = 128
+grid: float = np.linspace(-1., 1., npix)
+coords: float = np.array(np.meshgrid(grid, grid))
+
+aper: ApertureLayer = SquareAperture(1.)
+basis: ApertureLayer = AberratedAperture(nolls, coeffs, aper)
+
+aperture = aper._aperture(coords)
+zernikes: float = np.stack([h(coords) for h in basis.basis_funcs])
+
+# +
+length: int = len(nolls)
+
+fig = plt.figure(figsize=(length*4, 3))
+axes = fig.subplots(1, length)
+
+for i in range(length):
+    cmap = axes[i].imshow(zernikes[i])
+    fig.colorbar(cmap, ax=axes[i])
+# -
 
 pixel_area = aperture.sum()
 shape = zernikes.shape
