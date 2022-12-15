@@ -2573,8 +2573,6 @@ class AberratedAperture(ApertureLayer):
                 .sum(axis = (1, 2))\
                 .reshape(-1, 1, 1) 
 
-            print(coefficient)
- 
             intermediate += (coefficient * basis[1:] * mask).sum(axis = 0)
             
             basis = basis\
