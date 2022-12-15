@@ -2583,6 +2583,9 @@ class AberratedAperture(ApertureLayer):
         return basis
 
 
+class StaticAperture(ApertureLayer):
+    """
+    """
 ################################## tests ######################################
 #test_plots_of_aps({
 #    "Occ. Soft": RectangularAperture(1., .5, occulting=True, softening=True),
