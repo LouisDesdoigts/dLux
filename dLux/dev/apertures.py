@@ -2540,7 +2540,7 @@ class AberratedAperture(ApertureLayer):
         return basis
 
 
-class MultiAberratedAperture(eqx.Module):
+class MultiAberratedAperture(ApertureLayer):
     """
     This is for disjoint apertures that have multiple components. 
     For example, the James Webb Space Telescope and the Heimdellr
@@ -2553,18 +2553,18 @@ class MultiAberratedAperture(eqx.Module):
     bases: List[Layer]
         A list of `AberratedAperture` objects.
     """
-    aperture: Layer
-    bases: List[Layer]
+    aperture: ApertureLayer
+    bases: List[ApertureLayer]
  
  
-    def __init__(self   : Layer, 
+    def __init__(self   : ApertureLayer, 
             noll_inds   : Array, 
             coeffs      : Array,
-            aperture    : Layer) -> Layer: 
+            aperture    : ApertureLayer) -> Layer: 
         """
         Parameters:
         -----------
-        aperture: Layer
+        aperture: ApertureLayer
             A `MultiAperture` over which the basis will be generated. 
             Each `Aperture` in the `MultiAperture` will be bequeathed
             it's own basis. 
