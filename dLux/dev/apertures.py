@@ -2496,6 +2496,7 @@ class AberratedAperture(ApertureLayer):
         is_circ: bool = isinstance(self.aperture, CircularAperture)
 
         if (not is_reg_pol) or (not is_circ):
+            print("Othornormalising")
             aperture: float = self.aperture._aperture(coords)
             ikes: float = self._orthonormalise(aperture, ikes)
 
@@ -3018,9 +3019,9 @@ nolls: int = [i for i in range(3, 10)]
 coeffs: float = np.ones((len(nolls),), float)
 
 test_plots_of_aber_aps({
-   "Squarikes": AberratedAperture(nolls, coeffs, SquareAperture(1.)),
+   "Squarikes": AberratedAperture(nolls, coeffs, SquareAperture(np.sqrt(2.))),
    "Annikes": AberratedAperture(nolls, coeffs, AnnularAperture(1., .5)),
-   "Rectikes": AberratedAperture(nolls, coeffs, RectangularAperture(.5, 1.)),
+   "Rectikes": AberratedAperture(nolls, coeffs, RectangularAperture(1., 2.)),
    "Hexikes": AberratedAperture(nolls, coeffs, HexagonalAperture(1.)),
    "Reg. Pol. 5": AberratedAperture(nolls, coeffs, RegularPolygonalAperture(5, 1.)),
    "Reg. Pol. 4": AberratedAperture(nolls, coeffs, RegularPolygonalAperture(4, 1.)),
