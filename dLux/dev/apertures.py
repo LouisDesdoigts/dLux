@@ -2661,33 +2661,34 @@ class MultiAberratedAperture(ApertureLayer):
         return params_dict
 
 
-pixels: float = 128
-nterms: float = 6
-coords: float = dLux.utils.get_pixel_coordinates(pixels, 3. / pixels)
+def test_plots_of_aber_aps(aber_aps: dict):
+    pixels: float = 128
+    nterms: float = 6
+    coords: float = dLux.utils.get_pixel_coordinates(pixels, 3. / pixels)
 
-num_ikes: int = 10
-num_basis: int = 3
-noll_inds: list = [i + 1 for i in range(num_ikes)]
+    num_ikes: int = 10
+    num_basis: int = 3
+    noll_inds: list = [i + 1 for i in range(num_ikes)]
 
-coeffs: float = np.ones((num_ikes,), float)
-aper: ApertureLayer = CircularAperture(1.)
-basis: ApertureLayer = AberratedAperture(noll_inds, coeffs, aper)
+    coeffs: float = np.ones((num_ikes,), float)
+    aper: ApertureLayer = CircularAperture(1.)
+    basis: ApertureLayer = AberratedAperture(noll_inds, coeffs, aper)
 
-basis: float = basis._basis(coords)
-aper: float = aper._aperture(coords)
+    basis: float = basis._basis(coords)
+    aper: float = aper._aperture(coords)
 
-fig, axes = plt.subplots(2, 5)
-for i in range(num_ikes):
-    col = i % (num_ikes // 2)
-    row = i // (num_ikes // 2)
- 
-    axes[row][col].set_title(noll_inds[i])
-    _map = axes[row][col].imshow(basis[i] * aper)
-    axes[row][col].set_xticks([])
-    axes[row][col].set_yticks([])
-    axes[row][col].axis("off")
-    fig.colorbar(_map, ax=axes[row][col])
-plt.show()
+    fig, axes = plt.subplots(2, 5)
+    for i in range(num_ikes):
+        col = i % (num_ikes // 2)
+        row = i // (num_ikes // 2)
+     
+        axes[row][col].set_title(noll_inds[i])
+        _map = axes[row][col].imshow(basis[i] * aper)
+        axes[row][col].set_xticks([])
+        axes[row][col].set_yticks([])
+        axes[row][col].axis("off")
+        fig.colorbar(_map, ax=axes[row][col])
+    plt.show()
 
 ##So now I need to test the MultiAberratedAperture 
 #ps = {
