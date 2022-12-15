@@ -2168,6 +2168,7 @@ class AberratedAperture(ApertureLayer):
         """
         assert not aperture.occulting
         assert isinstance(aperture, dl.Aperture)
+
         self.aperture = aperture
         self.coeffs = np.asarray(coeffs).astype(float)
 
@@ -2419,10 +2420,19 @@ class AberratedAperture(ApertureLayer):
             It has been removed to save some time in the 
             calculations. 
         """
-        coords: Array = self.aperture._normalised_coordinates(coords)
-        return np.stack([h(coords) for h in self.basis_funcs])
+        coords: float = self.aperture._normalised_coordinates(coords)
+        ikes: float = np.stack([h(zern_coords) for h in self.basis_funcs])
+        
+        is_reg_pol: bool = isinstance(self.aperture, RegularPolyogonalAperture)
+        is_circ: bool = isinstance(self.aperture, CircularAperture)
+
+        if (not is_reg_pol) or (not is_circ):
+            aperture: float = self.aperture._aperture(coords)
+            ikes: float = self._orthonormalise(aperture, ikes)
+
+        return ikes 
  
- 
+
     def _opd(self: ApertureLayer, coords: Array) -> Array:
         """
         Calculate the optical path difference that is caused 
@@ -2524,31 +2534,6 @@ class AberratedAperture(ApertureLayer):
                     np.sqrt((intermediate ** 2).sum() / pixel_area))
         
         return basis
- 
- 
-    def _basis(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Parameters:
-        -----------
-        coords: Array, meters
-            The paraxial coordinate system on which to generate
-            the array. 
- 
-        Returns:
-        --------
-        basis: Array
-            The basis vectors associated with the aperture. 
-            These vectors are stacked in a tensor that is,
-            `(nterms, npix, npix)`. Normally the basis is 
-            cropped to be just on the aperture however, this 
-            step is not necessary except for in visualisation. 
-            It has been removed to save some time in the 
-            calculations. 
-        """
-        zern_coords = self.aperture._normalised_coordinates(coords)
-        zernikes = np.stack([h(zern_coords) for h in self.basis_funcs])
-        aperture = self.aperture._aperture(coords)
-        return self._orthonormalise(aperture, zernikes)
 
 
 class MultiAberratedAperture(eqx.Module):
