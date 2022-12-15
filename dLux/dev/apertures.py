@@ -72,11 +72,6 @@ def test_plots_of_aber_aps(aber_aps: dict):
     nterms: float = 6
     coords: float = dLux.utils.get_pixel_coordinates(pixels, 3. / pixels)
 
-    num_ikes: int = 10
-    num_basis: int = 3
-    noll_inds: list = [i + 1 for i in range(num_ikes)]
-    coeffs: float = np.ones((num_ikes,), float)
-
     length: int = len(aber_aps.keys())
     fig = plt.figure()
     subfigs = fig.subfigures(length, 1)
@@ -2764,41 +2759,25 @@ class MultiAberratedAperture(ApertureLayer):
 #lt.show()
 
 
-##So the goal here is to perform the tests for all the apertures using the 
-##`AberratedArbitraryAperture`. 
-##ps = {
-##   "Sq. Ap.": dl.SquareAperture(0., 0., 0., 1., False, False),
-##   "Ann. Ap.": dl.AnnularAperture(0., 0., 1., .5, False, False),
-##   "Rect. Ap.": dl.RectangularAperture(0., 0., 0., .5, 1., False, False),
-##   "Hex. Ap.": dl.HexagonalAperture(0., 0., 0., 1., False, False)
-##
-#
-##oeffs = np.ones((num_ikes,), dtype=float)
-##ases = {
-##   "Squarikes": AberratedArbitraryAperture(noll_inds, coeffs, aps["Sq. Ap."]),
-##   "Annikes": AberratedArbitraryAperture(noll_inds, coeffs, aps["Ann. Ap."]),
-##   "Rectikes": AberratedArbitraryAperture(noll_inds, coeffs, aps["Rect. Ap."]),
-##   "Hexikes": AberratedArbitraryAperture(noll_inds, coeffs, aps["Hex. Ap."])
-##
-#
-##igure = plt.figure()
-##igs = figure.subfigures(4, 1)
-##or fig, ap, basis in zip(figs, aps, bases):
-##   _basis = bases[basis]._basis(coordinates)
-##   _ap = aps[ap]._aperture(coordinates)
-#
-##   axes = fig.subplots(2, num_ikes // 2)
-##   for i in range(num_ikes):
-##       row = i // (num_ikes // 2)
-##       col = i % (num_ikes // 2)
-#
-##       fig.suptitle(basis)
-##       _map = axes[row][col].imshow(_basis[i] * _ap)
-##       axes[row][col].set_xticks([])
-##       axes[row][col].set_yticks([])
-##       axes[row][col].axis("off")
-##       fig.colorbar(_map, ax=axes[row][col]) 
-##lt.show()
+
+igure = plt.figure()
+igs = figure.subfigures(4, 1)
+or fig, ap, basis in zip(figs, aps, bases):
+   _basis = bases[basis]._basis(coordinates)
+   _ap = aps[ap]._aperture(coordinates)
+
+   axes = fig.subplots(2, num_ikes // 2)
+   for i in range(num_ikes):
+       row = i // (num_ikes // 2)
+       col = i % (num_ikes // 2)
+
+       fig.suptitle(basis)
+       _map = axes[row][col].imshow(_basis[i] * _ap)
+       axes[row][col].set_xticks([])
+       axes[row][col].set_yticks([])
+       axes[row][col].axis("off")
+       fig.colorbar(_map, ax=axes[row][col]) 
+lt.show()
 
 ##ps = {
 ##   "Default": dl.SquareAperture(0., 0., 0., 1., False, False),
@@ -3056,3 +3035,9 @@ class MultiAberratedAperture(ApertureLayer):
 #    "More": UniformSpider(6, .1)
 #})
 
+cases = {
+   "Squarikes": AberratedArbitraryAperture(noll_inds, coeffs, SquareAperture(1.)),
+   "Annikes": AberratedArbitraryAperture(noll_inds, coeffs, AnnularAperture(1., .5)),
+   "Rectikes": AberratedArbitraryAperture(noll_inds, coeffs, RectangularAperture(.5, 1.)),
+   "Hexikes": AberratedArbitraryAperture(noll_inds, coeffs, HexagonalAperture(1.))
+}
