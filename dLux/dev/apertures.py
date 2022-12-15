@@ -2692,6 +2692,63 @@ class StaticAperture(ApertureLayer):
         return wavefront.multiply_amplitude(self.aperture)
     
 
+class StaticAberratedAperture(ApertureLayer):
+    """
+    This layer is designed to increase the speed, when parameters 
+    are not getting learned. It pre-calculates the aperture and
+    basis arrays which is stored and then applied. 
+
+    Parameters:
+    -----------
+    aperture: Array
+        The aperture represented as an array.
+    basis: Array 
+        The basis represented as an array.
+    """
+    aperture: Array
+
+
+    def __init__(
+            self        : ApertureLayer, 
+            aperture    : ApertureLayer, 
+            npix        : int, 
+            pix_scale   : float) -> ApertureLayer:
+        """
+        Parameters:
+        -----------
+        aperture: ApertureLayer
+            An instance of DynamicAperture. 
+        npix: int
+            The number of pixels used to represent the wavefront 
+            coordinate system.
+        pixel_scale: float, meters / pixel
+            The pixel scale of the wavefront coordinate system.
+        """
+        assert isinstance(aperture, AberratedAperture)
+
+        super().__init__()
+        coords: float = dLux.utils.get_pixel_coordinates(npix, pix_scale)
+        self.aperture: float = aperture.aperture._aperture(coords)
+        self.basis: float = aperture._basis(coords)
+
+
+    def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Apply the aperture to the wavefront.
+
+        Parameters:
+        -----------
+        wavefront: Wavefront
+            The wavefront that is passing through the aperture.
+
+        Returns:
+        --------
+        wavefront: Wavefront
+            The wavefront after passing through the aperture
+        """
+        return wavefront\
+            .multiply_amplitude(self.aperture)\
+            .add_phase(self.basis)
 ################################## tests ######################################
 #test_plots_of_aps({
 #    "Occ. Soft": RectangularAperture(1., .5, occulting=True, softening=True),
