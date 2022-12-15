@@ -3,9 +3,11 @@ import dLux as dl
 import jax
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-
-
 jax.config.update("jax_enable_x64", True)
+
+from apertures import *
+
+aperture: ApertureLayer = SquareAperture
 
 pixel_area = aperture.sum()
 shape = zernikes.shape

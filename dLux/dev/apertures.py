@@ -2874,12 +2874,12 @@ class MultiAberratedAperture(ApertureLayer):
 nolls: int = [i for i in range(3, 10)]
 coeffs: float = np.ones((len(nolls),), float)
 
-test_plots_of_aber_aps({
-   "Squarikes": AberratedAperture(nolls, coeffs, SquareAperture(np.sqrt(2.))),
+#test_plots_of_aber_aps({
+#   "Squarikes": AberratedAperture(nolls, coeffs, SquareAperture(np.sqrt(2.))),
 #   "Annikes": AberratedAperture(nolls, coeffs, AnnularAperture(1., .5)),
 #   "Rectikes": AberratedAperture(nolls, coeffs, RectangularAperture(1., 2.)),
 #   "Hexikes": AberratedAperture(nolls, coeffs, HexagonalAperture(1.)),
 #   "Reg. Pol. 5": AberratedAperture(nolls, coeffs, RegularPolygonalAperture(5, 1.)),
 #   "Reg. Pol. 4": AberratedAperture(nolls, coeffs, RegularPolygonalAperture(4, 1.)),
-   "Circ.": AberratedAperture(nolls, coeffs, CircularAperture(1.))
-})
+#   "Circ.": AberratedAperture(nolls, coeffs, CircularAperture(1.))
+#})
