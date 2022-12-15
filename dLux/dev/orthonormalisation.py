@@ -15,7 +15,7 @@ def plot_basis(basis: float):
     axes: object = fig.subplots(1, length)
 
     for i in range(length):
-        cmap = axes[i].imshow(zernikes[i])
+        cmap = axes[i].imshow(basis[i])
         fig.colorbar(cmap, ax=axes[i])
     
     plt.show()
@@ -23,6 +23,7 @@ def plot_basis(basis: float):
 
 nolls: int = [i for i in range(3, 10)]
 coeffs: float = np.ones((len(nolls),), float)
+nterms: int = len(nolls)
 
 npix: int = 128
 grid: float = np.linspace(-1., 1., npix)
@@ -34,30 +35,28 @@ basis: ApertureLayer = AberratedAperture(nolls, coeffs, aper)
 aperture = aper._aperture(coords)
 zernikes: float = np.stack([h(coords) for h in basis.basis_funcs])
 
-plot_basis(zernikes)
-
 pixel_area = aperture.sum()
 shape = zernikes.shape
 width = shape[-1]
-basis = np.zeros(shape).at[0].set(aperture)
+_basis = np.zeros(shape).at[0].set(aperture)
 
-
-
-for j in np.arange(1, self.nterms):
+for j in np.arange(1, nterms):
     intermediate = zernikes[j] * aperture
-    coefficient = np.zeros((self.nterms, 1, 1), dtype=float)
-    mask = (np.arange(1, self.nterms) > j + 1).reshape((-1, 1, 1))
+    coefficient = np.zeros((nterms, 1, 1), dtype=float)
+    mask = (np.arange(1, nterms) > j + 1).reshape((-1, 1, 1))
 
-    coefficient = -1 / pixel_area * \
-        (zernikes[j] * basis[1:] * aperture * mask)\
+    coefficient = -1. / pixel_area * \
+        (zernikes[j] * _basis[1:] * aperture * mask)\
         .sum(axis = (1, 2))\
         .reshape(-1, 1, 1) 
 
-    print(coefficient)
-
-    intermediate += (coefficient * basis[1:] * mask).sum(axis = 0)
+    intermediate += (coefficient * _basis[1:] * mask).sum(axis = 0)
     
-    basis = basis\
+    _basis = _basis\
         .at[j]\
         .set(intermediate / \
             np.sqrt((intermediate ** 2).sum() / pixel_area))
+
+plot_basis(_basis)
+
+
