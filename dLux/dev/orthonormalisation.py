@@ -35,27 +35,33 @@ basis: ApertureLayer = AberratedAperture(nolls, coeffs, aper)
 aperture = aper._aperture(coords)
 zernikes: float = np.stack([h(coords) for h in basis.basis_funcs])
 
-pixel_area = aperture.sum()
-shape = zernikes.shape
-width = shape[-1]
-_basis = np.zeros(shape).at[0].set(aperture)
+# +
+# for j in np.arange(1, nterms):
+# -
 
-for j in np.arange(1, nterms):
-    intermediate = zernikes[j] * aperture
-    coefficient = np.zeros((nterms, 1, 1), dtype=float)
-    mask = (np.arange(1, nterms) > j + 1).reshape((-1, 1, 1))
+pixel_area: float = aperture.sum()
+shape: tuple = zernikes.shape
+width: int = shape[-1]
+_basis: float = np.zeros(shape).at[0].set(aperture)
+j: int = 1
 
-    coefficient = -1. / pixel_area * \
-        (zernikes[j] * _basis[1:] * aperture * mask)\
-        .sum(axis = (1, 2))\
-        .reshape(-1, 1, 1) 
+# +
+intermediate = zernikes[j] * aperture
+coefficient = np.zeros((nterms, 1, 1), dtype=float)
+mask = (np.arange(1, nterms) > j + 1).reshape((-1, 1, 1))
 
-    intermediate += (coefficient * _basis[1:] * mask).sum(axis = 0)
-    
-    _basis = _basis\
-        .at[j]\
-        .set(intermediate / \
-            np.sqrt((intermediate ** 2).sum() / pixel_area))
+coefficient = -1. / pixel_area * \
+    (zernikes[j] * _basis[1:] * aperture * mask)\
+    .sum(axis = (1, 2))\
+    .reshape(-1, 1, 1) 
+
+intermediate += (coefficient * _basis[1:] * mask).sum(axis = 0)
+
+_basis = _basis\
+    .at[j]\
+    .set(intermediate / \
+        np.sqrt((intermediate ** 2).sum() / pixel_area))
+# -
 
 plot_basis(_basis)
 
