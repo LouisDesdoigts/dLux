@@ -21,7 +21,7 @@ def plot_basis(basis: float):
     plt.show()
 
 
-nolls: int = [i for i in range(3, 10)]
+nolls: int = [i for i in range(0, 10)]
 coeffs: float = np.ones((len(nolls),), float)
 nterms: int = len(nolls)
 
@@ -32,8 +32,9 @@ coords: float = np.array(np.meshgrid(grid, grid))
 aper: ApertureLayer = SquareAperture(1.)
 basis: ApertureLayer = AberratedAperture(nolls, coeffs, aper)
 
-aperture = aper._aperture(coords)
-zernikes: float = np.stack([h(coords) for h in basis.basis_funcs])
+aperture: float = aper._aperture(coords)
+zcoords: float = aper._normalised_coordinates(coords)
+zernikes: float = np.stack([h(zcoords) for h in basis.basis_funcs])
 
 # +
 # for j in np.arange(1, nterms):
@@ -80,3 +81,8 @@ def inner_product(f1: float, f2: float) -> float:
 
 def projection(f1: float, f2: float) -> float:
     return inner_product(f1, f2) / inner_product(f2, f2) * f2
+
+
+plot_basis(zernikes)
+
+
