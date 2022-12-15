@@ -2383,7 +2383,7 @@ class AberratedAperture(ApertureLayer):
             The zernike polynomials evaluated until number. The shape
             of the output tensor is number by pixels by pixels. 
         """
-        n, m = noll_index(j)
+        n, m = self.noll_index(j)
      
         def _jth_zernike(coords: list) -> list:
             polar_coords = dl.utils.cartesian_to_polar(coords)
@@ -2414,7 +2414,7 @@ class AberratedAperture(ApertureLayer):
             A function representing the jth hexike that is evaluated 
             on a cartesian coordinate grid. 
         """
-        _jth_zernike = jth_zernike(j)
+        _jth_zernike = self.jth_zernike(j)
      
         def _jth_polike(coords: Array) -> Array:
             polar: float = dl.utils.cartesian_to_polar(coords)
@@ -2554,13 +2554,13 @@ class MultiAberratedAperture(ApertureLayer):
         A list of `AberratedAperture` objects.
     """
     aperture: ApertureLayer
-    bases: List[ApertureLayer]
+    bases: list
  
  
     def __init__(self   : ApertureLayer, 
             noll_inds   : Array, 
             coeffs      : Array,
-            aperture    : ApertureLayer) -> Layer: 
+            aperture    : ApertureLayer) -> ApertureLayer: 
         """
         Parameters:
         -----------
@@ -2660,7 +2660,7 @@ class MultiAberratedAperture(ApertureLayer):
 
 pixels: float = 128
 nterms: float = 6
-coords: float = dl.utils.get_pixel_coordinates(pixels, 3. / pixels)
+coords: float = dLux.utils.get_pixel_coordinates(pixels, 3. / pixels)
 
 num_ikes: int = 10
 num_basis: int = 3
@@ -2668,7 +2668,7 @@ noll_inds: list = [i + 1 for i in range(num_ikes)]
 
 coeffs: float = np.ones((num_ikes,), float)
 aper: ApertureLayer = CircularAperture(1.)
-basis: ApertureLayer = AberratedCircularAperture(noll_inds, coeffs, aper)
+basis: ApertureLayer = AberratedAperture(noll_inds, coeffs, aper)
 
 basis: float = basis._basis(coords)
 aper: float = aper._aperture(coords)
