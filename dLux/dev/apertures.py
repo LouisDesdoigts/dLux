@@ -2682,7 +2682,7 @@ for i in range(num_ikes):
     row = i // (num_ikes // 2)
  
     axes[row][col].set_title(noll_inds[i])
-    _map = axes[row][col].imshow(_basis[i] * _aper)
+    _map = axes[row][col].imshow(basis[i] * aper)
     axes[row][col].set_xticks([])
     axes[row][col].set_yticks([])
     axes[row][col].axis("off")
