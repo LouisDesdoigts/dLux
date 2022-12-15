@@ -13,6 +13,12 @@ Array = np.ndarray
 Wavefront = dLux.wavefronts.Wavefront
 
 
+__all__ = ["factorial", "CircularAperture", "SquareAperture", 
+    "HexagonalAperture", "RegularPolygonalAperture", 
+    "IrregularPolygonalAperture", "StaticAperture",
+    "AberratedAperture", "StaticAberratedAperture"]
+
+
 two_pi: float = 2. * np.pi
         
  
