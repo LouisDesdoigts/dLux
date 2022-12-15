@@ -7,6 +7,20 @@ jax.config.update("jax_enable_x64", True)
 
 from apertures import *
 
+
+def plot_basis(basis: float):
+    length: int = basis.shape[0]
+        
+    fig: object = plt.figure(figsize=(length*4, 3))
+    axes: object = fig.subplots(1, length)
+
+    for i in range(length):
+        cmap = axes[i].imshow(zernikes[i])
+        fig.colorbar(cmap, ax=axes[i])
+    
+    plt.show()
+
+
 nolls: int = [i for i in range(3, 10)]
 coeffs: float = np.ones((len(nolls),), float)
 
@@ -20,21 +34,14 @@ basis: ApertureLayer = AberratedAperture(nolls, coeffs, aper)
 aperture = aper._aperture(coords)
 zernikes: float = np.stack([h(coords) for h in basis.basis_funcs])
 
-# +
-length: int = len(nolls)
-
-fig = plt.figure(figsize=(length*4, 3))
-axes = fig.subplots(1, length)
-
-for i in range(length):
-    cmap = axes[i].imshow(zernikes[i])
-    fig.colorbar(cmap, ax=axes[i])
-# -
+plot_basis(zernikes)
 
 pixel_area = aperture.sum()
 shape = zernikes.shape
 width = shape[-1]
 basis = np.zeros(shape).at[0].set(aperture)
+
+
 
 for j in np.arange(1, self.nterms):
     intermediate = zernikes[j] * aperture
