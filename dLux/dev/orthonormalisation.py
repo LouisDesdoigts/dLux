@@ -74,3 +74,9 @@ _basis = _basis\
 plot_basis(_basis)
 
 
+def inner_product(f1: float, f2: float) -> float:
+    return (f1 * f2).sum()
+
+
+def projection(f1: float, f2: float) -> float:
+    return inner_product(f1, f2) / inner_product(f2, f2) * f2
