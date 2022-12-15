@@ -21,7 +21,7 @@ def plot_basis(basis: float):
     plt.show()
 
 
-nolls: int = [i for i in range(0, 10)]
+nolls: int = [i for i in range(1, 5)]
 coeffs: float = np.ones((len(nolls),), float)
 nterms: int = len(nolls)
 
@@ -45,6 +45,20 @@ def projection(f1: float, f2: float) -> float:
     return inner_product(f1, f2) / inner_product(f2, f2) * f2
 
 
-plot_basis(zernikes)
+vecs: float = zernikes * aperture
+bvecs: float = np.zeros_like(vecs)
+
+for k in range(nterms):
+    u_k: float = vecs[k]
+    for j in range(1, k):
+        u_k -= projection(vecs[j], u_k) 
+        plt.imshow(projection(vecs[j], u_k))
+        plt.colorbar()
+        plt.show()
+    bvecs: float = bvecs.at[k].set(u_k)  
+
+plot_basis(bvecs)
+
+plot_basis(vecs)
 
 
