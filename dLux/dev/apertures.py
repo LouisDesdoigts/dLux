@@ -2460,8 +2460,8 @@ class AberratedAperture(ApertureLayer):
         def _jth_polike(coords: Array) -> Array:
             polar: float = dLux.utils.cartesian_to_polar(coords)
             rho: float = polar[0]
-            phi: float = polar[1] + np.pi / 2. # TODO:
             alpha: float = np.pi / n
+            phi: float = polar[1] + alpha 
             wedge: float = np.floor((phi + alpha) / (2. * alpha))
             u_alpha: float = phi - wedge * (2 * alpha)
             r_alpha: float = np.cos(alpha) / np.cos(u_alpha)
