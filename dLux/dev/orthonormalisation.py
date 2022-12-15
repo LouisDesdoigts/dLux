@@ -73,4 +73,41 @@ _basis = _basis\
 
 plot_basis(_basis)
 
+# +
+if aperture is None:
+    aperture = hex_aperture(npix=npix, rho=rho, theta=theta, vertical=vertical, outside=0)
 
+# any pixels with zero or NaN in the aperture are outside the area
+apmask = (np.isfinite(aperture) & (aperture > 0))
+apmask_float = np.asarray(apmask, float)
+A = apmask.sum()
+
+# precompute zernikes
+Z = np.full((nterms + 1,) + shape, outside, dtype=float)
+Z[1:] = zernike_basis(nterms=nterms, npix=npix, rho=rho, theta=theta, outside=0.0)
+
+G = [np.zeros(shape), np.ones(shape)]  # array of G_i etc. intermediate fn
+H = [np.zeros(shape), apmask_float.copy()]  # array of hexikes
+c = {}  # coefficients hash
+
+for j in np.arange(nterms - 1) + 1:  # can do one less since we already have the piston term
+    _log.debug("  j = " + str(j))
+    # Compute the j'th G, then H
+    nextG = Z[j + 1] * apmask_float
+    for k in np.arange(j) + 1:
+        c[(j + 1, k)] = -1 / A * (Z[j + 1] * H[k] * apmask_float).sum()
+        if c[(j + 1, k)] != 0:
+            nextG += c[(j + 1, k)] * H[k]
+        _log.debug("    c[%s] = %f", str((j + 1, k)), c[(j + 1, k)])
+
+    nextH = nextG / np.sqrt((nextG ** 2).sum() / A)
+
+    G.append(nextG)
+    H.append(nextH)
+
+    # TODO - contemplate whether the above algorithm is numerically stable
+    # cf. modified gram-schmidt algorithm discussion on wikipedia.
+
+basis = np.asarray(H[1:])  # drop the 0th null element
+basis[:, ~apmask] = outside
+return basis
