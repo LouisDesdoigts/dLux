@@ -94,8 +94,7 @@ def test_plots_of_aber_aps(aber_aps: dict):
             axes[row][col].axis("off")
             subfigs[i].colorbar(_map, ax=axes[row][col])
             
-     plt.show()
-
+    plt.show()
 
 
 class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
@@ -2760,25 +2759,6 @@ class MultiAberratedAperture(ApertureLayer):
 
 
 
-igure = plt.figure()
-igs = figure.subfigures(4, 1)
-or fig, ap, basis in zip(figs, aps, bases):
-   _basis = bases[basis]._basis(coordinates)
-   _ap = aps[ap]._aperture(coordinates)
-
-   axes = fig.subplots(2, num_ikes // 2)
-   for i in range(num_ikes):
-       row = i // (num_ikes // 2)
-       col = i % (num_ikes // 2)
-
-       fig.suptitle(basis)
-       _map = axes[row][col].imshow(_basis[i] * _ap)
-       axes[row][col].set_xticks([])
-       axes[row][col].set_yticks([])
-       axes[row][col].axis("off")
-       fig.colorbar(_map, ax=axes[row][col]) 
-lt.show()
-
 ##ps = {
 ##   "Default": dl.SquareAperture(0., 0., 0., 1., False, False),
 ##   "Trans. x": dl.SquareAperture(.5, 0., 0., 1., False, False),
@@ -3035,9 +3015,12 @@ lt.show()
 #    "More": UniformSpider(6, .1)
 #})
 
-cases = {
-   "Squarikes": AberratedArbitraryAperture(noll_inds, coeffs, SquareAperture(1.)),
-   "Annikes": AberratedArbitraryAperture(noll_inds, coeffs, AnnularAperture(1., .5)),
-   "Rectikes": AberratedArbitraryAperture(noll_inds, coeffs, RectangularAperture(.5, 1.)),
-   "Hexikes": AberratedArbitraryAperture(noll_inds, coeffs, HexagonalAperture(1.))
-}
+nolls: int = [i for i in range(3, 10)]
+coeffs: float = np.ones((len(nolls,) float)
+
+test_plots_of_aber_aps({
+   "Squarikes": AberratedAperture(nolls, coeffs, SquareAperture(1.)),
+   "Annikes": AberratedAperture(nolls, coeffs, AnnularAperture(1., .5)),
+   "Rectikes": AberratedAperture(nolls, coeffs, RectangularAperture(.5, 1.)),
+   "Hexikes": AberratedAperture(nolls, coeffs, HexagonalAperture(1.))
+})
