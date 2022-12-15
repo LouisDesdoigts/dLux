@@ -73,37 +73,4 @@ _basis = _basis\
 
 plot_basis(_basis)
 
-apmask: float = aperture
-
-Z: float = zernikes
-
-A = apmask.sum()
-
-G = [np.zeros(shape), np.ones(shape)]  # array of G_i etc. intermediate fn
-H = [np.zeros(shape), apmask.copy()]  # array of hexikes
-c = [] # coefficients hash
-
-# +
-for j in np.arange(nterms - 1) + 1:  # can do one less since we already have the piston term
-    # Compute the j'th G, then H
-    nextG = Z[j + 1] * apmask
-    for k in np.arange(j) + 1:
-        coeff = -1 / A * (Z[j + 1] * H[k] * apmask).sum()
-        c.append(coeff)
-        if coeff != 0:
-            nextG += coeff * H[k]
-
-    nextH = nextG / np.sqrt((nextG ** 2).sum() / A)
-
-    G.append(nextG)
-    H.append(nextH)
-
-    # TODO - contemplate whether the above algorithm is numerically stable
-    # cf. modified gram-schmidt algorithm discussion on wikipedia.
-
-_basis = np.asarray(H[1:])  # drop the 0th null element
-# -
-
-plot_basis(_basis)
-
 
