@@ -2146,6 +2146,7 @@ class AberratedAperture(ApertureLayer):
     basis_funcs: list
     aperture: ApertureLayer
     coeffs: Array
+    nterms: int
  
  
     def __init__(self   : ApertureLayer, 
@@ -2175,7 +2176,9 @@ class AberratedAperture(ApertureLayer):
         else:
             self.basis_funcs = [self.jth_zernike(j) for j in noll_inds]
 
+        super().__init__()
         self.aperture = aperture
+        self.nterms = int(len(coeffs))
         self.coeffs = np.asarray(coeffs).astype(float)
  
  
@@ -2386,12 +2389,12 @@ class AberratedAperture(ApertureLayer):
         n, m = self.noll_index(j)
      
         def _jth_zernike(coords: list) -> list:
-            polar_coords = dl.utils.cartesian_to_polar(coords)
+            polar_coords = dLux.utils.cartesian_to_polar(coords)
             rho = polar_coords[0]
             theta = polar_coords[1]
             aperture = rho <= 1.
-            _jth_rad_zern = jth_radial_zernike(n, m)
-            _jth_pol_zern = jth_polar_zernike(n, m)
+            _jth_rad_zern = self.jth_radial_zernike(n, m)
+            _jth_pol_zern = self.jth_polar_zernike(n, m)
             return aperture * _jth_rad_zern(rho) * _jth_pol_zern(theta)
         
         return _jth_zernike 
@@ -2449,9 +2452,9 @@ class AberratedAperture(ApertureLayer):
             calculations. 
         """
         coords: float = self.aperture._normalised_coordinates(coords)
-        ikes: float = np.stack([h(zern_coords) for h in self.basis_funcs])
+        ikes: float = np.stack([h(coords) for h in self.basis_funcs])
         
-        is_reg_pol: bool = isinstance(self.aperture, RegularPolyogonalAperture)
+        is_reg_pol: bool = isinstance(self.aperture, RegularPolygonalAperture)
         is_circ: bool = isinstance(self.aperture, CircularAperture)
 
         if (not is_reg_pol) or (not is_circ):
