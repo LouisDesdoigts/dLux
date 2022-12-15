@@ -2658,17 +2658,6 @@ class MultiAberratedAperture(eqx.Module):
         return params_dict
 
 
-##TODO: I should pre-calculate the _aperture in the init for the 
-##AberratedCircularAperture and the AberratedHexagonalAperture
-##This is so that I can add a note.
-##This is testing code. 
-#mport jax.numpy as np
-#mport matplotlib as mpl 
-#mport matplotlib.pyplot as plt
-
-#pl.rcParams["text.usetex"] = True
-#pl.rcParams["image.cmap"] = "seismic"
-
 #ixels = 128
 #terms = 6
 
