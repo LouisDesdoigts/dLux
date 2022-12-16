@@ -1,4 +1,10 @@
 import pytest
+import jax.numpy as np
+import dLux
+
+
+Array = np.ndarray
+Wavefront = dLux.wavefronts.Wavefront
 
 
 @pytest.fixture
