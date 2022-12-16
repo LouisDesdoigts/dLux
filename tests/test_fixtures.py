@@ -36,6 +36,6 @@ def create_charlie():
     return Person("Charlie", 1.543, 564)
 
 
-def test_john(fixture: callable):
+def test_john(create_john: callable):
     corr: str = "I am John, a 33 years old Gender.MALE, who is 1.84m tall"
-    assert str(fixture) == corr 
+    assert str(create_john) == corr 
