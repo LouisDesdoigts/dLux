@@ -27,10 +27,16 @@ class Person(object):
 
 
 @pytest.fixture
-def create_john():
-    return Person("John", 1.845, 33, Gender.MALE)
+def create_person():
+    def _create_person(
+            name: str = "John", 
+            height: float = 1.845,
+            age: int = 33, 
+            gender: int = Gender.MALE):
+        return Person(name, height, age, gender)
+    return _create_person
 
 
-def test_john(create_john: callable):
+def test_john(create_person: callable):
     corr: str = "I am John, a 33 years old MALE, who is 1.84m tall."
-    assert str(create_john) == corr 
+    assert str(create_person()) == corr 
