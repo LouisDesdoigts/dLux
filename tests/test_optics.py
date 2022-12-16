@@ -9,6 +9,61 @@ config.update("jax_debug_nans", True)
 Array = np.ndarray
 
 
+
+
+class TestCreateWavefront(UtilityUser):
+    """
+    Tests the CreateWavefront class.
+    """
+    utility : CreateWavefrontUtility = CreateWavefrontUtility()
+
+
+    def test_constructor(self):
+        """
+        Tests the constructor.
+        """
+        # Test wrong dims
+        with pytest.raises(AssertionError):
+            self.utility.construct(diameter=np.array([]))
+
+        # Test wrong string input
+        with pytest.raises(AssertionError):
+            self.utility.construct(wavefront_type='cartesian')
+
+        # Test functioning
+        self.utility.construct()
+
+
+    def test_call(self):
+        """
+        Tests the __call__ method.
+        """
+        params = {'wavelength': np.array(1e-6), 'offset': np.zeros(2)}
+        self.utility.construct()(None, params)
+
+
+class TiltWavefrontUtility(Utility):
+    """
+    Utility for TiltWavefront class.
+    """
+    tilt_angles : Array
+
+
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the TiltWavefront Utility.
+        """
+        self.tilt_angles = np.ones(2)
+
+
+    def construct(self : Utility, tilt_angles : Array = None) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        tilt_angles = self.tilt_angles if tilt_angles is None else tilt_angles
+        return dLux.optics.TiltWavefront(tilt_angles)
+
+
 class TestTiltWavefront(UtilityUser):
     """
     Tests the TiltWavefront class.
