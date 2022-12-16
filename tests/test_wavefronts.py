@@ -90,7 +90,7 @@ def create_far_field_fresnel_wavefront():
     return _create_wavefront
 
 
-class TestWavefront(UtilityUser):
+class TestWavefront(object):
     """
     Test the Wavefront class.
     """
