@@ -57,3 +57,25 @@ def create_tilt_wavefront() -> callable:
             tilt_angles: Array = np.ones(2)) -> OpticalLayer:
         return dLux.optics.TiltWavefront(tilt_angles)
     return _create_tilt_wavefront
+
+
+class NormaliseWavefrontUtility(Utility):
+    """
+    Utility for NormaliseWavefront class.
+    """
+
+
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the NormaliseWavefront Utility.
+        """
+        pass
+
+
+    def construct(self : Utility) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.optics.NormaliseWavefront()
+
+

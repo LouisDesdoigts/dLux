@@ -8,7 +8,6 @@ config.update("jax_debug_nans", True)
 
 Array = np.ndarray
 
-
 class TestCreateWavefront(UtilityUser):
     """
     Tests the CreateWavefront class.
@@ -69,49 +68,6 @@ class TestTiltWavefront(UtilityUser):
         """
         wf = WavefrontUtility().construct()
         self.utility.construct()(wf)
-
-
-class TestCircularAperture(UtilityUser):
-    """
-    Tests the CircularAperture class.
-    """
-    utility : CircularApertureUtility = CircularApertureUtility()
-
-
-    def test_constructor(self):
-        """
-        Tests the constructor.
-        """
-        # Test functioning
-        self.utility.construct()
-
-
-    def test_call(self):
-        """
-        Tests the __call__ method.
-        """
-        wf = WavefrontUtility().construct()
-        self.utility.construct(npixels=wf.npixels)(wf)
-
-
-class NormaliseWavefrontUtility(Utility):
-    """
-    Utility for NormaliseWavefront class.
-    """
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the NormaliseWavefront Utility.
-        """
-        pass
-
-
-    def construct(self : Utility) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        return dLux.optics.NormaliseWavefront()
 
 
 class TestNormaliseWavefront(UtilityUser):
