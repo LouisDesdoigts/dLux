@@ -31,11 +31,6 @@ def create_john():
     return Person("John", 1.845, 33, Gender.MALE)
 
 
-@pytest.fixture
-def create_charlie():
-    return Person("Charlie", 1.543, 564)
-
-
 def test_john(create_john: callable):
     corr: str = "I am John, a 33 years old MALE, who is 1.84m tall."
     assert str(create_john) == corr 
