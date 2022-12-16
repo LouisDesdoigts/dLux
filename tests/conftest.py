@@ -59,23 +59,17 @@ def create_tilt_wavefront() -> callable:
     return _create_tilt_wavefront
 
 
-class NormaliseWavefrontUtility(Utility):
+@pytest.fixture
+def create_normalise_wavefront() -> callable:
     """
-    Utility for NormaliseWavefront class.
+    Returns:
+    --------
+    create_normalise_wavefront: callable 
+        A function that has all keyword arguments and can be 
+        used to create a `NormaliseWavefront` layer for testing.
     """
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the NormaliseWavefront Utility.
-        """
-        pass
-
-
-    def construct(self : Utility) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
+    def _create_normalise_wavefront():
         return dLux.optics.NormaliseWavefront()
+    return _create_normalise_wavefront
 
 
