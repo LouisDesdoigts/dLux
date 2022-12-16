@@ -145,77 +145,77 @@ class TestWavefront(object):
             create_wavefront(plane_type=[1])
 
 
-    def test_npixels(self):
+    def test_npixels(self, create_wavefront: callable) -> None:
         """
         Tests the npixels property.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         assert wf.npixels == wf.amplitude.shape[-1]
 
 
-    def test_nfields(self):
+    def test_nfields(self, create_wavefront: callable) -> None:
         """
         Tests the nfields property.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         assert wf.nfields == wf.amplitude.shape[0]
 
 
-    def test_diameter(self):
+    def test_diameter(self, create_wavefront: callable) -> None:
         """
         Tests the diameter property.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         assert wf.diameter == wf.npixels * wf.pixel_scale
 
 
-    def test_real(self):
+    def test_real(self, create_wavefront: callable) -> None:
         """
         Tests the real property.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         assert (wf.real == wf.amplitude * np.cos(wf.phase)).all()
 
 
-    def test_imaginary(self):
+    def test_imaginary(self, create_wavefront: callable) -> None:
         """
         Tests the imaginary property.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         assert (wf.imaginary == wf.amplitude * np.sin(wf.phase)).all()
 
 
-    def test_phasor(self):
+    def test_phasor(self, create_wavefront: callable) -> None::
         """
         Tests the phasor property.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         assert (wf.phasor == wf.amplitude * np.exp(1j*wf.phase)).all()
 
 
-    def test_psf(self):
+    def test_psf(self, create_wavefront: callable) -> None::
         """
         Tests the psf property.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         assert (wf.psf == wf.amplitude**2).all()
 
 
-    def test_pixel_coordinates(self):
+    def test_pixel_coordinates(self, create_wavefront: callable) -> None::
         """
         Tests the pixel_coordinates property.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         assert (wf.pixel_coordinates == \
         dLux.utils.coordinates.get_pixel_coordinates(wf.npixels,
                                                      wf.pixel_scale)).all()
 
 
-    def test_set_amplitude(self):
+    def test_set_amplitude(self, create_wavefront: callable) -> None::
         """
         Tests the set_amplitude method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         # Test string inputs
         with pytest.raises(AssertionError):
@@ -238,11 +238,11 @@ class TestWavefront(object):
         assert (wf.set_amplitude(new_ampl).amplitude == new_ampl).all()
 
 
-    def test_set_phase(self):
+    def test_set_phase(self, create_wavefront: callable) -> None::
         """
         Tests the set_phase method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         # Test string inputs
         with pytest.raises(AssertionError):
@@ -265,11 +265,11 @@ class TestWavefront(object):
         assert (wf.set_phase(new_phase).phase == new_phase).all()
 
 
-    def test_set_pixel_scale(self):
+    def test_set_pixel_scale(self, create_wavefront: callable) -> None::
         """
         Tests the set_pixel_scale method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         # Test string inputs
         with pytest.raises(AssertionError):
@@ -288,11 +288,11 @@ class TestWavefront(object):
         assert wf.set_pixel_scale(new_pixscale).pixel_scale == new_pixscale
 
 
-    def test_set_plane_type(self):
+    def test_set_plane_type(self, create_wavefront: callable) -> None::
         """
         Tests the set_plane_type method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         # Test string inputs
         with pytest.raises(AssertionError):
@@ -303,11 +303,11 @@ class TestWavefront(object):
         assert wf.set_plane_type(new_plane_type).plane_type == new_plane_type
 
 
-    def test_set_phasor(self):
+    def test_set_phasor(self, create_wavefront: callable) -> None::
         """
         Tests the set_phasor method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         # Test string inputs
         with pytest.raises(AssertionError):
@@ -336,11 +336,11 @@ class TestWavefront(object):
         assert (wf.set_phasor(new_ampl, new_phase).phase == new_phase).all()
 
 
-    def test_tilt_wavefront(self):
+    def test_tilt_wavefront(self, create_wavefront: callable) -> None::
         """
         Tests the tilt_wavefront method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         # Test string inputs
         with pytest.raises(AssertionError):
@@ -362,11 +362,11 @@ class TestWavefront(object):
         wf.tilt_wavefront(np.ones(2))
 
 
-    def test_multiply_amplitude(self):
+    def test_multiply_amplitude(self, create_wavefront: callable) -> None::
         """
         Tests the multiply_amplitude method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         # Test string inputs
         with pytest.raises(AssertionError):
@@ -387,11 +387,11 @@ class TestWavefront(object):
         wf.multiply_amplitude(np.ones((1, npix, npix)))
 
 
-    def test_add_phase(self):
+    def test_add_phase(self, create_wavefront: callable) -> None::
         """
         Tests the add_phase method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         # Test string inputs
         with pytest.raises(AssertionError):
@@ -412,11 +412,11 @@ class TestWavefront(object):
         wf.add_phase(np.ones((1, npix, npix)))
 
 
-    def test_add_opd(self):
+    def test_add_opd(self, create_wavefront: callable) -> None::
         """
         Tests the add_opd method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         # Test string inputs
         with pytest.raises(AssertionError):
@@ -437,29 +437,29 @@ class TestWavefront(object):
         wf.add_opd(np.ones((1, npix, npix)))
 
 
-    def test_normalise(self):
+    def test_normalise(self, create_wavefront: callable) -> None::
         """
         Tests the normalise method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         new_wf = wf.normalise()
         assert np.sum(new_wf.amplitude**2) == 1.
 
 
-    def test_wavefront_to_psf(self):
+    def test_wavefront_to_psf(self, create_wavefront: callable) -> None::
         """
         Tests the wavefront_to_psf method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         wf.wavefront_to_psf()
 
 
-    def test_invert_x_and_y(self):
+    def test_invert_x_and_y(self, create_wavefront: callable) -> None::
         """
         Tests the invert_x_and_y method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         flipped_ampl = np.flip(wf.amplitude, axis=(-1, -2))
         flipped_phase = np.flip(wf.phase, axis=(-1, -2))
@@ -468,11 +468,11 @@ class TestWavefront(object):
         assert (new_wf.phase == flipped_phase).all()
 
 
-    def test_invert_x(self):
+    def test_invert_x(self, create_wavefront: callable) -> None::
         """
         Tests the invert_x method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         flipped_ampl = np.flip(wf.amplitude, axis=-1)
         flipped_phase = np.flip(wf.phase, axis=-1)
@@ -481,11 +481,11 @@ class TestWavefront(object):
         assert (new_wf.phase == flipped_phase).all()
 
 
-    def test_invert_y(self):
+    def test_invert_y(self, create_wavefront: callable) -> None::
         """
         Tests the invert_y method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
 
         flipped_ampl = np.flip(wf.amplitude, axis=-2)
         flipped_phase = np.flip(wf.phase, axis=-2)
@@ -494,11 +494,11 @@ class TestWavefront(object):
         assert (new_wf.phase == flipped_phase).all()
 
 
-    def test_interpolate(self):
+    def test_interpolate(self, create_wavefront: callable) -> None::
         """
         Tests the interpolate method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         wf = dLux.CircularAperture(1.)(wf)
 
         npix = wf.npixels
@@ -512,11 +512,11 @@ class TestWavefront(object):
         assert np.allclose(new_wf2.amplitude[0], small_ampl)
 
 
-    def test_rotate(self):
+    def test_rotate(self, create_wavefront: callable) -> None::
         """
         Tests the rotate method.
         """
-        wf = self.utility.construct()
+        wf = create_wavefront()
         wf = dLux.CircularAperture(1.)(wf)
         flipped_amplitude = np.flipud(wf.amplitude)
         flipped_phase = np.flipud(wf.phase)
@@ -533,12 +533,12 @@ class TestWavefront(object):
             wf.rotate(np.pi, fourier=True)
 
 
-    def test_pad_to(self):
+    def test_pad_to(self, create_wavefront: callable) -> None::
         """
         Tests the pad_to method.
         """
-        even_wf = self.utility.construct()
-        odd_wf = self.utility.construct(amplitude=np.ones((1, 15, 15)),
+        even_wf = create_wavefront()
+        odd_wf = create_wavefront(amplitude=np.ones((1, 15, 15)),
                                         phase=np.ones((1, 15, 15)))
 
         # Smaller value
@@ -556,12 +556,12 @@ class TestWavefront(object):
         assert even_wf.pad_to(20).npixels == 20
 
 
-    def test_crop_to(self):
+    def test_crop_to(self, create_wavefront: callable) -> None::
         """
         Tests the crop_to method.
         """
-        even_wf = self.utility.construct()
-        odd_wf = self.utility.construct(amplitude=np.ones((1, 15, 15)),
+        even_wf = create_wavefront()
+        odd_wf = create_wavefront(amplitude=np.ones((1, 15, 15)),
                                         phase=np.ones((1, 15, 15)))
 
         # Smaller value
