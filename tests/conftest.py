@@ -42,3 +42,25 @@ def create_create_wavefront() -> callable:
             wavefront_type = "Cartesian") -> OpticalLayer:
         return dLux.optics.CreateWavefront(npixels, diameter, wavefront_type)
     return _create_create_wavefront
+
+
+class TiltWavefrontUtility(Utility):
+    """
+    Utility for TiltWavefront class.
+    """
+    tilt_angles : Array
+
+
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the TiltWavefront Utility.
+        """
+        self.tilt_angles = np.ones(2)
+
+
+    def construct(self : Utility, tilt_angles : Array = None) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        tilt_angles = self.tilt_angles if tilt_angles is None else tilt_angles
+        return dLux.optics.TiltWavefront(tilt_angles)
