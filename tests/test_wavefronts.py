@@ -125,7 +125,7 @@ class TestWavefront(object):
         assert (wf.imaginary == wf.amplitude * np.sin(wf.phase)).all()
 
 
-    def test_phasor(self, create_wavefront: callable) -> None::
+    def test_phasor(self, create_wavefront: callable) -> None:
         """
         Tests the phasor property.
         """
@@ -133,7 +133,7 @@ class TestWavefront(object):
         assert (wf.phasor == wf.amplitude * np.exp(1j*wf.phase)).all()
 
 
-    def test_psf(self, create_wavefront: callable) -> None::
+    def test_psf(self, create_wavefront: callable) -> None:
         """
         Tests the psf property.
         """
@@ -141,7 +141,7 @@ class TestWavefront(object):
         assert (wf.psf == wf.amplitude**2).all()
 
 
-    def test_pixel_coordinates(self, create_wavefront: callable) -> None::
+    def test_pixel_coordinates(self, create_wavefront: callable) -> None:
         """
         Tests the pixel_coordinates property.
         """
@@ -151,7 +151,7 @@ class TestWavefront(object):
                                                      wf.pixel_scale)).all()
 
 
-    def test_set_amplitude(self, create_wavefront: callable) -> None::
+    def test_set_amplitude(self, create_wavefront: callable) -> None:
         """
         Tests the set_amplitude method.
         """
@@ -178,7 +178,7 @@ class TestWavefront(object):
         assert (wf.set_amplitude(new_ampl).amplitude == new_ampl).all()
 
 
-    def test_set_phase(self, create_wavefront: callable) -> None::
+    def test_set_phase(self, create_wavefront: callable) -> None:
         """
         Tests the set_phase method.
         """
@@ -205,7 +205,7 @@ class TestWavefront(object):
         assert (wf.set_phase(new_phase).phase == new_phase).all()
 
 
-    def test_set_pixel_scale(self, create_wavefront: callable) -> None::
+    def test_set_pixel_scale(self, create_wavefront: callable) -> None:
         """
         Tests the set_pixel_scale method.
         """
@@ -228,7 +228,7 @@ class TestWavefront(object):
         assert wf.set_pixel_scale(new_pixscale).pixel_scale == new_pixscale
 
 
-    def test_set_plane_type(self, create_wavefront: callable) -> None::
+    def test_set_plane_type(self, create_wavefront: callable) -> None:
         """
         Tests the set_plane_type method.
         """
@@ -243,7 +243,7 @@ class TestWavefront(object):
         assert wf.set_plane_type(new_plane_type).plane_type == new_plane_type
 
 
-    def test_set_phasor(self, create_wavefront: callable) -> None::
+    def test_set_phasor(self, create_wavefront: callable) -> None:
         """
         Tests the set_phasor method.
         """
@@ -276,7 +276,7 @@ class TestWavefront(object):
         assert (wf.set_phasor(new_ampl, new_phase).phase == new_phase).all()
 
 
-    def test_tilt_wavefront(self, create_wavefront: callable) -> None::
+    def test_tilt_wavefront(self, create_wavefront: callable) -> None:
         """
         Tests the tilt_wavefront method.
         """
@@ -302,7 +302,7 @@ class TestWavefront(object):
         wf.tilt_wavefront(np.ones(2))
 
 
-    def test_multiply_amplitude(self, create_wavefront: callable) -> None::
+    def test_multiply_amplitude(self, create_wavefront: callable) -> None:
         """
         Tests the multiply_amplitude method.
         """
@@ -327,7 +327,7 @@ class TestWavefront(object):
         wf.multiply_amplitude(np.ones((1, npix, npix)))
 
 
-    def test_add_phase(self, create_wavefront: callable) -> None::
+    def test_add_phase(self, create_wavefront: callable) -> None:
         """
         Tests the add_phase method.
         """
@@ -352,7 +352,7 @@ class TestWavefront(object):
         wf.add_phase(np.ones((1, npix, npix)))
 
 
-    def test_add_opd(self, create_wavefront: callable) -> None::
+    def test_add_opd(self, create_wavefront: callable) -> None:
         """
         Tests the add_opd method.
         """
@@ -377,7 +377,7 @@ class TestWavefront(object):
         wf.add_opd(np.ones((1, npix, npix)))
 
 
-    def test_normalise(self, create_wavefront: callable) -> None::
+    def test_normalise(self, create_wavefront: callable) -> None:
         """
         Tests the normalise method.
         """
@@ -387,7 +387,7 @@ class TestWavefront(object):
         assert np.sum(new_wf.amplitude**2) == 1.
 
 
-    def test_wavefront_to_psf(self, create_wavefront: callable) -> None::
+    def test_wavefront_to_psf(self, create_wavefront: callable) -> None:
         """
         Tests the wavefront_to_psf method.
         """
@@ -395,7 +395,7 @@ class TestWavefront(object):
         wf.wavefront_to_psf()
 
 
-    def test_invert_x_and_y(self, create_wavefront: callable) -> None::
+    def test_invert_x_and_y(self, create_wavefront: callable) -> None:
         """
         Tests the invert_x_and_y method.
         """
@@ -408,7 +408,7 @@ class TestWavefront(object):
         assert (new_wf.phase == flipped_phase).all()
 
 
-    def test_invert_x(self, create_wavefront: callable) -> None::
+    def test_invert_x(self, create_wavefront: callable) -> None:
         """
         Tests the invert_x method.
         """
@@ -421,7 +421,7 @@ class TestWavefront(object):
         assert (new_wf.phase == flipped_phase).all()
 
 
-    def test_invert_y(self, create_wavefront: callable) -> None::
+    def test_invert_y(self, create_wavefront: callable) -> None:
         """
         Tests the invert_y method.
         """
@@ -434,7 +434,7 @@ class TestWavefront(object):
         assert (new_wf.phase == flipped_phase).all()
 
 
-    def test_interpolate(self, create_wavefront: callable) -> None::
+    def test_interpolate(self, create_wavefront: callable) -> None:
         """
         Tests the interpolate method.
         """
@@ -452,7 +452,7 @@ class TestWavefront(object):
         assert np.allclose(new_wf2.amplitude[0], small_ampl)
 
 
-    def test_rotate(self, create_wavefront: callable) -> None::
+    def test_rotate(self, create_wavefront: callable) -> None:
         """
         Tests the rotate method.
         """
@@ -473,7 +473,7 @@ class TestWavefront(object):
             wf.rotate(np.pi, fourier=True)
 
 
-    def test_pad_to(self, create_wavefront: callable) -> None::
+    def test_pad_to(self, create_wavefront: callable) -> None:
         """
         Tests the pad_to method.
         """
@@ -496,7 +496,7 @@ class TestWavefront(object):
         assert even_wf.pad_to(20).npixels == 20
 
 
-    def test_crop_to(self, create_wavefront: callable) -> None::
+    def test_crop_to(self, create_wavefront: callable) -> None:
         """
         Tests the crop_to method.
         """
