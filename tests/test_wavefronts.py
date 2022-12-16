@@ -9,45 +9,16 @@ config.update("jax_debug_nans", True)
 
 Array = np.ndarray
 
-
-class WavefrontUtility(Utility):
-    """
-    Utility for Wavefront class.
-    """
-    wavelength  : Array
-    pixel_scale : Array
-    plane_type  : PlaneType
-    amplitude   : Array
-    phase       : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Wavefront Utility.
-        """
-        self.wavelength  = np.array(550e-09)
-        self.pixel_scale = np.array(1.)
-        self.plane_type  = dLux.PlaneType.Pupil
-        self.amplitude   = np.ones((1, 16, 16))
-        self.phase       = np.zeros((1, 16, 16))
-
-
-    def construct(self        : Utility,
-                  wavelength  : Array = None,
-                  pixel_scale : Array = None,
-                  plane_type  : dLux.wavefronts.PlaneType = None,
-                  amplitude   : Array = None,
-                  phase       : Array = None) -> Wavefront:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        wavelength  = self.wavelength  if wavelength  is None else wavelength
-        pixel_scale = self.pixel_scale if pixel_scale is None else pixel_scale
-        plane_type  = self.plane_type  if plane_type  is None else plane_type
-        amplitude   = self.amplitude   if amplitude   is None else amplitude
-        phase       = self.phase       if phase       is None else phase
-        return dLux.wavefronts.Wavefront(wavelength, pixel_scale, amplitude,
-                                         phase, plane_type)
+@pytest.fixture
+def create_wavefront()
+    def _create_wavefront(
+            wavelength: Array = np.array(550e-09),
+            pixel_scale: Array = np.array(1.),
+            plane_type: int = dLux.PlaneType.Pupil,
+            amplitude: Array = np.ones((1, 16, 16)),
+            phase: Array = np.zeros((1, 16, 16))) -> Wavefront:
+        return Wavefront(wavelength, pixel_scale, amplitude, phase, plane_type)
+    return _create_wavefront
 
 
 class CartesianWavefrontUtility(WavefrontUtility):
