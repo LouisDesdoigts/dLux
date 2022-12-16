@@ -25,7 +25,8 @@ def create_wavefront():
             plane_type: int = dLux.PlaneType.Pupil,
             amplitude: Array = np.ones((1, 16, 16)),
             phase: Array = np.zeros((1, 16, 16))) -> Wavefront:
-        return Wavefront(wavelength, pixel_scale, amplitude, phase, plane_type)
+        return dLux.wavefronts.Wavefront(
+            wavelength, pixel_scale, amplitude, phase, plane_type)
     return _create_wavefront
 
 
@@ -48,17 +49,7 @@ def create_cartesian_wavefront():
             wavelength, pixel_scale, amplitude, phase, plane_type)
     return _create_wavefront
 
-class AngularWavefrontUtility(WavefrontUtility):
-    """
-    Utility for AngularWavefront class.
-    """
 
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the CartesianWavefront Utility.
-        """
-        super().__init__()
 
 
 class FarFieldFresnelWavefrontUtility(WavefrontUtility):
