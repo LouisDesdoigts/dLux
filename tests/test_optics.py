@@ -71,37 +71,6 @@ class TestTiltWavefront(UtilityUser):
         self.utility.construct()(wf)
 
 
-class CircularApertureUtility(Utility):
-    """
-    Utility for CircularAperture class.
-    """
-    npixels : int
-    rmin    : float
-    rmax    : float
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the CircularAperture Utility.
-        """
-        self.npixels = 16
-        self.rmin    = 0.05
-        self.rmax    = 0.95
-
-
-    def construct(self    : Utility,
-                  npixels : int   = None,
-                  rmin    : float = None,
-                  rmax    : float = None) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        npixels = self.npixels if npixels is None else npixels
-        rmin    = self.rmin    if rmin    is None else rmin
-        rmax    = self.rmax    if rmax    is None else rmax
-        return dLux.optics.CircularAperture(npixels, rmin, rmax)
-
-
 class TestCircularAperture(UtilityUser):
     """
     Tests the CircularAperture class.
