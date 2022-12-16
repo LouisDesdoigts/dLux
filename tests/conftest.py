@@ -8,7 +8,7 @@ Wavefront = dLux.wavefronts.Wavefront
 
 
 @pytest.fixture
-def create_wavefront():
+def create_wavefront() -> callable:
     """
     Returns:
     --------
@@ -27,33 +27,18 @@ def create_wavefront():
     return _create_wavefront
 
 
-class CreateWavefrontUtility(Utility):
+@pytest.fixture
+def create_create_wavefront() -> callable:
     """
-    Utility for CreateWavefront class.
+    Returns:
+    --------
+    create_create_wavefront: callable 
+        A function that has all keyword arguments and can be 
+        used to create a `CreateWavefront` layer for testing.
     """
-    npixels        : int
-    diameter       : Array
-    wavefront_type : str
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the CreateWavefront Utility.
-        """
-        self.npixels = 16
-        self.diameter = np.array(1.)
-        self.wavefront_type = "Cartesian"
-
-
-    def construct(self            : Utility,
-                  npixels         : int   = None,
-                  diameter        : Array = None,
-                  wavefront_type  : str   = None) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        npixels  = self.npixels  if npixels  is None else npixels
-        diameter = self.diameter if diameter is None else diameter
-        wavefront_type = self.wavefront_type if wavefront_type is None else \
-        wavefront_type
+    def _create_create_wavefront(
+            npixels = 16,
+            diameter = np.array(1.),
+            wavefront_type = "Cartesian") -> OpticalLayer:
         return dLux.optics.CreateWavefront(npixels, diameter, wavefront_type)
+    return _create_create_wavefront
