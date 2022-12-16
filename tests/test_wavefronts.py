@@ -10,7 +10,14 @@ config.update("jax_debug_nans", True)
 Array = np.ndarray
 
 @pytest.fixture
-def create_wavefront()
+def create_wavefront():
+    """
+    Returns:
+    --------
+    create_wavefront: callable
+        A function that has all keyword arguments and can be 
+        used to create a wavefront for testing.
+    """
     def _create_wavefront(
             wavelength: Array = np.array(550e-09),
             pixel_scale: Array = np.array(1.),
