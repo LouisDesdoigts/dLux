@@ -70,6 +70,26 @@ def create_angular_wavefront():
     return _create_wavefront
 
 
+@pytest.fixture
+def create_far_field_fresnel_wavefront():
+    """
+    Returns:
+    --------
+    create_wavefront: callable
+        A function that has all keyword arguments and can be 
+        used to create a wavefront for testing.
+    """
+    def _create_wavefront(
+            wavelength: Array = np.array(550e-09),
+            pixel_scale: Array = np.array(1.),
+            plane_type: int = dLux.PlaneType.Pupil,
+            amplitude: Array = np.ones((1, 16, 16)),
+            phase: Array = np.zeros((1, 16, 16))) -> Wavefront:
+        return dLux.wavefronts.FarFieldFresnelWavefront(
+            wavelength, pixel_scale, amplitude, phase, plane_type)
+    return _create_wavefront
+
+
 class TestWavefront(UtilityUser):
     """
     Test the Wavefront class.
