@@ -94,56 +94,55 @@ class TestWavefront(UtilityUser):
     """
     Test the Wavefront class.
     """
-    utility : WavefrontUtility = WavefrontUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_wavefront: callable) -> None:
         """
         Tests the constructor.
         """
         # Test constructor
-        self.utility.construct()
+        create_wavefront()
 
         # Test empty array
         with pytest.raises(AssertionError):
-            self.utility.construct(wavelength=[])
+            create_wavefront(wavelength=[])
 
         # Test 1d array
         with pytest.raises(AssertionError):
-            self.utility.construct(wavelength=[1e3, 1e4])
+            create_wavefront(wavelength=[1e3, 1e4])
 
         # Test empty array
         with pytest.raises(AssertionError):
-            self.utility.construct(pixel_scale=[])
+            create_wavefront(pixel_scale=[])
 
         # Test 1d array
         with pytest.raises(AssertionError):
-            self.utility.construct(pixel_scale=[1e3, 1e4])
+            create_wavefront(pixel_scale=[1e3, 1e4])
 
         # Test non 3d amplitude array
         with pytest.raises(AssertionError):
-            self.utility.construct(amplitude=np.ones((3, 3)))
+            create_wavefront(amplitude=np.ones((3, 3)))
 
         # Test non 3d amplitude array
         with pytest.raises(AssertionError):
-            self.utility.construct(amplitude=np.ones((3, 3, 3, 3)))
+            create_wavefront(amplitude=np.ones((3, 3, 3, 3)))
 
         # Test non 3d phase array
         with pytest.raises(AssertionError):
-            self.utility.construct(phase=np.ones((3, 3)))
+            create_wavefront(phase=np.ones((3, 3)))
 
         # Test non 3d phase array
         with pytest.raises(AssertionError):
-            self.utility.construct(phase=np.ones((3, 3, 3, 3)))
+            create_wavefront(phase=np.ones((3, 3, 3, 3)))
 
         # Test different amplitude/phase array shapes
         with pytest.raises(AssertionError):
-            self.utility.construct(amplitude=np.ones((4, 4, 4)),
+            create_wavefront(amplitude=np.ones((4, 4, 4)),
                                    phase=np.ones((3, 3, 3)))
 
         # Test non-planetype plane_type
         with pytest.raises(AssertionError):
-            self.utility.construct(plane_type=[1])
+            create_wavefront(plane_type=[1])
 
 
     def test_npixels(self):
