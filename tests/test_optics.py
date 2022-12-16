@@ -9,36 +9,6 @@ config.update("jax_debug_nans", True)
 Array = np.ndarray
 
 
-class CreateWavefrontUtility(Utility):
-    """
-    Utility for CreateWavefront class.
-    """
-    npixels        : int
-    diameter       : Array
-    wavefront_type : str
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the CreateWavefront Utility.
-        """
-        self.npixels = 16
-        self.diameter = np.array(1.)
-        self.wavefront_type = "Cartesian"
-
-
-    def construct(self            : Utility,
-                  npixels         : int   = None,
-                  diameter        : Array = None,
-                  wavefront_type  : str   = None) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        npixels  = self.npixels  if npixels  is None else npixels
-        diameter = self.diameter if diameter is None else diameter
-        wavefront_type = self.wavefront_type if wavefront_type is None else \
-        wavefront_type
-        return dLux.optics.CreateWavefront(npixels, diameter, wavefront_type)
 
 
 class TestCreateWavefront(UtilityUser):
