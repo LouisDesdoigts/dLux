@@ -44,23 +44,16 @@ def create_create_wavefront() -> callable:
     return _create_create_wavefront
 
 
-class TiltWavefrontUtility(Utility):
+@pytest.fixture
+def create_tilt_wavefront() -> callable:
     """
-    Utility for TiltWavefront class.
+    Returns:
+    --------
+    create_tilt_wavefront: callable 
+        A function that has all keyword arguments and can be 
+        used to create a `TiltWavefront` layer for testing.
     """
-    tilt_angles : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the TiltWavefront Utility.
-        """
-        self.tilt_angles = np.ones(2)
-
-
-    def construct(self : Utility, tilt_angles : Array = None) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        tilt_angles = self.tilt_angles if tilt_angles is None else tilt_angles
+    def _create_tilt_wavefront(
+            tilt_angles: Array = np.ones(2)) -> OpticalLayer:
         return dLux.optics.TiltWavefront(tilt_angles)
+    return _create_tilt_wavefront
