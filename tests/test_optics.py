@@ -1,10 +1,9 @@
 from __future__ import annotations
-from utilities import Utility, UtilityUser
 import jax.numpy as np
-from test_wavefronts import WavefrontUtility
 import pytest
 import dLux
 from jax import config
+
 config.update("jax_debug_nans", True)
 
 Array = np.ndarray
