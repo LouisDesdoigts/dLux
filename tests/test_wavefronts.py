@@ -9,6 +9,7 @@ config.update("jax_debug_nans", True)
 
 Array = np.ndarray
 
+
 @pytest.fixture
 def create_wavefront():
     """
@@ -28,17 +29,6 @@ def create_wavefront():
     return _create_wavefront
 
 
-class CartesianWavefrontUtility(WavefrontUtility):
-    """
-    Utility for CartesianWavefront class.
-    """
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the CartesianWavefront Utility.
-        """
-        super().__init__()
 
 
 class AngularWavefrontUtility(WavefrontUtility):
