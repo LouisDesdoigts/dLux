@@ -23,7 +23,7 @@ class Person(object):
 
     def __repr__(self) -> str:
         out: str = "I am {}, a {} years old {}, who is {:.2f}m tall." 
-        return out.format(self.name, self.age, self.gender, self.height)
+        return out.format(self.name, self.age, self.gender.name, self.height)
 
 
 @pytest.fixture
@@ -37,5 +37,5 @@ def create_charlie():
 
 
 def test_john(create_john: callable):
-    corr: str = "I am John, a 33 years old Gender.MALE, who is 1.84m tall"
+    corr: str = "I am John, a 33 years old MALE, who is 1.84m tall."
     assert str(create_john) == corr 
