@@ -327,20 +327,17 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         """
         Apply the aperture to an incoming wavefront.
 
-        Parameters
-        ----------
-        parameters : dict
-            A dictionary containing the parameters of the model. 
-            The dictionary must satisfy `parameters.get("Wavefront")
-            != None`. 
+        Parameters:
+        -----------
+        wavefront: Wavefront
+            The wavefront before encountering the aperture.
 
-        Returns
-        -------
-        parameters : dict
-            The parameter, parameters, with the "Wavefront"; key
-            value updated. 
+        Returns:
+        --------
+        wavefront: Wavefront
+            The wavefront after encountering the aperture.
         """
-        coords = wavefront.pixel_coordinates()
+        coords = wavefront.pixel_coordinates
         aperture = self._aperture(coords)
         return wavefront.multiply_amplitude(aperture)
 
