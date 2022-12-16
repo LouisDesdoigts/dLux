@@ -70,19 +70,6 @@ def create_angular_wavefront():
     return _create_wavefront
 
 
-class FarFieldFresnelWavefrontUtility(WavefrontUtility):
-    """
-    Utility for FarFieldFresnelWavefront class.
-    """
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the FarFieldFresnelWavefront Utility.
-        """
-        super().__init__()
-
-
 class TestWavefront(UtilityUser):
     """
     Test the Wavefront class.
