@@ -75,10 +75,31 @@ def create_normalise_wavefront() -> callable:
 
 @pytest.fixture
 def create_apply_basis_opd():
+    """
+    Returns:
+    --------
+    create_apply_basis_opd: callable 
+        A function that has all keyword arguments and can be 
+        used to create a `ApplyBasisOPD` layer for testing.
+    """
     def _create_apply_basis_opd(
             basis = np.ones((3, 16, 16)),
             coefficients = np.ones(3)) -> OpticalLayer:
         return dLux.optics.ApplyBasisOPD(basis, coefficients)
     return _create_apply_basis_opd
+
+
+@pytest.fixture
+def create_add_phase():
+    """
+    Returns:
+    --------
+    create_add_phase: callable 
+        A function that has all keyword arguments and can be 
+        used to create a `AddPhase` layer for testing.
+    """
+    def _create_add_phase(phase: Array = np.ones((16, 16))) -> OpticalLayer:
+        return dLux.optics.AddPhase(phase)
+    return _create_add_phase    
 
 
