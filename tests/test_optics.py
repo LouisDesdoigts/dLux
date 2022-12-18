@@ -39,35 +39,36 @@ class TestCreateWavefront(object):
         create_create_wavefront()(None, params)
 
 
-class TestTiltWavefront(UtilityUser):
+class TestTiltWavefront(object):
     """
     Tests the TiltWavefront class.
     """
-    utility : TiltWavefrontUtility = TiltWavefrontUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_tilt_wavefront: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(tilt_angles=np.ones(1))
+            create_tilt_wavefront(tilt_angles=np.ones(1))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(tilt_angles=np.array([]))
+            create_tilt_wavefront(tilt_angles=np.array([]))
 
         # Test functioning
-        self.utility.construct()
+        create_tilt_wavefront()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_tilt_wavefront: callable,
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
-        self.utility.construct()(wf)
+        wf = create_wavefront() 
+        create_tilt_wavefront()(wf)
 
 
 class TestNormaliseWavefront(UtilityUser):
