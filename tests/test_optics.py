@@ -296,42 +296,6 @@ class TestApplyBasisCLIMB(UtilityUser):
         self.utility.construct(basis=basis)(wf)
 
 
-class RotateUtility(Utility):
-    """
-    Utility for Rotate class.
-    """
-    angle          : Array
-    real_imaginary : bool
-    fourier        : bool
-    padding        : int
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Rotate Utility.
-        """
-        self.angle          = np.array(np.pi)
-        self.real_imaginary = False
-        self.fourier        = False
-        self.padding        = 2
-
-
-    def construct(self           : Utility,
-                  angle          : Array = None,
-                  real_imaginary : Array = None,
-                  fourier        : bool  = None,
-                  padding        : bool  = None) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        angle   = self.angle   if angle   is None else angle
-        fourier = self.fourier if fourier is None else fourier
-        padding = self.padding if padding is None else padding
-        real_imaginary = self.real_imaginary if real_imaginary is None \
-                                           else real_imaginary
-        return dLux.optics.Rotate(angle, real_imaginary, fourier, padding)
-
-
 class TestRotate(UtilityUser):
     """
     Tests the Rotate class.
