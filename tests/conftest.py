@@ -106,14 +106,28 @@ def create_add_phase():
 @pytest.fixture
 def create_add_opd():
     """
-    Returns:
+    returns:
     --------
     create_add_opd: callable
-        A function that has all keyword arguments and can be
-        used to create a `AddOPD` layer for testing.
+        a function that has all keyword arguments and can be
+        used to create a `addopd` layer for testing.
     """
     def _create_add_opd(opd: Array = np.ones((16, 16))) -> OpticalLayer:
         return dLux.optics.AddOPD(opd)
     return _create_add_opd
+
+
+@pytest.fixture
+def create_transmissive_optic():
+    """
+    Returns:
+    --------
+    create_transmissive_optic: callable
+        a function that has all keyword arguments and can be
+        used to create a `TransmissiveOptic` layer for testing.
+    """
+    def _create_trans_optic(trans: Array = np.ones((16, 16))) -> OpticalLayer:
+        return dLux.optics.TransmissiveOptic(trans)
+    return _create_trans_optic 
 
 
