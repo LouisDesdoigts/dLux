@@ -174,28 +174,6 @@ class TestAddPhase(UtilityUser):
         self.utility.construct(phase=np.ones((1, npix, npix)))(wf)
 
 
-class AddOPDUtility(Utility):
-    """
-    Utility for AddOPD class.
-    """
-    opd : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the AddOPD Utility.
-        """
-        self.opd = np.ones((16, 16))
-
-
-    def construct(self : Utility, opd : Array = None) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        opd = self.opd if opd is None else opd
-        return dLux.optics.AddOPD(opd)
-
-
 class TestAddOPD(UtilityUser):
     """
     Tests the AddOPD class.
