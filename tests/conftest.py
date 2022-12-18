@@ -73,3 +73,12 @@ def create_normalise_wavefront() -> callable:
     return _create_normalise_wavefront
 
 
+@pytest.fixture
+def create_apply_basis_opd():
+    def _create_apply_basis_opd(
+            basis = np.ones((3, 16, 16)),
+            coefficients = np.ones(3)) -> OpticalLayer:
+        return dLux.optics.ApplyBasisOPD(basis, coefficients)
+    return _create_apply_basis_opd
+
+
