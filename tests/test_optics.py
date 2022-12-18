@@ -246,40 +246,6 @@ class TestTransmissiveOptic(UtilityUser):
         self.utility.construct(transmission=np.ones((1, npix, npix)))(wf)
 
 
-class ApplyBasisCLIMBUtility(Utility):
-    """
-    Utility for ApplyBasisCLIMB class.
-    """
-    basis            : Array
-    coefficients     : Array
-    ideal_wavelength : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the ApplyBasisCLIMB Utility.
-        """
-        self.basis            = np.ones((3, 16, 16))
-        self.coefficients     = np.ones(3)
-        self.ideal_wavelength = np.array(5e-7)
-
-
-    def construct(self             : Utility, 
-                  basis            : Array = None,
-                  coefficients     : Array = None,
-                  ideal_wavelength : Array = None) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        basis = self.basis if basis is None else basis
-        ideal_wavelength = self.ideal_wavelength if ideal_wavelength is None \
-                                               else ideal_wavelength
-        coefficients = self.coefficients if coefficients is None \
-                                       else coefficients
-        return dLux.optics.ApplyBasisCLIMB(basis, ideal_wavelength, 
-                                           coefficients)
-
-
 class TestApplyBasisCLIMB(UtilityUser):
     """
     Tests the ApplyBasisCLIMB class.
