@@ -131,3 +131,21 @@ def create_transmissive_optic():
     return _create_trans_optic 
 
 
+@pytest.fixture
+def create_basis_climb():
+    """
+    Returns:
+    --------
+    create_basis_climb: callable
+        a function that has all keyword arguments and can be
+        used to create a `BasisCLIMB` layer for testing.
+    """
+    def _create_basis_climb(
+            basis: Array = np.ones((3, 16, 16)),
+            coefficients: Array = np.ones(3),
+            ideal_wavelength: Array = np.array(5e-7)) -> OpticalLayer:
+        return dLux.optics.ApplyBasisCLIMB(
+            basis, ideal_wavelength, coefficients)
+    return _create_basis_climb
+
+
