@@ -8,35 +8,35 @@ config.update("jax_debug_nans", True)
 
 Array = np.ndarray
 
-class TestCreateWavefront(UtilityUser):
+
+class TestCreateWavefront(object):
     """
     Tests the CreateWavefront class.
     """
-    utility : CreateWavefrontUtility = CreateWavefrontUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_create_wavefront: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(diameter=np.array([]))
+            create_create_wavefront(diameter=np.array([]))
 
         # Test wrong string input
         with pytest.raises(AssertionError):
-            self.utility.construct(wavefront_type='cartesian')
+            create_create_wavefront(wavefront_type='cartesian')
 
         # Test functioning
-        self.utility.construct()
+        create_create_wavefront()
 
 
-    def test_call(self):
+    def test_call(self, create_create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
         params = {'wavelength': np.array(1e-6), 'offset': np.zeros(2)}
-        self.utility.construct()(None, params)
+        create_create_wavefront()(None, params)
 
 
 class TestTiltWavefront(UtilityUser):

@@ -159,9 +159,9 @@ def create_rotate() -> callable:
         used to create a `Rotate` layer for testing.
     """
     def _create_rotate(
-            angle: Array = np.array(np.pi)
-            real_imaginary: bool = False
-            fourier: bool = False
+            angle: Array = np.array(np.pi),
+            real_imaginary: bool = False,
+            fourier: bool = False,
             padding: int = 2) -> OpticalLayer:
         return dLux.optics.Rotate(angle, real_imaginary, fourier, padding)
     return _create_rotate
