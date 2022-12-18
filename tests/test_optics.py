@@ -210,29 +210,6 @@ class TestAddOPD(UtilityUser):
         self.utility.construct(opd=np.ones((1, npix, npix)))(wf)
 
 
-class TransmissiveOpticUtility(Utility):
-    """
-    Utility for TransmissiveOptic class.
-    """
-    transmission : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the TransmissiveOptic Utility.
-        """
-        self.transmission = np.ones((16, 16))
-
-
-    def construct(self : Utility, transmission : Array = None) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        transmission = self.transmission if transmission is None \
-                                         else transmission
-        return dLux.optics.TransmissiveOptic(transmission)
-
-
 class TestTransmissiveOptic(UtilityUser):
     """
     Tests the TransmissiveOptic class.
