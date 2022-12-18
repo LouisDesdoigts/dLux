@@ -94,34 +94,6 @@ class TestNormaliseWavefront(UtilityUser):
         assert wf.psf.sum() == 1.
 
 
-class ApplyBasisOPDUtility(Utility):
-    """
-    Utility for ApplyBasisOPD class.
-    """
-    basis        : Array
-    coefficients : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the ApplyBasisOPD Utility.
-        """
-        self.basis        = np.ones((3, 16, 16))
-        self.coefficients = np.ones(3)
-
-
-    def construct(self         : Utility,
-                  basis        : Array = None,
-                  coefficients : Array = None) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        basis        = self.basis        if basis        is None else basis
-        coefficients = self.coefficients if coefficients is None \
-                                         else coefficients
-        return dLux.optics.ApplyBasisOPD(basis, coefficients)
-
-
 class TestApplyBasisOPD(UtilityUser):
     """
     Tests the ApplyBasisOPD class.
