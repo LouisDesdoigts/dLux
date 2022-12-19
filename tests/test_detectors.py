@@ -43,33 +43,6 @@ class TestApplyPixelResponse(UtilityUser):
         self.utility.construct()(image)
 
 
-class ApplyJitterUtility(Utility):
-    """
-    Utility for ApplyJitter class.
-    """
-    sigma       : Array
-    kernel_size : int
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the ApplyJitter Utility.
-        """
-        self.sigma       = np.array(1.)
-        self.kernel_size = 10
-
-
-    def construct(self        : Utility,
-                  sigma       : Array = None,
-                  kernel_size : int   = None) -> DetectorLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        sigma       = self.sigma       if sigma       is None else sigma
-        kernel_size = self.kernel_size if kernel_size is None else kernel_size
-        return dLux.detectors.ApplyJitter(sigma, kernel_size)
-
-
 class TestApplyJitter(UtilityUser):
     """
     Tests the ApplyJitter class.
