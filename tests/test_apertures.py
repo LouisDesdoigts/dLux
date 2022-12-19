@@ -1,233 +1,232 @@
-import dLux as dl
+import dLux 
 import jax.numpy as np
 import typing
-from utilities import Utility, UtilityUser
 
 Aperture = typing.TypeVar("Aperture")
 Array = typing.TypeVar("Array")
 
 
-class SquareApertureUtility(ApertureUtility):
-    """
-    Contains useful default values for the constructor
-    of a `SquareAperture`.
+# class SquareApertureUtility(ApertureUtility):
+#     """
+#     Contains useful default values for the constructor
+#     of a `SquareAperture`.
 
-    parameters:
-    -----------
-    width: float = 0. meters
-        The default aperture is one meter wide.
-    theta: float = 0., radians
-        The default aperture is not rotated.
-    """
-    width: float = 1.
-    theta: float = 0.
-
-
-    def construct(self, 
-            occulting: bool = None, 
-            softening: bool = None,
-            x_offset: float = None, 
-            y_offset: float = None, 
-            width: float = None,
-            theta: float = None) -> Aperture:
-        """
-        Construct's an instance of `SquareAperture` making 
-        it easy to toggle a single parameter. 
-
-        Parameters:
-        -----------
-        occulting: bool = None
-            True if light passes through the aperture. 
-            False if light is blocked by the aperture. 
-        softening: bool = None
-            True is the aperture has soft pixels on the 
-            edges else false. 
-        x_offset: float = None, meters
-            The distance along the x axis that the aperture 
-            is moved from the centre of the coordinate system. 
-        y_offset: float = None, meters
-            The distance along the y axis that the aperture 
-            is moved from the centre of the coordinate system.
-        width: float = None, meters
-            The width of the aperture.
-        theta: float = None, radians
-            The rotationof the apertue with respect to the 
-            coordinate system. 
-        """
-        return dl.SquareAperture(
-            occulting = self.occulting if not occulting else occulting,
-            softening = self.softening if not softening else softening,
-            x_offset = self.x_offset if not x_offset else x_offset,
-            y_offset = self.y_offset if not y_offset else y_offset,
-            width = self.width if not width else width,
-            theta = self.theta if not theta else theta)
+#     parameters:
+#     -----------
+#     width: float = 0. meters
+#         The default aperture is one meter wide.
+#     theta: float = 0., radians
+#         The default aperture is not rotated.
+#     """
+#     width: float = 1.
+#     theta: float = 0.
 
 
-class RectangularApertureUtility(ApertureUtility):
-    """
-    Contains useful default values for the constructor
-    of a `RectangularAperture`.
+#     def construct(self, 
+#             occulting: bool = None, 
+#             softening: bool = None,
+#             x_offset: float = None, 
+#             y_offset: float = None, 
+#             width: float = None,
+#             theta: float = None) -> Aperture:
+#         """
+#         Construct's an instance of `SquareAperture` making 
+#         it easy to toggle a single parameter. 
 
-    Parameters:
-    -----------
-    width: float = 0. (meters)
-        The default aperture is one meter wide. 
-    length: float = .5, meters 
-        The defualt aperture is half a meter long. 
-    theta: float = 0., radians
-        The default aperture is not rotated. 
-    """
-    width: float = 1.
-    length: float = .5
-    theta: float = 0.
-
-
-    def construct(self, 
-            occulting: bool = None, 
-            softening: bool = None,
-            x_offset: float = None, 
-            y_offset: float = None, 
-            width: float = None,
-            length: float = None,
-            theta: float = None) -> Aperture:
-        """
-        Construct's an instance of `SquareAperture` making 
-        it easy to toggle a single parameter. 
-
-        Parameters:
-        -----------
-        occulting: bool = None
-            True if light passes through the aperture. 
-            False if light is blocked by the aperture. 
-        softening: bool = None
-            True is the aperture has soft pixels on the 
-            edges else false. 
-        x_offset: float = None, meters
-            The distance along the x axis that the aperture 
-            is moved from the centre of the coordinate system. 
-        y_offset: float = None, meters
-            The distance along the y axis that the aperture 
-            is moved from the centre of the coordinate system.
-        width: float = None, meters
-            The width of the aperture.
-        length: float = None, meters 
-            The length of the aperture.
-        theta: float = None, radians
-            The rotation of the aperture.
-        """
-        return dl.RectangularAperture(
-            occulting = self.occulting if not occulting else occulting,
-            softening = self.softening if not softening else softening,
-            x_offset = self.x_offset if not x_offset else x_offset,
-            y_offset = self.y_offset if not y_offset else y_offset,
-            width = self.width if not width else width,
-            length = self.length if not length else length, 
-            theta = self.theta if not theta else theta)
+#         Parameters:
+#         -----------
+#         occulting: bool = None
+#             True if light passes through the aperture. 
+#             False if light is blocked by the aperture. 
+#         softening: bool = None
+#             True is the aperture has soft pixels on the 
+#             edges else false. 
+#         x_offset: float = None, meters
+#             The distance along the x axis that the aperture 
+#             is moved from the centre of the coordinate system. 
+#         y_offset: float = None, meters
+#             The distance along the y axis that the aperture 
+#             is moved from the centre of the coordinate system.
+#         width: float = None, meters
+#             The width of the aperture.
+#         theta: float = None, radians
+#             The rotationof the apertue with respect to the 
+#             coordinate system. 
+#         """
+#         return dLux.SquareAperture(
+#             occulting = self.occulting if not occulting else occulting,
+#             softening = self.softening if not softening else softening,
+#             x_offset = self.x_offset if not x_offset else x_offset,
+#             y_offset = self.y_offset if not y_offset else y_offset,
+#             width = self.width if not width else width,
+#             theta = self.theta if not theta else theta)
 
 
-class CircularApertureUtility(ApertureUtility):
-    """
-    Contains the default parameters for the `CircularAperture`. 
+# class RectangularApertureUtility(ApertureUtility):
+#     """
+#     Contains useful default values for the constructor
+#     of a `RectangularAperture`.
 
-    Parameters:
-    -----------
-    radius: float = 1., meters
-        The default aperture is one meter wide.
-    """
-    radius: float = 1.
+#     Parameters:
+#     -----------
+#     width: float = 0. (meters)
+#         The default aperture is one meter wide. 
+#     length: float = .5, meters 
+#         The defualt aperture is half a meter long. 
+#     theta: float = 0., radians
+#         The default aperture is not rotated. 
+#     """
+#     width: float = 1.
+#     length: float = .5
+#     theta: float = 0.
 
 
-    def construct(self, 
-            occulting: bool = None, 
-            softening: bool = None,
-            x_offset: float = None, 
-            y_offset: float = None, 
-            radius: float = None) -> Aperture:
-        """
-        Construct's an instance of `CircularAperture` making 
-        it easy to toggle a single parameter. 
+#     def construct(self, 
+#             occulting: bool = None, 
+#             softening: bool = None,
+#             x_offset: float = None, 
+#             y_offset: float = None, 
+#             width: float = None,
+#             length: float = None,
+#             theta: float = None) -> Aperture:
+#         """
+#         Construct's an instance of `SquareAperture` making 
+#         it easy to toggle a single parameter. 
 
-        Parameters:
-        -----------
-        occulting: bool = None
-            True if light passes through the aperture. 
-            False if light is blocked by the aperture. 
-        softening: bool = None
-            True is the aperture has soft pixels on the 
-            edges else false. 
-        x_offset: float = None, meters
-            The distance along the x axis that the aperture 
-            is moved from the centre of the coordinate system. 
-        y_offset: float = None, meters
-            The distance along the y axis that the aperture 
-            is moved from the centre of the coordinate system.
-        radius: float = None, meters
-            The radius of the aperture.
-        """
-        return dl.CircularAperture(
-            occulting = self.occulting if not occulting else occulting,
-            softening = self.softening if not softening else softening,
-            x_offset = self.x_offset if not x_offset else x_offset,
-            y_offset = self.y_offset if not y_offset else y_offset,
-            radius = self.radius if not radius else radius)
+#         Parameters:
+#         -----------
+#         occulting: bool = None
+#             True if light passes through the aperture. 
+#             False if light is blocked by the aperture. 
+#         softening: bool = None
+#             True is the aperture has soft pixels on the 
+#             edges else false. 
+#         x_offset: float = None, meters
+#             The distance along the x axis that the aperture 
+#             is moved from the centre of the coordinate system. 
+#         y_offset: float = None, meters
+#             The distance along the y axis that the aperture 
+#             is moved from the centre of the coordinate system.
+#         width: float = None, meters
+#             The width of the aperture.
+#         length: float = None, meters 
+#             The length of the aperture.
+#         theta: float = None, radians
+#             The rotation of the aperture.
+#         """
+#         return dLux.RectangularAperture(
+#             occulting = self.occulting if not occulting else occulting,
+#             softening = self.softening if not softening else softening,
+#             x_offset = self.x_offset if not x_offset else x_offset,
+#             y_offset = self.y_offset if not y_offset else y_offset,
+#             width = self.width if not width else width,
+#             length = self.length if not length else length, 
+#             theta = self.theta if not theta else theta)
+
+
+# class CircularApertureUtility(ApertureUtility):
+#     """
+#     Contains the default parameters for the `CircularAperture`. 
+
+#     Parameters:
+#     -----------
+#     radius: float = 1., meters
+#         The default aperture is one meter wide.
+#     """
+#     radius: float = 1.
+
+
+#     def construct(self, 
+#             occulting: bool = None, 
+#             softening: bool = None,
+#             x_offset: float = None, 
+#             y_offset: float = None, 
+#             radius: float = None) -> Aperture:
+#         """
+#         Construct's an instance of `CircularAperture` making 
+#         it easy to toggle a single parameter. 
+
+#         Parameters:
+#         -----------
+#         occulting: bool = None
+#             True if light passes through the aperture. 
+#             False if light is blocked by the aperture. 
+#         softening: bool = None
+#             True is the aperture has soft pixels on the 
+#             edges else false. 
+#         x_offset: float = None, meters
+#             The distance along the x axis that the aperture 
+#             is moved from the centre of the coordinate system. 
+#         y_offset: float = None, meters
+#             The distance along the y axis that the aperture 
+#             is moved from the centre of the coordinate system.
+#         radius: float = None, meters
+#             The radius of the aperture.
+#         """
+#         return dLux.CircularAperture(
+#             occulting = self.occulting if not occulting else occulting,
+#             softening = self.softening if not softening else softening,
+#             x_offset = self.x_offset if not x_offset else x_offset,
+#             y_offset = self.y_offset if not y_offset else y_offset,
+#             radius = self.radius if not radius else radius)
     
 
-class AnnularApertureUtility(ApertureUtility):
-    """
-    Contains the parameters of the `AnnularAperture` that 
-    are used as default. 
+# class AnnularApertureUtility(ApertureUtility):
+#     """
+#     Contains the parameters of the `AnnularAperture` that 
+#     are used as default. 
 
-    Parameters:
-    -----------
-    rmin: float = .5, meters
-        The default inner radius is half a meter. 
-    rmax: float = 1., meters
-        The default outer radius is a full meter.
-    """
-    rmin: float = .5 
-    rmax: float = 1.
-
-
-    def construct(self, 
-            occulting: bool = None, 
-            softening: bool = None,
-            x_offset: float = None, 
-            y_offset: float = None, 
-            rmin: float = None,
-            rmax: float = None) -> Aperture:
-        """
-        Construct's an instance of `AnnularAperture` making 
-        it easy to toggle a single parameter. 
-
-        Parameters:
-        -----------
-        occulting: bool = None
-            True if light passes through the aperture. 
-            False if light is blocked by the aperture. 
-        softening: bool = None
-            True is the aperture has soft pixels on the 
-            edges else false. 
-        x_offset: float = None, meters
-            The distance along the x axis that the aperture 
-            is moved from the centre of the coordinate system. 
-        y_offset: float = None, meters
-            The distance along the y axis that the aperture 
-            is moved from the centre of the coordinate system.
-        rmin: float = None, meters
-            The inner radius of the aperture.
-        rmax: float = None, meters
-            The outer radius of the aperture.
-        """
-        return dl.AnnularAperture(
-            occulting = self.occulting if not occulting else occulting,
-            softening = self.softening if not softening else softening,
-            x_offset = self.x_offset if not x_offset else x_offset,
-            y_offset = self.y_offset if not y_offset else y_offset,
-            rmin = self.rmin if not rmin else rmin,
-            rmax = self.rmax if not rmax else rmax)
+#     Parameters:
+#     -----------
+#     rmin: float = .5, meters
+#         The default inner radius is half a meter. 
+#     rmax: float = 1., meters
+#         The default outer radius is a full meter.
+#     """
+#     rmin: float = .5 
+#     rmax: float = 1.
 
 
-class TestSquareAperture(UtilityUser):
+#     def construct(self, 
+#             occulting: bool = None, 
+#             softening: bool = None,
+#             x_offset: float = None, 
+#             y_offset: float = None, 
+#             rmin: float = None,
+#             rmax: float = None) -> Aperture:
+#         """
+#         Construct's an instance of `AnnularAperture` making 
+#         it easy to toggle a single parameter. 
+
+#         Parameters:
+#         -----------
+#         occulting: bool = None
+#             True if light passes through the aperture. 
+#             False if light is blocked by the aperture. 
+#         softening: bool = None
+#             True is the aperture has soft pixels on the 
+#             edges else false. 
+#         x_offset: float = None, meters
+#             The distance along the x axis that the aperture 
+#             is moved from the centre of the coordinate system. 
+#         y_offset: float = None, meters
+#             The distance along the y axis that the aperture 
+#             is moved from the centre of the coordinate system.
+#         rmin: float = None, meters
+#             The inner radius of the aperture.
+#         rmax: float = None, meters
+#             The outer radius of the aperture.
+#         """
+#         return dLux.AnnularAperture(
+#             occulting = self.occulting if not occulting else occulting,
+#             softening = self.softening if not softening else softening,
+#             x_offset = self.x_offset if not x_offset else x_offset,
+#             y_offset = self.y_offset if not y_offset else y_offset,
+#             rmin = self.rmin if not rmin else rmin,
+#             rmax = self.rmax if not rmax else rmax)
+
+
+class TestSquareAperture():
     """
     Provides unit tests for the `Square Aperture` class. 
 
@@ -236,152 +235,168 @@ class TestSquareAperture(UtilityUser):
     utility: SquareApertureUtility
         Provides default parameter values and coordinate systems. 
     """
-    utility: Utility = SquareApertureUtility()
 
 
-    def test_constructor(self) -> None:
+    def test_constructor(self, create_square_aperture : callable) -> None:
         """
         Checks that all of the fields are correctly set. 
         """
         # Case default
-        sq_ap = self.utility.construct()
+        sq_ap = create_square_aperture()
 
-        assert sq_ap.occulting == self.utility.occulting
-        assert sq_ap.softening == np.inf 
-        assert sq_ap.x_offset == self.utility.x_offset
-        assert sq_ap.y_offset == self.utility.y_offset
-        assert sq_ap.width == self.utility.width
-        assert sq_ap.theta == self.utility.theta 
+        # TODO check that these don't actually test anything?
+        # assert sq_ap.occulting == self.utility.occulting
+        # assert sq_ap.softening == np.inf 
+        # assert sq_ap.x_offset == self.utility.x_offset
+        # assert sq_ap.y_offset == self.utility.y_offset
+        # assert sq_ap.width == self.utility.width
+        # assert sq_ap.theta == self.utility.theta 
 
         # Case Translated X
         x_offset = 1.
-        sq_ap = self.utility.construct(x_offset = x_offset)
+        centre = np.array([x_offset, 0.])
+        sq_ap = create_square_aperture(centre = centre)
 
-        assert sq_ap.x_offset == x_offset
+        assert (sq_ap.centre == centre).all()
 
         # Case Translated Y
         y_offset = 1.
-        sq_ap = self.utility.construct(y_offset = y_offset)
+        centre = np.array([0., y_offset])
+        sq_ap = create_square_aperture(centre = centre)
 
-        assert sq_ap.y_offset == y_offset
+        assert (sq_ap.centre == centre).all()
 
         # Case Rotated Clockwise
-        theta = np.pi / 2.
-        sq_ap = self.utility.construct(theta = theta)
+        rotation = np.pi / 2.
+        sq_ap = create_square_aperture(rotation = rotation)
 
-        assert sq_ap.theta == theta
+        assert sq_ap.rotation == rotation
 
 
-    def test_range_hard(self) -> None:
+    def test_range_hard(self, create_square_aperture : callable) -> None:
         """
         Checks that the apertures fall into the correct range.
         """
-        coords = self.utility.get_coordinates()
+        coords = dLux.utils.get_pixel_coordinates(512, 2./512)
 
         # Case Translated X
         x_offset = 1.
-        aperture = self\
-            .utility\
-            .construct(x_offset = x_offset)\
-            ._aperture(coords)
+        centre = np.array([x_offset, 0.])
+        aperture = create_square_aperture(centre = centre)._aperture(coords)
 
-        assert ((aperture == 1.) | (aperture == 0.)).all()
+        TestSquareAperture._check_valid_hard_aperture(aperture)
 
         # Case Translated Y
         y_offset = 1.
-        aperture = self\
-            .utility\
-            .construct(y_offset = y_offset)\
-            ._aperture(coords)
+        centre = np.array([0., y_offset])
+        aperture = create_square_aperture(centre = centre)._aperture(coords)
 
-        assert ((aperture == 1.) | (aperture == 0.)).all()
+        TestSquareAperture._check_valid_hard_aperture(aperture)
 
         # Case Rotated 
-        theta = np.pi / 2.
-        aperture = self\
-            .utility\
-            .construct(theta = theta)\
-            ._aperture(coords)
+        rotation = np.pi / 2.
+        aperture = create_square_aperture(rotation = rotation)._aperture(coords)
 
-        assert ((aperture == 1.) | (aperture == 0.)).all()
+        TestSquareAperture._check_valid_hard_aperture(aperture)
 
         # Case Occulting
-        occulting = True
-        aperture = self\
-            .utility\
-            .construct(occulting = occulting)\
-            ._aperture(coords)
+        aperture = create_square_aperture(occulting = True)._aperture(coords)
 
-        assert ((aperture == 1.) | (aperture == 0.)).all()
+        TestSquareAperture._check_valid_hard_aperture(aperture)
 
         # Case Not Occulting
-        occulting = False
-        aperture = self\
-            .utility\
-            .construct(occulting = occulting)\
-            ._aperture(coords)
+        aperture = create_square_aperture(occulting = False)._aperture(coords)
 
+        TestSquareAperture._check_valid_hard_aperture(aperture)
+
+    def _check_valid_hard_aperture(aperture):
         assert ((aperture == 1.) | (aperture == 0.)).all()
+        
+    def _check_valid_soft_aperture(aperture):
+        assert (aperture <= 1.).all()
+        assert (aperture >= 0.).all()
+        # there should also exist something in bounds (assuming edges are within coords)
+        assert np.logical_and(aperture > 0., aperture < 1.).any()
 
-
-    def test_range_soft(self) -> None:
+    def test_range_soft(self, create_square_aperture : callable) -> None:
         """
         Checks that the aperture falls into the correct range.
         """
-        coords = self.utility.get_coordinates()
-
+        coords = dLux.utils.get_pixel_coordinates(512, 2./512)
+        softening = True
+        
         # Case Translated X
         x_offset = 1.
-        aperture = self\
-            .utility\
-            .construct(x_offset = x_offset)\
-            ._aperture(coords)
+        centre = np.array([x_offset, 0.])
+        aperture = create_square_aperture(centre=centre, softening=softening)._aperture(coords)
 
-        assert (aperture <= 1.).all()
-        assert (aperture >= 0.).all()
+        import matplotlib.pyplot as plt
+        TestSquareAperture._check_valid_soft_aperture(aperture)
 
         # Case Translated Y
         y_offset = 1.
-        aperture = self\
-            .utility\
-            .construct(y_offset = y_offset)\
-            ._aperture(coords)
+        centre = np.array([0., y_offset])
+        aperture = create_square_aperture(centre=centre, softening=softening)._aperture(coords)
 
-        assert (aperture <= 1.).all()
-        assert (aperture >= 0.).all()
+        TestSquareAperture._check_valid_soft_aperture(aperture)
 
         # Case Rotated 
-        theta = np.pi / 2.
-        aperture = self\
-            .utility\
-            .construct(theta = theta)\
-            ._aperture(coords)
+        rotation = np.pi / 2.
+        aperture = create_square_aperture(rotation=rotation, softening=softening)._aperture(coords)
 
-        assert (aperture <= 1.).all()
-        assert (aperture >= 0.).all()
+        TestSquareAperture._check_valid_soft_aperture(aperture)
 
         # Case Occulting
-        occulting = True
-        aperture = self\
-            .utility\
-            .construct(occulting = occulting)\
-            ._aperture(coords)
+        aperture = create_square_aperture(centre=centre, softening=softening)._aperture(coords)
 
-        assert (aperture <= 1.).all()
-        assert (aperture >= 0.).all()
+        TestSquareAperture._check_valid_soft_aperture(aperture)
 
         # Case Not Occulting
-        occulting = False
-        aperture = self\
-            .utility\
-            .construct(occulting = occulting)\
-            ._aperture(coords)
+        aperture = create_square_aperture(centre=centre, softening=softening)._aperture(coords)
 
+        TestSquareAperture._check_valid_soft_aperture(aperture)
+
+class TestAperturesCommonInterfaces():
+    """
+    For each type of aperture that has common properties, test it
+    """
+    def _assert_valid_hard_aperture(aperture):
+        assert ((aperture == 1.) | (aperture == 0.)).all()
+        
+    def _assert_valid_soft_aperture(aperture):
         assert (aperture <= 1.).all()
         assert (aperture >= 0.).all()
+        # there should also exist something in bounds (assuming edges are within coords)
+        assert np.logical_and(aperture > 0., aperture < 1.).any()
+        
+    def test_valid(self, create_square_aperture : callable, create_rectangular_aperture : callable):
+        coords = dLux.utils.get_pixel_coordinates(512, 2./512)
+        
+        constructors = [create_square_aperture,
+                        create_rectangular_aperture]
+        
+        x_offset = 1.
+        y_offset = 1.
+        centres = [np.array([0., 0.]),
+                   np.array([x_offset, 0.]),
+                   np.array([0., y_offset]),
+                   np.array([x_offset, y_offset])]
+        
+        # TODO might need to add error message for when this fails but it checks things very easily
+        for ctor in constructors:
+            for centre in centres:
+                for softening in [True, False]:
+                    for occulting in [True, False]:
+                        aperture = ctor(centre=centre, softening=softening, occulting=occulting)._aperture(coords)
+                        if softening:
+                            TestAperturesCommonInterfaces._assert_valid_soft_aperture(aperture)
+                        else:
+                            TestAperturesCommonInterfaces._assert_valid_hard_aperture(aperture)
+    
 
+'''
 
-class TestRectangularAperture(UtilityUser):
+class TestRectangularAperture():
     """
     Provides unit tests for the `RectangularAperture` class. 
 
@@ -536,7 +551,7 @@ class TestRectangularAperture(UtilityUser):
         assert (aperture >= 0.).all()
 
 
-class TestCircularAperture(UtilityUser):
+class TestCircularAperture():
     """
     Provides unit tests for the `CircularAperture` class. 
 
@@ -664,7 +679,7 @@ class TestCircularAperture(UtilityUser):
         assert (aperture >= 0.).all()
 
 
-class TestAnnularAperture(UtilityUser):
+class TestAnnularAperture():
     """
     Provides unit tests for the `AnnularAperture` class. 
 
@@ -792,3 +807,4 @@ class TestAnnularAperture(UtilityUser):
         assert (aperture <= 1.).all()
         assert (aperture >= 0.).all()
 
+'''
