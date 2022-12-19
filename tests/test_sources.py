@@ -695,20 +695,16 @@ class TestBinarySource():
         # source.model(optics, detector, filter_in)
         # source.model(optics, filter_in=filter_in)
 
-
-'''
 class TestPointExtendedSource():
     """
     Tests the PointExtendedSource class.
     """
-    utility : PointExtendedSourceUtility = PointExtendedSourceUtility()
 
-
-    def test_model(self) -> None:
+    def test_model(self, create_point_extended_source : callable) -> None:
         """
         Tests the model method.
         """
-        source = create_source()
+        source = create_point_extended_source()
         optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
         detector = dLux.core.Detector([dLux.AddConstant(0.)])
         filter_in = dLux.Filter()
@@ -717,6 +713,8 @@ class TestPointExtendedSource():
         # source.model(optics, detector, filter_in)
         # source.model(optics, filter_in=filter_in)
 
+
+'''
 
 class TestPointAndExtendedSource():
     """
