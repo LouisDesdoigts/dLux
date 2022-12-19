@@ -11,30 +11,6 @@ config.update("jax_debug_nans", True)
 Array = np.ndarray
 
 
-class DetectorUtility(Utility):
-    """
-    Utility for the Detector class.
-    """
-    layers : list
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Detector Utility.
-        """
-        self.layers = [
-            dLux.detectors.AddConstant(1.)
-        ]
-
-
-    def construct(self : Utility, layers : list = None) -> Detector:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        layers = self.layers if layers is None else layers
-        return dLux.core.Detector(layers)
-
-
 class SceneUtility(Utility):
     """
     Utility for the Scene class.
