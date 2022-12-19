@@ -250,7 +250,6 @@ def create_cartesian_propagator() -> callable:
     return _create_cartesian_propagator
 
 
-
 @pytest.fixture
 def create_angular_propagator() -> callable:
     """
@@ -433,3 +432,22 @@ def create_source() -> callable:
         """
         return dLux.sources.Source(position, flux, spectrum, name=name)
     return _create_source
+
+
+def create_optics() -> callable:
+    """
+    Returns:
+    --------
+    _create_optics: callable
+        A function that has all keyword arguments and can be
+        used to create a `Optics` layer for testing.
+    """
+    def _create_optics(
+            layers = [
+                dLux.optics.CreateWavefront(16, 1),
+                dLux.optics.CompoundAperture([0.5]),
+                dLux.optics.NormaliseWavefront(),
+                dLux.propagators.CartesianMFT(16, 1., 1e-6)
+            ]) -> OpticalLayer:
+        return dLux.core.Optics(layers)
+    return _create_optics
