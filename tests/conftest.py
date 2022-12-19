@@ -488,6 +488,7 @@ def create_relative_position_source() -> callable:
                                                    spectrum=spectrum, name=name)
     return _create_relative_position_source
 
+
 @pytest.fixture
 def create_point_source() -> callable:
     """
@@ -707,6 +708,7 @@ def create_combined_spectrum() -> callable:
     return _create_combined_spectrum
 
 
+@pytest.fixture
 def create_optics() -> callable:
     """
     Returns:
@@ -742,7 +744,7 @@ def create_detector() -> callable:
 
 
 @pytest.fixture
-def create_scene() -> callable:
+def create_scene(create_point_source) -> callable:
     """
     Returns:
     --------
@@ -751,7 +753,7 @@ def create_scene() -> callable:
         used to create a `Scene` layer for testing.
     """
     def _create_scene(
-            sources = [dLux.sources.PointSource()]) -> OpticalLayer:
+            sources = [create_point_source()]) -> OpticalLayer:
         return dLux.core.Scene(sources)
     return _create_scene
 
@@ -767,14 +769,15 @@ def create_filter() -> callable:
     """
     def _create_filter( 
             wavelengths = np.linspace(1e-6, 10e-6, 10),
-            throughput = np.linspace(0, 1, 10)) -> OpticalLayer:
-        return dLux.core.Filter(wavelengths, throughput)
+            throughput = np.linspace(0, 1, 10),
+            filter_name = None) -> OpticalLayer:
+        return dLux.core.Filter(wavelengths, throughput, filter_name=filter_name)
     return _create_filter
 
 
 @pytest.fixture
 def create_instrument(
-        create_optic: callable, 
+        create_optics: callable, 
         create_scene: callable, 
         create_detector: callable,
         create_filter: callable) -> callable:
@@ -786,7 +789,7 @@ def create_instrument(
         used to create a `Instrument` layer for testing.
     """
     def _create_instrument(
-            optics          : OpticalLayer  = create_optic(),
+            optics          : OpticalLayer  = create_optics(),
             scene           : OpticalLayer  = create_scene(),
             detector        : OpticalLayer  = create_detector(),
             # filter        : OpticalLayer  = create_filter(),
@@ -795,7 +798,7 @@ def create_instrument(
             sources         : list          = None,
             detector_layers : list          = None,
             input_layers    : bool          = False,
-            input_both      : bool          = False) -> Instrument:
+            input_both      : bool          = False) -> OpticalLayer:
 
         if input_both:
             return dLux.core.Instrument(
