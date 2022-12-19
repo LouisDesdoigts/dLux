@@ -96,48 +96,49 @@ class TestNormaliseWavefront(object):
         assert wf.psf.sum() == 1.
 
 
-class TestApplyBasisOPD(UtilityUser):
+class TestApplyBasisOPD(object):
     """
     Tests the ApplyBasisOPD class.
     """
-    utility : ApplyBasisOPDUtility = ApplyBasisOPDUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_apply_basis_opd: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(basis=np.ones((16, 16)))
+            create_apply_basis_opd(basis=np.ones((16, 16)))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(basis=np.ones((1, 1, 16, 16)))
+            create_apply_basis_opd(basis=np.ones((1, 1, 16, 16)))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(coefficients=np.array([]))
+            create_apply_basis_opd(coefficients=np.array([]))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(coefficients=np.zeros((1, 1)))
+            create_apply_basis_opd(coefficients=np.zeros((1, 1)))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(basis=np.ones((2, 15, 15)),
+            create_apply_basis_opd(basis=np.ones((2, 15, 15)),
                                    coefficients=np.zeros((3)))
 
         # Test functioning
-        self.utility.construct()
+        create_apply_basis_opd()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_apply_basis_opd: callable, 
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
-        self.utility.construct()(wf)
+        wf = create_wavefront() 
+        create_apply_basis_opd()(wf)
 
 
 class TestAddPhase(UtilityUser):
