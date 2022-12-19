@@ -151,7 +151,6 @@ class TestArraySpectrum():
 
 
 
-'''
 class TestPolynomialSpectrum():
     """
     Tests the PolynomialSpectrum class.
@@ -160,41 +159,42 @@ class TestPolynomialSpectrum():
     normalise the coefficients, instead the .get_weights() returns a normalised
     weights.
     """
-    utility : PolynomialSpectrumUtility = PolynomialSpectrumUtility()
 
 
-    def test_constructor(self) -> None:
+    def test_constructor(self, create_polynomial_spectrum : callable) -> None:
         """
         Tests the constructor.
         """
         # Test string inputs
         with pytest.raises(ValueError):
-            self.utility.construct(coefficients="")
+            create_polynomial_spectrum(coefficients="")
 
         # Test zero dimension input
         with pytest.raises(AssertionError):
-            self.utility.construct(coefficients=5.)
+            create_polynomial_spectrum(coefficients=5.)
 
         # Test zero length input
         with pytest.raises(AssertionError):
-            self.utility.construct(coefficients=[])
+            create_polynomial_spectrum(coefficients=[])
 
         # Test nan inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(coefficients=[np.nan])
+            create_polynomial_spectrum(coefficients=[np.nan])
 
         # Test infinite inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(coefficients=[np.inf])
+            create_polynomial_spectrum(coefficients=[np.inf])
 
+        create_polynomial_spectrum()
 
-    def test_get_weights(self) -> None:
+    def test_get_weights(self, create_polynomial_spectrum : callable) -> None:
         """
         Tests the normalisation of the get_weights method.
         """
-        assert np.allclose(self.utility.construct().get_weights().sum(), 1.)
+        assert np.allclose(create_polynomial_spectrum().get_weights().sum(), 1.)
 
 
+'''
 class TestCombinedSpectrum():
     """
     Tests the CombinedSpectrum class

@@ -668,6 +668,25 @@ def create_array_spectrum() -> callable:
     return _create_array_spectrum
 
 
+@pytest.fixture
+def create_polynomial_spectrum() -> callable:
+    """
+    Returns:
+    --------
+    _create_polynomial_spectrum: callable
+        a function that has all keyword arguments and can be
+        used to create a `ArraySpectrum` layer for testing.
+    """
+
+    def _create_polynomial_spectrum(
+                  wavelengths  : Array = np.linspace(500e-9, 600e-9, 10),
+                  coefficients : Array = np.arange(3)) -> Spectrum:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.spectrums.PolynomialSpectrum(wavelengths, coefficients)
+    return _create_polynomial_spectrum
+
 def create_optics() -> callable:
     """
     Returns:
