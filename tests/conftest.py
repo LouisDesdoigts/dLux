@@ -302,9 +302,9 @@ def create_cartesian_mft() -> callable:
     """
 
     def _create_cartesian_mft(
-                            focal_length    : Array = np.array(1.),
                             npixels_out     : int   = 16,
                             pixel_scale_out : Array = np.array(1.),
+                            focal_length    : Array = np.array(1.),
                             shift           : Array = np.zeros(2),
                             pixel_shift     : bool  = False,
                             inverse         : bool  = False) -> OpticalLayer:
