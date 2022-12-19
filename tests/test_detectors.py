@@ -97,28 +97,6 @@ class TestApplySaturation(UtilityUser):
         self.utility.construct()(image)
 
 
-class AddConstantUtility(Utility):
-    """
-    Utility for AddConstant class.
-    """
-    value : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the AddConstant Utility.
-        """
-        self.value = np.array(1.)
-
-
-    def construct(self : Utility, value : Array = None) -> DetectorLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        value = self.value if value is None else value
-        return dLux.detectors.AddConstant(value)
-
-
 class TestAddConstant(UtilityUser):
     """
     Tests the AddConstant class.
