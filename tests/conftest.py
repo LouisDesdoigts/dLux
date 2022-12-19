@@ -250,7 +250,6 @@ def create_cartesian_propagator() -> callable:
     return _create_cartesian_propagator
 
 
-
 @pytest.fixture
 def create_angular_propagator() -> callable:
     """
@@ -433,3 +432,117 @@ def create_source() -> callable:
         """
         return dLux.sources.Source(position, flux, spectrum, name=name)
     return _create_source
+
+
+def create_optics() -> callable:
+    """
+    Returns:
+    --------
+    _create_optics: callable
+        A function that has all keyword arguments and can be
+        used to create a `Optics` layer for testing.
+    """
+    def _create_optics(
+            layers = [
+                dLux.optics.CreateWavefront(16, 1),
+                dLux.optics.CompoundAperture([0.5]),
+                dLux.optics.NormaliseWavefront(),
+                dLux.propagators.CartesianMFT(16, 1., 1e-6)
+            ]) -> OpticalLayer:
+        return dLux.core.Optics(layers)
+    return _create_optics
+
+
+@pytest.fixture
+def create_detector() -> callable:
+    """
+    Returns:
+    --------
+    _create_detector: callable
+        A function that has all keyword arguments and can be
+        used to create a `Detector` layer for testing.
+    """
+    def _create_detector(
+            layers = [dLux.detectors.AddConstant(1.)]) -> OpticalLayer:
+        return dLux.core.Detector(layers)
+    return _create_detector
+
+
+@pytest.fixture
+def create_scene() -> callable:
+    """
+    Returns:
+    --------
+    _create_scene: callable
+        A function that has all keyword arguments and can be
+        used to create a `Scene` layer for testing.
+    """
+    def _create_scene(
+            sources = [dLux.sources.PointSource()]) -> OpticalLayer:
+        return dLux.core.Scene(sources)
+    return _create_scene
+
+
+@pytest.fixture
+def create_filter() -> callable:
+    """
+    Returns:
+    --------
+    _create_filter: callable
+        A function that has all keyword arguments and can be
+        used to create a `Filter` layer for testing.
+    """
+    def _create_filter( 
+            wavelengths = np.linspace(1e-6, 10e-6, 10),
+            throughput = np.linspace(0, 1, 10)) -> OpticalLayer:
+        return dLux.core.Filter(wavelengths, throughput)
+    return _create_filter
+
+
+@pytest.fixture
+def create_instrument(
+        create_optic: callable, 
+        create_scene: callable, 
+        create_detector: callable,
+        create_filter: callable) -> callable:
+    """
+    Returns:
+    --------
+    _create_instrument: callable
+        A function that has all keyword arguments and can be
+        used to create a `Instrument` layer for testing.
+    """
+    def _create_instrument(
+            optics          : OpticalLayer  = OpticsUtility().construct(),
+            scene           : OpticalLayer  = SceneUtility().construct(),
+            detector        : OpticalLayer  = DetectorUtility().construct(),
+            # filter        : OpticalLayer  = FilterUtility().construct()
+            filter          : OpticalLayer  = None,
+            optical_layers  : list          = None,
+            sources         : list          = None,
+            detector_layers : list          = None,
+            input_layers    : bool          = False,
+            input_both      : bool          = False) -> Instrument:
+
+        if input_both:
+            return dLux.core.Instrument(
+                optics=optics,
+                scene=scene,
+                detector=detector,
+                filter=filter,
+                optical_layers=optical_layers,
+                sources=sources,
+                detector_layers=detector_layers)
+        elif not input_layers:
+            return dLux.core.Instrument(
+                optics=optics,
+                scene=scene,
+                detector=detector,
+                filter=filter)
+        else:
+            return dLux.core.Instrument(
+                filter=filter,
+                optical_layers=optical_layers,
+                sources=sources,
+                detector_layers=detector_layers)
+    return _create_instrument
