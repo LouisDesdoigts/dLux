@@ -11,30 +11,6 @@ config.update("jax_debug_nans", True)
 Array = np.ndarray
 
 
-class SceneUtility(Utility):
-    """
-    Utility for the Scene class.
-    """
-    sources : list
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Scene Utility.
-        """
-        self.sources = [
-            PointSourceUtility().construct()
-        ]
-
-
-    def construct(self : Utility, sources : list = None) -> Scene:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        sources = self.sources if sources is None else sources
-        return dLux.core.Scene(sources)
-
-
 class FilterUtility(Utility):
     """
     Utility for the Filter class.
