@@ -296,31 +296,30 @@ class TestScene(object):
         assert not np.isinf(psf).all()
 
 
-class TestDetector(UtilityUser):
+class TestDetector(object):
     """
     Tests the Detector class.
     """
-    utility : DetectorUtility = DetectorUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_detector: callable) -> None:
         """
         Tests the constructor.
         """
         # Test non-list inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(layers={})
+            create_detector(layers={})
 
         # Test list input with non Optics Layer input
         with pytest.raises(AssertionError):
-            self.utility.construct(layers=[10.])
+            create_detector(layers=[10.])
 
 
-    def test_apply_detector(self):
+    def test_apply_detector(self, create_detector: callable) -> None:
         """
         Tests the apply_detector method.
         """
-        detector = self.utility.construct()
+        detector = create_detector()
 
         # Test inputs
         with pytest.raises(AssertionError):
@@ -340,11 +339,11 @@ class TestDetector(UtilityUser):
         assert not np.isinf(image).all()
 
 
-    def test_debug_apply_detector(self):
+    def test_debug_apply_detector(self, create_detector: callable) -> None:
         """
         Tests the debug_apply_detector method.
         """
-        detector = self.utility.construct()
+        detector = create_detector()
 
         # Test inputs
         with pytest.raises(AssertionError):
@@ -364,13 +363,16 @@ class TestDetector(UtilityUser):
         assert not np.isinf(image).all()
 
 
-    def test_model(self):
+    def test_model(self,
+            create_detector: callable,
+            create_scene: callable,
+            create_optics: callable) -> None:
         """
         Tests the model method
         """
-        detector = self.utility.construct()
-        scene = SceneUtility().construct()
-        psf = detector.model(OpticsUtility().construct(), scene=scene)
+        detector = create_detector()
+        scene = create_scene()
+        psf = detector.model(create_optics(), scene=scene)
         assert not np.isnan(psf).all()
         assert not np.isinf(psf).all()
 
