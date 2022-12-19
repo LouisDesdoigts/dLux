@@ -252,54 +252,55 @@ class TestTransmissiveOptic(object):
         create_transmissive_optic(trans=np.ones((1, npix, npix)))(wf)
 
 
-class TestApplyBasisCLIMB(UtilityUser):
+class TestApplyBasisCLIMB(object):
     """
     Tests the ApplyBasisCLIMB class.
     """
-    utility : ApplyBasisCLIMBUtility = ApplyBasisCLIMBUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_basis_climb: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(basis=np.ones((16, 16)))
+            create_basis_climb(basis=np.ones((16, 16)))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(basis=np.ones((1, 1, 16, 16)))
+            create_basis_climb(basis=np.ones((1, 1, 16, 16)))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(ideal_wavelength=np.ones(1))
+            create_basis_climb(ideal_wavelength=np.ones(1))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(coefficients=np.array([]))
+            create_basis_climb(coefficients=np.array([]))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(coefficients=np.zeros((1, 1)))
+            create_basis_climb(coefficients=np.zeros((1, 1)))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(basis=np.ones((2, 15, 15)),
+            create_basis_climb(basis=np.ones((2, 15, 15)),
                                    coefficients=np.zeros((3)))
 
         # Test functioning
-        self.utility.construct()
+        create_basis_climb()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_basis_climb: callable, 
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
+        wf = create_wavefront() 
         npix = wf.npixels
         basis = np.ones((3, 3*npix, 3*npix))
-        self.utility.construct(basis=basis)(wf)
+        create_basis_climb(basis=basis)(wf)
 
 
 class TestRotate(UtilityUser):
