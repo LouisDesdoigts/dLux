@@ -7,7 +7,27 @@ from jax import config
 config.update("jax_debug_nans", True)
 
 
+class PropagatorUtility(Utility):
+    """
+    Utility for Propagator class.
+    """
+    dLux.propagators.Propagator.__abstractmethods__ = ()
+    inverse : bool
 
+
+    def __init__(self : Utility) -> Utility:
+        """
+        Constructor for the Propagator Utility.
+        """
+        self.inverse  = False
+
+
+    def construct(self : Utility, inverse : bool = None) -> Propagator:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        inverse = self.inverse if inverse is None else inverse
+        return dLux.propagators.Propagator(inverse=inverse)
 
 
 class FixedSamplingPropagatorUtility(PropagatorUtility):
@@ -318,11 +338,11 @@ class TestPropagator(UtilityUser):
     utility : PropagatorUtility = PropagatorUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_propagator : callable) -> None:
         """
         Tests the constructor.
         """
-        self.utility.construct()
+        create_propagator()
 
 
 class TestVariableSamplingPropagator(UtilityUser):
