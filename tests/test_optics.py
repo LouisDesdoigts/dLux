@@ -303,38 +303,39 @@ class TestApplyBasisCLIMB(object):
         create_basis_climb(basis=basis)(wf)
 
 
-class TestRotate(UtilityUser):
+class TestRotate(object):
     """
     Tests the Rotate class.
     """
-    utility : RotateUtility = RotateUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_rotate: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(angle=np.ones(1))
+            create_rotate(angle=np.ones(1))
 
         # Test functioning
-        self.utility.construct()
+        create_rotate()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_rotate: callable, 
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
         # Test regular rotation
-        wf = WavefrontUtility().construct()
-        self.utility.construct()(wf)
+        wf = create_wavefront()
+        create_rotate()(wf)
 
         # Test real imaginary rotation
-        wf = WavefrontUtility().construct()
-        self.utility.construct(real_imaginary=True)(wf)
+        wf = create_wavefront()
+        create_rotate(real_imaginary=True)(wf)
 
         # Test fourier
         with pytest.raises(NotImplementedError):
-            wf = WavefrontUtility().construct()
-            self.utility.construct(fourier=True)(wf)
+            wf = create_wavefront()
+            create_rotate(fourier=True)(wf)
