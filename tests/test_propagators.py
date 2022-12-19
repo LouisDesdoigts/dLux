@@ -387,24 +387,21 @@ class TestCartesianMFT():
         assert np.allclose(focal_roll, focal_shift.psf[1:, 1:])
         assert np.allclose(focal_roll, focal_shift_pix.psf[1:, 1:])
 
-'''
 
 class TestAngularMFT():
     """
     Test the AngularMFT class.
     """
-    utility : AngularMFTUtility = AngularMFTUtility()
 
-
-    def test_constructor(self):
+    def test_constructor(self, create_angular_mft : callable):
         """
         Tests the constructor.
         """
         # Test constructor
-        self.utility.construct()
+        create_angular_mft()
 
 
-    def test_propagate(self):
+    def test_propagate(self, create_angular_mft : callable):
         """
         Tests the propagate method.
         """
@@ -416,8 +413,8 @@ class TestAngularMFT():
 
         # Construct
         wf = dLux.AngularWavefront(wl, p_pscale, amplitude, phase, plane_type)
-        prop = self.utility.construct(npix, f_pscale)
-        inv_prop = self.utility.construct(npix, p_pscale, inverse=True)
+        prop = create_angular_mft(npix, f_pscale)
+        inv_prop = create_angular_mft(npix, p_pscale, inverse=True)
 
         # Prop
         focal = prop(wf)
@@ -432,8 +429,8 @@ class TestAngularMFT():
         shift = f_pscale * np.ones(2)
 
         # Construct
-        prop_shift = self.utility.construct(npix, f_pscale, shift=shift)
-        prop_shift_pix = self.utility.construct(npix, f_pscale, 
+        prop_shift = create_angular_mft(npix, f_pscale, shift=shift)
+        prop_shift_pix = create_angular_mft(npix, f_pscale, 
                                             shift=shift_pix, pixel_shift=True)
 
         # Prop
@@ -446,6 +443,7 @@ class TestAngularMFT():
         assert np.allclose(focal_roll, focal_shift_pix.psf[1:, 1:])
 
 
+'''
 class TestCartesianFFT():
     """
     Test the CartesianFFT class.
