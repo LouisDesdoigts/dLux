@@ -499,3 +499,50 @@ def create_filter() -> callable:
     return _create_filter
 
 
+@pytest.fixture
+def create_instrument(
+        create_optic: callable, 
+        create_scene: callable, 
+        create_detector: callable,
+        create_filter: callable) -> callable:
+    """
+    Returns:
+    --------
+    _create_instrument: callable
+        A function that has all keyword arguments and can be
+        used to create a `Instrument` layer for testing.
+    """
+    def _create_instrument(
+            optics          : OpticalLayer  = OpticsUtility().construct(),
+            scene           : OpticalLayer  = SceneUtility().construct(),
+            detector        : OpticalLayer  = DetectorUtility().construct(),
+            # filter        : OpticalLayer  = FilterUtility().construct()
+            filter          : OpticalLayer  = None,
+            optical_layers  : list          = None,
+            sources         : list          = None,
+            detector_layers : list          = None,
+            input_layers    : bool          = False,
+            input_both      : bool          = False) -> Instrument:
+
+        if input_both:
+            return dLux.core.Instrument(
+                optics=optics,
+                scene=scene,
+                detector=detector,
+                filter=filter,
+                optical_layers=optical_layers,
+                sources=sources,
+                detector_layers=detector_layers)
+        elif not input_layers:
+            return dLux.core.Instrument(
+                optics=optics,
+                scene=scene,
+                detector=detector,
+                filter=filter)
+        else:
+            return dLux.core.Instrument(
+                filter=filter,
+                optical_layers=optical_layers,
+                sources=sources,
+                detector_layers=detector_layers)
+    return _create_instrument
