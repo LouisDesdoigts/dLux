@@ -5,111 +5,6 @@ import dLux
 from jax import config
 config.update("jax_debug_nans", True)
 
-
-# class SpectrumUtility(Utility):
-#     """
-#     Utility for the Spectrum class.
-#     """
-#     wavelengths : Array
-#     dLux.spectrums.Spectrum.__abstractmethods__ = ()
-
-
-#     def __init__(self : Utility) -> Utility:
-#         """
-#         Constrcutor for the Spectrum Utility.
-#         """
-#         self.wavelengths = np.linspace(500e-9, 600e-9, 10)
-
-
-#     def construct(self : Utility, wavelengths : Array = None) -> Spectrum:
-#         """
-#         Safe constructor for the dLuxModule, associated with this utility.
-#         """
-#         wavelengths = self.wavelengths if wavelengths is None else wavelengths
-#         return dLux.spectrums.Spectrum(wavelengths)
-
-
-# class ArraySpectrumUtility(SpectrumUtility):
-#     """
-#     Utility for the ArraySpectrum class.
-#     """
-#     weights : Array
-
-
-#     def __init__(self : Utility) -> Utility:
-#         """
-#         Constrcutor for the ArraySpectrum Utility.
-#         """
-#         super().__init__()
-#         self.weights = np.arange(10)
-
-
-#     def construct(self        : Utility,
-#                   wavelengths : Array = None,
-#                   weights     : Array = None) -> Spectrum:
-#         """
-#         Safe constructor for the dLuxModule, associated with this utility.
-#         """
-#         wavelengths = self.wavelengths if wavelengths is None else wavelengths
-#         weights = self.weights if weights is None else weights
-#         return dLux.spectrums.ArraySpectrum(wavelengths, weights)
-
-
-# class PolynomialSpectrumUtility(SpectrumUtility):
-#     """
-#     Utility for the PolynomialSpectrum class.
-#     """
-#     coefficients : Array
-
-
-#     def __init__(self : Utility) -> Utility:
-#         """
-#         Constrcutor for the PolynomialSpectrum Utility.
-#         """
-#         super().__init__()
-#         self.coefficients = np.arange(3)
-
-
-#     def construct(self         : Utility,
-#                   wavelengths  : Utility = None,
-#                   coefficients : Utility = None) -> Spectrum:
-#         """
-#         Safe constructor for the dLuxModule, associated with this utility.
-#         """
-#         wavelengths = self.wavelengths if wavelengths is None else wavelengths
-#         coefficients = self.coefficients if coefficients is None \
-#                                                             else coefficients
-#         return dLux.spectrums.PolynomialSpectrum(wavelengths, coefficients)
-
-
-# class CombinedSpectrumUtility(SpectrumUtility):
-#     """
-#     Utility for the ArraySpectrum class.
-#     """
-#     wavelengths : Array
-#     weights     : Array
-
-
-#     def __init__(self : Utility) -> Utility:
-#         """
-#         Constrcutor for the ArraySpectrum Utility.
-#         """
-#         super()
-#         self.wavelengths = np.tile(np.linspace(500e-9, 600e-9, 10), (2, 1))
-#         self.weights = np.tile(np.arange(10), (2, 1))
-
-
-#     def construct(self        : Utility,
-#                   wavelengths : Utility = None,
-#                   weights     : Utility = None) -> Spectrum:
-#         """
-#         Safe constructor for the dLuxModule, associated with this utility.
-#         """
-#         wavelengths = self.wavelengths if wavelengths is None else wavelengths
-#         weights = self.weights if weights is None else weights
-#         return dLux.spectrums.CombinedSpectrum(wavelengths, weights)
-
-
 class TestArraySpectrum():
     """
     Tests the ArraySpectrum class.
@@ -194,52 +89,48 @@ class TestPolynomialSpectrum():
         assert np.allclose(create_polynomial_spectrum().get_weights().sum(), 1.)
 
 
-'''
 class TestCombinedSpectrum():
     """
     Tests the CombinedSpectrum class
     """
-    utility : CombinedSpectrumUtility = CombinedSpectrumUtility()
 
 
-    def test_constructor(self) -> None:
+    def test_constructor(self, create_combined_spectrum : callable) -> None:
         """
         Test the constructor.
         """
         # Wavelengths Testing
         # Test string inputs
         with pytest.raises(ValueError):
-            self.utility.construct(wavelengths="")
+            create_combined_spectrum(wavelengths="")
 
         # Test zero dimension input
         with pytest.raises(AssertionError):
-            self.utility.construct(wavelengths=5.)
+            create_combined_spectrum(wavelengths=5.)
 
         # Test zero length input
         with pytest.raises(AssertionError):
-            self.utility.construct(wavelengths=[])
+            create_combined_spectrum(wavelengths=[])
 
         # Weights Testing
         # Test string inputs
         with pytest.raises(ValueError):
-            self.utility.construct(weights="")
+            create_combined_spectrum(weights="")
 
         # Test zero dimension input
         with pytest.raises(AssertionError):
-            self.utility.construct(weights=5.)
+            create_combined_spectrum(weights=5.)
 
         # Test zero length input
         with pytest.raises(AssertionError):
-            self.utility.construct(weights=[])
+            create_combined_spectrum(weights=[])
 
 
-    def test_normalise(self) -> None:
+    def test_normalise(self, create_combined_spectrum : callable) -> None:
         """
         Tests the normalise method.
         """
         new_weights = np.tile(np.arange(10), (2, 1))
-        new_spectrum = self.utility.construct().set('weights',
+        new_spectrum = create_combined_spectrum().set('weights',
                                                     new_weights).normalise()
         assert np.allclose(new_spectrum.weights.sum(1), 1.)
-        
-'''

@@ -687,6 +687,25 @@ def create_polynomial_spectrum() -> callable:
         return dLux.spectrums.PolynomialSpectrum(wavelengths, coefficients)
     return _create_polynomial_spectrum
 
+@pytest.fixture
+def create_combined_spectrum() -> callable:
+    """
+    Returns:
+    --------
+    _create_combined_spectrum: callable
+        a function that has all keyword arguments and can be
+        used to create a `ArraySpectrum` layer for testing.
+    """
+
+    def _create_combined_spectrum(
+                  wavelengths : Array = np.tile(np.linspace(500e-9, 600e-9, 10), (2, 1)),
+                  weights     : Array = np.tile(np.arange(10), (2, 1))) -> Spectrum:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.spectrums.CombinedSpectrum(wavelengths, weights)
+    return _create_combined_spectrum
+
 def create_optics() -> callable:
     """
     Returns:
