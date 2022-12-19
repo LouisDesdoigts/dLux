@@ -481,3 +481,21 @@ def create_scene() -> callable:
             sources = [dLux.sources.PointSource()]) -> OpticalLayer:
         return dLux.core.Scene(sources)
     return _create_scene
+
+
+@pytest.fixture
+def create_filter() -> callable:
+    """
+    Returns:
+    --------
+    _create_filter: callable
+        A function that has all keyword arguments and can be
+        used to create a `Filter` layer for testing.
+    """
+    def _create_filter( 
+            wavelengths = np.linspace(1e-6, 10e-6, 10),
+            throughput = np.linspace(0, 1, 10)) -> OpticalLayer:
+        return dLux.core.Filter(wavelengths, throughput)
+    return _create_filter
+
+
