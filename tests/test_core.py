@@ -252,32 +252,31 @@ class TestOptics(object):
         assert not np.isinf(psf).all()
 
 
-class TestScene(UtilityUser):
+class TestScene(object):
     """
     Tests the Scene class.
     """
-    utility : SceneUtility = SceneUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_scene: callable) -> None:
         """
         Tests the constructor.
         """
         # Test non-list inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(sources={})
+            create_scene(sources={})
 
         # Test list input with non Source input
         with pytest.raises(AssertionError):
-            self.utility.construct(sources=[10.])
+            create_scene(sources=[10.])
 
 
-    def test_normalise(self):
+    def test_normalise(self, create_scene: callable) -> None:
         """
         Tests the normalise method.
         """
         # Test all sources in the scene are normalised
-        scene = self.utility.construct()
+        scene = create_scene()
         normalised_scene = scene.normalise()
         for source in normalised_scene.sources.values():
             assert np.allclose(source.get_weights().sum(), 1.)
@@ -285,12 +284,14 @@ class TestScene(UtilityUser):
                 assert np.allclose(source.get_distribution(), 1.)
 
 
-    def test_model(self):
+    def test_model(self, 
+            create_scene: callable, 
+            create_optics: callable) -> None:
         """
         Tests the model method
         """
-        scene = self.utility.construct()
-        psf = scene.model(OpticsUtility().construct())
+        scene = create_scene()
+        psf = scene.model(create_optics())
         assert not np.isnan(psf).all()
         assert not np.isinf(psf).all()
 
