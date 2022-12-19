@@ -369,11 +369,12 @@ class TestAperturesCommonInterfaces():
         # there should also exist something in bounds (assuming edges are within coords)
         assert np.logical_and(aperture > 0., aperture < 1.).any()
         
-    def test_valid(self, create_square_aperture : callable, create_rectangular_aperture : callable):
+    def test_valid(self, create_square_aperture : callable, create_rectangular_aperture : callable, create_circular_aperture : callable):
         coords = dLux.utils.get_pixel_coordinates(512, 2./512)
         
         constructors = [create_square_aperture,
-                        create_rectangular_aperture]
+                        create_rectangular_aperture,
+                        create_circular_aperture]
         
         x_offset = 1.
         y_offset = 1.
@@ -384,14 +385,19 @@ class TestAperturesCommonInterfaces():
         
         # TODO might need to add error message for when this fails but it checks things very easily
         for ctor in constructors:
+            # TODO needs correct handling of kwargs
+            rotations = [0]
+            if ctor() not in [create_circular_aperture]:
+                rotations = [0, np.pi/2.]
             for centre in centres:
-                for softening in [True, False]:
-                    for occulting in [True, False]:
-                        aperture = ctor(centre=centre, softening=softening, occulting=occulting)._aperture(coords)
-                        if softening:
-                            TestAperturesCommonInterfaces._assert_valid_soft_aperture(aperture)
-                        else:
-                            TestAperturesCommonInterfaces._assert_valid_hard_aperture(aperture)
+                for rotation in rotations:
+                    for softening in [True, False]:
+                        for occulting in [True, False]:
+                            aperture = ctor(centre=centre, softening=softening, occulting=occulting, rotation=rotation)._aperture(coords)
+                            if softening:
+                                TestAperturesCommonInterfaces._assert_valid_soft_aperture(aperture)
+                            else:
+                                TestAperturesCommonInterfaces._assert_valid_hard_aperture(aperture)
     
 
 '''
