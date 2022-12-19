@@ -1,9 +1,7 @@
 from __future__ import annotations
-from utilities import Utility, UtilityUser
 import jax.numpy as np
 import pytest
 import dLux
-from test_sources import PointSourceUtility
 from jax import config
 config.update("jax_debug_nans", True)
 
@@ -393,31 +391,31 @@ class TestFilter(object):
 
         # Test 2d wavelengths input
         with pytest.raises(AssertionError):
-            create_filter(2,2)))
+            create_filter(2,2)
 
         # Test 2d throughput input
         with pytest.raises(AssertionError):
-            create_filter(2,2)))
+            create_filter(2,2)
 
         # Test different shape wavelengths and throughput
         with pytest.raises(AssertionError):
-            create_filter(4))
+            create_filter(4)
 
         # Test negative wavelengths
         with pytest.raises(AssertionError):
-            create_filter([-1, 1]))
+            create_filter([-1, 1])
 
         # Test negative throughputs
         with pytest.raises(AssertionError):
-            create_filter([-1, 1]))
+            create_filter([-1, 1])
 
         # Test throughputs greater than 1
         with pytest.raises(AssertionError):
-            create_filter([0, 1.5]))
+            create_filter([0, 1.5])
 
         # Test reverse order wavelengths
         with pytest.raises(AssertionError):
-            create_filter([1, 0.5]))
+            create_filter([1, 0.5])
 
 
     def test_get_throughput(self, create_filter: callable) -> None:
