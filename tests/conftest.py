@@ -855,3 +855,17 @@ def create_jitter() -> None:
     return _create_jitter
 
 
+@pytest.fixture
+def create_saturation() -> None:
+    """
+    Returns:
+    --------
+    _create_saturation: callable
+        A function that has all keyword arguments and can be
+        used to create a `ApplySaturation` layer for testing.
+    """
+    def _create_saturation(saturation: Array = np.array(1.)) -> OpticalLayer:
+        return dLux.detectors.ApplySaturation(saturation)
+    return _create_saturation
+
+
