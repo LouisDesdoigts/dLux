@@ -11,33 +11,6 @@ config.update("jax_debug_nans", True)
 Array = np.ndarray
 
 
-class OpticsUtility(Utility):
-    """
-    Utility for the Optics class.
-    """
-    layers : list
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Optics Utility.
-        """
-        self.layers = [
-            dLux.optics.CreateWavefront(16, 1),
-            dLux.optics.CompoundAperture([0.5]),
-            dLux.optics.NormaliseWavefront(),
-            dLux.propagators.CartesianMFT(16, 1., 1e-6)
-        ]
-
-
-    def construct(self : Utility, layers : list = None) -> Optics:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        layers = self.layers if layers is None else layers
-        return dLux.core.Optics(layers)
-
-
 class DetectorUtility(Utility):
     """
     Utility for the Detector class.
