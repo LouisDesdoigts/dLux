@@ -451,3 +451,20 @@ def create_optics() -> callable:
             ]) -> OpticalLayer:
         return dLux.core.Optics(layers)
     return _create_optics
+
+
+@pytest.fixture
+def create_detector() -> callable:
+    """
+    Returns:
+    --------
+    _create_detector: callable
+        A function that has all keyword arguments and can be
+        used to create a `Detector` layer for testing.
+    """
+    def _create_detector(
+            layers = [dLux.detectors.AddConstant(1.)]) -> OpticalLayer:
+        return dLux.core.Detector(layers)
+    return _create_detector
+
+
