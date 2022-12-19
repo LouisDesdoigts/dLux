@@ -540,7 +540,7 @@ def create_array_distribution():
     """
     Returns:
     --------
-    _create_point_source: callable
+    _create_array_distribution: callable
         a function that has all keyword arguments and can be
         used to create a `ArrayDistribution` layer for testing.
     """
@@ -560,7 +560,36 @@ def create_array_distribution():
                                               spectrum, name=name)
     return _create_array_distribution
 
+@pytest.fixture
+def create_binary_source():
+    """
+    Returns:
+    --------
+    _create_binary_source: callable
+        a function that has all keyword arguments and can be
+        used to create a `BinarySource` layer for testing.
+    """
 
+
+    def _create_binary_source(
+                  position       : Array    = np.array([0., 0.]),
+                  flux           : Array    = np.array(1.),
+                  spectrum       : Spectrum = None,
+                  separation     : Array    = np.array(1.),
+                  position_angle : Array    = np.array(0.),
+                  contrast       : Array    = np.array(2.),
+                  name           : str      = "BinarySource") -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        if spectrum is None:
+            wavelengths = np.tile(np.linspace(500e-9, 600e-9, 10), (2, 1))
+            weights     = np.tile(np.arange(10), (2, 1))
+            spectrum = dLux.spectrums.CombinedSpectrum(wavelengths, weights)
+            
+        return dLux.sources.BinarySource(position, flux, separation, \
+                                  position_angle, contrast, spectrum, name=name)
+    return _create_binary_source
 
 
 def create_optics() -> callable:

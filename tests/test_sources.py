@@ -675,19 +675,18 @@ class TestArrayDistribution():
         # source.model(optics, filter_in=filter_in)
 
 
-'''
 class TestBinarySource():
     """
     Tests the BinarySource class.
     """
-    utility : BinarySourceUtility = BinarySourceUtility()
 
 
-    def test_model(self) -> None:
+    def test_model(self, create_binary_source : callable) -> None:
         """
         Tests the model method.
         """
-        source = create_source()
+        # TODO add tests
+        source = create_binary_source()
         optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
         detector = dLux.core.Detector([dLux.AddConstant(0.)])
         filter_in = dLux.Filter()
@@ -697,6 +696,7 @@ class TestBinarySource():
         # source.model(optics, filter_in=filter_in)
 
 
+'''
 class TestPointExtendedSource():
     """
     Tests the PointExtendedSource class.
