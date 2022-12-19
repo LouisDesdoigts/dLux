@@ -141,40 +141,41 @@ class TestApplyBasisOPD(object):
         create_apply_basis_opd()(wf)
 
 
-class TestAddPhase(UtilityUser):
+class TestAddPhase(object):
     """
     Tests the AddPhase class.
     """
-    utility : AddPhaseUtility = AddPhaseUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_add_phase: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(phase=np.ones(1))
+            create_add_phase(phase=np.ones(1))
 
         # Test functioning
-        self.utility.construct()
+        create_add_phase()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_add_phase: callable, 
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
+        wf = create_wavefront() 
         npix = wf.npixels
 
         # Test 0d
-        self.utility.construct(phase=np.array(1.))(wf)
+        create_add_phase(phase=np.array(1.))(wf)
 
         # Test 2d
-        self.utility.construct(phase=np.ones((npix, npix)))(wf)
+        create_add_phase(phase=np.ones((npix, npix)))(wf)
 
         # Test 3d
-        self.utility.construct(phase=np.ones((1, npix, npix)))(wf)
+        create_add_phase(phase=np.ones((1, npix, npix)))(wf)
 
 
 class TestAddOPD(UtilityUser):
