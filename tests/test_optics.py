@@ -71,27 +71,28 @@ class TestTiltWavefront(object):
         create_tilt_wavefront()(wf)
 
 
-class TestNormaliseWavefront(UtilityUser):
+class TestNormaliseWavefront(object):
     """
     Tests the NormaliseWavefront class.
     """
-    utility : NormaliseWavefrontUtility = NormaliseWavefrontUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_normalise_wavefront: callable) -> None:
         """
         Tests the constructor.
         """
         # Test functioning
-        self.utility.construct()
+        create_normalise_wavefront()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_normalise_wavefront: callable,
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
-        wf = self.utility.construct()(wf)
+        wf = create_wavefront() 
+        wf = create_normalise_wavefront()(wf)
         assert wf.psf.sum() == 1.
 
 
