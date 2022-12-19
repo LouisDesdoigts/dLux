@@ -1,5 +1,5 @@
 from __future__ import annotations
-from utilities import Utility, UtilityUser
+# from utilities import Utility, 
 import jax.numpy as np
 import pytest
 import dLux
@@ -7,424 +7,332 @@ from jax import config
 config.update("jax_debug_nans", True)
 
 
-class PropagatorUtility(Utility):
-    """
-    Utility for Propagator class.
-    """
-    dLux.propagators.Propagator.__abstractmethods__ = ()
-    inverse : bool
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Propagator Utility.
-        """
-        self.inverse  = False
-
-
-    def construct(self : Utility, inverse : bool = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        inverse = self.inverse if inverse is None else inverse
-        return dLux.propagators.Propagator(inverse=inverse)
-
-
-class FixedSamplingPropagatorUtility(PropagatorUtility):
-    """
-    Utility for FixedSamplingPropagator class.
-    """
-    dLux.propagators.FixedSamplingPropagator.__abstractmethods__ = ()
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Propagator Utility.
-        """
-        super().__init__()
-
-
-    def construct(self : Utility, inverse : bool = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        inverse = self.inverse if inverse is None else inverse
-        return dLux.propagators.FixedSamplingPropagator(inverse=inverse)
-
-
-class VariableSamplingPropagatorUtility(PropagatorUtility):
-    """
-    Utility for VariableSamplingPropagator class.
-    """
-    dLux.propagators.VariableSamplingPropagator.__abstractmethods__ = ()
-    npixels_out     : int
-    pixel_scale_out : Array
-    shift           : Array
-    pixel_shift     : bool
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the VariableSamplingPropagator Utility.
-        """
-        super().__init__()
-        self.npixels_out      = 16
-        self.pixel_scale_out  = np.array(1.)
-        self.shift            = np.zeros(2)
-        self.pixel_shift      = False
-
-
-    def construct(self            : Utility,
-                  npixels_out     : int   = None,
-                  pixel_scale_out : Array = None,
-                  shift           : Array = None,
-                  pixel_shift     : bool  = None,
-                  inverse         : bool  = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None \
-                                                        else pixel_scale_out
-        npixels_out = self.npixels_out if npixels_out is None else npixels_out
-        shift       = self.shift       if shift       is None else shift
-        pixel_shift = self.pixel_shift if pixel_shift is None else pixel_shift
-        inverse     = self.inverse     if inverse     is None else inverse
-        return dLux.propagators.VariableSamplingPropagator(pixel_scale_out,
-                            npixels_out, shift, pixel_shift, inverse=inverse)
-
-
-class CartesianPropagatorUtility(PropagatorUtility):
-    """
-    Utility for CartesianPropagator class.
-    """
-    dLux.propagators.CartesianPropagator.__abstractmethods__ = ()
-    focal_length : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the CartesianPropagator Utility.
-        """
-        super().__init__()
-        self.focal_length = np.array(1.)
-
+# class PropagatorUtility(Utility):
+#     """
+#     Utility for Propagator class.
+#     """
+#     dLux.propagators.Propagator.__abstractmethods__ = ()
+#     inverse : bool
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the Propagator Utility.
+#         """
+#         self.inverse  = False
+
+
+#     def construct(self : Utility, inverse : bool = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         inverse = self.inverse if inverse is None else inverse
+#         return dLux.propagators.Propagator(inverse=inverse)
+
+
+# class FixedSamplingPropagatorUtility(PropagatorUtility):
+#     """
+#     Utility for FixedSamplingPropagator class.
+#     """
+#     dLux.propagators.FixedSamplingPropagator.__abstractmethods__ = ()
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the Propagator Utility.
+#         """
+#         super().__init__()
+
+
+#     def construct(self : Utility, inverse : bool = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         inverse = self.inverse if inverse is None else inverse
+#         return dLux.propagators.FixedSamplingPropagator(inverse=inverse)
+
+
+# class VariableSamplingPropagatorUtility(PropagatorUtility):
+#     """
+#     Utility for VariableSamplingPropagator class.
+#     """
+#     dLux.propagators.VariableSamplingPropagator.__abstractmethods__ = ()
+#     npixels_out     : int
+#     pixel_scale_out : Array
+#     shift           : Array
+#     pixel_shift     : bool
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the VariableSamplingPropagator Utility.
+#         """
+#         super().__init__()
+#         self.npixels_out      = 16
+#         self.pixel_scale_out  = np.array(1.)
+#         self.shift            = np.zeros(2)
+#         self.pixel_shift      = False
+
+
+#     def construct(self            : Utility,
+#                   npixels_out     : int   = None,
+#                   pixel_scale_out : Array = None,
+#                   shift           : Array = None,
+#                   pixel_shift     : bool  = None,
+#                   inverse         : bool  = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None \
+#                                                         else pixel_scale_out
+#         npixels_out = self.npixels_out if npixels_out is None else npixels_out
+#         shift       = self.shift       if shift       is None else shift
+#         pixel_shift = self.pixel_shift if pixel_shift is None else pixel_shift
+#         inverse     = self.inverse     if inverse     is None else inverse
+#         return dLux.propagators.VariableSamplingPropagator(pixel_scale_out,
+#                             npixels_out, shift, pixel_shift, inverse=inverse)
+
+
+# class CartesianPropagatorUtility(PropagatorUtility):
+#     """
+#     Utility for CartesianPropagator class.
+#     """
+#     dLux.propagators.CartesianPropagator.__abstractmethods__ = ()
+#     focal_length : Array
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the CartesianPropagator Utility.
+#         """
+#         super().__init__()
+#         self.focal_length = np.array(1.)
+
 
-    def construct(self         : Utility,
-                  focal_length : Array = None,
-                  inverse      : bool  = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        focal_length = self.focal_length \
-                        if focal_length is None else focal_length
-        inverse = self.inverse if inverse is None else inverse
-        return dLux.propagators.CartesianPropagator(focal_length, \
-                                                    inverse=inverse)
-
-
-class AngularPropagatorUtility(PropagatorUtility):
-    """
-    Utility for AngularPropagator class.
-    """
-    dLux.propagators.AngularPropagator.__abstractmethods__ = ()
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the AngularPropagator Utility.
-        """
-        super().__init__()
-        self.focal_length = np.array(1.)
-
-
-    def construct(self : Utility, inverse : bool = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        inverse = self.inverse if inverse is None else inverse
-        return dLux.propagators.AngularPropagator(inverse=inverse)
-
-
-class FarFieldFresnelUtility(PropagatorUtility):
-    """
-    Utility for FarFieldFresnel class.
-    """
-    dLux.propagators.FarFieldFresnel.__abstractmethods__ = ()
-    propagation_shift : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the FarFieldFresnel Utility.
-        """
-        super().__init__()
-        self.propagation_shift = np.array(1e-3)
-
-
-    def construct(self              : Utility,
-                  propagation_shift : Array = None,
-                  inverse           : bool  = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        propagation_shift = self.propagation_shift \
-                            if propagation_shift is None else propagation_shift
-        inverse = self.inverse if inverse is None else inverse
-        return dLux.propagators.FarFieldFresnel(propagation_shift, \
-                                                inverse=inverse)
-
-
-
-class CartesianMFTUtility(CartesianPropagatorUtility,
-                          VariableSamplingPropagatorUtility):
-    """
-    Utility for CartesianMFT class.
-    """
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the CartesianMFT Utility.
-        """
-        super().__init__()
-
-
-    def construct(self            : Utility,
-                  npixels_out     : int   = None,
-                  pixel_scale_out : float = None,
-                  focal_length    : Array = None,
-                  inverse         : bool  = None,
-                  shift           : Array = None,
-                  pixel_shift     : bool  = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None \
-                                                        else pixel_scale_out
-        focal_length = self.focal_length if focal_length is None \
-                                                        else focal_length
-        npixels_out = self.npixels_out if npixels_out is None else npixels_out
-        shift       = self.shift       if shift       is None else shift
-        pixel_shift = self.pixel_shift if pixel_shift is None else pixel_shift
-        inverse     = self.inverse     if inverse     is None else inverse
-        return dLux.propagators.CartesianMFT(npixels_out, pixel_scale_out,
-                                     focal_length, inverse, shift, pixel_shift)
-
-
-class AngularMFTUtility(AngularPropagatorUtility,
-                        VariableSamplingPropagatorUtility):
-    """
-    Utility for AngularMFT class.
-    """
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the AngularMFT Utility.
-        """
-        super().__init__()
-
-
-    def construct(self            : Utility,
-                  npixels_out     : int   = None,
-                  pixel_scale_out : float = None,
-                  inverse         : bool  = None,
-                  shift           : Array = None,
-                  pixel_shift     : bool  = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None \
-                                                        else pixel_scale_out
-        npixels_out = self.npixels_out if npixels_out is None else npixels_out
-        shift       = self.shift       if shift       is None else shift
-        pixel_shift = self.pixel_shift if pixel_shift is None else pixel_shift
-        inverse     = self.inverse     if inverse     is None else inverse
-        return dLux.propagators.AngularMFT(npixels_out, pixel_scale_out,
-                                           inverse, shift, pixel_shift)
-
-
-class CartesianFFTUtility(CartesianPropagatorUtility,
-                          FixedSamplingPropagatorUtility):
-    """
-    Utility for CartesianFFT class.
-    """
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the CartesianFFT Utility.
-        """
-        super().__init__()
-
-
-    def construct(self         : Utility,
-                  focal_length : Array = None,
-                  inverse      : bool  = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        focal_length = self.focal_length if focal_length is None \
-                                                        else focal_length
-        inverse = self.inverse if inverse is None else inverse
-        return dLux.propagators.CartesianFFT(focal_length, inverse)
-
-
-class AngularFFTUtility(AngularPropagatorUtility,
-                        FixedSamplingPropagatorUtility):
-    """
-    Utility for AngularFFT class.
-    """
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the AngularFFT Utility.
-        """
-        super().__init__()
-
-
-    def construct(self : Utility, inverse : bool = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        inverse = self.inverse if inverse is None else inverse
-        return dLux.propagators.AngularFFT(inverse)
-
-
-
-class CartesianFresnelUtility(FarFieldFresnelUtility, CartesianMFTUtility):
-    """
-    Utility for CartesianFresnel class.
-    """
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the CartesianFresnel Utility.
-        """
-        super().__init__()
-
-
-    def construct(self              : Utility,
-                  npixels_out       : int   = None,
-                  pixel_scale_out   : float = None,
-                  focal_length      : Array = None,
-                  propagation_shift : Array = None,
-                  inverse           : bool  = None,
-                  shift             : Array = None,
-                  pixel_shift       : bool  = None) -> Propagator:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None \
-                                                        else pixel_scale_out
-        focal_length = self.focal_length if focal_length is None \
-                                                        else focal_length
-        propagation_shift = self.propagation_shift if propagation_shift is None\
-                                                        else propagation_shift
-        npixels_out = self.npixels_out if npixels_out is None else npixels_out
-        shift       = self.shift       if shift       is None else shift
-        pixel_shift = self.pixel_shift if pixel_shift is None else pixel_shift
-        inverse     = self.inverse     if inverse     is None else inverse
-        return dLux.propagators.CartesianFresnel(npixels_out, pixel_scale_out,
-                 focal_length, propagation_shift, inverse, shift, pixel_shift)
-
-
-class TestPropagator(UtilityUser):
-    """
-    Test the Propagator class.
-    """
-
-
-    def test_constructor(self, create_propagator : callable) -> None:
-        """
-        Tests the constructor.
-        """
-        create_propagator()
-
-
-class TestVariableSamplingPropagator(UtilityUser):
-    """
-    Test the VariableSamplingPropagator class.
-    """
-
-    def test_constructor(self, create_variable_sampling_propagator : callable):
-        """
-        Tests the constructor.
-        """
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_variable_sampling_propagator(pixel_scale_out=np.ones(1))
-
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_variable_sampling_propagator(shift=np.ones(1))
-
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_variable_sampling_propagator(shift=np.ones((1, 2)))
-
-        create_variable_sampling_propagator()
-
-
-class TestFixedSamplingPropagator(UtilityUser):
-    """
-    Test the FixedSamplingPropagator class.
-    """
-
-    def test_constructor(self, create_fixed_sampling_propagator : callable):
-        """
-        Tests the constructor.
-        """
-        create_fixed_sampling_propagator()
-
-
-class TestCartesianPropagator(UtilityUser):
-    """
-    Test the CartesianPropagator class.
-    """
-
-
-    def test_constructor(self, create_cartesian_propagator : callable):
-        """
-        Tests the constructor.
-        """
-        # Test wrong dim
-        with pytest.raises(AssertionError):
-            create_cartesian_propagator(focal_length=np.array([]))
-
-        create_cartesian_propagator()
-
-
-class TestAngularPropagator(UtilityUser):
-    """
-    Test the AngularPropagator class.
-    """
-
-    def test_constructor(self, create_angular_propagator : callable):
-        """
-        Tests the constructor.
-        """
-        create_angular_propagator()
-
-
-class TestFarFieldFresnel():
-    """
-    Test the FarFieldFresnel class.
-    """
-
-    def test_constructor(self, create_far_field_fresnel : callable):
-        """
-        Tests the constructor.
-        """
-        # Test wrong dim
-        with pytest.raises(AssertionError):
-            create_far_field_fresnel(propagation_shift=np.array([]))
-
-        create_far_field_fresnel()
-
-class TestCartesianMFT(UtilityUser):
+#     def construct(self         : Utility,
+#                   focal_length : Array = None,
+#                   inverse      : bool  = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         focal_length = self.focal_length \
+#                         if focal_length is None else focal_length
+#         inverse = self.inverse if inverse is None else inverse
+#         return dLux.propagators.CartesianPropagator(focal_length, \
+#                                                     inverse=inverse)
+
+
+# class AngularPropagatorUtility(PropagatorUtility):
+#     """
+#     Utility for AngularPropagator class.
+#     """
+#     dLux.propagators.AngularPropagator.__abstractmethods__ = ()
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the AngularPropagator Utility.
+#         """
+#         super().__init__()
+#         self.focal_length = np.array(1.)
+
+
+#     def construct(self : Utility, inverse : bool = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         inverse = self.inverse if inverse is None else inverse
+#         return dLux.propagators.AngularPropagator(inverse=inverse)
+
+
+# class FarFieldFresnelUtility(PropagatorUtility):
+#     """
+#     Utility for FarFieldFresnel class.
+#     """
+#     dLux.propagators.FarFieldFresnel.__abstractmethods__ = ()
+#     propagation_shift : Array
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the FarFieldFresnel Utility.
+#         """
+#         super().__init__()
+#         self.propagation_shift = np.array(1e-3)
+
+
+#     def construct(self              : Utility,
+#                   propagation_shift : Array = None,
+#                   inverse           : bool  = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         propagation_shift = self.propagation_shift \
+#                             if propagation_shift is None else propagation_shift
+#         inverse = self.inverse if inverse is None else inverse
+#         return dLux.propagators.FarFieldFresnel(propagation_shift, \
+#                                                 inverse=inverse)
+
+
+
+# class CartesianMFTUtility(CartesianPropagatorUtility,
+#                           VariableSamplingPropagatorUtility):
+#     """
+#     Utility for CartesianMFT class.
+#     """
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the CartesianMFT Utility.
+#         """
+#         super().__init__()
+
+
+#     def construct(self            : Utility,
+#                   npixels_out     : int   = None,
+#                   pixel_scale_out : float = None,
+#                   focal_length    : Array = None,
+#                   inverse         : bool  = None,
+#                   shift           : Array = None,
+#                   pixel_shift     : bool  = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None \
+#                                                         else pixel_scale_out
+#         focal_length = self.focal_length if focal_length is None \
+#                                                         else focal_length
+#         npixels_out = self.npixels_out if npixels_out is None else npixels_out
+#         shift       = self.shift       if shift       is None else shift
+#         pixel_shift = self.pixel_shift if pixel_shift is None else pixel_shift
+#         inverse     = self.inverse     if inverse     is None else inverse
+#         return dLux.propagators.CartesianMFT(npixels_out, pixel_scale_out,
+#                                      focal_length, inverse, shift, pixel_shift)
+
+
+# class AngularMFTUtility(AngularPropagatorUtility,
+#                         VariableSamplingPropagatorUtility):
+#     """
+#     Utility for AngularMFT class.
+#     """
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the AngularMFT Utility.
+#         """
+#         super().__init__()
+
+
+#     def construct(self            : Utility,
+#                   npixels_out     : int   = None,
+#                   pixel_scale_out : float = None,
+#                   inverse         : bool  = None,
+#                   shift           : Array = None,
+#                   pixel_shift     : bool  = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None \
+#                                                         else pixel_scale_out
+#         npixels_out = self.npixels_out if npixels_out is None else npixels_out
+#         shift       = self.shift       if shift       is None else shift
+#         pixel_shift = self.pixel_shift if pixel_shift is None else pixel_shift
+#         inverse     = self.inverse     if inverse     is None else inverse
+#         return dLux.propagators.AngularMFT(npixels_out, pixel_scale_out,
+#                                            inverse, shift, pixel_shift)
+
+
+# class CartesianFFTUtility(CartesianPropagatorUtility,
+#                           FixedSamplingPropagatorUtility):
+#     """
+#     Utility for CartesianFFT class.
+#     """
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the CartesianFFT Utility.
+#         """
+#         super().__init__()
+
+
+#     def construct(self         : Utility,
+#                   focal_length : Array = None,
+#                   inverse      : bool  = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         focal_length = self.focal_length if focal_length is None \
+#                                                         else focal_length
+#         inverse = self.inverse if inverse is None else inverse
+#         return dLux.propagators.CartesianFFT(focal_length, inverse)
+
+
+# class AngularFFTUtility(AngularPropagatorUtility,
+#                         FixedSamplingPropagatorUtility):
+#     """
+#     Utility for AngularFFT class.
+#     """
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the AngularFFT Utility.
+#         """
+#         super().__init__()
+
+
+#     def construct(self : Utility, inverse : bool = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         inverse = self.inverse if inverse is None else inverse
+#         return dLux.propagators.AngularFFT(inverse)
+
+
+
+# class CartesianFresnelUtility(FarFieldFresnelUtility, CartesianMFTUtility):
+#     """
+#     Utility for CartesianFresnel class.
+#     """
+
+
+#     def __init__(self : Utility) -> Utility:
+#         """
+#         Constructor for the CartesianFresnel Utility.
+#         """
+#         super().__init__()
+
+
+#     def construct(self              : Utility,
+#                   npixels_out       : int   = None,
+#                   pixel_scale_out   : float = None,
+#                   focal_length      : Array = None,
+#                   propagation_shift : Array = None,
+#                   inverse           : bool  = None,
+#                   shift             : Array = None,
+#                   pixel_shift       : bool  = None) -> Propagator:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         pixel_scale_out = self.pixel_scale_out if pixel_scale_out is None \
+#                                                         else pixel_scale_out
+#         focal_length = self.focal_length if focal_length is None \
+#                                                         else focal_length
+#         propagation_shift = self.propagation_shift if propagation_shift is None\
+#                                                         else propagation_shift
+#         npixels_out = self.npixels_out if npixels_out is None else npixels_out
+#         shift       = self.shift       if shift       is None else shift
+#         pixel_shift = self.pixel_shift if pixel_shift is None else pixel_shift
+#         inverse     = self.inverse     if inverse     is None else inverse
+#         return dLux.propagators.CartesianFresnel(npixels_out, pixel_scale_out,
+#                  focal_length, propagation_shift, inverse, shift, pixel_shift)
+
+
+
+class TestCartesianMFT():
     """
     Test the CartesianMFT class.
     """
@@ -479,8 +387,9 @@ class TestCartesianMFT(UtilityUser):
         assert np.allclose(focal_roll, focal_shift.psf[1:, 1:])
         assert np.allclose(focal_roll, focal_shift_pix.psf[1:, 1:])
 
+'''
 
-class TestAngularMFT(UtilityUser):
+class TestAngularMFT():
     """
     Test the AngularMFT class.
     """
@@ -537,7 +446,7 @@ class TestAngularMFT(UtilityUser):
         assert np.allclose(focal_roll, focal_shift_pix.psf[1:, 1:])
 
 
-class TestCartesianFFT(UtilityUser):
+class TestCartesianFFT():
     """
     Test the CartesianFFT class.
     """
@@ -576,7 +485,7 @@ class TestCartesianFFT(UtilityUser):
         assert not np.isnan(pupil.psf).any()
 
 
-class TestAngularFFT(UtilityUser):
+class TestAngularFFT():
     """
     Test the AngularFFT class.
     """
@@ -615,7 +524,7 @@ class TestAngularFFT(UtilityUser):
         assert not np.isnan(pupil.psf).any()
 
 
-class TestCartesianFresnel(UtilityUser):
+class TestCartesianFresnel():
     """
     Test the CartesianFresnel class.
     """
@@ -656,3 +565,4 @@ class TestCartesianFresnel(UtilityUser):
         assert not np.isnan(fresnel.psf).any()
         assert not np.isnan(focal.psf).any()
         assert not np.isnan(pupil.psf).any()
+'''
