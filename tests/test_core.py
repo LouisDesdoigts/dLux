@@ -7,22 +7,22 @@ from test_sources import PointSourceUtility
 from jax import config
 config.update("jax_debug_nans", True)
 
-
 Array = np.ndarray
 
-
-#############
-### Tests ###
-#############
-def test_model():
+def test_model(
+        create_optics: callable,
+        create_detector: callable,
+        create_scene: callable,
+        create_filter: callable, 
+        create_source: callable) -> None:
     """
     Test the model function
     """
-    optics = OpticsUtility().construct()
-    detector = DetectorUtility().construct()
-    scene = SceneUtility().construct()
-    filter = FilterUtility().construct()
-    source = PointSourceUtility().construct()
+    optics = create_optics()
+    detector = create_detector()
+    scene = create_scene()
+    filter = create_filter()
+    source = create_pointsource()
     sources = [source, source]
 
     # Test non-optics input
