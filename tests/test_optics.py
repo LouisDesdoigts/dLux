@@ -227,7 +227,7 @@ class TestTransmissiveOptic(object):
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            create_transmissive_optic(transmission=np.ones(1))
+            create_transmissive_optic(trans=np.ones(1))
 
         # Test functioning
         create_transmissive_optic()

@@ -5,6 +5,7 @@ import dLux
 
 Array = np.ndarray
 Wavefront = dLux.wavefronts.Wavefront
+OpticalLayer = dLux.optics.OpticalLayer
 
 
 @pytest.fixture
