@@ -268,3 +268,25 @@ def create_angular_propagator() -> callable:
         """
         return dLux.propagators.AngularPropagator(inverse=inverse)
     return _create_angular_propagator
+
+
+
+@pytest.fixture
+def create_far_field_fresnel() -> callable:
+    """
+    Returns:
+    --------
+    _create_far_field_fresnel: callable
+        a function that has all keyword arguments and can be
+        used to create a `AngularPropagator` layer for testing.
+    """
+
+    def _create_far_field_fresnel(
+                  propagation_shift : Array = np.array(1e-3),
+                  inverse           : bool  = False) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.propagators.FarFieldFresnel(propagation_shift, \
+                                                inverse=inverse)
+    return _create_far_field_fresnel

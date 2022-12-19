@@ -409,22 +409,20 @@ class TestAngularPropagator(UtilityUser):
         create_angular_propagator()
 
 
-class TestFarFieldFresnel(UtilityUser):
+class TestFarFieldFresnel():
     """
     Test the FarFieldFresnel class.
     """
-    utility : FarFieldFresnelUtility = FarFieldFresnelUtility()
 
-
-    def test_constructor(self):
+    def test_constructor(self, create_far_field_fresnel : callable):
         """
         Tests the constructor.
         """
         # Test wrong dim
         with pytest.raises(AssertionError):
-            self.utility.construct(propagation_shift=np.array([]))
+            create_far_field_fresnel(propagation_shift=np.array([]))
 
-        self.utility.construct()
+        create_far_field_fresnel()
 
 class TestCartesianMFT(UtilityUser):
     """
