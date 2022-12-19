@@ -483,50 +483,48 @@ class TestRelativeFluxSource():
         assert np.allclose(flux_out[0]/flux_out[1], source.contrast)
 
 
-'''
 class TestRelativePositionSource():
     """
     Tests the RelativePositionSource class.
     """
-    utility : RelativePositionSourceUtility = RelativePositionSourceUtility()
 
 
-    def test_constructor(self) -> None:
+    def test_constructor(self, create_relative_position_source : callable) -> None:
         """
         Tests the constructor.
         """
         # Separation
         # Test string inputs
         with pytest.raises(ValueError):
-            create_source(separation="")
+            create_relative_position_source(separation="")
 
         # Test one dimension input
         with pytest.raises(AssertionError):
-            create_source(separation=[5.])
+            create_relative_position_source(separation=[5.])
 
         # Test zero length input
         with pytest.raises(AssertionError):
-            create_source(separation=[])
+            create_relative_position_source(separation=[])
 
         # position_angle
         # Test string inputs
         with pytest.raises(ValueError):
-            create_source(position_angle="")
+            create_relative_position_source(position_angle="")
 
         # Test one dimension input
         with pytest.raises(AssertionError):
-            create_source(position_angle=[5.])
+            create_relative_position_source(position_angle=[5.])
 
         # Test zero length input
         with pytest.raises(AssertionError):
-            create_source(position_angle=[])
+            create_relative_position_source(position_angle=[])
 
 
-    def test_get_position(self) -> None:
+    def test_get_position(self, create_relative_position_source : callable) -> None:
         """
         Tests the get_position method.
         """
-        source = create_source()
+        source = create_relative_position_source()
         position_out = source.get_position()
         sep_vec = position_out[0] - position_out[1]
         separation = np.hypot(sep_vec[0], sep_vec[1])
@@ -536,6 +534,7 @@ class TestRelativePositionSource():
         assert np.allclose(source.position_angle, position_angle).all()
 
 
+'''
 class TestPointSource():
     """
     Tests the PointSource class.
