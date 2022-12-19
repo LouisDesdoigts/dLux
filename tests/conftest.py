@@ -599,7 +599,7 @@ def create_point_extended_source() -> callable:
     --------
     _create_point_extended_source: callable
         a function that has all keyword arguments and can be
-        used to create a `BinarySource` layer for testing.
+        used to create a `PointExtendedSource` layer for testing.
     """
 
     def _create_point_extended_source(
@@ -624,7 +624,7 @@ def create_point_and_extended_source():
     --------
     _create_point_and_extended_source: callable
         a function that has all keyword arguments and can be
-        used to create a `BinarySource` layer for testing.
+        used to create a `PointAndExtendedSource` layer for testing.
     """
 
 
@@ -646,6 +646,7 @@ def create_point_and_extended_source():
         return dLux.sources.PointAndExtendedSource(position, flux, distribution,
                                                 contrast, spectrum, name=name)
     return _create_point_and_extended_source
+
 
 
 def create_optics() -> callable:
