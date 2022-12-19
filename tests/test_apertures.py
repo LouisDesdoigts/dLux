@@ -7,39 +7,6 @@ Aperture = typing.TypeVar("Aperture")
 Array = typing.TypeVar("Array")
 
 
-class ApertureUtility(Utility):
-    """
-    Contains the default constructor values for all of
-    the parameters common to every aperture.
-
-    Parameters:
-    -----------
-    occulting: bool = False
-        The default occulting setting is false.
-    softening: bool = False
-        The default softening setting is False.
-    x_offset: float = 0.
-        The default aperture is centred. 
-    y_offset: float = 0. 
-        The default aperture is centred. 
-    """
-    occulting: bool = False
-    softening: bool = False
-    x_offset: float = 0.
-    y_offset: float = 0.
-
-
-    def get_coordinates(self) -> Array:
-        """
-        Returns:
-        --------
-        coords: Array, meters
-            A default coordinate array that the aperture can be generated
-            over. 
-        """
-        return dl.utils.get_pixel_coordinates(128, 4. / 128)
-
-
 class SquareApertureUtility(ApertureUtility):
     """
     Contains useful default values for the constructor

@@ -8,7 +8,6 @@ Wavefront = dLux.wavefronts.Wavefront
 OpticalLayer = dLux.optics.OpticalLayer
 
 
-
 @pytest.fixture
 def create_wavefront() -> callable:
     """
@@ -169,6 +168,7 @@ def create_rotate() -> callable:
     return _create_rotate
 
 
+<<<<<<< HEAD
 @pytest.fixture
 def create_propagator() -> callable:
     """
@@ -249,3 +249,4 @@ def create_cartesian_propagator() -> callable:
         return dLux.propagators.CartesianPropagator(focal_length, \
                                                     inverse=inverse)
     return _create_cartesian_propagator
+
