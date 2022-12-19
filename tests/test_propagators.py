@@ -384,18 +384,17 @@ class TestCartesianPropagator(UtilityUser):
     """
     Test the CartesianPropagator class.
     """
-    utility : CartesianPropagatorUtility = CartesianPropagatorUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_cartesian_propagator : callable):
         """
         Tests the constructor.
         """
         # Test wrong dim
         with pytest.raises(AssertionError):
-            self.utility.construct(focal_length=np.array([]))
+            create_cartesian_propagator(focal_length=np.array([]))
 
-        self.utility.construct()
+        create_cartesian_propagator()
 
 
 class TestAngularPropagator(UtilityUser):

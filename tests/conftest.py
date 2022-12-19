@@ -210,7 +210,7 @@ def create_variable_sampling_propagator() -> callable:
     """
     Returns:
     --------
-    _create_variable_sampling_propagator_utility: callable
+    create_variable_sampling_propagator: callable
         a function that has all keyword arguments and can be
         used to create a `VariableSamplingPropagator` layer for testing.
     """
@@ -227,3 +227,25 @@ def create_variable_sampling_propagator() -> callable:
         return dLux.propagators.VariableSamplingPropagator(pixel_scale_out,
                             npixels_out, shift, pixel_shift)
     return _create_variable_sampling_propagator_utility
+
+
+
+@pytest.fixture
+def create_cartesian_propagator() -> callable:
+    """
+    Returns:
+    --------
+    _create_cartesian_propagator: callable
+        a function that has all keyword arguments and can be
+        used to create a `CartesianPropagator` layer for testing.
+    """
+
+    def _create_cartesian_propagator(
+                                     focal_length : Array = np.array(1.),
+                                     inverse      : bool  = False) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.propagators.CartesianPropagator(focal_length, \
+                                                    inverse=inverse)
+    return _create_cartesian_propagator
