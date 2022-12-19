@@ -168,7 +168,6 @@ def create_rotate() -> callable:
     return _create_rotate
 
 
-<<<<<<< HEAD
 @pytest.fixture
 def create_propagator() -> callable:
     """
