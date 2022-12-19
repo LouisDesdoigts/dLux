@@ -152,31 +152,30 @@ def test_model(
     assert not np.isinf(out).all()
 
 
-class TestOptics(UtilityUser):
+class TestOptics(object):
     """
     Tests the Optics class.
     """
-    utility : OpticsUtility = OpticsUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_optics: callable) -> None:
         """
         Tests the constructor.
         """
         # Test non-list inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(layers={})
+            create_optics(layers={})
 
         # Test list input with non Optics Layer input
         with pytest.raises(AssertionError):
-            self.utility.construct(layers=[10.])
+            create_optics(layers=[10.])
 
 
-    def test_propagate_mono(self):
+    def test_propagate_mono(self, create_optic: callable) -> None:
         """
         Tests the propagate_mono method.
         """
-        osys = self.utility.construct()
+        osys = create_optic() 
 
         # Test inputs
         with pytest.raises(AssertionError):
@@ -194,11 +193,11 @@ class TestOptics(UtilityUser):
         assert not np.isinf(psf).all()
 
 
-    def test_propagate_multi(self):
+    def test_propagate_multi(self, create_optic: callable) -> None:
         """
         Tests the propagate_multi method.
         """
-        osys = self.utility.construct()
+        osys = create_optic()
 
         # Test inputs
         with pytest.raises(AssertionError):
@@ -219,11 +218,11 @@ class TestOptics(UtilityUser):
         assert not np.isinf(psf).all()
 
 
-    def test_debug_prop(self):
+    def test_debug_prop(self, create_optic: callable) -> None:
         """
         Tests the debug_prop method.
         """
-        osys = self.utility.construct()
+        osys = create_optic()
 
         # Test inputs
         with pytest.raises(AssertionError):
@@ -241,12 +240,14 @@ class TestOptics(UtilityUser):
         assert not np.isinf(psf).all()
 
 
-    def test_model(self):
+    def test_model(self, 
+            create_optic: callable, 
+            create_point_source: callable) -> None:
         """
         Tests the model method
         """
-        osys = self.utility.construct()
-        psf = osys.model(source=PointSourceUtility().construct())
+        osys = create_optic()
+        psf = osys.model(source=create_point_source())
         assert not np.isnan(psf).all()
         assert not np.isinf(psf).all()
 
