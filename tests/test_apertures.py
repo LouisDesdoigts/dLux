@@ -360,21 +360,28 @@ class TestAperturesCommonInterfaces():
     """
     For each type of aperture that has common properties, test it
     """
-    def _assert_valid_hard_aperture(aperture):
-        assert ((aperture == 1.) | (aperture == 0.)).all()
+    def _assert_valid_hard_aperture(aperture, msg=''):
+        assert ((aperture == 1.) | (aperture == 0.)).all(), msg
         
-    def _assert_valid_soft_aperture(aperture):
-        assert (aperture <= 1.).all()
-        assert (aperture >= 0.).all()
+    def _assert_valid_soft_aperture(aperture, msg=''):
+        assert (aperture <= 1. + np.finfo(np.float32).resolution).all(), msg
+        assert (aperture >= 0. - np.finfo(np.float32).resolution).all(), msg
         # there should also exist something in bounds (assuming edges are within coords)
-        assert np.logical_and(aperture > 0., aperture < 1.).any()
+        assert np.logical_and(aperture > 0., aperture < 1.).any(), msg
         
-    def test_valid(self, create_square_aperture : callable, create_rectangular_aperture : callable, create_circular_aperture : callable):
-        coords = dLux.utils.get_pixel_coordinates(512, 2./512)
+    def test_all_apertures(self, create_square_aperture : callable, create_rectangular_aperture : callable, create_circular_aperture : callable):
         
         constructors = [create_square_aperture,
                         create_rectangular_aperture,
                         create_circular_aperture]
+        
+        # TODO might need to add error message for when this fails but it checks things very easily
+        for ctor in constructors:
+            self._test_single_aperture_class(ctor)
+    
+    def _test_single_aperture_class(self, aperture_fixture):
+        
+        coords = dLux.utils.get_pixel_coordinates(512, 2./512)
         
         x_offset = 1.
         y_offset = 1.
@@ -383,22 +390,37 @@ class TestAperturesCommonInterfaces():
                    np.array([0., y_offset]),
                    np.array([x_offset, y_offset])]
         
-        # TODO might need to add error message for when this fails but it checks things very easily
-        for ctor in constructors:
-            # TODO needs correct handling of kwargs
-            rotations = [0]
-            if ctor() not in [create_circular_aperture]:
-                rotations = [0, np.pi/2.]
-            for centre in centres:
-                for rotation in rotations:
-                    for softening in [True, False]:
-                        for occulting in [True, False]:
-                            aperture = ctor(centre=centre, softening=softening, occulting=occulting, rotation=rotation)._aperture(coords)
-                            if softening:
-                                TestAperturesCommonInterfaces._assert_valid_soft_aperture(aperture)
-                            else:
-                                TestAperturesCommonInterfaces._assert_valid_hard_aperture(aperture)
-    
+        rotations = [0, np.pi/2.]
+        not_rotatable_apertures = (dLux.apertures.CircularAperture,
+                                   dLux.apertures.AnnularAperture)
+        
+        base_kwargs = {"centre" : None,
+                       "softening" : None,
+                       "occulting" : None
+                       }
+
+        for centre in centres:
+            for rotation in rotations:
+                for softening in [True, False]:
+                    for occulting in [True, False]:
+                        actual_kwargs = base_kwargs
+                        actual_kwargs["centre"] = centre
+                        actual_kwargs["softening"] = softening
+                        actual_kwargs["occulting"] = occulting
+                        
+                        if not isinstance(aperture_fixture(), not_rotatable_apertures):
+                            actual_kwargs["rotation"] = rotation
+                            
+                        
+                        aperture = aperture_fixture(**actual_kwargs)._aperture(coords)
+                        
+                        msg = f'{actual_kwargs}, on ctor {aperture_fixture}'
+                        
+                        if softening:
+                            TestAperturesCommonInterfaces._assert_valid_soft_aperture(aperture, msg)
+                        else:
+                            TestAperturesCommonInterfaces._assert_valid_hard_aperture(aperture, msg)
+                            
 
 '''
 
