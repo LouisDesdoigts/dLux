@@ -512,7 +512,7 @@ def create_point_source() -> callable:
     return _create_point_source
 
 @pytest.fixture
-def create_multi_point_source():
+def create_multi_point_source() -> callable:
     """
     Returns:
     --------
@@ -533,6 +533,35 @@ def create_multi_point_source():
         """
         return dLux.sources.MultiPointSource(position, flux, spectrum, name=name)
     return _create_multi_point_source
+
+
+@pytest.fixture
+def create_array_distribution():
+    """
+    Returns:
+    --------
+    _create_point_source: callable
+        a function that has all keyword arguments and can be
+        used to create a `ArrayDistribution` layer for testing.
+    """
+
+
+    def _create_array_distribution(
+                  position     : Array    = np.array([0., 0.]),
+                  flux         : Array    = np.array(1.),
+                  spectrum     : Spectrum = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
+                                                                 600e-9, 10)),
+                  distribution : Array    = np.ones((5, 5))/np.ones((5, 5)).sum(),
+                  name         : str      = "Source") -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.sources.ArrayDistribution(position, flux, distribution,
+                                              spectrum, name=name)
+    return _create_array_distribution
+
+
+
 
 def create_optics() -> callable:
     """

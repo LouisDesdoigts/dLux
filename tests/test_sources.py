@@ -619,55 +619,53 @@ class TestMultiPointSource():
         # source.model(optics, detector, filter_in)
         # source.model(optics, filter_in=filter_in)
 
-'''
 
 class TestArrayDistribution():
     """
     Tests the ArrayDistribution class.
     """
-    utility : ArrayDistributionUtility = ArrayDistributionUtility()
 
 
-    def test_constructor(self) -> None:
+    def test_constructor(self, create_array_distribution : callable) -> None:
         """
         Tests the constructor.
         """
         # Test string inputs
         with pytest.raises(ValueError):
-            create_source(distribution="")
+            create_array_distribution(distribution="")
 
         # Test one dimension input
         with pytest.raises(AssertionError):
-            create_source(distribution=[5.])
+            create_array_distribution(distribution=[5.])
 
         # Test zero length input
         with pytest.raises(AssertionError):
-            create_source(distribution=[])
+            create_array_distribution(distribution=[])
 
 
-    def test_get_distribution(self) -> None:
+    def test_get_distribution(self, create_array_distribution : callable) -> None:
         """
         Tests the get_distribution method.
         """
-        source = create_source()
+        source = create_array_distribution()
         assert (source.get_distribution() == source.distribution).all()
 
 
-    def test_normalise(self) -> None:
+    def test_normalise(self, create_array_distribution : callable) -> None:
         """
         Tests the normalise method.
         """
-        source = create_source()
+        source = create_array_distribution()
         new_distribution = np.ones((4, 4))
         new_source = source.set('distribution', new_distribution).normalise()
         assert np.allclose(new_source.distribution.sum(), 1.)
 
 
-    def test_model(self) -> None:
+    def test_model(self, create_array_distribution : callable) -> None:
         """
         Tests the model method.
         """
-        source = create_source()
+        source = create_array_distribution()
         optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
         detector = dLux.core.Detector([dLux.AddConstant(0.)])
         filter_in = dLux.Filter()
@@ -677,6 +675,7 @@ class TestArrayDistribution():
         # source.model(optics, filter_in=filter_in)
 
 
+'''
 class TestBinarySource():
     """
     Tests the BinarySource class.
