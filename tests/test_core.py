@@ -377,55 +377,54 @@ class TestDetector(object):
         assert not np.isinf(psf).all()
 
 
-class TestFilter(UtilityUser):
+class TestFilter(object):
     """
     Tests the Filter class.
     """
-    utility : FilterUtility = FilterUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_filter: callable) -> None:
         """
         Tests the constructor.
         """
         # Test adding filter name
         with pytest.raises(NotImplementedError):
-            self.utility.construct(filter_name='Test')
+            create_filter(filter_name='Test')
 
         # Test 2d wavelengths input
         with pytest.raises(AssertionError):
-            self.utility.construct(np.ones((2,2)))
+            create_filter(2,2)))
 
         # Test 2d throughput input
         with pytest.raises(AssertionError):
-            self.utility.construct(throughput=np.ones((2,2)))
+            create_filter(2,2)))
 
         # Test different shape wavelengths and throughput
         with pytest.raises(AssertionError):
-            self.utility.construct(np.ones(5), np.ones(4))
+            create_filter(4))
 
         # Test negative wavelengths
         with pytest.raises(AssertionError):
-            self.utility.construct(np.array([-1, 1]))
+            create_filter([-1, 1]))
 
         # Test negative throughputs
         with pytest.raises(AssertionError):
-            self.utility.construct(throughput=np.array([-1, 1]))
+            create_filter([-1, 1]))
 
         # Test throughputs greater than 1
         with pytest.raises(AssertionError):
-            self.utility.construct(throughput=np.array([0, 1.5]))
+            create_filter([0, 1.5]))
 
         # Test reverse order wavelengths
         with pytest.raises(AssertionError):
-            self.utility.construct(wavelengths=np.array([1, 0.5]))
+            create_filter([1, 0.5]))
 
 
-    def test_get_throughput(self):
+    def test_get_throughput(self, create_filter: callable) -> None:
         """
         Test the get_throughput method.
         """
-        filt = self.utility.construct()
+        filt = create_filter()
 
         # Test scalar input
         throughput = filt.get_throughput(np.array([1e-6, 2e-6]))
@@ -460,66 +459,63 @@ class TestFilter(UtilityUser):
     #     assert not np.isinf(psf).all()
 
 
-class TestInstrument(UtilityUser):
+class TestInstrument(object):
     """
     Tests the Optics class.
     """
-    utility : InstrumentUtility = InstrumentUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_instrument: callable) -> None:
         """
         Tests the constructor.
         """
         # Test optic and optical_layers input
         with pytest.raises(ValueError):
-            self.utility.construct(optics=[], optical_layers=[], 
-                                   input_both=True)
+            create_instrument(optics=[], optical_layers=[], input_both=True)
 
         # Test detector and detector_layers input
         with pytest.raises(ValueError):
-            self.utility.construct(detector=[], detector_layers=[], 
-                                   input_both=True)
+            create_instrument(detector=[], detector_layers=[], input_both=True)
 
         # Test scene and sources input
         with pytest.raises(ValueError):
-            self.utility.construct(scene=[], sources=[], input_both=True)
+            create_instrument(scene=[], sources=[], input_both=True)
 
         # Test non optics input
         with pytest.raises(AssertionError):
-            self.utility.construct(optics=[])
+            create_instrument(optics=[])
 
         # Test non detector input
         with pytest.raises(AssertionError):
-            self.utility.construct(detector=[])
+            create_instrument(detector=[])
 
         # Test non scene input
         with pytest.raises(AssertionError):
-            self.utility.construct(scene=[])
+            create_instrument(scene=[])
 
         # Test non filter input
         with pytest.raises(AssertionError):
-            self.utility.construct(filter=[])
+            create_instrument(filter=[])
 
         # Test non list optical_layers input
         with pytest.raises(AssertionError):
-            self.utility.construct(optical_layers={}, input_layers=True)
+            create_instrument(optical_layers={}, input_layers=True)
 
         # Test non list detector_layers input
         with pytest.raises(AssertionError):
-            self.utility.construct(detector_layers={}, input_layers=True)
+            create_instrument(detector_layers={}, input_layers=True)
 
         # Test non list sources input
         with pytest.raises(AssertionError):
-            self.utility.construct(sources={}, input_layers=True)
+            create_instrument(sources={}, input_layers=True)
 
 
-    def test_normalise(self):
+    def test_normalise(self, create_instrument: callable) -> None:
         """
         Tests the normalise method.
         """
         # Test all sources in the scene are normalised
-        instrument = self.utility.construct()
+        instrument = create_instrument()
         normalised_instrument = instrument.normalise()
         for source in normalised_instrument.scene.sources.values():
             assert np.allclose(source.get_weights().sum(), 1.)
@@ -527,13 +523,15 @@ class TestInstrument(UtilityUser):
                 assert np.allclose(source.get_distribution(), 1.)
 
 
-    def test_model(self):
+    def test_model(self, 
+            create_instrument: callable, 
+            create_point_source: callable) -> None:
         """
         Tests the model method.
         """
-        instrument = self.utility.construct()
-        sources = [PointSourceUtility().construct()]
-        source = PointSourceUtility().construct()
+        instrument = create_instrument()
+        sources = [create_point_source()]
+        source = create_point_source()
 
         # Test modelling
         psf = instrument.model()
