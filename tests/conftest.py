@@ -706,6 +706,7 @@ def create_combined_spectrum() -> callable:
         return dLux.spectrums.CombinedSpectrum(wavelengths, weights)
     return _create_combined_spectrum
 
+
 def create_optics() -> callable:
     """
     Returns:
