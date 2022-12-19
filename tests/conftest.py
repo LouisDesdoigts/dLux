@@ -822,3 +822,20 @@ def create_instrument(
                 sources=sources,
                 detector_layers=detector_layers)
     return _create_instrument
+
+
+@pytest.fixtures
+def create_pixel_response() -> callable:
+    """
+    Returns:
+    --------
+    _create_instrument: callable
+        A function that has all keyword arguments and can be
+        used to create a `Instrument` layer for testing.
+    """
+    def _create_pixel_response(
+            pixel_response: Array = np.ones((16, 16))) -> OpticalLayer:
+        return dLux.detectors.ApplyPixelResponse(pixel_response)
+    return _create_pixel_response
+
+
