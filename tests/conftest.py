@@ -249,3 +249,22 @@ def create_cartesian_propagator() -> callable:
         return dLux.propagators.CartesianPropagator(focal_length, \
                                                     inverse=inverse)
     return _create_cartesian_propagator
+
+
+
+@pytest.fixture
+def create_angular_propagator() -> callable:
+    """
+    Returns:
+    --------
+    _create_angular_propagator: callable
+        a function that has all keyword arguments and can be
+        used to create a `AngularPropagator` layer for testing.
+    """
+
+    def _create_angular_propagator(inverse : bool = False) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.propagators.AngularPropagator(inverse=inverse)
+    return _create_angular_propagator

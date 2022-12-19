@@ -401,14 +401,12 @@ class TestAngularPropagator(UtilityUser):
     """
     Test the AngularPropagator class.
     """
-    utility : AngularPropagatorUtility = AngularPropagatorUtility()
 
-
-    def test_constructor(self):
+    def test_constructor(self, create_angular_propagator : callable):
         """
         Tests the constructor.
         """
-        self.utility.construct()
+        create_angular_propagator()
 
 
 class TestFarFieldFresnel(UtilityUser):
