@@ -215,40 +215,41 @@ class TestAddOPD(object):
         create_add_opd(opd=np.ones((1, npix, npix)))(wf)
 
 
-class TestTransmissiveOptic(UtilityUser):
+class TestTransmissiveOptic(object):
     """
     Tests the TransmissiveOptic class.
     """
-    utility : TransmissiveOpticUtility = TransmissiveOpticUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_transmissive_optic: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(transmission=np.ones(1))
+            create_transmissive_optic(transmission=np.ones(1))
 
         # Test functioning
-        self.utility.construct()
+        create_transmissive_optic()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_transmissive_optic: callable, 
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
+        wf = create_wavefront() 
         npix = wf.npixels
 
         # Test 0d
-        self.utility.construct(transmission=np.array(1.))(wf)
+        create_transmissive_optic(trans=np.array(1.))(wf)
 
         # Test 2d
-        self.utility.construct(transmission=np.ones((npix, npix)))(wf)
+        create_transmissive_optic(trans=np.ones((npix, npix)))(wf)
 
         # Test 3d
-        self.utility.construct(transmission=np.ones((1, npix, npix)))(wf)
+        create_transmissive_optic(trans=np.ones((1, npix, npix)))(wf)
 
 
 class TestApplyBasisCLIMB(UtilityUser):
