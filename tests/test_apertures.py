@@ -20,15 +20,18 @@ class TestAperturesCommonInterfaces():
         # there should also exist something in bounds (assuming edges are within coords)
         assert np.logical_and(aperture > 0., aperture < 1.).any(), msg
         
+    # input is all the fixtures that need testing
     def test_all_apertures(self, create_square_aperture : callable,
                            create_rectangular_aperture : callable,
                            create_circular_aperture : callable,
-                           create_hexagonal_aperture : callable):
+                           create_hexagonal_aperture : callable,
+                           create_annular_aperture : callable):
         
         constructors = [create_square_aperture,
                         create_rectangular_aperture,
                         create_circular_aperture,
-                        create_hexagonal_aperture]
+                        create_hexagonal_aperture,
+                        create_annular_aperture]
         
         # TODO might need to add error message for when this fails but it checks things very easily
         for ctor in constructors:
@@ -75,7 +78,7 @@ class TestAperturesCommonInterfaces():
                             TestAperturesCommonInterfaces._assert_valid_soft_aperture(aperture, msg)
                         else:
                             TestAperturesCommonInterfaces._assert_valid_hard_aperture(aperture, msg)
-                            
+
 
 # the above for loops essentially run the following tests for each aperture
 

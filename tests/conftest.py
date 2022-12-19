@@ -958,26 +958,6 @@ def create_circular_aperture() -> callable:
                                 compression : Array = [1., 1.],
                                 occulting   : bool = False, 
                                 softening   : bool = False) -> Aperture:
-        """
-        Construct's an instance of `CircularAperture` making 
-        it easy to toggle a single parameter. 
-        Parameters:
-        -----------
-        occulting: bool = None
-            True if light passes through the aperture. 
-            False if light is blocked by the aperture. 
-        softening: bool = None
-            True is the aperture has soft pixels on the 
-            edges else false. 
-        x_offset: float = None, meters
-            The distance along the x axis that the aperture 
-            is moved from the centre of the coordinate system. 
-        y_offset: float = None, meters
-            The distance along the y axis that the aperture 
-            is moved from the centre of the coordinate system.
-        radius: float = None, meters
-            The radius of the aperture.
-        """
         return dLux.apertures.CircularAperture(
                                 radius,
                                 centre,
@@ -1015,3 +995,33 @@ def create_hexagonal_aperture() -> callable:
                                 occulting,
                                 softening)
     return _create_hexagonal_aperture
+
+
+@pytest.fixture
+def create_annular_aperture() -> callable:
+    """
+    Returns:
+    --------
+    _create_annular_aperture: callable
+        A function that has all keyword arguments and can be
+        used to create a `AnnularAperture` layer for testing.
+    """
+
+
+    def _create_annular_aperture( 
+                                rmax        : Array = 1.2, 
+                                rmin        : Array = 0.5, 
+                                centre      : Array = [0., 0.],
+                                strain      : Array = [0., 0.],
+                                compression : Array = [1., 1.],
+                                occulting   : bool = False, 
+                                softening   : bool = False) -> Aperture:
+        return dLux.apertures.AnnularAperture(
+                                rmax,
+                                rmin,
+                                centre,
+                                strain,
+                                compression,
+                                occulting,
+                                softening)
+    return _create_annular_aperture
