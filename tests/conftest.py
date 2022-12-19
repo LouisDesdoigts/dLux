@@ -829,13 +829,29 @@ def create_pixel_response() -> callable:
     """
     Returns:
     --------
-    _create_instrument: callable
+    _create_pixel_response: callable
         A function that has all keyword arguments and can be
-        used to create a `Instrument` layer for testing.
+        used to create a `ApplyPixelResponse` layer for testing.
     """
     def _create_pixel_response(
             pixel_response: Array = np.ones((16, 16))) -> OpticalLayer:
         return dLux.detectors.ApplyPixelResponse(pixel_response)
     return _create_pixel_response
+
+
+@pytest.fixture
+def create_jitter() -> None:
+    """
+    Returns:
+    --------
+    _create_jitter: callable
+        A function that has all keyword arguments and can be
+        used to create a `ApplyJitter` layer for testing.
+    """
+    def _create_jitter(
+            sigma: Array = np.array(1.),
+            kernel_size: int = 10) -> OpticalLayer:
+        return dLux.detectors.ApplyJitter(sigma, kernel_size)
+    return _create_jitter
 
 
