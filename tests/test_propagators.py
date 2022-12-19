@@ -443,23 +443,21 @@ class TestAngularMFT():
         assert np.allclose(focal_roll, focal_shift_pix.psf[1:, 1:])
 
 
-'''
 class TestCartesianFFT():
     """
     Test the CartesianFFT class.
     """
-    utility : CartesianFFTUtility = CartesianFFTUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_cartesian_fft : callable):
         """
         Tests the constructor.
         """
         # Test constructor
-        self.utility.construct()
+        create_cartesian_fft()
 
 
-    def test_propagate(self):
+    def test_propagate(self, create_cartesian_fft : callable):
         """
         Tests the propagate method.
         """
@@ -471,8 +469,8 @@ class TestCartesianFFT():
 
         # Construct
         wf = dLux.CartesianWavefront(wl, p_pscale, amplitude, phase, plane_type)
-        prop = self.utility.construct(fl)
-        inv_prop = self.utility.construct(fl, inverse=True)
+        prop = create_cartesian_fft(fl)
+        inv_prop = create_cartesian_fft(fl, inverse=True)
 
         # Prop
         focal = prop(wf.pad_to(npix * 5))
@@ -482,23 +480,21 @@ class TestCartesianFFT():
         assert not np.isnan(focal.psf).any()
         assert not np.isnan(pupil.psf).any()
 
-
 class TestAngularFFT():
     """
     Test the AngularFFT class.
     """
-    utility : AngularFFTUtility = AngularFFTUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_angular_fft : callable):
         """
         Tests the constructor.
         """
         # Test constructor
-        self.utility.construct()
+        create_angular_fft()
 
 
-    def test_propagate(self):
+    def test_propagate(self, create_angular_fft : callable):
         """
         Tests the propagate method.
         """
@@ -510,8 +506,8 @@ class TestAngularFFT():
 
         # Construct
         wf = dLux.AngularWavefront(wl, p_pscale, amplitude, phase, plane_type)
-        prop = self.utility.construct()
-        inv_prop = self.utility.construct(inverse=True)
+        prop = create_angular_fft()
+        inv_prop = create_angular_fft(inverse=True)
 
         # Prop
         focal = prop(wf.pad_to(npix * 5))
@@ -521,6 +517,8 @@ class TestAngularFFT():
         assert not np.isnan(focal.psf).any()
         assert not np.isnan(pupil.psf).any()
 
+
+'''
 
 class TestCartesianFresnel():
     """

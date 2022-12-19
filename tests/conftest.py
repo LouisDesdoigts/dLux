@@ -345,3 +345,43 @@ def create_angular_mft() -> callable:
         return dLux.propagators.AngularMFT(npixels_out, pixel_scale_out,
                                            inverse, shift, pixel_shift)
     return _create_angular_mft
+
+
+@pytest.fixture
+def create_cartesian_fft():
+    """
+    Returns:
+    --------
+    _create_angular_mft: callable
+        a function that has all keyword arguments and can be
+        used to create a `CartesianFFT` layer for testing.
+    """
+
+    def _create_cartesian_fft(
+                  focal_length : Array = np.array(1.),
+                  inverse      : bool  = False) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        focal_length = focal_length if focal_length is None \
+                                                        else focal_length
+        inverse = inverse if inverse is None else inverse
+        return dLux.propagators.CartesianFFT(focal_length, inverse)
+    return _create_cartesian_fft
+
+@pytest.fixture
+def create_angular_fft() -> callable:
+    """
+    Returns:
+    --------
+    _create_angular_fft: callable
+        a function that has all keyword arguments and can be
+        used to create a `AngularFFT` layer for testing.
+    """
+
+    def _create_angular_fft(inverse : bool = False) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.propagators.AngularFFT(inverse)
+    return _create_angular_fft
