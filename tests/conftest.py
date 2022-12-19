@@ -468,3 +468,16 @@ def create_detector() -> callable:
     return _create_detector
 
 
+@pytest.fixture
+def create_scene() -> callable:
+    """
+    Returns:
+    --------
+    _create_scene: callable
+        A function that has all keyword arguments and can be
+        used to create a `Scene` layer for testing.
+    """
+    def _create_scene(
+            sources = [dLux.sources.PointSource()]) -> OpticalLayer:
+        return dLux.core.Scene(sources)
+    return _create_scene
