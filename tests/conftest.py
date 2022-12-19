@@ -617,7 +617,35 @@ def create_point_extended_source() -> callable:
                                                 contrast, spectrum, name=name)
     return _create_point_extended_source
 
+@pytest.fixture
+def create_point_and_extended_source():
+    """
+    Returns:
+    --------
+    _create_point_and_extended_source: callable
+        a function that has all keyword arguments and can be
+        used to create a `BinarySource` layer for testing.
+    """
 
+
+    def _create_point_and_extended_source(
+                  position     : Array    = np.array([0., 0.]),
+                  flux         : Array    = np.array(1.),
+                  spectrum     : Spectrum = None,
+                  contrast     : Array    = np.array(2.),
+                  distribution : Array    = np.ones((5, 5))/np.ones((5, 5)).sum(),
+                  name         : str      = "Point and extended source") -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        if spectrum is None:
+            wavelengths = np.tile(np.linspace(500e-9, 600e-9, 10), (2, 1))
+            weights = np.tile(np.arange(10), (2, 1))
+            spectrum = dLux.spectrums.CombinedSpectrum(wavelengths, weights)
+            
+        return dLux.sources.PointAndExtendedSource(position, flux, distribution,
+                                                contrast, spectrum, name=name)
+    return _create_point_and_extended_source
 
 
 def create_optics() -> callable:

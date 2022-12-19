@@ -714,30 +714,28 @@ class TestPointExtendedSource():
         # source.model(optics, filter_in=filter_in)
 
 
-'''
 
 class TestPointAndExtendedSource():
     """
     Tests the PointAndExtendedSource class.
     """
-    utility : PointAndExtendedSourceUtility = PointAndExtendedSourceUtility()
 
 
-    def test_constructor(self) -> None:
+    def test_constructor(self, create_point_and_extended_source : callable) -> None:
         """
         Tests the constructor.
         """
         # Test non Combined Spectrum input
         with pytest.raises(AssertionError):
             spec = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, 600e-9, 10))
-            create_source(spectrum=spec)
+            create_point_and_extended_source(spectrum=spec)
 
 
-    def test_model(self) -> None:
+    def test_model(self, create_point_and_extended_source : callable) -> None:
         """
         Tests the model method.
         """
-        source = create_source()
+        source = create_point_and_extended_source()
         optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
         detector = dLux.core.Detector([dLux.AddConstant(0.)])
         filter_in = dLux.Filter()
@@ -745,5 +743,3 @@ class TestPointAndExtendedSource():
         source.model(optics, detector)
         # source.model(optics, detector, filter_in)
         # source.model(optics, filter_in=filter_in)
-
-'''
