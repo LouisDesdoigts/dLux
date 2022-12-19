@@ -186,3 +186,20 @@ def create_propagator() -> callable:
         inverse = inverse if inverse is None else False
         return dLux.propagators.Propagator(inverse=inverse)
     return _create_propagator
+
+
+@pytest.fixture
+def create_fixed_sampling_propagator_utility() -> callable:
+    """
+    Returns:
+    --------
+    _create_fixed_sampling_propagator_utility: callable
+        a function that has all keyword arguments and can be
+        used to create a `FixedSamplingPropagatorUtility` layer for testing.
+    """
+    def _create_fixed_sampling_propagator_utility() -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.propagators.FixedSamplingPropagator()
+    return _create_fixed_sampling_propagator_utility

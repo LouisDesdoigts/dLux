@@ -376,15 +376,12 @@ class TestFixedSamplingPropagator(UtilityUser):
     """
     Test the FixedSamplingPropagator class.
     """
-    utility : FixedSamplingPropagatorUtility = \
-              FixedSamplingPropagatorUtility()
 
-
-    def test_constructor(self):
+    def test_constructor(self, create_fixed_sampling_propagator_utility : callable):
         """
         Tests the constructor.
         """
-        self.utility.construct()
+        create_fixed_sampling_propagator_utility()
 
 
 class TestCartesianPropagator(UtilityUser):
