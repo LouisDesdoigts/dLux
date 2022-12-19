@@ -8,134 +8,137 @@ config.update("jax_debug_nans", True)
 
 Array = np.ndarray
 
-class TestCreateWavefront(UtilityUser):
+
+class TestCreateWavefront(object):
     """
     Tests the CreateWavefront class.
     """
-    utility : CreateWavefrontUtility = CreateWavefrontUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_create_wavefront: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(diameter=np.array([]))
+            create_create_wavefront(diameter=np.array([]))
 
         # Test wrong string input
         with pytest.raises(AssertionError):
-            self.utility.construct(wavefront_type='cartesian')
+            create_create_wavefront(wavefront_type='cartesian')
 
         # Test functioning
-        self.utility.construct()
+        create_create_wavefront()
 
 
-    def test_call(self):
+    def test_call(self, create_create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
         params = {'wavelength': np.array(1e-6), 'offset': np.zeros(2)}
-        self.utility.construct()(None, params)
+        create_create_wavefront()(None, params)
 
 
-class TestTiltWavefront(UtilityUser):
+class TestTiltWavefront(object):
     """
     Tests the TiltWavefront class.
     """
-    utility : TiltWavefrontUtility = TiltWavefrontUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_tilt_wavefront: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(tilt_angles=np.ones(1))
+            create_tilt_wavefront(tilt_angles=np.ones(1))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(tilt_angles=np.array([]))
+            create_tilt_wavefront(tilt_angles=np.array([]))
 
         # Test functioning
-        self.utility.construct()
+        create_tilt_wavefront()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_tilt_wavefront: callable,
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
-        self.utility.construct()(wf)
+        wf = create_wavefront() 
+        create_tilt_wavefront()(wf)
 
 
-class TestNormaliseWavefront(UtilityUser):
+class TestNormaliseWavefront(object):
     """
     Tests the NormaliseWavefront class.
     """
-    utility : NormaliseWavefrontUtility = NormaliseWavefrontUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_normalise_wavefront: callable) -> None:
         """
         Tests the constructor.
         """
         # Test functioning
-        self.utility.construct()
+        create_normalise_wavefront()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_normalise_wavefront: callable,
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
-        wf = self.utility.construct()(wf)
+        wf = create_wavefront() 
+        wf = create_normalise_wavefront()(wf)
         assert wf.psf.sum() == 1.
 
 
-class TestApplyBasisOPD(UtilityUser):
+class TestApplyBasisOPD(object):
     """
     Tests the ApplyBasisOPD class.
     """
-    utility : ApplyBasisOPDUtility = ApplyBasisOPDUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_apply_basis_opd: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(basis=np.ones((16, 16)))
+            create_apply_basis_opd(basis=np.ones((16, 16)))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(basis=np.ones((1, 1, 16, 16)))
+            create_apply_basis_opd(basis=np.ones((1, 1, 16, 16)))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(coefficients=np.array([]))
+            create_apply_basis_opd(coefficients=np.array([]))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(coefficients=np.zeros((1, 1)))
+            create_apply_basis_opd(coefficients=np.zeros((1, 1)))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(basis=np.ones((2, 15, 15)),
+            create_apply_basis_opd(basis=np.ones((2, 15, 15)),
                                    coefficients=np.zeros((3)))
 
         # Test functioning
-        self.utility.construct()
+        create_apply_basis_opd()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_apply_basis_opd: callable, 
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
-        self.utility.construct()(wf)
+        wf = create_wavefront() 
+        create_apply_basis_opd()(wf)
 
 
 class TestAddPhase(UtilityUser):
