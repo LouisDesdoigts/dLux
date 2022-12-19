@@ -278,7 +278,7 @@ def create_far_field_fresnel() -> callable:
     --------
     _create_far_field_fresnel: callable
         a function that has all keyword arguments and can be
-        used to create a `AngularPropagator` layer for testing.
+        used to create a `FarFieldFresnel` layer for testing.
     """
 
     def _create_far_field_fresnel(
@@ -290,3 +290,36 @@ def create_far_field_fresnel() -> callable:
         return dLux.propagators.FarFieldFresnel(propagation_shift, \
                                                 inverse=inverse)
     return _create_far_field_fresnel
+
+
+@pytest.fixture
+def create_cartesian_mft() -> callable:
+    """
+    Returns:
+    --------
+    _create_cartesian_mft: callable
+        a function that has all keyword arguments and can be
+        used to create a `CartesianMFT` layer for testing.
+    """
+
+    def _create_cartesian_mft(
+                            focal_length    : Array = np.array(1.),
+                            npixels_out     : int   = 16,
+                            pixel_scale_out : Array = np.array(1.),
+                            shift           : Array = np.zeros(2),
+                            pixel_shift     : bool  = False,
+                            inverse         : bool  = False) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        pixel_scale_out = pixel_scale_out if pixel_scale_out is None \
+                                                        else pixel_scale_out
+        focal_length = focal_length if focal_length is None \
+                                                        else focal_length
+        npixels_out = npixels_out if npixels_out is None else npixels_out
+        shift       = shift       if shift       is None else shift
+        pixel_shift = pixel_shift if pixel_shift is None else pixel_shift
+        inverse     = inverse     if inverse     is None else inverse
+        return dLux.propagators.CartesianMFT(npixels_out, pixel_scale_out,
+                                     focal_length, inverse, shift, pixel_shift)
+    return _create_cartesian_mft

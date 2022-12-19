@@ -428,18 +428,17 @@ class TestCartesianMFT(UtilityUser):
     """
     Test the CartesianMFT class.
     """
-    utility : CartesianMFTUtility = CartesianMFTUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_cartesian_mft : callable):
         """
         Tests the constructor.
         """
         # Test constructor
-        self.utility.construct()
+        create_cartesian_mft()
 
 
-    def test_propagate(self):
+    def test_propagate(self, create_cartesian_mft : callable):
         """
         Tests the propagate method.
         """
@@ -451,8 +450,8 @@ class TestCartesianMFT(UtilityUser):
 
         # Construct
         wf = dLux.CartesianWavefront(wl, p_pscale, amplitude, phase, plane_type)
-        prop = self.utility.construct(npix, f_pscale, fl)
-        inv_prop = self.utility.construct(npix, p_pscale, fl, inverse=True)
+        prop = create_cartesian_mft(npix, f_pscale, fl)
+        inv_prop = create_cartesian_mft(npix, p_pscale, fl, inverse=True)
 
         # Prop
         focal = prop(wf)
@@ -467,8 +466,8 @@ class TestCartesianMFT(UtilityUser):
         shift = f_pscale * np.ones(2)
 
         # Construct
-        prop_shift = self.utility.construct(npix, f_pscale, fl, shift=shift)
-        prop_shift_pix = self.utility.construct(npix, f_pscale, fl, 
+        prop_shift = create_cartesian_mft(npix, f_pscale, fl, shift=shift)
+        prop_shift_pix = create_cartesian_mft(npix, f_pscale, fl, 
                                             shift=shift_pix, pixel_shift=True)
 
         # Prop
