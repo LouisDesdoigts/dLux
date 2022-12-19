@@ -11,7 +11,6 @@ config.update("jax_debug_nans", True)
 Array = np.ndarray
 
 
-
 #############
 ### Tests ###
 #############
