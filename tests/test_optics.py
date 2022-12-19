@@ -178,40 +178,41 @@ class TestAddPhase(object):
         create_add_phase(phase=np.ones((1, npix, npix)))(wf)
 
 
-class TestAddOPD(UtilityUser):
+class TestAddOPD(object):
     """
     Tests the AddOPD class.
     """
-    utility : AddOPDUtility = AddOPDUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_add_opd: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(opd=np.ones(1))
+            create_add_opd(opd=np.ones(1))
 
         # Test functioning
-        self.utility.construct()
+        create_add_opd()
 
 
-    def test_call(self):
+    def test_call(self, 
+            create_add_opd: callable, 
+            create_wavefront: callable) -> None:
         """
         Tests the __call__ method.
         """
-        wf = WavefrontUtility().construct()
+        wf = create_wavefront() 
         npix = wf.npixels
 
         # Test 0d
-        self.utility.construct(opd=np.array(1.))(wf)
+        create_add_opd(opd=np.array(1.))(wf)
 
         # Test 2d
-        self.utility.construct(opd=np.ones((npix, npix)))(wf)
+        create_add_opd(opd=np.ones((npix, npix)))(wf)
 
         # Test 3d
-        self.utility.construct(opd=np.ones((1, npix, npix)))(wf)
+        create_add_opd(opd=np.ones((1, npix, npix)))(wf)
 
 
 class TestTransmissiveOptic(UtilityUser):
