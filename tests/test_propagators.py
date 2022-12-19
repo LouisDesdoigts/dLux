@@ -518,24 +518,22 @@ class TestAngularFFT():
         assert not np.isnan(pupil.psf).any()
 
 
-'''
 
 class TestCartesianFresnel():
     """
     Test the CartesianFresnel class.
     """
-    utility : CartesianFresnelUtility = CartesianFresnelUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_cartesian_fresnel : callable):
         """
         Tests the constructor.
         """
         # Test constructor
-        self.utility.construct()
+        create_cartesian_fresnel()
 
 
-    def test_propagate(self):
+    def test_propagate(self, create_cartesian_fresnel : callable):
         """
         Tests the propagate method.
         """
@@ -548,9 +546,9 @@ class TestCartesianFresnel():
         # Construct
         wf = dLux.FarFieldFresnelWavefront(wl, p_pscale, amplitude, phase, 
                                          plane_type)
-        fresnel_prop = self.utility.construct(npix, f_pscale, fl, 5e-5)
+        fresnel_prop = create_cartesian_fresnel(npix, f_pscale, fl, 5e-5)
         focal_prop = dLux.CartesianFresnel(npix, f_pscale, fl, 0.)
-        inv_prop = self.utility.construct(npix, p_pscale, fl, 1e0, inverse=True)
+        inv_prop = create_cartesian_fresnel(npix, p_pscale, fl, 1e0, inverse=True)
 
         # Prop
         fresnel = fresnel_prop(wf)
@@ -561,4 +559,3 @@ class TestCartesianFresnel():
         assert not np.isnan(fresnel.psf).any()
         assert not np.isnan(focal.psf).any()
         assert not np.isnan(pupil.psf).any()
-'''

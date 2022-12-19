@@ -385,3 +385,28 @@ def create_angular_fft() -> callable:
         """
         return dLux.propagators.AngularFFT(inverse)
     return _create_angular_fft
+
+
+@pytest.fixture
+def create_cartesian_fresnel() -> callable:
+    """
+    Returns:
+    --------
+    _create_cartesian_fresnel: callable
+        a function that has all keyword arguments and can be
+        used to create a `CartesianFresnel` layer for testing.
+    """
+    def _create_cartesian_fresnel(
+                  npixels_out       : int   = 16,
+                  pixel_scale_out   : float = np.array(1.),
+                  focal_length      : Array = np.array(1.),
+                  propagation_shift : Array = np.array(1e-3),
+                  inverse           : bool  = False,
+                  shift             : Array = np.zeros(2),
+                  pixel_shift       : bool  = False) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.propagators.CartesianFresnel(npixels_out, pixel_scale_out,
+                 focal_length, propagation_shift, inverse, shift, pixel_shift)
+    return _create_cartesian_fresnel
