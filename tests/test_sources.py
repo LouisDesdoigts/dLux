@@ -559,59 +559,58 @@ class TestMultiPointSource():
     """
     Tests the MultiPointSource class.
     """
-    utility : MultiPointSourceUtility = MultiPointSourceUtility()
 
 
-    def test_constructor(self) -> None:
+    def test_constructor(self, create_multi_point_source : callable) -> None:
         """
         Test the constructor class.
         """
         # Position
         # Test string inputs
         with pytest.raises(ValueError):
-            create_source(position="")
+            create_multi_point_source(position="")
 
         # Test zero dimension input
         with pytest.raises(AssertionError):
-            create_source(position=5.)
+            create_multi_point_source(position=5.)
 
         # Test zero length input
         with pytest.raises(AssertionError):
-            create_source(position=[])
+            create_multi_point_source(position=[])
 
         # Test 1 dim input
         with pytest.raises(AssertionError):
-            create_source(position=np.ones(2))
+            create_multi_point_source(position=np.ones(2))
 
         # Flux
         # Test string inputs
         with pytest.raises(ValueError):
-            create_source(flux="")
+            create_multi_point_source(flux="")
 
         # Test zero length input
         with pytest.raises(AssertionError):
-            create_source(flux=[])
+            create_multi_point_source(flux=[])
 
         # Test 2 dim input
         with pytest.raises(AssertionError):
-            create_source(flux=np.ones((2, 2)))
+            create_multi_point_source(flux=np.ones((2, 2)))
 
         # Spectrum
         # Test non-spectrum input
         with pytest.raises(AssertionError):
-            create_source(spectrum=[])
+            create_multi_point_source(spectrum=[])
 
         # Name
         # Test non-string input
         with pytest.raises(AssertionError):
-            create_source(name=[])
+            create_multi_point_source(name=[])
 
 
-    def test_model(self) -> None:
+    def test_model(self, create_multi_point_source : callable) -> None:
         """
         Tests the model method.
         """
-        source = create_source()
+        source = create_multi_point_source()
         optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
         detector = dLux.core.Detector([dLux.AddConstant(0.)])
         filter_in = dLux.Filter()

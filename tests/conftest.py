@@ -6,6 +6,8 @@ import dLux
 Array = np.ndarray
 Wavefront = dLux.wavefronts.Wavefront
 OpticalLayer = dLux.optics.OpticalLayer
+Spectrum = dLux.spectrums.Spectrum
+Source = dLux.sources.Source
 
 
 @pytest.fixture
@@ -426,7 +428,7 @@ def create_source() -> callable:
                   flux     : Array    = np.array(1.),
                   spectrum : OpticalLayer = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
                                                                  600e-9, 10)),
-                  name     : str      = "Source") -> OpticalLayer:
+                  name     : str      = "Source") -> Source:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
@@ -450,7 +452,7 @@ def create_relative_flux_source() -> callable:
                   spectrum : OpticalLayer = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
                                                                  600e-9, 10)),
                   contrast   : Array    = np.array(2.),
-                  name       : str      = "RelativeSource") -> OpticalLayer:
+                  name       : str      = "RelativeSource") -> Source:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
@@ -477,7 +479,7 @@ def create_relative_position_source() -> callable:
                                                                  600e-9, 10)),
                   separation     : Array    = np.array(1.),
                   position_angle : Array    = np.array(0.),
-                  name           : str      = "RelativePositionSource") -> OpticalLayer:
+                  name           : str      = "RelativePositionSource") -> Source:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
@@ -502,13 +504,35 @@ def create_point_source() -> callable:
                   flux        : Array    = np.array(1.),
                   spectrum    : OpticalLayer = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
                                                                  600e-9, 10)),
-                  name        : str      = "PointSource") -> OpticalLayer:
+                  name        : str      = "PointSource") -> Source:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
         return dLux.sources.PointSource(position, flux, spectrum, name=name)
     return _create_point_source
 
+@pytest.fixture
+def create_multi_point_source():
+    """
+    Returns:
+    --------
+    _create_point_source: callable
+        a function that has all keyword arguments and can be
+        used to create a `MultiPointSource` layer for testing.
+    """
+
+
+    def _create_multi_point_source(
+                  position : Array    = np.zeros((3, 2)),
+                  flux     : Array    = np.ones(3),
+                  spectrum : Spectrum = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
+                                                                 600e-9, 10)),
+                  name     : str      = "Source") -> Source:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.sources.MultiPointSource(position, flux, spectrum, name=name)
+    return _create_multi_point_source
 
 def create_optics() -> callable:
     """
