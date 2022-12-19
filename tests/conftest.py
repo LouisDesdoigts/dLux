@@ -410,3 +410,26 @@ def create_cartesian_fresnel() -> callable:
         return dLux.propagators.CartesianFresnel(npixels_out, pixel_scale_out,
                  focal_length, propagation_shift, inverse, shift, pixel_shift)
     return _create_cartesian_fresnel
+
+
+@pytest.fixture
+def create_source() -> callable:
+    """
+    Returns:
+    --------
+    _create_source: callable
+        a function that has all keyword arguments and can be
+        used to create a `Source` layer for testing.
+    """
+
+    def _create_source(
+                  position : Array    = np.array([0., 0.]),
+                  flux     : Array    = np.array(1.),
+                  spectrum : OpticalLayer = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
+                                                                 600e-9, 10)),
+                  name     : str      = "Source") -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.sources.Source(position, flux, spectrum, name=name)
+    return _create_source
