@@ -20,11 +20,15 @@ class TestAperturesCommonInterfaces():
         # there should also exist something in bounds (assuming edges are within coords)
         assert np.logical_and(aperture > 0., aperture < 1.).any(), msg
         
-    def test_all_apertures(self, create_square_aperture : callable, create_rectangular_aperture : callable, create_circular_aperture : callable):
+    def test_all_apertures(self, create_square_aperture : callable,
+                           create_rectangular_aperture : callable,
+                           create_circular_aperture : callable,
+                           create_hexagonal_aperture : callable):
         
         constructors = [create_square_aperture,
                         create_rectangular_aperture,
-                        create_circular_aperture]
+                        create_circular_aperture,
+                        create_hexagonal_aperture]
         
         # TODO might need to add error message for when this fails but it checks things very easily
         for ctor in constructors:

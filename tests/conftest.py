@@ -986,3 +986,32 @@ def create_circular_aperture() -> callable:
                                 occulting,
                                 softening)
     return _create_circular_aperture
+
+@pytest.fixture
+def create_hexagonal_aperture() -> callable:
+    """
+    Returns:
+    --------
+    _create_hexagonal_aperture: callable
+        A function that has all keyword arguments and can be
+        used to create a `HexagonalAperture` layer for testing.
+    """
+
+
+    def _create_hexagonal_aperture( 
+                                radius      : Array = 1., 
+                                centre      : Array = [0., 0.],
+                                strain      : Array = [0., 0.],
+                                compression : Array = [1., 1.],
+                                rotation    : Array = 0.,
+                                occulting   : bool = False, 
+                                softening   : bool = False) -> Aperture:
+        return dLux.apertures.HexagonalAperture(
+                                radius,
+                                centre,
+                                strain,
+                                compression,
+                                rotation,
+                                occulting,
+                                softening)
+    return _create_hexagonal_aperture
