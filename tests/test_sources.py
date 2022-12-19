@@ -534,19 +534,18 @@ class TestRelativePositionSource():
         assert np.allclose(source.position_angle, position_angle).all()
 
 
-'''
 class TestPointSource():
     """
     Tests the PointSource class.
     """
-    utility : PointSourceUtility = PointSourceUtility()
 
 
-    def test_model(self) -> None:
+    def test_model(self, create_point_source : callable) -> None:
         """
         Tests the model method.
         """
-        source = create_source()
+        # TODO: this has no asserts?
+        source = create_point_source()
         optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
         detector = dLux.core.Detector([dLux.AddConstant(0.)])
         filter_in = dLux.Filter()
@@ -621,6 +620,7 @@ class TestMultiPointSource():
         # source.model(optics, detector, filter_in)
         # source.model(optics, filter_in=filter_in)
 
+'''
 
 class TestArrayDistribution():
     """

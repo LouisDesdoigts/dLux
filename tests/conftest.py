@@ -486,6 +486,30 @@ def create_relative_position_source() -> callable:
                                                    spectrum=spectrum, name=name)
     return _create_relative_position_source
 
+@pytest.fixture
+def create_point_source() -> callable:
+    """
+    Returns:
+    --------
+    _create_point_source: callable
+        a function that has all keyword arguments and can be
+        used to create a `PointSource` layer for testing.
+    """
+
+
+    def _create_point_source(
+                  position    : Array    = np.array([0., 0.]),
+                  flux        : Array    = np.array(1.),
+                  spectrum    : OpticalLayer = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
+                                                                 600e-9, 10)),
+                  name        : str      = "PointSource") -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.sources.PointSource(position, flux, spectrum, name=name)
+    return _create_point_source
+
+
 def create_optics() -> callable:
     """
     Returns:
