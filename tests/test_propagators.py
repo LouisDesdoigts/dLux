@@ -335,7 +335,6 @@ class TestPropagator(UtilityUser):
     """
     Test the Propagator class.
     """
-    utility : PropagatorUtility = PropagatorUtility()
 
 
     def test_constructor(self, create_propagator : callable) -> None:
@@ -349,27 +348,24 @@ class TestVariableSamplingPropagator(UtilityUser):
     """
     Test the VariableSamplingPropagator class.
     """
-    utility : VariableSamplingPropagatorUtility = \
-              VariableSamplingPropagatorUtility()
 
-
-    def test_constructor(self):
+    def test_constructor(self, create_variable_sampling_propagator : callable):
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(pixel_scale_out=np.ones(1))
+            create_variable_sampling_propagator(pixel_scale_out=np.ones(1))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(shift=np.ones(1))
+            create_variable_sampling_propagator(shift=np.ones(1))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(shift=np.ones((1, 2)))
+            create_variable_sampling_propagator(shift=np.ones((1, 2)))
 
-        self.utility.construct()
+        create_variable_sampling_propagator()
 
 
 class TestFixedSamplingPropagator(UtilityUser):
@@ -377,11 +373,11 @@ class TestFixedSamplingPropagator(UtilityUser):
     Test the FixedSamplingPropagator class.
     """
 
-    def test_constructor(self, create_fixed_sampling_propagator_utility : callable):
+    def test_constructor(self, create_fixed_sampling_propagator : callable):
         """
         Tests the constructor.
         """
-        create_fixed_sampling_propagator_utility()
+        create_fixed_sampling_propagator()
 
 
 class TestCartesianPropagator(UtilityUser):

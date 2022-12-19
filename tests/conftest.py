@@ -189,13 +189,13 @@ def create_propagator() -> callable:
 
 
 @pytest.fixture
-def create_fixed_sampling_propagator_utility() -> callable:
+def create_fixed_sampling_propagator() -> callable:
     """
     Returns:
     --------
     _create_fixed_sampling_propagator_utility: callable
         a function that has all keyword arguments and can be
-        used to create a `FixedSamplingPropagatorUtility` layer for testing.
+        used to create a `FixedSamplingPropagator` layer for testing.
     """
     def _create_fixed_sampling_propagator_utility() -> OpticalLayer:
         """
@@ -203,3 +203,27 @@ def create_fixed_sampling_propagator_utility() -> callable:
         """
         return dLux.propagators.FixedSamplingPropagator()
     return _create_fixed_sampling_propagator_utility
+
+
+@pytest.fixture
+def create_variable_sampling_propagator() -> callable:
+    """
+    Returns:
+    --------
+    _create_variable_sampling_propagator_utility: callable
+        a function that has all keyword arguments and can be
+        used to create a `VariableSamplingPropagator` layer for testing.
+    """
+    def _create_variable_sampling_propagator_utility(
+                                                     npixels_out     : int   = 16,
+                                                     pixel_scale_out : Array = np.array(1.),
+                                                     shift           : Array = np.zeros(2),
+                                                     pixel_shift     : bool  = False,
+                                                     inverse         : bool  = None
+                                                     ) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.propagators.VariableSamplingPropagator(pixel_scale_out,
+                            npixels_out, shift, pixel_shift)
+    return _create_variable_sampling_propagator_utility
