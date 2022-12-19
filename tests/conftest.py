@@ -434,6 +434,32 @@ def create_source() -> callable:
     return _create_source
 
 
+@pytest.fixture
+def create_relative_flux_source() -> callable:
+    """
+    Returns:
+    --------
+    _create_relative_flux_source: callable
+        a function that has all keyword arguments and can be
+        used to create a `RelativeFluxSource` layer for testing.
+    """
+    
+    def _create_relative_flux_source(
+                  position : Array    = np.array([0., 0.]),
+                  flux     : Array    = np.array(1.),
+                  spectrum : OpticalLayer = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
+                                                                 600e-9, 10)),
+                  contrast   : Array    = np.array(2.),
+                  name       : str      = "RelativeSource") -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.sources.RelativeFluxSource(contrast, position=position,
+                                               flux=flux, spectrum=spectrum,
+                                               name=name)
+    return _create_relative_flux_source
+
+
 def create_optics() -> callable:
     """
     Returns:

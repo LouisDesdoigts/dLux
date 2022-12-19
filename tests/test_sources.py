@@ -443,12 +443,10 @@ class TestSource():
         source = create_source()
         assert (source.get_weights() == source.spectrum.weights).all()
 
-'''
 class TestResolvedSource():
     """
     Tests the ResolvedSourve class.
     """
-    utility : ResolvedSourceUtility = ResolvedSourceUtility()
     pass
 
 
@@ -456,36 +454,36 @@ class TestRelativeFluxSource():
     """
     Tests the RelativeFluxSource class.
     """
-    utility : RelativeFluxSourceUtility = RelativeFluxSourceUtility()
 
 
-    def test_constructor(self) -> None:
+    def test_constructor(self, create_relative_flux_source : callable) -> None:
         """
         Tests the constructor.
         """
         # Test string inputs
         with pytest.raises(ValueError):
-            create_source(contrast="")
+            create_relative_flux_source(contrast="")
 
         # Test one dimension input
         with pytest.raises(AssertionError):
-            create_source(contrast=[5.])
+            create_relative_flux_source(contrast=[5.])
 
         # Test zero length input
         with pytest.raises(AssertionError):
-            create_source(contrast=[])
+            create_relative_flux_source(contrast=[])
 
 
-    def test_get_flux(self) -> None:
+    def test_get_flux(self, create_relative_flux_source : callable) -> None:
         """
         Tests the get_flux method.
         """
-        source = create_source()
+        source = create_relative_flux_source()
         flux_out = source.get_flux()
         assert flux_out.shape == (2,)
         assert np.allclose(flux_out[0]/flux_out[1], source.contrast)
 
 
+'''
 class TestRelativePositionSource():
     """
     Tests the RelativePositionSource class.
