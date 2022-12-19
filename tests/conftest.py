@@ -785,10 +785,10 @@ def create_instrument(
         used to create a `Instrument` layer for testing.
     """
     def _create_instrument(
-            optics          : OpticalLayer  = OpticsUtility().construct(),
-            scene           : OpticalLayer  = SceneUtility().construct(),
-            detector        : OpticalLayer  = DetectorUtility().construct(),
-            # filter        : OpticalLayer  = FilterUtility().construct()
+            optics          : OpticalLayer  = create_optic(),
+            scene           : OpticalLayer  = create_scene(),
+            detector        : OpticalLayer  = create_detector(),
+            # filter        : OpticalLayer  = create_filter(),
             filter          : OpticalLayer  = None,
             optical_layers  : list          = None,
             sources         : list          = None,
