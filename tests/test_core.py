@@ -11,40 +11,6 @@ config.update("jax_debug_nans", True)
 Array = np.ndarray
 
 
-class FilterUtility(Utility):
-    """
-    Utility for the Filter class.
-    """
-    wavelengths : Array
-    throughput  : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Filter Utility.
-        """
-        self.wavelengths = np.linspace(1e-6, 10e-6, 10)
-        self.throughput  = np.linspace(0, 1, len(self.wavelengths))
-        self.order       = int(1)
-
-
-    def construct(self        : Utility,
-                  wavelengths : Array = None,
-                  throughput  : Array = None,
-                  filter_name : str   = None) -> Filter:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        wavelengths = self.wavelengths if wavelengths is None else wavelengths
-        throughput  = self.throughput  if throughput  is None else throughput
-
-        if filter_name is None:
-            return dLux.core.Filter(wavelengths, throughput)
-        else:
-            return dLux.core.Filter(wavelengths, throughput, \
-                                    filter_name=filter_name)
-
-
 class InstrumentUtility(Utility):
     """
     Utility for the Instrument class.
