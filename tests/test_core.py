@@ -11,63 +11,6 @@ config.update("jax_debug_nans", True)
 Array = np.ndarray
 
 
-class InstrumentUtility(Utility):
-    """
-    Utility for the Instrument class.
-    """
-    optics   : Optics
-    scene    : Scene
-    detector : Detector
-    filter   : Filter
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Instrument Utility.
-        """
-        self.optics   = OpticsUtility().construct()
-        self.scene    = SceneUtility().construct()
-        self.detector = DetectorUtility().construct()
-        # self.filter   = FilterUtility().construct()
-        self.filter   = None
-
-
-    def construct(self            : Utility,
-                  optics          : Optics   = None,
-                  scene           : Scene    = None,
-                  detector        : Detector = None,
-                  filter          : Filter   = None,
-                  optical_layers  : list     = None,
-                  sources         : list     = None,
-                  detector_layers : list     = None,
-                  input_layers    : bool     = False,
-                  input_both      : bool     = False) -> Instrument:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        optics   = self.optics   if optics   is None else optics
-        scene    = self.scene    if scene    is None else scene
-        detector = self.detector if detector is None else detector
-        filter   = self.filter   if filter   is None else filter
-
-        if input_both:
-            return dLux.core.Instrument(optics=optics,
-                                        scene=scene,
-                                        detector=detector,
-                                        filter=filter,
-                                        optical_layers=optical_layers,
-                                        sources=sources,
-                                        detector_layers=detector_layers)
-        elif not input_layers:
-            return dLux.core.Instrument(optics=optics,
-                                        scene=scene,
-                                        detector=detector,
-                                        filter=filter)
-        else:
-            return dLux.core.Instrument(filter=filter,
-                                        optical_layers=optical_layers,
-                                        sources=sources,
-                                        detector_layers=detector_layers)
 
 
 #############
