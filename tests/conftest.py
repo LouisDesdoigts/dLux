@@ -648,6 +648,25 @@ def create_point_and_extended_source():
     return _create_point_and_extended_source
 
 
+@pytest.fixture
+def create_array_spectrum() -> callable:
+    """
+    Returns:
+    --------
+    _create_array_spectrum: callable
+        a function that has all keyword arguments and can be
+        used to create a `ArraySpectrum` layer for testing.
+    """
+
+    def _create_array_spectrum(
+                  wavelengths : Array = np.linspace(500e-9, 600e-9, 10),
+                  weights     : Array = np.arange(10)) -> Spectrum:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.spectrums.ArraySpectrum(wavelengths, weights)
+    return _create_array_spectrum
+
 
 def create_optics() -> callable:
     """
