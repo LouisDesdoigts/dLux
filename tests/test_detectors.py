@@ -1,5 +1,4 @@
 from __future__ import annotations
-from utilities import Utility, UtilityUser
 import jax.numpy as np
 import pytest
 import dLux
@@ -7,30 +6,6 @@ from jax import config
 config.update("jax_debug_nans", True)
 
 Array = np.ndarray
-
-
-class ApplyPixelResponseUtility(Utility):
-    """
-    Utility for ApplyPixelResponse class.
-    """
-    pixel_response : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the ApplyPixelResponse Utility.
-        """
-        self.pixel_response = np.ones((16, 16))
-
-
-    def construct(self           : Utility,
-                  pixel_response : Array = None) -> DetectorLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        pixel_response = self.pixel_response if pixel_response is None \
-                                           else pixel_response
-        return dLux.detectors.ApplyPixelResponse(pixel_response)
 
 
 class TestApplyPixelResponse(UtilityUser):
