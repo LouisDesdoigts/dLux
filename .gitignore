@@ -16,3 +16,4 @@ dist/
 dLux.egg-info/
 docs/notebooks/files
 .vscode
+.coverage
