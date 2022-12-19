@@ -70,28 +70,6 @@ class TestApplyJitter(UtilityUser):
         self.utility.construct()(image)
 
 
-class ApplySaturationUtility(Utility):
-    """
-    Utility for ApplySaturation class.
-    """
-    saturation : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the ApplySaturation Utility.
-        """
-        self.saturation = np.array(1.)
-
-
-    def construct(self : Utility, saturation : Array = None) -> DetectorLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        saturation = self.saturation if saturation is None else saturation
-        return dLux.detectors.ApplySaturation(saturation)
-
-
 class TestApplySaturation(UtilityUser):
     """
     Tests the ApplySaturation class.
