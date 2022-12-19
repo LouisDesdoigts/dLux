@@ -8,6 +8,7 @@ Wavefront = dLux.wavefronts.Wavefront
 OpticalLayer = dLux.optics.OpticalLayer
 Spectrum = dLux.spectrums.Spectrum
 Source = dLux.sources.Source
+Aperture = dLux.apertures.ApertureLayer
 
 
 @pytest.fixture
@@ -822,3 +823,208 @@ def create_instrument(
                 sources=sources,
                 detector_layers=detector_layers)
     return _create_instrument
+
+
+
+
+#####  Apertures ######
+
+@pytest.fixture
+def create_square_aperture() -> callable:
+    """
+    Returns:
+    --------
+    _create_filter: callable
+        A function that has all keyword arguments and can be
+        used to create a `Filter` layer for testing.
+    """
+
+    def _create_square_aperture(  
+            width       : Array = 1., 
+            centre      : Array = [0., 0.],
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> Aperture:
+        """
+        Construct's an instance of `SquareAperture` making 
+        it easy to toggle a single parameter. 
+        Parameters:
+        -----------
+        centre: float, meters
+            The centre of the coordinate system in the paraxial coordinates.
+        strain: Array
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        softening: bool 
+            True if the aperture is soft edged otherwise False. A
+            soft edged aperture has a small layer of non-binary 
+            pixels. This is to prevent undefined gradients. 
+        occulting: bool 
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        theta: float, radians
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        width: float, meters
+            The side length of the square. 
+        """
+        return dLux.SquareAperture(width,
+                                    centre,
+                                    strain,
+                                    compression,
+                                    rotation,
+                                    occulting,
+                                    softening)
+
+    return _create_square_aperture
+
+
+
+@pytest.fixture
+def create_rectangular_aperture()-> callable:
+    """
+    Returns:
+    --------
+    _create_rectangular_aperture: callable
+        A function that has all keyword arguments and can be
+        used to create a `RectangularAperture` layer for testing.
+    """
+
+    def _create_rectangular_aperture(
+                                    length      : Array = 0.5, 
+                                    width       : Array = 1., 
+                                    centre      : Array = [0., 0.],
+                                    strain      : Array = [0., 0.],
+                                    compression : Array = [1., 1.],
+                                    rotation    : Array = 0.,
+                                    occulting   : bool = False, 
+                                    softening   : bool = False) -> Aperture:
+        """
+        Construct's an instance of `SquareAperture` making 
+        it easy to toggle a single parameter. 
+        Parameters:
+        -----------
+        occulting: bool = None
+            True if light passes through the aperture. 
+            False if light is blocked by the aperture. 
+        softening: bool = None
+            True is the aperture has soft pixels on the 
+            edges else false. 
+        x_offset: float = None, meters
+            The distance along the x axis that the aperture 
+            is moved from the centre of the coordinate system. 
+        y_offset: float = None, meters
+            The distance along the y axis that the aperture 
+            is moved from the centre of the coordinate system.
+        width: float = None, meters
+            The width of the aperture.
+        length: float = None, meters 
+            The length of the aperture.
+        theta: float = None, radians
+            The rotation of the aperture.
+        """
+        return dLux.apertures.RectangularAperture(
+                                                length      , 
+                                                width       , 
+                                                centre      ,
+                                                strain      ,
+                                                compression ,
+                                                rotation    ,
+                                                occulting   , 
+                                                softening)
+    return _create_rectangular_aperture
+
+
+@pytest.fixture
+def create_circular_aperture() -> callable:
+    """
+    Returns:
+    --------
+    _create_circular_aperture: callable
+        A function that has all keyword arguments and can be
+        used to create a `CircularAperture` layer for testing.
+    """
+
+
+    def _create_circular_aperture( 
+                                radius      : Array = 1., 
+                                centre      : Array = [0., 0.],
+                                strain      : Array = [0., 0.],
+                                compression : Array = [1., 1.],
+                                occulting   : bool = False, 
+                                softening   : bool = False) -> Aperture:
+        return dLux.apertures.CircularAperture(
+                                radius,
+                                centre,
+                                strain,
+                                compression,
+                                occulting,
+                                softening)
+    return _create_circular_aperture
+
+@pytest.fixture
+def create_hexagonal_aperture() -> callable:
+    """
+    Returns:
+    --------
+    _create_hexagonal_aperture: callable
+        A function that has all keyword arguments and can be
+        used to create a `HexagonalAperture` layer for testing.
+    """
+
+
+    def _create_hexagonal_aperture( 
+                                radius      : Array = 1., 
+                                centre      : Array = [0., 0.],
+                                strain      : Array = [0., 0.],
+                                compression : Array = [1., 1.],
+                                rotation    : Array = 0.,
+                                occulting   : bool = False, 
+                                softening   : bool = False) -> Aperture:
+        return dLux.apertures.HexagonalAperture(
+                                radius,
+                                centre,
+                                strain,
+                                compression,
+                                rotation,
+                                occulting,
+                                softening)
+    return _create_hexagonal_aperture
+
+
+@pytest.fixture
+def create_annular_aperture() -> callable:
+    """
+    Returns:
+    --------
+    _create_annular_aperture: callable
+        A function that has all keyword arguments and can be
+        used to create a `AnnularAperture` layer for testing.
+    """
+
+
+    def _create_annular_aperture( 
+                                rmax        : Array = 1.2, 
+                                rmin        : Array = 0.5, 
+                                centre      : Array = [0., 0.],
+                                strain      : Array = [0., 0.],
+                                compression : Array = [1., 1.],
+                                occulting   : bool = False, 
+                                softening   : bool = False) -> Aperture:
+        return dLux.apertures.AnnularAperture(
+                                rmax,
+                                rmin,
+                                centre,
+                                strain,
+                                compression,
+                                occulting,
+                                softening)
+    return _create_annular_aperture
