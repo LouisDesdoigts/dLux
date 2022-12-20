@@ -1,19 +1,13 @@
-import equinox as eqx
-import matplotlib as mpl 
-import matplotlib.pyplot as plt
-import jax.numpy as np
-import jax 
 import dLux
-import abc
-import functools
-from typing import TypeVar 
+from abc import ABC, abstractmethod
+from jax import numpy as np, jax 
 
 
 Array = np.ndarray
 Wavefront = dLux.wavefronts.Wavefront
 
 
-__all__ = ["factorial", "CircularAperture", "SquareAperture", 
+__all__ = ["CircularAperture", "SquareAperture", 
     "HexagonalAperture", "RegularPolygonalAperture", 
     "IrregularPolygonalAperture", "StaticAperture",
     "AberratedAperture", "StaticAberratedAperture"]
@@ -23,7 +17,7 @@ two_pi: float = 2. * np.pi
 
 
 
-class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
+class ApertureLayer(dLux.optics.OpticalLayer, ABC):
     """
     The ApertureLayer groups together all of the functionality 
     that is associated with the apertures. Very little of this
@@ -34,7 +28,7 @@ class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
 
     Parameters:
     -----------
-    name: String
+    name: str
         The address of this ApertureLayer within the optical 
         system. 
     """
@@ -48,7 +42,7 @@ class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
         self.name = self.__class__.__name__
 
 
-class AbstractDynamicAperture(ApertureLayer, abc.ABC):
+class AbstractDynamicAperture(ApertureLayer, ABC):
     """
     AbstractDynamicAperture:
     ------------------------
@@ -206,29 +200,29 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
             The coordinates of the `Aperture`.
         """
         is_trans = (self.centre != np.zeros((2,), float)).any()
-        coords: Array = jax.lax.cond(is_trans,
+        coords: Array = lax.cond(is_trans,
             lambda: self._translate(coords),
             lambda: coords)
 
         is_compr: bool = (self.compression != np.ones((2,), float)).any()
-        coords: Array = jax.lax.cond(is_compr,
+        coords: Array = lax.cond(is_compr,
             lambda: self._compress(coords),
             lambda: coords)
 
         is_strain: bool = (self.strain != np.zeros((2,), float)).any()
-        coords: Array = jax.lax.cond(is_strain,
+        coords: Array = lax.cond(is_strain,
             lambda: self._strain(coords),
             lambda: coords)
 
         is_rot: bool = (self.rotation != 0.)
-        coords: Array = jax.lax.cond(is_rot,
+        coords: Array = lax.cond(is_rot,
             lambda: self._rotate(coords),
             lambda: coords)
 
         return coords
 
 
-class DynamicAperture(AbstractDynamicAperture, abc.ABC):
+class DynamicAperture(AbstractDynamicAperture, ABC):
     """
     An abstract class that defines the structure of all the concrete
     apertures. An aperture is represented by an array, usually in the
@@ -325,7 +319,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         return wavefront.multiply_amplitude(aperture)
 
 
-    @abc.abstractmethod
+    @abstractmethod
     def _extent(self: ApertureLayer) -> Array:
         """
         Returns the largest distance to the outer edge of the aperture from the
@@ -345,7 +339,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         """
 
 
-    @abc.abstractmethod
+    @abstractmethod
     def _metric(self: ApertureLayer, distances: Array) -> Array:
         """
         A measure of how far a pixel is from the aperture.
@@ -885,7 +879,7 @@ class SquareAperture(DynamicAperture):
         return np.sqrt(2) * self.width / 2.
 
 
-class PolygonalAperture(DynamicAperture, abc.ABC):
+class PolygonalAperture(DynamicAperture, ABC):
     """
     An abstract class that represents all `PolygonalApertures`.
     The structure here is more than a little strange. Most of 
@@ -1669,7 +1663,7 @@ class CompositeAperture(AbstractDynamicAperture):
         return parameters
 
 
-    @abc.abstractmethod
+    @abstractmethod
     def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Evaluates the aperture. 
@@ -1853,7 +1847,7 @@ class MultiAperture(CompositeAperture):
         return aps.sum(axis=0)
 
 
-class Spider(DynamicAperture, abc.ABC):
+class Spider(DynamicAperture, ABC):
     """
     An abstraction on the concept of an optical spider for a space telescope.
     These are the things that hold up the secondary mirrors. 
@@ -2280,10 +2274,10 @@ class AberratedAperture(ApertureLayer):
 
        k = np.arange(MAX_DIFF)
        mask = (k < upper).reshape(MAX_DIFF, 1, 1)
-       coefficients = (-1) ** k * factorial(n - k) / \
-           (factorial(k) * \
-               factorial(((n + m) / 2).astype(int) - k) * \
-               factorial(((n - m) / 2).astype(int) - k))
+       coefficients = (-1) ** k * dLux.utils.math.factorial(n - k) / \
+           (dLux.utils.math.factorial(k) * \
+               dLux.utils.math.factorial(((n + m) / 2).astype(int) - k) * \
+               dLux.utils.math.factorial(((n - m) / 2).astype(int) - k))
 
        def _jth_radial_zernike(rho: list) -> list:
            rho = np.tile(rho, (MAX_DIFF, 1, 1))
