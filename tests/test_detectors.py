@@ -124,28 +124,6 @@ class TestAddConstant(UtilityUser):
         self.utility.construct()(image)
 
 
-class IntegerDownsampleUtility(Utility):
-    """
-    Utility for IntegerDownsample class.
-    """
-    kernel_size : int
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the IntegerDownsample Utility.
-        """
-        self.kernel_size = 4
-
-
-    def construct(self : Utility, kernel_size : int = None) -> DetectorLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        kernel_size = self.kernel_size if kernel_size is None else kernel_size
-        return dLux.detectors.IntegerDownsample(kernel_size)
-
-
 class TestIntegerDownsample(UtilityUser):
     """
     Tests the IntegerDownsample class.
