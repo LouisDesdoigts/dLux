@@ -154,3 +154,39 @@ class TestUniformSpider(object):
         aperture = spider._aperture(coords)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
+
+
+class TestAberratedAperture(object):
+    """
+    Checks that the aberrated aperture is functional. It does not
+    test whether the aberrated aperture is correct.
+    """
+
+
+    def test_constructor(self, create_aberrated_aperture: callable) -> None:
+        """
+        Tests that it is possible to instantiate an AberratedAperture.
+        Does not test if the AberratedAperture is correct.
+        """
+        # TODO: Make sure that the class asserts that the coeffs and 
+        # the noll indexes have the same length.
+        create_aberrated_aperture()
+
+
+    def test_on_aperture(self: object, 
+            create_aberrated_aperture: callable,
+            create_circular_aperture: callable) -> None:
+        """
+        Tests that the basis functions are evaluated atop the aperture.
+        Applies mutliple different permutations.
+        """
+        width = 2.
+        npix = 128
+        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+
+        aber_ap = create_aberrated_aperture()._basis(coords)
+        ap = aber_ap.aperture()._aperture(coords)
+
+        abers = np.where(ap == 0., aber_ap, 0.)
+        assert (abers == 0.).all()
+
