@@ -869,3 +869,17 @@ def create_saturation() -> None:
     return _create_saturation
 
 
+@pytest.fixture
+def create_constant() -> None:
+    """
+    Returns:
+    --------
+    _create_constant: callable
+        A function that has all keyword arguments and can be
+        used to create a `ApplyConstant` layer for testing.
+    """
+    def _create_constant(value: Array = np.array(1.)) -> OpticalLayer:
+        return dLux.detectors.AddConstant(value)
+    return _create_constant
+
+
