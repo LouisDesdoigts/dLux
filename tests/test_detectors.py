@@ -120,27 +120,26 @@ class TestAddConstant(object):
         create_constant()(image)
 
 
-class TestIntegerDownsample(UtilityUser):
+class TestIntegerDownsample(object):
     """
     Tests the IntegerDownsample class.
     """
-    utility : IntegerDownsampleUtility = IntegerDownsampleUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_integer_downsample: callable) -> None:
         """
         Tests the constructor.
         """
         # Test functioning
-        self.utility.construct()
+        create_integer_downsample()
 
 
-    def test_call(self):
+    def test_call(self, create_integer_downsample: callable) -> None:
         """
         Tests the __call__ method.
         """
         image = np.ones((16, 16))
-        self.utility.construct()(image)
+        create_integer_downsample()(image)
 
 
 class TestRotate(UtilityUser):
