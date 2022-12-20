@@ -825,8 +825,6 @@ def create_instrument(
     return _create_instrument
 
 
-
-
 #####  Apertures ######
 
 @pytest.fixture
@@ -1028,3 +1026,94 @@ def create_annular_aperture() -> callable:
                                 occulting,
                                 softening)
     return _create_annular_aperture
+
+
+@pytest.fixture
+def create_pixel_response() -> callable:
+    """
+    Returns:
+    --------
+    _create_pixel_response: callable
+        A function that has all keyword arguments and can be
+        used to create a `ApplyPixelResponse` layer for testing.
+    """
+    def _create_pixel_response(
+            pixel_response: Array = np.ones((16, 16))) -> OpticalLayer:
+        return dLux.detectors.ApplyPixelResponse(pixel_response)
+    return _create_pixel_response
+
+
+@pytest.fixture
+def create_jitter() -> None:
+    """
+    Returns:
+    --------
+    _create_jitter: callable
+        A function that has all keyword arguments and can be
+        used to create a `ApplyJitter` layer for testing.
+    """
+    def _create_jitter(
+            sigma: Array = np.array(1.),
+            kernel_size: int = 10) -> OpticalLayer:
+        return dLux.detectors.ApplyJitter(sigma, kernel_size)
+    return _create_jitter
+
+
+@pytest.fixture
+def create_saturation() -> None:
+    """
+    Returns:
+    --------
+    _create_saturation: callable
+        A function that has all keyword arguments and can be
+        used to create a `ApplySaturation` layer for testing.
+    """
+    def _create_saturation(saturation: Array = np.array(1.)) -> OpticalLayer:
+        return dLux.detectors.ApplySaturation(saturation)
+    return _create_saturation
+
+
+@pytest.fixture
+def create_constant() -> None:
+    """
+    Returns:
+    --------
+    _create_constant: callable
+        A function that has all keyword arguments and can be
+        used to create a `ApplyConstant` layer for testing.
+    """
+    def _create_constant(value: Array = np.array(1.)) -> OpticalLayer:
+        return dLux.detectors.AddConstant(value)
+    return _create_constant
+
+
+@pytest.fixture
+def create_integer_downsample() -> callable:
+    """
+    Returns:
+    --------
+    _create_integer_downsample: callable
+        A function that has all keyword arguments and can be
+        used to create a `IntegerDownsample` layer for testing.
+    """
+    def _create_integer_downsample(kernel_size: int = 4) -> OpticalLayer:
+        return dLux.detectors.IntegerDownsample(kernel_size)
+    return _create_integer_downsample    
+
+
+@pytest.fixture
+def create_rotate_detector() -> callable:
+    """
+    Returns:
+    --------
+    _create_rotate_detector: callable
+        A function that has all keyword arguments and can be
+        used to create a `Rotate` layer for testing.
+    """
+    def _create_rotate_detector(
+            angle: Array = np.array(np.pi),
+            fourier: bool = False,
+            padding: int = 2) -> OpticalLayer:
+        return dLux.detectors.Rotate(angle, fourier, padding)
+    return _create_rotate_detector
+
