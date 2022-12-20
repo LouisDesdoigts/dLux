@@ -4,7 +4,7 @@ import typing
 
 Aperture = typing.TypeVar("Aperture")
 Array = typing.TypeVar("Array")
-
+Spider = typing.TypeVar("Spider")
 
 
 class TestAperturesCommonInterfaces():
@@ -211,13 +211,7 @@ class TestAperturesCommonInterfaces():
 #         aperture = create_square_aperture(centre=centre, softening=softening)._aperture(coords)
 
 #         TestSquareAperture._check_valid_soft_aperture(aperture)import jax.numpy as np
-import typing
-import dLux as dl
-from test_apertures import ApertureUtility 
-from utilities import UtilityUser
 
-Utility = typing.TypeVar("Utility")
-Spider = typing.TypeVar("Spider")
 
 class UniformSpiderUtility(ApertureUtility):
     """
