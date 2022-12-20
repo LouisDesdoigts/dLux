@@ -184,8 +184,9 @@ class TestAberratedAperture(object):
         npix = 128
         coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
-        aber_ap = create_aberrated_aperture()._basis(coords)
-        ap = aber_ap.aperture()._aperture(coords)
+        ap = create_circular_aperture()
+        aber_ap = create_aberrated_aperture(aperture=ap)._basis(coords)
+        ap = ap._aperture(coords)
 
         abers = np.where(ap == 0., aber_ap, 0.)
         assert (abers == 0.).all()

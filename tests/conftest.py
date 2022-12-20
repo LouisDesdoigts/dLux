@@ -1160,8 +1160,8 @@ def create_aberrated_aperture(create_circular_aperture: callable) -> callable:
     shape: int = 6
 
     def _create_aberrated_aperture(
-            noll_inds: list = np.arange(shape, int),
-            coeffs: Array = np.ones(shape, float),
+            noll_inds: list = np.arange(shape, dtype=int),
+            coeffs: Array = np.ones(shape, dtype=float),
             aperture: object = create_circular_aperture()) -> OpticalLayer:
         return dLux.apertures.AberratedAperture(
             noll_inds=noll_inds,
