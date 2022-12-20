@@ -211,6 +211,17 @@ class ResolvedSource(Source, ABC):
     Base class for resolved source objects. This simply extends the base Source
     class by implementing an abstract get_distribution() method and a concrete
     model() method.
+
+    Attributes
+    ----------
+    position : Array, radians
+        The (x, y) on-sky position of this object.
+    flux : Array, photons
+        The flux of the object.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a Spectrum object.
+    name : str
+        The name for this object.
     """
 
 
@@ -278,8 +289,16 @@ class RelativeFluxSource(Source, ABC):
 
     Attributes
     ----------
+    position : Array, radians
+        The (x, y) on-sky position of this object.
+    flux : Array, photons
+        The flux of the object.
     contrast : Array
         The contrast ratio between the two sources.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a Spectrum object.
+    name : str
+        The name for this object.
     """
     contrast : Array
 
@@ -327,11 +346,19 @@ class RelativePositionSource(Source, ABC):
 
     Attributes
     ----------
+    position : Array, radians
+        The (x, y) on-sky position of this object.
+    flux : Array, photons
+        The flux of the object.
     separation : Array, radians
         The separation of the two sources in radians.
     position_angle : Array, radians
         The field angle between the two sources measure from the positive
         x axis.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a Spectrum object.
+    name : str
+        The name for this object.
     """
     separation     : Array
     position_angle : Array
@@ -384,6 +411,17 @@ class RelativePositionSource(Source, ABC):
 class PointSource(Source):
     """
     Concrete Class for unresolved point source objects.
+
+    Attributes
+    ----------
+    position : Array, radians
+        The (x, y) on-sky position of this object.
+    flux : Array, photons
+        The flux of the object.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a Spectrum object.
+    name : str
+        The name for this object.
     """
 
 
@@ -423,6 +461,18 @@ class PointSource(Source):
 class MultiPointSource(Source):
     """
     Concrete Class for multiple unresolved point source objects.
+
+    Attributes
+    ----------
+    position : Array, radians
+        The (x, y) on-sky positions of these sources.
+    flux : Array, photons
+        The fluxes of the sources.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a Spectrum object.
+        Every source in this class will have an identical spectrum.
+    name : str
+        The name for this object.
     """
 
 
@@ -534,8 +584,16 @@ class ArrayDistribution(ResolvedSource):
 
     Attributes
     ----------
+    position : Array, radians
+        The (x, y) on-sky position of this object.
+    flux : Array, photons
+        The flux of the object.
     distribution : Array
         The array of intensities respresenting the resolved source.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a Spectrum object.
+    name : str
+        The name for this object.
     """
     distribution : Array
 
@@ -577,6 +635,7 @@ class ArrayDistribution(ResolvedSource):
 
         super().__init__(position, flux, spectrum, name=name, **kwargs)
         distribution = np.asarray(distribution, dtype=float)
+        distribution = np.maximum(distribution, 0.)
         self.distribution = distribution/distribution.sum()
 
         # Input checking
@@ -609,7 +668,8 @@ class ArrayDistribution(ResolvedSource):
             The source object with the normalised spectrum and distribution.
         """
         normalised_spectrum = self.spectrum.normalise()
-        normalised_distribution = self.distribution/self.distribution.sum()
+        distribution_floor = np.maximum(self.distribution, 0.)
+        normalised_distribution = distribution_floor/distribution_floor.sum()
         return tree_at(
             lambda source : (source.spectrum, source.distribution), self, \
                             (normalised_spectrum, normalised_distribution))
@@ -618,6 +678,24 @@ class ArrayDistribution(ResolvedSource):
 class BinarySource(RelativePositionSource, RelativeFluxSource):
     """
     A parameterised binary source.
+
+    Attributes
+    ----------
+    position : Array, radians
+        The (x, y) on-sky position of this object.
+    flux : Array, photons
+        The mean flux of the sources.
+    separation : Array, radians
+        The separation of the two sources in radians.
+    position_angle : Array, radians
+        The position angle between the two sources measured clockwise from
+        the vertical axis.
+    contrast : Array
+        The contrast ratio between the two sources.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a CombinedSpectrum object.
+    name : str
+        The name for this object.
     """
 
 
@@ -728,6 +806,22 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
     ratio (contrast) between the point source and resolved distribution. The
     resolved component is defined by an array (ie this class inherits from
     ArrayDistribution).
+
+    Attributes
+    ----------
+    position : Array, radians
+        The (x, y) on-sky position of this object.
+    flux : Array, photons
+        The mean flux of the point and resolved source.
+    distribution : Array
+        The array of intensities respresenting the resolved source.
+    contrast : Array
+        The contrast ratio between the point source and the resolved
+        source.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a Spectrum object.
+    name : str
+        The name for this object.
     """
 
 
@@ -745,7 +839,7 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
         position : Array, radians = np.array([0., 0.])
             The (x, y) on-sky position of this object.
         flux : Array, photons = np.array(1.)
-            The flux of the object.
+            The mean flux of the point and resolved source.
         distribution : Array = np.ones((3, 3))
             The array of intensities respresenting the resolved source.
         contrast : Array = np.array(1.)
@@ -833,6 +927,22 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
     and the flux ratio (contrast) between the point source and resolved
     distribution. The resolved component is defined by an array (ie this class
     inherits from ArrayDistribution).
+
+    Attributes
+    ----------
+    position : Array, radians
+        The (x, y) on-sky position of this object.
+    flux : Array, photons
+        The mean flux of the point and resolves source.
+    distribution : Array
+        The array of intensities respresenting the resolved source.
+    contrast : Array
+        The contrast ratio between the point source and the resolved
+        source.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a Spectrum object.
+    name : str
+        The name for this object.
     """
 
 

@@ -1,46 +1,23 @@
-import equinox as eqx
-import matplotlib as mpl 
-import matplotlib.pyplot as plt
-import jax.numpy as np
-import jax 
 import dLux
-import abc
-import functools
-from typing import TypeVar 
+from abc import ABC, abstractmethod
+from jax import numpy as np, lax 
 
 
 Array = np.ndarray
 Wavefront = dLux.wavefronts.Wavefront
 
 
-__all__ = ["factorial", "CircularAperture", "SquareAperture", 
+__all__ = ["CircularAperture", "SquareAperture", 
     "HexagonalAperture", "RegularPolygonalAperture", 
     "IrregularPolygonalAperture", "StaticAperture",
     "AberratedAperture", "StaticAberratedAperture"]
 
 
 two_pi: float = 2. * np.pi
-        
- 
-def factorial(n : int) -> int:
-    """
-    Calculate n! in a jax friendly way. Note that n == 0 is not a 
-    safe case.  
- 
-    Parameters
-    ----------
-    n : int
-        The integer to calculate the factorial of.
- 
-    Returns
-    n! : int
-        The factorial of the integer
-    """
-    return jax.lax.exp(jax.lax.lgamma(n + 1.))
 
 
 
-class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
+class ApertureLayer(dLux.optics.OpticalLayer, ABC):
     """
     The ApertureLayer groups together all of the functionality 
     that is associated with the apertures. Very little of this
@@ -49,9 +26,9 @@ class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
     layer within the class Heirachy that exists almost purely 
     as a classification.
 
-    Parameters:
+    Attributes:
     -----------
-    name: String
+    name: str
         The address of this ApertureLayer within the optical 
         system. 
     """
@@ -65,7 +42,7 @@ class ApertureLayer(dLux.optics.OpticalLayer, abc.ABC):
         self.name = self.__class__.__name__
 
 
-class AbstractDynamicAperture(ApertureLayer, abc.ABC):
+class AbstractDynamicAperture(ApertureLayer, ABC):
     """
     AbstractDynamicAperture:
     ------------------------
@@ -74,17 +51,17 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
     `DynamicAberratedAperture` and `DynamicAperture` could 
     inherit from a common base. 
 
-    Parameters:
+    Attributes:
     -----------
-    centre: float, meters
-        The x coordinate of the centre of the aperture.
+    centre: Array, meters
+        The (x, y) coordinate of the centre of the aperture.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -106,22 +83,16 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
 
         Parameters
         ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
-        softening: bool = False
-            True if the aperture is soft edged otherwise False. A
-            soft edged aperture has a small layer of non-binary 
-            pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -135,17 +106,17 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
     def _rotate(self: ApertureLayer, coords: Array) -> Array:
         """
         Rotate the coordinate system by a pre-specified amount,
-        `self._theta`
+        `self.rotation`
 
-        Parameters
-        ----------
+        Parameters:
+        -----------
         coords : Array
             A `(2, npix, npix)` representation of the coordinate 
             system. The leading dimensions specifies the x and then 
             the y coordinates in that order. 
 
-        Returns
-        -------
+        Returns:
+        --------
         coordinates : Array
             The rotated coordinate system. 
         """
@@ -155,7 +126,7 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
         return np.array([new_x, new_y])
 
 
-    def _translate(self, coords: Array) -> Array:
+    def _translate(self: ApertureLayer, coords: Array) -> Array:
         """
         Move the center of the aperture. 
 
@@ -223,39 +194,40 @@ class AbstractDynamicAperture(ApertureLayer, abc.ABC):
             The coordinates of the `Aperture`.
         """
         is_trans = (self.centre != np.zeros((2,), float)).any()
-        coords: Array = jax.lax.cond(is_trans,
+        coords: Array = lax.cond(is_trans,
             lambda: self._translate(coords),
             lambda: coords)
 
         is_compr: bool = (self.compression != np.ones((2,), float)).any()
-        coords: Array = jax.lax.cond(is_compr,
+        coords: Array = lax.cond(is_compr,
             lambda: self._compress(coords),
             lambda: coords)
 
         is_strain: bool = (self.strain != np.zeros((2,), float)).any()
-        coords: Array = jax.lax.cond(is_strain,
+        coords: Array = lax.cond(is_strain,
             lambda: self._strain(coords),
             lambda: coords)
 
         is_rot: bool = (self.rotation != 0.)
-        coords: Array = jax.lax.cond(is_rot,
+        coords: Array = lax.cond(is_rot,
             lambda: self._rotate(coords),
             lambda: coords)
 
         return coords
 
 
-class DynamicAperture(AbstractDynamicAperture, abc.ABC):
+class DynamicAperture(AbstractDynamicAperture, ABC):
     """
     An abstract class that defines the structure of all the concrete
     apertures. An aperture is represented by an array, usually in the
     range of 0. to 1.. Values in between can be used to represent 
     soft edged apertures and intermediate surfaces. 
 
-    Attributes
-    ----------
-    centre: float, meters
-        The x coordinate of the centre of the aperture.
+    Attributes:
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside.
@@ -274,7 +246,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -293,10 +265,11 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         The default aperture is dis-allows the learning of all 
         parameters. 
 
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -310,7 +283,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -342,7 +315,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         return wavefront.multiply_amplitude(aperture)
 
 
-    @abc.abstractmethod
+    @abstractmethod
     def _extent(self: ApertureLayer) -> Array: # pragma: no cover
         """
         Returns the largest distance to the outer edge of the aperture from the
@@ -362,7 +335,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
         """
 
 
-    @abc.abstractmethod
+    @abstractmethod
     def _metric(self: ApertureLayer, distances: Array) -> Array: # pragma: no cover
         """
         A measure of how far a pixel is from the aperture.
@@ -470,22 +443,21 @@ class AnnularAperture(DynamicAperture):
     the array. By default this is a hard edged aperture but may be 
     in future modifed to provide soft edges. 
 
-    Attributes
-    ----------
-    centre: float, meters
-        The centre of the coordinate system in the paraxial coordinates.
+    Attributes:
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rmax : float
-        The proportion of the pixel vector that is contained within
-        the outer ring of the aperture.
-    rmin : float
-        The proportion of the pixel vector that is contained within
-        the inner ring of the aperture. 
+    rmax: Array, meters
+        Outer radius of aperture.
+    rmin: Array, meters
+        Inner radius of aperture.
     softening: bool 
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -494,8 +466,8 @@ class AnnularAperture(DynamicAperture):
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
     """
-    rmin : float
-    rmax : float
+    rmin: Array
+    rmax: Array
 
 
     def __init__(self   : ApertureLayer, 
@@ -509,9 +481,9 @@ class AnnularAperture(DynamicAperture):
         """
         Parameters
         ----------
-        centre: float, meters
-            The centre of the coordinate system in the paraxial 
-            coordinates.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         rmax : float, meters
             The outer radius of the annular aperture. 
         rmin : float, meters
@@ -584,10 +556,11 @@ class CircularAperture(DynamicAperture):
     """
     A circular aperture represented as a binary array.
 
-    Parameters
-    ----------
-    centre: float, meters
-        The centre of the coordinate system in the paraxial coordinates.
+    Attributes: 
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -615,10 +588,11 @@ class CircularAperture(DynamicAperture):
             occulting   : bool = False, 
             softening   : bool = False) -> Array:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system in the paraxial coordinates.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
@@ -687,17 +661,18 @@ class RectangularAperture(DynamicAperture):
     """
     A rectangular aperture.
 
-    Parameters
-    ----------
-    centre: float, meters
-        The centre of the coordinate system in the paraxial coordinates.
+    Attributes: 
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     softening: bool 
@@ -728,15 +703,16 @@ class RectangularAperture(DynamicAperture):
         """
         Parameters
         ----------
-        centre: float, meters
-            The centre of the coordinate system in the paraxial coordinates.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         softening: bool 
@@ -799,17 +775,18 @@ class SquareAperture(DynamicAperture):
     A square aperture. Note: this can also be created from the rectangular 
     aperture class, but this one tracks less parameters.
 
-    Parameters
-    ----------
-    centre: float, meters
-        The centre of the coordinate system in the paraxial coordinates.
+    Attributes: 
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     softening: bool 
@@ -837,17 +814,18 @@ class SquareAperture(DynamicAperture):
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer: 
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system in the paraxial coordinates.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         softening: bool 
@@ -902,7 +880,7 @@ class SquareAperture(DynamicAperture):
         return np.sqrt(2) * self.width / 2.
 
 
-class PolygonalAperture(DynamicAperture, abc.ABC):
+class PolygonalAperture(DynamicAperture, ABC):
     """
     An abstract class that represents all `PolygonalApertures`.
     The structure here is more than a little strange. Most of 
@@ -923,10 +901,11 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
     change is applied to an array the new array is given the 
     prefix `bc` standing for "broadcastable".
 
-    Parameters
-    ----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    Attributes:
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -940,7 +919,7 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -953,10 +932,11 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -970,7 +950,7 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1017,8 +997,8 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
             The distance of the points (x, y) from the line. Has the same 
             shape as x and y.
         """
-        inf_case: float = (x - x1)
-        gen_case: float = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
+        inf_case = (x - x1)
+        gen_case = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
         return np.where(np.isinf(m), inf_case, gen_case)
     
     
@@ -1068,7 +1048,7 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
         theta: float, radians 
             The offset coordinate system.
         """
-        comps: float = (theta < threshold).astype(float)
+        comps = (theta < threshold).astype(float)
         return theta + comps * two_pi
     
     
@@ -1098,8 +1078,9 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
         is_left: int
             1 if the origin is to the left else -1.
         """
-        bc_orig: float = np.array([[0.]])
-        dist_from_orig: float = self._perp_dists_from_lines(ms, xs, ys, bc_orig, bc_orig)
+        # NOTE: see class docs.
+        bc_orig = np.array([[0.]])
+        dist_from_orig = self._perp_dists_from_lines(ms, xs, ys, bc_orig, bc_orig)
         return np.sign(dist_from_orig)
     
     
@@ -1130,10 +1111,10 @@ class PolygonalAperture(DynamicAperture, abc.ABC):
             A stack of binary (float) arrays that represent the angles 
             bounded by each consecutive pair of vertices.
         """
-        next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
-        greater_than: bool = (off_phi >= sorted_theta)
-        less_than: bool = (off_phi < next_sorted_theta)
-        wedges: bool = greater_than & less_than
+        next_sorted_theta = np.roll(sorted_theta, -1).at[-1].add(two_pi)
+        greater_than = (off_phi >= sorted_theta)
+        less_than = (off_phi < next_sorted_theta)
+        wedges = greater_than & less_than
         return wedges.astype(float)
 
 
@@ -1142,10 +1123,11 @@ class IrregularPolygonalAperture(PolygonalAperture):
     The default aperture is dis-allows the learning of all 
     parameters. 
 
-    Parameters
-    ----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    Attributes: 
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -1159,7 +1141,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     vertices: Array, meters
@@ -1170,19 +1152,20 @@ class IrregularPolygonalAperture(PolygonalAperture):
     
     def __init__(self   : ApertureLayer, 
             vertices    : Array,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
+        Parameters:
+        -----------
         vertices: Array, meters
             The location of the vertices of the aperture.
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -1196,7 +1179,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1208,13 +1191,13 @@ class IrregularPolygonalAperture(PolygonalAperture):
             occulting = occulting,
             softening = softening)
         
-        vertices: float = np.array(vertices).astype(float)
-        shape: tuple = vertices.shape
-        is_corr_shape: bool = (shape[0] > shape[1]) and (shape[1] == 2)
+        vertices = np.array(vertices).astype(float)
+        shape = vertices.shape
+        is_corr_shape = (shape[0] > shape[1]) and (shape[1] == 2)
 
         assert is_corr_shape, "Make sure that the vertices are (n, 2)"
 
-        self.vertices: float = vertices
+        self.vertices = vertices
             
     
     def _grads_from_many_points(self: ApertureLayer, x1: float, y1: float) -> float:
@@ -1249,8 +1232,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
             vertices wrap around to form a closed shape whatever it 
             may look like. 
         """
-        x_diffs: float = x1 - np.roll(x1, -1)
-        y_diffs: float = y1 - np.roll(y1, -1)
+        x_diffs = x1 - np.roll(x1, -1)
+        y_diffs = y1 - np.roll(y1, -1)
         return y_diffs / x_diffs
     
     
@@ -1304,29 +1287,30 @@ class IrregularPolygonalAperture(PolygonalAperture):
             the aperture. What is returned is the non-occulting 
             version of the aperture. 
         """
-        bc_x1: float = self.vertices[:, 0][:, None, None]
-        bc_y1: float = self.vertices[:, 1][:, None, None]
+        # NOTE: see class docs.
+        bc_x1 = self.vertices[:, 0][:, None, None]
+        bc_y1 = self.vertices[:, 1][:, None, None]
 
-        bc_x: float = coords[0][None, :, :]
-        bc_y: float = coords[1][None, :, :]
+        bc_x = coords[0][None, :, :]
+        bc_y = coords[1][None, :, :]
 
-        theta: float = np.arctan2(bc_y1, bc_x1)
-        offset_theta: float = self._offset(theta, 0.)
+        theta = np.arctan2(bc_y1, bc_x1)
+        offset_theta = self._offset(theta, 0.)
 
-        sorted_inds: int = np.argsort(offset_theta.flatten())
+        sorted_inds = np.argsort(offset_theta.flatten())
 
-        sorted_x1: float = bc_x1[sorted_inds]
-        sorted_y1: float = bc_y1[sorted_inds]
-        sorted_theta: float = offset_theta[sorted_inds]   
-        sorted_m: float = self._grads_from_many_points(sorted_x1, sorted_y1)
+        sorted_x1 = bc_x1[sorted_inds]
+        sorted_y1 = bc_y1[sorted_inds]
+        sorted_theta = offset_theta[sorted_inds]   
+        sorted_m = self._grads_from_many_points(sorted_x1, sorted_y1)
 
-        phi: float = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
+        phi = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
 
-        dist_from_edges: float = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
-        wedges: float = self._make_wedges(phi, sorted_theta)
-        dist_sgn: float = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
+        dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
+        wedges = self._make_wedges(phi, sorted_theta)
+        dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
 
-        flat_dists: float = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
+        flat_dists = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
         return self._soften(flat_dists)
 
 
@@ -1336,10 +1320,11 @@ class RegularPolygonalAperture(PolygonalAperture):
     regular polygonal apertures without using their 
     vertices. 
     
-    Parameters:
+    Attributes:
     -----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -1353,7 +1338,7 @@ class RegularPolygonalAperture(PolygonalAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     nsides: int
@@ -1369,17 +1354,18 @@ class RegularPolygonalAperture(PolygonalAperture):
     def __init__(self   : ApertureLayer, 
             nsides      : int,
             rmax        : float,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -1393,7 +1379,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1474,10 +1460,11 @@ class HexagonalAperture(RegularPolygonalAperture):
     """
     Generate a hexagonal aperture, parametrised by rmax. 
    
-    Parameters
-    ----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    Attributes: 
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -1491,7 +1478,7 @@ class HexagonalAperture(RegularPolygonalAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     rmax : float, meters
@@ -1504,17 +1491,18 @@ class HexagonalAperture(RegularPolygonalAperture):
     
     def __init__(self   : ApertureLayer, 
             rmax        : float,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -1528,7 +1516,7 @@ class HexagonalAperture(RegularPolygonalAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1577,19 +1565,20 @@ class CompositeAperture(AbstractDynamicAperture):
     the connection implies that changes to once are likely to 
     affect one another.
 
-    Parameters:
+    Attributes:
     -----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
-    centre: float, meters
-        The x coordinate of the centre of the aperture.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -1598,25 +1587,26 @@ class CompositeAperture(AbstractDynamicAperture):
 
     def __init__(self   : ApertureLayer, 
             apertures   : dict,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.) -> ApertureLayer:
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.)) -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
 
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         apertures : dict
@@ -1686,7 +1676,7 @@ class CompositeAperture(AbstractDynamicAperture):
         return parameters
 
 
-    @abc.abstractmethod
+    @abstractmethod
     def _aperture(self: ApertureLayer, coordinates: Array) -> Array: # pragma: no cover
         """
         Evaluates the aperture. 
@@ -1723,19 +1713,20 @@ class CompoundAperture(CompositeAperture):
     the connection implies that changes to once are likely to 
     affect one another.
 
-    Parameters:
+    Attributes:
     -----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
-    centre: float, meters
-        The x coordinate of the centre of the aperture.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -1744,24 +1735,25 @@ class CompoundAperture(CompositeAperture):
     def __init__(
             self        : ApertureLayer,
             apertures   : dict,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.) -> ApertureLayer:
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.)) -> ApertureLayer:
         """
         Parameters:
         -----------
         apertures: dict(str, Aperture)
            The apertures that make up the compound aperture. 
-        centre: float, meters
-            The x coordinate of the centre of the aperture.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1801,19 +1793,20 @@ class MultiAperture(CompositeAperture):
     not overlapping. We can add `CompoundAperture`s into 
     `MultiAperture` to create a combination of the two affects.
 
-    Parameters:
+    Attributes:
     -----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
-    centre: float, meters
-        The x coordinate of the centre of the aperture.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -1822,24 +1815,25 @@ class MultiAperture(CompositeAperture):
     def __init__(
             self        : ApertureLayer,
             apertures   : dict,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.) -> ApertureLayer:
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.)) -> ApertureLayer:
         """
         Parameters:
         -----------
         apertures: dict(str, Aperture)
            The apertures that make up the compound aperture. 
-        centre: float, meters
-            The x coordinate of the centre of the aperture.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1870,15 +1864,16 @@ class MultiAperture(CompositeAperture):
         return aps.sum(axis=0)
 
 
-class Spider(DynamicAperture, abc.ABC):
+class Spider(DynamicAperture, ABC):
     """
     An abstraction on the concept of an optical spider for a space telescope.
     These are the things that hold up the secondary mirrors. 
 
-    Parameters:
+    Attributes:
     -----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -1892,23 +1887,24 @@ class Spider(DynamicAperture, abc.ABC):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
     
     
     def __init__(self   : ApertureLayer, 
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0., 
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.), 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -1922,7 +1918,7 @@ class Spider(DynamicAperture, abc.ABC):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1990,10 +1986,11 @@ class UniformSpider(Spider):
     taken with respect to the width of the struts and the global rotation 
     as well as the centre of the spider.
  
-    Parameters
-    ----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    Attributes: 
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -2004,7 +2001,7 @@ class UniformSpider(Spider):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     number_of_struts: int 
@@ -2020,17 +2017,18 @@ class UniformSpider(Spider):
     def __init__(self   : ApertureLayer, 
             num_struts  : int,
             strut_width : float,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -2044,7 +2042,7 @@ class UniformSpider(Spider):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         number_of_struts: int 
@@ -2108,7 +2106,7 @@ class AberratedAperture(ApertureLayer):
     above a telescope but whether or not this is a good idea 
     remains to be seen.
  
-    Parameters:
+    Attributes:
     -----------
     basis_funcs: list[callable]
         A list of functions that represent the basis. The exact
@@ -2297,10 +2295,10 @@ class AberratedAperture(ApertureLayer):
 
        k = np.arange(MAX_DIFF)
        mask = (k < upper).reshape(MAX_DIFF, 1, 1)
-       coefficients = (-1) ** k * factorial(n - k) / \
-           (factorial(k) * \
-               factorial(((n + m) / 2).astype(int) - k) * \
-               factorial(((n - m) / 2).astype(int) - k))
+       coefficients = (-1) ** k * dLux.utils.math.factorial(n - k) / \
+           (dLux.utils.math.factorial(k) * \
+               dLux.utils.math.factorial(((n + m) / 2).astype(int) - k) * \
+               dLux.utils.math.factorial(((n - m) / 2).astype(int) - k))
 
        def _jth_radial_zernike(rho: list) -> list:
            rho = np.tile(rho, (MAX_DIFF, 1, 1))
@@ -2531,7 +2529,7 @@ class StaticAperture(ApertureLayer):
     are not getting learned. It pre-calculates the aperture array 
     which is stored and then simply applies it. 
 
-    Parameters:
+    Attributes:
     -----------
     aperture: Array
         The aperture represented as an array.
@@ -2585,7 +2583,7 @@ class StaticAberratedAperture(ApertureLayer):
     are not getting learned. It pre-calculates the aperture and
     basis arrays which is stored and then applied. 
 
-    Parameters:
+    Attributes:
     -----------
     aperture: Array
         The aperture represented as an array.

@@ -146,9 +146,9 @@ def simple_optical_system(aperture_diameter         : Array,
 
 def toliman(wavefront_npixels         : int,
             detector_npixels          : int,
-            aperture_diameter         : Array = 0.125,
-            secondary_mirror_diameter : Array = 0.025,
-            detector_pixel_size       : Array = 0.5,
+            aperture_diameter         : Array = 0.13,
+            secondary_mirror_diameter : Array = 0.032,
+            detector_pixel_size       : Array = 0.375,
             angular                   : bool  = True,
             focal_length              : Array = None,
             nzernike                  : int   = None,
@@ -165,18 +165,19 @@ def toliman(wavefront_npixels         : int,
         The number of pixel used to represent the wavefront.
     detector_npixels : int
         The number of pixel of the detector
-    aperture_diameter : Array, meters = 0.125
+    aperture_diameter : Array, meters = 0.13
         The diameter of the optical system aperture.
-    secondary_mirror_diameter : Array = 0.025
+    secondary_mirror_diameter : Array = 0.032
         The diameter of the secondary mirror obscuration.
-    detector_pixel_size : Array, arcseconds/pixel or meters/pixel = 0.5
+    detector_pixel_size : Array, arcseconds/pixel or meters/pixel = 0.375
         The size of the detector pixels. Taken in units of arcseconds per pixel
-        if anuglar == True, else units are taken in meters per pixel.
+        if anuglar == True, else units are taken in meters per pixel. The
+        physical detector pixels are 2.4um
     angular : bool = True
         Whether to use angular (radians) or cartesian (meters) units.
     focal_length : Array = None
         The focal length of the optical system. This paramter is only used if
-        angular == False.
+        angular == False. The EFL is 1.32m.
     nzernike : int = None
         The number of zernike terms to use. Ignore piston tip tilt.
     zernike_coefficients : Array = None

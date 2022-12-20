@@ -1117,3 +1117,57 @@ def create_rotate_detector() -> callable:
         return dLux.detectors.Rotate(angle, fourier, padding)
     return _create_rotate_detector
 
+
+@pytest.fixture
+def create_uniform_spider() -> callable:
+    """
+    Returns:
+    --------
+    _create_uniform_spider: callable
+        A function that has all keyword arguments and can be
+        used to create a `UniformSpider` layer for testing.
+    """
+    def _create_uniform_spider(
+            number_of_struts: int = 4,
+            width_of_struts: float = .05,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> OpticalLayer:
+        return dLux.apertures.UniformSpider(
+            number_of_struts, 
+            width_of_struts,
+            centre=centre,
+            strain=strain,
+            compression=compression,
+            rotation=rotation,
+            occulting=occulting,
+            softening=softening)
+    return _create_uniform_spider
+
+
+@pytest.fixture
+def create_aberrated_aperture(create_circular_aperture: callable) -> callable:
+    """
+    Returns:
+    --------
+    _create_aberrated_aperture: callable
+        A function that has all keyword arguments and can be
+        used to create a `AberratedAperture` layer for testing.
+    """
+    shape: int = 6
+
+    def _create_aberrated_aperture(
+            noll_inds: list = np.arange(shape, dtype=int),
+            coeffs: Array = np.ones(shape, dtype=float),
+            aperture: object = create_circular_aperture()) -> OpticalLayer:
+        return dLux.apertures.AberratedAperture(
+            noll_inds=noll_inds,
+            coeffs=coeffs,
+            aperture=aperture)
+    
+    return _create_aberrated_aperture
+    
+

@@ -4,7 +4,7 @@ import typing
 
 Aperture = typing.TypeVar("Aperture")
 Array = typing.TypeVar("Array")
-
+Spider = typing.TypeVar("Spider")
 
 
 class TestAperturesCommonInterfaces():
@@ -80,134 +80,114 @@ class TestAperturesCommonInterfaces():
                             TestAperturesCommonInterfaces._assert_valid_hard_aperture(aperture, msg)
 
 
-# the above for loops essentially run the following tests for each aperture
-
-# class TestSquareAperture():
-#     """
-#     Provides unit tests for the `Square Aperture` class. 
-
-#     Parameters:
-#     -----------
-#     utility: SquareApertureUtility
-#         Provides default parameter values and coordinate systems. 
-#     """
+class TestUniformSpider(object):
+    """
+    Contains the unit tests for the `UniformSpider` class.
+    """
 
 
-#     def test_constructor(self, create_square_aperture : callable) -> None:
-#         """
-#         Checks that all of the fields are correctly set. 
-#         """
-#         # Case default
-#         sq_ap = create_square_aperture()
+    def test_constructor(self, create_uniform_spider: callable) -> None:
+        """
+        Tests that the state is correctly initialised. 
+        """
+        # Test functioning
+        spider = create_uniform_spider()
 
-#         # TODO check that these don't actually test anything?
-#         # assert sq_ap.occulting == self.utility.occulting
-#         # assert sq_ap.softening == np.inf 
-#         # assert sq_ap.x_offset == self.utility.x_offset
-#         # assert sq_ap.y_offset == self.utility.y_offset
-#         # assert sq_ap.width == self.utility.width
-#         # assert sq_ap.theta == self.utility.theta 
+    
+    def test_range_hard(self, create_uniform_spider: callable) -> None:
+        """
+        Checks that the apertures fall into the correct range.
+        """
+        npix = 128
+        width = 2.
+        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
-#         # Case Translated X
-#         x_offset = 1.
-#         centre = np.array([x_offset, 0.])
-#         sq_ap = create_square_aperture(centre = centre)
+        # Case Translated 
+        spider = create_uniform_spider(centre=[1., 1.], softening=False)
+        aperture = spider._aperture(coords)
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
-#         assert (sq_ap.centre == centre).all()
+        # Case Rotated 
+        spider = create_uniform_spider(rotation=np.pi/4., softening=False)
+        aperture = spider._aperture(coords)
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
-#         # Case Translated Y
-#         y_offset = 1.
-#         centre = np.array([0., y_offset])
-#         sq_ap = create_square_aperture(centre = centre)
+        # Case Strained 
+        spider = create_uniform_spider(strain=[.05, .05], softening=False)
+        aperture = spider._aperture(coords)
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
-#         assert (sq_ap.centre == centre).all()
-
-#         # Case Rotated Clockwise
-#         rotation = np.pi / 2.
-#         sq_ap = create_square_aperture(rotation = rotation)
-
-#         assert sq_ap.rotation == rotation
+        # Case Compression
+        spider = create_uniform_spider(compression=[1.05, .95], softening=False)
+        aperture = spider._aperture(coords)
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
 
-#     def test_range_hard(self, create_square_aperture : callable) -> None:
-#         """
-#         Checks that the apertures fall into the correct range.
-#         """
-#         coords = dLux.utils.get_pixel_coordinates(512, 2./512)
+    def test_range_soft(self, create_uniform_spider: callable) -> None:
+        """
+        Checks that the aperture falls into the correct range.
+        """
+        npix = 128
+        width = 2.
+        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
-#         # Case Translated X
-#         x_offset = 1.
-#         centre = np.array([x_offset, 0.])
-#         aperture = create_square_aperture(centre = centre)._aperture(coords)
+        # Case Translated 
+        spider = create_uniform_spider(centre=[1., 1.], softening=False)
+        aperture = spider._aperture(coords)
+        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
+        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
-#         TestSquareAperture._check_valid_hard_aperture(aperture)
+        # Case Rotated 
+        spider = create_uniform_spider(rotation=np.pi/4., softening=False)
+        aperture = spider._aperture(coords)
+        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
+        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
-#         # Case Translated Y
-#         y_offset = 1.
-#         centre = np.array([0., y_offset])
-#         aperture = create_square_aperture(centre = centre)._aperture(coords)
+        # Case Strained 
+        spider = create_uniform_spider(strain=[.05, .05], softening=False)
+        aperture = spider._aperture(coords)
+        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
+        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
-#         TestSquareAperture._check_valid_hard_aperture(aperture)
+        # Case Compression
+        spider = create_uniform_spider(compression=[1.05, .95], softening=False)
+        aperture = spider._aperture(coords)
+        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
+        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
-#         # Case Rotated 
-#         rotation = np.pi / 2.
-#         aperture = create_square_aperture(rotation = rotation)._aperture(coords)
 
-#         TestSquareAperture._check_valid_hard_aperture(aperture)
+class TestAberratedAperture(object):
+    """
+    Checks that the aberrated aperture is functional. It does not
+    test whether the aberrated aperture is correct.
+    """
 
-#         # Case Occulting
-#         aperture = create_square_aperture(occulting = True)._aperture(coords)
 
-#         TestSquareAperture._check_valid_hard_aperture(aperture)
+    def test_constructor(self, create_aberrated_aperture: callable) -> None:
+        """
+        Tests that it is possible to instantiate an AberratedAperture.
+        Does not test if the AberratedAperture is correct.
+        """
+        # TODO: Make sure that the class asserts that the coeffs and 
+        # the noll indexes have the same length.
+        create_aberrated_aperture()
 
-#         # Case Not Occulting
-#         aperture = create_square_aperture(occulting = False)._aperture(coords)
 
-#         TestSquareAperture._check_valid_hard_aperture(aperture)
+    def test_on_aperture(self: object, 
+            create_aberrated_aperture: callable,
+            create_circular_aperture: callable) -> None:
+        """
+        Tests that the basis functions are evaluated atop the aperture.
+        Applies mutliple different permutations.
+        """
+        width = 2.
+        npix = 128
+        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
-#     def _check_valid_hard_aperture(aperture):
-#         assert ((aperture == 1.) | (aperture == 0.)).all()
-        
-#     def _check_valid_soft_aperture(aperture):
-#         assert (aperture <= 1.).all()
-#         assert (aperture >= 0.).all()
-#         # there should also exist something in bounds (assuming edges are within coords)
-#         assert np.logical_and(aperture > 0., aperture < 1.).any()
+        ap = create_circular_aperture()
+        aber_ap = create_aberrated_aperture(aperture=ap)._basis(coords)
+        ap = ap._aperture(coords)
 
-#     def test_range_soft(self, create_square_aperture : callable) -> None:
-#         """
-#         Checks that the aperture falls into the correct range.
-#         """
-#         coords = dLux.utils.get_pixel_coordinates(512, 2./512)
-#         softening = True
-        
-#         # Case Translated X
-#         x_offset = 1.
-#         centre = np.array([x_offset, 0.])
-#         aperture = create_square_aperture(centre=centre, softening=softening)._aperture(coords)
+        abers = np.where(ap == 0., aber_ap, 0.)
+        assert (abers == 0.).all()
 
-#         import matplotlib.pyplot as plt
-#         TestSquareAperture._check_valid_soft_aperture(aperture)
-
-#         # Case Translated Y
-#         y_offset = 1.
-#         centre = np.array([0., y_offset])
-#         aperture = create_square_aperture(centre=centre, softening=softening)._aperture(coords)
-
-#         TestSquareAperture._check_valid_soft_aperture(aperture)
-
-#         # Case Rotated 
-#         rotation = np.pi / 2.
-#         aperture = create_square_aperture(rotation=rotation, softening=softening)._aperture(coords)
-
-#         TestSquareAperture._check_valid_soft_aperture(aperture)
-
-#         # Case Occulting
-#         aperture = create_square_aperture(centre=centre, softening=softening)._aperture(coords)
-
-#         TestSquareAperture._check_valid_soft_aperture(aperture)
-
-#         # Case Not Occulting
-#         aperture = create_square_aperture(centre=centre, softening=softening)._aperture(coords)
-
-#         TestSquareAperture._check_valid_soft_aperture(aperture)
