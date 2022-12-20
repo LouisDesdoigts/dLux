@@ -26,7 +26,7 @@ class ApertureLayer(dLux.optics.OpticalLayer, ABC):
     layer within the class Heirachy that exists almost purely 
     as a classification.
 
-    Parameters:
+    Attributes:
     -----------
     name: str
         The address of this ApertureLayer within the optical 
@@ -51,7 +51,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
     `DynamicAberratedAperture` and `DynamicAperture` could 
     inherit from a common base. 
 
-    Parameters:
+    Attributes:
     -----------
     centre: float, meters
         The x coordinate of the centre of the aperture.
@@ -561,8 +561,8 @@ class CircularAperture(DynamicAperture):
     """
     A circular aperture represented as a binary array.
 
-    Parameters
-    ----------
+    Attributes: 
+    -----------
     centre: float, meters
         The centre of the coordinate system in the paraxial coordinates.
     strain: Array
@@ -664,8 +664,8 @@ class RectangularAperture(DynamicAperture):
     """
     A rectangular aperture.
 
-    Parameters
-    ----------
+    Attributes: 
+    -----------
     centre: float, meters
         The centre of the coordinate system in the paraxial coordinates.
     strain: Array
@@ -776,8 +776,8 @@ class SquareAperture(DynamicAperture):
     A square aperture. Note: this can also be created from the rectangular 
     aperture class, but this one tracks less parameters.
 
-    Parameters
-    ----------
+    Attributes: 
+    -----------
     centre: float, meters
         The centre of the coordinate system in the paraxial coordinates.
     strain: Array
@@ -900,8 +900,8 @@ class PolygonalAperture(DynamicAperture, ABC):
     change is applied to an array the new array is given the 
     prefix `bc` standing for "broadcastable".
 
-    Parameters
-    ----------
+    Attributes:
+    -----------
     centre: float, meters
         The centre of the coordinate system along the x-axis.
     softening: bool = False
@@ -1119,8 +1119,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
     The default aperture is dis-allows the learning of all 
     parameters. 
 
-    Parameters
-    ----------
+    Attributes: 
+    -----------
     centre: float, meters
         The centre of the coordinate system along the x-axis.
     softening: bool = False
@@ -1313,7 +1313,7 @@ class RegularPolygonalAperture(PolygonalAperture):
     regular polygonal apertures without using their 
     vertices. 
     
-    Parameters:
+    Attributes:
     -----------
     centre: float, meters
         The centre of the coordinate system along the x-axis.
@@ -1451,8 +1451,8 @@ class HexagonalAperture(RegularPolygonalAperture):
     """
     Generate a hexagonal aperture, parametrised by rmax. 
    
-    Parameters
-    ----------
+    Attributes: 
+    -----------
     centre: float, meters
         The centre of the coordinate system along the x-axis.
     softening: bool = False
@@ -1554,7 +1554,7 @@ class CompositeAperture(AbstractDynamicAperture):
     the connection implies that changes to once are likely to 
     affect one another.
 
-    Parameters:
+    Attributes:
     -----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
@@ -1700,7 +1700,7 @@ class CompoundAperture(CompositeAperture):
     the connection implies that changes to once are likely to 
     affect one another.
 
-    Parameters:
+    Attributes:
     -----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
@@ -1778,7 +1778,7 @@ class MultiAperture(CompositeAperture):
     not overlapping. We can add `CompoundAperture`s into 
     `MultiAperture` to create a combination of the two affects.
 
-    Parameters:
+    Attributes:
     -----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
@@ -1852,7 +1852,7 @@ class Spider(DynamicAperture, ABC):
     An abstraction on the concept of an optical spider for a space telescope.
     These are the things that hold up the secondary mirrors. 
 
-    Parameters:
+    Attributes:
     -----------
     centre: float, meters
         The centre of the coordinate system along the x-axis.
@@ -1967,8 +1967,8 @@ class UniformSpider(Spider):
     taken with respect to the width of the struts and the global rotation 
     as well as the centre of the spider.
  
-    Parameters
-    ----------
+    Attributes: 
+    -----------
     centre: float, meters
         The centre of the coordinate system along the x-axis.
     softening: bool = False
@@ -2085,7 +2085,7 @@ class AberratedAperture(ApertureLayer):
     above a telescope but whether or not this is a good idea 
     remains to be seen.
  
-    Parameters:
+    Attributes:
     -----------
     basis_funcs: list[callable]
         A list of functions that represent the basis. The exact
@@ -2508,7 +2508,7 @@ class StaticAperture(ApertureLayer):
     are not getting learned. It pre-calculates the aperture array 
     which is stored and then simply applies it. 
 
-    Parameters:
+    Attributes:
     -----------
     aperture: Array
         The aperture represented as an array.
@@ -2562,7 +2562,7 @@ class StaticAberratedAperture(ApertureLayer):
     are not getting learned. It pre-calculates the aperture and
     basis arrays which is stored and then applied. 
 
-    Parameters:
+    Attributes:
     -----------
     aperture: Array
         The aperture represented as an array.
