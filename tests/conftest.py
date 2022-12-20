@@ -883,3 +883,18 @@ def create_constant() -> None:
     return _create_constant
 
 
+@pytest.fixture
+def create_integer_downsample() -> callable:
+    """
+    Returns:
+    --------
+    _create_integer_downsample: callable
+        A function that has all keyword arguments and can be
+        used to create a `IntegerDownsample` layer for testing.
+    """
+    def _create_integer_downsample(kernel_size: int = 4) -> OpticalLayer:
+        return dLux.detectors.IntegerDownsample(kernel_size)
+    return _create_integer_downsample    
+
+
+
