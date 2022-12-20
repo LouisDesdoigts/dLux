@@ -94,31 +94,30 @@ class TestApplySaturation(object):
         create_saturation()(image)
 
 
-class TestAddConstant(UtilityUser):
+class TestAddConstant(object):
     """
     Tests the AddConstant class.
     """
-    utility : AddConstantUtility = AddConstantUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_constant: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(value=np.ones(1))
+            create_constant(value=np.ones(1))
 
         # Test functioning
-        self.utility.construct()
+        create_constant()
 
 
-    def test_call(self):
+    def test_call(self, create_constant: callable) -> None:
         """
         Tests the __call__ method.
         """
         image = np.ones((16, 16))
-        self.utility.construct()(image)
+        create_constant()(image)
 
 
 class TestIntegerDownsample(UtilityUser):
