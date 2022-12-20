@@ -53,8 +53,8 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
 
     Attributes:
     -----------
-    centre: float, meters
-        The x coordinate of the centre of the aperture.
+    centre: Array, meters
+        The (x, y) coordinate of the centre of the aperture.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -83,8 +83,9 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
 
         Parameters
         ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -229,10 +230,11 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
     range of 0. to 1.. Values in between can be used to represent 
     soft edged apertures and intermediate surfaces. 
 
-    Attributes
-    ----------
-    centre: float, meters
-        The x coordinate of the centre of the aperture.
+    Attributes:
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside.
@@ -270,10 +272,11 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         The default aperture is dis-allows the learning of all 
         parameters. 
 
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -447,10 +450,11 @@ class AnnularAperture(DynamicAperture):
     the array. By default this is a hard edged aperture but may be 
     in future modifed to provide soft edges. 
 
-    Attributes
-    ----------
-    centre: float, meters
-        The centre of the coordinate system in the paraxial coordinates.
+    Attributes:
+    -----------
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -486,9 +490,9 @@ class AnnularAperture(DynamicAperture):
         """
         Parameters
         ----------
-        centre: float, meters
-            The centre of the coordinate system in the paraxial 
-            coordinates.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         rmax : float, meters
             The outer radius of the annular aperture. 
         rmin : float, meters
@@ -563,8 +567,9 @@ class CircularAperture(DynamicAperture):
 
     Attributes: 
     -----------
-    centre: float, meters
-        The centre of the coordinate system in the paraxial coordinates.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -592,10 +597,11 @@ class CircularAperture(DynamicAperture):
             occulting   : bool = False, 
             softening   : bool = False) -> Array:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system in the paraxial coordinates.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
@@ -666,8 +672,9 @@ class RectangularAperture(DynamicAperture):
 
     Attributes: 
     -----------
-    centre: float, meters
-        The centre of the coordinate system in the paraxial coordinates.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -705,8 +712,9 @@ class RectangularAperture(DynamicAperture):
         """
         Parameters
         ----------
-        centre: float, meters
-            The centre of the coordinate system in the paraxial coordinates.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
@@ -778,8 +786,9 @@ class SquareAperture(DynamicAperture):
 
     Attributes: 
     -----------
-    centre: float, meters
-        The centre of the coordinate system in the paraxial coordinates.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -814,10 +823,11 @@ class SquareAperture(DynamicAperture):
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer: 
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system in the paraxial coordinates.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
@@ -902,8 +912,9 @@ class PolygonalAperture(DynamicAperture, ABC):
 
     Attributes:
     -----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -930,10 +941,11 @@ class PolygonalAperture(DynamicAperture, ABC):
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -1121,8 +1133,9 @@ class IrregularPolygonalAperture(PolygonalAperture):
 
     Attributes: 
     -----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -1154,12 +1167,13 @@ class IrregularPolygonalAperture(PolygonalAperture):
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
+        Parameters:
+        -----------
         vertices: Array, meters
             The location of the vertices of the aperture.
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -1315,8 +1329,9 @@ class RegularPolygonalAperture(PolygonalAperture):
     
     Attributes:
     -----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -1353,10 +1368,11 @@ class RegularPolygonalAperture(PolygonalAperture):
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -1453,8 +1469,9 @@ class HexagonalAperture(RegularPolygonalAperture):
    
     Attributes: 
     -----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -1488,10 +1505,11 @@ class HexagonalAperture(RegularPolygonalAperture):
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -1558,8 +1576,9 @@ class CompositeAperture(AbstractDynamicAperture):
     -----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
-    centre: float, meters
-        The x coordinate of the centre of the aperture.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -1583,10 +1602,11 @@ class CompositeAperture(AbstractDynamicAperture):
         The default aperture is dis-allows the learning of all 
         parameters. 
 
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
@@ -1704,8 +1724,9 @@ class CompoundAperture(CompositeAperture):
     -----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
-    centre: float, meters
-        The x coordinate of the centre of the aperture.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -1730,8 +1751,9 @@ class CompoundAperture(CompositeAperture):
         -----------
         apertures: dict(str, Aperture)
            The apertures that make up the compound aperture. 
-        centre: float, meters
-            The x coordinate of the centre of the aperture.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
@@ -1782,8 +1804,9 @@ class MultiAperture(CompositeAperture):
     -----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
-    centre: float, meters
-        The x coordinate of the centre of the aperture.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -1808,8 +1831,9 @@ class MultiAperture(CompositeAperture):
         -----------
         apertures: dict(str, Aperture)
            The apertures that make up the compound aperture. 
-        centre: float, meters
-            The x coordinate of the centre of the aperture.
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
@@ -1854,8 +1878,9 @@ class Spider(DynamicAperture, ABC):
 
     Attributes:
     -----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -1882,10 +1907,11 @@ class Spider(DynamicAperture, ABC):
             rotation    : Array = 0., 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -1969,8 +1995,9 @@ class UniformSpider(Spider):
  
     Attributes: 
     -----------
-    centre: float, meters
-        The centre of the coordinate system along the x-axis.
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     softening: bool = False
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -2004,10 +2031,11 @@ class UniformSpider(Spider):
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
-        Parameters
-        ----------
-        centre: float, meters
-            The centre of the coordinate system along the x-axis.
+        Parameters:
+        -----------
+        centre: Array, meters
+            The (x, y) centre of the coordinate system in the wavefront
+            coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
