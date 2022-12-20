@@ -9,6 +9,7 @@ from dLux.utils.coordinates import get_pixel_coordinates
 from dLux.utils.interpolation import interpolate_field, rotate_field
 import dLux
 
+
 __all__ = ["PlaneType", "CartesianWavefront", "AngularWavefront",
            'FarFieldFresnelWavefront']
 
@@ -47,7 +48,7 @@ class Wavefront(ExtendedBase, ABC):
         The electric field phase of the `Wavefront`.
     pixel_scale : float, meters/pixel or radians/pixel
         The physical dimensions of the pixels representing the wavefront. This
-        can be in units of eitehr meters per pixel or radians per pixel
+        can be in units of either meters per pixel or radians per pixel
         depending on both the plane type and the wavfront type (Cartesian or
         Angular).
     plane_type : enum.IntEnum.PlaneType
@@ -702,6 +703,20 @@ class CartesianWavefront(Wavefront):
     parameters such as wavelength, pixel_scale, amplitude and phase, as well as
     a helper parmeter, plane_type. CartesianWavefronts have pixel scales in
     units of meters per pixel in all planes.
+
+    Attributes
+    ----------
+    wavelength : float, meters
+        The wavelength of the `Wavefront`.
+    amplitude : Array, power
+        The electric field amplitude of the `Wavefront`.
+    phase : Array, radians
+        The electric field phase of the `Wavefront`.
+    pixel_scale : float, meters/pixel
+        The physical dimensions of the pixels representing the wavefront.
+    plane_type : enum.IntEnum.PlaneType
+        The current plane type of wavefront, can be Pupil, Focal or
+        Intermediate.
     """
 
 
@@ -738,6 +753,22 @@ class AngularWavefront(Wavefront):
     a helper parmeter, plane_type. AngularWavefronts have pixel scales in
     units of meters per pixel in Pupil planes and radians per pixel in Focal
     planes.
+
+    Attributes
+    ----------
+    wavelength : float, meters
+        The wavelength of the `Wavefront`.
+    amplitude : Array, power
+        The electric field amplitude of the `Wavefront`.
+    phase : Array, radians
+        The electric field phase of the `Wavefront`.
+    pixel_scale : float, meters/pixel or radians/pixel
+        The physical dimensions of the pixels representing the wavefront. This
+        is in units of meters per pixel in pupil planes and radians per pixel
+        in focal planes.
+    plane_type : enum.IntEnum.PlaneType
+        The current plane type of wavefront, can be Pupil, Focal or
+        Intermediate.
     """
 
 
@@ -776,6 +807,20 @@ class FarFieldFresnelWavefront(Wavefront):
     work with FarFieldFresnel Propagators, and are better able to represent the
     behaviour of wavefronts outside of the focal planes, in the far-field
     approximation.
+
+    Attributes
+    ----------
+    wavelength : float, meters
+        The wavelength of the `Wavefront`.
+    amplitude : Array, power
+        The electric field amplitude of the `Wavefront`.
+    phase : Array, radians
+        The electric field phase of the `Wavefront`.
+    pixel_scale : float, meters/pixel
+        The physical dimensions of the pixels representing the wavefront.
+    plane_type : enum.IntEnum.PlaneType
+        The current plane type of wavefront, can be Pupil, Focal or
+        Intermediate.
     """
 
 

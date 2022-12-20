@@ -120,6 +120,8 @@ class CreateWavefront(OpticalLayer):
     wavefront_type: str
         Determines the type of wavefront class to create. Currently supports
         'Cartesian', 'Angular', 'FarFieldFresnel'.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     npixels        : int
     diameter       : Array
@@ -232,6 +234,8 @@ class TiltWavefront(OpticalLayer):
     ----------
     tilt_angles : Array, radians
         The (x, y) angles by which to tilt the wavefront.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     tilt_angles : Array
 
@@ -275,10 +279,131 @@ class TiltWavefront(OpticalLayer):
         return wavefront.tilt_wavefront(self.tilt_angles)
 
 
+<<<<<<< HEAD
+=======
+class CircularAperture(OpticalLayer):
+    """
+    Multiplies the input wavefront amplitude by a pre calculated circular binary
+    (float) mask that extents to the edge of the wavefront. Supports an inner
+    occuulting mask as would be seen for typical optical systems using a
+    seconday mirror.
+
+    Attributes
+    ----------
+    npixels : int
+        The number of pixels along one side of the aperture. This must match the
+        size of the wavefront when it is applied to it or it will throw an
+        error.
+    transmission : Array, transmission
+        A binary array describing the transmission of the apertures location.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
+    """
+    npixels      : int
+    transmission : Array
+
+
+    def __init__(self    : OpticalLayer,
+                 npixels : int,
+                 rmin    : float = 0.,
+                 rmax    : float = 1.,
+                 name    : str   = 'CircularAperture') -> OpticalLayer:
+        """
+        Constructor for the CircularAperture class.
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels along one side of the aperture. This must
+            match the size of the wavefront when it is applied to it or it will
+            throw an error.
+        rmin : float = 0.
+            The inner radius of the cirucular aperture, ie the radius of the
+            secondary mirror obscuration. A value of 0.5 will have the diameter
+            of the obscuration span half of the array. This value must be
+            smaller than rmax.
+        rmax : float = 1.
+            The outer radius of the cirucular aperture. A value of 0.5 will
+            have the diameter of the aperture span half of the array. This
+            value must be larger than rmax.
+        name : str = 'CircularAperture'
+            The name of the layer, which is used to index the layers dictionary.
+            Default is 'CircularAperture'.
+        """
+        super().__init__(name)
+        self.npixels = int(npixels)
+        self.transmission = self.create_aperture(self.npixels, float(rmin),
+                                                 float(rmax))
+
+
+    def create_aperture(self    : OpticalLayer,
+                        npixels : int,
+                        rmin    : float,
+                        rmax    : float) -> Array:
+        """
+        Produces the annular aperture array. The coordinate aray upon which the
+        radial values are used defines the center of the array as a radius of
+        zero, and the central edges a radial value of one, therefore the corners
+        of the array have a radial value of 2**0.5.
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels along one side of the aperture. This must
+            match the size of the wavefront when it is applied to it or it will
+            throw an error.
+        rmin : float
+            The inner radius of the cirucular aperture, ie the radius of the
+            secondary mirror obscuration. A value of 0.5 will have the diameter
+            of the obscuration span half of the array. This value must be
+            smaller than rmax.
+        rmax : float
+            The outer radius of the cirucular aperture. A value of 0.5 will
+            have the diameter of the aperture span half of the array. This
+            value must be larger than rmax.
+
+        Returns
+        -------
+        aperture : Array
+            The array representing the tranmission of the aperture.
+        """
+        centre = (npixels - 1.) / 2.
+        normalised_coordinates = (np.arange(npixels) - centre) / centre
+        stacked_grids = np.array(np.meshgrid(normalised_coordinates,
+            normalised_coordinates))
+        radial_coordinates = np.sqrt(np.sum(stacked_grids ** 2, axis = 0))
+        aperture = np.logical_and(radial_coordinates <= rmax,
+            radial_coordinates > rmin).astype(float)
+        return aperture
+
+
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+        """
+        Apply the aperture transmisson to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront with the aperture tranmission applied.
+        """
+        return wavefront.multiply_amplitude(self.transmission)
+
+
+>>>>>>> main
 class NormaliseWavefront(OpticalLayer):
     """
     Normalises the input wavefront using the in-built wavefront normalisation
     method.
+
+    Attributes
+    ----------
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
 
 
@@ -320,12 +445,14 @@ class ApplyBasisOPD(OpticalLayer):
     arrays, and weighted by the coefficients, and converted to phases by the
     wavefront methods.
 
-    Parameters
+    Attributes
     ----------
     basis: Array, meters
         Arrays holding the pre-calculated basis vectors.
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     basis        : Array
     coefficients : Array
@@ -401,10 +528,12 @@ class AddPhase(OpticalLayer):
     """
     Adds an array of phase values to the wavefront.
 
-    Parameters
+    Attributes
     ----------
     phase: Array, radians
         The Array of phase values to be applied to the input wavefront.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     phase : Array
 
@@ -453,10 +582,12 @@ class AddOPD(OpticalLayer):
     """
     Adds an Optical Path Difference (OPD) to the wavefront.
 
-    Parameters
+    Attributes
     ----------
     opd : Array, meters
         Array of OPD values to be applied to the input wavefront.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     opd : Array
 
@@ -512,6 +643,8 @@ class TransmissiveOptic(OpticalLayer):
     ----------
     transmission : Array
         An array representing the transmission of the optic.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     transmission: Array
 
@@ -572,6 +705,8 @@ class CompoundAperture(OpticalLayer):
         The array of radii of the occulters.
     occulter_coords : Array, meters
         The array of (x, y) coordinates of the centers of the occulters.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     aperture_radii  : Array
     aperture_coords : Array
@@ -805,8 +940,10 @@ class ApplyBasisCLIMB(OpticalLayer):
     anti-phase relationship given by the Optical Path Difference.
 
     Note: Many of the methods in the class still need doccumentation.
+    Note: This currently only outputs 256 pixel arrays and uses a 3x oversample,
+    therefore requiring a 768 pixel basis array.
 
-    Parameters
+    Attributes
     ----------
     basis: Array
         Arrays holding the continous pre-calculated basis vectors.
@@ -815,6 +952,8 @@ class ApplyBasisCLIMB(OpticalLayer):
     ideal_wavelength : Array
         The target wavelength at which a perfect anti-phase relationship is
         applied via the OPD.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     basis            : Array
     coefficients     : Array
@@ -835,7 +974,8 @@ class ApplyBasisCLIMB(OpticalLayer):
             Arrays holding the continous pre-calculated basis vectors. This must
             be a 3d array of shape (nterms, npixels, npixels), with the final
             two dimensions matching that of the wavefront at time of
-            application.
+            application. This is currently required to be a nx768x768 shaped
+            array. 
         ideal_wavelength : Array
             The target wavelength at which a perfect anti-phase relationship is
             applied via the OPD.
@@ -856,6 +996,8 @@ class ApplyBasisCLIMB(OpticalLayer):
         # Inputs checks
         assert self.basis.ndim == 3, \
         ("basis must be a 3 dimensional array, ie (nterms, npixels, npixels).")
+        assert self.basis.shape[-1] == 768, \
+        ("Basis must have shape (n, 768, 768).")
         assert self.coefficients.ndim == 1 and \
         self.coefficients.shape[0] == self.basis.shape[0], \
         ("coefficients must be a 1 dimensional array with length equal to the "
@@ -966,7 +1108,7 @@ class Rotate(OpticalLayer):
     """
     Applies a rotation to the wavefront using interpolation methods.
 
-    Parameters
+    Attributes
     ----------
     angle : Array, radians
         The angle by which to rotate the wavefront in the clockwise direction.
@@ -977,6 +1119,8 @@ class Rotate(OpticalLayer):
         Should the rotation be done using fourier methods or interpolation.
     padding : int
         The amount of padding to use if the fourier method is used.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
     """
     angle          : Array
     real_imaginary : bool
