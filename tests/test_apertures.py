@@ -48,7 +48,7 @@ class TestAperturesCommonInterfaces():
                    np.array([0., y_offset]),
                    np.array([x_offset, y_offset])]
         
-        rotations = [0, np.pi/2.]
+        rotations = [0, np.pi/3., -np.pi/3.5, np.pi/2.]
         not_rotatable_apertures = (dLux.apertures.CircularAperture,
                                    dLux.apertures.AnnularAperture)
         
