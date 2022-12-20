@@ -34,15 +34,12 @@ class ApertureLayer(dLux.optics.OpticalLayer, ABC):
     """
 
     
-    def __init__(
-            self    : dLux.optics.OpticalLayer, 
-            dtype   : type = None) -> dLux.optics.OpticalLayer:
+    def __init__(self: dLux.optics.OpticalLayer) -> dLux.optics.OpticalLayer:
         """
         Automatically assigns the name of the layer to be the 
         class name. 
         """
-        # TODO: raise GH issue
-        self.name = dtype.__class__.__name__
+        self.name = self.__class__.__name__
 
 
 class AbstractDynamicAperture(ApertureLayer, ABC):
@@ -79,8 +76,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
             centre      : Array = [0., 0.], 
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
-            rotation    : Array = 0.,
-            dtype       : type = None) -> ApertureLayer:
+            rotation    : Array = 0.) -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
@@ -100,7 +96,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
             The rotation of the aperture away from the positive 
             x-axis. 
         """
-        super().__init__(dtype)
+        super().__init__()
         self.centre = np.asarray(centre).astype(float)
         self.strain = np.asarray(strain).astype(float)
         self.compression = np.asarray(compression).astype(float)
@@ -189,8 +185,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             compression : Array = [1., 1.],
             rotation    : Array = 0.,
             occulting   : bool = False, 
-            softening   : bool = False,
-            dtype       : type = None) -> ApertureLayer:
+            softening   : bool = False) -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
@@ -221,8 +216,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             centre = centre,
             strain = strain,
             compression = compression,
-            rotation = rotation,
-            dtype = dtype)
+            rotation = rotation)
         self.softening = 1. if softening else 1e32
         self.occulting = bool(occulting)
 
@@ -438,8 +432,7 @@ class AnnularAperture(DynamicAperture):
             strain = strain, 
             compression = compression, 
             occulting = occulting, 
-            softening = softening,
-            dtype = AnnularAperture)
+            softening = softening)
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
 
@@ -546,8 +539,7 @@ class CircularAperture(DynamicAperture):
             strain = strain, 
             compression = compression, 
             occulting = occulting, 
-            softening = softening,
-            dtype = CircularAperture)
+            softening = softening)
         self.radius = np.asarray(radius).astype(float)
 
 
@@ -666,8 +658,7 @@ class RectangularAperture(DynamicAperture):
             compression = compression,
             rotation = rotation, 
             occulting = occulting, 
-            softening = softening,
-            dtype = RectangularAperture)
+            softening = softening)
         self.length = np.asarray(length).astype(float)
         self.width = np.asarray(width).astype(float)
 
@@ -778,8 +769,7 @@ class SquareAperture(DynamicAperture):
             compression = compression,
             rotation = rotation, 
             occulting = occulting, 
-            softening = softening,
-            dtype = SquareAperture)
+            softening = softening)
         self.width = np.asarray(width).astype(float)
 
 
@@ -859,16 +849,13 @@ class PolygonalAperture(DynamicAperture, ABC):
         x-axis. 
     """
     
-
-    # TODO: Can this be removed?
     def __init__(self   : ApertureLayer, 
             centre      : Array = [0., 0.], 
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
             rotation    : Array = 0.,
             occulting   : bool = False, 
-            softening   : bool = False,
-            dtype       : type = None) -> ApertureLayer:
+            softening   : bool = False) -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -898,8 +885,7 @@ class PolygonalAperture(DynamicAperture, ABC):
             compression = compression,
             rotation = rotation,
             occulting = occulting,
-            softening = softening,
-            dtype = dtype)
+            softening = softening)
     
     
     def _perp_dists_from_lines(
@@ -1128,8 +1114,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
             compression = compression,
             rotation = rotation,
             occulting = occulting,
-            softening = softening,
-            dtype = IrregularPolygonalAperture)
+            softening = softening)
         
         vertices = np.array(vertices).astype(float)
         shape = vertices.shape
@@ -1329,8 +1314,7 @@ class RegularPolygonalAperture(PolygonalAperture):
             compression = compression,
             rotation = rotation,
             occulting = occulting,
-            softening = softening,
-            dtype = RegularPolygonalAperture)
+            softening = softening)
         self.nsides = int(nsides)
         self.rmax = np.array(rmax).astype(float)
         
@@ -1469,8 +1453,7 @@ class HexagonalAperture(RegularPolygonalAperture):
             compression = compression,
             rotation = rotation,
             occulting = occulting,
-            softening = softening,
-            dtype = HexagonalAperture)
+            softening = softening)
 
 # TODO: See if this code can be used to fix the bugs that 
 #       I am encountering with the rotations. I believe 
@@ -1532,8 +1515,7 @@ class CompositeAperture(AbstractDynamicAperture):
             centre      : Array = np.array([0., 0.]), 
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
-            rotation    : Array = np.array(0.),
-            dtype       : type = None) -> ApertureLayer:
+            rotation    : Array = np.array(0.)) -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
@@ -1561,8 +1543,7 @@ class CompositeAperture(AbstractDynamicAperture):
             centre = centre,
             strain = strain, 
             compression = compression,
-            rotation = rotation,
-            dtype = dtype)
+            rotation = rotation)
         self.apertures = apertures
 
 
@@ -1705,8 +1686,7 @@ class CompoundAperture(CompositeAperture):
             centre = centre,
             strain = strain,
             compression = compression,
-            rotation = rotation,
-            dtype = CompoundAperture)
+            rotation = rotation)
         
 
     def _aperture(self, coords: Array) -> Array:
@@ -1786,8 +1766,7 @@ class MultiAperture(CompositeAperture):
             centre = centre,
             strain = strain,
             compression = compression,
-            rotation = rotation,
-            dtype = MultiAperture)
+            rotation = rotation)
 
 
     def _aperture(self, coords: Array) -> Array:
@@ -1844,8 +1823,7 @@ class Spider(DynamicAperture, ABC):
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.), 
-            softening   : bool = False,
-            dtype       : type = None) -> ApertureLayer:
+            softening   : bool = False) -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -1875,8 +1853,7 @@ class Spider(DynamicAperture, ABC):
             compression = compression,
             rotation = rotation,
             occulting = True,
-            softening = softening,
-            dtype = dtype)
+            softening = softening)
  
  
     def _strut(
@@ -2004,8 +1981,7 @@ class UniformSpider(Spider):
             strain = strain, 
             compression = compression,
             rotation = rotation,
-            softening = softening,
-            dtype = UniformSpider)
+            softening = softening)
         self.number_of_struts = int(num_struts)
         self.width_of_struts = np.asarray(strut_width).astype(float)
  
@@ -2103,7 +2079,7 @@ class AberratedAperture(ApertureLayer):
         else:
             self.basis_funcs = [self.jth_zernike(j) for j in noll_inds]
 
-        super().__init__(AberratedAperture)
+        super().__init__()
         self.aperture = aperture
         self.nterms = int(len(coeffs))
         self.coeffs = np.asarray(coeffs).astype(float)
@@ -2561,7 +2537,7 @@ class StaticAberratedAperture(ApertureLayer):
         """
         assert isinstance(aperture, AberratedAperture)
 
-        super().__init__(StaticAberratedAperture)
+        super().__init__()
         coords: float = dLux.utils.get_pixel_coordinates(npix, pix_scale)
         self.aperture: float = aperture.aperture._aperture(coords)
         self.basis: float = aperture._basis(coords)
