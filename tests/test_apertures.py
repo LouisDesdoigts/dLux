@@ -80,9 +80,7 @@ class TestAperturesCommonInterfaces():
                             TestAperturesCommonInterfaces._assert_valid_hard_aperture(aperture, msg)
 
 
-
-
-class TestUniformSpiderUtility(object):
+class TestUniformSpider(object):
     """
     Contains the unit tests for the `UniformSpider` class.
     """

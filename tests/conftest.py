@@ -1128,7 +1128,21 @@ def create_uniform_spider() -> callable:
         used to create a `UniformSpider` layer for testing.
     """
     def _create_uniform_spider(
-            number_of_struts: int = 4
-            width_of_struts: float = .05) -> OpticalLayer:
-        return dl.UniformSpider(number_of_struts, width_of_struts)
+            number_of_struts: int = 4,
+            width_of_struts: float = .05,
+            centre      : Array = [0., 0.], 
+            strain      : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : bool = False) -> OpticalLayer:
+        return dLux.apertures.UniformSpider(
+            number_of_struts, 
+            width_of_struts,
+            centre=centre,
+            strain=strain,
+            compression=compression,
+            rotation=rotation,
+            occulting=occulting,
+            softening=softening)
     return _create_uniform_spider
