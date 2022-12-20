@@ -16,7 +16,6 @@ __all__ = ["CircularAperture", "SquareAperture",
 two_pi: float = 2. * np.pi
 
 
-
 class ApertureLayer(dLux.optics.OpticalLayer, ABC):
     """
     The ApertureLayer groups together all of the functionality 
@@ -120,22 +119,22 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         """
         is_trans = (self.centre != np.zeros((2,), float)).any()
         coords: Array = lax.cond(is_trans,
-            lambda: self._translate(coords),
+            lambda: dLux.utils.coordinates.translate(coords, self.centre),
             lambda: coords)
 
         is_compr: bool = (self.compression != np.ones((2,), float)).any()
         coords: Array = lax.cond(is_compr,
-            lambda: self._compress(coords),
+            lambda: dLux.utils.coordinates.compress(coords, self.compression),
             lambda: coords)
 
         is_strain: bool = (self.strain != np.zeros((2,), float)).any()
         coords: Array = lax.cond(is_strain,
-            lambda: self._strain(coords),
+            lambda: dLux.utils.coordinates.strain(coords, self.strain),
             lambda: coords)
 
         is_rot: bool = (self.rotation != 0.)
         coords: Array = lax.cond(is_rot,
-            lambda: self._rotate(coords),
+            lambda: dLux.utils.coordinates.rotate(coords, self.compression),
             lambda: coords)
 
         return coords
