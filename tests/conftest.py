@@ -1146,3 +1146,28 @@ def create_uniform_spider() -> callable:
             occulting=occulting,
             softening=softening)
     return _create_uniform_spider
+
+
+@pytest.fixture
+def create_aberrated_aperture(create_circular_aperture: callable) -> callable:
+    """
+    Returns:
+    --------
+    _create_aberrated_aperture: callable
+        A function that has all keyword arguments and can be
+        used to create a `AberratedAperture` layer for testing.
+    """
+    shape: int = 6
+
+    def _create_aberrated_aperture(
+            noll_inds: list = np.arange(shape, int),
+            coeffs: Array = np.ones(shape, float),
+            aperture: object = create_circular_aperture()) -> OpticalLayer:
+        return dLux.apertures.AberratedAperture(
+            noll_inds=noll_inds,
+            coeffs=coeffs,
+            aperture=aperture)
+    
+    return _create_aberrated_aperture
+    
+
