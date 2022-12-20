@@ -1117,3 +1117,18 @@ def create_rotate_detector() -> callable:
         return dLux.detectors.Rotate(angle, fourier, padding)
     return _create_rotate_detector
 
+
+@pytest.fixture
+def create_uniform_spider() -> callable:
+    """
+    Returns:
+    --------
+    _create_uniform_spider: callable
+        A function that has all keyword arguments and can be
+        used to create a `UniformSpider` layer for testing.
+    """
+    def _create_uniform_spider(
+            number_of_struts: int = 4
+            width_of_struts: float = .05) -> OpticalLayer:
+        return dl.UniformSpider(number_of_struts, width_of_struts)
+    return _create_uniform_spider
