@@ -8,39 +8,38 @@ config.update("jax_debug_nans", True)
 Array = np.ndarray
 
 
-class TestApplyPixelResponse(UtilityUser):
+class TestApplyPixelResponse(object):
     """
     Tests the ApplyPixelResponse class.
     """
-    utility : ApplyPixelResponseUtility = ApplyPixelResponseUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_pixel_response: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(pixel_response=np.ones(1))
+            create_pixel_response(pixel_response=np.ones(1))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(pixel_response=np.array(1.))
+            create_pixel_response(pixel_response=np.array(1.))
 
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(pixel_response=np.ones((1, 1, 1)))
+            create_pixel_response(pixel_response=np.ones((1, 1, 1)))
 
         # Test functioning
-        self.utility.construct()
+        create_pixel_response()
 
 
-    def test_call(self):
+    def test_call(self, create_pixel_response: callable) -> None:
         """
         Tests the __call__ method.
         """
         image = np.ones((16, 16))
-        self.utility.construct()(image)
+        create_pixel_response()(image)
 
 
 class TestApplyJitter(UtilityUser):
