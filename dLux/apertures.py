@@ -86,13 +86,6 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
-        softening: bool = False
-            True if the aperture is soft edged otherwise False. A
-            soft edged aperture has a small layer of non-binary 
-            pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
         strain: Array
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
@@ -113,17 +106,17 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
     def _rotate(self: ApertureLayer, coords: Array) -> Array:
         """
         Rotate the coordinate system by a pre-specified amount,
-        `self._theta`
+        `self.rotation`
 
-        Parameters
-        ----------
+        Parameters:
+        -----------
         coords : Array
             A `(2, npix, npix)` representation of the coordinate 
             system. The leading dimensions specifies the x and then 
             the y coordinates in that order. 
 
-        Returns
-        -------
+        Returns:
+        --------
         coordinates : Array
             The rotated coordinate system. 
         """
@@ -133,7 +126,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         return np.array([new_x, new_y])
 
 
-    def _translate(self, coords: Array) -> Array:
+    def _translate(self: ApertureLayer, coords: Array) -> Array:
         """
         Move the center of the aperture. 
 
