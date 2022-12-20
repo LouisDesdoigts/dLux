@@ -68,31 +68,30 @@ class TestApplyJitter(object):
         create_jitter()(image)
 
 
-class TestApplySaturation(UtilityUser):
+class TestApplySaturation(object):
     """
     Tests the ApplySaturation class.
     """
-    utility : ApplySaturationUtility = ApplySaturationUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_saturation: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(saturation=np.ones(1))
+            create_saturation(saturation=np.ones(1))
 
         # Test functioning
-        self.utility.construct()
+        create_saturation()
 
 
-    def test_call(self):
+    def test_call(self, create_saturation: callable) -> None:
         """
         Tests the __call__ method.
         """
         image = np.ones((16, 16))
-        self.utility.construct()(image)
+        create_saturation()(image)
 
 
 class TestAddConstant(UtilityUser):
