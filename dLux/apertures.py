@@ -103,23 +103,6 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         self.rotation = np.asarray(rotation).astype(float)
 
 
-    def _translate(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Move the center of the aperture. 
-
-        Parameters:
-        -----------
-        coordinates: Array, meters 
-            The paraxial coordinates of the `Wavefront`.
-
-        Returns:
-        --------
-        coordinates: Array, meters
-            The translated coordinate system. 
-        """
-        return coords - self.centre[:, None, None]
-
-
     def _strain(self: ApertureLayer, coords: Array) -> Array:
         """
         Apply a strain to the coordinate system. 

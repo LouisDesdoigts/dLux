@@ -212,17 +212,18 @@ def get_polar_coordinates(npixels     : int,
                                               y_offset / pixel_scale)
 
 
-def rotate(coords: Array) -> Array:
+def rotate(coords: Array, rotation: Array) -> Array:
     """
     Rotate the coordinate system by a pre-specified amount,
-    `self.rotation`
 
     Parameters:
     -----------
-    coords : Array
+    coords : Array, meters
         A `(2, npix, npix)` representation of the coordinate 
         system. The leading dimensions specifies the x and then 
         the y coordinates in that order. 
+    rotation: Array, radians
+        Rotation clockwise from the x-axis.
 
     Returns:
     --------
@@ -230,8 +231,31 @@ def rotate(coords: Array) -> Array:
         The rotated coordinate system. 
     """
     x, y = coords[0], coords[1]
-    new_x = np.cos(self.rotation) * x + np.sin(self.rotation) * y
-    new_y = -np.sin(self.rotation) * x + np.cos(self.rotation) * y
+    new_x = np.cos(rotation) * x + np.sin(rotation) * y
+    new_y = -np.sin(rotation) * x + np.cos(rotation) * y
     return np.array([new_x, new_y])
+
+
+def _translate(coords: Array, centre: Array) -> Array:
+    """
+    Move the center of the coordinate system by some 
+    amount (centre). 
+
+    Parameters:
+    -----------
+    coordinates: Array, meters 
+        The (x, y) coordinates with the dimensions 
+        (2, npix, npix).
+    centre: Array, meters
+        The (x, y) coordinates of the new centre 
+        with dimensions (2,)
+        
+
+    Returns:
+    --------
+    coordinates: Array, meters
+        The translated coordinate system. 
+    """
+    return coords - centre[:, None, None]
 
 
