@@ -10,7 +10,8 @@ Wavefront = dLux.wavefronts.Wavefront
 __all__ = ["CircularAperture", "SquareAperture", 
     "HexagonalAperture", "RegularPolygonalAperture", 
     "IrregularPolygonalAperture", "StaticAperture",
-    "AberratedAperture", "StaticAberratedAperture"]
+    "AberratedAperture", "StaticAberratedAperture", 
+    "AnnularAperture"]
 
 
 two_pi: float = 2. * np.pi

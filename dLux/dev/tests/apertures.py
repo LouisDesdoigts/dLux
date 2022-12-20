@@ -2,6 +2,7 @@ import dLux as dl
 import jax.numpy as np
 import matplotlib as mpl 
 import matplotlib.pyplot as plt
+from dLux.apertures import *
 
 mpl.rcParams["text.usetex"] = True
 mpl.rcParams["image.cmap"] = "inferno"
