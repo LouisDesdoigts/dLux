@@ -51,7 +51,7 @@ jobs:
         run: pytest --quiet tests/test_detectors.py
 
       - name: aperture tests
-        run: pytest --quiet tests/apertures.py
+        run: pytest --quiet tests/test_apertures.py
 
       - name: spider tests
         run: pytest --quiet tests/test_spiders.py
