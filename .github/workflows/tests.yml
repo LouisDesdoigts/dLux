@@ -26,9 +26,6 @@ jobs:
           pip install --quiet .
 
       # ===== Tests =====
-      # - name: base tests
-      #   run: pytest --quiet tests/base.py
-
       - name: core tests
         run: pytest --quiet tests/test_core.py
 
@@ -53,8 +50,3 @@ jobs:
       - name: aperture tests
         run: pytest --quiet tests/test_apertures.py
 
-      - name: spider tests
-        run: pytest --quiet tests/test_spiders.py
-
-#       - name: utils tests
-#         run: pytest --quiet tests/utils.py
