@@ -49,7 +49,7 @@ class OpticalLayer(ExtendedBase, ABC):
 
 
     @abstractmethod
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront: # pragma: no cover
         """
         Appies the layer to the `Wavefront`.
 

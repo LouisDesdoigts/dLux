@@ -343,7 +343,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
 
 
     @abc.abstractmethod
-    def _extent(self: ApertureLayer) -> Array:
+    def _extent(self: ApertureLayer) -> Array: # pragma: no cover
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre. For inherited classes, consider implementing analytically for speed.
@@ -363,7 +363,7 @@ class DynamicAperture(AbstractDynamicAperture, abc.ABC):
 
 
     @abc.abstractmethod
-    def _metric(self: ApertureLayer, distances: Array) -> Array:
+    def _metric(self: ApertureLayer, distances: Array) -> Array: # pragma: no cover
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -1687,7 +1687,7 @@ class CompositeAperture(AbstractDynamicAperture):
 
 
     @abc.abstractmethod
-    def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
+    def _aperture(self: ApertureLayer, coordinates: Array) -> Array: # pragma: no cover
         """
         Evaluates the aperture. 
 

@@ -57,7 +57,7 @@ class Spectrum(ExtendedBase, ABC):
 
 
     @abstractmethod
-    def normalise(self : Spectrum) -> Spectrum:
+    def normalise(self : Spectrum) -> Spectrum: # pragma: no cover
         """
         Abstract method to normalise the spectrum. Must be overwitten by child
         classes.
@@ -66,7 +66,7 @@ class Spectrum(ExtendedBase, ABC):
 
 
     @abstractmethod
-    def get_weights(self : Spectrum) -> Array:
+    def get_weights(self : Spectrum) -> Array: # pragma: no cover
         """
         Abstract getter method for the weights. Must be overwritten by child
         classes.

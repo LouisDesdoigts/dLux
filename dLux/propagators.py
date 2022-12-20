@@ -50,7 +50,7 @@ class Propagator(dLux.optics.OpticalLayer, ABC):
 
 
     @abstractmethod
-    def propagate(self : Propagator, wavefront : Wavefront) -> Array:
+    def propagate(self : Propagator, wavefront : Wavefront) -> Array: # pragma: no cover
         """
         Performs the propagation as a directional wrapper to the fourier methods
         of the class.
@@ -128,7 +128,7 @@ class VariableSamplingPropagator(Propagator, ABC):
 
 
     @abstractmethod
-    def get_nfringes(self : Propagator, wavefront : Wavefront) -> Array:
+    def get_nfringes(self : Propagator, wavefront : Wavefront) -> Array: # pragma: no cover
         """
         The number of diffraction fringes in the output plane.
 
@@ -292,7 +292,7 @@ class FixedSamplingPropagator(Propagator, ABC):
 
     @abstractmethod
     def get_pixel_scale_out(self     : Propagator,
-                           wavefront : Wavefront) -> Array:
+                           wavefront : Wavefront) -> Array: # pragma: no cover
         """
         Calculates the pixel scale in the output plane.
 

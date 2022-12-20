@@ -44,7 +44,7 @@ class DetectorLayer(ExtendedBase, ABC):
 
 
     @abstractmethod
-    def __call__(self : DetectorLayer, image : Array) -> Array:
+    def __call__(self : DetectorLayer, image : Array) -> Array: # pragma: no cover
         """
         Abstract method for Detector Layers
         """
