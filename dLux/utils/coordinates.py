@@ -236,7 +236,7 @@ def rotate(coords: Array, rotation: Array) -> Array:
     return np.array([new_x, new_y])
 
 
-def _translate(coords: Array, centre: Array) -> Array:
+def translate(coords: Array, centre: Array) -> Array:
     """
     Move the center of the coordinate system by some 
     amount (centre). 
@@ -249,7 +249,6 @@ def _translate(coords: Array, centre: Array) -> Array:
     centre: Array, meters
         The (x, y) coordinates of the new centre 
         with dimensions (2,)
-        
 
     Returns:
     --------
@@ -257,5 +256,26 @@ def _translate(coords: Array, centre: Array) -> Array:
         The translated coordinate system. 
     """
     return coords - centre[:, None, None]
+
+
+def strain(coords: Array, strain: Array) -> Array:
+    """
+    Apply a strain to the coordinate system. 
+
+    Parameters:
+    -----------
+    coordinates: Array, meters 
+        The (x, y) coordinates with the dimensions 
+        (2, npix, npix).
+    strain: Array
+        The (x, y) strain with dimensions (2,)
+
+    Returns:
+    --------
+    coords: Array 
+        The strained coordinate system. 
+    """
+    trans_coords: Array = np.transpose(coords, (0, 2, 1))
+    return coords + trans_coords * self.strain[:, None, None]
 
 

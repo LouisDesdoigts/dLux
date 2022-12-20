@@ -103,24 +103,6 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         self.rotation = np.asarray(rotation).astype(float)
 
 
-    def _strain(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Apply a strain to the coordinate system. 
-
-        Parameters:
-        -----------
-        coords: Array
-            The coordinates to apply the strain to. 
-
-        Returns:
-        --------
-        coords: Array 
-            The strained coordinate system. 
-        """
-        trans_coords: Array = np.transpose(coords, (0, 2, 1))
-        return coords + trans_coords * self.strain[:, None, None]
-
-
     def _compress(self: ApertureLayer, coords: Array) -> Array:
         """
         Apply a compression to the coordinates.
