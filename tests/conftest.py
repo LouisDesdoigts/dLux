@@ -824,7 +824,7 @@ def create_instrument(
     return _create_instrument
 
 
-@pytest.fixtures
+@pytest.fixture
 def create_pixel_response() -> callable:
     """
     Returns:

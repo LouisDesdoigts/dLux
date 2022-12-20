@@ -48,7 +48,7 @@ class TestApplyJitter(object):
     """
 
 
-    def test_constructor(self, create_jitter: callable) -> None::
+    def test_constructor(self, create_jitter: callable) -> None:
         """
         Tests the constructor.
         """
@@ -60,7 +60,7 @@ class TestApplyJitter(object):
         create_jitter()
 
 
-    def test_call(self, create_jitter: callable) -> None::
+    def test_call(self, create_jitter: callable) -> None:
         """
         Tests the __call__ method.
         """
