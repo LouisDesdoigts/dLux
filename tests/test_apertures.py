@@ -82,130 +82,77 @@ class TestAperturesCommonInterfaces():
 
 
 
-class TestUniformSpiderUtility(UtilityUser):
+class TestUniformSpiderUtility(object):
     """
     Contains the unit tests for the `UniformSpider` class.
-
-    Parameters:
-    -----------
-    utility: Utility
-        Helper functions and default values for easier 
-        comparisons. 
     """
-    utility: Utility = UniformSpiderUtility()
 
 
-    def test_constructor(self) -> None:
+    def test_constructor(self, create_uniform_spider: callable) -> None:
         """
         Tests that the state is correctly initialised. 
         """
-        spider = self.utility.construct()
-
-        assert spider.number_of_struts == self.utility.number_of_struts
-        assert spider.width_of_struts == self.utility.width_of_struts
-        assert spider.softening == np.inf
-        assert spider.x_offset == self.utility.x_offset
-        assert spider.y_offset == self.utility.y_offset
-        assert spider.rotation == self.utility.rotation
-
-        # Case: Extra Strut
-        number_of_struts = 5
-        spider = self.utility.construct(number_of_struts = number_of_struts)
-
-        assert spider.number_of_struts == number_of_struts
-
-        # Case: Fatter Struts
-        width_of_struts = .1
-        spider = self.utility.construct(width_of_struts = width_of_struts)
-
-        assert spider.width_of_struts == width_of_struts
-
-        # Case: Rotated
-        rotation = np.pi / 4.
-        spider = self.utility.construct(rotation = rotation)
-
-        assert spider.rotation == rotation
-
-        # Case: Translated x
-        x_offset = 1.
-        spider = self.utility.construct(x_offset = x_offset)
-
-        assert spider.x_offset == x_offset
-
-        # Case: Translated y
-        y_offset = 1.
-        spider = self.utility.construct(y_offset = y_offset)
-
-        assert spider.y_offset == y_offset
+        # Test functioning
+        spider = create_uniform_spider()
 
     
-    def test_range_hard(self) -> None:
+    def test_range_hard(self, create_uniform_spider: callable) -> None:
         """
         Checks that the apertures fall into the correct range.
         """
-        coords = self.utility.get_coordinates()
+        npix = 128
+        width = 2.
+        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
-        # Case Translated X
-        x_offset = 1.
-        aperture = self\
-            .utility\
-            .construct(x_offset = x_offset)\
-            ._aperture(coords)
-
-        assert ((aperture == 1.) | (aperture == 0.)).all()
-
-        # Case Translated Y
-        y_offset = 1.
-        aperture = self\
-            .utility\
-            .construct(y_offset = y_offset)\
-            ._aperture(coords)
-
+        # Case Translated 
+        spider = create_uniform_spider(centre=[1., 1.], softening=False)
+        aperture = spider._aperture(coords)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Rotated 
-        rotation = np.pi / 2.
-        aperture = self\
-            .utility\
-            .construct(rotation = rotation)\
-            ._aperture(coords)
+        spider = create_uniform_spider(rotation=np.pi/4., softening=False)
+        aperture = spider._aperture(coords)
+        assert ((aperture == 1.) | (aperture == 0.)).all()
 
+        # Case Strained 
+        spider = create_uniform_spider(strain=[.05, .05], softening=False)
+        aperture = spider._aperture(coords)
+        assert ((aperture == 1.) | (aperture == 0.)).all()
+
+        # Case Compression
+        spider = create_uniform_spider(compression=[1.05, .95], softening=False)
+        aperture = spider._aperture(coords)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
 
-    def test_range_soft(self) -> None:
+    def test_range_soft(self, create_uniform_spider: callable) -> None:
         """
         Checks that the aperture falls into the correct range.
         """
-        coords = self.utility.get_coordinates()
+        npix = 128
+        width = 2.
+        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
-        # Case Translated X
-        x_offset = 1.
-        aperture = self\
-            .utility\
-            .construct(x_offset = x_offset)\
-            ._aperture(coords)
-
-        assert (aperture <= 1.).all()
-        assert (aperture >= 0.).all()
-
-        # Case Translated Y
-        y_offset = 1.
-        aperture = self\
-            .utility\
-            .construct(y_offset = y_offset)\
-            ._aperture(coords)
-
-        assert (aperture <= 1.).all()
-        assert (aperture >= 0.).all()
+        # Case Translated 
+        spider = create_uniform_spider(centre=[1., 1.], softening=False)
+        aperture = spider._aperture(coords)
+        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
+        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Rotated 
-        rotation = np.pi / 2.
-        aperture = self\
-            .utility\
-            .construct(rotation = rotation)\
-            ._aperture(coords)
+        spider = create_uniform_spider(rotation=np.pi/4., softening=False)
+        aperture = spider._aperture(coords)
+        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
+        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
-        assert (aperture <= 1.).all()
-        assert (aperture >= 0.).all()
+        # Case Strained 
+        spider = create_uniform_spider(strain=[.05, .05], softening=False)
+        aperture = spider._aperture(coords)
+        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
+        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
+        # Case Compression
+        spider = create_uniform_spider(compression=[1.05, .95], softening=False)
+        aperture = spider._aperture(coords)
+        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
+        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
