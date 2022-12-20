@@ -997,8 +997,8 @@ class PolygonalAperture(DynamicAperture, ABC):
             The distance of the points (x, y) from the line. Has the same 
             shape as x and y.
         """
-        inf_case: float = (x - x1)
-        gen_case: float = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
+        inf_case = (x - x1)
+        gen_case = (m * inf_case - (y - y1)) / np.sqrt(1 + m ** 2)
         return np.where(np.isinf(m), inf_case, gen_case)
     
     
@@ -1048,7 +1048,7 @@ class PolygonalAperture(DynamicAperture, ABC):
         theta: float, radians 
             The offset coordinate system.
         """
-        comps: float = (theta < threshold).astype(float)
+        comps = (theta < threshold).astype(float)
         return theta + comps * two_pi
     
     
@@ -1078,8 +1078,9 @@ class PolygonalAperture(DynamicAperture, ABC):
         is_left: int
             1 if the origin is to the left else -1.
         """
-        bc_orig: float = np.array([[0.]])
-        dist_from_orig: float = self._perp_dists_from_lines(ms, xs, ys, bc_orig, bc_orig)
+        # NOTE: see class docs.
+        bc_orig = np.array([[0.]])
+        dist_from_orig = self._perp_dists_from_lines(ms, xs, ys, bc_orig, bc_orig)
         return np.sign(dist_from_orig)
     
     
@@ -1110,10 +1111,10 @@ class PolygonalAperture(DynamicAperture, ABC):
             A stack of binary (float) arrays that represent the angles 
             bounded by each consecutive pair of vertices.
         """
-        next_sorted_theta: float = np.roll(sorted_theta, -1).at[-1].add(two_pi)
-        greater_than: bool = (off_phi >= sorted_theta)
-        less_than: bool = (off_phi < next_sorted_theta)
-        wedges: bool = greater_than & less_than
+        next_sorted_theta = np.roll(sorted_theta, -1).at[-1].add(two_pi)
+        greater_than = (off_phi >= sorted_theta)
+        less_than = (off_phi < next_sorted_theta)
+        wedges = greater_than & less_than
         return wedges.astype(float)
 
 
@@ -1190,13 +1191,13 @@ class IrregularPolygonalAperture(PolygonalAperture):
             occulting = occulting,
             softening = softening)
         
-        vertices: float = np.array(vertices).astype(float)
-        shape: tuple = vertices.shape
-        is_corr_shape: bool = (shape[0] > shape[1]) and (shape[1] == 2)
+        vertices = np.array(vertices).astype(float)
+        shape = vertices.shape
+        is_corr_shape = (shape[0] > shape[1]) and (shape[1] == 2)
 
         assert is_corr_shape, "Make sure that the vertices are (n, 2)"
 
-        self.vertices: float = vertices
+        self.vertices = vertices
             
     
     def _grads_from_many_points(self: ApertureLayer, x1: float, y1: float) -> float:
@@ -1231,8 +1232,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
             vertices wrap around to form a closed shape whatever it 
             may look like. 
         """
-        x_diffs: float = x1 - np.roll(x1, -1)
-        y_diffs: float = y1 - np.roll(y1, -1)
+        x_diffs = x1 - np.roll(x1, -1)
+        y_diffs = y1 - np.roll(y1, -1)
         return y_diffs / x_diffs
     
     
@@ -1286,29 +1287,30 @@ class IrregularPolygonalAperture(PolygonalAperture):
             the aperture. What is returned is the non-occulting 
             version of the aperture. 
         """
-        bc_x1: float = self.vertices[:, 0][:, None, None]
-        bc_y1: float = self.vertices[:, 1][:, None, None]
+        # NOTE: see class docs.
+        bc_x1 = self.vertices[:, 0][:, None, None]
+        bc_y1 = self.vertices[:, 1][:, None, None]
 
-        bc_x: float = coords[0][None, :, :]
-        bc_y: float = coords[1][None, :, :]
+        bc_x = coords[0][None, :, :]
+        bc_y = coords[1][None, :, :]
 
-        theta: float = np.arctan2(bc_y1, bc_x1)
-        offset_theta: float = self._offset(theta, 0.)
+        theta = np.arctan2(bc_y1, bc_x1)
+        offset_theta = self._offset(theta, 0.)
 
-        sorted_inds: int = np.argsort(offset_theta.flatten())
+        sorted_inds = np.argsort(offset_theta.flatten())
 
-        sorted_x1: float = bc_x1[sorted_inds]
-        sorted_y1: float = bc_y1[sorted_inds]
-        sorted_theta: float = offset_theta[sorted_inds]   
-        sorted_m: float = self._grads_from_many_points(sorted_x1, sorted_y1)
+        sorted_x1 = bc_x1[sorted_inds]
+        sorted_y1 = bc_y1[sorted_inds]
+        sorted_theta = offset_theta[sorted_inds]   
+        sorted_m = self._grads_from_many_points(sorted_x1, sorted_y1)
 
-        phi: float = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
+        phi = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
 
-        dist_from_edges: float = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
-        wedges: float = self._make_wedges(phi, sorted_theta)
-        dist_sgn: float = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
+        dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
+        wedges = self._make_wedges(phi, sorted_theta)
+        dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
 
-        flat_dists: float = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
+        flat_dists = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
         return self._soften(flat_dists)
 
 
