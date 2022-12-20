@@ -142,33 +142,32 @@ class TestIntegerDownsample(object):
         create_integer_downsample()(image)
 
 
-class TestRotate(UtilityUser):
+class TestRotate(object):
     """
     Tests the Rotate class.
     """
-    utility : RotateUtility = RotateUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_rotate_detector: callable) -> None:
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(angle=np.ones(1))
+            create_rotate_detector(angle=np.ones(1))
 
         # Test functioning
-        self.utility.construct()
+        create_rotate_detector()
 
 
-    def test_call(self):
+    def test_call(self, create_rotate_detector: callable) -> None:
         """
         Tests the __call__ method.
         """
         # Test regular rotation
         image = np.ones((16, 16))
-        self.utility.construct()(image)
+        create_rotate_detector()(image)
 
         # Test fourier
         with pytest.raises(NotImplementedError):
-            self.utility.construct(fourier=True)(image)
+            create_rotate_detector(fourier=True)(image)
