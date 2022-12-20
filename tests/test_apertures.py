@@ -185,6 +185,7 @@ class TestAberratedAperture(object):
         coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
         ap = create_circular_aperture()
+
         aber_ap = create_aberrated_aperture(aperture=ap)._basis(coords)
         ap = ap._aperture(coords)
 
