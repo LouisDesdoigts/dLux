@@ -454,12 +454,10 @@ class AnnularAperture(DynamicAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rmax : float
-        The proportion of the pixel vector that is contained within
-        the outer ring of the aperture.
-    rmin : float
-        The proportion of the pixel vector that is contained within
-        the inner ring of the aperture. 
+    rmax: Array, meters
+        Outer radius of aperture.
+    rmin: Array, meters
+        Inner radius of aperture.
     softening: bool 
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -468,8 +466,8 @@ class AnnularAperture(DynamicAperture):
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
     """
-    rmin : float
-    rmax : float
+    rmin: Array
+    rmax: Array
 
 
     def __init__(self   : ApertureLayer, 
