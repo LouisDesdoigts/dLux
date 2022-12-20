@@ -897,4 +897,20 @@ def create_integer_downsample() -> callable:
     return _create_integer_downsample    
 
 
+@pytest.fixture
+def create_rotate_detector() -> callable:
+    """
+    Returns:
+    --------
+    _create_rotate_detector: callable
+        A function that has all keyword arguments and can be
+        used to create a `Rotate` layer for testing.
+    """
+    def _create_rotate_detector(
+            angle: Array = np.array(np.pi),
+            fourier: bool = False,
+            padding: int = 2) -> OpticalLayer:
+        return dLux.detectors.Rotate(angle, fourier, padding)
+    return _create_rotate_detector
+
 
