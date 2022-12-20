@@ -103,29 +103,6 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         self.rotation = np.asarray(rotation).astype(float)
 
 
-    def _rotate(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Rotate the coordinate system by a pre-specified amount,
-        `self.rotation`
-
-        Parameters:
-        -----------
-        coords : Array
-            A `(2, npix, npix)` representation of the coordinate 
-            system. The leading dimensions specifies the x and then 
-            the y coordinates in that order. 
-
-        Returns:
-        --------
-        coordinates : Array
-            The rotated coordinate system. 
-        """
-        x, y = coords[0], coords[1]
-        new_x = np.cos(self.rotation) * x + np.sin(self.rotation) * y
-        new_y = -np.sin(self.rotation) * x + np.cos(self.rotation) * y
-        return np.array([new_x, new_y])
-
-
     def _translate(self: ApertureLayer, coords: Array) -> Array:
         """
         Move the center of the aperture. 
