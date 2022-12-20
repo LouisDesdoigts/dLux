@@ -1152,10 +1152,10 @@ class IrregularPolygonalAperture(PolygonalAperture):
     
     def __init__(self   : ApertureLayer, 
             vertices    : Array,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
@@ -1354,10 +1354,10 @@ class RegularPolygonalAperture(PolygonalAperture):
     def __init__(self   : ApertureLayer, 
             nsides      : int,
             rmax        : float,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
@@ -1491,10 +1491,10 @@ class HexagonalAperture(RegularPolygonalAperture):
     
     def __init__(self   : ApertureLayer, 
             rmax        : float,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
@@ -1587,10 +1587,10 @@ class CompositeAperture(AbstractDynamicAperture):
 
     def __init__(self   : ApertureLayer, 
             apertures   : dict,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.) -> ApertureLayer:
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.)) -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
@@ -1735,10 +1735,10 @@ class CompoundAperture(CompositeAperture):
     def __init__(
             self        : ApertureLayer,
             apertures   : dict,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.) -> ApertureLayer:
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.)) -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -1815,10 +1815,10 @@ class MultiAperture(CompositeAperture):
     def __init__(
             self        : ApertureLayer,
             apertures   : dict,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.) -> ApertureLayer:
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.)) -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -1894,10 +1894,10 @@ class Spider(DynamicAperture, ABC):
     
     
     def __init__(self   : ApertureLayer, 
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0., 
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.), 
             softening   : bool = False) -> ApertureLayer:
         """
         Parameters:
@@ -2017,10 +2017,10 @@ class UniformSpider(Spider):
     def __init__(self   : ApertureLayer, 
             num_struts  : int,
             strut_width : float,
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer:
         """
