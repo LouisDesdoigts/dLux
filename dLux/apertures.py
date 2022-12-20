@@ -11,7 +11,7 @@ __all__ = ["CircularAperture", "SquareAperture",
     "HexagonalAperture", "RegularPolygonalAperture", 
     "IrregularPolygonalAperture", "StaticAperture",
     "AberratedAperture", "StaticAberratedAperture", 
-    "AnnularAperture"]
+    "AnnularAperture", "RectangularAperture"]
 
 
 two_pi: float = 2. * np.pi
@@ -135,7 +135,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
 
         is_rot: bool = (self.rotation != 0.)
         coords: Array = lax.cond(is_rot,
-            lambda: dLux.utils.coordinates.rotate(coords, self.compression),
+            lambda: dLux.utils.coordinates.rotate(coords, self.rotation),
             lambda: coords)
 
         return coords
