@@ -145,7 +145,7 @@ def create_basis_climb():
         used to create a `BasisCLIMB` layer for testing.
     """
     def _create_basis_climb(
-            basis: Array = np.ones((3, 16, 16)),
+            basis: Array = np.ones((3, 768, 768)),
             coefficients: Array = np.ones(3),
             ideal_wavelength: Array = np.array(5e-7)) -> OpticalLayer:
         return dLux.optics.ApplyBasisCLIMB(

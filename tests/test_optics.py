@@ -4,7 +4,7 @@ import pytest
 import dLux
 from jax import config
 
-config.update("jax_debug_nans", True)
+# config.update("jax_debug_nans", True)
 
 Array = np.ndarray
 
@@ -297,7 +297,8 @@ class TestApplyBasisCLIMB(object):
         """
         Tests the __call__ method.
         """
-        wf = create_wavefront() 
+        wf = create_wavefront(amplitude = np.ones((1, 256, 256)),
+                            phase = np.zeros((1, 256, 256))) 
         npix = wf.npixels
         basis = np.ones((3, 3*npix, 3*npix))
         create_basis_climb(basis=basis)(wf)
