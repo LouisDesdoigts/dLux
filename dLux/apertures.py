@@ -103,23 +103,6 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         self.rotation = np.asarray(rotation).astype(float)
 
 
-    def _compress(self: ApertureLayer, coords: Array) -> Array:
-        """
-        Apply a compression to the coordinates.
-
-        Parameters:
-        -----------
-        coords: Array, meters
-            The uncompressed coordinates. 
-
-        Returns:
-        --------
-        coords: Array, meters
-            The compressed coordinates. 
-        """
-        return coords * self.compression[:, None, None]
-
-
     def _coordinates(self: ApertureLayer, coords: Array) -> Array:
         """
         Transform the paraxial coordinates into the coordinate

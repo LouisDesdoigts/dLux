@@ -276,6 +276,26 @@ def strain(coords: Array, strain: Array) -> Array:
         The strained coordinate system. 
     """
     trans_coords: Array = np.transpose(coords, (0, 2, 1))
-    return coords + trans_coords * self.strain[:, None, None]
+    return coords + trans_coords * strain[:, None, None]
+
+
+def compress(coords: Array, compression: Array) -> Array:
+    """
+    Apply a compression to the coordinates.
+
+    Parameters:
+    -----------
+    coordinates: Array, meters 
+        The (x, y) coordinates with the dimensions 
+        (2, npix, npix).
+    compression: Array
+        The (x, y) compression with dimensions (2,)
+
+    Returns:
+    --------
+    coords: Array, meters
+        The compressed coordinates. 
+    """
+    return coords * compression[:, None, None]
 
 
