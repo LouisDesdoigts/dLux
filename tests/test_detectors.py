@@ -42,31 +42,30 @@ class TestApplyPixelResponse(object):
         create_pixel_response()(image)
 
 
-class TestApplyJitter(UtilityUser):
+class TestApplyJitter(object):
     """
     Tests the ApplyJitter class.
     """
-    utility : ApplyJitterUtility = ApplyJitterUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_jitter: callable) -> None::
         """
         Tests the constructor.
         """
         # Test wrong dims
         with pytest.raises(AssertionError):
-            self.utility.construct(sigma=np.ones(1))
+            create_jitter(sigma=np.ones(1))
 
         # Test functioning
-        self.utility.construct()
+        create_jitter()
 
 
-    def test_call(self):
+    def test_call(self, create_jitter: callable) -> None::
         """
         Tests the __call__ method.
         """
         image = np.ones((16, 16))
-        self.utility.construct()(image)
+        create_jitter()(image)
 
 
 class TestApplySaturation(UtilityUser):
