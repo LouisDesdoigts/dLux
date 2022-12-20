@@ -1,5 +1,8 @@
 from jax import lax
 
+
+__all__ = ["factorial"]
+
  
 def factorial(n : int) -> int:
     """
