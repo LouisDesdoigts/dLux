@@ -61,7 +61,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -99,7 +99,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -253,7 +253,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -290,7 +290,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -681,7 +681,7 @@ class RectangularAperture(DynamicAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     softening: bool 
@@ -721,7 +721,7 @@ class RectangularAperture(DynamicAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         softening: bool 
@@ -795,7 +795,7 @@ class SquareAperture(DynamicAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     softening: bool 
@@ -834,7 +834,7 @@ class SquareAperture(DynamicAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         softening: bool 
@@ -928,7 +928,7 @@ class PolygonalAperture(DynamicAperture, ABC):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -959,7 +959,7 @@ class PolygonalAperture(DynamicAperture, ABC):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1149,7 +1149,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     vertices: Array, meters
@@ -1187,7 +1187,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1345,7 +1345,7 @@ class RegularPolygonalAperture(PolygonalAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     nsides: int
@@ -1386,7 +1386,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1485,7 +1485,7 @@ class HexagonalAperture(RegularPolygonalAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     rmax : float, meters
@@ -1523,7 +1523,7 @@ class HexagonalAperture(RegularPolygonalAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1585,7 +1585,7 @@ class CompositeAperture(AbstractDynamicAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -1613,7 +1613,7 @@ class CompositeAperture(AbstractDynamicAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         apertures : dict
@@ -1733,7 +1733,7 @@ class CompoundAperture(CompositeAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -1760,7 +1760,7 @@ class CompoundAperture(CompositeAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1813,7 +1813,7 @@ class MultiAperture(CompositeAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -1840,7 +1840,7 @@ class MultiAperture(CompositeAperture):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -1894,7 +1894,7 @@ class Spider(DynamicAperture, ABC):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     """
@@ -1925,7 +1925,7 @@ class Spider(DynamicAperture, ABC):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         """
@@ -2008,7 +2008,7 @@ class UniformSpider(Spider):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rotation: float, radians
+    rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
     number_of_struts: int 
@@ -2049,7 +2049,7 @@ class UniformSpider(Spider):
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: float, radians
+        rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
         number_of_struts: int 
