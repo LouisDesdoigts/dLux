@@ -47,6 +47,9 @@ jobs:
       - name: detector tests
         run: pytest --quiet tests/test_detectors.py
 
+      - name: spectra tests
+        run: pytest --quiet tests/test_spectrums.py
+
       - name: aperture tests
         run: pytest --quiet tests/test_apertures.py
 
