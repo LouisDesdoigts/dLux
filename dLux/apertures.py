@@ -1,6 +1,6 @@
 import dLux
 from abc import ABC, abstractmethod
-from jax import numpy as np, jax 
+from jax import numpy as np, lax 
 
 
 Array = np.ndarray
