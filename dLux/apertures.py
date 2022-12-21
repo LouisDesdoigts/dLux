@@ -145,6 +145,27 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         return coords
 
 
+    def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Apply the aperture to an incoming wavefront.
+
+        Parameters:
+        -----------
+        wavefront: Wavefront
+            The wavefront before encountering the aperture.
+
+        Returns:
+        --------
+        wavefront: Wavefront
+            The wavefront after encountering the aperture.
+        """
+        coords = wavefront.pixel_coordinates
+        aperture = self._aperture(coords)
+        return wavefront.multiply_amplitude(aperture)
+
+
+
+
 class DynamicAperture(AbstractDynamicAperture, ABC):
     """
     An abstract class that defines the structure of all the concrete
@@ -225,25 +246,6 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             name = name)
         self.softening = 1. if softening else 1e32
         self.occulting = bool(occulting)
-
-
-    def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Apply the aperture to an incoming wavefront.
-
-        Parameters:
-        -----------
-        wavefront: Wavefront
-            The wavefront before encountering the aperture.
-
-        Returns:
-        --------
-        wavefront: Wavefront
-            The wavefront after encountering the aperture.
-        """
-        coords = wavefront.pixel_coordinates
-        aperture = self._aperture(coords)
-        return wavefront.multiply_amplitude(aperture)
 
 
     @abstractmethod
