@@ -1402,9 +1402,9 @@ class IrregularPolygonalAperture(PolygonalAperture):
         dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
         # wedges = self._make_wedges(phi, sorted_theta)
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
-        soft_edges = dist_from_edges < 0.
+        edges = (dist_from_edges * dist_sgn) < 0.
 
-        return (dist_sgn * soft_edges).prod(axis=0).astype(float)
+        return (edges).prod(axis=0).astype(float)
 
 
 class RegularPolygonalAperture(PolygonalAperture):
@@ -1660,28 +1660,6 @@ class HexagonalAperture(RegularPolygonalAperture):
             occulting = occulting,
             softening = softening)
         self.name = "HexagonalAperture"
-
-# TODO: See if this code can be used to fix the bugs that 
-#       I am encountering with the rotations. I believe 
-#       that it will and is probably faster. For now forge
-#       ahead. 
-#coords: Array = self._rotate(self._translate(coords))
-#theta: Array = np.linspace(0, 2 * np.pi, 6, endpoint=False).reshape((6, 1, 1)) + np.pi / 6.
-#rmax: float = np.sqrt(3.) / 2. * self.rmax
-
-#m: Array = (-1. / np.tan(theta)).reshape((6, 1, 1))
-
-#x1: Array = (rmax * np.cos(theta)).reshape((6, 1, 1))
-#y1: Array = (rmax * np.sin(theta)).reshape((6, 1, 1))
-
-#x: Array = np.tile(coords[0], (6, 1, 1))
-#y: Array = np.tile(coords[1], (6, 1, 1))
-
-#dist: Array = (y - y1 - m * (x - x1)) / np.sqrt(1 + m ** 2)
-#dist: Array = (1. - 2. * (theta <= np.pi)) * dist
-#lines: Array = self._soften(dist)
-
-#return lines.prod(axis=0)
 
 
 class CompositeAperture(AbstractDynamicAperture):
