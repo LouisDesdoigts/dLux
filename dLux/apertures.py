@@ -1,7 +1,6 @@
 import dLux
 from abc import ABC, abstractmethod
 from jax import numpy as np, lax 
-from matplotlib import pyplot as plt
 
 
 Array = np.ndarray
