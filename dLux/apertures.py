@@ -1772,7 +1772,10 @@ class MultiAperture(CompositeAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    has_abberated : bool
+        A flag to indicate if there are any aperutres with basis
     """
+    has_abberated : bool
 
 
     def __init__(
@@ -1806,6 +1809,12 @@ class MultiAperture(CompositeAperture):
             compression = compression,
             rotation = rotation,
             name = "MultiAperture")
+        # check if has abberated aperture
+        self.has_abberated = False
+        
+        for aperture in self.apertures.values():
+            if isinstance(aperture, AberratedAperture):
+                self.has_abberated = True
 
 
     def _aperture(self, coords: Array) -> Array:
@@ -1827,6 +1836,39 @@ class MultiAperture(CompositeAperture):
         aps: float = np.stack([ap._aperture(coords) for ap in self.apertures.values()])
         return aps.sum(axis=0)
 
+    def _opd(self, coords : Array) -> Array:        
+        basis = []
+        
+        for aperture in self.apertures.values():
+            if isinstance(aperture, AberratedAperture):
+                basis.append(aperture._opd(coords))
+
+        return np.stack(basis).sum(axis=0)
+
+    def __call__(self, wavefront: Wavefront) -> Wavefront:
+        """
+        Apply the aperture to an incoming wavefront.
+        Parameters
+        ----------
+        parameters : dict
+           A dictionary containing the parameters of the model. 
+           The dictionary must satisfy `parameters.get("Wavefront")
+           != None`. 
+        Returns
+        -------
+        parameters : dict
+           The parameter, parameters, with the "Wavefront"; key
+           value updated. 
+        """
+        # apply amplitude changes
+        wavefront = wavefront.multiply_amplitude(
+           self._aperture(
+               wavefront.pixel_coordinates))
+        
+        if self.has_abberated:
+            wavefront = wavefront.add_opd(self._opd(wavefront.pixel_coordinates))
+                
+        return wavefront
 
 class Spider(DynamicAperture, ABC):
     """
@@ -2143,7 +2185,7 @@ class AberratedAperture(ApertureLayer):
         params: dict 
             A dictionary containing the key "wavefront".
         """
-        coords: Array = wavefront.pixel_positions()
+        coords: Array = wavefront.pixel_coordinates
         opd: Array = self._opd(coords)
         aperture: Array = self.aperture._aperture(coords)
         return wavefront\
