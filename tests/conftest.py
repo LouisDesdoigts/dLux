@@ -145,7 +145,7 @@ def create_basis_climb():
         used to create a `BasisCLIMB` layer for testing.
     """
     def _create_basis_climb(
-            basis: Array = np.ones((3, 16, 16)),
+            basis: Array = np.ones((3, 768, 768)),
             coefficients: Array = np.ones(3),
             ideal_wavelength: Array = np.array(5e-7)) -> OpticalLayer:
         return dLux.optics.ApplyBasisCLIMB(
@@ -1160,7 +1160,7 @@ def create_aberrated_aperture(create_circular_aperture: callable) -> callable:
     shape: int = 6
 
     def _create_aberrated_aperture(
-            noll_inds: list = np.arange(shape, dtype=int),
+            noll_inds: list = np.arange(1, shape+1, dtype=int),
             coeffs: Array = np.ones(shape, dtype=float),
             aperture: object = create_circular_aperture()) -> OpticalLayer:
         return dLux.apertures.AberratedAperture(

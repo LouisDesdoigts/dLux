@@ -3,7 +3,7 @@ import pytest
 import dLux
 from jax import config
 
-config.update("jax_debug_nans", True)
+# config.update("jax_debug_nans", True)
 
 Array = np.ndarray
 

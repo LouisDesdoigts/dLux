@@ -1656,7 +1656,6 @@ class CompositeAperture(AbstractDynamicAperture):
         self.apertures[key] = value
 
 
-    # TODO: I should be able to remove this.
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         """
         Apply the aperture to an incoming wavefront.
@@ -1674,8 +1673,8 @@ class CompositeAperture(AbstractDynamicAperture):
         """
         wavefront = wavefront.multiply_amplitude(
            self._aperture(
-               wavefront.pixel_coordinates()))
-        return parameters
+               wavefront.pixel_coordinates))
+        return wavefront
 
 
     @abstractmethod
@@ -2128,9 +2127,9 @@ class AberratedAperture(ApertureLayer):
         for the learning process is significantly reduced.
     """
     basis_funcs: list
-    aperture: ApertureLayer
     coeffs: Array
     nterms: int
+    aperture: ApertureLayer
  
  
     def __init__(self   : ApertureLayer, 
@@ -2166,6 +2165,8 @@ class AberratedAperture(ApertureLayer):
         self.nterms = int(len(coeffs))
         self.coeffs = np.asarray(coeffs).astype(float)
  
+    def _aperture(self : ApertureLayer, coords : Array) -> Array:
+        return self.aperture._aperture(coords)
  
     def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
         """
