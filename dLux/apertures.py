@@ -608,7 +608,7 @@ class CircularAperture(DynamicAperture):
         self.radius = np.asarray(radius).astype(float)
 
 
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -622,9 +622,26 @@ class CircularAperture(DynamicAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        # TODO: Optimisation here.
-        coords = dLux.utils.cartesian_to_polar(coords)[0]
+        coords = np.hypot(coords[0], coords[1])
         return self._soften(- coords + self.radius)
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        coords = np.hypot(coords[0], coords[1])
+        return (coords < self.radius).astype(float)
 
 
     def _extent(self: ApertureLayer) -> float:
