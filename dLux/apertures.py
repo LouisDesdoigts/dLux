@@ -12,7 +12,8 @@ __all__ = ["CircularAperture", "SquareAperture",
     "IrregularPolygonalAperture", "StaticAperture",
     "AberratedAperture", "StaticAberratedAperture", 
     "AnnularAperture", "RectangularAperture",
-    "CompoundAperture", "MultiAperture"]
+    "CompoundAperture", "MultiAperture", 
+    "UniformSpider"]
 
 
 two_pi: float = 2. * np.pi
