@@ -217,7 +217,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         x-axis. 
     """
     occulting: bool 
-    softening: Array
+    softening: bool
     
 
     def __init__(self   : ApertureLayer, 
@@ -352,7 +352,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             The image represented as an approximately binary mask, but with 
             the prozed soft edges.
         """
-        steepness = self.softening * distances.shape[-1]
+        steepness = distances.shape[-1]
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
@@ -484,7 +484,7 @@ class AnnularAperture(DynamicAperture):
         self.rmin = np.asarray(rmin).astype(float)
 
 
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -498,10 +498,27 @@ class AnnularAperture(DynamicAperture):
         metriiic: Array
             The "distance" from the aperture. 
         """
-        # TODO: Optimise this slightly by calling hypot directly.
-        coords = dLux.utils.cartesian_to_polar(coords)[0]
+        coords = np.hypot(coords[0], coords[1])
         return self._soften(coords - self.rmin) * \
             self._soften(- coords + self.rmax)
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        coords = np.hypot(coords[0], coords[1])
+        return ((coords > self.rmin) * (coords < self.rmax)).astype(float)
 
 
     def _extent(self: ApertureLayer) -> Array:
