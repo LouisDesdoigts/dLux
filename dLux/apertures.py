@@ -1469,8 +1469,8 @@ class HexagonalAperture(RegularPolygonalAperture):
             compression = compression,
             rotation = rotation,
             occulting = occulting,
-            softening = softening,
-            name = "HexagonalAperture")
+            softening = softening)
+        self.name = "HexagonalAperture"
 
 # TODO: See if this code can be used to fix the bugs that 
 #       I am encountering with the rotations. I believe 
