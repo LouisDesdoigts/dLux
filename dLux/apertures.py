@@ -764,6 +764,25 @@ class RectangularAperture(DynamicAperture):
         y_mask = self._soften(- np.abs(coords[1]) + self.width / 2.)
         return x_mask * y_mask
 
+    
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        x_mask = np.abs(coords[0]) < self.length / 2.
+        y_mask = np.abs(coords[1]) < self.width / 2.
+        return (x_mask * y_mask).astype(float)
+
 
     def _extent(self: ApertureLayer) -> Array:
         """
