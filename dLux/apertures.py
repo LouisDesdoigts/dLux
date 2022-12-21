@@ -2181,8 +2181,7 @@ class UniformSpider(Spider):
         angles += self.rotation
         struts = np.array([self._strut(angle, coords) for angle in angles]) - self.width_of_struts / 2.
         struts = struts > self.width_of_struts / 2. 
-        return softened.prod(axis=0)
-
+        return struts.prod(axis=0)
 
 
 class AberratedAperture(ApertureLayer):
