@@ -1495,9 +1495,7 @@ class RegularPolygonalAperture(PolygonalAperture):
             
         i: int = np.arange(self.nsides)[:, None, None] # Dummy index
         bounds: float = 2. * i * alpha
-        # phi: float = self._offset(neg_pi_to_pi_phi, bounds[0])
             
-        # wedges: float = self._make_wedges(phi, bounds)
         ms: float = -1 / np.tan(2. * i * alpha + alpha)
         xs: float = self.rmax * np.cos(2. * i * alpha)
         ys: float = self.rmax * np.sin(2. * i * alpha)
@@ -1530,9 +1528,7 @@ class RegularPolygonalAperture(PolygonalAperture):
             
         i: int = np.arange(self.nsides)[:, None, None] # Dummy index
         bounds: float = 2. * i * alpha
-        # phi: float = self._offset(neg_pi_to_pi_phi, bounds[0])
             
-        # wedges: float = self._make_wedges(phi, bounds)
         ms: float = -1 / np.tan(2. * i * alpha + alpha)
         xs: float = self.rmax * np.cos(2. * i * alpha)
         ys: float = self.rmax * np.sin(2. * i * alpha)
@@ -2134,7 +2130,7 @@ class UniformSpider(Spider):
         self.width_of_struts = np.asarray(strut_width).astype(float)
  
  
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -2164,6 +2160,29 @@ class UniformSpider(Spider):
         struts = np.array([self._strut(angle, coords) for angle in angles]) - self.width_of_struts / 2.
         softened = self._soften(struts)
         return softened.prod(axis=0)
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        coords = self._coordinates(coords)
+        angles = np.linspace(0, 2 * np.pi, self.number_of_struts, endpoint=False)
+        angles += self.rotation
+        struts = np.array([self._strut(angle, coords) for angle in angles]) - self.width_of_struts / 2.
+        struts = struts > self.width_of_struts / 2. 
+        return softened.prod(axis=0)
+
 
 
 class AberratedAperture(ApertureLayer):
