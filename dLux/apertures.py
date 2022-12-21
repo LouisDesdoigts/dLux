@@ -1311,7 +1311,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
         return np.max(dist_to_verts)
     
     
-    def _metric(self: ApertureLayer, coords: float) -> float:
+    def _soft_edged(self: ApertureLayer, coords: float) -> float:
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -1353,17 +1353,36 @@ class IrregularPolygonalAperture(PolygonalAperture):
 
         sorted_x1 = bc_x1[sorted_inds]
         sorted_y1 = bc_y1[sorted_inds]
-        sorted_theta = offset_theta[sorted_inds]   
+        # sorted_theta = offset_theta[sorted_inds]   
         sorted_m = self._grads_from_many_points(sorted_x1, sorted_y1)
 
-        phi = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
+        # phi = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
 
         dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
-        wedges = self._make_wedges(phi, sorted_theta)
+        # wedges = self._make_wedges(phi, sorted_theta)
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
+        soft_edges = self._soften(dist_from_edges)
 
-        flat_dists = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
-        return self._soften(flat_dists)
+        return (dist_sgn * soft_edges).sum(axis=0)
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        x_mask = np.abs(coords[0]) < self.length / 2.
+        y_mask = np.abs(coords[1]) < self.width / 2.
+        return (x_mask * y_mask).astype(float)
 
 
 class RegularPolygonalAperture(PolygonalAperture):
