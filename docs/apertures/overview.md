@@ -19,6 +19,15 @@ ask make sure your model is accounting for more common, larger sources
 of error. 
 
 
+When working with gradients we found that it was best to avoid discontinuous 
+functions. However, an aperture is discontinuous across the boundary. 
+To avoid the undefined gradients that this can lead to we developed a 
+system of soft-edging the apertures. In particular we avoided using a 
+nearest-neighbour interpolator (or linear interpolator) by choosing a 
+sigmoid like function across the boundary. Naturally this leads to a 
+degree of approximation, but in general works.
+
+
 ## Static Apertures
 The inbuild flexibility of the `dLux.apertures` module is not all good.
 The evaluation of the apertures remains much cheaper than the calculations
@@ -72,20 +81,20 @@ handling of arbitrary apertures.
 ## Usage and Examples
 Here is a complete list of the apertures that we have implemented.
  - Simple, shaped apertures:
-  - `AnnularAperture`
-  - `CircularAperture`
-  - `HexagonalAperture`
-  - `SquareAperture`
-  - `RectangularAperture`
-  - `RegularPolygonalAperture`
-  - `IrregularPolygonalAperture`
+   - `AnnularAperture`
+   - `CircularAperture`
+   - `HexagonalAperture`
+   - `SquareAperture`
+   - `RectangularAperture`
+   - `RegularPolygonalAperture`
+   - `IrregularPolygonalAperture`
  - Composite apertures:
-  - `CompoundAperture`
-  - `MultiAperture`
+   - `CompoundAperture`
+   - `MultiAperture`
  - `AberratedAperture`
  - Static apertures:
-  - `StaticAperture`
-  - `StaticAberratedAperture`
+   - `StaticAperture`
+   - `StaticAberratedAperture`
  - `UniformSpider`
 In general they function as you might intuitively expect. The 
 notable exception to this rule is the composite apertures, of 
@@ -94,5 +103,57 @@ apertures that you wish to treat as a single aperture. For example,
 the components of a spider that is fused to an obstruction and 
 pupil will not move very much with respect to one another. 
 Indeed for all intents and purposes we can treat this as static.
-However, it may 
+However, **it might** move with respect to a secondary pupil 
+acting as the camera lens. This particular circumstance was the 
+case on the Hubble Space Telescope.
+
+
+Now let's write some code. We can create a basic circular aperture
+at the centre of the paraxial coordinate system and with radius 
+of $1m$ using,
+```python 
+circ = CircularAperture(1.) # Default w. radius: 1m
+circ = CircularAperture(1., centre=[.5, .5])
+circ = CircularAperture(1., strain=[.05, .05])
+circ = CircularAperture(1., compression=[1.05, .95])
+circ = CircularAperture(1., softening=True)
+circ = CircularAperture(1., occulting=True)
+```
+Running this script produces the output shown in Fig. 1.
+![Fig. 1.](assets/circles.png)
+
+
+The same can be done for all of the other apertures which in 
+general have only a few non-default parameters, such as length 
+and width for the `RectangularAperture`. The notable exception 
+to this rule is `IrregularPolygonalAperture` which takes a 
+list of vertices as a non-default parameter. This class can be 
+used to generate many of the other pre-loaded parameters but the 
+cost of generality is performance. Moreover, it is very unlikely
+that learning the position of the vertices is ever going to be 
+necessary, but it is possible. Fig. 2. shows plots of all the apertures. 
+![Fig. 2.](assets/apertures.png)
+
+
+The `AberratedApertures`, which contain basis implementation in 
+`dLux` takes in three parameters. The *noll indices* of the basis 
+vectors, the *aperture* and the *coefficients* of those basis 
+vectors. The basis vectors shown in Fig. 3. were generated using 
+the following code,
+```python 
+shape = 10
+aber_circ = AberratedAperture(
+    noll_inds = np.arange(1, shape, dtype=float),
+    coeffs = np.ones(shape),
+    aperture = CircularAperture(1.)
+)
+```
+The benefit of this representation is that we can simultaneously 
+learn abitrary aberrations represented using *Zernike* polynomials 
+and the shape/position of the aperture. Although this is unlikely 
+to be something that is often required it is an interesting piece 
+of functionality. 
+![Fig. 3.](assets/aberrated_apertures.png)
+
+
 
