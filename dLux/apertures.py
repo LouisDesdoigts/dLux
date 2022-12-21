@@ -1550,6 +1550,41 @@ class RegularPolygonalAperture(PolygonalAperture):
         return dist.prod(axis=0)
 
 
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        x: float = coords[0]
+        y: float = coords[1]
+
+        neg_pi_to_pi_phi: float = np.arctan2(y, x) 
+        alpha: float = np.pi / self.nsides
+            
+        i: int = np.arange(self.nsides)[:, None, None] # Dummy index
+        bounds: float = 2. * i * alpha
+        # phi: float = self._offset(neg_pi_to_pi_phi, bounds[0])
+            
+        # wedges: float = self._make_wedges(phi, bounds)
+        ms: float = -1 / np.tan(2. * i * alpha + alpha)
+        xs: float = self.rmax * np.cos(2. * i * alpha)
+        ys: float = self.rmax * np.sin(2. * i * alpha)
+        dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
+        inside: float = self._is_orig_left_of_edge(ms, xs, ys)
+         
+        dist: float = (inside * dists) < 0.
+        return dist.prod(axis=0)
+
+
 class HexagonalAperture(RegularPolygonalAperture):
     """
     Generate a hexagonal aperture, parametrised by rmax. 
