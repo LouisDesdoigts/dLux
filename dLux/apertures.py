@@ -1,6 +1,7 @@
 import dLux
 from abc import ABC, abstractmethod
 from jax import numpy as np, lax 
+from matplotlib import pyplot as plt
 
 
 Array = np.ndarray
@@ -1361,9 +1362,9 @@ class IrregularPolygonalAperture(PolygonalAperture):
         dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
         # wedges = self._make_wedges(phi, sorted_theta)
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
-        soft_edges = self._soften(dist_from_edges)
+        soft_edges = self._soften(dist_sgn * dist_from_edges)
 
-        return (dist_sgn * soft_edges).prod(axis=0)
+        return (soft_edges).prod(axis=0)
 
 
     def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
@@ -1402,9 +1403,19 @@ class IrregularPolygonalAperture(PolygonalAperture):
         dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
         # wedges = self._make_wedges(phi, sorted_theta)
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
-        edges = (dist_from_edges * dist_sgn) < 0.
+        edges = (dist_from_edges * dist_sgn) > 0.
 
-        return (edges).prod(axis=0).astype(float)
+        shape = dist_from_edges.shape[0]
+        fig = plt.figure(figsize=(shape*4, 3))
+        axes = fig.subplots(1, shape)
+
+        for i in range(shape):
+            _map = axes[i].imshow(edges[i])
+            fig.colorbar(_map, ax=axes[i])
+            
+        plt.show()
+
+        return (edges).prod(axis=0)
 
 
 class RegularPolygonalAperture(PolygonalAperture):
@@ -1581,7 +1592,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
         inside: float = self._is_orig_left_of_edge(ms, xs, ys)
          
-        dist: float = (inside * dists) < 0.
+        dist: float = (inside * dists) > 0.
         return dist.prod(axis=0)
 
 
