@@ -1405,16 +1405,6 @@ class IrregularPolygonalAperture(PolygonalAperture):
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
         edges = (dist_from_edges * dist_sgn) > 0.
 
-        shape = dist_from_edges.shape[0]
-        fig = plt.figure(figsize=(shape*4, 3))
-        axes = fig.subplots(1, shape)
-
-        for i in range(shape):
-            _map = axes[i].imshow(edges[i])
-            fig.colorbar(_map, ax=axes[i])
-            
-        plt.show()
-
         return (edges).prod(axis=0)
 
 
