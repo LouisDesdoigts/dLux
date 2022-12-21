@@ -746,7 +746,7 @@ class RectangularAperture(DynamicAperture):
         self.width = np.asarray(width).astype(float)
 
 
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
