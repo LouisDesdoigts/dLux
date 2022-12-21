@@ -285,7 +285,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
 
 
     @abstractmethod
-    def _metric(self: ApertureLayer, distances: Array) -> Array: # pragma: no cover
+    def _soft_edged(self: ApertureLayer, distances: Array) -> Array: # pragma: no cover
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -312,6 +312,24 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             This is essential the final step in processing to produce
             the aperture. What is returned is the non-occulting 
             version of the aperture. 
+        """
+
+
+
+    @abstractmethod
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
         """
 
 
