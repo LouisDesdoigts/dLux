@@ -260,7 +260,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             compression = compression,
             rotation = rotation,
             name = name)
-        self.softening = 1. if softening else 1e32
+        self.softening = bool(softening) 
         self.occulting = bool(occulting)
 
 
@@ -371,7 +371,11 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             The aperture.
         """
         coords: Array = self._coordinates(coords) 
-        aperture: Array = self._metric(coords)
+
+        if self.softening:
+            aperture: Array = self._soft_edged(coords)
+        else:
+            aperture: Array = self._hard_edged(coords)
 
         if self.occulting:
             aperture: Array = (1. - aperture)
