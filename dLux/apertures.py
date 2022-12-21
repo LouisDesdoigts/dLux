@@ -1135,40 +1135,6 @@ class PolygonalAperture(DynamicAperture, ABC):
         return np.sign(dist_from_orig)
     
     
-    def _make_wedges(self: ApertureLayer, off_phi: float, sorted_theta: float) -> float:
-        """
-        Wedges are used to isolate the space between two vertices in the 
-        angular plane. 
-        
-        Parameters:
-        -----------
-        off_phi: float, radians
-            The angular coordinates that have been correctly offset so 
-            that the minimum angle corresponds to the first vertex.
-            Note that this particular offset is not unique as any offset
-            that is two pi greater will also work.
-        sorted_theta: float, radians
-            The angles of the vertices sorted from lowest to highest. 
-            Implementation Note: The sorting is required for other 
-            functions that are typically called together. As a result 
-            it has not been internalised. This is a helper function 
-            that is not designed to be called in general. This should 
-            have the correct shape to be braodcast. This usually involves 
-            expanding it to have two extra dimensions. 
-            
-        Returns:
-        --------
-        wedges: float
-            A stack of binary (float) arrays that represent the angles 
-            bounded by each consecutive pair of vertices.
-        """
-        next_sorted_theta = np.roll(sorted_theta, -1).at[-1].add(two_pi)
-        greater_than = (off_phi >= sorted_theta)
-        less_than = (off_phi < next_sorted_theta)
-        wedges = greater_than & less_than
-        return wedges.astype(float)
-
-
 class IrregularPolygonalAperture(PolygonalAperture):
     """
     The default aperture is dis-allows the learning of all 
@@ -1353,13 +1319,9 @@ class IrregularPolygonalAperture(PolygonalAperture):
 
         sorted_x1 = bc_x1[sorted_inds]
         sorted_y1 = bc_y1[sorted_inds]
-        # sorted_theta = offset_theta[sorted_inds]   
         sorted_m = self._grads_from_many_points(sorted_x1, sorted_y1)
 
-        # phi = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
-
         dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
-        # wedges = self._make_wedges(phi, sorted_theta)
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
         soft_edges = self._soften(dist_sgn * dist_from_edges)
 
@@ -1394,13 +1356,9 @@ class IrregularPolygonalAperture(PolygonalAperture):
 
         sorted_x1 = bc_x1[sorted_inds]
         sorted_y1 = bc_y1[sorted_inds]
-        # sorted_theta = offset_theta[sorted_inds]   
         sorted_m = self._grads_from_many_points(sorted_x1, sorted_y1)
 
-        # phi = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
-
         dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
-        # wedges = self._make_wedges(phi, sorted_theta)
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
         edges = (dist_from_edges * dist_sgn) > 0.
 
