@@ -217,7 +217,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         x-axis. 
     """
     occulting: bool 
-    softening: Array
+    softening: bool
     
 
     def __init__(self   : ApertureLayer, 
@@ -260,7 +260,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             compression = compression,
             rotation = rotation,
             name = name)
-        self.softening = 1. if softening else 1e32
+        self.softening = bool(softening) 
         self.occulting = bool(occulting)
 
 
@@ -285,7 +285,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
 
 
     @abstractmethod
-    def _metric(self: ApertureLayer, distances: Array) -> Array: # pragma: no cover
+    def _soft_edged(self: ApertureLayer, distances: Array) -> Array: # pragma: no cover
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -315,6 +315,24 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         """
 
 
+
+    @abstractmethod
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+
+
     def _soften(self: ApertureLayer, distances: Array) -> Array:
         """
         Softens an image so that the hard boundaries are not present. 
@@ -334,7 +352,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             The image represented as an approximately binary mask, but with 
             the prozed soft edges.
         """
-        steepness = self.softening * distances.shape[-1]
+        steepness = distances.shape[-1]
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
@@ -353,7 +371,11 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             The aperture.
         """
         coords: Array = self._coordinates(coords) 
-        aperture: Array = self._metric(coords)
+
+        if self.softening:
+            aperture: Array = self._soft_edged(coords)
+        else:
+            aperture: Array = self._hard_edged(coords)
 
         if self.occulting:
             aperture: Array = (1. - aperture)
@@ -462,7 +484,7 @@ class AnnularAperture(DynamicAperture):
         self.rmin = np.asarray(rmin).astype(float)
 
 
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -476,10 +498,27 @@ class AnnularAperture(DynamicAperture):
         metriiic: Array
             The "distance" from the aperture. 
         """
-        # TODO: Optimise this slightly by calling hypot directly.
-        coords = dLux.utils.cartesian_to_polar(coords)[0]
+        coords = np.hypot(coords[0], coords[1])
         return self._soften(coords - self.rmin) * \
             self._soften(- coords + self.rmax)
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        coords = np.hypot(coords[0], coords[1])
+        return ((coords > self.rmin) * (coords < self.rmax)).astype(float)
 
 
     def _extent(self: ApertureLayer) -> Array:
@@ -569,7 +608,7 @@ class CircularAperture(DynamicAperture):
         self.radius = np.asarray(radius).astype(float)
 
 
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -583,9 +622,26 @@ class CircularAperture(DynamicAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        # TODO: Optimisation here.
-        coords = dLux.utils.cartesian_to_polar(coords)[0]
+        coords = np.hypot(coords[0], coords[1])
         return self._soften(- coords + self.radius)
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        coords = np.hypot(coords[0], coords[1])
+        return (coords < self.radius).astype(float)
 
 
     def _extent(self: ApertureLayer) -> float:
@@ -690,7 +746,7 @@ class RectangularAperture(DynamicAperture):
         self.width = np.asarray(width).astype(float)
 
 
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -707,6 +763,25 @@ class RectangularAperture(DynamicAperture):
         x_mask = self._soften(- np.abs(coords[0]) + self.length / 2.)
         y_mask = self._soften(- np.abs(coords[1]) + self.width / 2.)
         return x_mask * y_mask
+
+    
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        x_mask = np.abs(coords[0]) < self.length / 2.
+        y_mask = np.abs(coords[1]) < self.width / 2.
+        return (x_mask * y_mask).astype(float)
 
 
     def _extent(self: ApertureLayer) -> Array:
@@ -801,7 +876,7 @@ class SquareAperture(DynamicAperture):
         self.width = np.asarray(width).astype(float)
 
 
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -818,6 +893,25 @@ class SquareAperture(DynamicAperture):
         x_mask = self._soften(- np.abs(coords[0]) + self.width / 2.)
         y_mask = self._soften(- np.abs(coords[1]) + self.width / 2.)
         return x_mask * y_mask
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        x_mask = np.abs(coords[0]) < self.width / 2.
+        y_mask = np.abs(coords[1]) < self.width / 2.
+        return (x_mask * y_mask).astype(float)
 
 
     def _extent(self: ApertureLayer) -> Array:
@@ -1041,40 +1135,6 @@ class PolygonalAperture(DynamicAperture, ABC):
         return np.sign(dist_from_orig)
     
     
-    def _make_wedges(self: ApertureLayer, off_phi: float, sorted_theta: float) -> float:
-        """
-        Wedges are used to isolate the space between two vertices in the 
-        angular plane. 
-        
-        Parameters:
-        -----------
-        off_phi: float, radians
-            The angular coordinates that have been correctly offset so 
-            that the minimum angle corresponds to the first vertex.
-            Note that this particular offset is not unique as any offset
-            that is two pi greater will also work.
-        sorted_theta: float, radians
-            The angles of the vertices sorted from lowest to highest. 
-            Implementation Note: The sorting is required for other 
-            functions that are typically called together. As a result 
-            it has not been internalised. This is a helper function 
-            that is not designed to be called in general. This should 
-            have the correct shape to be braodcast. This usually involves 
-            expanding it to have two extra dimensions. 
-            
-        Returns:
-        --------
-        wedges: float
-            A stack of binary (float) arrays that represent the angles 
-            bounded by each consecutive pair of vertices.
-        """
-        next_sorted_theta = np.roll(sorted_theta, -1).at[-1].add(two_pi)
-        greater_than = (off_phi >= sorted_theta)
-        less_than = (off_phi < next_sorted_theta)
-        wedges = greater_than & less_than
-        return wedges.astype(float)
-
-
 class IrregularPolygonalAperture(PolygonalAperture):
     """
     The default aperture is dis-allows the learning of all 
@@ -1217,7 +1277,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
         return np.max(dist_to_verts)
     
     
-    def _metric(self: ApertureLayer, coords: float) -> float:
+    def _soft_edged(self: ApertureLayer, coords: float) -> float:
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -1259,17 +1319,50 @@ class IrregularPolygonalAperture(PolygonalAperture):
 
         sorted_x1 = bc_x1[sorted_inds]
         sorted_y1 = bc_y1[sorted_inds]
-        sorted_theta = offset_theta[sorted_inds]   
         sorted_m = self._grads_from_many_points(sorted_x1, sorted_y1)
 
-        phi = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
+        dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
+        dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
+        soft_edges = self._soften(dist_sgn * dist_from_edges)
+
+        return (soft_edges).prod(axis=0)
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        # NOTE: see class docs.
+        bc_x1 = self.vertices[:, 0][:, None, None]
+        bc_y1 = self.vertices[:, 1][:, None, None]
+
+        bc_x = coords[0][None, :, :]
+        bc_y = coords[1][None, :, :]
+
+        theta = np.arctan2(bc_y1, bc_x1)
+        offset_theta = self._offset(theta, 0.)
+
+        sorted_inds = np.argsort(offset_theta.flatten())
+
+        sorted_x1 = bc_x1[sorted_inds]
+        sorted_y1 = bc_y1[sorted_inds]
+        sorted_m = self._grads_from_many_points(sorted_x1, sorted_y1)
 
         dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
-        wedges = self._make_wedges(phi, sorted_theta)
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
+        edges = (dist_from_edges * dist_sgn) > 0.
 
-        flat_dists = (dist_sgn * dist_from_edges * wedges).sum(axis=0)
-        return self._soften(flat_dists)
+        return (edges).prod(axis=0)
 
 
 class RegularPolygonalAperture(PolygonalAperture):
@@ -1366,7 +1459,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         return self.rmax
         
     
-    def _metric(self: ApertureLayer, coords: float) -> float:
+    def _soft_edged(self: ApertureLayer, coords: float) -> float:
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -1402,17 +1495,48 @@ class RegularPolygonalAperture(PolygonalAperture):
             
         i: int = np.arange(self.nsides)[:, None, None] # Dummy index
         bounds: float = 2. * i * alpha
-        phi: float = self._offset(neg_pi_to_pi_phi, bounds[0])
             
-        wedges: float = self._make_wedges(phi, bounds)
         ms: float = -1 / np.tan(2. * i * alpha + alpha)
         xs: float = self.rmax * np.cos(2. * i * alpha)
         ys: float = self.rmax * np.sin(2. * i * alpha)
         dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
         inside: float = self._is_orig_left_of_edge(ms, xs, ys)
          
-        dist: float = (inside * dists * wedges)
-        return self._soften(dist.sum(axis=0))
+        dist: float = self._soften(inside * dists)
+        return dist.prod(axis=0)
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        x: float = coords[0]
+        y: float = coords[1]
+
+        neg_pi_to_pi_phi: float = np.arctan2(y, x) 
+        alpha: float = np.pi / self.nsides
+            
+        i: int = np.arange(self.nsides)[:, None, None] # Dummy index
+        bounds: float = 2. * i * alpha
+            
+        ms: float = -1 / np.tan(2. * i * alpha + alpha)
+        xs: float = self.rmax * np.cos(2. * i * alpha)
+        ys: float = self.rmax * np.sin(2. * i * alpha)
+        dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
+        inside: float = self._is_orig_left_of_edge(ms, xs, ys)
+         
+        dist: float = (inside * dists) > 0.
+        return dist.prod(axis=0)
 
 
 class HexagonalAperture(RegularPolygonalAperture):
@@ -1490,28 +1614,6 @@ class HexagonalAperture(RegularPolygonalAperture):
             occulting = occulting,
             softening = softening)
         self.name = "HexagonalAperture"
-
-# TODO: See if this code can be used to fix the bugs that 
-#       I am encountering with the rotations. I believe 
-#       that it will and is probably faster. For now forge
-#       ahead. 
-#coords: Array = self._rotate(self._translate(coords))
-#theta: Array = np.linspace(0, 2 * np.pi, 6, endpoint=False).reshape((6, 1, 1)) + np.pi / 6.
-#rmax: float = np.sqrt(3.) / 2. * self.rmax
-
-#m: Array = (-1. / np.tan(theta)).reshape((6, 1, 1))
-
-#x1: Array = (rmax * np.cos(theta)).reshape((6, 1, 1))
-#y1: Array = (rmax * np.sin(theta)).reshape((6, 1, 1))
-
-#x: Array = np.tile(coords[0], (6, 1, 1))
-#y: Array = np.tile(coords[1], (6, 1, 1))
-
-#dist: Array = (y - y1 - m * (x - x1)) / np.sqrt(1 + m ** 2)
-#dist: Array = (1. - 2. * (theta <= np.pi)) * dist
-#lines: Array = self._soften(dist)
-
-#return lines.prod(axis=0)
 
 
 class CompositeAperture(AbstractDynamicAperture):
@@ -2070,7 +2172,7 @@ class UniformSpider(Spider):
         self.width_of_struts = np.asarray(strut_width).astype(float)
  
  
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -2100,6 +2202,28 @@ class UniformSpider(Spider):
         struts = np.array([self._strut(angle, coords) for angle in angles]) - self.width_of_struts / 2.
         softened = self._soften(struts)
         return softened.prod(axis=0)
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        coords = self._coordinates(coords)
+        angles = np.linspace(0, 2 * np.pi, self.number_of_struts, endpoint=False)
+        angles += self.rotation
+        struts = np.array([self._strut(angle, coords) for angle in angles]) - self.width_of_struts / 2.
+        struts = struts > self.width_of_struts / 2. 
+        return struts.prod(axis=0)
 
 
 class AberratedAperture(ApertureLayer):
