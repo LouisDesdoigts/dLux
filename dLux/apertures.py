@@ -1363,7 +1363,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
         soft_edges = self._soften(dist_from_edges)
 
-        return (dist_sgn * soft_edges).sum(axis=0)
+        return (dist_sgn * soft_edges).prod(axis=0)
 
 
     def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
@@ -1380,9 +1380,31 @@ class IrregularPolygonalAperture(PolygonalAperture):
         aperture: Array
             A binary float representation of the aperture.
         """
-        x_mask = np.abs(coords[0]) < self.length / 2.
-        y_mask = np.abs(coords[1]) < self.width / 2.
-        return (x_mask * y_mask).astype(float)
+        # NOTE: see class docs.
+        bc_x1 = self.vertices[:, 0][:, None, None]
+        bc_y1 = self.vertices[:, 1][:, None, None]
+
+        bc_x = coords[0][None, :, :]
+        bc_y = coords[1][None, :, :]
+
+        theta = np.arctan2(bc_y1, bc_x1)
+        offset_theta = self._offset(theta, 0.)
+
+        sorted_inds = np.argsort(offset_theta.flatten())
+
+        sorted_x1 = bc_x1[sorted_inds]
+        sorted_y1 = bc_y1[sorted_inds]
+        # sorted_theta = offset_theta[sorted_inds]   
+        sorted_m = self._grads_from_many_points(sorted_x1, sorted_y1)
+
+        # phi = self._offset(np.arctan2(bc_y, bc_x), sorted_theta[0])
+
+        dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
+        # wedges = self._make_wedges(phi, sorted_theta)
+        dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
+        soft_edges = dist_from_edges < 0.
+
+        return (dist_sgn * soft_edges).prod(axis=0).astype(float)
 
 
 class RegularPolygonalAperture(PolygonalAperture):
