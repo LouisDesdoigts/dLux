@@ -163,7 +163,22 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         aperture = self._aperture(coords)
         return wavefront.multiply_amplitude(aperture)
 
+    
+    @abstractmethod
+    def _aperture(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Compute the array representing the aperture. 
 
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinate system of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array 
+            The aperture.
+        """
 
 
 class DynamicAperture(AbstractDynamicAperture, ABC):
