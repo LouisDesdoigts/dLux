@@ -2120,9 +2120,9 @@ class AberratedAperture(ApertureLayer):
         for the learning process is significantly reduced.
     """
     basis_funcs: list
-    aperture: ApertureLayer
     coeffs: Array
     nterms: int
+    aperture: ApertureLayer
  
  
     def __init__(self   : ApertureLayer, 
@@ -2158,6 +2158,8 @@ class AberratedAperture(ApertureLayer):
         self.nterms = int(len(coeffs))
         self.coeffs = np.asarray(coeffs).astype(float)
  
+    def _aperture(self : ApertureLayer, coords : Array) -> Array:
+        return self.aperture._aperture(coords)
  
     def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
         """
