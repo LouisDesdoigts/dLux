@@ -876,7 +876,7 @@ class SquareAperture(DynamicAperture):
         self.width = np.asarray(width).astype(float)
 
 
-    def _metric(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -893,6 +893,25 @@ class SquareAperture(DynamicAperture):
         x_mask = self._soften(- np.abs(coords[0]) + self.width / 2.)
         y_mask = self._soften(- np.abs(coords[1]) + self.width / 2.)
         return x_mask * y_mask
+
+
+    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Creates the hard edged version of the aperture. 
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        aperture: Array
+            A binary float representation of the aperture.
+        """
+        x_mask = np.abs(coords[0]) < self.width / 2.
+        y_mask = np.abs(coords[1]) < self.width / 2.
+        return (x_mask * y_mask).astype(float)
 
 
     def _extent(self: ApertureLayer) -> Array:
