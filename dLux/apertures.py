@@ -2337,6 +2337,26 @@ class AberratedAperture(ApertureLayer):
         """
         coords = dLux.utils.get_pixel_coordinates(npix, widthi / npix)
         return self.aperture._aperture(coords)
+
+
+    def basis(self: ApertureLayer, npix: int, width: float) -> Array:
+        """
+        Compute the array representing the aberrations. 
+
+        Parameters:
+        -----------
+        npix: int
+            The number of pixels accross one edge of the aperture.  
+        width: float, meters
+            The width of the aperture in meters. 
+
+        Returns:
+        --------
+        aperture: Array 
+            The aberrations.
+        """
+        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        return self._basis(coords)
  
 
     def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
