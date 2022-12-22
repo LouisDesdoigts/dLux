@@ -127,160 +127,160 @@ def test_plots_of_stat_aber_aps(aber_aps: dict):
 
 
 ################################## tests ######################################
-test_plots_of_aps({
-    "Occ. Soft": RectangularAperture(1., .5, occulting=True, softening=True),
-    "Occ. Hard": RectangularAperture(1., .5, occulting=True),
-    "Soft": RectangularAperture(1., .5, softening=True),
-    "Hard": RectangularAperture(1., .5),
-    "Trans.": RectangularAperture(1., .5, centre=[.5, .5]),
-    "Strain": RectangularAperture(1., .5, strain=[.5, 0.]),
-    "Compr.": RectangularAperture(1., .5, compression=[.5, 1.]),
-    "Rot.": RectangularAperture(1., .5, rotation=np.pi / 4.)
-})
-
-
-test_plots_of_aps({
-    "Occ. Soft": CircularAperture(1., occulting=True, softening=True),
-    "Occ. Hard": CircularAperture(1., occulting=True),
-    "Soft": CircularAperture(1., softening=True),
-    "Hard": CircularAperture(1.),
-    "Trans.": CircularAperture(1., centre=[.5, .5]),
-    "Strain": CircularAperture(1., strain=[.5, 0.]),
-    "Compr.": CircularAperture(1., compression=[.5, 1.])
-})
-
-
-test_plots_of_aps({
-    "Occ. Soft": AnnularAperture(1., .5, occulting=True, softening=True),
-    "Occ. Hard": AnnularAperture(1., .5, occulting=True),
-    "Soft": AnnularAperture(1., .5, softening=True),
-    "Hard": AnnularAperture(1., .5),
-    "Trans.": AnnularAperture(1., .5, centre=[.5, .5]),
-    "Strain": AnnularAperture(1., .5, strain=[.5, 0.]),
-    "Compr.": AnnularAperture(1., .5, compression=[.5, 1.])
-})
-
-
-test_plots_of_aps({
-   "Occ. Soft": SquareAperture(1., occulting=True, softening=True),
-   "Occ. Hard": SquareAperture(1., occulting=True),
-   "Soft": SquareAperture(1., softening=True),
-   "Hard": SquareAperture(1.),
-   "Trans.": SquareAperture(1., centre=[.5, .5]),
-   "Strain": SquareAperture(1., strain=[.5, 0.]),
-   "Compr.": SquareAperture(1., compression=[.5, 1.]),
-   "Rot.": SquareAperture(1., rotation=np.pi / 4.)
-})
-
-
-vert_angs: float = np.linspace(0., 2. * np.pi, 4, endpoint=False)
-verts: float = np.array([np.cos(vert_angs), np.sin(vert_angs)])
-trans_verts: float = np.transpose(verts)
-
-
-test_plots_of_aps({
-   "Occ. Soft": IrregularPolygonalAperture(trans_verts, occulting=True, softening=True),
-   "Occ. Hard": IrregularPolygonalAperture(trans_verts, occulting=True),
-   "Soft": IrregularPolygonalAperture(trans_verts, softening=True),
-   "Hard": IrregularPolygonalAperture(trans_verts),
-   "Trans.": IrregularPolygonalAperture(trans_verts, centre=[.5, .5]),
-   "Strain": IrregularPolygonalAperture(trans_verts, strain=[.5, 0.]),
-   "Compr.": IrregularPolygonalAperture(trans_verts, compression=[.5, 1.]),
-   "Rot.": IrregularPolygonalAperture(trans_verts, rotation=np.pi / 4.)
-})
-
-
-test_plots_of_aps({
-   "Occ. Soft": RegularPolygonalAperture(5, 1., occulting=True, softening=True),
-   "Occ. Hard": RegularPolygonalAperture(5, 1., occulting=True),
-   "Soft": RegularPolygonalAperture(5, 1., softening=True),
-   "Hard": RegularPolygonalAperture(5, 1.),
-   "Trans.": RegularPolygonalAperture(5, 1., centre=[.5, .5]),
-   "Strain": RegularPolygonalAperture(5, 1., strain=[.5, 0.]),
-   "Compr.": RegularPolygonalAperture(5, 1., compression=[.5, 1.]),
-   "Rot.": RegularPolygonalAperture(5, 1., rotation=np.pi / 4.)
-})
-
-
-test_plots_of_aps({
-   "Occ. Soft": HexagonalAperture(1., occulting=True, softening=True),
-   "Occ. Hard": HexagonalAperture(1., occulting=True),
-   "Soft": HexagonalAperture(1., softening=True),
-   "Hard": HexagonalAperture(1.),
-   "Trans.": HexagonalAperture(1., centre=[.5, .5]),
-   "Strain": HexagonalAperture(1., strain=[.5, 0.]),
-   "Compr.": HexagonalAperture(1., compression=[.5, 1.]),
-   "Rot.": HexagonalAperture(1., rotation=np.pi / 4.)
-})
+#test_plots_of_aps({
+#    "Occ. Soft": RectangularAperture(1., .5, occulting=True, softening=True),
+#    "Occ. Hard": RectangularAperture(1., .5, occulting=True),
+#    "Soft": RectangularAperture(1., .5, softening=True),
+#    "Hard": RectangularAperture(1., .5),
+#    "Trans.": RectangularAperture(1., .5, centre=[.5, .5]),
+#    "Strain": RectangularAperture(1., .5, strain=[.5, 0.]),
+#    "Compr.": RectangularAperture(1., .5, compression=[.5, 1.]),
+#    "Rot.": RectangularAperture(1., .5, rotation=np.pi / 4.)
+#})
+#
+#
+#test_plots_of_aps({
+#    "Occ. Soft": CircularAperture(1., occulting=True, softening=True),
+#    "Occ. Hard": CircularAperture(1., occulting=True),
+#    "Soft": CircularAperture(1., softening=True),
+#    "Hard": CircularAperture(1.),
+#    "Trans.": CircularAperture(1., centre=[.5, .5]),
+#    "Strain": CircularAperture(1., strain=[.5, 0.]),
+#    "Compr.": CircularAperture(1., compression=[.5, 1.])
+#})
+#
+#
+#test_plots_of_aps({
+#    "Occ. Soft": AnnularAperture(1., .5, occulting=True, softening=True),
+#    "Occ. Hard": AnnularAperture(1., .5, occulting=True),
+#    "Soft": AnnularAperture(1., .5, softening=True),
+#    "Hard": AnnularAperture(1., .5),
+#    "Trans.": AnnularAperture(1., .5, centre=[.5, .5]),
+#    "Strain": AnnularAperture(1., .5, strain=[.5, 0.]),
+#    "Compr.": AnnularAperture(1., .5, compression=[.5, 1.])
+#})
+#
+#
+#test_plots_of_aps({
+#   "Occ. Soft": SquareAperture(1., occulting=True, softening=True),
+#   "Occ. Hard": SquareAperture(1., occulting=True),
+#   "Soft": SquareAperture(1., softening=True),
+#   "Hard": SquareAperture(1.),
+#   "Trans.": SquareAperture(1., centre=[.5, .5]),
+#   "Strain": SquareAperture(1., strain=[.5, 0.]),
+#   "Compr.": SquareAperture(1., compression=[.5, 1.]),
+#   "Rot.": SquareAperture(1., rotation=np.pi / 4.)
+#})
+#
+#
+#vert_angs: float = np.linspace(0., 2. * np.pi, 4, endpoint=False)
+#verts: float = np.array([np.cos(vert_angs), np.sin(vert_angs)])
+#trans_verts: float = np.transpose(verts)
+#
+#
+#test_plots_of_aps({
+#   "Occ. Soft": IrregularPolygonalAperture(trans_verts, occulting=True, softening=True),
+#   "Occ. Hard": IrregularPolygonalAperture(trans_verts, occulting=True),
+#   "Soft": IrregularPolygonalAperture(trans_verts, softening=True),
+#   "Hard": IrregularPolygonalAperture(trans_verts),
+#   "Trans.": IrregularPolygonalAperture(trans_verts, centre=[.5, .5]),
+#   "Strain": IrregularPolygonalAperture(trans_verts, strain=[.5, 0.]),
+#   "Compr.": IrregularPolygonalAperture(trans_verts, compression=[.5, 1.]),
+#   "Rot.": IrregularPolygonalAperture(trans_verts, rotation=np.pi / 4.)
+#})
+#
+#
+#test_plots_of_aps({
+#   "Occ. Soft": RegularPolygonalAperture(5, 1., occulting=True, softening=True),
+#   "Occ. Hard": RegularPolygonalAperture(5, 1., occulting=True),
+#   "Soft": RegularPolygonalAperture(5, 1., softening=True),
+#   "Hard": RegularPolygonalAperture(5, 1.),
+#   "Trans.": RegularPolygonalAperture(5, 1., centre=[.5, .5]),
+#   "Strain": RegularPolygonalAperture(5, 1., strain=[.5, 0.]),
+#   "Compr.": RegularPolygonalAperture(5, 1., compression=[.5, 1.]),
+#   "Rot.": RegularPolygonalAperture(5, 1., rotation=np.pi / 4.)
+#})
+#
+#
+#test_plots_of_aps({
+#   "Occ. Soft": HexagonalAperture(1., occulting=True, softening=True),
+#   "Occ. Hard": HexagonalAperture(1., occulting=True),
+#   "Soft": HexagonalAperture(1., softening=True),
+#   "Hard": HexagonalAperture(1.),
+#   "Trans.": HexagonalAperture(1., centre=[.5, .5]),
+#   "Strain": HexagonalAperture(1., strain=[.5, 0.]),
+#   "Compr.": HexagonalAperture(1., compression=[.5, 1.]),
+#   "Rot.": HexagonalAperture(1., rotation=np.pi / 4.)
+#})
 
 
 test_plots_of_aps({
     "Comp. Trans.": CompoundAperture(
         centre = [.5, .5],
-        apertures = {
-            "pupil": CircularAperture(1.),
-            "obstruction": SquareAperture(.5, occulting=True),
-    }),
+        apertures = [
+            CircularAperture(1.),
+            SquareAperture(.5, occulting=True),
+    ]),
     "Circ. Trans.": CompoundAperture(
-        apertures = {
-            "pupil": CircularAperture(1., centre=[.1, .1]),
-            "obstruction": SquareAperture(.5, occulting=True),
-    }),
+        apertures = [
+            CircularAperture(1., centre=[.1, .1]),
+            SquareAperture(.5, occulting=True),
+    ]),
     "Comp. Rot.": CompoundAperture(
         rotation = np.pi / 4.,
-        apertures = {
-            "pupil": CircularAperture(1.),
-            "obstruction": SquareAperture(.5, occulting=True),
-    }),
+        apertures = [
+            CircularAperture(1.),
+            SquareAperture(.5, occulting=True),
+    ]),
     "Comp. Strain": CompoundAperture(
         strain = [.05, .05],
-        apertures = {
-            "pupil": CircularAperture(1.),
-            "obstruction": SquareAperture(.5, occulting=True),
-    }),
+        apertures = [
+            CircularAperture(1.),
+            SquareAperture(.5, occulting=True),
+    ]),
     "Comp. Compr.": CompoundAperture(
         compression = [1., .5],
-        apertures = {
-            "pupil": CircularAperture(1.),
-            "obstruction": SquareAperture(.5, occulting=True),
-    })
+        apertures = [
+            CircularAperture(1.),
+            SquareAperture(.5, occulting=True),
+    ])
 })
 
 
 test_plots_of_aps({
     "Comp. Trans.": MultiAperture(
         centre = [.5, .5],
-        apertures = {
-            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
-            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
-        }
+        apertures = [
+            CircularAperture(.5, centre=[-.5, 0.]),
+            CircularAperture(.5, centre=[.5, 0.]),
+        ]
     ),
     "Circ. Trans.": MultiAperture(
-        apertures = {
-            "pupil": CircularAperture(.5, centre=[-.5, .5]),
-            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
-        }
+        apertures = [
+            CircularAperture(.5, centre=[-.5, .5]),
+            CircularAperture(.5, centre=[.5, 0.]),
+        ]
     ),
     "Comp. Rot.": MultiAperture(
         rotation = np.pi / 4.,
-        apertures = {
-            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
-            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
-        }
+        apertures = [
+            CircularAperture(.5, centre=[-.5, 0.]),
+            CircularAperture(.5, centre=[.5, 0.]),
+        ]
     ),
     "Comp. Strain": MultiAperture(
         strain = [.05, .05],
-        apertures = {
-            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
-            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
-        }
+        apertures = [
+            CircularAperture(.5, centre=[-.5, 0.]),
+            CircularAperture(.5, centre=[.5, 0.]),
+        ]
     ),
     "Comp. Compr.": MultiAperture(
         compression = [1., .5],
-        apertures = {
-            "pupil": CircularAperture(.5, centre=[-.5, 0.]),
-            "obstruction": CircularAperture(.5, centre=[.5, 0.]),
-        }
+        apertures = [
+            CircularAperture(.5, centre=[-.5, 0.]),
+            CircularAperture(.5, centre=[.5, 0.]),
+        ]
     )
 })
 
