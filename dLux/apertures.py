@@ -2183,7 +2183,29 @@ class UniformSpider(Spider):
             name = name)
         self.number_of_struts = int(num_struts)
         self.width_of_struts = np.asarray(strut_width).astype(float)
- 
+
+
+    def _stacked_struts(self: ApertureLayer, coords: Array) -> Array:
+        """
+        This method is designed to produce an output that can 
+        be fed directly into `_soft_edged` and `_hard_edged`.
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront.
+
+        Returns:
+        --------
+        struts: Array, meters
+            An array of distances from each strut.
+        """
+        coords = self._coordinates(coords)
+        angles = np.linspace(0, two_pi, self.number_of_struts, endpoint=False)
+        angles += self.rotation
+        return vmap(self._strut)(angles, coords[None, :, :]) 
+
+
  
     def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
         """
