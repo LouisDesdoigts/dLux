@@ -1734,9 +1734,11 @@ class CompositeAperture(AbstractDynamicAperture):
         coords = wavefront.pixel_coordinates
         aper = self._aperture(coords)
         
-        if self.has_a
-        opd = self._opd(coords)
-        return wavefront.multiply_amplitude(aper).add_opd(opd)
+        if self.has_aberrated:
+            opd = self._opd(coords)
+            wavefront = wavefront.add_opd(opd)
+
+        return wavefront.multiply_amplitude(aper)
         
 
     def _opd(self: ApertureLayer, coords : Array) -> Array:        
