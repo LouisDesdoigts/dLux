@@ -1933,7 +1933,7 @@ class MultiAperture(CompositeAperture):
 
     def __init__(
             self        : ApertureLayer,
-            apertures   : dict,
+            apertures   : list,
             centre      : Array = np.array([0., 0.]), 
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
@@ -1942,7 +1942,7 @@ class MultiAperture(CompositeAperture):
         """
         Parameters:
         -----------
-        apertures: dict(str, Aperture)
+        apertures: list(Aperture)
            The apertures that make up the compound aperture. 
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
