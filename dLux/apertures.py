@@ -1664,7 +1664,10 @@ class CompositeAperture(AbstractDynamicAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    has_abberated : bool
+        A flag to indicate if there are any aperutres with basis
     """
+    has_abberated : bool
     apertures: dict
     
 
@@ -1706,6 +1709,13 @@ class CompositeAperture(AbstractDynamicAperture):
             name = name)
         self.apertures = dLux.utils.list_to_dict(apertures)
 
+        # check if has abberated aperture
+        self.has_abberated = False
+        
+        for aperture in self.apertures.values():
+            if isinstance(aperture, AberratedAperture):
+                self.has_abberated = True
+
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         """
@@ -1723,6 +1733,8 @@ class CompositeAperture(AbstractDynamicAperture):
         """
         coords = wavefront.pixel_coordinates
         aper = self._aperture(coords)
+        
+        if self.has_a
         opd = self._opd(coords)
         return wavefront.multiply_amplitude(aper).add_opd(opd)
         
@@ -1906,10 +1918,7 @@ class MultiAperture(CompositeAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
-    has_abberated : bool
-        A flag to indicate if there are any aperutres with basis
     """
-    has_abberated : bool
 
 
     def __init__(
@@ -1943,12 +1952,6 @@ class MultiAperture(CompositeAperture):
             compression = compression,
             rotation = rotation,
             name = "MultiAperture")
-        # check if has abberated aperture
-        self.has_abberated = False
-        
-        for aperture in self.apertures.values():
-            if isinstance(aperture, AberratedAperture):
-                self.has_abberated = True
 
 
     def _aperture(self, coords: Array) -> Array:
