@@ -2324,6 +2324,9 @@ class AberratedAperture(ApertureLayer):
         self.coeffs = np.asarray(coeffs).astype(float)
  
 
+    def _aperture(self : ApertureLayer, coords : Array) -> Array:
+        return self.aperture._aperture(coords)
+        
     def get_aperture(self : ApertureLayer, npix: int, width: float) -> Array:
         """
         Compute the array representing the aperture. 
