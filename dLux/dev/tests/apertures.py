@@ -212,77 +212,77 @@ def test_plots_of_stat_aber_aps(aber_aps: dict):
 #   "Compr.": HexagonalAperture(1., compression=[.5, 1.]),
 #   "Rot.": HexagonalAperture(1., rotation=np.pi / 4.)
 #})
-
-
-test_plots_of_aps({
-    "Comp. Trans.": CompoundAperture(
-        centre = [.5, .5],
-        apertures = [
-            CircularAperture(1.),
-            SquareAperture(.5, occulting=True),
-    ]),
-    "Circ. Trans.": CompoundAperture(
-        apertures = [
-            CircularAperture(1., centre=[.1, .1]),
-            SquareAperture(.5, occulting=True),
-    ]),
-    "Comp. Rot.": CompoundAperture(
-        rotation = np.pi / 4.,
-        apertures = [
-            CircularAperture(1.),
-            SquareAperture(.5, occulting=True),
-    ]),
-    "Comp. Strain": CompoundAperture(
-        strain = [.05, .05],
-        apertures = [
-            CircularAperture(1.),
-            SquareAperture(.5, occulting=True),
-    ]),
-    "Comp. Compr.": CompoundAperture(
-        compression = [1., .5],
-        apertures = [
-            CircularAperture(1.),
-            SquareAperture(.5, occulting=True),
-    ])
-})
-
-
-test_plots_of_aps({
-    "Comp. Trans.": MultiAperture(
-        centre = [.5, .5],
-        apertures = [
-            CircularAperture(.5, centre=[-.5, 0.]),
-            CircularAperture(.5, centre=[.5, 0.]),
-        ]
-    ),
-    "Circ. Trans.": MultiAperture(
-        apertures = [
-            CircularAperture(.5, centre=[-.5, .5]),
-            CircularAperture(.5, centre=[.5, 0.]),
-        ]
-    ),
-    "Comp. Rot.": MultiAperture(
-        rotation = np.pi / 4.,
-        apertures = [
-            CircularAperture(.5, centre=[-.5, 0.]),
-            CircularAperture(.5, centre=[.5, 0.]),
-        ]
-    ),
-    "Comp. Strain": MultiAperture(
-        strain = [.05, .05],
-        apertures = [
-            CircularAperture(.5, centre=[-.5, 0.]),
-            CircularAperture(.5, centre=[.5, 0.]),
-        ]
-    ),
-    "Comp. Compr.": MultiAperture(
-        compression = [1., .5],
-        apertures = [
-            CircularAperture(.5, centre=[-.5, 0.]),
-            CircularAperture(.5, centre=[.5, 0.]),
-        ]
-    )
-})
+#
+#
+#test_plots_of_aps({
+#    "Comp. Trans.": CompoundAperture(
+#        centre = [.5, .5],
+#        apertures = [
+#            CircularAperture(1.),
+#            SquareAperture(.5, occulting=True),
+#    ]),
+#    "Circ. Trans.": CompoundAperture(
+#        apertures = [
+#            CircularAperture(1., centre=[.1, .1]),
+#            SquareAperture(.5, occulting=True),
+#    ]),
+#    "Comp. Rot.": CompoundAperture(
+#        rotation = np.pi / 4.,
+#        apertures = [
+#            CircularAperture(1.),
+#            SquareAperture(.5, occulting=True),
+#    ]),
+#    "Comp. Strain": CompoundAperture(
+#        strain = [.05, .05],
+#        apertures = [
+#            CircularAperture(1.),
+#            SquareAperture(.5, occulting=True),
+#    ]),
+#    "Comp. Compr.": CompoundAperture(
+#        compression = [1., .5],
+#        apertures = [
+#            CircularAperture(1.),
+#            SquareAperture(.5, occulting=True),
+#    ])
+#})
+#
+#
+#test_plots_of_aps({
+#    "Comp. Trans.": MultiAperture(
+#        centre = [.5, .5],
+#        apertures = [
+#            CircularAperture(.5, centre=[-.5, 0.]),
+#            CircularAperture(.5, centre=[.5, 0.]),
+#        ]
+#    ),
+#    "Circ. Trans.": MultiAperture(
+#        apertures = [
+#            CircularAperture(.5, centre=[-.5, .5]),
+#            CircularAperture(.5, centre=[.5, 0.]),
+#        ]
+#    ),
+#    "Comp. Rot.": MultiAperture(
+#        rotation = np.pi / 4.,
+#        apertures = [
+#            CircularAperture(.5, centre=[-.5, 0.]),
+#            CircularAperture(.5, centre=[.5, 0.]),
+#        ]
+#    ),
+#    "Comp. Strain": MultiAperture(
+#        strain = [.05, .05],
+#        apertures = [
+#            CircularAperture(.5, centre=[-.5, 0.]),
+#            CircularAperture(.5, centre=[.5, 0.]),
+#        ]
+#    ),
+#    "Comp. Compr.": MultiAperture(
+#        compression = [1., .5],
+#        apertures = [
+#            CircularAperture(.5, centre=[-.5, 0.]),
+#            CircularAperture(.5, centre=[.5, 0.]),
+#        ]
+#    )
+#})
 
 test_plots_of_aps({
     "Van.": UniformSpider(3, .1),
@@ -294,38 +294,38 @@ test_plots_of_aps({
     "More": UniformSpider(6, .1)
 })
 
-nolls: int = [i for i in range(3, 10)]
-coeffs: float = np.ones((len(nolls),), float)
-
-test_plots_of_aber_aps({
-   "Squarikes": AberratedAperture(nolls, coeffs, SquareAperture(np.sqrt(2.))),
-   "Annikes": AberratedAperture(nolls, coeffs, AnnularAperture(1., .5)),
-   "Rectikes": AberratedAperture(nolls, coeffs, RectangularAperture(1., 2.)),
-   "Hexikes": AberratedAperture(nolls, coeffs, HexagonalAperture(1.)),
-   "Reg. Pol. 5": AberratedAperture(nolls, coeffs, RegularPolygonalAperture(5, 1.)),
-   "Reg. Pol. 4": AberratedAperture(nolls, coeffs, RegularPolygonalAperture(4, 1.)),
-   "Circ.": AberratedAperture(nolls, coeffs, CircularAperture(1.))
-})
-
-test_plots_of_stat_aps({
-   "Sq.": StaticAperture(SquareAperture(np.sqrt(2.)), 128, 2. / 128),
-   "Ann.": StaticAperture(AnnularAperture(1., .5), 128, 2. / 128),
-   "Rect.": StaticAperture(RectangularAperture(1., 2.), 128, 2. / 128),
-   "Hex.": StaticAperture(HexagonalAperture(1.), 128, 2. / 128),
-   "Reg. Pol. 5": StaticAperture(RegularPolygonalAperture(5, 1.), 128, 2. / 128),
-   "Reg. Pol. 4": StaticAperture(RegularPolygonalAperture(4, 1.), 128, 2. / 128),
-   "Circ.": StaticAperture(CircularAperture(1.), 128, 2. / 128)
-})
-
-nolls: int = [i for i in range(3, 10)]
-coeffs: float = np.ones((len(nolls),), float)
-
-test_plots_of_stat_aber_aps({
-    "Sq.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, SquareAperture(np.sqrt(2.))), 128, 2. / 128),
-    "Ann.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, AnnularAperture(1., .5)), 128, 2. / 128),
-    "Rect.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, RectangularAperture(1., 2.)), 128, 2. / 128),
-    "Hex.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, HexagonalAperture(1.)), 128, 2. / 128),
-    "Reg. Pol. 5": StaticAberratedAperture(AberratedAperture(nolls, coeffs, RegularPolygonalAperture(5, 1.)), 128, 2. / 128),
-    "Reg. Pol. 4": StaticAberratedAperture(AberratedAperture(nolls, coeffs, RegularPolygonalAperture(4, 1.)), 128, 2. / 128),
-    "Circ.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, CircularAperture(1.)), 128, 2. / 128)
-})
+#nolls: int = [i for i in range(3, 10)]
+#coeffs: float = np.ones((len(nolls),), float)
+#
+#test_plots_of_aber_aps({
+#   "Squarikes": AberratedAperture(nolls, coeffs, SquareAperture(np.sqrt(2.))),
+#   "Annikes": AberratedAperture(nolls, coeffs, AnnularAperture(1., .5)),
+#   "Rectikes": AberratedAperture(nolls, coeffs, RectangularAperture(1., 2.)),
+#   "Hexikes": AberratedAperture(nolls, coeffs, HexagonalAperture(1.)),
+#   "Reg. Pol. 5": AberratedAperture(nolls, coeffs, RegularPolygonalAperture(5, 1.)),
+#   "Reg. Pol. 4": AberratedAperture(nolls, coeffs, RegularPolygonalAperture(4, 1.)),
+#   "Circ.": AberratedAperture(nolls, coeffs, CircularAperture(1.))
+#})
+#
+#test_plots_of_stat_aps({
+#   "Sq.": StaticAperture(SquareAperture(np.sqrt(2.)), 128, 2. / 128),
+#   "Ann.": StaticAperture(AnnularAperture(1., .5), 128, 2. / 128),
+#   "Rect.": StaticAperture(RectangularAperture(1., 2.), 128, 2. / 128),
+#   "Hex.": StaticAperture(HexagonalAperture(1.), 128, 2. / 128),
+#   "Reg. Pol. 5": StaticAperture(RegularPolygonalAperture(5, 1.), 128, 2. / 128),
+#   "Reg. Pol. 4": StaticAperture(RegularPolygonalAperture(4, 1.), 128, 2. / 128),
+#   "Circ.": StaticAperture(CircularAperture(1.), 128, 2. / 128)
+#})
+#
+#nolls: int = [i for i in range(3, 10)]
+#coeffs: float = np.ones((len(nolls),), float)
+#
+#test_plots_of_stat_aber_aps({
+#    "Sq.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, SquareAperture(np.sqrt(2.))), 128, 2. / 128),
+#    "Ann.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, AnnularAperture(1., .5)), 128, 2. / 128),
+#    "Rect.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, RectangularAperture(1., 2.)), 128, 2. / 128),
+#    "Hex.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, HexagonalAperture(1.)), 128, 2. / 128),
+#    "Reg. Pol. 5": StaticAberratedAperture(AberratedAperture(nolls, coeffs, RegularPolygonalAperture(5, 1.)), 128, 2. / 128),
+#    "Reg. Pol. 4": StaticAberratedAperture(AberratedAperture(nolls, coeffs, RegularPolygonalAperture(4, 1.)), 128, 2. / 128),
+#    "Circ.": StaticAberratedAperture(AberratedAperture(nolls, coeffs, CircularAperture(1.)), 128, 2. / 128)
+#})

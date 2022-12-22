@@ -2212,6 +2212,7 @@ class UniformSpider(Spider):
         coords = self._coordinates(coords)
         angles = np.linspace(0, 2 * np.pi, self.number_of_struts, endpoint=False)
         angles += self.rotation
+        # TODO: Optimise with tree_map
         struts = np.array([self._strut(angle, coords) for angle in angles]) - self.width_of_struts / 2.
         softened = self._soften(struts)
         return softened.prod(axis=0)
@@ -2234,7 +2235,7 @@ class UniformSpider(Spider):
         coords = self._coordinates(coords)
         angles = np.linspace(0, 2 * np.pi, self.number_of_struts, endpoint=False)
         angles += self.rotation
-        struts = np.array([self._strut(angle, coords) for angle in angles]) - self.width_of_struts / 2.
+        struts = np.array([self._strut(angle, coords) for angle in angles]) 
         struts = struts > self.width_of_struts / 2. 
         return struts.prod(axis=0)
 
