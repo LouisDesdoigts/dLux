@@ -1716,11 +1716,11 @@ class CompositeAperture(AbstractDynamicAperture):
         self.apertures = dLux.utils.list_to_dictionary(apertures)
 
         # check if has abberated aperture
-        self.has_abberated = False
+        self.has_aberrated = False
         
         for aperture in self.apertures.values():
             if isinstance(aperture, AberratedAperture):
-                self.has_abberated = True
+                self.has_aberrated = True
 
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
