@@ -1717,7 +1717,7 @@ class CompositeAperture(AbstractDynamicAperture):
         # check if has abberated aperture
         self.has_aberrated = False
         
-        for aperture in self.apertures:
+        for aperture in apertures:
             if isinstance(aperture, AberratedAperture):
                 self.has_aberrated = True
                 break
