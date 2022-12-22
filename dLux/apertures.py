@@ -468,7 +468,8 @@ class AnnularAperture(DynamicAperture):
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
             occulting   : bool = False, 
-            softening   : bool = False) -> ApertureLayer:
+            softening   : bool = False,
+            name        : str = "AnnularAperture") -> ApertureLayer:
         """
         Parameters
         ----------
@@ -499,7 +500,7 @@ class AnnularAperture(DynamicAperture):
             compression = compression, 
             occulting = occulting, 
             softening = softening,
-            name = "AnnularAperture")
+            name = name)
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
 
@@ -595,7 +596,8 @@ class CircularAperture(DynamicAperture):
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
             occulting   : bool = False, 
-            softening   : bool = False) -> Array:
+            softening   : bool = False,
+            name        : str = "CircularAperture") -> Array:
         """
         Parameters:
         -----------
@@ -624,7 +626,7 @@ class CircularAperture(DynamicAperture):
             compression = compression, 
             occulting = occulting, 
             softening = softening,
-            name = "CircularAperture")
+            name = name) 
         self.radius = np.asarray(radius).astype(float)
 
 
@@ -726,7 +728,8 @@ class RectangularAperture(DynamicAperture):
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
-            softening   : bool = False) -> ApertureLayer: 
+            softening   : bool = False,
+            name        : str = "RectangularAperture") -> ApertureLayer: 
         """
         Parameters
         ----------
@@ -761,7 +764,7 @@ class RectangularAperture(DynamicAperture):
             rotation = rotation, 
             occulting = occulting, 
             softening = softening,
-            name = "RectangularAperture")
+            name = name)
         self.length = np.asarray(length).astype(float)
         self.width = np.asarray(width).astype(float)
 
@@ -859,7 +862,8 @@ class SquareAperture(DynamicAperture):
             compression : Array = [1., 1.],
             rotation    : Array = 0.,
             occulting   : bool = False, 
-            softening   : bool = False) -> ApertureLayer: 
+            softening   : bool = False,
+            name        : str = "SquareAperture") -> ApertureLayer: 
         """
         Parameters:
         -----------
@@ -892,7 +896,7 @@ class SquareAperture(DynamicAperture):
             rotation = rotation, 
             occulting = occulting, 
             softening = softening,
-            name = "SquareAperture")
+            name = name)
         self.width = np.asarray(width).astype(float)
 
 
@@ -1194,7 +1198,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
-            softening   : bool = False) -> ApertureLayer:
+            softening   : bool = False,
+            name        : str = "IrregularPolygonalAperture") -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -1227,7 +1232,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
             rotation = rotation,
             occulting = occulting,
             softening = softening,
-            name = "IrregularPolygonalAperture")
+            name = name)
         
         vertices = np.array(vertices).astype(float)
         shape = vertices.shape
@@ -1430,7 +1435,8 @@ class RegularPolygonalAperture(PolygonalAperture):
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
-            softening   : bool = False) -> ApertureLayer:
+            softening   : bool = False,
+            name        : str = "RegularPolygonalAperture") -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -1461,7 +1467,7 @@ class RegularPolygonalAperture(PolygonalAperture):
             rotation = rotation,
             occulting = occulting,
             softening = softening,
-            name = "RegularPolygonalAperture")
+            name = name)
         self.nsides = int(nsides)
         self.rmax = np.array(rmax).astype(float)
         
@@ -1600,7 +1606,7 @@ class HexagonalAperture(RegularPolygonalAperture):
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False,
-            name        : str = None) -> ApertureLayer:
+            name        : str = "HexagonalAperture") -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -1632,8 +1638,8 @@ class HexagonalAperture(RegularPolygonalAperture):
             compression = compression,
             rotation = rotation,
             occulting = occulting,
-            softening = softening)
-        self.name = "HexagonalAperture"
+            softening = softening,
+            name = name)
 
 
 class CompositeAperture(AbstractDynamicAperture):
@@ -1849,7 +1855,8 @@ class CompoundAperture(CompositeAperture):
             centre      : Array = np.array([0., 0.]), 
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
-            rotation    : Array = np.array(0.)) -> ApertureLayer:
+            rotation    : Array = np.array(0.),
+            name        : str = "CompoundAperture") -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -1873,10 +1880,10 @@ class CompoundAperture(CompositeAperture):
             strain = strain,
             compression = compression,
             rotation = rotation,
-            name = "CompoundAperture")
+            name = name)
         
 
-    def _aperture(self, coords: Array) -> Array:
+    def _aperture(self: ApertureLayer, coords: Array) -> Array:
         """
         Evaluates the aperture. 
 
@@ -1929,7 +1936,8 @@ class MultiAperture(CompositeAperture):
             centre      : Array = np.array([0., 0.]), 
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
-            rotation    : Array = np.array(0.)) -> ApertureLayer:
+            rotation    : Array = np.array(0.),
+            name        : str = "MultiAperture") -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -1953,7 +1961,7 @@ class MultiAperture(CompositeAperture):
             strain = strain,
             compression = compression,
             rotation = rotation,
-            name = "MultiAperture")
+            name = name)
 
 
     def _aperture(self, coords: Array) -> Array:
@@ -2135,7 +2143,8 @@ class UniformSpider(Spider):
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
-            softening   : bool = False) -> ApertureLayer:
+            softening   : bool = False,
+            name        : str = "UniformSpider") -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -2170,7 +2179,7 @@ class UniformSpider(Spider):
             compression = compression,
             rotation = rotation,
             softening = softening,
-            name = "UniformSpider")
+            name = name)
         self.number_of_struts = int(num_struts)
         self.width_of_struts = np.asarray(strut_width).astype(float)
  
@@ -2265,7 +2274,8 @@ class AberratedAperture(ApertureLayer):
     def __init__(self   : ApertureLayer, 
             noll_inds   : Array,
             coeffs      : Array,
-            aperture    : ApertureLayer) -> ApertureLayer: 
+            aperture    : ApertureLayer, 
+            name        : str = "AberratedAperture") -> ApertureLayer: 
         """
         Parameters:
         -----------
@@ -2290,7 +2300,7 @@ class AberratedAperture(ApertureLayer):
         else:
             self.basis_funcs = [self.jth_zernike(j) for j in noll_inds]
 
-        super().__init__(name = "AberratedAperture")
+        super().__init__(name = name)
         self.aperture = aperture
         self.nterms = int(len(coeffs))
         self.coeffs = np.asarray(coeffs).astype(float)
@@ -2717,7 +2727,8 @@ class StaticAperture(ApertureLayer):
             self        : ApertureLayer, 
             aperture    : ApertureLayer, 
             npix        : int, 
-            pix_scale   : float) -> ApertureLayer:
+            pix_scale   : float,
+            name        : str = "StaticAperture") -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -2731,7 +2742,7 @@ class StaticAperture(ApertureLayer):
         """
         assert isinstance(aperture, DynamicAperture)
 
-        super().__init__("StaticAperture")
+        super().__init__(name = name)
         coords = dLux.utils.get_pixel_coordinates(npix, pix_scale)
         self.aperture = aperture._aperture(coords)
 
@@ -2774,7 +2785,8 @@ class StaticAberratedAperture(ApertureLayer):
             self        : ApertureLayer, 
             aperture    : ApertureLayer, 
             npix        : int, 
-            pix_scale   : float) -> ApertureLayer:
+            pix_scale   : float,
+            name        : "StaticAberratedAperture") -> ApertureLayer:
         """
         Parameters:
         -----------
@@ -2788,7 +2800,7 @@ class StaticAberratedAperture(ApertureLayer):
         """
         assert isinstance(aperture, AberratedAperture)
 
-        super().__init__("StaticAberratedAperture")
+        super().__init__(name = name)
         coords = dLux.utils.get_pixel_coordinates(npix, pix_scale)
         self.aperture = aperture.aperture._aperture(coords)
         self.basis = aperture._basis(coords)
