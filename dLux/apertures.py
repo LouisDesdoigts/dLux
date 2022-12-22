@@ -1769,7 +1769,7 @@ class CompositeAperture(AbstractDynamicAperture):
         _map = lambda ap: ap._basis(coords)
         _leaf = lambda ap: isinstance(ap, AberratedAperture)
         basis = tree_map(_map, list(self.apertures.values()), is_leaf=_leaf)
-        return np.array(basis).sum(axis=0) 
+        return np.array(basis).sum(axis=0).sum(axis=0) 
 
 
     def _stacked_apertures(self: ApertureLayer, coords: Array) -> Array:
@@ -2340,7 +2340,7 @@ class AberratedAperture(ApertureLayer):
         aperture: Array 
             The aperture.
         """
-        coords = dLux.utils.get_pixel_coordinates(npix, widthi / npix)
+        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
         return self.aperture._aperture(coords)
 
 
