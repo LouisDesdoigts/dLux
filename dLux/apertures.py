@@ -1723,7 +1723,18 @@ class CompositeAperture(AbstractDynamicAperture):
         """
         coords = wavefront.pixel_coordinates
         aper = self._aperture(coords)
-        return wavefront.multiply_amplitude(aper)
+        opd = self._opd(coords)
+        return wavefront.multiply_amplitude(aper).add_phase(opd)
+        
+
+    def _opd(self, coords : Array) -> Array:        
+        basis = []
+        
+        for aperture in self.apertures.values():
+            if isinstance(aperture, AberratedAperture):
+                basis.append(aperture._opd(coords))
+
+        return np.stack(basis).sum(axis=0) 
 
 
     @abstractmethod
@@ -1925,19 +1936,6 @@ class MultiAperture(CompositeAperture):
         _leaf = lambda ap: isinstance(ap, ApertureLayer)
         aps = jax.tree_map(_map, self.apertures.values(), is_leaf=_leaf)
         return aps.sum(axis=0)
-
-
-    def _opd(self, coords : Array) -> Array:        
-        basis = []
-        
-        for aperture in self.apertures.values():
-            if isinstance(aperture, AberratedAperture):
-                basis.append(aperture._opd(coords))
-
-        return np.stack(basis).sum(axis=0)
-
-    
-        
 
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
