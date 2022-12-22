@@ -1133,8 +1133,7 @@ def create_uniform_spider() -> callable:
             centre      : Array = [0., 0.], 
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
-            rotation    : Array = 0.,
-            occulting   : bool = False, 
+            rotation    : Array = 0., 
             softening   : bool = False) -> OpticalLayer:
         return dLux.apertures.UniformSpider(
             number_of_struts, 
@@ -1143,7 +1142,6 @@ def create_uniform_spider() -> callable:
             strain=strain,
             compression=compression,
             rotation=rotation,
-            occulting=occulting,
             softening=softening)
     return _create_uniform_spider
 
