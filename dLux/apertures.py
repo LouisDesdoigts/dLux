@@ -721,10 +721,10 @@ class RectangularAperture(DynamicAperture):
     def __init__(self   : ApertureLayer, 
             length      : Array, 
             width       : Array, 
-            centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
+            centre      : Array = np.array([0., 0.]),
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False) -> ApertureLayer: 
         """
