@@ -1669,7 +1669,7 @@ class CompositeAperture(AbstractDynamicAperture):
     
 
     def __init__(self   : ApertureLayer, 
-            apertures   : dict,
+            apertures   : list,
             centre      : Array = np.array([0., 0.]), 
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
@@ -1693,9 +1693,9 @@ class CompositeAperture(AbstractDynamicAperture):
         rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
-        apertures : dict
+        apertures: list
            The aperture objects stored in a dictionary of type
-           {str : Aperture} where the Aperture is a subclass of the 
+           {str: Aperture} where the Aperture is a subclass of the 
            Aperture.
         """
         super().__init__(
@@ -1704,39 +1704,7 @@ class CompositeAperture(AbstractDynamicAperture):
             compression = compression,
             rotation = rotation,
             name = name)
-        self.apertures = apertures
-
-
-    def __getitem__(self: ApertureLayer, key: str) -> ApertureLayer:
-        """
-        Get one of the apertures from the collection using a name 
-        based lookup.
-
-        Parameters:
-        -----------
-        key: str
-           The name of the aperture to lookup. See the class doc
-           string for more information.
-
-        Returns:
-        --------
-        layer: Aperture
-           The layer that was stored under the name `key`. 
-        """
-        return self.apertures[key]
-
-
-    def __setitem__(self, key: str, value: ApertureLayer) -> None:
-        """
-        Assign a new value to one of the aperture mirrors.
-        Parameters
-        ----------
-        key : str
-           The name of the segement to replace for example "B1-7".
-        value : ApertureLayer
-           The new value to assign to that segement.
-        """
-        self.apertures[key] = value
+        self.apertures = dLux.utils.list_to_dict(apertures)
 
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
