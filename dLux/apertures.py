@@ -1921,7 +1921,9 @@ class MultiAperture(CompositeAperture):
            apertures that were stored. 
         """
         coords = self._coordinates(coords)
-        aps = np.stack([ap._aperture(coords) for ap in self.apertures.values()])
+        _map = lambda ap: ap._aperture(coords)
+        _leaf = lambda ap: isinstance(ap, ApertureLayer)
+        aps = jax.tree_map(_map, self.apertures.values(), is_leaf=_leaf)
         return aps.sum(axis=0)
 
 
