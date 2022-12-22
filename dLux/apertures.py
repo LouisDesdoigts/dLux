@@ -1,6 +1,6 @@
 import dLux
 from abc import ABC, abstractmethod
-from jax import numpy as np, lax, tree_map
+from jax import numpy as np, lax, tree_map, vmap
 
 
 Array = np.ndarray
@@ -2203,7 +2203,7 @@ class UniformSpider(Spider):
         coords = self._coordinates(coords)
         angles = np.linspace(0, two_pi, self.number_of_struts, endpoint=False)
         angles += self.rotation
-        return vmap(self._strut)(angles, coords[None, :, :]) 
+        return vmap(self._strut, in_axes=(0, None))(angles, coords) 
 
 
  
