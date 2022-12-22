@@ -182,7 +182,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         """
 
 
-    def aperture(self: ApertureLayer, npix: int, width: float) -> Array:
+    def get_aperture(self: ApertureLayer, npix: int, width: float) -> Array:
         """
         Compute the array representing the aperture. 
 
@@ -2319,7 +2319,7 @@ class AberratedAperture(ApertureLayer):
         self.coeffs = np.asarray(coeffs).astype(float)
  
 
-    def aperture(self : ApertureLayer, npix: int, width: float) -> Array:
+    def get_aperture(self : ApertureLayer, npix: int, width: float) -> Array:
         """
         Compute the array representing the aperture. 
 
@@ -2339,7 +2339,7 @@ class AberratedAperture(ApertureLayer):
         return self.aperture._aperture(coords)
 
 
-    def basis(self: ApertureLayer, npix: int, width: float) -> Array:
+    def get_basis(self: ApertureLayer, npix: int, width: float) -> Array:
         """
         Compute the array representing the aberrations. 
 
