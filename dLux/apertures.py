@@ -1713,7 +1713,7 @@ class CompositeAperture(AbstractDynamicAperture):
             compression = compression,
             rotation = rotation,
             name = name)
-        self.apertures = dLux.utils.list_to_dict(apertures)
+        self.apertures = dLux.utils.list_to_dictionary(apertures)
 
         # check if has abberated aperture
         self.has_abberated = False
