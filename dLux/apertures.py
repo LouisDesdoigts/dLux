@@ -1710,22 +1710,20 @@ class CompositeAperture(AbstractDynamicAperture):
     def __call__(self, wavefront: Wavefront) -> Wavefront:
         """
         Apply the aperture to an incoming wavefront.
-        Parameters
-        ----------
-        parameters : dict
-           A dictionary containing the parameters of the model. 
-           The dictionary must satisfy `parameters.get("Wavefront")
-           != None`. 
-        Returns
-        -------
-        parameters : dict
-           The parameter, parameters, with the "Wavefront"; key
-           value updated. 
+
+        Parameters:
+        -----------
+        wavefront: Wavefront
+            The incoming wavefront. 
+ 
+
+        Returns:
+        --------
+            The outgoing wavefront.
         """
-        wavefront = wavefront.multiply_amplitude(
-           self._aperture(
-               wavefront.pixel_coordinates))
-        return wavefront
+        coords = wavefront.pixel_coordinates
+        aper = self._aperture(coords)
+        return wavefront.multiply_amplitude(aper)
 
 
     @abstractmethod
