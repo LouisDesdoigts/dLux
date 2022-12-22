@@ -1727,7 +1727,22 @@ class CompositeAperture(AbstractDynamicAperture):
         return wavefront.multiply_amplitude(aper).add_phase(opd)
         
 
-    def _opd(self, coords : Array) -> Array:        
+    def _opd(self: ApertureLayer, coords : Array) -> Array:        
+        """
+        Calculate the optical path difference of the aperture.
+        This will only occur if the `CompositeAperture` 
+        contains an `AberratedAperture`.
+
+        Parameters:
+        -----------
+        coords: Array, meters
+            The paraxial coordinates of the wavefront. 
+
+        Returns:
+        --------
+        opd: Array, meters
+            The optical path difference of the aperture.
+        """
         basis = []
         
         for aperture in self.apertures.values():
