@@ -182,6 +182,26 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         """
 
 
+    def aperture(self: ApertureLayer, npix: int, width: float) -> Array:
+        """
+        Compute the array representing the aperture. 
+
+        Parameters:
+        -----------
+        npix: int
+            The number of pixels accross one edge of the aperture.  
+        width: float, meters
+            The width of the aperture in meters. 
+
+        Returns:
+        --------
+        aperture: Array 
+            The aperture.
+        """
+        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        return self._aperture(coords)
+
+
 class DynamicAperture(AbstractDynamicAperture, ABC):
     """
     An abstract class that defines the structure of all the concrete
