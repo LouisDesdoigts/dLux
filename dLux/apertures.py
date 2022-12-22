@@ -1670,10 +1670,10 @@ class CompositeAperture(AbstractDynamicAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
-    has_abberated : bool
+    has_aberrated : bool
         A flag to indicate if there are any aperutres with basis
     """
-    has_abberated : bool
+    has_aberrated : bool
     apertures: dict
     
 
@@ -1713,14 +1713,17 @@ class CompositeAperture(AbstractDynamicAperture):
             compression = compression,
             rotation = rotation,
             name = name)
-        self.apertures = dLux.utils.list_to_dictionary(apertures)
-
+        
         # check if has abberated aperture
         self.has_aberrated = False
         
-        for aperture in self.apertures.values():
+        for aperture in self.apertures:
             if isinstance(aperture, AberratedAperture):
                 self.has_aberrated = True
+                break
+
+        self.apertures = dLux.utils.list_to_dictionary(apertures)
+
 
 
     def __call__(self, wavefront: Wavefront) -> Wavefront:
