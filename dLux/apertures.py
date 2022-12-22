@@ -1743,13 +1743,10 @@ class CompositeAperture(AbstractDynamicAperture):
         opd: Array, meters
             The optical path difference of the aperture.
         """
-        basis = []
-        
-        for aperture in self.apertures.values():
-            if isinstance(aperture, AberratedAperture):
-                basis.append(aperture._opd(coords))
-
-        return np.stack(basis).sum(axis=0) 
+        _map = lambda ap: ap._basis(coords)
+        _leaf = lambda ap: isinstance(ap, AberratedAperture)
+        basis = jax.tree_map(_map, self.apertures.values, is_leaf=_leaf)
+        return basis.sum(axis=0) 
 
 
     @abstractmethod
