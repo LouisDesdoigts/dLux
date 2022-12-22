@@ -1975,32 +1975,6 @@ class MultiAperture(CompositeAperture):
         return aps.sum(axis=0)
 
 
-    def __call__(self, wavefront: Wavefront) -> Wavefront:
-        """
-        Apply the aperture to an incoming wavefront.
-        Parameters
-        ----------
-        parameters : dict
-           A dictionary containing the parameters of the model. 
-           The dictionary must satisfy `parameters.get("Wavefront")
-           != None`. 
-        Returns
-        -------
-        parameters : dict
-           The parameter, parameters, with the "Wavefront"; key
-           value updated. 
-        """
-        # apply amplitude changes
-        wavefront = wavefront.multiply_amplitude(
-           self._aperture(
-               wavefront.pixel_coordinates))
-        
-        if self.has_abberated:
-            wavefront = wavefront.add_opd(self._opd(wavefront.pixel_coordinates))
-                
-        return wavefront
-
-
 class Spider(DynamicAperture, ABC):
     """
     An abstraction on the concept of an optical spider for a space telescope.
