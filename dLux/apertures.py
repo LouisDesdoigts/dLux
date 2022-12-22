@@ -2048,7 +2048,7 @@ class Spider(DynamicAperture, ABC):
             strain = strain, 
             compression = compression,
             rotation = rotation,
-            occulting = True,
+            occulting = False,
             softening = softening,
             name = name)
  
@@ -2143,7 +2143,6 @@ class UniformSpider(Spider):
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.),
-            occulting   : bool = False, 
             softening   : bool = False,
             name        : str = "UniformSpider") -> ApertureLayer:
         """
