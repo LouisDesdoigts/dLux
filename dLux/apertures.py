@@ -1507,22 +1507,22 @@ class RegularPolygonalAperture(PolygonalAperture):
             the aperture. What is returned is the non-occulting 
             version of the aperture. 
         """
-        x: float = coords[0]
-        y: float = coords[1]
+        x = coords[0]
+        y = coords[1]
 
-        neg_pi_to_pi_phi: float = np.arctan2(y, x) 
-        alpha: float = np.pi / self.nsides
+        neg_pi_to_pi_phi = np.arctan2(y, x) 
+        alpha = np.pi / self.nsides
             
-        i: int = np.arange(self.nsides)[:, None, None] # Dummy index
-        bounds: float = 2. * i * alpha
+        i = np.arange(self.nsides)[:, None, None] # Dummy index
+        bounds = 2. * i * alpha
             
-        ms: float = -1 / np.tan(2. * i * alpha + alpha)
-        xs: float = self.rmax * np.cos(2. * i * alpha)
-        ys: float = self.rmax * np.sin(2. * i * alpha)
-        dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
-        inside: float = self._is_orig_left_of_edge(ms, xs, ys)
+        ms = -1 / np.tan(2. * i * alpha + alpha)
+        xs = self.rmax * np.cos(2. * i * alpha)
+        ys = self.rmax * np.sin(2. * i * alpha)
+        dists = self._perp_dists_from_lines(ms, xs, ys, x, y)
+        inside = self._is_orig_left_of_edge(ms, xs, ys)
          
-        dist: float = self._soften(inside * dists)
+        dist = self._soften(inside * dists)
         return dist.prod(axis=0)
 
 
@@ -1540,22 +1540,22 @@ class RegularPolygonalAperture(PolygonalAperture):
         aperture: Array
             A binary float representation of the aperture.
         """
-        x: float = coords[0]
-        y: float = coords[1]
+        x = coords[0]
+        y = coords[1]
 
-        neg_pi_to_pi_phi: float = np.arctan2(y, x) 
-        alpha: float = np.pi / self.nsides
+        neg_pi_to_pi_phi = np.arctan2(y, x) 
+        alpha = np.pi / self.nsides
             
-        i: int = np.arange(self.nsides)[:, None, None] # Dummy index
-        bounds: float = 2. * i * alpha
+        i = np.arange(self.nsides)[:, None, None] # Dummy index
+        bounds = 2. * i * alpha
             
-        ms: float = -1 / np.tan(2. * i * alpha + alpha)
-        xs: float = self.rmax * np.cos(2. * i * alpha)
-        ys: float = self.rmax * np.sin(2. * i * alpha)
-        dists: float = self._perp_dists_from_lines(ms, xs, ys, x, y)
-        inside: float = self._is_orig_left_of_edge(ms, xs, ys)
+        ms = -1 / np.tan(2. * i * alpha + alpha)
+        xs = self.rmax * np.cos(2. * i * alpha)
+        ys = self.rmax * np.sin(2. * i * alpha)
+        dists = self._perp_dists_from_lines(ms, xs, ys, x, y)
+        inside = self._is_orig_left_of_edge(ms, xs, ys)
          
-        dist: float = (inside * dists) > 0.
+        dist = (inside * dists) > 0.
         return dist.prod(axis=0)
 
 
