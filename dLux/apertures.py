@@ -84,9 +84,9 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
 
     def __init__(
             self        : ApertureLayer, 
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
             rotation    : Array = 0.,
             name        : str = 'AbstractDynamicAperture') -> ApertureLayer:
         """
@@ -252,9 +252,9 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
     
 
     def __init__(self   : ApertureLayer, 
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
             rotation    : Array = 0.,
             occulting   : bool = False, 
             softening   : bool = False,
@@ -479,9 +479,9 @@ class AnnularAperture(DynamicAperture):
     def __init__(self   : ApertureLayer, 
             rmax        : Array, 
             rmin        : Array, 
-            centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
+            centre      : Array = np.array([0., 0.]),
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
             occulting   : bool = False, 
             softening   : bool = False,
             name        : str = "AnnularAperture") -> ApertureLayer:
@@ -611,9 +611,9 @@ class CircularAperture(DynamicAperture):
  
     def __init__(self   : ApertureLayer, 
             radius      : Array, 
-            centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
+            centre      : Array = np.array([0., 0.]),
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
             occulting   : bool = False, 
             softening   : bool = False,
             name        : str = "CircularAperture") -> Array:
@@ -884,9 +884,9 @@ class SquareAperture(DynamicAperture):
  
     def __init__(self   : ApertureLayer, 
             width       : Array, 
-            centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
+            centre      : Array = np.array([0., 0.]),
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
             rotation    : Array = 0.,
             occulting   : bool = False, 
             softening   : bool = False,
@@ -1029,9 +1029,9 @@ class PolygonalAperture(DynamicAperture, ABC):
 
     # TODO: This may be removable
     def __init__(self   : ApertureLayer, 
-            centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
+            centre      : Array = np.array([0., 0.]), 
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
             rotation    : Array = 0.,
             occulting   : bool = False, 
             softening   : bool = False,
