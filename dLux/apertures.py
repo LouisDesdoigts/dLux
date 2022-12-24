@@ -345,7 +345,6 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         """
 
 
-
     @abstractmethod
     def _hard_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
@@ -804,8 +803,8 @@ class RectangularAperture(DynamicAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        x_mask = self._soften(- np.abs(coordinates[0]) + self.height / 2.)
-        y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
+        y_mask = self._soften(- np.abs(coordinates[1]) + self.height / 2.)
+        x_mask = self._soften(- np.abs(coordinates[0]) + self.width / 2.)
         return x_mask * y_mask
 
     
@@ -823,8 +822,8 @@ class RectangularAperture(DynamicAperture):
         aperture: Array
             A binary float representation of the aperture.
         """
-        x_mask = np.abs(coordinates[0]) < self.height / 2.
-        y_mask = np.abs(coordinates[1]) < self.width / 2.
+        y_mask = np.abs(coordinates[1]) < self.height / 2.
+        x_mask = np.abs(coordinates[0]) < self.width / 2.
         return (x_mask * y_mask).astype(float)
 
 
@@ -1776,8 +1775,7 @@ class CompositeAperture(AbstractDynamicAperture):
         Parameters
         ----------
         wavefront: Wavefront
-            The incoming wavefront. 
- 
+            The incoming wavefront.
 
         Returns
         -------
