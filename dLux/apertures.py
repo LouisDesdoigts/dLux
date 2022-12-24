@@ -71,8 +71,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -104,8 +103,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         name: str = 'AbstractDynamicAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -242,8 +240,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -274,8 +271,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         occulting: bool = False
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
@@ -729,8 +725,7 @@ class RectangularAperture(DynamicAperture):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     occulting: bool 
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
@@ -772,8 +767,7 @@ class RectangularAperture(DynamicAperture):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         occulting: bool = False
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
@@ -866,8 +860,7 @@ class SquareAperture(DynamicAperture):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     occulting: bool 
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
@@ -905,8 +898,7 @@ class SquareAperture(DynamicAperture):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         occulting: bool = False
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
@@ -1012,8 +1004,7 @@ class PolygonalAperture(DynamicAperture, ABC):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
@@ -1048,8 +1039,7 @@ class PolygonalAperture(DynamicAperture, ABC):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         occulting: bool = False
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
@@ -1211,8 +1201,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
@@ -1250,8 +1239,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         occulting: bool = False
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
@@ -1455,8 +1443,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
@@ -1499,8 +1486,7 @@ class RegularPolygonalAperture(PolygonalAperture):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         occulting: bool = False
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
@@ -1637,8 +1623,7 @@ class HexagonalAperture(RegularPolygonalAperture):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
@@ -1678,8 +1663,7 @@ class HexagonalAperture(RegularPolygonalAperture):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         occulting: bool = False
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
@@ -1730,8 +1714,7 @@ class CompositeAperture(AbstractDynamicAperture):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -1763,8 +1746,7 @@ class CompositeAperture(AbstractDynamicAperture):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         name: str = 'CompositeAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -1910,8 +1892,7 @@ class CompoundAperture(CompositeAperture):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -1940,8 +1921,7 @@ class CompoundAperture(CompositeAperture):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         name: str = 'CompoundAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -1995,8 +1975,7 @@ class MultiAperture(CompositeAperture):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -2025,8 +2004,7 @@ class MultiAperture(CompositeAperture):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         name: str = 'MultiAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -2074,8 +2052,7 @@ class Spider(DynamicAperture, ABC):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
@@ -2108,8 +2085,7 @@ class Spider(DynamicAperture, ABC):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
@@ -2202,8 +2178,7 @@ class UniformSpider(Spider):
         The x and y compression of the coordinate system. This 
         is a constant. 
     rotation: Array, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
+        The counter-clockwise rotation of the coordinate system.
     softening: bool
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
@@ -2242,8 +2217,7 @@ class UniformSpider(Spider):
             The x and y compression of the coordinate system. This 
             is a constant. 
         rotation: Array, radians = np.array(0.)
-            The rotation of the aperture away from the positive 
-            x-axis. 
+            The counter-clockwise rotation of the coordinate system.
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 

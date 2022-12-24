@@ -4,7 +4,8 @@ import dLux
 __all__ = ["cartesian_to_polar", "polar_to_cartesian",
            "get_positions_vector",  "get_pixel_positions",
            "get_polar_positions",   "get_coordinates_vector",
-           "get_pixel_coordinates", "get_polar_coordinates"]
+           "get_pixel_coordinates", "get_polar_coordinates",
+           "rotate", "translate", "strain", "compress"]
 
 
 Array = np.ndarray
@@ -214,7 +215,7 @@ def get_polar_coordinates(npixels     : int,
 
 def rotate(coords: Array, rotation: Array) -> Array:
     """
-    Rotate the coordinate system by a pre-specified amount,
+    Rotate the coordinate system by a pre-specified amount.
 
     Parameters:
     -----------
@@ -223,7 +224,7 @@ def rotate(coords: Array, rotation: Array) -> Array:
         system. The leading dimensions specifies the x and then 
         the y coordinates in that order. 
     rotation: Array, radians
-        Rotation clockwise from the x-axis.
+        The counter-clockwise rotation to apply.
 
     Returns:
     --------
@@ -231,8 +232,8 @@ def rotate(coords: Array, rotation: Array) -> Array:
         The rotated coordinate system. 
     """
     x, y = coords[0], coords[1]
-    new_x = np.cos(rotation) * x + np.sin(rotation) * y
-    new_y = -np.sin(rotation) * x + np.cos(rotation) * y
+    new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
+    new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
     return np.array([new_x, new_y])
 
 
