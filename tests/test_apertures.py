@@ -19,7 +19,7 @@ class TestAperturesCommonInterfaces():
     def _assert_valid_soft_aperture(aperture, msg=''):
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all(), msg
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all(), msg
-        # there should also exist something in bounds (assuming edges are within coords)
+        # there should also exist something in bounds (assuming edges are within coordinates)
         assert np.logical_and(aperture > 0., aperture < 1.).any(), msg
         
     # input is all the fixtures that need testing
@@ -41,7 +41,7 @@ class TestAperturesCommonInterfaces():
     
     def _test_single_aperture_class(self, aperture_fixture):
         
-        coords = dLux.utils.get_pixel_coordinates(512, 2./512)
+        coordinates = dLux.utils.get_pixel_coordinates(512, 2./512)
         
         x_offset = 1.
         y_offset = 1.
@@ -72,7 +72,7 @@ class TestAperturesCommonInterfaces():
                             actual_kwargs["rotation"] = rotation
                             
                         
-                        aperture = aperture_fixture(**actual_kwargs)._aperture(coords)
+                        aperture = aperture_fixture(**actual_kwargs)._aperture(coordinates)
                         
                         msg = f'{actual_kwargs}, on ctor {aperture_fixture}'
                         
@@ -102,26 +102,26 @@ class TestUniformSpider(object):
         """
         npix = 128
         width = 2.
-        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        coordinates = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
         # Case Translated 
         spider = create_uniform_spider(centre=[1., 1.], softening=False)
-        aperture = spider._aperture(coords)
+        aperture = spider._aperture(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Rotated 
         spider = create_uniform_spider(rotation=np.pi/4., softening=False)
-        aperture = spider._aperture(coords)
+        aperture = spider._aperture(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Strained 
         spider = create_uniform_spider(strain=[.05, .05], softening=False)
-        aperture = spider._aperture(coords)
+        aperture = spider._aperture(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Compression
         spider = create_uniform_spider(compression=[1.05, .95], softening=False)
-        aperture = spider._aperture(coords)
+        aperture = spider._aperture(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
 
@@ -131,29 +131,29 @@ class TestUniformSpider(object):
         """
         npix = 128
         width = 2.
-        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        coordinates = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
         # Case Translated 
         spider = create_uniform_spider(centre=[1., 1.], softening=False)
-        aperture = spider._aperture(coords)
+        aperture = spider._aperture(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Rotated 
         spider = create_uniform_spider(rotation=np.pi/4., softening=False)
-        aperture = spider._aperture(coords)
+        aperture = spider._aperture(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Strained 
         spider = create_uniform_spider(strain=[.05, .05], softening=False)
-        aperture = spider._aperture(coords)
+        aperture = spider._aperture(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Compression
         spider = create_uniform_spider(compression=[1.05, .95], softening=False)
-        aperture = spider._aperture(coords)
+        aperture = spider._aperture(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
@@ -184,12 +184,12 @@ class TestAberratedAperture(object):
         """
         width = 2.
         npix = 128
-        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        coordinates = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
         ap = create_circular_aperture()
 
-        aber_ap = create_aberrated_aperture(aperture=ap)._basis(coords)
-        ap = ap._aperture(coords)
+        aber_ap = create_aberrated_aperture(aperture=ap)._basis(coordinates)
+        ap = ap._aperture(coordinates)
 
         abers = np.where(ap == 0., aber_ap, 0.)
         assert (abers == 0.).all()

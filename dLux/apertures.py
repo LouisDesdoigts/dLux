@@ -117,42 +117,43 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         self.rotation = np.asarray(rotation).astype(float)
 
 
-    def _coordinates(self: ApertureLayer, coords: Array) -> Array:
+    def _coordinates(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Transform the paraxial coordinates into the coordinate
         system of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the `Wavefront`. 
 
         Returns
         -------
-        coords: Array, meters
+        coordinates: Array, meters
             The coordinates of the `Aperture`.
         """
         is_trans = (self.centre != np.zeros((2,), float)).any()
-        coords = lax.cond(is_trans,
-            lambda: dLux.utils.coordinates.translate(coords, self.centre),
-            lambda: coords)
+        coordinates = lax.cond(is_trans,
+            lambda: dLux.utils.coordinates.translate(coordinates, self.centre),
+            lambda: coordinates)
 
         is_compr = (self.compression != np.ones((2,), float)).any()
-        coords = lax.cond(is_compr,
-            lambda: dLux.utils.coordinates.compress(coords, self.compression),
-            lambda: coords)
+        coordinates = lax.cond(is_compr,
+            lambda: dLux.utils.coordinates.compress(coordinates, \
+                self.compression),
+            lambda: coordinates)
 
         is_strain = (self.strain != np.zeros((2,), float)).any()
-        coords = lax.cond(is_strain,
-            lambda: dLux.utils.coordinates.strain(coords, self.strain),
-            lambda: coords)
+        coordinates = lax.cond(is_strain,
+            lambda: dLux.utils.coordinates.strain(coordinates, self.strain),
+            lambda: coordinates)
 
         is_rot = (self.rotation != 0.)
-        coords = lax.cond(is_rot,
-            lambda: dLux.utils.coordinates.rotate(coords, self.rotation),
-            lambda: coords)
+        coordinates = lax.cond(is_rot,
+            lambda: dLux.utils.coordinates.rotate(coordinates, self.rotation),
+            lambda: coordinates)
 
-        return coords
+        return coordinates
 
 
     def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
@@ -169,19 +170,19 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         wavefront: Wavefront
             The wavefront after encountering the aperture.
         """
-        coords = wavefront.pixel_coordinates
-        aperture = self._aperture(coords)
+        coordinates = wavefront.pixel_coordinates
+        aperture = self._aperture(coordinates)
         return wavefront.multiply_amplitude(aperture)
 
     
     @abstractmethod
-    def _aperture(self: ApertureLayer, coords: Array) -> Array:
+    def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Compute the array representing the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinate system of the wavefront.
 
         Returns
@@ -207,8 +208,8 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         aperture: Array 
             The aperture.
         """
-        coords = dLux.utils.get_pixel_coordinates(npixels, width / npixels)
-        return self._aperture(coords)
+        coordinates = dLux.utils.get_pixel_coordinates(npixels, width / npixels)
+        return self._aperture(coordinates)
 
 
 class DynamicAperture(AbstractDynamicAperture, ABC):
@@ -352,13 +353,13 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
 
 
     @abstractmethod
-    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _hard_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Creates the hard edged version of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront.
 
         Returns:
@@ -391,13 +392,13 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
-    def _aperture(self: ApertureLayer, coords: Array) -> Array:
+    def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Compute the array representing the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinate system of the wavefront.
 
         Returns
@@ -405,12 +406,12 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         aperture: Array 
             The aperture.
         """
-        coords = self._coordinates(coords) 
+        coordinates = self._coordinates(coordinates) 
 
         if self.softening:
-            aperture = self._soft_edged(coords)
+            aperture = self._soft_edged(coordinates)
         else:
-            aperture = self._hard_edged(coords)
+            aperture = self._hard_edged(coordinates)
 
         if self.occulting:
             aperture = (1. - aperture)
@@ -524,7 +525,7 @@ class AnnularAperture(DynamicAperture):
         self.rmin = np.asarray(rmin).astype(float)
 
 
-    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -538,18 +539,18 @@ class AnnularAperture(DynamicAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        coords = np.hypot(coords[0], coords[1])
-        return self._soften(coords - self.rmin) * \
-            self._soften(- coords + self.rmax)
+        coordinates = np.hypot(coordinates[0], coordinates[1])
+        return self._soften(coordinates - self.rmin) * \
+            self._soften(- coordinates + self.rmax)
 
 
-    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _hard_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Creates the hard edged version of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront.
 
         Returns
@@ -557,8 +558,9 @@ class AnnularAperture(DynamicAperture):
         aperture: Array
             A binary float representation of the aperture.
         """
-        coords = np.hypot(coords[0], coords[1])
-        return ((coords > self.rmin) * (coords < self.rmax)).astype(float)
+        coordinates = np.hypot(coordinates[0], coordinates[1])
+        return ((coordinates > self.rmin) * \
+            (coordinates < self.rmax)).astype(float)
 
 
     def _extent(self: ApertureLayer) -> Array:
@@ -653,7 +655,7 @@ class CircularAperture(DynamicAperture):
         self.radius = np.asarray(radius).astype(float)
 
 
-    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
@@ -667,17 +669,17 @@ class CircularAperture(DynamicAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        coords = np.hypot(coords[0], coords[1])
-        return self._soften(- coords + self.radius)
+        coordinates = np.hypot(coordinates[0], coordinates[1])
+        return self._soften(- coordinates + self.radius)
 
 
-    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _hard_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Creates the hard edged version of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront.
 
         Returns
@@ -685,8 +687,8 @@ class CircularAperture(DynamicAperture):
         aperture: Array
             A binary float representation of the aperture.
         """
-        coords = np.hypot(coords[0], coords[1])
-        return (coords < self.radius).astype(float)
+        coordinates = np.hypot(coordinates[0], coordinates[1])
+        return (coordinates < self.radius).astype(float)
 
 
     def _extent(self: ApertureLayer) -> float:
@@ -796,13 +798,13 @@ class RectangularAperture(DynamicAperture):
         self.width = np.asarray(width).astype(float)
 
 
-    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the `Wavefront`.
 
         Returns
@@ -810,18 +812,18 @@ class RectangularAperture(DynamicAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        x_mask = self._soften(- np.abs(coords[0]) + self.height / 2.)
-        y_mask = self._soften(- np.abs(coords[1]) + self.width / 2.)
+        x_mask = self._soften(- np.abs(coordinates[0]) + self.height / 2.)
+        y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
     
-    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _hard_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Creates the hard edged version of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront.
 
         Returns
@@ -829,8 +831,8 @@ class RectangularAperture(DynamicAperture):
         aperture: Array
             A binary float representation of the aperture.
         """
-        x_mask = np.abs(coords[0]) < self.height / 2.
-        y_mask = np.abs(coords[1]) < self.width / 2.
+        x_mask = np.abs(coordinates[0]) < self.height / 2.
+        y_mask = np.abs(coordinates[1]) < self.width / 2.
         return (x_mask * y_mask).astype(float)
 
 
@@ -928,13 +930,13 @@ class SquareAperture(DynamicAperture):
         self.width = np.asarray(width).astype(float)
 
 
-    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Measures the distance from the edges of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the `Wavefront`.
 
         Returns
@@ -942,18 +944,18 @@ class SquareAperture(DynamicAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        x_mask = self._soften(- np.abs(coords[0]) + self.width / 2.)
-        y_mask = self._soften(- np.abs(coords[1]) + self.width / 2.)
+        x_mask = self._soften(- np.abs(coordinates[0]) + self.width / 2.)
+        y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
         return x_mask * y_mask
 
 
-    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _hard_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Creates the hard edged version of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront.
 
         Returns
@@ -961,8 +963,8 @@ class SquareAperture(DynamicAperture):
         aperture: Array
             A binary float representation of the aperture.
         """
-        x_mask = np.abs(coords[0]) < self.width / 2.
-        y_mask = np.abs(coords[1]) < self.width / 2.
+        x_mask = np.abs(coordinates[0]) < self.width / 2.
+        y_mask = np.abs(coordinates[1]) < self.width / 2.
         return (x_mask * y_mask).astype(float)
 
 
@@ -1343,7 +1345,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
         return np.max(dist_to_verts)
     
     
-    def _soft_edged(self: ApertureLayer, coords: float) -> float:
+    def _soft_edged(self: ApertureLayer, coordinates: float) -> float:
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -1375,8 +1377,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         bc_x1 = self.vertices[:, 0][:, None, None]
         bc_y1 = self.vertices[:, 1][:, None, None]
 
-        bc_x = coords[0][None, :, :]
-        bc_y = coords[1][None, :, :]
+        bc_x = coordinates[0][None, :, :]
+        bc_y = coordinates[1][None, :, :]
 
         theta = np.arctan2(bc_y1, bc_x1)
         offset_theta = self._offset(theta, 0.)
@@ -1395,13 +1397,13 @@ class IrregularPolygonalAperture(PolygonalAperture):
         return (soft_edges).prod(axis=0)
 
 
-    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _hard_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Creates the hard edged version of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront.
 
         Returns
@@ -1413,8 +1415,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         bc_x1 = self.vertices[:, 0][:, None, None]
         bc_y1 = self.vertices[:, 1][:, None, None]
 
-        bc_x = coords[0][None, :, :]
-        bc_y = coords[1][None, :, :]
+        bc_x = coordinates[0][None, :, :]
+        bc_y = coordinates[1][None, :, :]
 
         theta = np.arctan2(bc_y1, bc_x1)
         offset_theta = self._offset(theta, 0.)
@@ -1538,7 +1540,7 @@ class RegularPolygonalAperture(PolygonalAperture):
         return self.rmax
         
     
-    def _soft_edged(self: ApertureLayer, coords: float) -> float:
+    def _soft_edged(self: ApertureLayer, coordinates: float) -> float:
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -1566,8 +1568,8 @@ class RegularPolygonalAperture(PolygonalAperture):
             the aperture. What is returned is the non-occulting 
             version of the aperture. 
         """
-        x = coords[0]
-        y = coords[1]
+        x = coordinates[0]
+        y = coordinates[1]
 
         neg_pi_to_pi_phi = np.arctan2(y, x) 
         alpha = np.pi / self.nsides
@@ -1585,13 +1587,13 @@ class RegularPolygonalAperture(PolygonalAperture):
         return dist.prod(axis=0)
 
 
-    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _hard_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Creates the hard edged version of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront.
 
         Returns
@@ -1599,8 +1601,8 @@ class RegularPolygonalAperture(PolygonalAperture):
         aperture: Array
             A binary float representation of the aperture.
         """
-        x = coords[0]
-        y = coords[1]
+        x = coordinates[0]
+        y = coordinates[1]
 
         neg_pi_to_pi_phi = np.arctan2(y, x) 
         alpha = np.pi / self.nsides
@@ -1803,17 +1805,17 @@ class CompositeAperture(AbstractDynamicAperture):
         -------
             The outgoing wavefront.
         """
-        coords = wavefront.pixel_coordinates
-        aper = self._aperture(coords)
+        coordinates = wavefront.pixel_coordinates
+        aper = self._aperture(coordinates)
         
         if self.has_aberrated:
-            opd = self._opd(coords)
+            opd = self._opd(coordinates)
             wavefront = wavefront.add_opd(opd)
 
         return wavefront.multiply_amplitude(aper)
         
 
-    def _opd(self: ApertureLayer, coords : Array) -> Array:        
+    def _opd(self: ApertureLayer, coordinates : Array) -> Array:        
         """
         Calculate the optical path difference of the aperture.
         This will only occur if the `CompositeAperture` 
@@ -1821,7 +1823,7 @@ class CompositeAperture(AbstractDynamicAperture):
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront. 
 
         Returns
@@ -1829,13 +1831,13 @@ class CompositeAperture(AbstractDynamicAperture):
         opd: Array, meters
             The optical path difference of the aperture.
         """
-        _map = lambda ap: ap._basis(coords)
+        _map = lambda ap: ap._basis(coordinates)
         _leaf = lambda ap: isinstance(ap, AberratedAperture)
         basis = tree_map(_map, list(self.apertures.values()), is_leaf=_leaf)
         return np.array(basis).sum(axis=0).sum(axis=0) 
 
 
-    def _stacked_apertures(self: ApertureLayer, coords: Array) -> Array:
+    def _stacked_apertures(self: ApertureLayer, coordinates: Array) -> Array:
         """
         This method is not physically meaningful. What it does 
         is process the aperture arrays so that they are in a 
@@ -1845,7 +1847,7 @@ class CompositeAperture(AbstractDynamicAperture):
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront. 
 
         Returns
@@ -1853,8 +1855,8 @@ class CompositeAperture(AbstractDynamicAperture):
         apers: Array
             A tower of apertures.
         """
-        coords = self._coordinates(coords)
-        _map = lambda ap: ap._aperture(coords)
+        coordinates = self._coordinates(coordinates)
+        _map = lambda ap: ap._aperture(coordinates)
         _leaf = lambda ap: isinstance(ap, ApertureLayer)
         aps = tree_map(_map, list(self.apertures.values()), is_leaf=_leaf)
         return np.array(aps)
@@ -1955,7 +1957,7 @@ class CompoundAperture(CompositeAperture):
             name = name)
         
 
-    def _aperture(self: ApertureLayer, coords: Array) -> Array:
+    def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Evaluates the aperture. 
 
@@ -1970,7 +1972,7 @@ class CompoundAperture(CompositeAperture):
            An aperture generated by combining all of the sub 
            apertures that were stored. 
         """
-        aps = self._stacked_apertures(coords)
+        aps = self._stacked_apertures(coordinates)
         return aps.prod(axis=0)
 
 
@@ -2040,7 +2042,7 @@ class MultiAperture(CompositeAperture):
             name = name)
 
 
-    def _aperture(self, coords: Array) -> Array:
+    def _aperture(self, coordinates: Array) -> Array:
         """
         Evaluates the aperture. 
 
@@ -2055,7 +2057,7 @@ class MultiAperture(CompositeAperture):
            An aperture generated by combining all of the sub 
            apertures that were stored. 
         """
-        aps = self._stacked_apertures(coords)
+        aps = self._stacked_apertures(coordinates)
         return aps.sum(axis=0)
 
 
@@ -2130,9 +2132,9 @@ class Spider(DynamicAperture, ABC):
  
  
     def _strut(
-            self    : ApertureLayer, 
-            angle   : float, 
-            coords  : Array) -> Array:
+            self        : ApertureLayer, 
+            angle       : float, 
+            coordinates : Array) -> Array:
         """
         Generates a representation of a single strut in the spider. This is 
         more complex than you might imagine since the strut can point in 
@@ -2149,7 +2151,7 @@ class Spider(DynamicAperture, ABC):
         strut: float
             The soft edged strut. 
         """
-        x, y = coords[0], coords[1]
+        x, y = coordinates[0], coordinates[1]
         perp = np.tan(angle)
         gradient = np.tan(angle)
         dist = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
@@ -2264,14 +2266,14 @@ class UniformSpider(Spider):
         self.width_of_struts = np.asarray(width_of_struts).astype(float)
 
 
-    def _stacked_struts(self: ApertureLayer, coords: Array) -> Array:
+    def _stacked_struts(self: ApertureLayer, coordinates: Array) -> Array:
         """
         This method is designed to produce an output that can 
         be fed directly into `_soft_edged` and `_hard_edged`.
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront.
 
         Returns
@@ -2279,13 +2281,13 @@ class UniformSpider(Spider):
         struts: Array, meters
             An array of distances from each strut.
         """
-        coords = self._coordinates(coords)
+        coordinates = self._coordinates(coordinates)
         angles = np.linspace(0, two_pi, self.nstruts, endpoint=False)
         angles += self.rotation
-        return vmap(self._strut, in_axes=(0, None))(angles, coords) 
+        return vmap(self._strut, in_axes=(0, None))(angles, coordinates) 
 
  
-    def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -2299,7 +2301,7 @@ class UniformSpider(Spider):
 
         Parameters
         ----------
-        coords: Array
+        coordinates: Array
             The paraxial coordinates of the wavefront.
 
         Returns
@@ -2309,18 +2311,18 @@ class UniformSpider(Spider):
             the aperture. What is returned is the non-occulting 
             version of the aperture. 
         """
-        struts = self._stacked_struts(coords) - self.width_of_struts / 2.
+        struts = self._stacked_struts(coordinates) - self.width_of_struts / 2.
         softened = self._soften(struts)
         return softened.prod(axis=0)
 
 
-    def _hard_edged(self: ApertureLayer, coords: Array) -> Array:
+    def _hard_edged(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Creates the hard edged version of the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinates of the wavefront.
 
         Returns
@@ -2328,7 +2330,7 @@ class UniformSpider(Spider):
         aperture: Array
             A binary float representation of the aperture.
         """
-        struts = self._stacked_struts(coords) > self.width_of_struts / 2. 
+        struts = self._stacked_struts(coordinates) > self.width_of_struts / 2. 
         return struts.prod(axis=0)
 
 
@@ -2354,7 +2356,7 @@ class AberratedAperture(ApertureLayer):
         A list of functions that represent the basis. The exact
         polynomials that are represented will depend on the shape
         of the aperture. 
-    coeffs: Array
+    coefficients: Array
         The coefficients of the basis terms. By learning the 
         coefficients only the amount of time that is required 
         for the learning process is significantly reduced.
@@ -2365,15 +2367,15 @@ class AberratedAperture(ApertureLayer):
     """
     aperture: ApertureLayer
     basis_funcs: list
-    coeffs: Array
+    coefficients: Array
     nterms: int
  
  
-    def __init__(self   : ApertureLayer, 
-            noll_inds   : Array,
-            coeffs      : Array,
-            aperture    : ApertureLayer, 
-            name        : str = "AberratedAperture") -> ApertureLayer: 
+    def __init__(self    : ApertureLayer, 
+            noll_inds    : Array,
+            coefficients : Array,
+            aperture     : ApertureLayer, 
+            name         : str = "AberratedAperture") -> ApertureLayer: 
         """
         Parameters
         ----------
@@ -2383,7 +2385,7 @@ class AberratedAperture(ApertureLayer):
             indices but the noll indices prevent an order to 
             these pairs. All basis can be indexed using the noll
             indices based on `n` and `m`. 
-        coeffs: Array
+        coefficients: Array
             The coefficients of the basis vectors. 
         aperture: ApertureLayer
             The aperture that the basis is defined on. The shape 
@@ -2402,17 +2404,17 @@ class AberratedAperture(ApertureLayer):
 
         super().__init__(name = name)
         self.aperture = aperture
-        self.nterms = int(len(coeffs))
-        self.coeffs = np.asarray(coeffs).astype(float)
+        self.nterms = int(len(coefficients))
+        self.coefficients = np.asarray(coefficients).astype(float)
  
 
-    def _aperture(self : ApertureLayer, coords : Array) -> Array:
+    def _aperture(self : ApertureLayer, coordinates : Array) -> Array:
         """
         Compute the array representing the aperture. 
 
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinate system of the wavefront.
 
         Returns
@@ -2420,7 +2422,7 @@ class AberratedAperture(ApertureLayer):
         aperture: Array 
             The aperture.
         """
-        return self.aperture._aperture(coords)
+        return self.aperture._aperture(coordinates)
         
     def get_aperture(self : ApertureLayer, npixels: int, width: float) -> Array:
         """
@@ -2438,8 +2440,8 @@ class AberratedAperture(ApertureLayer):
         aperture: Array 
             The aperture.
         """
-        coords = dLux.utils.get_pixel_coordinates(npixels, width / npixels)
-        return self.aperture._aperture(coords)
+        coordinates = dLux.utils.get_pixel_coordinates(npixels, width / npixels)
+        return self.aperture._aperture(coordinates)
 
 
     def get_basis(self: ApertureLayer, npixels: int, width: float) -> Array:
@@ -2458,8 +2460,8 @@ class AberratedAperture(ApertureLayer):
         aperture: Array 
             The aberrations.
         """
-        coords = dLux.utils.get_pixel_coordinates(npixels, width / npixels)
-        return self._basis(coords)
+        coordinates = dLux.utils.get_pixel_coordinates(npixels, width / npixels)
+        return self._basis(coordinates)
  
 
     def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
@@ -2476,9 +2478,9 @@ class AberratedAperture(ApertureLayer):
         params: dict 
             A dictionary containing the key "wavefront".
         """
-        coords = wavefront.pixel_coordinates
-        opd = self._opd(coords)
-        aperture = self.aperture._aperture(coords)
+        coordinates = wavefront.pixel_coordinates
+        opd = self._opd(coordinates)
+        aperture = self.aperture._aperture(coordinates)
         return wavefront\
             .add_opd(opd)\
             .multiply_amplitude(aperture)
@@ -2604,9 +2606,9 @@ class AberratedAperture(ApertureLayer):
 
        def _jth_radial_zernike(rho: list) -> list:
            rho = np.tile(rho, (MAX_DIFF, 1, 1))
-           coeffs = coefficients.reshape(MAX_DIFF, 1, 1)
+           coefficients_out = coefficients.reshape(MAX_DIFF, 1, 1)
            rads = rho ** (n - 2 * k).reshape(MAX_DIFF, 1, 1)
-           return (coeffs * mask * rads).sum(axis = 0)
+           return (coefficients_out * mask * rads).sum(axis = 0)
                
        return _jth_radial_zernike
 
@@ -2668,10 +2670,10 @@ class AberratedAperture(ApertureLayer):
         """
         n, m = self.noll_index(j)
      
-        def _jth_zernike(coords: list) -> list:
-            polar_coords = dLux.utils.cartesian_to_polar(coords)
-            rho = polar_coords[0]
-            theta = polar_coords[1]
+        def _jth_zernike(coordinates: list) -> list:
+            polar_coordinates = dLux.utils.cartesian_to_polar(coordinates)
+            rho = polar_coordinates[0]
+            theta = polar_coordinates[1]
             aperture = rho <= 1.
             _jth_rad_zern = self.jth_radial_zernike(n, m)
             _jth_pol_zern = self.jth_polar_zernike(n, m)
@@ -2699,24 +2701,24 @@ class AberratedAperture(ApertureLayer):
         """
         _jth_zernike = self.jth_zernike(j)
      
-        def _jth_polike(coords: Array) -> Array:
-            polar = dLux.utils.cartesian_to_polar(coords)
+        def _jth_polike(coordinates: Array) -> Array:
+            polar = dLux.utils.cartesian_to_polar(coordinates)
             rho = polar[0]
             alpha = np.pi / n
             phi = polar[1] + alpha 
             wedge = np.floor((phi + alpha) / (2. * alpha))
             u_alpha = phi - wedge * (2 * alpha)
             r_alpha = np.cos(alpha) / np.cos(u_alpha)
-            return 1 / r_alpha * _jth_zernike(coords / r_alpha)
+            return 1 / r_alpha * _jth_zernike(coordinates / r_alpha)
      
         return _jth_polike
  
  
-    def _basis(self: ApertureLayer, coords: Array) -> Array:
+    def _basis(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinate system on which to generate
             the array. 
  
@@ -2731,8 +2733,8 @@ class AberratedAperture(ApertureLayer):
             It has been removed to save some time in the 
             calculations. 
         """
-        coords = self.aperture._normalised_coordinates(coords)
-        ikes = np.stack([h(coords) for h in self.basis_funcs])
+        coordinates = self.aperture._normalised_coordinates(coordinates)
+        ikes = np.stack([h(coordinates) for h in self.basis_funcs])
         
         is_reg_pol = isinstance(self.aperture, RegularPolygonalAperture)
         is_circ = isinstance(self.aperture, CircularAperture)
@@ -2740,20 +2742,20 @@ class AberratedAperture(ApertureLayer):
         if is_circ or is_reg_pol:
             return ikes
 
-        aperture = self.aperture._aperture(coords)
+        aperture = self.aperture._aperture(coordinates)
         ikes = self._orthonormalise(aperture, ikes)
 
         return ikes 
  
 
-    def _opd(self: ApertureLayer, coords: Array) -> Array:
+    def _opd(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Calculate the optical path difference that is caused 
         by the basis and the aberations that it represents. 
  
         Parameters
         ----------
-        coords: Array, meters
+        coordinates: Array, meters
             The paraxial coordinate system on which to generate
             the array. 
  
@@ -2763,8 +2765,8 @@ class AberratedAperture(ApertureLayer):
             The optical path difference associated with much of 
             the path. 
         """
-        basis = self._basis(coords)
-        opd = np.dot(basis.T, self.coeffs)
+        basis = self._basis(coordinates)
+        opd = np.dot(basis.T, self.coefficients)
         return opd
 
 
@@ -2845,7 +2847,7 @@ class StaticAperture(ApertureLayer):
     def __init__(
             self        : ApertureLayer, 
             aperture    : ApertureLayer, 
-            npixels        : int, 
+            npixels     : int, 
             pixel_scale : float,
             name        : str = "StaticAperture") -> ApertureLayer:
         """
@@ -2864,8 +2866,8 @@ class StaticAperture(ApertureLayer):
         assert isinstance(aperture, DynamicAperture)
 
         super().__init__(name = name)
-        coords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
-        self.aperture = aperture._aperture(coords)
+        coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
+        self.aperture = aperture._aperture(coordinates)
 
 
     def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
@@ -2907,7 +2909,7 @@ class StaticAberratedAperture(ApertureLayer):
     def __init__(
             self        : ApertureLayer, 
             aperture    : ApertureLayer, 
-            npixels        : int, 
+            npixels     : int, 
             pixel_scale : float,
             name        : str = "StaticAberratedAperture") -> ApertureLayer:
         """
@@ -2926,9 +2928,9 @@ class StaticAberratedAperture(ApertureLayer):
         assert isinstance(aperture, AberratedAperture)
 
         super().__init__(name = name)
-        coords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
-        self.aperture = aperture.aperture._aperture(coords)
-        self.basis = aperture._basis(coords)
+        coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
+        self.aperture = aperture.aperture._aperture(coordinates)
+        self.basis = aperture._basis(coordinates)
 
 
     def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
