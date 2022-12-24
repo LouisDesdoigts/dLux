@@ -5,6 +5,7 @@ from jax import numpy as np, lax, tree_map, vmap
 
 Array = np.ndarray
 Wavefront = dLux.wavefronts.Wavefront
+OpticalLayer = dLux.optics.OpticalLayer
 
 
 __all__ = ["CircularAperture", "SquareAperture", 
@@ -19,7 +20,7 @@ __all__ = ["CircularAperture", "SquareAperture",
 two_pi = 2. * np.pi
 
 
-class ApertureLayer(dLux.optics.OpticalLayer, ABC):
+class ApertureLayer(OpticalLayer, ABC):
     """
     The ApertureLayer groups together all of the functionality 
     that is associated with the apertures. Very little of this
@@ -36,8 +37,8 @@ class ApertureLayer(dLux.optics.OpticalLayer, ABC):
 
     
     def __init__(
-            self: dLux.optics.OpticalLayer, 
-            name: str = "ApertureLayer") -> dLux.optics.OpticalLayer:
+            self: OpticalLayer, 
+            name: str = "ApertureLayer") -> OpticalLayer:
         """
         Automatically assigns the name of the layer to be the 
         class name.
