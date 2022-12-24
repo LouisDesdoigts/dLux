@@ -28,8 +28,8 @@ class ApertureLayer(dLux.optics.OpticalLayer, ABC):
     layer within the class Heirachy that exists almost purely 
     as a classification.
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     name: str
         The address of this ApertureLayer within the optical 
         system. 
@@ -48,15 +48,15 @@ class ApertureLayer(dLux.optics.OpticalLayer, ABC):
 
 class AbstractDynamicAperture(ApertureLayer, ABC):
     """
-    AbstractDynamicAperture:
-    ------------------------
+    AbstractDynamicAperture
+    -----------------------
     This class also provides a level of classification without 
     implementing any functionality. It was created so that 
     `DynamicAberratedAperture` and `DynamicAperture` could 
     inherit from a common base. 
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) coordinate of the centre of the aperture.
     strain: Array
@@ -113,13 +113,13 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         Transform the paraxial coordinates into the coordinate
         system of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the `Wavefront`. 
 
-        Returns:
-        --------
+        Returns
+        -------
         coords: Array, meters
             The coordinates of the `Aperture`.
         """
@@ -150,13 +150,13 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         """
         Apply the aperture to an incoming wavefront.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         wavefront: Wavefront
             The wavefront before encountering the aperture.
 
-        Returns:
-        --------
+        Returns
+        -------
         wavefront: Wavefront
             The wavefront after encountering the aperture.
         """
@@ -170,13 +170,13 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         """
         Compute the array representing the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinate system of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array 
             The aperture.
         """
@@ -186,15 +186,15 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         """
         Compute the array representing the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         npix: int
             The number of pixels accross one edge of the aperture.  
         width: float, meters
             The width of the aperture in meters. 
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array 
             The aperture.
         """
@@ -209,8 +209,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
     range of 0. to 1.. Values in between can be used to represent 
     soft edged apertures and intermediate surfaces. 
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -252,8 +252,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         The default aperture is dis-allows the learning of all 
         parameters. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
@@ -317,8 +317,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         to mind the general idea. For a soft edged aperture the 
         metric is different.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         distances: Array
             The distances of each pixel from the edge of the aperture. 
             Again, the words distances is designed to aid in 
@@ -326,8 +326,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             permitting negative distances when inside the aperture
             because this was simplest to implement. 
 
-        Returns:
-        --------
+        Returns
+        -------
         non_occ_ap: Array 
             This is essential the final step in processing to produce
             the aperture. What is returned is the non-occulting 
@@ -341,8 +341,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         """
         Creates the hard edged version of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront.
 
@@ -380,13 +380,13 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         """
         Compute the array representing the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinate system of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array 
             The aperture.
         """
@@ -434,8 +434,8 @@ class AnnularAperture(DynamicAperture):
     the array. By default this is a hard edged aperture but may be 
     in future modifed to provide soft edges. 
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -514,9 +514,9 @@ class AnnularAperture(DynamicAperture):
         coordinates: Array, meters
             The paraxial coordinates of the `Wavefront`.
 
-        Returns:
-        --------
-        metriiic: Array
+        Returns
+        -------
+        metric: Array
             The "distance" from the aperture. 
         """
         coords = np.hypot(coords[0], coords[1])
@@ -528,13 +528,13 @@ class AnnularAperture(DynamicAperture):
         """
         Creates the hard edged version of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array
             A binary float representation of the aperture.
         """
@@ -566,8 +566,8 @@ class CircularAperture(DynamicAperture):
     """
     A circular aperture represented as a binary array.
 
-    Attributes: 
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -599,8 +599,8 @@ class CircularAperture(DynamicAperture):
             softening   : bool = False,
             name        : str = "CircularAperture") -> Array:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
@@ -634,13 +634,13 @@ class CircularAperture(DynamicAperture):
         """
         Measures the distance from the edges of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coordinates: Array, meters
             The paraxial coordinates of the `Wavefront`.
 
-        Returns:
-        --------
+        Returns
+        -------
         metric: Array
             The "distance" from the aperture. 
         """
@@ -652,13 +652,13 @@ class CircularAperture(DynamicAperture):
         """
         Creates the hard edged version of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array
             A binary float representation of the aperture.
         """
@@ -690,8 +690,8 @@ class RectangularAperture(DynamicAperture):
     """
     A rectangular aperture.
 
-    Attributes: 
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -773,13 +773,13 @@ class RectangularAperture(DynamicAperture):
         """
         Measures the distance from the edges of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the `Wavefront`.
 
-        Returns:
-        --------
+        Returns
+        -------
         metric: Array
             The "distance" from the aperture. 
         """
@@ -792,13 +792,13 @@ class RectangularAperture(DynamicAperture):
         """
         Creates the hard edged version of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array
             A binary float representation of the aperture.
         """
@@ -825,8 +825,8 @@ class SquareAperture(DynamicAperture):
     A square aperture. Note: this can also be created from the rectangular 
     aperture class, but this one tracks less parameters.
 
-    Attributes: 
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -865,8 +865,8 @@ class SquareAperture(DynamicAperture):
             softening   : bool = False,
             name        : str = "SquareAperture") -> ApertureLayer: 
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
@@ -904,13 +904,13 @@ class SquareAperture(DynamicAperture):
         """
         Measures the distance from the edges of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the `Wavefront`.
 
-        Returns:
-        --------
+        Returns
+        -------
         metric: Array
             The "distance" from the aperture. 
         """
@@ -923,13 +923,13 @@ class SquareAperture(DynamicAperture):
         """
         Creates the hard edged version of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array
             A binary float representation of the aperture.
         """
@@ -972,8 +972,8 @@ class PolygonalAperture(DynamicAperture, ABC):
     change is applied to an array the new array is given the 
     prefix `bc` standing for "broadcastable".
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -1006,8 +1006,8 @@ class PolygonalAperture(DynamicAperture, ABC):
             softening   : bool = False,
             name        : str = None) -> ApertureLayer:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
@@ -1051,8 +1051,8 @@ class PolygonalAperture(DynamicAperture, ABC):
         I am using x and y separately because the instructions cannot be vectorised
         accross them combined. This function can take any number of points.
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         m: float, None (meters / meter)
             The gradient of the line.
         x1: float, meters
@@ -1066,8 +1066,8 @@ class PolygonalAperture(DynamicAperture, ABC):
             A set of coordinates that you wish to calculate the distance to 
             from the line. Must have the same dimensions as x.
         
-        Returns:
-        --------
+        Returns
+        -------
         dists: float, meters
             The distance of the points (x, y) from the line. Has the same 
             shape as x and y.
@@ -1086,15 +1086,15 @@ class PolygonalAperture(DynamicAperture, ABC):
         Note: This is distinct from `_grads_from_many_points` in that
         it does not wrap arround.
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         xs: float, meters
             The x coordinates of the points.
         ys: float, meters
             The y coordinates of the points.
             
-        Returns:
-        --------
+        Returns
+        -------
         m: float, None (meters / meter)
             The gradient of the chord that connects the two points.
         """
@@ -1111,15 +1111,15 @@ class PolygonalAperture(DynamicAperture, ABC):
         $[\\phi, \\phi + 2 \\pi]$ where $\\phi$ represents the 
         `threshold`. 
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         theta: float, radians
             The angular coordinates.
         threshold: float
             The amount to offset the coordinates by.
         
-        Returns:
-        --------
+        Returns
+        -------
         theta: float, radians 
             The offset coordinate system.
         """
@@ -1137,8 +1137,8 @@ class PolygonalAperture(DynamicAperture, ABC):
         the edge. The edge(s) in this case are defined by a set of 
         gradients, m and points (xs, ys).
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         ms: float, None (meters / meter)
             The gradient of the edge(s).
         xs: float, meters
@@ -1148,8 +1148,8 @@ class PolygonalAperture(DynamicAperture, ABC):
             A set of y coordinates that lie along the edges.
             Must have the same shape as ms.
             
-        Returns:
-        --------
+        Returns
+        -------
         is_left: int
             1 if the origin is to the left else -1.
         """
@@ -1164,8 +1164,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
     The default aperture is dis-allows the learning of all 
     parameters. 
 
-    Attributes: 
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -1201,8 +1201,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
             softening   : bool = False,
             name        : str = "IrregularPolygonalAperture") -> ApertureLayer:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         vertices: Array, meters
             The location of the vertices of the aperture.
         centre: Array, meters
@@ -1260,16 +1260,16 @@ class IrregularPolygonalAperture(PolygonalAperture):
         There is no major performance difference between the different
         methods of reshaping. 
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         x1: float, meters
             The x coordinates of the points that are to be connected. 
         y1: float, meters
             The y coordinates of the points that are to be connected. 
             Must have the same shape as x. 
             
-        Returns:
-        --------
+        Returns
+        -------
         ms: float, None (meters / meter)
             The gradients of the lines that connect the vertices. The 
             vertices wrap around to form a closed shape whatever it 
@@ -1314,8 +1314,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         to mind the general idea. For a soft edged aperture the 
         metric is different.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         distances: Array
             The distances of each pixel from the edge of the aperture. 
             Again, the words distances is designed to aid in 
@@ -1323,8 +1323,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
             permitting negative distances when inside the aperture
             because this was simplest to implement. 
 
-        Returns:
-        --------
+        Returns
+        -------
         non_occ_ap: Array 
             This is essential the final step in processing to produce
             the aperture. What is returned is the non-occulting 
@@ -1357,13 +1357,13 @@ class IrregularPolygonalAperture(PolygonalAperture):
         """
         Creates the hard edged version of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array
             A binary float representation of the aperture.
         """
@@ -1396,8 +1396,8 @@ class RegularPolygonalAperture(PolygonalAperture):
     regular polygonal apertures without using their 
     vertices. 
     
-    Attributes:
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -1438,8 +1438,8 @@ class RegularPolygonalAperture(PolygonalAperture):
             softening   : bool = False,
             name        : str = "RegularPolygonalAperture") -> ApertureLayer:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
@@ -1497,8 +1497,8 @@ class RegularPolygonalAperture(PolygonalAperture):
         to mind the general idea. For a soft edged aperture the 
         metric is different.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         distances: Array
             The distances of each pixel from the edge of the aperture. 
             Again, the words distances is designed to aid in 
@@ -1506,8 +1506,8 @@ class RegularPolygonalAperture(PolygonalAperture):
             permitting negative distances when inside the aperture
             because this was simplest to implement. 
 
-        Returns:
-        --------
+        Returns
+        -------
         non_occ_ap: Array 
             This is essential the final step in processing to produce
             the aperture. What is returned is the non-occulting 
@@ -1536,13 +1536,13 @@ class RegularPolygonalAperture(PolygonalAperture):
         """
         Creates the hard edged version of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array
             A binary float representation of the aperture.
         """
@@ -1568,9 +1568,9 @@ class RegularPolygonalAperture(PolygonalAperture):
 class HexagonalAperture(RegularPolygonalAperture):
     """
     Generate a hexagonal aperture, parametrised by rmax. 
-   
-    Attributes: 
-    -----------
+    
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -1591,9 +1591,9 @@ class HexagonalAperture(RegularPolygonalAperture):
         The rotation of the aperture away from the positive 
         x-axis. 
     rmax : float, meters
-       The infimum of the radii of the set of circles that fully 
-       enclose the hexagonal aperture. In other words the distance 
-       from the centre to one of the vertices. 
+        The infimum of the radii of the set of circles that fully 
+        enclose the hexagonal aperture. In other words the distance 
+        from the centre to one of the vertices. 
     """
     rmax : float
     
@@ -1608,8 +1608,8 @@ class HexagonalAperture(RegularPolygonalAperture):
             softening   : bool = False,
             name        : str = "HexagonalAperture") -> ApertureLayer:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
@@ -1654,8 +1654,8 @@ class CompositeAperture(AbstractDynamicAperture):
     the connection implies that changes to once are likely to 
     affect one another.
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
     centre: Array, meters
@@ -1688,8 +1688,8 @@ class CompositeAperture(AbstractDynamicAperture):
         The default aperture is dis-allows the learning of all 
         parameters. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
@@ -1730,14 +1730,14 @@ class CompositeAperture(AbstractDynamicAperture):
         """
         Apply the aperture to an incoming wavefront.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         wavefront: Wavefront
             The incoming wavefront. 
  
 
-        Returns:
-        --------
+        Returns
+        -------
             The outgoing wavefront.
         """
         coords = wavefront.pixel_coordinates
@@ -1756,13 +1756,13 @@ class CompositeAperture(AbstractDynamicAperture):
         This will only occur if the `CompositeAperture` 
         contains an `AberratedAperture`.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront. 
 
-        Returns:
-        --------
+        Returns
+        -------
         opd: Array, meters
             The optical path difference of the aperture.
         """
@@ -1780,13 +1780,13 @@ class CompositeAperture(AbstractDynamicAperture):
         combined into the final aperture is up to the subclass 
         implementation of `_aperture`.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront. 
 
-        Returns:
-        --------
+        Returns
+        -------
         apers: Array
             A tower of apertures.
         """
@@ -1802,8 +1802,8 @@ class CompositeAperture(AbstractDynamicAperture):
         """
         Evaluates the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coordinates: Array, meters
            The coordinates of the paraxial array. 
 
@@ -1834,8 +1834,8 @@ class CompoundAperture(CompositeAperture):
     the connection implies that changes to once are likely to 
     affect one another.
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
     centre: Array, meters
@@ -1862,8 +1862,8 @@ class CompoundAperture(CompositeAperture):
             rotation    : Array = np.array(0.),
             name        : str = "CompoundAperture") -> ApertureLayer:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         apertures: list[Aperture]
            The apertures that make up the compound aperture. 
         centre: Array, meters
@@ -1891,8 +1891,8 @@ class CompoundAperture(CompositeAperture):
         """
         Evaluates the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coordinates: Array, meters
            The coordinates of the paraxial array. 
 
@@ -1915,8 +1915,8 @@ class MultiAperture(CompositeAperture):
     not overlapping. We can add `CompoundAperture`s into 
     `MultiAperture` to create a combination of the two affects.
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
     centre: Array, meters
@@ -1943,8 +1943,8 @@ class MultiAperture(CompositeAperture):
             rotation    : Array = np.array(0.),
             name        : str = "MultiAperture") -> ApertureLayer:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         apertures: list(Aperture)
            The apertures that make up the compound aperture. 
         centre: Array, meters
@@ -1972,8 +1972,8 @@ class MultiAperture(CompositeAperture):
         """
         Evaluates the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coordinates: Array, meters
            The coordinates of the paraxial array. 
 
@@ -1992,8 +1992,8 @@ class Spider(DynamicAperture, ABC):
     An abstraction on the concept of an optical spider for a space telescope.
     These are the things that hold up the secondary mirrors. 
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -2024,8 +2024,8 @@ class Spider(DynamicAperture, ABC):
             softening   : bool = False,
             name        : str = None) -> ApertureLayer:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
@@ -2111,8 +2111,8 @@ class UniformSpider(Spider):
     taken with respect to the width of the struts and the global rotation 
     as well as the centre of the spider.
  
-    Attributes: 
-    -----------
+    Attributes
+    ----------
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -2149,8 +2149,8 @@ class UniformSpider(Spider):
             softening   : bool = False,
             name        : str = "UniformSpider") -> ApertureLayer:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         centre: Array, meters
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
@@ -2192,13 +2192,13 @@ class UniformSpider(Spider):
         This method is designed to produce an output that can 
         be fed directly into `_soft_edged` and `_hard_edged`.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         struts: Array, meters
             An array of distances from each strut.
         """
@@ -2221,13 +2221,13 @@ class UniformSpider(Spider):
         to mind the general idea. For a soft edged aperture the 
         metric is different.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array
             The paraxial coordinates of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         non_occ_ap: Array 
             This is essential the final step in processing to produce
             the aperture. What is returned is the non-occulting 
@@ -2242,13 +2242,13 @@ class UniformSpider(Spider):
         """
         Creates the hard edged version of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinates of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array
             A binary float representation of the aperture.
         """
@@ -2269,8 +2269,8 @@ class AberratedAperture(ApertureLayer):
     above a telescope but whether or not this is a good idea 
     remains to be seen.
  
-    Attributes:
-    -----------
+    Attributes
+    ----------
     basis_funcs: list[callable]
         A list of functions that represent the basis. The exact
         polynomials that are represented will depend on the shape
@@ -2295,8 +2295,8 @@ class AberratedAperture(ApertureLayer):
             aperture    : ApertureLayer, 
             name        : str = "AberratedAperture") -> ApertureLayer: 
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         noll_inds: List[int]
             The noll indices are a scheme for indexing the Zernike
             polynomials. Normally these polynomials have two 
@@ -2331,8 +2331,8 @@ class AberratedAperture(ApertureLayer):
         """
         Compute the array representing the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         npix: int
             The number of pixels accross one edge of the aperture.  
         width: float, meters
@@ -2351,15 +2351,15 @@ class AberratedAperture(ApertureLayer):
         """
         Compute the array representing the aberrations. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         npix: int
             The number of pixels accross one edge of the aperture.  
         width: float, meters
             The width of the aperture in meters. 
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array 
             The aberrations.
         """
@@ -2371,13 +2371,13 @@ class AberratedAperture(ApertureLayer):
         """
         Apply the aperture and the abberations to the wavefront.  
  
-        Parameters:
-        -----------
+        Parameters
+        ----------
         params: dict
             A dictionary containing the key "Wavefront".
  
-        Returns:
-        --------
+        Returns
+        -------
         params: dict 
             A dictionary containing the key "wavefront".
         """
@@ -2521,15 +2521,15 @@ class AberratedAperture(ApertureLayer):
        Generates a function representing the polar component 
        of the jth Zernike polynomial.
 
-       Parameters:
-       -----------
+       Parameters
+       ----------
        n: int 
            The first index number of the Zernike polynomial.
        m: int 
            The second index number of the Zernike polynomials.
 
-       Returns:
-       --------
+       Returns
+       -------
        polar: Array
            The polar component of the jth Zernike polynomials.
        """
@@ -2589,15 +2589,15 @@ class AberratedAperture(ApertureLayer):
         """
         The jth polike as a function. 
      
-        Parameters:
-        -----------
+        Parameters
+        ----------
         j: int
             The noll index of the requested zernike.
         n: int
             The number of sides on the regular polygon.
      
-        Returns:
-        --------
+        Returns
+        -------
         hexike: callable
             A function representing the jth hexike that is evaluated 
             on a cartesian coordinate grid. 
@@ -2619,14 +2619,14 @@ class AberratedAperture(ApertureLayer):
  
     def _basis(self: ApertureLayer, coords: Array) -> Array:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinate system on which to generate
             the array. 
  
-        Returns:
-        --------
+        Returns
+        -------
         basis: Array
             The basis vectors associated with the aperture. 
             These vectors are stacked in a tensor that is,
@@ -2656,14 +2656,14 @@ class AberratedAperture(ApertureLayer):
         Calculate the optical path difference that is caused 
         by the basis and the aberations that it represents. 
  
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coords: Array, meters
             The paraxial coordinate system on which to generate
             the array. 
  
-        Returns:
-        --------
+        Returns
+        -------
         opd: Array
             The optical path difference associated with much of 
             the path. 
@@ -2736,8 +2736,8 @@ class StaticAperture(ApertureLayer):
     are not getting learned. It pre-calculates the aperture array 
     which is stored and then simply applies it. 
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     aperture: Array
         The aperture represented as an array.
     """
@@ -2751,8 +2751,8 @@ class StaticAperture(ApertureLayer):
             pix_scale   : float,
             name        : str = "StaticAperture") -> ApertureLayer:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         aperture: ApertureLayer
             An instance of DynamicAperture. 
         npix: int
@@ -2772,13 +2772,13 @@ class StaticAperture(ApertureLayer):
         """
         Apply the aperture to the wavefront.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         wavefront: Wavefront
             The wavefront that is passing through the aperture.
 
-        Returns:
-        --------
+        Returns
+        -------
         wavefront: Wavefront
             The wavefront after passing through the aperture
         """
@@ -2791,8 +2791,8 @@ class StaticAberratedAperture(ApertureLayer):
     are not getting learned. It pre-calculates the aperture and
     basis arrays which is stored and then applied. 
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     aperture: Array
         The aperture represented as an array.
     basis: Array 
@@ -2809,8 +2809,8 @@ class StaticAberratedAperture(ApertureLayer):
             pix_scale   : float,
             name        : "StaticAberratedAperture") -> ApertureLayer:
         """
-        Parameters:
-        -----------
+        Parameters
+        ----------
         aperture: ApertureLayer
             An instance of DynamicAperture. 
         npix: int
@@ -2831,8 +2831,8 @@ class StaticAberratedAperture(ApertureLayer):
         """
         Apply the aperture to the wavefront.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         wavefront: Wavefront
             The wavefront that is passing through the aperture.
 
@@ -2844,5 +2844,3 @@ class StaticAberratedAperture(ApertureLayer):
         return wavefront\
             .multiply_amplitude(self.aperture)\
             .add_phase(self.basis)
-
-
