@@ -87,7 +87,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
             centre      : Array = np.array([0., 0.]), 
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
-            rotation    : Array = 0.,
+            rotation    : Array = np.array(0.),
             name        : str = 'AbstractDynamicAperture') -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
@@ -255,7 +255,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             centre      : Array = np.array([0., 0.]), 
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
-            rotation    : Array = 0.,
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False,
             name        : str = 'DynamicAperture') -> ApertureLayer:
@@ -887,7 +887,7 @@ class SquareAperture(DynamicAperture):
             centre      : Array = np.array([0., 0.]),
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
-            rotation    : Array = 0.,
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False,
             name        : str = "SquareAperture") -> ApertureLayer: 
@@ -1032,7 +1032,7 @@ class PolygonalAperture(DynamicAperture, ABC):
             centre      : Array = np.array([0., 0.]), 
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
-            rotation    : Array = 0.,
+            rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False,
             name        : str = 'PolygonalAperture') -> ApertureLayer:
