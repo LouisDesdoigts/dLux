@@ -355,8 +355,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         coordinates: Array, meters
             The paraxial coordinates of the wavefront.
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array
             A binary float representation of the aperture.
         """
@@ -522,8 +522,8 @@ class AnnularAperture(DynamicAperture):
         """
         Measures the distance from the edges of the aperture. 
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coordinates: Array, meters
             The paraxial coordinates of the `Wavefront`.
 
@@ -1779,6 +1779,7 @@ class CompositeAperture(AbstractDynamicAperture):
 
         Returns
         -------
+        wavefront: Wavefront
             The outgoing wavefront.
         """
         coordinates = wavefront.pixel_coordinates
@@ -2403,8 +2404,8 @@ class AberratedAperture(ApertureLayer):
         width: float, meters
             The width of the aperture in meters. 
 
-        Returns:
-        --------
+        Returns
+        -------
         aperture: Array 
             The aperture.
         """
@@ -2438,13 +2439,13 @@ class AberratedAperture(ApertureLayer):
  
         Parameters
         ----------
-        params: dict
-            A dictionary containing the key "Wavefront".
- 
+        wavefront: Wavefront
+            The wavefront that is passing through the aperture.
+
         Returns
         -------
-        params: dict 
-            A dictionary containing the key "wavefront".
+        wavefront: Wavefront
+            The wavefront after passing through the aperture.
         """
         coordinates = wavefront.pixel_coordinates
         opd = self._opd(coordinates)
@@ -2850,7 +2851,7 @@ class StaticAperture(ApertureLayer):
         Returns
         -------
         wavefront: Wavefront
-            The wavefront after passing through the aperture
+            The wavefront after passing through the aperture.
         """
         return wavefront.multiply_amplitude(self.aperture)
     
@@ -2910,8 +2911,8 @@ class StaticAberratedAperture(ApertureLayer):
         wavefront: Wavefront
             The wavefront that is passing through the aperture.
 
-        Returns:
-        --------
+        Returns
+        -------
         wavefront: Wavefront
             The wavefront after passing through the aperture
         """
