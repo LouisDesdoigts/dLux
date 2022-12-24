@@ -137,6 +137,8 @@ nav:
         - Units:
             - radians to arcseconds: utils/units/radians_to_arcseconds.md
             - arcseconds to radians: utils/units/arcseconds_to_radians.md
+        - Math:
+            - factorial: utils/math/factorial.md
         - Coordinates:
             - cartesian to polar:     utils/coordinates/cartesian_to_polar.md
             - polar to cartesian:     utils/coordinates/polar_to_cartesian.md

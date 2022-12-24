@@ -4,19 +4,20 @@ from jax import lax
 __all__ = ["factorial"]
 
  
-def factorial(n : int) -> int:
+ # TODO: Use lax.cond to make n == 0 a safe case
+def factorial(n : float) -> float:
     """
     Calculate n! in a jax friendly way. Note that n == 0 is not a 
     safe case.  
  
-    Parameters:
-    -----------
-    n : int
-        The integer to calculate the factorial of.
+    Parameters
+    ----------
+    n : float
+        The value to calculate the factorial of.
  
-    Returns:
-    --------
-    n! : int
-        The factorial of the integer
+    Returns
+    -------
+    n! : float
+        The factorial of the value.
     """
     return lax.exp(lax.lgamma(n + 1.))
