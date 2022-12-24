@@ -1,6 +1,8 @@
 import dLux 
 import jax.numpy as np
 import typing
+# from jax import config
+# config.update("jax_debug_nans", True)
 
 Aperture = typing.TypeVar("Aperture")
 Array = typing.TypeVar("Array")
