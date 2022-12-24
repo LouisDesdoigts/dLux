@@ -1006,11 +1006,11 @@ class PolygonalAperture(DynamicAperture, ABC):
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool = False
+    softening: bool
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
-    occulting: bool = False
+    occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
     strain: Array
@@ -1202,11 +1202,11 @@ class IrregularPolygonalAperture(PolygonalAperture):
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool = False
+    softening: bool
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
-    occulting: bool = False
+    occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
     strain: Array
@@ -1438,11 +1438,11 @@ class RegularPolygonalAperture(PolygonalAperture):
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool = False
+    softening: bool
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
-    occulting: bool = False
+    occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
     strain: Array
@@ -1615,11 +1615,11 @@ class HexagonalAperture(RegularPolygonalAperture):
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool = False
+    softening: bool
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
-    occulting: bool = False
+    occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
     strain: Array
@@ -2054,11 +2054,11 @@ class Spider(DynamicAperture, ABC):
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool = False
+    softening: bool
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
-    occulting: bool = False
+    occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
     strain: Array
@@ -2177,7 +2177,7 @@ class UniformSpider(Spider):
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool = False
+    softening: bool
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
