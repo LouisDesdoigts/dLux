@@ -44,7 +44,7 @@ class ApertureLayer(dLux.optics.OpticalLayer, ABC):
 
         Parameters
         ----------
-        name : str = ApertureLayer
+        name : str = 'ApertureLayer'
             The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(name)
@@ -72,6 +72,8 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     centre: Array
     strain: Array
@@ -104,6 +106,8 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
+        name: str = 'AbstractDynamicAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(name)
         self.centre = np.asarray(centre).astype(float)
@@ -239,6 +243,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     occulting: bool 
     softening: bool
@@ -251,7 +257,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             rotation    : Array = 0.,
             occulting   : bool = False, 
             softening   : bool = False,
-            name        : str = None) -> ApertureLayer:
+            name        : str = 'DynamicAperture') -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
@@ -277,6 +283,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
+        name: str = 'DynamicAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             centre = centre,
@@ -460,6 +468,8 @@ class AnnularAperture(DynamicAperture):
     occulting: bool 
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     rmin: Array
     rmax: Array
@@ -496,7 +506,9 @@ class AnnularAperture(DynamicAperture):
             strain of the coordinate system.
         compression: Array 
             The x and y compression of the coordinate system. This 
-            is a constant. 
+            is a constant.
+        name: str = 'AnnularAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             centre = centre, 
@@ -590,6 +602,8 @@ class CircularAperture(DynamicAperture):
         occulting aperture is zero inside and one outside. 
     radius: float, meters
         The radius of the opening. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     radius: float
    
@@ -623,6 +637,8 @@ class CircularAperture(DynamicAperture):
         occulting: bool 
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
+        name: str = 'CircularAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             centre = centre, 
@@ -719,6 +735,8 @@ class RectangularAperture(DynamicAperture):
         The length of the aperture in the y-direction. 
     width: float, meters
         The length of the aperture in the x-direction. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     length: float
     width: float
@@ -760,6 +778,8 @@ class RectangularAperture(DynamicAperture):
             The length of the aperture in the y-direction.
         width: float, meters
             The length of the aperture in the x-direction.
+        name: str = 'RectangularAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             centre = centre, 
@@ -855,6 +875,8 @@ class SquareAperture(DynamicAperture):
         x-axis. 
     width: float, meters
         The side length of the square. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     width: float
    
@@ -892,6 +914,8 @@ class SquareAperture(DynamicAperture):
             occulting aperture is zero inside and one outside. 
         width: float, meters
             The length of the aperture in the x-direction.
+        name: str = 'SquareAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             centre = centre, 
@@ -997,6 +1021,8 @@ class PolygonalAperture(DynamicAperture, ABC):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     
 
@@ -1008,7 +1034,7 @@ class PolygonalAperture(DynamicAperture, ABC):
             rotation    : Array = 0.,
             occulting   : bool = False, 
             softening   : bool = False,
-            name        : str = None) -> ApertureLayer:
+            name        : str = 'PolygonalAperture') -> ApertureLayer:
         """
         Parameters
         ----------
@@ -1031,6 +1057,8 @@ class PolygonalAperture(DynamicAperture, ABC):
         rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
+        name: str = 'PolygonalAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             centre = centre, 
@@ -1191,6 +1219,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         x-axis. 
     vertices: Array, meters
         The location of the vertices of the aperture.
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     vertices: Array
     
@@ -1228,6 +1258,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
+        name: str = 'IrregularPolygonalAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             centre = centre, 
@@ -1426,6 +1458,8 @@ class RegularPolygonalAperture(PolygonalAperture):
     rmax: float, meters
         The radius of the smallest circle that can completely 
         enclose the aperture. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     nsides: int
     rmax: float
@@ -1463,6 +1497,8 @@ class RegularPolygonalAperture(PolygonalAperture):
         rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
+        name: str = 'RegularPolygonalAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             centre = centre, 
@@ -1598,6 +1634,8 @@ class HexagonalAperture(RegularPolygonalAperture):
         The infimum of the radii of the set of circles that fully 
         enclose the hexagonal aperture. In other words the distance 
         from the centre to one of the vertices. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     rmax : float
     
@@ -1633,6 +1671,8 @@ class HexagonalAperture(RegularPolygonalAperture):
         rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
+        name: str = 'HexagonalAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             nsides = 6,
@@ -1676,6 +1716,8 @@ class CompositeAperture(AbstractDynamicAperture):
         x-axis. 
     has_aberrated : bool
         A flag to indicate if there are any aperutres with basis
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     has_aberrated : bool
     apertures: dict
@@ -1687,7 +1729,7 @@ class CompositeAperture(AbstractDynamicAperture):
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.),
-            name        : str = None) -> ApertureLayer:
+            name        : str = 'CompositeAperture') -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
@@ -1710,6 +1752,8 @@ class CompositeAperture(AbstractDynamicAperture):
            The aperture objects stored in a dictionary of type
            {str: Aperture} where the Aperture is a subclass of the 
            Aperture.
+        name: str = 'CompositeAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             centre = centre,
@@ -1854,6 +1898,8 @@ class CompoundAperture(CompositeAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
 
 
@@ -1882,6 +1928,8 @@ class CompoundAperture(CompositeAperture):
         rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
+        name: str = 'CompoundAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(apertures,
             centre = centre,
@@ -1935,6 +1983,8 @@ class MultiAperture(CompositeAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
 
 
@@ -1963,6 +2013,8 @@ class MultiAperture(CompositeAperture):
         rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
+        name: str = 'MultiAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(apertures,
             centre = centre,
@@ -2017,6 +2069,8 @@ class Spider(DynamicAperture, ABC):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     
     
@@ -2026,7 +2080,7 @@ class Spider(DynamicAperture, ABC):
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.), 
             softening   : bool = False,
-            name        : str = None) -> ApertureLayer:
+            name        : str = 'Spider') -> ApertureLayer:
         """
         Parameters
         ----------
@@ -2049,6 +2103,8 @@ class Spider(DynamicAperture, ABC):
         rotation: Array, radians
             The rotation of the aperture away from the positive 
             x-axis. 
+        name: str = 'Spider'
+            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(
             centre = centre, 
@@ -2138,6 +2194,8 @@ class UniformSpider(Spider):
         a differentiable parameter. 
     width_of_struts: float, meters
         The width of each strut. 
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     number_of_struts: int
     width_of_struts: float
@@ -2179,6 +2237,8 @@ class UniformSpider(Spider):
             a differentiable parameter. 
         width_of_struts: float, meters
             The width of each strut. 
+        name: str = 'UniformSpider'
+            The name of the layer, which is used to index the layers dictionary.
         """ 
         super().__init__(
             centre = centre, 
@@ -2286,6 +2346,8 @@ class AberratedAperture(ApertureLayer):
         The coefficients of the basis terms. By learning the 
         coefficients only the amount of time that is required 
         for the learning process is significantly reduced.
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     basis_funcs: list
     coeffs: Array
@@ -2312,6 +2374,8 @@ class AberratedAperture(ApertureLayer):
             of this aperture defines what the polynomials are. 
         coeffs: Array
             The coefficients of the basis vectors. 
+        name: str = 'AberratedAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         assert not aperture.occulting
         assert isinstance(aperture, AbstractDynamicAperture)
@@ -2744,6 +2808,8 @@ class StaticAperture(ApertureLayer):
     ----------
     aperture: Array
         The aperture represented as an array.
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     aperture: Array
 
@@ -2764,6 +2830,8 @@ class StaticAperture(ApertureLayer):
             coordinate system.
         pixel_scale: float, meters / pixel
             The pixel scale of the wavefront coordinate system.
+        name: str = 'StaticAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         assert isinstance(aperture, DynamicAperture)
 
@@ -2801,6 +2869,8 @@ class StaticAberratedAperture(ApertureLayer):
         The aperture represented as an array.
     basis: Array 
         The basis represented as an array.
+    name: str
+        The name of the layer, which is used to index the layers dictionary.
     """
     aperture: Array
     basis: Array
@@ -2822,6 +2892,8 @@ class StaticAberratedAperture(ApertureLayer):
             coordinate system.
         pixel_scale: float, meters / pixel
             The pixel scale of the wavefront coordinate system.
+        name: str = 'StaticAberratedAperture'
+            The name of the layer, which is used to index the layers dictionary.
         """
         assert isinstance(aperture, AberratedAperture)
 
