@@ -213,90 +213,90 @@ def get_polar_coordinates(npixels     : int,
                                               y_offset / pixel_scale)
 
 
-def rotate(coords: Array, rotation: Array) -> Array:
+def rotate(coordinates: Array, rotation: Array) -> Array:
     """
     Rotate the coordinate system by a pre-specified amount.
 
-    Parameters:
-    -----------
-    coords : Array, meters
+    Parameters
+    ----------
+    coordinates : Array, meters
         A `(2, npix, npix)` representation of the coordinate 
         system. The leading dimensions specifies the x and then 
         the y coordinates in that order. 
-    rotation: Array, radians
+    rotation : Array, radians
         The counter-clockwise rotation to apply.
 
-    Returns:
-    --------
-    coordinates : Array
+    Returns
+    -------
+    coordinates : Array, meters
         The rotated coordinate system. 
     """
-    x, y = coords[0], coords[1]
+    x, y = coordinates[0], coordinates[1]
     new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
     new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
     return np.array([new_x, new_y])
 
 
-def translate(coords: Array, centre: Array) -> Array:
+def translate(coordinates: Array, centre: Array) -> Array:
     """
     Move the center of the coordinate system by some 
     amount (centre). 
 
-    Parameters:
-    -----------
-    coordinates: Array, meters 
+    Parameters
+    ----------
+    coordinates : Array, meters
         The (x, y) coordinates with the dimensions 
         (2, npix, npix).
-    centre: Array, meters
+    centre : Array, meters
         The (x, y) coordinates of the new centre 
         with dimensions (2,)
 
-    Returns:
-    --------
+    Returns
+    -------
     coordinates: Array, meters
         The translated coordinate system. 
     """
-    return coords - centre[:, None, None]
+    return coordinates - centre[:, None, None]
 
 
-def strain(coords: Array, strain: Array) -> Array:
+def strain(coordinates: Array, strain: Array) -> Array:
     """
     Apply a strain to the coordinate system. 
 
-    Parameters:
-    -----------
-    coordinates: Array, meters 
+    Parameters
+    ----------
+    coordinates : Array, meters
         The (x, y) coordinates with the dimensions 
         (2, npix, npix).
-    strain: Array
+    strain : Array
         The (x, y) strain with dimensions (2,)
 
-    Returns:
-    --------
-    coords: Array 
+    Returns
+    -------
+    coordinates: Array, meters
         The strained coordinate system. 
     """
-    trans_coords: Array = np.transpose(coords, (0, 2, 1))
-    return coords + trans_coords * strain[:, None, None]
+    trans_coordinates: Array = np.transpose(coordinates, (0, 2, 1))
+    return coordinates + trans_coordinates * strain[:, None, None]
 
 
-def compress(coords: Array, compression: Array) -> Array:
+def compress(coordinates: Array, compression: Array) -> Array:
     """
     Apply a compression to the coordinates.
 
-    Parameters:
-    -----------
-    coordinates: Array, meters 
+    Parameters
+    ----------
+    coordinates : Array, meters
         The (x, y) coordinates with the dimensions 
         (2, npix, npix).
-    compression: Array
+    compression : Array
         The (x, y) compression with dimensions (2,)
 
-    Returns:
-    --------
-    coords: Array, meters
+    Returns
+    -------
+    coordinates : Array, meters
         The compressed coordinates. 
     """
-    return coords * compression[:, None, None]
+    return coordinates * compression[:, None, None]
 
 

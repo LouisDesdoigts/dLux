@@ -140,6 +140,10 @@ nav:
         - Math:
             - factorial: utils/math/factorial.md
         - Coordinates:
+            - translate:              utils/coordinates/translate.md
+            - rotate:                 utils/coordinates/rotate.md
+            - compress:               utils/coordinates/compress.md
+            - strain:                 utils/coordinates/strain.md
             - cartesian to polar:     utils/coordinates/cartesian_to_polar.md
             - polar to cartesian:     utils/coordinates/polar_to_cartesian.md
             - get coordinates vector: utils/coordinates/get_coordinates_vector.md
