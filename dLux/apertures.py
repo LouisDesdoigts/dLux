@@ -90,8 +90,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
             rotation    : Array = np.array(0.),
             name        : str = 'AbstractDynamicAperture') -> ApertureLayer:
         """
-        The default aperture is dis-allows the learning of all 
-        parameters. 
+        Constructor for the AbstractDynamicAperture class.
 
         Parameters
         ----------
@@ -261,8 +260,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             softening   : bool = False,
             name        : str = 'DynamicAperture') -> ApertureLayer:
         """
-        The default aperture is dis-allows the learning of all 
-        parameters. 
+        Constructor for the DynamicAperture class.
 
         Parameters
         ----------
@@ -1197,8 +1195,7 @@ class PolygonalAperture(DynamicAperture, ABC):
     
 class IrregularPolygonalAperture(PolygonalAperture):
     """
-    The default aperture is dis-allows the learning of all 
-    parameters. 
+    Class for an aperture defined by a set of vertices.
 
     Attributes
     ----------
@@ -1750,8 +1747,7 @@ class CompositeAperture(AbstractDynamicAperture):
             rotation    : Array = np.array(0.),
             name        : str = 'CompositeAperture') -> ApertureLayer:
         """
-        The default aperture is dis-allows the learning of all 
-        parameters. 
+        Constructor for the CompositeAperture class.
 
         Parameters
         ----------
