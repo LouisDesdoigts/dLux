@@ -31,19 +31,23 @@ class ApertureLayer(dLux.optics.OpticalLayer, ABC):
     Attributes
     ----------
     name: str
-        The address of this ApertureLayer within the optical 
-        system. 
+        The name of the layer, which is used to index the layers dictionary.
     """
 
     
     def __init__(
             self: dLux.optics.OpticalLayer, 
-            name: str) -> dLux.optics.OpticalLayer:
+            name: str = "ApertureLayer") -> dLux.optics.OpticalLayer:
         """
         Automatically assigns the name of the layer to be the 
-        class name. 
+        class name.
+
+        Parameters
+        ----------
+        name : str = ApertureLayer
+            The name of the layer, which is used to index the layers dictionary.
         """
-        self.name = name 
+        super().__init__(name)
 
 
 class AbstractDynamicAperture(ApertureLayer, ABC):
@@ -81,7 +85,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
             strain      : Array = [0., 0.],
             compression : Array = [1., 1.],
             rotation    : Array = 0.,
-            name        : str = None) -> ApertureLayer:
+            name        : str = 'AbstractDynamicAperture') -> ApertureLayer:
         """
         The default aperture is dis-allows the learning of all 
         parameters. 
