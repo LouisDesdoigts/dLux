@@ -95,16 +95,16 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
 
         Parameters
         ----------
-        centre: Array, meters
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
-        strain: Array
+        strain: Array = np.array([0., 0.,])
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
-        compression: Array 
+        compression: Array = np.array([1., 1.,]) 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: Array, radians
+        rotation: Array, radians = np.array(0.)
             The rotation of the aperture away from the positive 
             x-axis. 
         name: str = 'AbstractDynamicAperture'
@@ -191,13 +191,13 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         """
 
 
-    def get_aperture(self: ApertureLayer, npix: int, width: float) -> Array:
+    def get_aperture(self: ApertureLayer, npixels: int, width: float) -> Array:
         """
         Compute the array representing the aperture. 
 
         Parameters
         ----------
-        npix: int
+        npixels: int
             The number of pixels accross one edge of the aperture.  
         width: float, meters
             The width of the aperture in meters. 
@@ -207,7 +207,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         aperture: Array 
             The aperture.
         """
-        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        coords = dLux.utils.get_pixel_coordinates(npixels, width / npixels)
         return self._aperture(coords)
 
 
@@ -220,9 +220,6 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
 
     Attributes
     ----------
-    centre: Array, meters
-        The (x, y) centre of the coordinate system in the wavefront
-        coordinate system.
     occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside.
@@ -235,6 +232,9 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         of `jax` is via a `np.tanh` function. This is good for 
         derivatives. Use this feature only if encountering 
         errors when using hard edged apertures. 
+    centre: Array, meters
+        The (x, y) centre of the coordinate system in the wavefront
+        coordinate system.
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -265,25 +265,25 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
 
         Parameters
         ----------
-        centre: Array, meters
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
+        strain: Array = np.array([0., 0.,])
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array = np.array([1., 1.,]) 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: Array, radians = np.array(0.)
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        strain: Array
-            Linear stretching of the x and y axis representing a 
-            strain of the coordinate system.
-        compression: Array 
-            The x and y compression of the coordinate system. This 
-            is a constant. 
-        rotation: Array, radians
-            The rotation of the aperture away from the positive 
-            x-axis. 
         name: str = 'DynamicAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -301,13 +301,14 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
     def _extent(self: ApertureLayer) -> Array: # pragma: no cover
         """
         Returns the largest distance to the outer edge of the aperture from the
-        centre. For inherited classes, consider implementing analytically for speed.
+        centre. For inherited classes, consider implementing analytically for 
+        speed.
 
         Parameters
         ----------
         coordinates : Array
             The cartesian coordinates to generate the hexikes on.
-            The dimensions of the tensor should be `(2, npix, npix)`.
+            The dimensions of the tensor should be `(2, npixels, npixels)`.
             where the leading axis is the x and y dimensions.  
 
         Returns
@@ -318,7 +319,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
 
 
     @abstractmethod
-    def _soft_edged(self: ApertureLayer, distances: Array) -> Array: # pragma: no cover
+    def _soft_edged(self: ApertureLayer, 
+                    distances: Array) -> Array: # pragma: no cover
         """
         A measure of how far a pixel is from the aperture.
         This is a very abstract description that was constructed 
@@ -427,7 +429,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         ----------
         coordinates : Array
             The cartesian coordinates to generate the aperture on.
-            The dimensions of the tensor should be `(2, npix, npix)`.
+            The dimensions of the tensor should be `(2, npixels, npixels)`.
             where the leading axis is the x and y dimensions.  
         
         Returns
@@ -436,7 +438,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             the radial coordinates centered on the centre of the aperture 
             and scaled such that they are 1
             at the maximum extent of the aperture
-            The dimensions of the tensor are be `(2, npix, npix)`
+            The dimensions of the tensor are be `(2, npixels, npixels)`
         """
         return self._coordinates(coordinates) / self._extent()
 
@@ -449,6 +451,10 @@ class AnnularAperture(DynamicAperture):
 
     Attributes
     ----------
+    rmax: Array, meters
+        Outer radius of aperture.
+    rmin: Array, meters
+        Inner radius of aperture.
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -458,17 +464,13 @@ class AnnularAperture(DynamicAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
-    rmax: Array, meters
-        Outer radius of aperture.
-    rmin: Array, meters
-        Inner radius of aperture.
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
     softening: bool 
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
-    occulting: bool 
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -488,26 +490,26 @@ class AnnularAperture(DynamicAperture):
         """
         Parameters
         ----------
-        centre: Array, meters
+        rmax : Array, meters
+            The outer radius of the annular aperture. 
+        rmin : Array, meters
+            The inner radius of the annular aperture. 
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
-        rmax : float, meters
-            The outer radius of the annular aperture. 
-        rmin : float, meters
-            The inner radius of the annular aperture. 
-        softening: bool 
+        strain: Array = np.array([0., 0.,])
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array = np.array([1., 1.,]) 
+            The x and y compression of the coordinate system. This 
+            is a constant.
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool 
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        strain: Array
-            Linear stretching of the x and y axis representing a 
-            strain of the coordinate system.
-        compression: Array 
-            The x and y compression of the coordinate system. This 
-            is a constant.
         name: str = 'AnnularAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -568,7 +570,7 @@ class AnnularAperture(DynamicAperture):
         ----------
         coordinates : Array
             The cartesian coordinates to generate the hexikes on.
-            The dimensions of the tensor should be `(2, npix, npix)`.
+            The dimensions of the tensor should be `(2, npixels, npixels)`.
             where the leading axis is the x and y dimensions.  
 
         Returns
@@ -585,6 +587,8 @@ class CircularAperture(DynamicAperture):
 
     Attributes
     ----------
+    radius: Array, meters
+        The radius of the opening. 
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -594,19 +598,17 @@ class CircularAperture(DynamicAperture):
     compression: Array 
         The x and y compression of the coordinate system. This 
         is a constant. 
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
     softening: bool 
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
-    occulting: bool 
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside. 
-    radius: float, meters
-        The radius of the opening. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
-    radius: float
+    radius: Array
    
  
     def __init__(self   : ApertureLayer, 
@@ -620,24 +622,24 @@ class CircularAperture(DynamicAperture):
         """
         Parameters
         ----------
-        centre: Array, meters
+        radius: Array, meters 
+            The radius of the aperture.
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
-        strain: Array
+        strain: Array = np.array([0., 0.,])
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
-        compression: Array 
+        compression: Array = np.array([1., 1.,]) 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        radius: float, meters 
-            The radius of the aperture.
-        softening: bool 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool 
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
         name: str = 'CircularAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -696,7 +698,7 @@ class CircularAperture(DynamicAperture):
         ----------
         coordinates : Array
             The cartesian coordinates to generate the hexikes on.
-            The dimensions of the tensor should be `(2, npix, npix)`.
+            The dimensions of the tensor should be `(2, npixels, npixels)`.
             where the leading axis is the x and y dimensions.  
 
         Returns
@@ -713,6 +715,10 @@ class RectangularAperture(DynamicAperture):
 
     Attributes
     ----------
+    height: Array, meters
+        The length of the aperture in the y-direction. 
+    width: Array, meters
+        The length of the aperture in the x-direction. 
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -725,26 +731,22 @@ class RectangularAperture(DynamicAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
     softening: bool 
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
-    occulting: bool 
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside. 
-    length: float, meters
-        The length of the aperture in the y-direction. 
-    width: float, meters
-        The length of the aperture in the x-direction. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
-    length: float
-    width: float
+    height: Array
+    width: Array
 
 
     def __init__(self   : ApertureLayer, 
-            length      : Array, 
+            height      : Array, 
             width       : Array, 
             centre      : Array = np.array([0., 0.]),
             strain      : Array = np.array([0., 0.]),
@@ -756,29 +758,29 @@ class RectangularAperture(DynamicAperture):
         """
         Parameters
         ----------
-        centre: Array, meters
+        height: Array, meters 
+            The length of the aperture in the y-direction.
+        width: Array, meters
+            The length of the aperture in the x-direction.
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
-        strain: Array
+        strain: Array = np.array([0., 0.,])
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
-        compression: Array 
+        compression: Array = np.array([1., 1.,]) 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: Array, radians
+        rotation: Array, radians = np.array(0.)
             The rotation of the aperture away from the positive 
             x-axis. 
-        softening: bool 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool 
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        length: float, meters 
-            The length of the aperture in the y-direction.
-        width: float, meters
-            The length of the aperture in the x-direction.
         name: str = 'RectangularAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -790,7 +792,7 @@ class RectangularAperture(DynamicAperture):
             occulting = occulting, 
             softening = softening,
             name = name)
-        self.length = np.asarray(length).astype(float)
+        self.height = np.asarray(height).astype(float)
         self.width = np.asarray(width).astype(float)
 
 
@@ -808,7 +810,7 @@ class RectangularAperture(DynamicAperture):
         metric: Array
             The "distance" from the aperture. 
         """
-        x_mask = self._soften(- np.abs(coords[0]) + self.length / 2.)
+        x_mask = self._soften(- np.abs(coords[0]) + self.height / 2.)
         y_mask = self._soften(- np.abs(coords[1]) + self.width / 2.)
         return x_mask * y_mask
 
@@ -827,7 +829,7 @@ class RectangularAperture(DynamicAperture):
         aperture: Array
             A binary float representation of the aperture.
         """
-        x_mask = np.abs(coords[0]) < self.length / 2.
+        x_mask = np.abs(coords[0]) < self.height / 2.
         y_mask = np.abs(coords[1]) < self.width / 2.
         return (x_mask * y_mask).astype(float)
 
@@ -842,7 +844,7 @@ class RectangularAperture(DynamicAperture):
         extent : float
             The maximum distance from centre to edge of aperture
         """
-        return np.hypot(self.length / 2., self.width / 2.)
+        return np.hypot(self.height / 2., self.width / 2.)
 
 
 class SquareAperture(DynamicAperture):
@@ -852,6 +854,8 @@ class SquareAperture(DynamicAperture):
 
     Attributes
     ----------
+    width: Array, meters
+        The side length of the square. 
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -864,22 +868,17 @@ class SquareAperture(DynamicAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    occulting: bool 
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
     softening: bool 
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
-    occulting: bool 
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside. 
-    theta: float, radians
-        The rotation of the aperture away from the positive 
-        x-axis. 
-    width: float, meters
-        The side length of the square. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
-    width: float
+    width: Array
    
  
     def __init__(self   : ApertureLayer, 
@@ -894,27 +893,27 @@ class SquareAperture(DynamicAperture):
         """
         Parameters
         ----------
-        centre: Array, meters
+        width: Array, meters
+            The length of the aperture in the x-direction.
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
-        strain: Array
+        strain: Array = np.array([0., 0.,])
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
-        compression: Array 
+        compression: Array = np.array([1., 1.,]) 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: Array, radians
+        rotation: Array, radians = np.array(0.)
             The rotation of the aperture away from the positive 
             x-axis. 
-        softening: bool 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
+        softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool 
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        width: float, meters
-            The length of the aperture in the x-direction.
         name: str = 'SquareAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -1006,13 +1005,6 @@ class PolygonalAperture(DynamicAperture, ABC):
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool
-        True if the aperture is soft edged otherwise False. A
-        soft edged aperture has a small layer of non-binary 
-        pixels. This is to prevent undefined gradients. 
-    occulting: bool
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside. 
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -1022,6 +1014,13 @@ class PolygonalAperture(DynamicAperture, ABC):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    occulting: bool
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    softening: bool
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -1039,25 +1038,25 @@ class PolygonalAperture(DynamicAperture, ABC):
         """
         Parameters
         ----------
-        centre: Array, meters
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
+        strain: Array = np.array([0., 0.,])
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array = np.array([1., 1.,]) 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: Array, radians = np.array(0.)
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        strain: Array
-            Linear stretching of the x and y axis representing a 
-            strain of the coordinate system.
-        compression: Array 
-            The x and y compression of the coordinate system. This 
-            is a constant. 
-        rotation: Array, radians
-            The rotation of the aperture away from the positive 
-            x-axis. 
         name: str = 'PolygonalAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -1081,8 +1080,9 @@ class PolygonalAperture(DynamicAperture, ABC):
         """
         Calculate the perpendicular distance of a set of points (x, y) from
         a line parametrised by a gradient m and a point (x1, y1). Notice, 
-        I am using x and y separately because the instructions cannot be vectorised
-        accross them combined. This function can take any number of points.
+        I am using x and y separately because the instructions cannot be 
+        vectorisedaccross them combined. This function can take any number of 
+        points.
         
         Parameters
         ----------
@@ -1188,7 +1188,8 @@ class PolygonalAperture(DynamicAperture, ABC):
         """
         # NOTE: see class docs.
         bc_orig = np.array([[0.]])
-        dist_from_orig = self._perp_dists_from_lines(ms, xs, ys, bc_orig, bc_orig)
+        dist_from_orig = self._perp_dists_from_lines(ms, xs, ys, bc_orig, \
+            bc_orig)
         return np.sign(dist_from_orig)
     
     
@@ -1199,16 +1200,11 @@ class IrregularPolygonalAperture(PolygonalAperture):
 
     Attributes
     ----------
+    vertices: Array, meters
+        The location of the vertices of the aperture.
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool
-        True if the aperture is soft edged otherwise False. A
-        soft edged aperture has a small layer of non-binary 
-        pixels. This is to prevent undefined gradients. 
-    occulting: bool
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside. 
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -1218,8 +1214,13 @@ class IrregularPolygonalAperture(PolygonalAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
-    vertices: Array, meters
-        The location of the vertices of the aperture.
+    occulting: bool
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    softening: bool
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -1240,25 +1241,25 @@ class IrregularPolygonalAperture(PolygonalAperture):
         ----------
         vertices: Array, meters
             The location of the vertices of the aperture.
-        centre: Array, meters
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
+        strain: Array = np.array([0., 0.,])
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array = np.array([1., 1.,]) 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: Array, radians = np.array(0.)
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        strain: Array
-            Linear stretching of the x and y axis representing a 
-            strain of the coordinate system.
-        compression: Array 
-            The x and y compression of the coordinate system. This 
-            is a constant. 
-        rotation: Array, radians
-            The rotation of the aperture away from the positive 
-            x-axis. 
         name: str = 'IrregularPolygonalAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -1280,7 +1281,9 @@ class IrregularPolygonalAperture(PolygonalAperture):
         self.vertices = vertices
             
     
-    def _grads_from_many_points(self: ApertureLayer, x1: float, y1: float) -> float:
+    def _grads_from_many_points(self: ApertureLayer, 
+                                x1: float, 
+                                y1: float) -> float:
         """
         Given a set of points, calculate the gradient of the line that 
         connects those points. This function assumes that the points are 
@@ -1320,13 +1323,14 @@ class IrregularPolygonalAperture(PolygonalAperture):
     def _extent(self: ApertureLayer) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
-        centre. For inherited classes, consider implementing analytically for speed.
+        centre. For inherited classes, consider implementing analytically for 
+        speed.
 
         Parameters
         ----------
         coordinates : Array
             The cartesian coordinates to generate the hexikes on.
-            The dimensions of the tensor should be `(2, npix, npix)`.
+            The dimensions of the tensor should be `(2, npixels, npixels)`.
             where the leading axis is the x and y dimensions.  
 
         Returns
@@ -1383,7 +1387,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         sorted_y1 = bc_y1[sorted_inds]
         sorted_m = self._grads_from_many_points(sorted_x1, sorted_y1)
 
-        dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
+        dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, \
+            sorted_y1, bc_x, bc_y)  
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
         soft_edges = self._soften(dist_sgn * dist_from_edges)
 
@@ -1420,7 +1425,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         sorted_y1 = bc_y1[sorted_inds]
         sorted_m = self._grads_from_many_points(sorted_x1, sorted_y1)
 
-        dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, sorted_y1, bc_x, bc_y)  
+        dist_from_edges = self._perp_dists_from_lines(sorted_m, sorted_x1, \
+            sorted_y1, bc_x, bc_y)  
         dist_sgn = self._is_orig_left_of_edge(sorted_m, sorted_x1, sorted_y1)
         edges = (dist_from_edges * dist_sgn) > 0.
 
@@ -1435,16 +1441,14 @@ class RegularPolygonalAperture(PolygonalAperture):
     
     Attributes
     ----------
+    nsides: int
+        The number of sides that the aperture has. 
+    rmax: Array, meters
+        The radius of the smallest circle that can completely 
+        enclose the aperture. 
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool
-        True if the aperture is soft edged otherwise False. A
-        soft edged aperture has a small layer of non-binary 
-        pixels. This is to prevent undefined gradients. 
-    occulting: bool
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside. 
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -1454,21 +1458,23 @@ class RegularPolygonalAperture(PolygonalAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
-    nsides: int
-        The number of sides that the aperture has. 
-    rmax: float, meters
-        The radius of the smallest circle that can completely 
-        enclose the aperture. 
+    occulting: bool
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    softening: bool
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
     nsides: int
-    rmax: float
+    rmax: Array
         
     
     def __init__(self   : ApertureLayer, 
             nsides      : int,
-            rmax        : float,
+            rmax        : Array,
             centre      : Array = np.array([0., 0.]), 
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
@@ -1479,25 +1485,30 @@ class RegularPolygonalAperture(PolygonalAperture):
         """
         Parameters
         ----------
-        centre: Array, meters
+        nsides: int
+            The number of sides that the aperture has. 
+        rmax: Array, meters
+            The radius of the smallest circle that can completely 
+            enclose the aperture. 
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
+        strain: Array = np.array([0., 0.,])
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array = np.array([1., 1.,]) 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: Array, radians = np.array(0.)
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        strain: Array
-            Linear stretching of the x and y axis representing a 
-            strain of the coordinate system.
-        compression: Array 
-            The x and y compression of the coordinate system. This 
-            is a constant. 
-        rotation: Array, radians
-            The rotation of the aperture away from the positive 
-            x-axis. 
         name: str = 'RegularPolygonalAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -1516,7 +1527,8 @@ class RegularPolygonalAperture(PolygonalAperture):
     def _extent(self: ApertureLayer) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
-        centre. For inherited classes, consider implementing analytically for speed.
+        centre. For inherited classes, consider implementing analytically for 
+        speed.
 
         Returns
         -------
@@ -1612,16 +1624,13 @@ class HexagonalAperture(RegularPolygonalAperture):
     
     Attributes
     ----------
+    rmax : Array, meters
+        The infimum of the radii of the set of circles that fully 
+        enclose the hexagonal aperture. In other words the distance 
+        from the centre to one of the vertices. 
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool
-        True if the aperture is soft edged otherwise False. A
-        soft edged aperture has a small layer of non-binary 
-        pixels. This is to prevent undefined gradients. 
-    occulting: bool
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside. 
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -1631,18 +1640,21 @@ class HexagonalAperture(RegularPolygonalAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
-    rmax : float, meters
-        The infimum of the radii of the set of circles that fully 
-        enclose the hexagonal aperture. In other words the distance 
-        from the centre to one of the vertices. 
+    occulting: bool
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    softening: bool
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
-    rmax : float
+    rmax : Array
     
     
     def __init__(self   : ApertureLayer, 
-            rmax        : float,
+            rmax        : Array,
             centre      : Array = np.array([0., 0.]), 
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
@@ -1653,25 +1665,29 @@ class HexagonalAperture(RegularPolygonalAperture):
         """
         Parameters
         ----------
-        centre: Array, meters
+        rmax : Array, meters
+            The infimum of the radii of the set of circles that fully 
+            enclose the hexagonal aperture. In other words the distance 
+            from the centre to one of the vertices. 
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
+        strain: Array = np.array([0., 0.,])
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array = np.array([1., 1.,]) 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: Array, radians = np.array(0.)
+            The rotation of the aperture away from the positive 
+            x-axis. 
+        occulting: bool = False
+            True if the aperture is occulting else False. An 
+            occulting aperture is zero inside and one outside. 
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        strain: Array
-            Linear stretching of the x and y axis representing a 
-            strain of the coordinate system.
-        compression: Array 
-            The x and y compression of the coordinate system. This 
-            is a constant. 
-        rotation: Array, radians
-            The rotation of the aperture away from the positive 
-            x-axis. 
         name: str = 'HexagonalAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -1703,6 +1719,8 @@ class CompositeAperture(AbstractDynamicAperture):
     ----------
     apertures: dict(str, Aperture)
        The apertures that make up the compound aperture. 
+    has_aberrated : bool
+        A flag to indicate if there are any aperutres with basis
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -1715,14 +1733,12 @@ class CompositeAperture(AbstractDynamicAperture):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
-    has_aberrated : bool
-        A flag to indicate if there are any aperutres with basis
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
-    has_aberrated : bool
     apertures: dict
-    
+    has_aberrated : bool
+
 
     def __init__(self   : ApertureLayer, 
             apertures   : list,
@@ -1737,22 +1753,20 @@ class CompositeAperture(AbstractDynamicAperture):
 
         Parameters
         ----------
-        centre: Array, meters
+        apertures: list[Aperture]
+            The list of Aperture objects to be combined.
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
-        strain: Array
+        strain: Array = np.array([0., 0.,])
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
-        compression: Array 
+        compression: Array = np.array([1., 1.,]) 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: Array, radians
+        rotation: Array, radians = np.array(0.)
             The rotation of the aperture away from the positive 
             x-axis. 
-        apertures: list
-           The aperture objects stored in a dictionary of type
-           {str: Aperture} where the Aperture is a subclass of the 
-           Aperture.
         name: str = 'CompositeAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -1847,7 +1861,8 @@ class CompositeAperture(AbstractDynamicAperture):
 
 
     @abstractmethod
-    def _aperture(self: ApertureLayer, coordinates: Array) -> Array: # pragma: no cover
+    def _aperture(self: ApertureLayer, 
+                  coordinates: Array) -> Array: # pragma: no cover
         """
         Evaluates the aperture. 
 
@@ -1917,16 +1932,16 @@ class CompoundAperture(CompositeAperture):
         ----------
         apertures: list[Aperture]
            The apertures that make up the compound aperture. 
-        centre: Array, meters
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
-        strain: Array
+        strain: Array = np.array([0., 0.,])
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
-        compression: Array 
+        compression: Array = np.array([1., 1.,]) 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: Array, radians
+        rotation: Array, radians = np.array(0.)
             The rotation of the aperture away from the positive 
             x-axis. 
         name: str = 'CompoundAperture'
@@ -2000,18 +2015,18 @@ class MultiAperture(CompositeAperture):
         """
         Parameters
         ----------
-        apertures: list(Aperture)
+        apertures: list[Aperture]
            The apertures that make up the compound aperture. 
-        centre: Array, meters
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
-        strain: Array
+        strain: Array = np.array([0., 0.,])
             Linear stretching of the x and y axis representing a 
             strain of the coordinate system.
-        compression: Array 
+        compression: Array = np.array([1., 1.,]) 
             The x and y compression of the coordinate system. This 
             is a constant. 
-        rotation: Array, radians
+        rotation: Array, radians = np.array(0.)
             The rotation of the aperture away from the positive 
             x-axis. 
         name: str = 'MultiAperture'
@@ -2054,13 +2069,6 @@ class Spider(DynamicAperture, ABC):
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool
-        True if the aperture is soft edged otherwise False. A
-        soft edged aperture has a small layer of non-binary 
-        pixels. This is to prevent undefined gradients. 
-    occulting: bool
-        True if the aperture is occulting else False. An 
-        occulting aperture is zero inside and one outside. 
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -2070,6 +2078,13 @@ class Spider(DynamicAperture, ABC):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
+    occulting: bool
+        True if the aperture is occulting else False. An 
+        occulting aperture is zero inside and one outside. 
+    softening: bool
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -2085,25 +2100,22 @@ class Spider(DynamicAperture, ABC):
         """
         Parameters
         ----------
-        centre: Array, meters
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
+        strain: Array = np.array([0., 0.,])
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array = np.array([1., 1.,]) 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: Array, radians = np.array(0.)
+            The rotation of the aperture away from the positive 
+            x-axis. 
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        strain: Array
-            Linear stretching of the x and y axis representing a 
-            strain of the coordinate system.
-        compression: Array 
-            The x and y compression of the coordinate system. This 
-            is a constant. 
-        rotation: Array, radians
-            The rotation of the aperture away from the positive 
-            x-axis. 
         name: str = 'Spider'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -2142,16 +2154,19 @@ class Spider(DynamicAperture, ABC):
         gradient = np.tan(angle)
         dist = np.abs(y - gradient * x) / np.sqrt(1 + gradient ** 2)
         theta = np.arctan2(y, x) + np.pi 
-        theta = np.where(theta > angle, theta - angle, theta + 2 * np.pi - angle)
+        theta = np.where(theta > angle, theta - angle, theta + 2 * np.pi - \
+            angle)
         theta = np.where(theta > 2 * np.pi, theta - 2 * np.pi, theta)
-        strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1., dist)
+        strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1., \
+            dist)
         return strut
 
 
     def _extent(self: ApertureLayer) -> float:
         """
         Returns the largest distance to the outer edge of the aperture from the
-        centre. For inherited classes, consider implementing analytically for speed.
+        centre. For inherited classes, consider implementing analytically for 
+        speed.
 
         Returns
         -------
@@ -2174,13 +2189,14 @@ class UniformSpider(Spider):
  
     Attributes
     ----------
+    nstruts: int 
+        The number of struts to equally space around the circle. This is not 
+        a differentiable parameter. 
+    width_of_struts: Array, meters
+        The width of each strut. 
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
-    softening: bool
-        True if the aperture is soft edged otherwise False. A
-        soft edged aperture has a small layer of non-binary 
-        pixels. This is to prevent undefined gradients. 
     strain: Array
         Linear stretching of the x and y axis representing a 
         strain of the coordinate system.
@@ -2190,54 +2206,50 @@ class UniformSpider(Spider):
     rotation: Array, radians
         The rotation of the aperture away from the positive 
         x-axis. 
-    number_of_struts: int 
-        The number of struts to equally space around the circle. This is not 
-        a differentiable parameter. 
-    width_of_struts: float, meters
-        The width of each strut. 
+    softening: bool
+        True if the aperture is soft edged otherwise False. A
+        soft edged aperture has a small layer of non-binary 
+        pixels. This is to prevent undefined gradients. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
-    number_of_struts: int
-    width_of_struts: float
+    nstruts: int
+    width_of_struts: Array
 
 
-    def __init__(self   : ApertureLayer, 
-            num_struts  : int,
-            strut_width : float,
-            centre      : Array = np.array([0., 0.]), 
-            strain      : Array = np.array([0., 0.]),
-            compression : Array = np.array([1., 1.]),
-            rotation    : Array = np.array(0.),
-            softening   : bool = False,
-            name        : str = "UniformSpider") -> ApertureLayer:
+    def __init__(self        : ApertureLayer, 
+            nstruts : int,
+            width_of_struts  : Array,
+            centre           : Array = np.array([0., 0.]), 
+            strain           : Array = np.array([0., 0.]),
+            compression      : Array = np.array([1., 1.]),
+            rotation         : Array = np.array(0.),
+            softening        : bool = False,
+            name             : str = "UniformSpider") -> ApertureLayer:
         """
         Parameters
         ----------
-        centre: Array, meters
+        nstruts: int 
+            The number of struts to equally space around the circle. This is not 
+            a differentiable parameter. 
+        width_of_struts: Array, meters
+            The width of each strut. 
+        centre: Array, meters = np.array([0., 0.,])
             The (x, y) centre of the coordinate system in the wavefront
             coordinate system.
+        strain: Array = np.array([0., 0.,])
+            Linear stretching of the x and y axis representing a 
+            strain of the coordinate system.
+        compression: Array = np.array([1., 1.,]) 
+            The x and y compression of the coordinate system. This 
+            is a constant. 
+        rotation: Array, radians = np.array(0.)
+            The rotation of the aperture away from the positive 
+            x-axis. 
         softening: bool = False
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
-        occulting: bool = False
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        strain: Array
-            Linear stretching of the x and y axis representing a 
-            strain of the coordinate system.
-        compression: Array 
-            The x and y compression of the coordinate system. This 
-            is a constant. 
-        rotation: Array, radians
-            The rotation of the aperture away from the positive 
-            x-axis. 
-        number_of_struts: int 
-            The number of struts to equally space around the circle. This is not 
-            a differentiable parameter. 
-        width_of_struts: float, meters
-            The width of each strut. 
         name: str = 'UniformSpider'
             The name of the layer, which is used to index the layers dictionary.
         """ 
@@ -2248,8 +2260,8 @@ class UniformSpider(Spider):
             rotation = rotation,
             softening = softening,
             name = name)
-        self.number_of_struts = int(num_struts)
-        self.width_of_struts = np.asarray(strut_width).astype(float)
+        self.nstruts = int(nstruts)
+        self.width_of_struts = np.asarray(width_of_struts).astype(float)
 
 
     def _stacked_struts(self: ApertureLayer, coords: Array) -> Array:
@@ -2268,10 +2280,9 @@ class UniformSpider(Spider):
             An array of distances from each strut.
         """
         coords = self._coordinates(coords)
-        angles = np.linspace(0, two_pi, self.number_of_struts, endpoint=False)
+        angles = np.linspace(0, two_pi, self.nstruts, endpoint=False)
         angles += self.rotation
         return vmap(self._strut, in_axes=(0, None))(angles, coords) 
-
 
  
     def _soft_edged(self: ApertureLayer, coords: Array) -> Array:
@@ -2336,24 +2347,26 @@ class AberratedAperture(ApertureLayer):
  
     Attributes
     ----------
+    aperture: ApertureLayer
+        The aperture on which the basis is defined. Must be a 
+        subcclass of the `Aperture` class.
     basis_funcs: list[callable]
         A list of functions that represent the basis. The exact
         polynomials that are represented will depend on the shape
         of the aperture. 
-    aperture: ApertureLayer
-        The aperture on which the basis is defined. Must be a 
-        subcclass of the `Aperture` class.
-    coeffs: list[floats]
+    coeffs: Array
         The coefficients of the basis terms. By learning the 
         coefficients only the amount of time that is required 
         for the learning process is significantly reduced.
+    nterms: int
+        The number of basis terms used in the aperture.
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
+    aperture: ApertureLayer
     basis_funcs: list
     coeffs: Array
     nterms: int
-    aperture: ApertureLayer
  
  
     def __init__(self   : ApertureLayer, 
@@ -2370,11 +2383,11 @@ class AberratedAperture(ApertureLayer):
             indices but the noll indices prevent an order to 
             these pairs. All basis can be indexed using the noll
             indices based on `n` and `m`. 
+        coeffs: Array
+            The coefficients of the basis vectors. 
         aperture: ApertureLayer
             The aperture that the basis is defined on. The shape 
             of this aperture defines what the polynomials are. 
-        coeffs: Array
-            The coefficients of the basis vectors. 
         name: str = 'AberratedAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -2394,15 +2407,28 @@ class AberratedAperture(ApertureLayer):
  
 
     def _aperture(self : ApertureLayer, coords : Array) -> Array:
-        return self.aperture._aperture(coords)
-        
-    def get_aperture(self : ApertureLayer, npix: int, width: float) -> Array:
         """
         Compute the array representing the aperture. 
 
         Parameters
         ----------
-        npix: int
+        coords: Array, meters
+            The paraxial coordinate system of the wavefront.
+
+        Returns
+        -------
+        aperture: Array 
+            The aperture.
+        """
+        return self.aperture._aperture(coords)
+        
+    def get_aperture(self : ApertureLayer, npixels: int, width: float) -> Array:
+        """
+        Compute the array representing the aperture. 
+
+        Parameters
+        ----------
+        npixels: int
             The number of pixels accross one edge of the aperture.  
         width: float, meters
             The width of the aperture in meters. 
@@ -2412,17 +2438,17 @@ class AberratedAperture(ApertureLayer):
         aperture: Array 
             The aperture.
         """
-        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        coords = dLux.utils.get_pixel_coordinates(npixels, width / npixels)
         return self.aperture._aperture(coords)
 
 
-    def get_basis(self: ApertureLayer, npix: int, width: float) -> Array:
+    def get_basis(self: ApertureLayer, npixels: int, width: float) -> Array:
         """
         Compute the array representing the aberrations. 
 
         Parameters
         ----------
-        npix: int
+        npixels: int
             The number of pixels accross one edge of the aperture.  
         width: float, meters
             The width of the aperture in meters. 
@@ -2432,7 +2458,7 @@ class AberratedAperture(ApertureLayer):
         aperture: Array 
             The aberrations.
         """
-        coords = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        coords = dLux.utils.get_pixel_coordinates(npixels, width / npixels)
         return self._basis(coords)
  
 
@@ -2563,7 +2589,7 @@ class AberratedAperture(ApertureLayer):
        Returns
        -------
        radial : Array
-           An npix by npix stack of radial zernike polynomials.
+           An npixels by npixels stack of radial zernike polynomials.
        """
        MAX_DIFF = 5
        m, n = np.abs(m), np.abs(n)
@@ -2699,7 +2725,7 @@ class AberratedAperture(ApertureLayer):
         basis: Array
             The basis vectors associated with the aperture. 
             These vectors are stacked in a tensor that is,
-            `(nterms, npix, npix)`. Normally the basis is 
+            `(nterms, npixels, npixels)`. Normally the basis is 
             cropped to be just on the aperture however, this 
             step is not necessary except for in visualisation. 
             It has been removed to save some time in the 
@@ -2757,10 +2783,10 @@ class AberratedAperture(ApertureLayer):
         ----------
         aperture : Array
             An array representing the aperture. This should be an 
-            `(npix, npix)` array. 
+            `(npixels, npixels)` array. 
         zernikes : Array
             The zernike polynomials to orthonormalise on the aperture.
-            This tensor should be `(nterms, npix, npix)` in size, where 
+            This tensor should be `(nterms, npixels, npixels)` in size, where 
             the first axis represents the noll indexes. 
  
         Returns
@@ -2771,7 +2797,8 @@ class AberratedAperture(ApertureLayer):
             The leading dimension is `number_of_hexikes` long and 
             each stacked array is a basis term. The final shape is:
             ```py
-            hexikes.shape == (number_of_hexikes, number_of_pixels, number_of_pixels)
+            hexikes.shape == (number_of_hexikes, number_of_pixels, 
+            number_of_pixels)
             ```
         """
         pixel_area = aperture.sum()
@@ -2818,15 +2845,15 @@ class StaticAperture(ApertureLayer):
     def __init__(
             self        : ApertureLayer, 
             aperture    : ApertureLayer, 
-            npix        : int, 
-            pix_scale   : float,
+            npixels        : int, 
+            pixel_scale : float,
             name        : str = "StaticAperture") -> ApertureLayer:
         """
         Parameters
         ----------
         aperture: ApertureLayer
             An instance of DynamicAperture. 
-        npix: int
+        npixels: int
             The number of pixels used to represent the wavefront 
             coordinate system.
         pixel_scale: float, meters / pixel
@@ -2837,7 +2864,7 @@ class StaticAperture(ApertureLayer):
         assert isinstance(aperture, DynamicAperture)
 
         super().__init__(name = name)
-        coords = dLux.utils.get_pixel_coordinates(npix, pix_scale)
+        coords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
         self.aperture = aperture._aperture(coords)
 
 
@@ -2880,15 +2907,15 @@ class StaticAberratedAperture(ApertureLayer):
     def __init__(
             self        : ApertureLayer, 
             aperture    : ApertureLayer, 
-            npix        : int, 
-            pix_scale   : float,
-            name        : "StaticAberratedAperture") -> ApertureLayer:
+            npixels        : int, 
+            pixel_scale : float,
+            name        : str = "StaticAberratedAperture") -> ApertureLayer:
         """
         Parameters
         ----------
         aperture: ApertureLayer
             An instance of DynamicAperture. 
-        npix: int
+        npixels: int
             The number of pixels used to represent the wavefront 
             coordinate system.
         pixel_scale: float, meters / pixel
@@ -2899,7 +2926,7 @@ class StaticAberratedAperture(ApertureLayer):
         assert isinstance(aperture, AberratedAperture)
 
         super().__init__(name = name)
-        coords = dLux.utils.get_pixel_coordinates(npix, pix_scale)
+        coords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
         self.aperture = aperture.aperture._aperture(coords)
         self.basis = aperture._basis(coords)
 
