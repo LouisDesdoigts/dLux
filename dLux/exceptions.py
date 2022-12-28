@@ -1,3 +1,8 @@
+attr_dims_message = f"""
+I was expecting dimensions that could be broadcast with
+{}. Instead I recieved dimensions {} when initialising 
+the attribute {}.
+"""
 
 
 class DimensionError(Exception):
@@ -27,5 +32,7 @@ def validate_attr_dims(
     try:
         np.broadcast_shapes(attr_shape, correct_shape)
     except ValueError:
-        raise DimensionError()
+        raise DimensionError(
+            attr_dims_message.format(
+                correct_shape, attr_shape, attr_name))
         
