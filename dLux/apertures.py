@@ -520,6 +520,10 @@ class AnnularAperture(DynamicAperture):
             occulting = occulting, 
             softening = softening,
             name = name)
+
+        dLux.exceptions.validate_eq_attr_dims((), rmax.shape, "rmax")
+        dLux.exceptions.validate_eq_attr_dims((), rmin.shape, "rmin")
+
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
 
