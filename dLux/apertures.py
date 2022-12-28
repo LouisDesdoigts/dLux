@@ -108,10 +108,18 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
             The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(name)
+
         self.centre = np.asarray(centre).astype(float)
         self.strain = np.asarray(strain).astype(float)
         self.compression = np.asarray(compression).astype(float)
         self.rotation = np.asarray(rotation).astype(float)
+
+        dLux.exceptions.validate_eq_attr_dims(self.centre.shape, (2,), "centre")
+        dLux.exceptions.validate_eq_attr_dims(self.strain.shape, (2,), "strain")
+        dLux.exceptions.validate_eq_attr_dims(
+            self.compression.shape, (2,), "compression")
+        dLux.exceptions.validate_eq_attr_dims(
+            self.rotation.shape, (), "rotation")
 
 
     def _coordinates(self: ApertureLayer, coordinates: Array) -> Array:
@@ -514,8 +522,12 @@ class AnnularAperture(DynamicAperture):
             occulting = occulting, 
             softening = softening,
             name = name)
+
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
+
+        dLux.exceptions.validate_eq_attr_dims((), self.rmax.shape, "rmax")
+        dLux.exceptions.validate_eq_attr_dims((), self.rmin.shape, "rmin")
 
 
     def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
@@ -645,7 +657,10 @@ class CircularAperture(DynamicAperture):
             occulting = occulting, 
             softening = softening,
             name = name) 
+
         self.radius = np.asarray(radius).astype(float)
+            
+        dLux.exceptions.validate_eq_attr_dims((), self.radius.shape, "radius")
 
 
     def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
@@ -785,8 +800,12 @@ class RectangularAperture(DynamicAperture):
             occulting = occulting, 
             softening = softening,
             name = name)
+
         self.height = np.asarray(height).astype(float)
         self.width = np.asarray(width).astype(float)
+
+        dLux.exceptions.validate_eq_attr_dims((), self.height.shape, "height")
+        dLux.exceptions.validate_eq_attr_dims((), self.width.shape, "width")
 
 
     def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
@@ -916,7 +935,10 @@ class SquareAperture(DynamicAperture):
             occulting = occulting, 
             softening = softening,
             name = name)
+
         self.width = np.asarray(width).astype(float)
+
+        dLux.exceptions.validate_eq_attr_dims((), self.width.shape, "width")
 
 
     def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
@@ -1258,13 +1280,9 @@ class IrregularPolygonalAperture(PolygonalAperture):
             softening = softening,
             name = name)
         
-        vertices = np.array(vertices).astype(float)
-        shape = vertices.shape
-        is_corr_shape = (shape[0] > shape[1]) and (shape[1] == 2)
-
-        assert is_corr_shape, "Make sure that the vertices are (n, 2)"
-
-        self.vertices = vertices
+        self.vertices = np.array(vertices).astype(float)
+        dLux.exceptions.validate_bc_attr_dims(
+            (1, 2), self.vertices.shape, "vertices")
             
     
     def _grads_from_many_points(self: ApertureLayer, 
@@ -1324,8 +1342,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         extent : float
             The maximum distance from centre to edge of aperture
         """
-        verts: float = self.vertices
-        dist_to_verts: float = np.hypot(verts[:, 1], verts[:, 0])
+        verts = self.vertices
+        dist_to_verts = np.hypot(verts[:, 1], verts[:, 0])
         return np.max(dist_to_verts)
     
     
@@ -1504,9 +1522,12 @@ class RegularPolygonalAperture(PolygonalAperture):
             occulting = occulting,
             softening = softening,
             name = name)
+
         self.nsides = int(nsides)
         self.rmax = np.array(rmax).astype(float)
-        
+
+        dLux.exceptions.validate_eq_attr_dims((), self.rmax.shape, "rmax")
+
         
     def _extent(self: ApertureLayer) -> float:
         """
@@ -1762,7 +1783,9 @@ class CompositeAperture(AbstractDynamicAperture):
         for aperture in apertures:
             if isinstance(aperture, AberratedAperture):
                 self.has_aberrated = True
-                break
+
+            if not isinstance(aperture, ApertureLayer):
+                raise ValueError("All the apertures should be ApertureLayers.")
 
         self.apertures = dLux.utils.list_to_dictionary(apertures)
 
@@ -2231,8 +2254,12 @@ class UniformSpider(Spider):
             rotation = rotation,
             softening = softening,
             name = name)
+
         self.nstruts = int(nstruts)
         self.width_of_struts = np.asarray(width_of_struts).astype(float)
+
+        dLux.exceptions.validate_eq_attr_dims(
+            (), self.width_of_struts.shape, "Width_of_struts")
 
 
     def _stacked_struts(self: ApertureLayer, coordinates: Array) -> Array:
@@ -2362,8 +2389,11 @@ class AberratedAperture(ApertureLayer):
         name: str = 'AberratedAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
-        assert not aperture.occulting
-        assert isinstance(aperture, AbstractDynamicAperture)
+        if aperture.occulting:
+            raise ValueError("The aperture shuld not be occulting.")
+        
+        if not isinstance(aperture, AbstractDynamicAperture):
+            raise ValueError("You have provided the wrong thing for the aperture.")
 
         if isinstance(aperture, RegularPolygonalAperture):
             n = aperture.nsides
@@ -2375,6 +2405,9 @@ class AberratedAperture(ApertureLayer):
         self.aperture = aperture
         self.nterms = int(len(coefficients))
         self.coefficients = np.asarray(coefficients).astype(float)
+
+        dLux.exceptions.validate_bc_attr_dims(
+            noll_inds.shape, self.coefficients.shape, "coefficients")
  
 
     def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
@@ -2833,7 +2866,11 @@ class StaticAperture(ApertureLayer):
         name: str = 'StaticAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
-        assert isinstance(aperture, DynamicAperture)
+        if not isinstance(aperture, DynamicAperture):
+            raise ValueError(
+                "You did not provide an Aperture." + \
+                "If you meant to use an AberratedAperture" +\
+                "use the StaticAberratedAperture class.")
 
         super().__init__(name = name)
         coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
@@ -2895,7 +2932,8 @@ class StaticAberratedAperture(ApertureLayer):
         name: str = 'StaticAberratedAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
-        assert isinstance(aperture, AberratedAperture)
+        if not isinstance(aperture, AberratedAperture):
+            raise ValueError("I expected an AberratedAperture.")
 
         super().__init__(name = name)
         coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)

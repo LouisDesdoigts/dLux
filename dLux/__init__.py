@@ -11,6 +11,7 @@ from . import utils
 from . import apertures
 from . import sources
 from . import spectrums
+from . import exceptions
 
 # Import core functions from modules
 from .core        import *
@@ -19,8 +20,9 @@ from .optics      import *
 from .wavefronts  import *
 from .propagators import *
 from .apertures   import *
-from .sources     import*
+from .sources     import *
 from .spectrums   import *
+from .exceptions  import *
 
 # Add to __all__
 __all__ = core.__all__ + detectors.__all__ + optics.__all__ + \
