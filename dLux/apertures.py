@@ -109,10 +109,10 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         """
         super().__init__(name)
 
-        validate_eq_attr_dims(centre.shape, (2,), "centre")
-        validate_eq_attr_dims(strain.shape, (2,), "strain")
-        validate_eq_attr_dims(compression.shape, (2,), "compression")
-        validate_eq_attr_dims(rotation.shape, (), "rotation")
+        dLux.exceptions.validate_eq_attr_dims(centre.shape, (2,), "centre")
+        dLux.exceptions.validate_eq_attr_dims(strain.shape, (2,), "strain")
+        dLux.exceptions.validate_eq_attr_dims(compression.shape, (2,), "compression")
+        dLux.exceptions.validate_eq_attr_dims(rotation.shape, (), "rotation")
 
         self.centre = np.asarray(centre).astype(float)
         self.strain = np.asarray(strain).astype(float)
@@ -655,6 +655,9 @@ class CircularAperture(DynamicAperture):
             occulting = occulting, 
             softening = softening,
             name = name) 
+            
+        dLux.exceptions.validate_eq_attr_dims((), radius.shape, "radius")
+
         self.radius = np.asarray(radius).astype(float)
 
 
