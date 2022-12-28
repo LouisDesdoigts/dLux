@@ -29,9 +29,22 @@ def validate_attr_dims(
         attr_shape: tuple, 
         correct_shape: tuple, 
         attr_name: str) -> None:
-    try:
-        np.broadcast_shapes(attr_shape, correct_shape)
-    except ValueError:
+    """
+    Confirm that an initialised attribute has the correct shape
+    and raise a helpful error if it does not.
+
+    Parameters
+    ----------
+    attr_shape: tuple
+        The shape of the attribute to be initialised.
+    correct_shape: tuple
+        A shape that meets the necessary conditions of
+        the attribute. 
+    attr_name: str
+        The name of the attribute that is getting 
+        initialised
+    """
+    if attr_shape != correct_shape:
         raise DimensionError(
             attr_dims_message.format(
                 correct_shape, attr_shape, attr_name))
