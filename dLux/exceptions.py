@@ -1,7 +1,13 @@
-attr_dims_message = f"""
+bc_attr_dims_message = """
 I was expecting dimensions that could be broadcast with
 {}. Instead I recieved dimensions {} when initialising 
 the attribute {}.
+"""
+
+
+eq_attr_dims_message = """
+I was expecting dimensions {} but I recieved dimensions
+{} when initialising the attribute {}.
 """
 
 
@@ -25,7 +31,7 @@ class DimensionError(Exception):
         super().__init__(message)
 
 
-def validate_attr_dims(
+def validate_eq_attr_dims(
         attr_shape: tuple, 
         correct_shape: tuple, 
         attr_name: str) -> None:
@@ -46,6 +52,6 @@ def validate_attr_dims(
     """
     if attr_shape != correct_shape:
         raise DimensionError(
-            attr_dims_message.format(
+            eq_attr_dims_message.format(
                 correct_shape, attr_shape, attr_name))
         
