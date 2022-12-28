@@ -5,15 +5,13 @@ __all__ = ["validate_eq_attr_dims", "validate_bc_attr_dims"]
 
 
 bc_attr_dims_message = """
-I was expecting dimensions that could be broadcast with
-{}. Instead I recieved dimensions {} when initialising 
-the attribute {}.
+Expected dimensions that could be broadcast with
+{}. Recieved dimensions {} when initialising attribute {}.
 """
 
 
 eq_attr_dims_message = """
-I was expecting dimensions {} but I recieved dimensions
-{} when initialising the attribute {}.
+Expected dimension {} but recieved {} when initialising the attribute {}.
 """
 
 
@@ -84,7 +82,7 @@ def validate_bc_attr_dims(
         initialised
     """
     try:
-        np.broacdcast_shapes(attr_shape, correct_shape)
+        np.broadcast_shapes(attr_shape, correct_shape)
     except ValueError:
         raise DimensionError(
             bc_attr_dims_message.format(
