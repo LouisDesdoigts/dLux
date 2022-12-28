@@ -798,6 +798,10 @@ class RectangularAperture(DynamicAperture):
             occulting = occulting, 
             softening = softening,
             name = name)
+
+        dLux.exceptions.validate_eq_attr_dims((), height, "height")
+        dLux.exceptions.validate_eq_attr_dims((), width, "width")
+
         self.height = np.asarray(height).astype(float)
         self.width = np.asarray(width).astype(float)
 
