@@ -1521,6 +1521,9 @@ class RegularPolygonalAperture(PolygonalAperture):
             softening = softening,
             name = name)
         self.nsides = int(nsides)
+
+        dLux.exceptions.validate_eq_attr_dims((), rmax.shape, "rmax")
+
         self.rmax = np.array(rmax).astype(float)
         
         
@@ -1778,7 +1781,9 @@ class CompositeAperture(AbstractDynamicAperture):
         for aperture in apertures:
             if isinstance(aperture, AberratedAperture):
                 self.has_aberrated = True
-                break
+
+            if not isinstance(aperture, ApertureLayer):
+                raise ValueError("All the apertures should be ApertureLayers.")
 
         self.apertures = dLux.utils.list_to_dictionary(apertures)
 
