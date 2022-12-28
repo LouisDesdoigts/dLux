@@ -1,3 +1,5 @@
+
+
 class DimensionError(Exception):
     """
     This error is raised in the place of a ValueError
@@ -16,3 +18,14 @@ class DimensionError(Exception):
             correctly formatted. 
         """
         super().__init__(message)
+
+
+def validate_attr_dims(
+        attr_shape: tuple, 
+        correct_shape: tuple, 
+        attr_name: str) -> None:
+    try:
+        np.broadcast_shapes(attr_shape, correct_shape)
+    except ValueError:
+        raise DimensionError()
+        
