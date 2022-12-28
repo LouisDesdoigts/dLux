@@ -2253,6 +2253,10 @@ class UniformSpider(Spider):
             softening = softening,
             name = name)
         self.nstruts = int(nstruts)
+
+        dLux.exceptions.validate_eq_attr_dims(
+            (), width_of_struts.shape, "Width_of_struts")
+
         self.width_of_struts = np.asarray(width_of_struts).astype(float)
 
 
@@ -2383,8 +2387,11 @@ class AberratedAperture(ApertureLayer):
         name: str = 'AberratedAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
-        assert not aperture.occulting
-        assert isinstance(aperture, AbstractDynamicAperture)
+        if aperture.occulting:
+            raise ValueError("The aperture shuld not be occulting.")
+        
+        if not isinstance(aperture, AbstractDynamicAperture):
+            raise ValueError("You have provided the wrong thing for the aperture.")
 
         if isinstance(aperture, RegularPolygonalAperture):
             n = aperture.nsides
@@ -2395,6 +2402,10 @@ class AberratedAperture(ApertureLayer):
         super().__init__(name = name)
         self.aperture = aperture
         self.nterms = int(len(coefficients))
+
+        dLux.exceptions.validate_bc_attr_dims(
+            noll_inds.shape, coefficients.shape, "coefficients")
+
         self.coefficients = np.asarray(coefficients).astype(float)
  
 
@@ -2414,6 +2425,7 @@ class AberratedAperture(ApertureLayer):
         """
         return self.aperture._aperture(coordinates)
         
+
     def get_aperture(self : ApertureLayer, npixels: int, width: float) -> Array:
         """
         Compute the array representing the aperture. 
