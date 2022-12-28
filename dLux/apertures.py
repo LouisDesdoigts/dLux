@@ -1340,8 +1340,8 @@ class IrregularPolygonalAperture(PolygonalAperture):
         extent : float
             The maximum distance from centre to edge of aperture
         """
-        verts: float = self.vertices
-        dist_to_verts: float = np.hypot(verts[:, 1], verts[:, 0])
+        verts = self.vertices
+        dist_to_verts = np.hypot(verts[:, 1], verts[:, 0])
         return np.max(dist_to_verts)
     
     
