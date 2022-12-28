@@ -2377,6 +2377,28 @@ class AberratedAperture(ApertureLayer):
         self.coefficients = np.asarray(coefficients).astype(float)
  
 
+    def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Apply the aperture and the abberations to the wavefront.  
+ 
+        Parameters
+        ----------
+        wavefront: Wavefront
+            The wavefront that is passing through the aperture.
+
+        Returns
+        -------
+        wavefront: Wavefront
+            The wavefront after passing through the aperture.
+        """
+        coordinates = wavefront.pixel_coordinates
+        opd = self._opd(coordinates)
+        aperture = self.aperture._aperture(coordinates)
+        return wavefront\
+            .add_opd(opd)\
+            .multiply_amplitude(aperture)
+ 
+
     def _aperture(self : ApertureLayer, coordinates : Array) -> Array:
         """
         Compute the array representing the aperture. 
@@ -2393,6 +2415,7 @@ class AberratedAperture(ApertureLayer):
         """
         return self.aperture._aperture(coordinates)
         
+
     def get_aperture(self : ApertureLayer, npixels: int, width: float) -> Array:
         """
         Compute the array representing the aperture. 
@@ -2431,28 +2454,6 @@ class AberratedAperture(ApertureLayer):
         """
         coordinates = dLux.utils.get_pixel_coordinates(npixels, width / npixels)
         return self._basis(coordinates)
- 
-
-    def __call__(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Apply the aperture and the abberations to the wavefront.  
- 
-        Parameters
-        ----------
-        wavefront: Wavefront
-            The wavefront that is passing through the aperture.
-
-        Returns
-        -------
-        wavefront: Wavefront
-            The wavefront after passing through the aperture.
-        """
-        coordinates = wavefront.pixel_coordinates
-        opd = self._opd(coordinates)
-        aperture = self.aperture._aperture(coordinates)
-        return wavefront\
-            .add_opd(opd)\
-            .multiply_amplitude(aperture)
 
 
     def noll_index(self: ApertureLayer, j: int) -> tuple:
