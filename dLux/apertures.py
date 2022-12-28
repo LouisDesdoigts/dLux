@@ -109,15 +109,17 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         """
         super().__init__(name)
 
-        dLux.exceptions.validate_eq_attr_dims(centre.shape, (2,), "centre")
-        dLux.exceptions.validate_eq_attr_dims(strain.shape, (2,), "strain")
-        dLux.exceptions.validate_eq_attr_dims(compression.shape, (2,), "compression")
-        dLux.exceptions.validate_eq_attr_dims(rotation.shape, (), "rotation")
-
         self.centre = np.asarray(centre).astype(float)
         self.strain = np.asarray(strain).astype(float)
         self.compression = np.asarray(compression).astype(float)
         self.rotation = np.asarray(rotation).astype(float)
+
+        dLux.exceptions.validate_eq_attr_dims(self.centre.shape, (2,), "centre")
+        dLux.exceptions.validate_eq_attr_dims(self.strain.shape, (2,), "strain")
+        dLux.exceptions.validate_eq_attr_dims(
+            self.compression.shape, (2,), "compression")
+        dLux.exceptions.validate_eq_attr_dims(
+            self.rotation.shape, (), "rotation")
 
 
     def _coordinates(self: ApertureLayer, coordinates: Array) -> Array:
@@ -521,11 +523,11 @@ class AnnularAperture(DynamicAperture):
             softening = softening,
             name = name)
 
-        dLux.exceptions.validate_eq_attr_dims((), rmax.shape, "rmax")
-        dLux.exceptions.validate_eq_attr_dims((), rmin.shape, "rmin")
-
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
+
+        dLux.exceptions.validate_eq_attr_dims((), self.rmax.shape, "rmax")
+        dLux.exceptions.validate_eq_attr_dims((), self.rmin.shape, "rmin")
 
 
     def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
@@ -655,10 +657,10 @@ class CircularAperture(DynamicAperture):
             occulting = occulting, 
             softening = softening,
             name = name) 
-            
-        dLux.exceptions.validate_eq_attr_dims((), radius.shape, "radius")
 
         self.radius = np.asarray(radius).astype(float)
+            
+        dLux.exceptions.validate_eq_attr_dims((), self.radius.shape, "radius")
 
 
     def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
@@ -799,11 +801,11 @@ class RectangularAperture(DynamicAperture):
             softening = softening,
             name = name)
 
-        dLux.exceptions.validate_eq_attr_dims((), height, "height")
-        dLux.exceptions.validate_eq_attr_dims((), width, "width")
-
         self.height = np.asarray(height).astype(float)
         self.width = np.asarray(width).astype(float)
+
+        dLux.exceptions.validate_eq_attr_dims((), self.height.shape, "height")
+        dLux.exceptions.validate_eq_attr_dims((), self.width.shape, "width")
 
 
     def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
@@ -934,9 +936,9 @@ class SquareAperture(DynamicAperture):
             softening = softening,
             name = name)
 
-        dLux.exceptions.validate_eq_attr_dims((), width.shape, "width")
-
         self.width = np.asarray(width).astype(float)
+
+        dLux.exceptions.validate_eq_attr_dims((), self.width.shape, "width")
 
 
     def _soft_edged(self: ApertureLayer, coordinates: Array) -> Array:
@@ -1278,9 +1280,9 @@ class IrregularPolygonalAperture(PolygonalAperture):
             softening = softening,
             name = name)
         
-        vertices = np.array(vertices).astype(float)
-        dLux.exceptions.validate_bc_attr_dims((1, 2), vertices.shape, "vertices")
-        self.vertices = vertices
+        self.vertices = np.array(vertices).astype(float)
+        dLux.exceptions.validate_bc_attr_dims(
+            (1, 2), self.vertices.shape, "vertices")
             
     
     def _grads_from_many_points(self: ApertureLayer, 
@@ -1520,12 +1522,12 @@ class RegularPolygonalAperture(PolygonalAperture):
             occulting = occulting,
             softening = softening,
             name = name)
+
         self.nsides = int(nsides)
-
-        dLux.exceptions.validate_eq_attr_dims((), rmax.shape, "rmax")
-
         self.rmax = np.array(rmax).astype(float)
-        
+
+        dLux.exceptions.validate_eq_attr_dims((), self.rmax.shape, "rmax")
+
         
     def _extent(self: ApertureLayer) -> float:
         """
@@ -2252,12 +2254,12 @@ class UniformSpider(Spider):
             rotation = rotation,
             softening = softening,
             name = name)
+
         self.nstruts = int(nstruts)
+        self.width_of_struts = np.asarray(width_of_struts).astype(float)
 
         dLux.exceptions.validate_eq_attr_dims(
-            (), width_of_struts.shape, "Width_of_struts")
-
-        self.width_of_struts = np.asarray(width_of_struts).astype(float)
+            (), self.width_of_struts.shape, "Width_of_struts")
 
 
     def _stacked_struts(self: ApertureLayer, coordinates: Array) -> Array:
@@ -2402,11 +2404,10 @@ class AberratedAperture(ApertureLayer):
         super().__init__(name = name)
         self.aperture = aperture
         self.nterms = int(len(coefficients))
+        self.coefficients = np.asarray(coefficients).astype(float)
 
         dLux.exceptions.validate_bc_attr_dims(
-            noll_inds.shape, coefficients.shape, "coefficients")
-
-        self.coefficients = np.asarray(coefficients).astype(float)
+            noll_inds.shape, self.coefficients.shape, "coefficients")
  
 
     def _aperture(self : ApertureLayer, coordinates : Array) -> Array:
