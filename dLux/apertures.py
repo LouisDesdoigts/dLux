@@ -108,6 +108,12 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
             The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(name)
+
+        validate_eq_attr_dims(centre.shape, (2,), "centre")
+        validate_eq_attr_dims(strain.shape, (2,), "strain")
+        validate_eq_attr_dims(compression.shape, (2,), "compression")
+        validate_eq_attr_dims(rotation.shape, (), "rotation")
+
         self.centre = np.asarray(centre).astype(float)
         self.strain = np.asarray(strain).astype(float)
         self.compression = np.asarray(compression).astype(float)
