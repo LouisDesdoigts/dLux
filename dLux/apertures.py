@@ -933,6 +933,9 @@ class SquareAperture(DynamicAperture):
             occulting = occulting, 
             softening = softening,
             name = name)
+
+        dLux.exceptions.validate_eq_attr_dims((), width.shape, "width")
+
         self.width = np.asarray(width).astype(float)
 
 
@@ -1276,11 +1279,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
             name = name)
         
         vertices = np.array(vertices).astype(float)
-        shape = vertices.shape
-        is_corr_shape = (shape[0] > shape[1]) and (shape[1] == 2)
-
-        assert is_corr_shape, "Make sure that the vertices are (n, 2)"
-
+        dLux.exceptions.validate_bc_attr_dims((1, 2), vertices.shape, "vertices")
         self.vertices = vertices
             
     
