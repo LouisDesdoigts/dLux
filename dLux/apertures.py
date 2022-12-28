@@ -2894,7 +2894,7 @@ class StaticAperture(ApertureLayer):
         return wavefront.multiply_amplitude(self.aperture)
     
 
-class StaticAberratedAperture(ApertureLayer):
+class StaticAberratedAperture(StaticAperture):
     """
     This layer is designed to increase the speed, when parameters 
     are not getting learned. It pre-calculates the aperture and
@@ -2909,8 +2909,8 @@ class StaticAberratedAperture(ApertureLayer):
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
-    aperture: Array
     basis: Array
+    coefficients: Array
 
 
     def __init__(
@@ -2935,9 +2935,9 @@ class StaticAberratedAperture(ApertureLayer):
         if not isinstance(aperture, AberratedAperture):
             raise ValueError("I expected an AberratedAperture.")
 
-        super().__init__(name = name)
+        super().__init__(name = name, aperture = aperture)
+        # TODO: coordinates are doubly generated
         coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
-        self.aperture = aperture.aperture._aperture(coordinates)
         self.basis = aperture._basis(coordinates)
 
 
@@ -2957,4 +2957,4 @@ class StaticAberratedAperture(ApertureLayer):
         """
         return wavefront\
             .multiply_amplitude(self.aperture)\
-            .add_phase(self.basis)
+            .add_opd(np.dot(self.basis.T, self.coefficients))
