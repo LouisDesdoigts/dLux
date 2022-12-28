@@ -37,7 +37,8 @@ def validate_eq_attr_dims(
         attr_name: str) -> None:
     """
     Confirm that an initialised attribute has the correct shape
-    and raise a helpful error if it does not.
+    and raise a helpful error if it does not. Correct in this 
+    case implies equality between `attr_shape` and `correct_shape`.
 
     Parameters
     ----------
@@ -53,5 +54,33 @@ def validate_eq_attr_dims(
     if attr_shape != correct_shape:
         raise DimensionError(
             eq_attr_dims_message.format(
+                correct_shape, attr_shape, attr_name))
+
+
+def validate_bc_attr_dims(
+        attr_shape: tuple, 
+        correct_shape: tuple,
+        attr_name: str) -> None:
+    """
+    Confirm that an initialised attribute has the correct shape
+    and raise a helpful error if it does not. Correct in this 
+    case is the relaxed "broadcastable" version.
+
+    Parameters
+    ----------
+    attr_shape: tuple
+        The shape of the attribute to be initialised.
+    correct_shape: tuple
+        A shape that meets the necessary conditions of
+        the attribute. 
+    attr_name: str
+        The name of the attribute that is getting 
+        initialised
+    """
+    try:
+        np.broacdcast_shapes(attr_shape, correct_shape)
+    except ValueError:
+        raise DimensionError(
+            bc_attr_dims_message.format(
                 correct_shape, attr_shape, attr_name))
         
