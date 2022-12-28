@@ -2850,8 +2850,9 @@ class StaticAperture(ApertureLayer):
     def __init__(
             self        : ApertureLayer, 
             aperture    : ApertureLayer, 
-            npixels     : int, 
-            pixel_scale : float,
+            npixels     : int = None, 
+            pixel_scale : float = None,
+            Coordinates : Array = None,
             name        : str = "StaticAperture") -> ApertureLayer:
         """
         Parameters
@@ -2871,6 +2872,14 @@ class StaticAperture(ApertureLayer):
                 "You did not provide an Aperture." + \
                 "If you meant to use an AberratedAperture" +\
                 "use the StaticAberratedAperture class.")
+
+        if not coordinates and not npixels or not pixel_scale:
+            raise ValueError(
+                "Please provide either npixels and pixel_scale" +\
+                "or coordinates")
+
+        if not coordinates:
+            coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
 
         super().__init__(name = name)
         coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
@@ -2916,8 +2925,9 @@ class StaticAberratedAperture(StaticAperture):
     def __init__(
             self        : ApertureLayer, 
             aperture    : ApertureLayer, 
-            npixels     : int, 
-            pixel_scale : float,
+            npixels     : int = None, 
+            pixel_scale : float = None,
+            coordinates : Array = None,
             name        : str = "StaticAberratedAperture") -> ApertureLayer:
         """
         Parameters
@@ -2935,9 +2945,13 @@ class StaticAberratedAperture(StaticAperture):
         if not isinstance(aperture, AberratedAperture):
             raise ValueError("I expected an AberratedAperture.")
 
-        super().__init__(name = name, aperture = aperture)
-        # TODO: coordinates are doubly generated
-        coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
+        super().__init__(
+            name = name, 
+            aperture = aperture, 
+            npixels = npixels,
+            pixel_scale = pixel_scale,
+            coordinates = coordinates)
+
         self.basis = aperture._basis(coordinates)
 
 
