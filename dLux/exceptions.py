@@ -1,3 +1,9 @@
+from jax import numpy as np 
+
+
+__all__ = ["validate_eq_attr_dims", "validate_bc_attr_dims"]
+
+
 bc_attr_dims_message = """
 I was expecting dimensions that could be broadcast with
 {}. Instead I recieved dimensions {} when initialising 
@@ -83,4 +89,6 @@ def validate_bc_attr_dims(
         raise DimensionError(
             bc_attr_dims_message.format(
                 correct_shape, attr_shape, attr_name))
-        
+
+
+
