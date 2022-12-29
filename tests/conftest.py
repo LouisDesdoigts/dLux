@@ -513,7 +513,6 @@ def create_point_source() -> callable:
         return dLux.sources.PointSource(position, flux, spectrum, name=name)
     return _create_point_source
 
-
 @pytest.fixture
 def create_multi_point_source() -> callable:
     """
@@ -562,7 +561,6 @@ def create_array_distribution():
         return dLux.sources.ArrayDistribution(position, flux, distribution,
                                               spectrum, name=name)
     return _create_array_distribution
-
 
 @pytest.fixture
 def create_binary_source():
@@ -620,7 +618,6 @@ def create_point_extended_source() -> callable:
         return dLux.sources.PointExtendedSource(position, flux, distribution,
                                                 contrast, spectrum, name=name)
     return _create_point_extended_source
-
 
 @pytest.fixture
 def create_point_and_extended_source():
@@ -691,7 +688,6 @@ def create_polynomial_spectrum() -> callable:
         """
         return dLux.spectrums.PolynomialSpectrum(wavelengths, coefficients)
     return _create_polynomial_spectrum
-
 
 @pytest.fixture
 def create_combined_spectrum() -> callable:
@@ -848,7 +844,7 @@ def create_square_aperture() -> callable:
             compression : Array = [1., 1.],
             rotation    : Array = 0.,
             occulting   : bool = False, 
-            softening   : Array = 0.) -> Aperture:
+            softening   : bool = False) -> Aperture:
         """
         Construct's an instance of `SquareAperture` making 
         it easy to toggle a single parameter. 
@@ -879,12 +875,12 @@ def create_square_aperture() -> callable:
             The side length of the square. 
         """
         return dLux.SquareAperture(width,
-            centre,
-            strain,
-            compression,
-            rotation,
-            occulting,
-            softening)
+                                    centre,
+                                    strain,
+                                    compression,
+                                    rotation,
+                                    occulting,
+                                    softening)
 
     return _create_square_aperture
 
@@ -908,7 +904,7 @@ def create_rectangular_aperture()-> callable:
                                     compression : Array = [1., 1.],
                                     rotation    : Array = 0.,
                                     occulting   : bool = False, 
-                                    softening   : Array = 0.) -> Aperture:
+                                    softening   : bool = False) -> Aperture:
         """
         Construct's an instance of `SquareAperture` making 
         it easy to toggle a single parameter. 
@@ -934,14 +930,14 @@ def create_rectangular_aperture()-> callable:
             The rotation of the aperture.
         """
         return dLux.apertures.RectangularAperture(
-                                                length      , 
-                                                width       , 
-                                                centre      ,
-                                                strain      ,
-                                                compression ,
-                                                rotation    ,
-                                                occulting   , 
-                                                softening)
+            length, 
+            width, 
+            centre,
+            strain,
+            compression,
+            rotation,
+            occulting, 
+            softening)
     return _create_rectangular_aperture
 
 
@@ -957,22 +953,20 @@ def create_circular_aperture() -> callable:
 
 
     def _create_circular_aperture( 
-            radius      : Array = 1., 
-            centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            occulting   : bool = False, 
-            softening   : Array = 0.) -> Aperture:
+                                radius      : Array = 1., 
+                                centre      : Array = [0., 0.],
+                                strain      : Array = [0., 0.],
+                                compression : Array = [1., 1.],
+                                occulting   : bool = False, 
+                                softening   : bool = False) -> Aperture:
         return dLux.apertures.CircularAperture(
-            radius,
-            centre,
-            strain,
-            compression,
-            occulting,
-            softening)
-
+                                radius,
+                                centre,
+                                strain,
+                                compression,
+                                occulting,
+                                softening)
     return _create_circular_aperture
-
 
 @pytest.fixture
 def create_hexagonal_aperture() -> callable:
@@ -986,22 +980,21 @@ def create_hexagonal_aperture() -> callable:
 
 
     def _create_hexagonal_aperture( 
-            radius      : Array = 1., 
-            centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0.,
-            occulting   : bool = False, 
-            softening   : Array = 0.) -> Aperture:
+                                radius      : Array = 1., 
+                                centre      : Array = [0., 0.],
+                                strain      : Array = [0., 0.],
+                                compression : Array = [1., 1.],
+                                rotation    : Array = 0.,
+                                occulting   : bool = False, 
+                                softening   : bool = False) -> Aperture:
         return dLux.apertures.HexagonalAperture(
-            radius,
-            centre,
-            strain,
-            compression,
-            rotation,
-            occulting,
-            softening)
-
+                                radius,
+                                centre,
+                                strain,
+                                compression,
+                                rotation,
+                                occulting,
+                                softening)
     return _create_hexagonal_aperture
 
 
@@ -1017,22 +1010,21 @@ def create_annular_aperture() -> callable:
 
 
     def _create_annular_aperture( 
-            rmax        : Array = 1.2, 
-            rmin        : Array = 0.5, 
-            centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            occulting   : bool = False, 
-            softening   : Array = 0.) -> Aperture:
+                                rmax        : Array = 1.2, 
+                                rmin        : Array = 0.5, 
+                                centre      : Array = [0., 0.],
+                                strain      : Array = [0., 0.],
+                                compression : Array = [1., 1.],
+                                occulting   : bool = False, 
+                                softening   : bool = False) -> Aperture:
         return dLux.apertures.AnnularAperture(
-            rmax,
-            rmin,
-            centre,
-            strain,
-            compression,
-            occulting,
-            softening)
-
+                                rmax,
+                                rmin,
+                                centre,
+                                strain,
+                                compression,
+                                occulting,
+                                softening)
     return _create_annular_aperture
 
 
