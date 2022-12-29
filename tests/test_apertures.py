@@ -1,7 +1,6 @@
 import dLux 
 import jax.numpy as np
 import typing
-# from jax import config
 # config.update("jax_debug_nans", True)
 
 Aperture = typing.TypeVar("Aperture")
@@ -61,7 +60,7 @@ class TestAperturesCommonInterfaces():
 
         for centre in centres:
             for rotation in rotations:
-                for softening in [True, False]:
+                for softening in [0., 1.]:
                     for occulting in [True, False]:
                         actual_kwargs = base_kwargs
                         actual_kwargs["centre"] = centre
@@ -105,22 +104,22 @@ class TestUniformSpider(object):
         coordinates = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
         # Case Translated 
-        spider = create_uniform_spider(centre=[1., 1.], softening=False)
+        spider = create_uniform_spider(centre=[1., 1.], softening=0.)
         aperture = spider._aperture(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Rotated 
-        spider = create_uniform_spider(rotation=np.pi/4., softening=False)
+        spider = create_uniform_spider(rotation=np.pi/4., softening=0.)
         aperture = spider._aperture(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Strained 
-        spider = create_uniform_spider(strain=[.05, .05], softening=False)
+        spider = create_uniform_spider(strain=[.05, .05], softening=0.)
         aperture = spider._aperture(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Compression
-        spider = create_uniform_spider(compression=[1.05, .95], softening=False)
+        spider = create_uniform_spider(compression=[1.05, .95], softening=0.)
         aperture = spider._aperture(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
@@ -134,25 +133,25 @@ class TestUniformSpider(object):
         coordinates = dLux.utils.get_pixel_coordinates(npix, width / npix)
 
         # Case Translated 
-        spider = create_uniform_spider(centre=[1., 1.], softening=False)
+        spider = create_uniform_spider(centre=[1., 1.], softening=0.)
         aperture = spider._aperture(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Rotated 
-        spider = create_uniform_spider(rotation=np.pi/4., softening=False)
+        spider = create_uniform_spider(rotation=np.pi/4., softening=0.)
         aperture = spider._aperture(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Strained 
-        spider = create_uniform_spider(strain=[.05, .05], softening=False)
+        spider = create_uniform_spider(strain=[.05, .05], softening=0.)
         aperture = spider._aperture(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Compression
-        spider = create_uniform_spider(compression=[1.05, .95], softening=False)
+        spider = create_uniform_spider(compression=[1.05, .95], softening=0.)
         aperture = spider._aperture(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
