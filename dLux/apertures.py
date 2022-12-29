@@ -238,6 +238,10 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         of `jax` is via a `np.tanh` function. This is good for 
         derivatives. Use this feature only if encountering 
         errors when using hard edged apertures. 
+    steepness: float
+        Controls the approximate width of the soft region in the 
+        soft edged aperture. In general it is best if this parameter
+        is set equal to the number of pixels. 
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -254,7 +258,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
     """
     occulting: bool 
     softening: bool
-    steepness: float
+    steepness: Array
     
 
     def __init__(self   : ApertureLayer, 
@@ -264,7 +268,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False,
-            steepness   : float = None,
+            steepness   : Array = None,
             name        : str = 'DynamicAperture') -> ApertureLayer:
         """
         Constructor for the DynamicAperture class.
@@ -289,6 +293,10 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
+        steepness: float
+            Controls the approximate width of the soft region in the 
+            soft edged aperture. In general it is best if this parameter
+            is set equal to the number of pixels. 
         name: str = 'DynamicAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -483,6 +491,10 @@ class AnnularAperture(DynamicAperture):
         True if the aperture is soft edged otherwise False. A
         soft edged aperture has a small layer of non-binary 
         pixels. This is to prevent undefined gradients. 
+    steepness: float
+        Controls the approximate width of the soft region in the 
+        soft edged aperture. In general it is best if this parameter
+        is set equal to the number of pixels. 
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -498,6 +510,7 @@ class AnnularAperture(DynamicAperture):
             compression : Array = np.array([1., 1.]),
             occulting   : bool = False, 
             softening   : bool = False,
+            steepness   : Array = None,
             name        : str = "AnnularAperture") -> ApertureLayer:
         """
         Parameters
@@ -522,6 +535,10 @@ class AnnularAperture(DynamicAperture):
             True if the aperture is soft edged otherwise False. A
             soft edged aperture has a small layer of non-binary 
             pixels. This is to prevent undefined gradients. 
+        steepness: float
+            Controls the approximate width of the soft region in the 
+            soft edged aperture. In general it is best if this parameter
+            is set equal to the number of pixels. 
         name: str = 'AnnularAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -531,6 +548,7 @@ class AnnularAperture(DynamicAperture):
             compression = compression, 
             occulting = occulting, 
             softening = softening,
+            steepness = steepness,
             name = name)
 
         self.rmax = np.asarray(rmax).astype(float)
