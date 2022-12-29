@@ -2301,10 +2301,15 @@ class UniformSpider(Spider):
         is a constant. 
     rotation: Array, radians
         The counter-clockwise rotation of the coordinate system.
-    softening: bool
-        True if the aperture is soft edged otherwise False. A
-        soft edged aperture has a small layer of non-binary 
-        pixels. This is to prevent undefined gradients. 
+    softening: float, pixels
+        There is a layer of pixels that is non-binary. The 
+        way that this is implemented (due to the limitations)
+        of `jax` is via a `np.tanh` function. This is good for 
+        derivatives. Use this feature only if encountering 
+        errors when using hard edged apertures. The softening
+        value roughly represents the number of non-binary 
+        pixels. Setting softening to 0. will produce hard 
+        edged apertures.
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -2319,7 +2324,7 @@ class UniformSpider(Spider):
             strain           : Array = np.array([0., 0.]),
             compression      : Array = np.array([1., 1.]),
             rotation         : Array = np.array(0.),
-            softening        : bool = False,
+            softening        : Array = np.array(1.),
             name             : str = "UniformSpider") -> ApertureLayer:
         """
         Parameters
@@ -2340,10 +2345,15 @@ class UniformSpider(Spider):
             is a constant. 
         rotation: Array, radians = np.array(0.)
             The counter-clockwise rotation of the coordinate system.
-        softening: bool = False
-            True if the aperture is soft edged otherwise False. A
-            soft edged aperture has a small layer of non-binary 
-            pixels. This is to prevent undefined gradients. 
+        softening: float, pixels
+            There is a layer of pixels that is non-binary. The 
+            way that this is implemented (due to the limitations)
+            of `jax` is via a `np.tanh` function. This is good for 
+            derivatives. Use this feature only if encountering 
+            errors when using hard edged apertures. The softening
+            value roughly represents the number of non-binary 
+            pixels. Setting softening to 0. will produce hard 
+            edged apertures.
         name: str = 'UniformSpider'
             The name of the layer, which is used to index the layers dictionary.
         """ 
