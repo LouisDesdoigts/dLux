@@ -231,13 +231,16 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         occulting aperture is zero inside and one outside.
         A non-occulting aperture is one inside and zero 
         outside. 
-    softening: bool 
+    softening: float, pixels
         True is the aperture is soft edged. This means that 
         there is a layer of pixels that is non-binary. The 
         way that this is implemented (due to the limitations)
         of `jax` is via a `np.tanh` function. This is good for 
         derivatives. Use this feature only if encountering 
-        errors when using hard edged apertures. 
+        errors when using hard edged apertures. The softening
+        value roughly represents the number of non-binary 
+        pixels. Setting softening to 0. will produce hard 
+        edged apertures.
     centre: Array, meters
         The (x, y) centre of the coordinate system in the wavefront
         coordinate system.
@@ -253,7 +256,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         The name of the layer, which is used to index the layers dictionary.
     """
     occulting: bool 
-    softening: bool
+    softening: float
     
 
     def __init__(self   : ApertureLayer, 
@@ -262,7 +265,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
-            softening   : bool = False,
+            softening   : float = np.array([1.]),
             name        : str = 'DynamicAperture') -> ApertureLayer:
         """
         Constructor for the DynamicAperture class.
@@ -296,8 +299,11 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             compression = compression,
             rotation = rotation,
             name = name)
-        self.softening = bool(softening) 
+
+        self.softening = np.asarray(softening).astype(float) 
         self.occulting = bool(occulting)
+
+        dLux.exceptions.validate_eq_attr_dims((), softening, "softening")
 
 
     @abstractmethod
@@ -389,7 +395,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             The image represented as an approximately binary mask, but with 
             the prozed soft edges.
         """
-        steepness = distances.shape[-1]
+        steepness = 3. / self.softening * distances.shape[-1]
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
@@ -409,7 +415,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         """
         coordinates = self._coordinates(coordinates) 
 
-        if self.softening:
+        if self.softening != 0.:
             aperture = self._soft_edged(coordinates)
         else:
             aperture = self._hard_edged(coordinates)
