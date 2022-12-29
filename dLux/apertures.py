@@ -649,7 +649,7 @@ class CircularAperture(DynamicAperture):
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
             occulting   : bool = False, 
-            softening   : bool = False,
+            softening   : Array = np.array(1.),
             name        : str = "CircularAperture") -> Array:
         """
         Parameters
@@ -797,7 +797,7 @@ class RectangularAperture(DynamicAperture):
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
-            softening   : float = np.array(1.),
+            softening   : Array = np.array(1.),
             name        : str = "RectangularAperture") -> ApertureLayer: 
         """
         Parameters
