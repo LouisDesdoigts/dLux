@@ -264,7 +264,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
-            softening   : float = np.array([1.]),
+            softening   : float = np.array(1.),
             name        : str = 'DynamicAperture') -> ApertureLayer:
         """
         Constructor for the DynamicAperture class.
@@ -304,10 +304,11 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             rotation = rotation,
             name = name)
 
-        self.softening = np.asarray(softening).astype(float) 
         self.occulting = bool(occulting)
 
-        dLux.exceptions.validate_eq_attr_dims((), softening, "softening")
+        softening = np.asarray(softening).astype(float) 
+        dLux.exceptions.validate_eq_attr_dims((), softening.shape, "softening")
+        self.softening = softening
 
 
     @abstractmethod
@@ -502,7 +503,7 @@ class AnnularAperture(DynamicAperture):
             strain      : Array = np.array([0., 0.]),
             compression : Array = np.array([1., 1.]),
             occulting   : bool = False, 
-            softening   : bool = False,
+            softening   : Array = np.array(1.),
             name        : str = "AnnularAperture") -> ApertureLayer:
         """
         Parameters
