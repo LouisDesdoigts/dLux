@@ -973,6 +973,7 @@ def create_circular_aperture() -> callable:
 
     return _create_circular_aperture
 
+
 @pytest.fixture
 def create_hexagonal_aperture() -> callable:
     """
