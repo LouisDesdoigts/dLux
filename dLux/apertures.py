@@ -1286,10 +1286,15 @@ class IrregularPolygonalAperture(PolygonalAperture):
     occulting: bool
         True if the aperture is occulting else False. An 
         occulting aperture is zero inside and one outside. 
-    softening: bool
-        True if the aperture is soft edged otherwise False. A
-        soft edged aperture has a small layer of non-binary 
-        pixels. This is to prevent undefined gradients. 
+    softening: float, pixels
+        There is a layer of pixels that is non-binary. The 
+        way that this is implemented (due to the limitations)
+        of `jax` is via a `np.tanh` function. This is good for 
+        derivatives. Use this feature only if encountering 
+        errors when using hard edged apertures. The softening
+        value roughly represents the number of non-binary 
+        pixels. Setting softening to 0. will produce hard 
+        edged apertures.
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -1303,7 +1308,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
             compression : Array = np.array([1., 1.]),
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
-            softening   : bool = False,
+            softening   : Array = np.array(1.),
             name        : str = "IrregularPolygonalAperture") -> ApertureLayer:
         """
         Parameters
@@ -1324,10 +1329,15 @@ class IrregularPolygonalAperture(PolygonalAperture):
         occulting: bool = False
             True if the aperture is occulting else False. An 
             occulting aperture is zero inside and one outside. 
-        softening: bool = False
-            True if the aperture is soft edged otherwise False. A
-            soft edged aperture has a small layer of non-binary 
-            pixels. This is to prevent undefined gradients. 
+        softening: float, pixels
+            There is a layer of pixels that is non-binary. The 
+            way that this is implemented (due to the limitations)
+            of `jax` is via a `np.tanh` function. This is good for 
+            derivatives. Use this feature only if encountering 
+            errors when using hard edged apertures. The softening
+            value roughly represents the number of non-binary 
+            pixels. Setting softening to 0. will produce hard 
+            edged apertures.
         name: str = 'IrregularPolygonalAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
