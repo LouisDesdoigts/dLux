@@ -254,7 +254,6 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
     """
     occulting: bool 
     softening: bool
-    steepness: float
     
 
     def __init__(self   : ApertureLayer, 
@@ -264,7 +263,6 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             rotation    : Array = np.array(0.),
             occulting   : bool = False, 
             softening   : bool = False,
-            steepness   : float = None,
             name        : str = 'DynamicAperture') -> ApertureLayer:
         """
         Constructor for the DynamicAperture class.
@@ -300,11 +298,6 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             name = name)
         self.softening = bool(softening) 
         self.occulting = bool(occulting)
-        
-        if not steepness:
-            self.steepness = np.array([0.])
-        else:
-            self.steepness = np.asarray(steepness).astype(float)
 
 
     @abstractmethod
@@ -396,11 +389,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             The image represented as an approximately binary mask, but with 
             the prozed soft edges.
         """
-        if self.steepness != 0.:
-            return (np.tanh(self.steepness * distances) + 1.) / 2.
-        else:
-            steepness = distances.shape[-1]
-            return (np.tanh(steepness * distances) + 1.) / 2.
+        steepness = distances.shape[-1]
+        return (np.tanh(steepness * distances) + 1.) / 2.
 
 
     def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
