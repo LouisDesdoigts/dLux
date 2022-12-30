@@ -181,7 +181,7 @@ class TestAberratedAperture(object):
         Tests that the basis functions are evaluated atop the aperture.
         Applies mutliple different permutations.
         """
-        jax.config.update("jax_debug_nan", True)
+        jax.config.update("jax_debug_nans", True)
         
         width = 2.
         npix = 128
