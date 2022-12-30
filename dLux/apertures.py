@@ -2713,7 +2713,7 @@ class AberratedAperture(ApertureLayer):
 
        k = np.arange(MAX_DIFF)
        mask = (k < upper).reshape(MAX_DIFF, 1, 1)
-       coefficients = (-1) ** k * dLux.utils.math.factorial(n - k) / \
+       coefficients = (-1) ** k * dLux.utils.math.factorial(np.abs(n - k)) / \
            (dLux.utils.math.factorial(k) * \
                dLux.utils.math.factorial(((n + m) / 2).astype(int) - k) * \
                dLux.utils.math.factorial(((n - m) / 2).astype(int) - k))
