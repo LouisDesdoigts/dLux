@@ -33,7 +33,7 @@ def jth_radial_zernike(n: int, m: int) -> callable:
 
     print(n - k)
 
-    coefficients = (-1) ** k * dl.utils.math.factorial(n - k) / \
+    coefficients = (-1) ** k * dl.utils.math.factorial(np.abs(n - k)) / \
         (dl.utils.math.factorial(k) * \
             dl.utils.math.factorial(((n + m) / 2).astype(int) - k) * \
             dl.utils.math.factorial(((n - m) / 2).astype(int) - k))
