@@ -1,7 +1,7 @@
 import dLux 
+import jax
 import jax.numpy as np
 import typing
-# config.update("jax_debug_nans", True)
 
 Aperture = typing.TypeVar("Aperture")
 Array = typing.TypeVar("Array")
@@ -181,6 +181,8 @@ class TestAberratedAperture(object):
         Tests that the basis functions are evaluated atop the aperture.
         Applies mutliple different permutations.
         """
+        jax.config.update("jax_debug_nan", True)
+        
         width = 2.
         npix = 128
         coordinates = dLux.utils.get_pixel_coordinates(npix, width / npix)
