@@ -6,6 +6,7 @@ site/
 https:/
 sandbox/
 _notebooks/
+docs/notebooks/*.ipynb
 .ipynb_checkpoints
 */.ipynb_checkpoints 
 */*/.ipynb_checkpoints
