@@ -420,15 +420,10 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         """
         coordinates = self._coordinates(coordinates) 
 
-        # TODO: This is causing a ConcretisationError
-        # NOTE: I belive that `self` is getting turned 
-        #       into a tracer is therefore causing the 
-        #       error. Is there some way to view the 
-        #       `jaxpr` of part of a function?
         aperture = lax.cond(
             (self.softening != 0.).any(),
             lambda coords: self._soft_edged(coords),
-            lambda coords: self._hard_edged(coords),
+            lambda coords: self._hard_edged(coords).astype(float),
             coordinates)
 
         if self.occulting:
