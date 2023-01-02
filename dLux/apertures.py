@@ -426,9 +426,9 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         #       error. Is there some way to view the 
         #       `jaxpr` of part of a function?
         aperture = lax.cond(
-            self.softening != 0.).any(),
+            (self.softening != 0.).any(),
             lambda coords: self._soft_edged(coords),
-            lambda Coords: self._hard_edged(coords),
+            lambda coords: self._hard_edged(coords),
             coordinates)
 
         if self.occulting:
