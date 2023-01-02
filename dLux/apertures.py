@@ -420,7 +420,8 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         """
         coordinates = self._coordinates(coordinates) 
 
-        if self.softening != 0.:
+        # TODO: This is causing a ConcretisationError
+        if (self.softening != 0.).any():
             aperture = self._soft_edged(coordinates)
         else:
             aperture = self._hard_edged(coordinates)
