@@ -425,10 +425,11 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         #       into a tracer is therefore causing the 
         #       error. Is there some way to view the 
         #       `jaxpr` of part of a function?
-        if (self.softening != 0.).any():
-            aperture = self._soft_edged(coordinates)
-        else:
-            aperture = self._hard_edged(coordinates)
+        aperture = lax.cond(
+            self.softening != 0.).any(),
+            lambda coords: self._soft_edged(coords),
+            lambda Coords: self._hard_edged(coords),
+            coordinates)
 
         if self.occulting:
             aperture = (1. - aperture)
