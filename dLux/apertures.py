@@ -2713,17 +2713,15 @@ class AberratedAperture(ApertureLayer):
        upper = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
 
        k = np.arange(MAX_DIFF)
-       mask = (k < upper).reshape(MAX_DIFF, 1, 1)
+       mask = (k < upper)
        coefficients = (-1) ** k * dLux.utils.math.factorial(np.abs(n - k)) / \
            (dLux.utils.math.factorial(k) * \
                dLux.utils.math.factorial(((n + m) / 2).astype(int) - k) * \
                dLux.utils.math.factorial(((n - m) / 2).astype(int) - k))
 
        def _jth_radial_zernike(rho: list) -> list:
-           rho = np.tile(rho, (MAX_DIFF, 1, 1))
-           coefficients_out = coefficients.reshape(MAX_DIFF, 1, 1)
-           rads = rho ** (n - 2 * k).reshape(MAX_DIFF, 1, 1)
-           return (coefficients_out * mask * rads).sum(axis = 0)
+           rads = (rho ** (n - 2 * k))[:, None, None]
+           return (coefficients * mask * rads).sum(axis = 0)
                
        return _jth_radial_zernike
 
