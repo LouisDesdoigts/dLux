@@ -2726,7 +2726,7 @@ class AberratedAperture(ApertureLayer):
         coefficients =  sign * _fact_1 / _fact_2 / _fact_3 / _fact_4 
                
         def _jth_radial_zernike(rho: list) -> list:
-            rads = lax.pow((rho[:, :, None], (n - 2 * k)))
+            rads = lax.pow(rho[:, :, None], (n - 2 * k))
             return (coefficients * rads).sum(axis = 2)
                 
         return _jth_radial_zernike
