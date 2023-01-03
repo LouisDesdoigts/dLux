@@ -2708,23 +2708,25 @@ class AberratedAperture(ApertureLayer):
         radial : Array
             An npixels by npixels stack of radial zernike polynomials.
         """
-        MAX_DIFF = 5
         m, n = np.abs(m), np.abs(n)
         upper = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
 
+        # NOTE: Old discussion. 
         # k is the dummy index. It is only meant to 
-        # go up to  
-        k = np.arange(MAX_DIFF) # Dummy index.
-        mask = (k < upper)
-        sign = (-1) ** k
-        _fac_1 = dLux.utils.math.factorial(np.abs(n - k))
-        coefficients =  sign * _fac_1 / \
-            (dLux.utils.math.factorial(k) * \
-                dLux.utils.math.factorial(((n + m) / 2).astype(int) - k) * \
-                dLux.utils.math.factorial(((n - m) / 2).astype(int) - k))
+        # go up to upper, however, due to the constraints 
+        # of the compiler it is over-extended to a constant value.
+        # k = np.arange(MAX_DIFF) # Dummy index.
+        # mask = (k < upper)
 
+        sign = (-1) ** k
+        _fact_1 = dLux.utils.math.factorial(np.abs(n - k))
+        _fact_2 = dLux.utils.math.factorial(k)
+        _fact_3 = dLux.utils.math.factorial(((n + m) / 2).astype(int) - k)
+        _fact_4 = dLux.utils.math.factorial(((n - m) / 2).astype(int) - k)
+        coefficients =  sign * _fact_1 / _fact_2 / _fact_3 / _fact_4 
+               
         def _jth_radial_zernike(rho: list) -> list:
-            # TODO: This should be optimisable using `lax.pow`
+            # TODO: This should be optimisable using `lax.pow`
             # if not `lax.integer_pow`.
             rads = (rho[:, :, None] ** (n - 2 * k))
             return (coefficients * mask * rads).sum(axis = 2)
