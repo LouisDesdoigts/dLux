@@ -2716,9 +2716,9 @@ class AberratedAperture(ApertureLayer):
         # of the compiler it is over-extended to a constant value.
         # k = np.arange(MAX_DIFF) # Dummy index.
         # mask = (k < upper)
-        k = np.arange(((n - m) / 2).astype(int) + 1)
+        k = np.arange(((n - m) / 2).astype(int) + 1, dtype=float)
 
-        sign = (-1) ** k
+        sign = lax.pow(-1., k)
         _fact_1 = dLux.utils.math.factorial(np.abs(n - k))
         _fact_2 = dLux.utils.math.factorial(k)
         _fact_3 = dLux.utils.math.factorial(((n + m) / 2).astype(int) - k)
@@ -2726,9 +2726,7 @@ class AberratedAperture(ApertureLayer):
         coefficients =  sign * _fact_1 / _fact_2 / _fact_3 / _fact_4 
                
         def _jth_radial_zernike(rho: list) -> list:
-            # TODO: This should be optimisable using `lax.pow`
-            # if not `lax.integer_pow`.
-            rads = (rho[:, :, None] ** (n - 2 * k))
+            rads = lax.pow((rho[:, :, None], (n - 2 * k)))
             return (coefficients * rads).sum(axis = 2)
                 
         return _jth_radial_zernike
