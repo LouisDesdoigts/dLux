@@ -2854,8 +2854,10 @@ class AberratedAperture(ApertureLayer):
             calculations. 
         """
         coordinates = self.aperture._normalised_coordinates(coordinates)
-        # TODO: Work out if tree_map can be used here.
-        ikes = np.stack([h(coordinates) for h in self.basis_funcs])
+
+        ikes = jax.tree_utils.tree_map(
+            lambda bfunc: bfunc(coordinates), 
+            self.basis_funcs)
         
         is_reg_pol = isinstance(self.aperture, RegularPolygonalAperture)
         is_circ = isinstance(self.aperture, CircularAperture)
