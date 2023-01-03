@@ -2782,14 +2782,14 @@ class AberratedAperture(ApertureLayer):
             of the output tensor is number by pixels by pixels. 
         """
         n, m = self.noll_index(j)
+        _jth_rad_zern = self.jth_radial_zernike(n, m)
+        _jth_pol_zern = self.jth_polar_zernike(n, m)
      
         def _jth_zernike(coordinates: list) -> list:
             polar_coordinates = dLux.utils.cartesian_to_polar(coordinates)
             rho = polar_coordinates[0]
             theta = polar_coordinates[1]
             aperture = rho <= 1.
-            _jth_rad_zern = self.jth_radial_zernike(n, m)
-            _jth_pol_zern = self.jth_polar_zernike(n, m)
             return aperture * _jth_rad_zern(rho) * _jth_pol_zern(theta)
         
         return _jth_zernike 
