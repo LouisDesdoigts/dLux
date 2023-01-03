@@ -2693,73 +2693,79 @@ class AberratedAperture(ApertureLayer):
 
 
     def jth_radial_zernike(self: ApertureLayer, n: int, m: int) -> callable:
-       """
-       The radial zernike polynomial.
+        """
+        The radial zernike polynomial.
 
-       Parameters
-       ----------
-       n : int
-           The first index number of the zernike polynomial to forge
-       m : int 
-           The second index number of the zernike polynomial to forge.
+        Parameters
+        ----------
+        n : int
+            The first index number of the zernike polynomial to forge
+        m : int 
+            The second index number of the zernike polynomial to forge.
 
-       Returns
-       -------
-       radial : Array
-           An npixels by npixels stack of radial zernike polynomials.
-       """
-       MAX_DIFF = 5
-       m, n = np.abs(m), np.abs(n)
-       upper = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
+        Returns
+        -------
+        radial : Array
+            An npixels by npixels stack of radial zernike polynomials.
+        """
+        MAX_DIFF = 5
+        m, n = np.abs(m), np.abs(n)
+        upper = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
 
-       k = np.arange(MAX_DIFF)
-       mask = (k < upper)
-       coefficients = (-1) ** k * dLux.utils.math.factorial(np.abs(n - k)) / \
-           (dLux.utils.math.factorial(k) * \
-               dLux.utils.math.factorial(((n + m) / 2).astype(int) - k) * \
-               dLux.utils.math.factorial(((n - m) / 2).astype(int) - k))
+        # k is the dummy index. It is only meant to 
+        # go up to  
+        k = np.arange(MAX_DIFF) # Dummy index.
+        mask = (k < upper)
+        sign = (-1) ** k
+        _fac_1 = dLux.utils.math.factorial(np.abs(n - k))
+        coefficients =  sign * _fac_1 / \
+            (dLux.utils.math.factorial(k) * \
+                dLux.utils.math.factorial(((n + m) / 2).astype(int) - k) * \
+                dLux.utils.math.factorial(((n - m) / 2).astype(int) - k))
 
-       def _jth_radial_zernike(rho: list) -> list:
-           rads = (rho[:, :, None] ** (n - 2 * k))
-           return (coefficients * mask * rads).sum(axis = 2)
-               
-       return _jth_radial_zernike
-
+        def _jth_radial_zernike(rho: list) -> list:
+            # TODO: This should be optimisable using `lax.pow`
+            # if not `lax.integer_pow`.
+            rads = (rho[:, :, None] ** (n - 2 * k))
+            return (coefficients * mask * rads).sum(axis = 2)
+                
+        return _jth_radial_zernike
+        
 
     def jth_polar_zernike(self: ApertureLayer, n: int, m: int) -> callable:
-       """
-       Generates a function representing the polar component 
-       of the jth Zernike polynomial.
+        """
+        Generates a function representing the polar component 
+        of the jth Zernike polynomial.
 
-       Parameters
-       ----------
-       n: int 
-           The first index number of the Zernike polynomial.
-       m: int 
-           The second index number of the Zernike polynomials.
+        Parameters
+        ----------
+        n: int 
+            The first index number of the Zernike polynomial.
+        m: int 
+            The second index number of the Zernike polynomials.
 
-       Returns
-       -------
-       polar: Array
-           The polar component of the jth Zernike polynomials.
-       """
-       is_m_zero = (m != 0).astype(int)
-       norm_coeff = (1 + (np.sqrt(2) - 1) * is_m_zero) * np.sqrt(n + 1)
+        Returns
+        -------
+        polar: Array
+            The polar component of the jth Zernike polynomials.
+        """
+        is_m_zero = (m != 0).astype(int)
+        norm_coeff = (1 + (np.sqrt(2) - 1) * is_m_zero) * np.sqrt(n + 1)
 
-       # When m < 0 we have the odd zernike polynomials which are 
-       # the radial zernike polynomials multiplied by a sine term.
-       # When m > 0 we have the even sernike polynomials which are 
-       # the radial polynomials multiplies by a cosine term. 
-       # To produce this result without logic we can use the fact
-       # that sine and cosine are separated by a phase of pi / 2
-       # hence by casting int(m < 0) we can add the nessecary phase.
+        # When m < 0 we have the odd zernike polynomials which are 
+        # the radial zernike polynomials multiplied by a sine term.
+        # When m > 0 we have the even sernike polynomials which are 
+        # the radial polynomials multiplies by a cosine term. 
+        # To produce this result without logic we can use the fact
+        # that sine and cosine are separated by a phase of pi / 2
+        # hence by casting int(m < 0) we can add the nessecary phase.
 
-       phase_mod = (m < 0).astype(int) * np.pi / 2
+        phase_mod = (m < 0).astype(int) * np.pi / 2
 
-       def _jth_polar_zernike(theta: list) -> list:
-           return norm_coeff * np.cos(np.abs(m) * theta - phase_mod)
+        def _jth_polar_zernike(theta: list) -> list:
+            return norm_coeff * np.cos(np.abs(m) * theta - phase_mod)
 
-       return _jth_polar_zernike  
+        return _jth_polar_zernike  
 
 
     def jth_zernike(self: ApertureLayer, j: int) -> callable:
@@ -2847,6 +2853,7 @@ class AberratedAperture(ApertureLayer):
             calculations. 
         """
         coordinates = self.aperture._normalised_coordinates(coordinates)
+        # TODO: Work out if tree_map can be used here.
         ikes = np.stack([h(coordinates) for h in self.basis_funcs])
         
         is_reg_pol = isinstance(self.aperture, RegularPolygonalAperture)
