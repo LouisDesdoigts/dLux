@@ -2761,9 +2761,10 @@ class AberratedAperture(ApertureLayer):
         # hence by casting int(m < 0) we can add the nessecary phase.
 
         phase_mod = (m < 0).astype(int) * np.pi / 2
+        abs_m = np.abs(m)
 
         def _jth_polar_zernike(theta: list) -> list:
-            return norm_coeff * np.cos(np.abs(m) * theta - phase_mod)
+            return norm_coeff * np.cos(abs_m * theta - phase_mod)
 
         return _jth_polar_zernike  
 
