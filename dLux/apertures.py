@@ -2726,7 +2726,7 @@ class AberratedAperture(ApertureLayer):
         coefficients =  sign * _fact_1 / _fact_2 / _fact_3 / _fact_4 
                
         def _jth_radial_zernike(rho: list) -> list:
-            rads = lax.pow(rho[:, :, None], (n - 2 * k)[:, None, None])
+            rads = lax.pow(rho[:, :, None], (n - 2 * k)[None, None, :])
             return (coefficients * rads).sum(axis = 2)
                 
         return _jth_radial_zernike
@@ -2856,7 +2856,8 @@ class AberratedAperture(ApertureLayer):
         coordinates = self.aperture._normalised_coordinates(coordinates)
 
         ikes = tree_map(lambda bfunc: bfunc(coordinates), self.basis_funcs)
-        
+        ikes = np.array(ikes)
+
         is_reg_pol = isinstance(self.aperture, RegularPolygonalAperture)
         is_circ = isinstance(self.aperture, CircularAperture)
 
