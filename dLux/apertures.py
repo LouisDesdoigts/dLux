@@ -2855,9 +2855,7 @@ class AberratedAperture(ApertureLayer):
         """
         coordinates = self.aperture._normalised_coordinates(coordinates)
 
-        ikes = jax.tree_utils.tree_map(
-            lambda bfunc: bfunc(coordinates), 
-            self.basis_funcs)
+        ikes = tree_map(lambda bfunc: bfunc(coordinates), self.basis_funcs)
         
         is_reg_pol = isinstance(self.aperture, RegularPolygonalAperture)
         is_circ = isinstance(self.aperture, CircularAperture)
