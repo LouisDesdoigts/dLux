@@ -2720,8 +2720,8 @@ class AberratedAperture(ApertureLayer):
                dLux.utils.math.factorial(((n - m) / 2).astype(int) - k))
 
        def _jth_radial_zernike(rho: list) -> list:
-           rads = (rho ** (n - 2 * k))[:, None, None]
-           return (coefficients * mask * rads).sum(axis = 0)
+           rads = (rho[:, :, None] ** (n - 2 * k))
+           return (coefficients * mask * rads).sum(axis = 2)
                
        return _jth_radial_zernike
 
