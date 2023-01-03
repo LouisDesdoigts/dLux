@@ -123,7 +123,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
             self.rotation.shape, (), "rotation")
 
 
-    @Partial(jit, inline=True)
+    @Partial(jax.jit, inline=True)
     def _coordinates(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Transform the paraxial coordinates into the coordinate
@@ -406,7 +406,6 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
-    @Partial(jit, inline=True)
     def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Compute the array representing the aperture. 
