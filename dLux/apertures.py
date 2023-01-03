@@ -406,7 +406,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         return (np.tanh(steepness * distances) + 1.) / 2.
 
 
-    @Partial(jit, inline=True)
+    @Partial(jit, inline=True, static_argnums=0)
     def _aperture(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Compute the array representing the aperture. 
