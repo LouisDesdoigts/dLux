@@ -2709,7 +2709,6 @@ class AberratedAperture(ApertureLayer):
             An npixels by npixels stack of radial zernike polynomials.
         """
         m, n = np.abs(m), np.abs(n)
-        upper = ((np.abs(n) - np.abs(m)) / 2).astype(int) + 1
 
         # NOTE: Old discussion. 
         # k is the dummy index. It is only meant to 
@@ -2717,6 +2716,7 @@ class AberratedAperture(ApertureLayer):
         # of the compiler it is over-extended to a constant value.
         # k = np.arange(MAX_DIFF) # Dummy index.
         # mask = (k < upper)
+        k = np.arange(((n - m) / 2).astype(int) + 1)
 
         sign = (-1) ** k
         _fact_1 = dLux.utils.math.factorial(np.abs(n - k))
@@ -2729,7 +2729,7 @@ class AberratedAperture(ApertureLayer):
             # TODO: This should be optimisable using `lax.pow`
             # if not `lax.integer_pow`.
             rads = (rho[:, :, None] ** (n - 2 * k))
-            return (coefficients * mask * rads).sum(axis = 2)
+            return (coefficients * rads).sum(axis = 2)
                 
         return _jth_radial_zernike
         
