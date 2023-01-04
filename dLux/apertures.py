@@ -428,6 +428,10 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             lambda coords: self._hard_edged(coords).astype(float),
             coordinates)
 
+        # TODO: Workout how to recast this using raw logic and see 
+        #       if it is faster or not. Need to lok at the `jaxpr` 
+        #       for python if statements like this and to try 
+        #       work-out if extra stuff is getting done.
         if self.occulting:
             aperture = (1. - aperture)
 
