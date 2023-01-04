@@ -62,6 +62,13 @@ def _hypotenuse(x: float, y: float) -> float:
 # -
 
 @ft.partial(jax.jit, inline=True)
+def get_pixel_scale(ccoords: float) -> float:
+    first: float = jax.lax.slice(ccoords, (0, 0, 0), (1, 1, 1))
+    second: float = jax.lax.slice(ccoords, (0, 0, 1), (1, 1, 2))
+    return (first - second).flatten()
+
+
+@ft.partial(jax.jit, inline=True)
 def cart_to_polar(coords: float) -> float:
     x: float = coords[0]
     y: float = coords[1]
@@ -75,7 +82,7 @@ pol_coords: float = cart_to_polar(cart_coords)
 @ft.partial(jax.jit, inline=True)
 def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
     r: float = hypotenuse(ccoords)
-    pixel_scale: float = ccoords[0, 0, 1] - ccoords[0, 0, 0]
+    pixel_scale: float = get_pixel_scale(ccoords)
     ann_ap: float = np.logical_and((rmin < r), (r < rmax)).astype(float)
     in_bound: float = np.logical_and((rmin - pixel_scale) < r, r < (rmin + pixel_scale))
     out_bound: float = np.logical_and((rmax - pixel_scale) < r, r < (rmax + pixel_scale))
@@ -84,48 +91,8 @@ def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
 
 
 ccoords: float = cart_coords
-rmin: float = np.array(.5, dtype=float)
-rmax: float = np.array(1., dtype=float)
-
-r: float = hypotenuse(ccoords)
-pixel_scale: float = ccoords[0, 0, 1] - ccoords[0, 0, 0]
-ann_ap: float = np.logical_and((rmin < r), (r < rmax)).astype(float)
-in_bound: float = np.logical_and((rmin - pixel_scale) < r, r < (rmin + pixel_scale))
-out_bound: float = np.logical_and((rmax - pixel_scale) < r, r < (rmax + pixel_scale))
-bound: float = np.logical_or(in_bound, out_bound)  
-
-
-@ft.partial(jax.jit, inline=True)
-def get_pixel_scale_v1(ccoords: float) -> float:
-    return ccoords[0, 0, 1] - ccoords[0, 0, 0]
-
-
-@ft.partial(jax.jit, inline=True)
-def get_pixel_scale_v2(ccoords: float) -> float:
-    first: int = np.array([0, 0, 1], dtype=int)
-    second: int = np.array([0, 0, 0], dtype=int)
-    return ccoords[first] - ccoords[second]
-
-
-@ft.partial(jax.jit, inline=True)
-def get_pixel_scale_v3(ccoords: float) -> float:
-    first: float = jax.lax.slice(ccoords, (0, 0, 0), (1, 1, 1))
-    second: float = jax.lax.slice(ccoords, (0, 0, 1), (1, 1, 1))
-    return first - second
-
-
-jax.make_jaxpr(get_pixel_scale_v3)(ccoords)
-
-# %%timeit
-get_pixel_scale_v1(ccoords)
-
-# %%timeit
-get_pixel_scale_v2(ccoords)
-
-# %%timeit
-get_pixel_scale_v3(ccoords)
-
-ann_ap: float = soft_annular_aperture(rmin, rmax, cart_coords)
+rmin: float = np.array([.5], dtype=float)
+rmax: float = np.array([1.], dtype=float)
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -136,4 +103,4 @@ plt.imshow(ann_ap)
 # %%timeit
 soft_annular_aperture(.5, 1., cart_coords)
 
-jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, cart_coords)
+
