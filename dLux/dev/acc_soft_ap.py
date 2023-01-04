@@ -47,48 +47,28 @@ def coords(n: int, rad: float) -> float:
     return np.asarray(np.meshgrid(axes, axes))
 
 
+# +
 @ft.partial(jax.jit, inline=True)
-def hypotenuse_v1(coords: float) -> float:
+def hypotenuse(coords: float) -> float:
     return np.sqrt(jax.lax.integer_pow(coords, 2).sum(axis = 0))
 
-
 @ft.partial(jax.jit, inline=True)
-def cart_to_polar_v1(coords: float) -> float:
-    return jax.lax.concatenate([hypotenuse_v1(coords), jax.lax.atan2(coords[0], coords[1])], 0)
-
-
-@ft.partial(jax.jit, inline=True)
-def cart_to_polar_v2(coords: float) -> float:
-    x: float = coords[0]
-    y: float = coords[1]
-    return jax.lax.concatenate([hypotenuse_v2(x, y), jax.lax.atan2(x, y)], 0)
-
-
-cart_coords: float = coords(100, 1.)
-pol_coords: float = cart_to_polar(cart_coords)
-
-
-@ft.partial(jax.jit, inline=True)
-def hypotenuse_v2(x: float, y: float) -> float:
+def _hypotenuse(x: float, y: float) -> float:
     x_sq: float = jax.lax.integer_pow(x, 2)
     y_sq: float = jax.lax.integer_pow(y, 2)
     return jax.lax.sqrt(x_sq + y_sq)
 
 
-# %%timeit
-hypotenuse_v2(cart_coords[0], cart_coords[1])
+# -
 
-# %%timeit
-hypotenuse_v1(cart_coords)
+@ft.partial(jax.jit, inline=True)
+def cart_to_polar(coords: float) -> float:
+    x: float = coords[0]
+    y: float = coords[1]
+    return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
 
-# %%timeit
-cart_to_polar_v1(cart_coords)
 
-# %%timeit
-cart_to_polar_v2(cart_coords)
-
-jax.make_jaxpr(cart_to_polar_v2)(cart_coords)
-
-jax.make_jaxpr(cart_to_polar_v1)(cart_coords)
+cart_coords: float = coords(100, 1.)
+pol_coords: float = cart_to_polar(cart_coords)
 
 
