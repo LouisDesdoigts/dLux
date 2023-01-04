@@ -89,7 +89,7 @@ def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
 
 
 @ft.partial(jax.jit, inline=True)
-def soft_circular_aperture_v0(r: float, ccoords: float) -> float:
+def soft_circular_aperture(r: float, ccoords: float) -> float:
     rho: float = hypotenuse(ccoords)
     pixel_scale: float = get_pixel_scale(ccoords)
     
@@ -108,12 +108,10 @@ import matplotlib.pyplot as plt
 # %matplotlib qt
 plt.imshow(soft_annular_aperture(rmin, rmax, ccoords))
 
-jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
+# %%timeit
+soft_circular_aperture(rmax, ccoords)
 
-jax.make_jaxpr(soft_circular_aperture_v0)(rmax, ccoords)
-
-jax.make_jaxpr(lambda x: x[0, 0, 0])(ccoords)
-
-jax.make_jaxpr(lambda x: jax.lax.slice(x, (0, 0, 0), (1, 1, 1)).reshape(1, 1))(ccoords)
+# %%timeit
+soft_annular_aperture(rmin, rmax, ccoords)
 
 
