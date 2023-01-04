@@ -94,6 +94,21 @@ in_bound: float = np.logical_and((rmin - pixel_scale) < r, r < (rmin + pixel_sca
 out_bound: float = np.logical_and((rmax - pixel_scale) < r, r < (rmax + pixel_scale))
 bound: float = np.logical_or(in_bound, out_bound)  
 
+
+def get_pixel_scale_v1(ccoords: float) -> float:
+    return ccoords[0, 0, 1] - ccoords[0, 0, 0]
+
+
+def get_pixel_scale_v2(ccoords: float) -> float:
+    first: int = np.array([0, 0, 1], dtype=int)
+    second: int = np.array([0, 0, 0], dtype=int)
+    return ccoords[first] - ccoords[second]
+
+
+jax.make_jaxpr(get_pixel_scale_v2)(ccoords)
+
+jax.make_jaxpr(get_pixel_scale_v1)(ccoords)
+
 ann_ap: float = soft_annular_aperture(rmin, rmax, cart_coords)
 
 import matplotlib as mpl
@@ -106,9 +121,3 @@ plt.imshow(ann_ap)
 soft_annular_aperture(.5, 1., cart_coords)
 
 jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, cart_coords)
-
-jax.lax.scatter()
-
-np.logical_or
-
-
