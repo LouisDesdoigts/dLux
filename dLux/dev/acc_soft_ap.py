@@ -52,3 +52,42 @@ def hypotenuse(coords: float) -> float:
     return np.sqrt(jax.lax.integer_pow(coords, 2).sum(axis = 0))
 
 
+@ft.partial(jax.jit, inline=True)
+def cart_to_polar_v0(coords: float) -> float:
+    return jax\
+        .lax\
+        .full_like(coords, 0.)\
+        .at[0]\
+        .set(hypotenuse(coords))\
+        .at[1]\
+        .set(jax.lax.atan2(coords[0], coords[1]))
+
+
+@ft.partial(jax.jit, inline=True)
+def cart_to_polar_v0(coords: float) -> float:
+    empty: float = jax.lax.broadcast(0., coords.shape)
+    return jax\
+        .lax\
+        .full_like(coords, 0.)\
+        .at[0]\
+        .set(hypotenuse(coords))\
+        .at[1]\
+        .set(jax.lax.atan2(coords[0], coords[1]))
+
+
+jax.make_jaxpr(cart_to_polar_v0)(coords)
+
+# %%timeit
+cart_to_polar_v0(coords)
+
+import dLux as dl
+
+# %%timeit
+sl/
+
+jax.lax.atan2
+
+
+
+
+
