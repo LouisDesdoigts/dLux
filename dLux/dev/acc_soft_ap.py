@@ -1,5 +1,4 @@
 import jax 
-import jax.lax as lax
 import jax.numpy as np 
 import functools as ft
 
@@ -80,7 +79,7 @@ pol_coords: float = cart_to_polar(cart_coords)
 
 
 @ft.partial(jax.jit, inline=True)
-def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
+def soft_annular_aperture_v0(rmin: float, rmax: float, ccoords: float) -> float:
     r: float = hypotenuse(ccoords)
     pixel_scale: float = get_pixel_scale(ccoords)
     ann_ap: float = np.logical_and((rmin < r), (r < rmax)).astype(float)
@@ -88,6 +87,16 @@ def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
     out_bound: float = np.logical_and((rmax - pixel_scale) < r, r < (rmax + pixel_scale))
     bound: float = np.logical_or(in_bound, out_bound)
     return jax.lax.select(bound, jax.lax.full_like(ann_ap, .5), ann_ap)
+
+
+@ft.partial(jax.jit, inline=True)
+def soft_annular_aperture_v1(rmin: float, rmax: float, ccoords: float) -> float:
+    r: float = hypotenuse(ccoords)
+    pixel_scale: float = get_pixel_scale(ccoords)
+        
+    ann_ap: float = np.logical_and((rmin < r), (r < rmax)).astype(float)
+    bounds: float = np.logical_and((rmin - pixel_scale) < r, r < (rmax + pixel_scale)).astype(float)
+    return (ann_ap + bounds) / 2.
 
 
 ccoords: float = cart_coords
@@ -101,8 +110,8 @@ import matplotlib.pyplot as plt
 plt.imshow(soft_annular_aperture(rmin, rmax, cart_coords))
 
 # %%timeit
-soft_annular_aperture(rmin, rmax, cart_coords)
+soft_annular_aperture_v1(rmin, rmax, cart_coords)
 
-jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
+jax.make_jaxpr(soft_annular_aperture_v1)(rmin, rmax, ccoords)
 
 
