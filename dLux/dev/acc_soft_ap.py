@@ -76,15 +76,25 @@ pol_coords: float = cart_to_polar(cart_coords)
 def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
     r: float = hypotenuse(ccoords)
     pixel_scale: float = ccoords[0, 0, 1] - ccoords[0, 0, 0]
-    ann_ap: float = np.logical_and((rmin < r), (r < rmax))
+    ann_ap: float = np.logical_and((rmin < r), (r < rmax)).astype(float)
     in_bound: float = np.logical_and((rmin - pixel_scale) < r, r < (rmin + pixel_scale))
     out_bound: float = np.logical_and((rmax - pixel_scale) < r, r < (rmax + pixel_scale))
     bound: float = np.logical_or(in_bound, out_bound)
-    return np.where(bound, .5, ann_ap)
+    return jax.lax.select(bound, jax.lax.full_like(ann_ap, .5), ann_ap)
 
 
+ccoords: float = cart_coords
+rmin: float = np.array(.5, dtype=float)
+rmax: float = np.array(1., dtype=float)
 
-ann_ap: float = soft_annular_aperture(.5, 1., cart_coords)
+r: float = hypotenuse(ccoords)
+pixel_scale: float = ccoords[0, 0, 1] - ccoords[0, 0, 0]
+ann_ap: float = np.logical_and((rmin < r), (r < rmax)).astype(float)
+in_bound: float = np.logical_and((rmin - pixel_scale) < r, r < (rmin + pixel_scale))
+out_bound: float = np.logical_and((rmax - pixel_scale) < r, r < (rmax + pixel_scale))
+bound: float = np.logical_or(in_bound, out_bound)  
+
+ann_ap: float = soft_annular_aperture(rmin, rmax, cart_coords)
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -95,7 +105,7 @@ plt.imshow(ann_ap)
 # %%timeit
 soft_annular_aperture(.5, 1., cart_coords)
 
-jax.make_jaxpr(soft_annular_aperture)(.5, 1., cart_coords)
+jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, cart_coords)
 
 jax.lax.scatter()
 
