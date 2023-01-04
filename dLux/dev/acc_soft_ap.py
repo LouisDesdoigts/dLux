@@ -58,33 +58,23 @@ socculting_v2(occulting, x)
 # -
 
 @ft.partial(jax.jit, inline=True, static_argnums=0)
-def coords_v1(n: int, rad: float) -> float:
-    axes: float = np.linspace(-rad, rad, n, endpoint=True)
-    return np.asarray(np.meshgrid(axes, axes))
-
-
-@ft.partial(jax.jit, inline=True, static_argnums=0)
-def coords_v2(n: int, rad: float) -> float:
+def coords(n: int, rad: float) -> float:
     arange: float = jax.lax.iota(float, n)
     max_: float = np.array(n - 1, dtype=float)
     axes: float = arange * 2. * rad / max_ - rad
     return np.asarray(np.meshgrid(axes, axes))
 
 
-arange: float = jax.lax.iota(float, 100)
-max_: float = np.array(100 - 1, dtype=float)
-axes: float = arange * 2. / max_ - 1.
+@ft.partial(jax.jit, inline=True)
+def hypotenuse(coords: float) -> float:
+    return np.sqrt(jax.lax.integer_pow(coords, 2).sum(axis = 0))
 
-test: float = np.tile(axes, (1, 100, 1))
-
-# %%timeit
-coords_v1(100, 1.)
 
 # %%timeit
-coords_v2(100, 1.)
+hypot_v1(coords)
 
-jax.make_jaxpr(coords_v1, static_argnums=0)(100, 1.)
+coords: float = coords(100, 1.)
 
-jax.make_jaxpr(coords_v2, static_argnums=0)(100, 1.)
+jax.lax.reduce_sum
 
-coords: float = 
+
