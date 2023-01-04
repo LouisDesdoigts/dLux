@@ -74,10 +74,6 @@ def cart_to_polar(coords: float) -> float:
     return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
 
 
-cart_coords: float = coords(100, 1.)
-pol_coords: float = cart_to_polar(cart_coords)
-
-
 @ft.partial(jax.jit, inline=True)
 def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
     r: float = hypotenuse(ccoords)
@@ -87,19 +83,19 @@ def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
     return (ann_ap + bounds) / 2.
 
 
-ccoords: float = cart_coords
+def 
+
+
 rmin: float = np.array([[.5]], dtype=float)
 rmax: float = np.array([[1.]], dtype=float)
+
+ccoords: float = coords(1024, 1.)
+soft_annular_aperture(rmin, rmax, cart_coords)
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # %matplotlib qt
-plt.imshow(soft_annular_aperture(rmin, rmax, cart_coords))
-
-# %%timeit
-soft_annular_aperture(rmin, rmax, cart_coords)
-
-jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
+plt.imshow(soft_annular_aperture(rmin, rmax, ccoords))
 
 
