@@ -2,6 +2,11 @@ import jax
 import jax.numpy as np 
 import functools as ft
 
+from jaxtyping import (
+    Float,
+    Array
+)
+
 npix: int = 10000
 x: float = np.ones((npix, npix), dtype=float)
 
@@ -83,19 +88,28 @@ def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
     return (ann_ap + bounds) / 2.
 
 
-def 
+@ft.partial(jax.jit, inline=True)
+def soft_circular_aperture_v0(r: float, ccoords: float) -> float:
+    rho: float = hypotenuse(ccoords)
+    pixel_scale: float = get_pixel_scale(ccoords)
+    
+    circ: float = (rho < r).astype(float)
+    edges: float = (rho < (r + pixel_scale)).astype(float)
+    return (circ + edges) / 2.
 
 
 rmin: float = np.array([[.5]], dtype=float)
 rmax: float = np.array([[1.]], dtype=float)
-
 ccoords: float = coords(1024, 1.)
-soft_annular_aperture(rmin, rmax, cart_coords)
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # %matplotlib qt
 plt.imshow(soft_annular_aperture(rmin, rmax, ccoords))
+
+jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
+
+jax.make_jaxpr(soft_circular_aperture_v0)(rmax, ccoords)
 
 
