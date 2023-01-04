@@ -64,30 +64,33 @@ def cart_to_polar_v0(coords: float) -> float:
 
 
 @ft.partial(jax.jit, inline=True)
-def cart_to_polar_v0(coords: float) -> float:
+def cart_to_polar_v1(coords: float) -> float:
     empty: float = jax.lax.broadcast(0., coords.shape)
-    return jax\
-        .lax\
-        .full_like(coords, 0.)\
+    return empty\
         .at[0]\
         .set(hypotenuse(coords))\
         .at[1]\
         .set(jax.lax.atan2(coords[0], coords[1]))
 
 
-jax.make_jaxpr(cart_to_polar_v0)(coords)
+jax.lax.concatenate((coordinates, coordinates), 0).shape
+
+
+@ft.partial(jax.jit, inline=True)
+def cart_to_polar_v2(coords: float) -> float:
+    return jax.lax.concatenate([hypotenuse(coords), jax.lax.atan2(coords[0], coords[1])], 0)
+
+
+coordinates: float = coords(100, 1.)
 
 # %%timeit
-cart_to_polar_v0(coords)
+cart_to_polar_v2(coordinates)
 
 import dLux as dl
 
 # %%timeit
-sl/
+dl.utils.cartesian_to_polar(coordinates)
 
-jax.lax.atan2
-
-
-
+jax.make_jaxpr(dl.utils.cartesian_to_polar)(coordinates)
 
 
