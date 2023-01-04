@@ -53,35 +53,12 @@ def hypotenuse(coords: float) -> float:
 
 
 @ft.partial(jax.jit, inline=True)
-def cart_to_polar_v0(coords: float) -> float:
-    return jax\
-        .lax\
-        .full_like(coords, 0.)\
-        .at[0]\
-        .set(hypotenuse(coords))\
-        .at[1]\
-        .set(jax.lax.atan2(coords[0], coords[1]))
-
-
-@ft.partial(jax.jit, inline=True)
-def cart_to_polar_v1(coords: float) -> float:
-    empty: float = jax.lax.broadcast(0., coords.shape)
-    return empty\
-        .at[0]\
-        .set(hypotenuse(coords))\
-        .at[1]\
-        .set(jax.lax.atan2(coords[0], coords[1]))
-
-
-jax.lax.concatenate((coordinates, coordinates), 0).shape
-
-
-@ft.partial(jax.jit, inline=True)
-def cart_to_polar_v2(coords: float) -> float:
+def cart_to_polar(coords: float) -> float:
     return jax.lax.concatenate([hypotenuse(coords), jax.lax.atan2(coords[0], coords[1])], 0)
 
 
-coordinates: float = coords(100, 1.)
+cart_coords: float = coords(100, 1.)
+pol_coords: float = cart_to_polar(cart_coords)
 
 # %%timeit
 cart_to_polar_v2(coordinates)
