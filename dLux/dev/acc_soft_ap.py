@@ -95,19 +95,35 @@ out_bound: float = np.logical_and((rmax - pixel_scale) < r, r < (rmax + pixel_sc
 bound: float = np.logical_or(in_bound, out_bound)  
 
 
+@ft.partial(jax.jit, inline=True)
 def get_pixel_scale_v1(ccoords: float) -> float:
     return ccoords[0, 0, 1] - ccoords[0, 0, 0]
 
 
+@ft.partial(jax.jit, inline=True)
 def get_pixel_scale_v2(ccoords: float) -> float:
     first: int = np.array([0, 0, 1], dtype=int)
     second: int = np.array([0, 0, 0], dtype=int)
     return ccoords[first] - ccoords[second]
 
 
-jax.make_jaxpr(get_pixel_scale_v2)(ccoords)
+@ft.partial(jax.jit, inline=True)
+def get_pixel_scale_v3(ccoords: float) -> float:
+    first: float = jax.lax.slice(ccoords, (0, 0, 0), (1, 1, 1))
+    second: float = jax.lax.slice(ccoords, (0, 0, 1), (1, 1, 1))
+    return first - second
 
-jax.make_jaxpr(get_pixel_scale_v1)(ccoords)
+
+jax.make_jaxpr(get_pixel_scale_v3)(ccoords)
+
+# %%timeit
+get_pixel_scale_v1(ccoords)
+
+# %%timeit
+get_pixel_scale_v2(ccoords)
+
+# %%timeit
+get_pixel_scale_v3(ccoords)
 
 ann_ap: float = soft_annular_aperture(rmin, rmax, cart_coords)
 
