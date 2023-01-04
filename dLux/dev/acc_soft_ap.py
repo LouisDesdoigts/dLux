@@ -72,3 +72,33 @@ cart_coords: float = coords(100, 1.)
 pol_coords: float = cart_to_polar(cart_coords)
 
 
+@ft.partial(jax.jit, inline=True)
+def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
+    r: float = hypotenuse(ccoords)
+    pixel_scale: float = ccoords[0, 0, 1] - ccoords[0, 0, 0]
+    ann_ap: float = np.logical_and((rmin < r), (r < rmax))
+    in_bound: float = np.logical_and((rmin - pixel_scale) < r, r < (rmin + pixel_scale))
+    out_bound: float = np.logical_and((rmax - pixel_scale) < r, r < (rmax + pixel_scale))
+    bound: float = np.logical_or(in_bound, out_bound)
+    return np.where(bound, .5, ann_ap)
+
+
+
+ann_ap: float = soft_annular_aperture(.5, 1., cart_coords)
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+# %matplotlib qt
+plt.imshow(ann_ap)
+
+# %%timeit
+soft_annular_aperture(.5, 1., cart_coords)
+
+jax.make_jaxpr(soft_annular_aperture)(.5, 1., cart_coords)
+
+jax.lax.scatter()
+
+np.logical_or
+
+
