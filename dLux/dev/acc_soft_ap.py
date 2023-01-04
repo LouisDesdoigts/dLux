@@ -106,6 +106,17 @@ def soft_square_aperture_v0(width: float, ccoords: float) -> float:
     return (square + edges) / 2.
 
 
+@ft.partial(jax.jit, inline=True)
+def soft_square_aperture_v1(width: float, ccoords: float) -> float:
+    pixel_scale: float = get_pixel_scale(ccoords)
+    acoords: float = jax.lax.abs(ccoords)
+    x: float = ccoords[0, :, :]
+    y: float = ccoords[1, :, :]
+    square: float = ((x < width) & (y < width)).astype(float)
+    edges: float = ((x < (width + pixel_scale)) & (y < (width + pixel_scale))).astype(float)
+    return (square + edges) / 2.
+
+
 rmin: float = np.array([[.5]], dtype=float)
 rmax: float = np.array([[1.]], dtype=float)
 width: float = np.array([[[.8]]], dtype=float)
@@ -133,7 +144,10 @@ soft_annular_aperture(rmin, rmax, ccoords)
 # %%timeit
 soft_square_aperture_v0(width, ccoords)
 
-jax.make_jaxpr(soft_square_aperture_v0)(width, ccoords)
+# %%timeit
+soft_square_aperture_v1(width, ccoords)
+
+jax.make_jaxpr(soft_square_aperture_v1)(width, ccoords)
 
 from jax.interpreters import xla
 
