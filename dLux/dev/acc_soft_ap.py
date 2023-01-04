@@ -112,4 +112,8 @@ jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
 
 jax.make_jaxpr(soft_circular_aperture_v0)(rmax, ccoords)
 
+jax.make_jaxpr(lambda x: x[0, 0, 0])(ccoords)
+
+jax.make_jaxpr(lambda x: jax.lax.slice(x, (0, 0, 0), (1, 1, 1)).reshape(1, 1))(ccoords)
+
 
