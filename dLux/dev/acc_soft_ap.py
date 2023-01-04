@@ -65,7 +65,7 @@ def _hypotenuse(x: float, y: float) -> float:
 def get_pixel_scale(ccoords: float) -> float:
     first: float = jax.lax.slice(ccoords, (0, 0, 0), (1, 1, 1))
     second: float = jax.lax.slice(ccoords, (0, 0, 1), (1, 1, 2))
-    return (first - second).flatten()
+    return (second - first).flatten()
 
 
 @ft.partial(jax.jit, inline=True)
@@ -79,7 +79,7 @@ cart_coords: float = coords(100, 1.)
 pol_coords: float = cart_to_polar(cart_coords)
 
 
-@ft.partial(jax.jit, inline=True)
+# @ft.partial(jax.jit, inline=True)
 def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
     r: float = hypotenuse(ccoords)
     pixel_scale: float = get_pixel_scale(ccoords)
@@ -98,9 +98,11 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # %matplotlib qt
-plt.imshow(ann_ap)
+plt.imshow(soft_annular_aperture(rmin, rmax, cart_coords))
 
 # %%timeit
-soft_annular_aperture(.5, 1., cart_coords)
+soft_annular_aperture(rmin, rmax, cart_coords)
+
+jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
 
 
