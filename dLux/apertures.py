@@ -1,6 +1,7 @@
 import dLux
 from abc import ABC, abstractmethod
-from jax import numpy as np, lax, tree_map, vmap
+from jax import numpy as np, lax, tree_map, vmap, jit
+from jax.tree_util import Partial
 
 
 Array = np.ndarray
@@ -122,6 +123,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
             self.rotation.shape, (), "rotation")
 
 
+    @Partial(jax.jit, inline=True)
     def _coordinates(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Transform the paraxial coordinates into the coordinate
