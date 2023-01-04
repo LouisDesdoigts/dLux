@@ -70,11 +70,3 @@ def hypotenuse(coords: float) -> float:
     return np.sqrt(jax.lax.integer_pow(coords, 2).sum(axis = 0))
 
 
-# %%timeit
-hypot_v1(coords)
-
-coords: float = coords(100, 1.)
-
-jax.lax.reduce_sum
-
-
