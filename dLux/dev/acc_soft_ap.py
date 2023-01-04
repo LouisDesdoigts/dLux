@@ -114,4 +114,14 @@ soft_circular_aperture(rmax, ccoords)
 # %%timeit
 soft_annular_aperture(rmin, rmax, ccoords)
 
+dir(jax.interpreters.xla)
+
+help(jax.interpreters.ConcreteArray)
+
+jax.interpreters.DeviceArray
+
+from jax.interpreters import xla
+
+help(xla.xla_call)
+
 
