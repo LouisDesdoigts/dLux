@@ -59,12 +59,11 @@ def cart_to_polar(coords: float) -> float:
     return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
 
 
-@ft.partial(jax.jit, inline=True)
 def soft_annular_aperture(
         rmin: float, 
         rmax: float, 
         ccoords: float, 
-        nsoft: float = 1.) -> float:
+        nsoft: float = 1) -> float:
     """
     Generate an annular aperture.
     
@@ -84,15 +83,15 @@ def soft_annular_aperture(
     aperture: Array
         An anulus.
     """
-    r: float = hypotenuse(ccoords)
+    r: float = jax.lax.expand_dims(hypotenuse(ccoords), (-1,))
     
     pixel_scale: float = get_pixel_scale(ccoords)
-    rsmin: float = rmin - pixel_scale * nsoft
-    rsmax: float = rmax + pixel_scale * nsoft
+    bounds: float = jax.lax.iota(float, nsoft) * pixel_scale
+    rmins: float = rmin - bounds
+    rmaxs: float = rmax + bounds
         
-    ann_ap: float = ((rmin < r) & (r < rmax)).astype(float)
-    bounds: float = ((rsmin < r) & (r < rsmax)).astype(float)
-    return (ann_ap + bounds) / 2.
+    aps: float = ((rmins < r) & (r < rmaxs)).astype(float)
+    return aps.sum(axis = -1) / nsoft
 
 
 @jax.value_and_grad
@@ -103,11 +102,16 @@ def annular_power(rmax: float) -> float:
     return annulus.sum()
 
 
-annulus: float = soft_annular_aperture(np.array([[.5]], dtype=float), np.array([[.5]], dtype=float), ccoords)
+annulus: float = soft_annular_aperture(
+    np.array([[.5]], dtype=float), 
+    np.array([[1.]], dtype=float), 
+    ccoords,
+    nsoft = 10
+)
 
 plt.imshow(annulus)
 
-annular_power(np.array([[.5]], dtype=float))
+annular_power(np.array([[1.]], dtype=float))
 
 
 @ft.partial(jax.jit, inline=True)
