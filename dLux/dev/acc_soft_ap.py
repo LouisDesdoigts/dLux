@@ -34,12 +34,19 @@ def coords(n: int, rad: float) -> float:
     return mesh(axes)
 
 
+# +
 @ft.partial(jax.jit, inline=True)
-def hypotenuse(x: float, y: float) -> float:
+def hypotenuse(coords: float) -> float:
+    return np.sqrt(jax.lax.integer_pow(coords, 2).sum(axis = 0))
+
+@ft.partial(jax.jit, inline=True)
+def _hypotenuse(x: float, y: float) -> float:
     x_sq: float = jax.lax.integer_pow(x, 2)
     y_sq: float = jax.lax.integer_pow(y, 2)
     return jax.lax.sqrt(x_sq + y_sq)
 
+
+# -
 
 @ft.partial(jax.jit, inline=True)
 def get_pixel_scale(ccoords: float) -> float:
@@ -52,7 +59,7 @@ def get_pixel_scale(ccoords: float) -> float:
 def cart_to_polar(coords: float) -> float:
     x: float = jax.lax.index_in_dim(coords, 0)
     y: float = jax.lax.index_in_dim(coords, 1)
-    return jax.lax.concatenate([hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
+    return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
 
 
 @ft.partial(jax.jit, inline=True)
