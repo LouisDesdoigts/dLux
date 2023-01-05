@@ -1,9 +1,6 @@
 import jax 
 import jax.numpy as np 
 import functools as ft
-import multipledispatch as md
-
-
 
 npix: int = 10000
 x: float = np.ones((npix, npix), dtype=float)
@@ -73,15 +70,12 @@ def soft_annular_aperture(
     r: float = hypotenuse(ccoords)
     
     pixel_scale: float = get_pixel_scale(ccoords)
-    rsmin: float = rmin - pixel_scale
+    rsmin: float = rmin - pixel_scale * nsoft
     rsmax: float = rmax + pixel_scale * nsoft
         
     ann_ap: float = ((rmin < r) & (r < rmax)).astype(float)
     bounds: float = ((rsmin < r) & (r < rsmax)).astype(float)
     return (ann_ap + bounds) / 2.
-
-
-soft_annular_aperture(rmin, rmax, ccoords)
 
 
 @ft.partial(jax.jit, inline=True)
