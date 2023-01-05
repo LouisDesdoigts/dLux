@@ -99,7 +99,8 @@ def soft_annular_aperture(
     return aps.sum(axis = -1) / 2.
 
 
-with jax.profiler("tmp/jax-trace")
+with jax.profiler.trace("tmp/jax-trace", create_perfetto_link=True):
+    soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
 
 import dLux as dl
 
@@ -112,19 +113,21 @@ def annular_power(rmax: float) -> float:
     return annulus.sum()
 
 
-dl_annular_aperture: callable = jax.jit(dl.AnnularAperture(1., .5)._aperture, inline=True)
+comp_dl_annular_aperture: callable = jax.jit(dl.AnnularAperture(1., .5)._aperture, inline=True)
+
+dl_annular_aperture: callable = dl.AnnularAperture(1., .5)._aperture
 
 jax.make_jaxpr(dl_annular_aperture)(ccoords)
 
 jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
 
 # %%timeit
-comp_soft_annular_aperture(rmin, rmax, ccoords)
+comp_soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
 
 comp_soft_annular_aperture: callable = jax.jit(soft_annular_aperture, inline=True)
 
 # %%timeit
-dl_annular_aperture(ccoords)
+dl_annular_aperture(ccoords).block_until_ready()
 
 plt.imshow(dl_annular_aperture(ccoords))
 
@@ -203,8 +206,6 @@ height: float = np.array([[[.9]]], dtype=float)
 n: int = 6
 prmax: float = np.array(.8, dtype=float)
 ccoords: float = coords(1024, np.array([1.], dtype=float))
-
-
 
 plt.imshow(soft_annular_aperture(rmin, rmax, ccoords))
 
