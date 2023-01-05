@@ -184,11 +184,3 @@ _soft_square_aperture(width, ccoords)
 
 # %%timeit
 soft_square_aperture(width, ccoords)
-
-from jax.interpreters import xla
-
-help(xla.xla_call)
-
-help(xla.XlaBuilder)
-
-
