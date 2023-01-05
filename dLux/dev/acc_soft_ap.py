@@ -133,63 +133,6 @@ def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> fl
 
 
 @ft.partial(jax.jit, inline=True, static_argnums=0)
-def soft_regular_polygonal_aperture_v1(n: float, rmax: float, ccoords: float) -> float:
-    alpha: float = np.pi / n
-    pcoords: float = cart_to_polar(ccoords)
-    rho: float = jax.lax.index_in_dim(pcoords, 0)
-    phi: float = jax.lax.index_in_dim(pcoords, 1)
-    x: float = jax.lax.index_in_dim(ccoords, 0)
-    y: float = jax.lax.index_in_dim(ccoords, 1)
-        
-    # TODO: Make use of broadcasted iota.
-    spikes: float = jax.lax.iota(float, n) * 2. * alpha
-    ms: float = jax.lax.expand_dims(-1. / jax.lax.tan(spikes), (1, 2))
-    sgn: float = jax.lax.expand_dims(
-        jax.lax.select(
-            jax.lax.ge(spikes, np.pi), 
-            jax.lax.full_like(spikes, 1., dtype=float), 
-            jax.lax.full_like(spikes, -1., dtype=float)
-        ), 
-        (1, 2)
-    )
-    dists: float = sgn * (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
-    dists: float = jax.lax.select(
-        jax.lax.broadcast_in_dim(
-            lax.eq(np.abs(ms), np.inf),
-            dists.shape, 
-            (0, 1, 2)
-        ),
-        jax.lax.broadcast_in_dim(
-            x, 
-            dists.shape,
-            (0, 1, 2)
-        ),
-        dists
-    )
-    edges: float = jax.lax.lt(dists, rmax)
-    pol: float = edges.prod(axis = 0) 
-    return pol 
-
-
-@ft.partial(jax.jit, inline=True, static_argnums=0)
-def soft_regular_polygonal_aperture_v0(n: float, rmax: float, ccoords: float) -> float:
-    alpha: float = np.pi / n
-    pcoords: float = cart_to_polar(ccoords)
-    rho: float = jax.lax.index_in_dim(pcoords, 0)
-    phi: float = jax.lax.index_in_dim(pcoords, 1)
-    x: float = jax.lax.index_in_dim(ccoords, 0)
-    y: float = jax.lax.index_in_dim(ccoords, 1)
-    spikes: float = jax.lax.iota(float, n) * 2. * alpha
-    ms: float = jax.lax.expand_dims(-1. / jax.lax.tan(spikes), (1, 2))
-    sgn: float = jax.lax.expand_dims(np.where(jax.lax.ge(spikes, np.pi), 1., -1.), (1, 2))
-    dists: float = sgn * (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
-    dists: float = np.where(lax.eq(np.abs(ms), np.inf), x, dists)
-    edges: float = jax.lax.lt(dists, rmax)
-    pol: float = edges.prod(axis = 0) 
-    return pol 
-
-
-@ft.partial(jax.jit, inline=True, static_argnums=0)
 def soft_regular_polygonal_aperture_v2(n: float, rmax: float, ccoords: float) -> float:
     alpha: float = np.pi / n
     pcoords: float = cart_to_polar(ccoords)
