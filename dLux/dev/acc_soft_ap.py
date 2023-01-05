@@ -162,6 +162,7 @@ ccoords: float = _coords(100, np.array([1.], dtype=float))
 pcoords: float = _cart_to_polar(ccoords)
 
 n: int = 6
+rmax: float = .8
 
 alpha: float = np.pi / n
 rho: float = jax.lax.index_in_dim(pcoords, 0, axis=2)
@@ -169,12 +170,16 @@ phi: float = jax.lax.index_in_dim(pcoords, 1, axis=2)
 x: float = jax.lax.index_in_dim(ccoords, 0, axis=2)
 y: float = jax.lax.index_in_dim(ccoords, 1, axis=2)
 wedge: float = jax.lax.floor((phi + np.pi) / (2. * alpha))
+spikes: float = jax.lax.iota(float, n) * 2. * alpha
+ms: float = -1. / jax.lax.tan(spikes)
+sgn: float = np.where(jax.lax.gt(spikes, np.pi), -1., 1.)
+dists: float = sgn * (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
+dists: float = np.where(lax.eq(np.abs(ms), np.inf), x, dists)
+pol: float = jax.lax.lt(dists, rmax).prod(axis = -1) 
 
-ms: float = jax.lax.expand_dims(jax.lax.tan(jax.lax.iota(float, n) * alpha), (1, 2))
+plt.imshow(pol)
 
-dists: float = (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
-
-pred: float = jax.lax.squeeze(wedge, (0,)).astype(int)
+pred: float = jax.lax.squeeze(wedge.astype(int)
 hex_: float = jax.lax.select_n(pred, *dists)
 
 # I need to look at moving the leading dimension to the bask as perhaps was intended by the `jax` creators. This might allow me to simplify the code considerably.
