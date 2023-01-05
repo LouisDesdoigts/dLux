@@ -65,12 +65,10 @@ def cart_to_polar(coords: float) -> float:
     return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
 
 
-@ft.partial(jax.jit, inline=True, static_argnums=3)
 def soft_annular_aperture(
         rmin: float, 
         rmax: float, 
-        ccoords: float, 
-        nsoft: float = 3) -> float:
+        ccoords: float) -> float:
     """
     Generate an annular aperture.
     
@@ -93,13 +91,15 @@ def soft_annular_aperture(
     r: float = jax.lax.expand_dims(hypotenuse(ccoords), (-1,))
     
     pixel_scale: float = get_pixel_scale(ccoords)
-    bounds: float = jax.lax.iota(float, nsoft) * pixel_scale
+    bounds: float = jax.lax.iota(float, 2) * pixel_scale
     rmins: float = rmin - bounds
     rmaxs: float = rmax + bounds
         
     aps: float = ((rmins < r) & (r < rmaxs)).astype(float)
-    return aps.sum(axis = -1) / nsoft
+    return aps.sum(axis = -1) / 2.
 
+
+with jax.profiler("tmp/jax-trace")
 
 import dLux as dl
 
@@ -119,9 +119,9 @@ jax.make_jaxpr(dl_annular_aperture)(ccoords)
 jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
 
 # %%timeit
-soft_annular_aperture(rmin, rmax, ccoords)
+comp_soft_annular_aperture(rmin, rmax, ccoords)
 
-soft_annular_aperture
+comp_soft_annular_aperture: callable = jax.jit(soft_annular_aperture, inline=True)
 
 # %%timeit
 dl_annular_aperture(ccoords)
