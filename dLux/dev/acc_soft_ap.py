@@ -63,14 +63,21 @@ def _hypotenuse(x: float, y: float) -> float:
     return jax.lax.sqrt(x_sq + y_sq)
 
 
-# -
-
+# +
 @ft.partial(jax.jit, inline=True, static_argnums=1)
 def get_pixel_scale(ccoords: float, shape: tuple) -> float:
     first: float = jax.lax.slice(ccoords, (0, 0, 0), (1, 1, 1))
     second: float = jax.lax.slice(ccoords, (0, 0, 1), (1, 1, 2))
     return (second - first).reshape(shape)
 
+@ft.partial(jax.jit, inline=True)
+def _get_pixel_scale(ccoords: float) -> float:
+    first: float = jax.lax.slice(ccoords, (0, 0, 0), (1, 1, 1))
+    second: float = jax.lax.slice(ccoords, (0, 0, 1), (1, 1, 2))
+    return (second - first).reshape(1, 1)
+
+
+# -
 
 @ft.partial(jax.jit, inline=True)
 def cart_to_polar(coords: float) -> float:
@@ -83,7 +90,7 @@ def cart_to_polar(coords: float) -> float:
 @ft.partial(jax.jit, inline=True)
 def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
     r: float = hypotenuse(ccoords)
-    pixel_scale: float = get_pixel_scale(ccoords, (1, 1))
+    pixel_scale: float = _get_pixel_scale(ccoords)
     ann_ap: float = ((rmin < r) & (r < rmax)).astype(float)
     bounds: float = (((rmin - pixel_scale) < r) & (r < (rmax + pixel_scale))).astype(float)
     return (ann_ap + bounds) / 2.
@@ -92,14 +99,14 @@ def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
 @ft.partial(jax.jit, inline=True)
 def soft_circular_aperture(r: float, ccoords: float) -> float:
     rho: float = hypotenuse(ccoords)
-    pixel_scale: float = get_pixel_scale(ccoords, (1, 1))
+    pixel_scale: float = _get_pixel_scale(ccoords)
     circ: float = (rho < r).astype(float)
     edges: float = (rho < (r + pixel_scale)).astype(float)
     return (circ + edges) / 2.
 
 
 @ft.partial(jax.jit, inline=True)
-def soft_square_aperture_v0(width: float, ccoords: float) -> float:
+def _soft_square_aperture(width: float, ccoords: float) -> float:
     pixel_scale: float = get_pixel_scale(ccoords, (1, 1, 1))
     acoords: float = jax.lax.abs(ccoords)
     square: float = (acoords < width).prod(axis = 0).astype(float)
@@ -108,18 +115,7 @@ def soft_square_aperture_v0(width: float, ccoords: float) -> float:
 
 
 @ft.partial(jax.jit, inline=True)
-def soft_square_aperture_v1(width: float, ccoords: float) -> float:
-    pixel_scale: float = get_pixel_scale(ccoords, (1, 1, 1))
-    acoords: float = jax.lax.abs(ccoords)
-    x: float = ccoords[0, :, :]
-    y: float = ccoords[1, :, :]
-    square: float = ((x < width) & (y < width)).astype(float)
-    edges: float = ((x < (width + pixel_scale)) & (y < (width + pixel_scale))).astype(float)
-    return (square + edges) / 2.
-
-
-@ft.partial(jax.jit, inline=True)
-def soft_square_aperture_v2(width: float, ccoords: float) -> float:
+def soft_square_aperture(width: float, ccoords: float) -> float:
     pixel_scale: float = get_pixel_scale(ccoords, (1, 1, 1))
     acoords: float = jax.lax.abs(ccoords)
     x: float = jax.lax.index_in_dim(ccoords, 0)
@@ -154,17 +150,9 @@ soft_circular_aperture(rmax, ccoords).block_until_ready()
 soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
 
 # %%timeit
-soft_square_aperture_v0(width, ccoords).block_until_ready()
-
-# %%timeit
-soft_square_aperture_v1(width, ccoords).block_until_ready()
-
-# %%timeit
-soft_square_aperture_v2(width, ccoords).block_until_ready()
+soft_square_aperture(width, ccoords).block_until_ready()
 
 jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
-
-jax.make_jaxpr(lambda x: jax.lax.index_in_dim(x, 0))(ccoords)
 
 from jax.interpreters import xla
 
