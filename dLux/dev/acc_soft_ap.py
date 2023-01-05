@@ -135,14 +135,41 @@ def soft_regular_polygonal_aperture(nsides: float, rmax: float, ccoords: float) 
     
 
 
+n: int = 6
+
+alpha: float = np.pi / n
 pcoords: float = cart_to_polar(ccoords)
 rho: float = jax.lax.index_in_dim(pcoords, 0)
+phi: float = jax.lax.index_in_dim(pcoords, 1)
+x: float = jax.lax.index_in_dim(ccoords, 0)
+y: float = jax.lax.index_in_dim(ccoords, 1)
+wedge: float = jax.lax.floor(phi / (2. * alpha))
 
-alpha = np.pi / n
-phi = polar[1] + alpha 
-wedge = np.floor((phi + alpha) / (2. * alpha))
-u_alpha = phi - wedge * (2 * alpha)
-r_alpha = np.cos(alpha) / np.cos(u_alpha)
+phi.shape
+
+# %%timeit
+jax.lax.broadcast_in_dim(phi, (6, 100, 100), (0, 1, 2)).shape
+
+np.tile(phi, (6, 1, 1)).shape
+
+# %%timeit
+np.tile(phi, (6, 1, 1))
+
+jax.make_jaxpr(lambda x: jax.lax.broadcast_in_dim(x, (6, 100, 100), (0, 1, 2)))(phi)
+
+jax.make_jaxpr(lambda x: np.tile(x, (6, 1, 1)))(phi)
+
+wedge.shape
+
+ms: float = jax.lax.expand_dims(jax.lax.tan(jax.lax.iota(float, n) * alpha), (1, 2))
+
+dists: float = (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
+
+jax.lax.select_n(wedge.astype(int), dists)
+
+dists.shape
+
+plt.imshow(wedge.squeeze())
 
 rmin: float = np.array([[.5]], dtype=float)
 rmax: float = np.array([[1.]], dtype=float)
