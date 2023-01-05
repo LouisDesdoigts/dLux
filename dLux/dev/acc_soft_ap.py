@@ -76,7 +76,6 @@ def _get_pixel_scale(ccoords: float) -> float:
 
 @ft.partial(jax.jit, inline=True)
 def cart_to_polar(coords: float) -> float:
-    # TODO: use the slice based index here.
     x: float = jax.lax.index_in_dim(coords, 0)
     y: float = jax.lax.index_in_dim(coords, 1)
     return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
@@ -134,6 +133,35 @@ def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> fl
 def soft_regular_polygonal_aperture(nsides: float, rmax: float, ccoords: float) -> float:
     
 
+
+@ft.partial(jax.jit, inline=True, static_argnums=0)
+def _coords(n: int, rad: float) -> float:
+    arange: float = jax.lax.expand_dims(jax.lax.iota(float, n), (1,))
+    max_: float = np.array(n - 1, dtype=float)
+    axes: float = arange * 2. * rad / max_ - rad
+    return jax.lax.concatenate(np.meshgrid(axes, axes), 2)
+
+
+@ft.partial(jax.jit, inline=True)
+def _cart_to_polar(coords: float) -> float:
+    x: float = jax.lax.index_in_dim(coords, 0)
+    y: float = jax.lax.index_in_dim(coords, 1)
+    return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 2)
+
+
+def _mesh(grid: float) -> float:
+    s: int = grid.size
+    shape: tuple = (s, s, 1) 
+    x: float = jax.lax.broadcast_in_dim(grid, shape, (0,))
+    y: float = jax.lax.broadcast_in_dim(grid, shape, (1,))
+    return jax.lax.concatenate([x, y], 2)
+
+
+jax.make_jaxpr(_mesh)(np.arange(5))
+
+_coords(100, 1.)
+
+_cart_to_polar(ccoords).shape
 
 n: int = 6
 
