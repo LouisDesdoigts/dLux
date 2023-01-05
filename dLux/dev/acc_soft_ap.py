@@ -86,7 +86,7 @@ def cart_to_polar(coords: float) -> float:
 @ft.partial(jax.jit, inline=True)
 def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
     r: float = hypotenuse(ccoords)
-    pixel_scale: float = _get_pixel_scale(ccoords)
+    pixel_scale: float = get_pixel_scale(ccoords)
     ann_ap: float = ((rmin < r) & (r < rmax)).astype(float)
     bounds: float = (((rmin - pixel_scale) < r) & (r < (rmax + pixel_scale))).astype(float)
     return (ann_ap + bounds) / 2.
@@ -103,7 +103,7 @@ def soft_circular_aperture(r: float, ccoords: float) -> float:
 
 @ft.partial(jax.jit, inline=True)
 def _soft_square_aperture(width: float, ccoords: float) -> float:
-    pixel_scale: float = get_pixel_scale(ccoords, (1, 1, 1))
+    pixel_scale: float = get_pixel_scale(ccoords)
     acoords: float = jax.lax.abs(ccoords)
     square: float = (acoords < width).prod(axis = 0).astype(float)
     edges: float = (acoords < (width + pixel_scale)).prod(axis = 0).astype(float)
@@ -112,7 +112,7 @@ def _soft_square_aperture(width: float, ccoords: float) -> float:
 
 @ft.partial(jax.jit, inline=True)
 def soft_square_aperture(width: float, ccoords: float) -> float:
-    pixel_scale: float = get_pixel_scale(ccoords, (1, 1, 1))
+    pixel_scale: float = get_pixel_scale(ccoords)
     acoords: float = jax.lax.abs(ccoords)
     x: float = jax.lax.index_in_dim(acoords, 0)
     y: float = jax.lax.index_in_dim(acoords, 1)
@@ -123,7 +123,7 @@ def soft_square_aperture(width: float, ccoords: float) -> float:
 
 @ft.partial(jax.jit, inline=True)
 def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> float:
-    pixel_scale: float = get_pixel_scale(ccoords, (1, 1, 1))
+    pixel_scale: float = get_pixel_scale(ccoords)
     acoords: float = jax.lax.abs(ccoords)
     x: float = jax.lax.index_in_dim(acoords, 0)
     y: float = jax.lax.index_in_dim(acoords, 1)
@@ -132,30 +132,29 @@ def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> fl
     return ((square + edges) / 2.).squeeze()
 
 
-
-jax.numpy.broadcast_shapes((1, 100, 100), (100,))
-
-
 @ft.partial(jax.jit, inline=True, static_argnums=0)
 def soft_regular_polygonal_aperture(n: float, rmax: float, ccoords: float) -> float:
     alpha: float = np.pi / n
-    rho: float = jax.lax.index_in_dim(pcoords, 0, axis=2)
-    phi: float = jax.lax.index_in_dim(pcoords, 1, axis=2)
-    x: float = jax.lax.index_in_dim(ccoords, 0, axis=2)
-    y: float = jax.lax.index_in_dim(ccoords, 1, axis=2)
+    pcoords: float = cart_to_polar(ccoords)
+    rho: float = jax.lax.index_in_dim(pcoords, 0)
+    phi: float = jax.lax.index_in_dim(pcoords, 1)
+    x: float = jax.lax.index_in_dim(ccoords, 0)
+    y: float = jax.lax.index_in_dim(ccoords, 1)
     spikes: float = jax.lax.iota(float, n) * 2. * alpha
-    ms: float = -1. / jax.lax.tan(spikes)
-    sgn: float = np.where(jax.lax.ge(spikes, np.pi), 1., -1.)
+    ms: float = jax.lax.expand_dims(-1. / jax.lax.tan(spikes), (1, 2))
+    sgn: float = jax.lax.expand_dims(np.where(jax.lax.ge(spikes, np.pi), 1., -1.), (1, 2))
     dists: float = sgn * (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
     dists: float = np.where(lax.eq(np.abs(ms), np.inf), x, dists)
     edges: float = jax.lax.lt(dists, rmax)
-    pol: float = edges.prod(axis = -1) 
+    pol: float = edges.prod(axis = 0) 
     return pol 
 
 
-ccoords: float = _coords(100, np.array([1.], dtype=float))
+ccoords: float = coords(100, np.array([1.], dtype=float))
 n: int = 8
 rmax: float = .8
+
+
 
 # %%timeit
 soft_regular_polygonal_aperture(n, rmax, ccoords).block_until_ready()
