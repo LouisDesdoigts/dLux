@@ -38,6 +38,15 @@ def occulting_v2(occulting: bool, x: float) -> float:
 # I also want to test writing my own XLA code and binding it to python. 
 # -
 
+@ft.partial(jax.jit, inline=True)
+def mesh(grid: float) -> float:
+    s: int = grid.size
+    shape: tuple = (1, s, s) 
+    x: float = jax.lax.broadcast_in_dim(grid, shape, (2,))
+    y: float = jax.lax.broadcast_in_dim(grid, shape, (1,))
+    return jax.lax.concatenate([x, y], 0)
+
+
 @ft.partial(jax.jit, inline=True, static_argnums=0)
 def coords(n: int, rad: float) -> float:
     arange: float = jax.lax.iota(float, n)
@@ -122,14 +131,6 @@ def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> fl
     edges: float = ((x < (width + pixel_scale)) & (y < (height + pixel_scale))).astype(float)
     return ((square + edges) / 2.).squeeze()
 
-
-@ft.partial(jax.jit, inline=True)
-def mesh(grid: float) -> float:
-    s: int = grid.size
-    shape: tuple = (1, s, s) 
-    x: float = jax.lax.broadcast_in_dim(grid, shape, (2,))
-    y: float = jax.lax.broadcast_in_dim(grid, shape, (1,))
-    return jax.lax.concatenate([x, y], 0)
 
 
 jax.numpy.broadcast_shapes((1, 100, 100), (100,))
