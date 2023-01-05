@@ -136,12 +136,13 @@ def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> fl
 def soft_regular_polygonal_aperture(n: float, rmax: float, ccoords: float) -> float:
     alpha: float = np.pi / n
     pcoords: float = cart_to_polar(ccoords)
+    pixel_scale: float = get_pixel_scale(ccoords)
+        
     rho: float = jax.lax.index_in_dim(pcoords, 0)
     phi: float = jax.lax.index_in_dim(pcoords, 1)
     x: float = jax.lax.index_in_dim(ccoords, 0)
     y: float = jax.lax.index_in_dim(ccoords, 1)
         
-    # TODO: Make use of broadcasted iota.
     spikes: float = jax.lax.broadcasted_iota(float, (n, 1, 1), 0) * 2. * alpha
     ms: float = -1. / jax.lax.tan(spikes)
     sgn: float = jax.lax.select(
@@ -160,7 +161,9 @@ def soft_regular_polygonal_aperture(n: float, rmax: float, ccoords: float) -> fl
         sgn * (ms * x - y) / jax.lax.sqrt(1 + jax.lax.integer_pow(ms, 2))
     )
         
-    return jax.lax.lt(dists, rmax).astype(float).prod(axis = 0) 
+    ap: float = (dists < rmax).astype(float).prod(axis = 0) 
+    ed: float = (dists < (rmax + pixel_scale)).astype(float).prod(axis = 0) 
+    return (ap + ed) / 2.    
 
 
 rmin: float = np.array([[.5]], dtype=float)
@@ -169,10 +172,7 @@ width: float = np.array([[[.8]]], dtype=float)
 height: float = np.array([[[.9]]], dtype=float)
 n: int = 6
 prmax: float = np.array(.8, dtype=float)
-ccoords: float = coords(100, np.array([1.], dtype=float))
-
-# %%timeit
-soft_regular_polygonal_aperture_v2(n, prmax, ccoords).block_until_ready()
+ccoords: float = coords(1024, np.array([1.], dtype=float))
 
 # +
 import matplotlib as mpl
@@ -200,7 +200,8 @@ soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
 # %%timeit
 soft_square_aperture(width, ccoords).block_until_ready()
 
-
+# %%timeit
+soft_regular_polygonal_aperture(n, prmax, ccoords).block_until_ready()
 
 from jax.interpreters import xla
 
