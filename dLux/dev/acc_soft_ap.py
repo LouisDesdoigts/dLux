@@ -189,14 +189,46 @@ def soft_regular_polygonal_aperture_v0(n: float, rmax: float, ccoords: float) ->
     return pol 
 
 
-jax.make_jaxpr(soft_regular_polygonal_aperture_v1, static_argnums=0)(n, rmax, ccoords)
+@ft.partial(jax.jit, inline=True, static_argnums=0)
+def soft_regular_polygonal_aperture_v2(n: float, rmax: float, ccoords: float) -> float:
+    alpha: float = np.pi / n
+    pcoords: float = cart_to_polar(ccoords)
+    rho: float = jax.lax.index_in_dim(pcoords, 0)
+    phi: float = jax.lax.index_in_dim(pcoords, 1)
+    x: float = jax.lax.index_in_dim(ccoords, 0)
+    y: float = jax.lax.index_in_dim(ccoords, 1)
+        
+    # TODO: Make use of broadcasted iota.
+    spikes: float = jax.lax.broadcasted_iota(float, (n, 1, 1), 0) * 2. * alpha
+    ms: float = -1. / jax.lax.tan(spikes)
+    sgn: float = jax.lax.select(
+            jax.lax.ge(spikes, np.pi), 
+            jax.lax.full_like(spikes, 1., dtype=float), 
+            jax.lax.full_like(spikes, -1., dtype=float)
+    )
+    
+    npix: int = x.shape[-1]
+    shape: tuple = (n, npix, npix)
+    dims: tuple = (0, 1, 2)
+        
+    dists: float = jax.lax.select(
+        jax.lax.broadcast_in_dim(lax.eq(np.abs(ms), np.inf), shape, dims),
+        jax.lax.broadcast_in_dim(x, shape, dims),
+        sgn * (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
+    )
+        
+    edges: float = jax.lax.lt(dists, rmax)
+    return edges.prod(axis = 0) 
+
+
+jax.make_jaxpr(soft_regular_polygonal_aperture_v2, static_argnums=0)(n, rmax, ccoords)
 
 ccoords: float = coords(100, np.array([1.], dtype=float))
 n: int = 6
 rmax: float = .8
 
 # %%timeit
-soft_regular_polygonal_aperture_v1(n, rmax, ccoords).block_until_ready()
+soft_regular_polygonal_aperture_v2(n, rmax, ccoords).block_until_ready()
 
 pred: float = jax.lax.squeeze(wedge.astype(int)
 hex_: float = jax.lax.select_n(pred, *dists)
