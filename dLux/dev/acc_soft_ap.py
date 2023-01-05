@@ -8,35 +8,11 @@ x: float = np.ones((npix, npix), dtype=float)
 occulting: bool = True
 
 
-@ft.partial(jax.jit, static_argnums=0, inline=True)
-def occulting_v0(occulting: bool, x: float) -> float:
-    y: float
-    if occulting:
-        y: float = (1. - x)
-    else:
-        y: float = x
-    return y
-
-
 @ft.partial(jax.jit, inline=True)
-def occulting_v1(occulting: bool, x: float) -> float:
+def occulting(occulting: bool, x: float) -> float:
     occ: float = occulting.astype(float)
     return (1. - x) * occ + (1. - occ) * x
 
-
-@ft.partial(jax.jit, inline=True)
-def occulting_v2(occulting: bool, x: float) -> float:
-    occ: float = occulting.astype(float)
-    return occ + x - 2. * x * occ 
-
-
-# Specify the width of the soft fringe in pixels then use .at and set the value to .5. Discuss this with louis. 
-
-# +
-# So I want to do a soft edged aperture. 
-# I also want to test if using the inline=True option is a performance boon.
-# I also want to test writing my own XLA code and binding it to python. 
-# -
 
 @ft.partial(jax.jit, inline=True)
 def mesh(grid: float) -> float:
@@ -146,9 +122,9 @@ def soft_regular_polygonal_aperture(n: float, rmax: float, ccoords: float) -> fl
     spikes: float = jax.lax.broadcasted_iota(float, (n, 1, 1), 0) * 2. * alpha
     ms: float = -1. / jax.lax.tan(spikes)
     sgn: float = jax.lax.select(
-            jax.lax.ge(spikes, np.pi), 
-            jax.lax.full_like(spikes, 1., dtype=float), 
-            jax.lax.full_like(spikes, -1., dtype=float)
+        jax.lax.ge(spikes, np.pi), 
+        jax.lax.full_like(spikes, 1., dtype=float), 
+        jax.lax.full_like(spikes, -1., dtype=float)
     )
     
     npix: int = x.shape[-1]
@@ -202,6 +178,12 @@ soft_square_aperture(width, ccoords).block_until_ready()
 
 # %%timeit
 soft_regular_polygonal_aperture(n, prmax, ccoords).block_until_ready()
+
+# %%timeit
+_soft_square_aperture(width, ccoords)
+
+# %%timeit
+soft_square_aperture(width, ccoords)
 
 from jax.interpreters import xla
 
