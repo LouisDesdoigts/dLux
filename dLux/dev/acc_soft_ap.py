@@ -133,7 +133,7 @@ def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> fl
 
 
 @ft.partial(jax.jit, inline=True, static_argnums=0)
-def soft_regular_polygonal_aperture_v2(n: float, rmax: float, ccoords: float) -> float:
+def soft_regular_polygonal_aperture(n: float, rmax: float, ccoords: float) -> float:
     alpha: float = np.pi / n
     pcoords: float = cart_to_polar(ccoords)
     rho: float = jax.lax.index_in_dim(pcoords, 0)
@@ -157,32 +157,22 @@ def soft_regular_polygonal_aperture_v2(n: float, rmax: float, ccoords: float) ->
     dists: float = jax.lax.select(
         jax.lax.broadcast_in_dim(lax.eq(np.abs(ms), np.inf), shape, dims),
         jax.lax.broadcast_in_dim(x, shape, dims),
-        sgn * (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
+        sgn * (ms * x - y) / jax.lax.sqrt(1 + jax.lax.integer_pow(ms, 2))
     )
         
-    edges: float = jax.lax.lt(dists, rmax)
-    return edges.prod(axis = 0) 
+    return jax.lax.lt(dists, rmax).astype(float).prod(axis = 0) 
 
-
-jax.make_jaxpr(soft_regular_polygonal_aperture_v2, static_argnums=0)(n, rmax, ccoords)
-
-ccoords: float = coords(100, np.array([1.], dtype=float))
-n: int = 6
-rmax: float = .8
-
-# %%timeit
-soft_regular_polygonal_aperture_v2(n, rmax, ccoords).block_until_ready()
-
-pred: float = jax.lax.squeeze(wedge.astype(int)
-hex_: float = jax.lax.select_n(pred, *dists)
-
-# I need to look at moving the leading dimension to the bask as perhaps was intended by the `jax` creators. This might allow me to simplify the code considerably.
 
 rmin: float = np.array([[.5]], dtype=float)
 rmax: float = np.array([[1.]], dtype=float)
 width: float = np.array([[[.8]]], dtype=float)
 height: float = np.array([[[.9]]], dtype=float)
-ccoords: float = coords(100, 1.)
+n: int = 6
+prmax: float = np.array(.8, dtype=float)
+ccoords: float = coords(100, np.array([1.], dtype=float))
+
+# %%timeit
+soft_regular_polygonal_aperture_v2(n, prmax, ccoords).block_until_ready()
 
 # +
 import matplotlib as mpl
@@ -199,6 +189,8 @@ plt.imshow(soft_square_aperture(width, ccoords)[0])
 
 plt.imshow(soft_rectangular_aperture(width, height, ccoords))
 
+plt.imshow(soft_regular_polygonal_aperture(n, prmax, ccoords))
+
 # %%timeit
 soft_circular_aperture(rmax, ccoords).block_until_ready()
 
@@ -207,6 +199,8 @@ soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
 
 # %%timeit
 soft_square_aperture(width, ccoords).block_until_ready()
+
+
 
 from jax.interpreters import xla
 
