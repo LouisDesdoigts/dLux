@@ -14,13 +14,12 @@ x: float = np.ones((npix, npix), dtype=float)
 occulting: bool = True
 
 
-@ft.partial(jax.jit, inline=True)
 def occulting(occulting: bool, x: float) -> float:
     occ: float = occulting.astype(float)
     return (1. - x) * occ + (1. - occ) * x
 
 
-@ft.partial(jax.jit, inline=True)
+# +
 def mesh(grid: float) -> float:
     s: int = grid.size
     shape: tuple = (1, s, s) 
@@ -28,8 +27,6 @@ def mesh(grid: float) -> float:
     y: float = jax.lax.broadcast_in_dim(grid, shape, (1,))
     return jax.lax.concatenate([x, y], 0)
 
-
-@ft.partial(jax.jit, inline=True, static_argnums=0)
 def coords(n: int, rad: float) -> float:
     arange: float = jax.lax.iota(float, n)
     max_: float = np.array(n - 1, dtype=float)
@@ -38,11 +35,10 @@ def coords(n: int, rad: float) -> float:
 
 
 # +
-@ft.partial(jax.jit, inline=True)
+@jax.jit
 def hypotenuse(coords: float) -> float:
     return np.sqrt(jax.lax.integer_pow(coords, 2).sum(axis = 0))
 
-@ft.partial(jax.jit, inline=True)
 def _hypotenuse(x: float, y: float) -> float:
     x_sq: float = jax.lax.integer_pow(x, 2)
     y_sq: float = jax.lax.integer_pow(y, 2)
@@ -51,26 +47,22 @@ def _hypotenuse(x: float, y: float) -> float:
 
 # -
 
-@ft.partial(jax.jit, inline=True)
 def get_pixel_scale(ccoords: float) -> float:
     first: float = jax.lax.slice(ccoords, (0, 0, 0), (1, 1, 1))
     second: float = jax.lax.slice(ccoords, (0, 0, 1), (1, 1, 2))
     return (second - first).reshape(1, 1)
 
 
-@ft.partial(jax.jit, inline=True)
 def cart_to_polar(coords: float) -> float:
     x: float = jax.lax.index_in_dim(coords, 0)
     y: float = jax.lax.index_in_dim(coords, 1)
     return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
 
 
-@ft.partial(jax.jit, inline=True, static_argnums=3)
 def soft_annular_aperture(
         rmin: float, 
         rmax: float, 
-        ccoords: float, 
-        nsoft: float = 3) -> float:
+        ccoords: float) -> float:
     """
     Generate an annular aperture.
     
@@ -93,26 +85,18 @@ def soft_annular_aperture(
     r: float = jax.lax.expand_dims(hypotenuse(ccoords), (-1,))
     
     pixel_scale: float = get_pixel_scale(ccoords)
-    bounds: float = jax.lax.iota(float, nsoft) * pixel_scale
+    bounds: float = jax.lax.iota(float, 3) * pixel_scale
     rmins: float = rmin - bounds
     rmaxs: float = rmax + bounds
         
     aps: float = ((rmins < r) & (r < rmaxs)).astype(float)
-    return aps.sum(axis = -1) / nsoft
+    return aps.sum(axis = -1) / 3.
 
-
-with jax.profiler.trace("tmp/jax-trace", create_perfetto_link=True):
-    soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
-
-# +
 
 import dLux as dl
 
 
-# -
-
 @jax.value_and_grad
-@jax.jit
 def annular_power(rmax: float) -> float:
     ccoords: float = coords(100, np.array([1.], dtype=float))
     annulus: float = dl.AnnularAperture(rmax, 1.)._aperture(ccoords)
@@ -123,6 +107,8 @@ comp_dl_annular_aperture: callable = jax.jit(dl.AnnularAperture(1., .5)._apertur
 
 dl_annular_aperture: callable = dl.AnnularAperture(1., .5)._aperture
 
+comp_soft_annular_aperture: callable = jax.jit(soft_annular_aperture, inline=True)
+
 jax.make_jaxpr(dl_annular_aperture)(ccoords)
 
 jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
@@ -130,7 +116,48 @@ jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
 # %%timeit
 comp_soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
 
-soft_annular_aperture
+
+@jax.jit
+def hypotenuse_v0(coords: float) -> float:
+    return jax.lax.sqrt(jax.lax.integer_pow(coords, 2).sum(axis = 0))
+
+
+@jax.jit
+def hypotenuse_v1(ccoords: float) -> float:
+    x: float = ccoords[0]
+    y: float = ccoords[1]
+    return np.hypot(x, y)
+
+
+@jax.jit
+def hypotenuse_v2(ccoords: float) -> float:
+    x: float = ccoords[0]
+    y: float = ccoords[1]
+    x_sq: float = jax.lax.integer_pow(x, 2)
+    y_sq: float = jax.lax.integer_pow(y, 2)
+    return jax.lax.sqrt(x_sq + y_sq)
+
+
+@jax.jit
+def hypotenuse_v3(ccoords: float) -> float:
+    x: float = jax.lax.index_in_dim(ccoords, 0)
+    y: float = jax.lax.index_in_dim(ccoords, 1)
+    x_sq: float = jax.lax.integer_pow(x, 2)
+    y_sq: float = jax.lax.integer_pow(y, 2)
+    return jax.lax.sqrt(x_sq + y_sq)
+
+
+# %%timeit
+hypotenuse_v0(ccoords).block_until_ready()
+
+# %%timeit
+hypotenuse_v1(ccoords).block_until_ready()
+
+# %%timeit
+hypotenuse_v2(ccoords).block_until_ready()
+
+# %%timeit
+hypotenuse_v3(ccoords).block_until_ready()
 
 # %%timeit
 dl_annular_aperture(ccoords).block_until_ready()
