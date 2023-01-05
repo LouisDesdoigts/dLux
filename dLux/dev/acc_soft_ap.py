@@ -1,6 +1,12 @@
+# +
 import jax 
 import jax.numpy as np 
 import functools as ft
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+# %matplotlib qt
+# -
 
 npix: int = 10000
 x: float = np.ones((npix, npix), dtype=float)
@@ -59,11 +65,12 @@ def cart_to_polar(coords: float) -> float:
     return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
 
 
+@ft.partial(jax.jit, inline=True, static_argnums=3)
 def soft_annular_aperture(
         rmin: float, 
         rmax: float, 
         ccoords: float, 
-        nsoft: float = 1) -> float:
+        nsoft: float = 3) -> float:
     """
     Generate an annular aperture.
     
@@ -105,14 +112,23 @@ def annular_power(rmax: float) -> float:
     return annulus.sum()
 
 
-annulus: float = soft_annular_aperture(
-    np.array([[.5]], dtype=float), 
-    np.array([[1.]], dtype=float), 
-    ccoords,
-    nsoft = 10
-)
+dl_annular_aperture: callable = jax.jit(dl.AnnularAperture(1., .5)._aperture, inline=True)
 
-annular_power(1.)
+jax.make_jaxpr(dl_annular_aperture)(ccoords)
+
+jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
+
+# %%timeit
+soft_annular_aperture(rmin, rmax, ccoords)
+
+soft_annular_aperture
+
+# %%timeit
+dl_annular_aperture(ccoords)
+
+plt.imshow(dl_annular_aperture(ccoords))
+
+plt.imshow(soft_annular_aperture(rmin, rmax, ccoords))
 
 
 @ft.partial(jax.jit, inline=True)
@@ -188,12 +204,7 @@ n: int = 6
 prmax: float = np.array(.8, dtype=float)
 ccoords: float = coords(1024, np.array([1.], dtype=float))
 
-# +
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 
-# %matplotlib qt
-# -
 
 plt.imshow(soft_annular_aperture(rmin, rmax, ccoords))
 
