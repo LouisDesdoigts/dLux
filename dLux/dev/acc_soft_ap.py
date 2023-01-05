@@ -118,16 +118,28 @@ def _soft_square_aperture(width: float, ccoords: float) -> float:
 def soft_square_aperture(width: float, ccoords: float) -> float:
     pixel_scale: float = get_pixel_scale(ccoords, (1, 1, 1))
     acoords: float = jax.lax.abs(ccoords)
-    x: float = jax.lax.index_in_dim(ccoords, 0)
-    y: float = jax.lax.index_in_dim(ccoords, 1)
+    x: float = jax.lax.index_in_dim(acoords, 0)
+    y: float = jax.lax.index_in_dim(acoords, 1)
     square: float = ((x < width) & (y < width)).astype(float)
     edges: float = ((x < (width + pixel_scale)) & (y < (width + pixel_scale))).astype(float)
-    return (square + edges) / 2.
+    return ((square + edges) / 2.).squeeze()
+
+
+@ft.partial(jax.jit, inline=True)
+def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> float:
+    pixel_scale: float = get_pixel_scale(ccoords, (1, 1, 1))
+    acoords: float = jax.lax.abs(ccoords)
+    x: float = jax.lax.index_in_dim(acoords, 0)
+    y: float = jax.lax.index_in_dim(acoords, 1)
+    square: float = ((x < width) & (y < height)).astype(float)
+    edges: float = ((x < (width + pixel_scale)) & (y < (height + pixel_scale))).astype(float)
+    return ((square + edges) / 2.).squeeze()
 
 
 rmin: float = np.array([[.5]], dtype=float)
 rmax: float = np.array([[1.]], dtype=float)
 width: float = np.array([[[.8]]], dtype=float)
+height: float = np.array([[[.9]]], dtype=float)
 ccoords: float = coords(100, 1.)
 
 # +
@@ -141,7 +153,9 @@ plt.imshow(soft_annular_aperture(rmin, rmax, ccoords))
 
 plt.imshow(soft_circular_aperture(rmax, ccoords))
 
-plt.imshow(soft_square_aperture_v0(rmin, ccoords))
+plt.imshow(soft_square_aperture(width, ccoords)[0])
+
+plt.imshow(soft_rectangular_aperture(width, height, ccoords))
 
 # %%timeit
 soft_circular_aperture(rmax, ccoords).block_until_ready()
@@ -152,7 +166,7 @@ soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
 # %%timeit
 soft_square_aperture(width, ccoords).block_until_ready()
 
-jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
+jax.make_jaxpr(soft_rectangular_aperture)(width, height, ccoords)
 
 from jax.interpreters import xla
 
