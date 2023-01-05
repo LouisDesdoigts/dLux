@@ -2,11 +2,6 @@ import jax
 import jax.numpy as np 
 import functools as ft
 
-from jaxtyping import (
-    Float,
-    Array
-)
-
 npix: int = 10000
 x: float = np.ones((npix, npix), dtype=float)
 
@@ -82,8 +77,8 @@ def _get_pixel_scale(ccoords: float) -> float:
 @ft.partial(jax.jit, inline=True)
 def cart_to_polar(coords: float) -> float:
     # TODO: use the slice based index here.
-    x: float = coords[0]
-    y: float = coords[1]
+    x: float = jax.lax.index_in_dim(coords, 0)
+    y: float = jax.lax.index_in_dim(coords, 1)
     return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
 
 
@@ -135,6 +130,19 @@ def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> fl
     edges: float = ((x < (width + pixel_scale)) & (y < (height + pixel_scale))).astype(float)
     return ((square + edges) / 2.).squeeze()
 
+
+def soft_regular_polygonal_aperture(nsides: float, rmax: float, ccoords: float) -> float:
+    
+
+
+pcoords: float = cart_to_polar(ccoords)
+rho: float = jax.lax.index_in_dim(pcoords, 0)
+
+alpha = np.pi / n
+phi = polar[1] + alpha 
+wedge = np.floor((phi + alpha) / (2. * alpha))
+u_alpha = phi - wedge * (2 * alpha)
+r_alpha = np.cos(alpha) / np.cos(u_alpha)
 
 rmin: float = np.array([[.5]], dtype=float)
 rmax: float = np.array([[1.]], dtype=float)
