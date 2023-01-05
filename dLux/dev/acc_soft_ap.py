@@ -43,7 +43,7 @@ def coords(n: int, rad: float) -> float:
     arange: float = jax.lax.iota(float, n)
     max_: float = np.array(n - 1, dtype=float)
     axes: float = arange * 2. * rad / max_ - rad
-    return np.asarray(np.meshgrid(axes, axes))
+    return mesh(axes)
 
 
 # +
@@ -130,28 +130,16 @@ def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> fl
     return ((square + edges) / 2.).squeeze()
 
 
-@ft.partial(jax.jit, inline=True, static_argnums=0)
-def _coords(n: int, rad: float) -> float:
-    arange: float = jax.lax.iota(float, n)
-    max_: float = np.array(n - 1, dtype=float)
-    axes: float = arange * 2. * rad / max_ - rad
-    return _mesh(axes)
-
-
 @ft.partial(jax.jit, inline=True)
-def _cart_to_polar(coords: float) -> float:
-    x: float = jax.lax.index_in_dim(coords, 0, axis=2)
-    y: float = jax.lax.index_in_dim(coords, 1, axis=2)
-    return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 2)
-
-
-@ft.partial(jax.jit, inline=True)
-def _mesh(grid: float) -> float:
+def mesh(grid: float) -> float:
     s: int = grid.size
-    shape: tuple = (s, s, 1) 
-    x: float = jax.lax.broadcast_in_dim(grid, shape, (1,))
-    y: float = jax.lax.broadcast_in_dim(grid, shape, (0,))
-    return jax.lax.concatenate([x, y], 2)
+    shape: tuple = (1, s, s) 
+    x: float = jax.lax.broadcast_in_dim(grid, shape, (2,))
+    y: float = jax.lax.broadcast_in_dim(grid, shape, (1,))
+    return jax.lax.concatenate([x, y], 0)
+
+
+jax.numpy.broadcast_shapes((1, 100, 100), (100,))
 
 
 @ft.partial(jax.jit, inline=True, static_argnums=0)
@@ -172,9 +160,11 @@ def soft_regular_polygonal_aperture(n: float, rmax: float, ccoords: float) -> fl
 
 
 ccoords: float = _coords(100, np.array([1.], dtype=float))
-
 n: int = 8
 rmax: float = .8
+
+# %%timeit
+soft_regular_polygonal_aperture(n, rmax, ccoords).block_until_ready()
 
 pred: float = jax.lax.squeeze(wedge.astype(int)
 hex_: float = jax.lax.select_n(pred, *dists)
@@ -210,8 +200,6 @@ soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
 
 # %%timeit
 soft_square_aperture(width, ccoords).block_until_ready()
-
-jax.make_jaxpr(soft_rectangular_aperture)(width, height, ccoords)
 
 from jax.interpreters import xla
 
