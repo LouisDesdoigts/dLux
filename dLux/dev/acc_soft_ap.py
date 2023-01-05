@@ -58,21 +58,14 @@ def _hypotenuse(x: float, y: float) -> float:
     return jax.lax.sqrt(x_sq + y_sq)
 
 
-# +
-@ft.partial(jax.jit, inline=True, static_argnums=1)
-def get_pixel_scale(ccoords: float, shape: tuple) -> float:
-    first: float = jax.lax.slice(ccoords, (0, 0, 0), (1, 1, 1))
-    second: float = jax.lax.slice(ccoords, (0, 0, 1), (1, 1, 2))
-    return (second - first).reshape(shape)
+# -
 
 @ft.partial(jax.jit, inline=True)
-def _get_pixel_scale(ccoords: float) -> float:
+def get_pixel_scale(ccoords: float) -> float:
     first: float = jax.lax.slice(ccoords, (0, 0, 0), (1, 1, 1))
     second: float = jax.lax.slice(ccoords, (0, 0, 1), (1, 1, 2))
     return (second - first).reshape(1, 1)
 
-
-# -
 
 @ft.partial(jax.jit, inline=True)
 def cart_to_polar(coords: float) -> float:
