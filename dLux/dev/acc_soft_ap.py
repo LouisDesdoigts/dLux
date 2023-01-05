@@ -66,6 +66,23 @@ def soft_annular_aperture(
         ccoords: float, 
         nsoft: float = 1.) -> float:
     """
+    Generate an annular aperture.
+    
+    Parameters
+    ----------
+    rmin: Array, meters
+        The inner radius of the annulus.
+    rmax: Array, meters
+        The outer radius of the annulus. 
+    ccoords: Array, meters
+        The cartesian_coordinates.
+    nsoft: Array, pixels
+        The number of soft pixels. 
+        
+    Returns
+    -------
+    aperture: Array
+        An anulus.
     """
     r: float = hypotenuse(ccoords)
     
