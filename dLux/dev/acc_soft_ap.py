@@ -1,6 +1,9 @@
 import jax 
 import jax.numpy as np 
 import functools as ft
+import multipledispatch as md
+
+
 
 npix: int = 10000
 x: float = np.ones((npix, npix), dtype=float)
@@ -53,16 +56,29 @@ def cart_to_polar(coords: float) -> float:
 
 
 @ft.partial(jax.jit, inline=True)
-def soft_annular_aperture(rmin: float, rmax: float, ccoords: float) -> float:
+def soft_annular_aperture(
+        rmin: float, 
+        rmax: float, 
+        ccoords: float, 
+        nsoft: float = 1.) -> float:
+    """
+    """
     r: float = hypotenuse(ccoords)
+    
     pixel_scale: float = get_pixel_scale(ccoords)
+    rsmin: float = rmin - pixel_scale
+    rsmax: float = rmax + pixel_scale * nsoft
+        
     ann_ap: float = ((rmin < r) & (r < rmax)).astype(float)
-    bounds: float = (((rmin - pixel_scale) < r) & (r < (rmax + pixel_scale))).astype(float)
+    bounds: float = ((rsmin < r) & (r < rsmax)).astype(float)
     return (ann_ap + bounds) / 2.
 
 
+soft_annular_aperture(rmin, rmax, ccoords)
+
+
 @ft.partial(jax.jit, inline=True)
-def soft_circular_aperture(r: float, ccoords: float) -> float:
+def soft_circular_aperture(r: float, ccoords: float, nsoft: float = 1.) -> float:
     rho: float = hypotenuse(ccoords)
     pixel_scale: float = _get_pixel_scale(ccoords)
     circ: float = (rho < r).astype(float)
