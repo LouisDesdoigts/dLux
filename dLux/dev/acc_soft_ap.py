@@ -117,6 +117,17 @@ def soft_square_aperture_v1(width: float, ccoords: float) -> float:
     return (square + edges) / 2.
 
 
+@ft.partial(jax.jit, inline=True)
+def soft_square_aperture_v2(width: float, ccoords: float) -> float:
+    pixel_scale: float = get_pixel_scale(ccoords)
+    acoords: float = jax.lax.abs(ccoords)
+    x: float = jax.lax.index_in_dim(ccoords, 0)
+    y: float = jax.lax.index_in_dim(ccoords, 1)
+    square: float = ((x < width) & (y < width)).astype(float)
+    edges: float = ((x < (width + pixel_scale)) & (y < (width + pixel_scale))).astype(float)
+    return (square + edges) / 2.
+
+
 rmin: float = np.array([[.5]], dtype=float)
 rmax: float = np.array([[1.]], dtype=float)
 width: float = np.array([[[.8]]], dtype=float)
@@ -129,6 +140,8 @@ import matplotlib.pyplot as plt
 # %matplotlib qt
 # -
 
+help(jax.lax.index_take)
+
 plt.imshow(soft_annular_aperture(rmin, rmax, ccoords))
 
 plt.imshow(soft_circular_aperture(rmax, ccoords))
@@ -136,18 +149,23 @@ plt.imshow(soft_circular_aperture(rmax, ccoords))
 plt.imshow(soft_square_aperture_v0(rmin, ccoords))
 
 # %%timeit
-soft_circular_aperture(rmax, ccoords)
+soft_circular_aperture(rmax, ccoords).block_until_ready()
 
 # %%timeit
-soft_annular_aperture(rmin, rmax, ccoords)
+soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
 
 # %%timeit
-soft_square_aperture_v0(width, ccoords)
+soft_square_aperture_v0(width, ccoords).block_until_ready()
 
 # %%timeit
-soft_square_aperture_v1(width, ccoords)
+soft_square_aperture_v1(width, ccoords).block_until_ready()
 
-jax.make_jaxpr(soft_square_aperture_v1)(width, ccoords)
+# %%timeit
+soft_square_aperture_v2(width, ccoords).block_until_ready()
+
+jax.make_jaxpr(soft_square_aperture_v2)(width, ccoords)
+
+jax.make_jaxpr(lambda x: jax.lax.index_in_dim(x, 0))(ccoords)
 
 from jax.interpreters import xla
 
