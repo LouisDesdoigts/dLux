@@ -130,10 +130,6 @@ def soft_rectangular_aperture(width: float, height: float, ccoords: float) -> fl
     return ((square + edges) / 2.).squeeze()
 
 
-def soft_regular_polygonal_aperture(nsides: float, rmax: float, ccoords: float) -> float:
-    
-
-
 @ft.partial(jax.jit, inline=True, static_argnums=0)
 def _coords(n: int, rad: float) -> float:
     arange: float = jax.lax.iota(float, n)
@@ -158,47 +154,32 @@ def _mesh(grid: float) -> float:
     return jax.lax.concatenate([x, y], 2)
 
 
+@ft.partial(jax.jit, inline=True, static_argnums=0)
+def soft_regular_polygonal_aperture(n: float, rmax: float, ccoords: float) -> float:
+    alpha: float = np.pi / n
+    rho: float = jax.lax.index_in_dim(pcoords, 0, axis=2)
+    phi: float = jax.lax.index_in_dim(pcoords, 1, axis=2)
+    x: float = jax.lax.index_in_dim(ccoords, 0, axis=2)
+    y: float = jax.lax.index_in_dim(ccoords, 1, axis=2)
+    spikes: float = jax.lax.iota(float, n) * 2. * alpha
+    ms: float = -1. / jax.lax.tan(spikes)
+    sgn: float = np.where(jax.lax.ge(spikes, np.pi), 1., -1.)
+    dists: float = sgn * (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
+    dists: float = np.where(lax.eq(np.abs(ms), np.inf), x, dists)
+    edges: float = jax.lax.lt(dists, rmax)
+    pol: float = edges.prod(axis = -1) 
+    return pol 
+
+
 ccoords: float = _coords(100, np.array([1.], dtype=float))
-pcoords: float = _cart_to_polar(ccoords)
 
 n: int = 8
 rmax: float = .8
-
-alpha: float = np.pi / n
-rho: float = jax.lax.index_in_dim(pcoords, 0, axis=2)
-phi: float = jax.lax.index_in_dim(pcoords, 1, axis=2)
-x: float = jax.lax.index_in_dim(ccoords, 0, axis=2)
-y: float = jax.lax.index_in_dim(ccoords, 1, axis=2)
-spikes: float = jax.lax.iota(float, n) * 2. * alpha
-ms: float = -1. / jax.lax.tan(spikes)
-sgn: float = np.where(jax.lax.ge(spikes, np.pi), 1., -1.)
-dists: float = sgn * (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
-dists: float = np.where(lax.eq(np.abs(ms), np.inf), x, dists)
-edges: float = jax.lax.lt(dists, rmax)
-pol: float = edges.prod(axis = -1) 
-
-fig = plt.figure()
-axes = fig.subplots(1, n)
-for i in range(n):
-    c: object = axes[i].imshow(edges[:, :, i])
-    _: object = fig.colorbar(c, ax=axes[i])
-plt.show()    
-
-plt.imshow(pol)
 
 pred: float = jax.lax.squeeze(wedge.astype(int)
 hex_: float = jax.lax.select_n(pred, *dists)
 
 # I need to look at moving the leading dimension to the bask as perhaps was intended by the `jax` creators. This might allow me to simplify the code considerably.
-
-len([*dists])
-
-plt.imshow(hex_)
-plt.colorbar()
-
-dists.shape
-
-plt.imshow(wedge.squeeze())
 
 rmin: float = np.array([[.5]], dtype=float)
 rmax: float = np.array([[1.]], dtype=float)
