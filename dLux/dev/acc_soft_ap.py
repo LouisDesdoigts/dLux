@@ -94,11 +94,14 @@ def soft_annular_aperture(
     return aps.sum(axis = -1) / nsoft
 
 
+import dLux as dl
+
+
 @jax.value_and_grad
 @jax.jit
 def annular_power(rmax: float) -> float:
     ccoords: float = coords(100, np.array([1.], dtype=float))
-    annulus: float = soft_annular_aperture(np.array([[.5]], dtype=float), rmax, ccoords)
+    annulus: float = dl.AnnularAperture(rmax, 1.)._aperture(ccoords)
     return annulus.sum()
 
 
@@ -109,9 +112,7 @@ annulus: float = soft_annular_aperture(
     nsoft = 10
 )
 
-plt.imshow(annulus)
-
-annular_power(np.array([[1.]], dtype=float))
+annular_power(1.)
 
 
 @ft.partial(jax.jit, inline=True)
