@@ -78,15 +78,6 @@ def soft_circular_aperture(r: float, ccoords: float) -> float:
 
 
 @ft.partial(jax.jit, inline=True)
-def _soft_square_aperture(width: float, ccoords: float) -> float:
-    pixel_scale: float = get_pixel_scale(ccoords)
-    acoords: float = jax.lax.abs(ccoords)
-    square: float = (acoords < width).prod(axis = 0).astype(float)
-    edges: float = (acoords < (width + pixel_scale)).prod(axis = 0).astype(float)
-    return (square + edges) / 2.
-
-
-@ft.partial(jax.jit, inline=True)
 def soft_square_aperture(width: float, ccoords: float) -> float:
     pixel_scale: float = get_pixel_scale(ccoords)
     acoords: float = jax.lax.abs(ccoords)
