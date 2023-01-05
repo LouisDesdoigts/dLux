@@ -136,41 +136,38 @@ def soft_regular_polygonal_aperture(nsides: float, rmax: float, ccoords: float) 
 
 @ft.partial(jax.jit, inline=True, static_argnums=0)
 def _coords(n: int, rad: float) -> float:
-    arange: float = jax.lax.expand_dims(jax.lax.iota(float, n), (1,))
+    arange: float = jax.lax.iota(float, n)
     max_: float = np.array(n - 1, dtype=float)
     axes: float = arange * 2. * rad / max_ - rad
-    return jax.lax.concatenate(np.meshgrid(axes, axes), 2)
+    return _mesh(axes)
 
 
 @ft.partial(jax.jit, inline=True)
 def _cart_to_polar(coords: float) -> float:
-    x: float = jax.lax.index_in_dim(coords, 0)
-    y: float = jax.lax.index_in_dim(coords, 1)
+    x: float = jax.lax.index_in_dim(coords, 0, axis=2)
+    y: float = jax.lax.index_in_dim(coords, 1, axis=2)
     return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 2)
 
 
+@ft.partial(jax.jit, inline=True)
 def _mesh(grid: float) -> float:
     s: int = grid.size
     shape: tuple = (s, s, 1) 
-    x: float = jax.lax.broadcast_in_dim(grid, shape, (0,))
-    y: float = jax.lax.broadcast_in_dim(grid, shape, (1,))
+    x: float = jax.lax.broadcast_in_dim(grid, shape, (1,))
+    y: float = jax.lax.broadcast_in_dim(grid, shape, (0,))
     return jax.lax.concatenate([x, y], 2)
 
 
-jax.make_jaxpr(_mesh)(np.arange(5))
-
-_coords(100, 1.)
-
-_cart_to_polar(ccoords).shape
+ccoords: float = _coords(100, np.array([1.], dtype=float))
+pcoords: float = _cart_to_polar(ccoords)
 
 n: int = 6
 
 alpha: float = np.pi / n
-pcoords: float = cart_to_polar(ccoords)
-rho: float = jax.lax.index_in_dim(pcoords, 0)
-phi: float = jax.lax.index_in_dim(pcoords, 1)
-x: float = jax.lax.index_in_dim(ccoords, 0)
-y: float = jax.lax.index_in_dim(ccoords, 1)
+rho: float = jax.lax.index_in_dim(pcoords, 0, axis=2)
+phi: float = jax.lax.index_in_dim(pcoords, 1, axis=2)
+x: float = jax.lax.index_in_dim(ccoords, 0, axis=2)
+y: float = jax.lax.index_in_dim(ccoords, 1, axis=2)
 wedge: float = jax.lax.floor((phi + np.pi) / (2. * alpha))
 
 ms: float = jax.lax.expand_dims(jax.lax.tan(jax.lax.iota(float, n) * alpha), (1, 2))
