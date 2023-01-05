@@ -95,6 +95,21 @@ def soft_annular_aperture(
     return (ann_ap + bounds) / 2.
 
 
+@jax.value_and_grad
+@jax.jit
+def annular_power(rmax: float) -> float:
+    ccoords: float = coords(100, np.array([1.], dtype=float))
+    annulus: float = soft_annular_aperture(np.array([[.5]], dtype=float), rmax, ccoords)
+    return annulus.sum()
+
+
+annulus: float = soft_annular_aperture(np.array([[.5]], dtype=float), np.array([[.5]], dtype=float), ccoords)
+
+plt.imshow(annulus)
+
+annular_power(np.array([[.5]], dtype=float))
+
+
 @ft.partial(jax.jit, inline=True)
 def soft_circular_aperture(r: float, ccoords: float, nsoft: float = 1.) -> float:
     rho: float = hypotenuse(ccoords)
