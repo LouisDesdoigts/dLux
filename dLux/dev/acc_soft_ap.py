@@ -161,7 +161,7 @@ def _mesh(grid: float) -> float:
 ccoords: float = _coords(100, np.array([1.], dtype=float))
 pcoords: float = _cart_to_polar(ccoords)
 
-n: int = 6
+n: int = 8
 rmax: float = .8
 
 alpha: float = np.pi / n
@@ -169,13 +169,20 @@ rho: float = jax.lax.index_in_dim(pcoords, 0, axis=2)
 phi: float = jax.lax.index_in_dim(pcoords, 1, axis=2)
 x: float = jax.lax.index_in_dim(ccoords, 0, axis=2)
 y: float = jax.lax.index_in_dim(ccoords, 1, axis=2)
-wedge: float = jax.lax.floor((phi + np.pi) / (2. * alpha))
 spikes: float = jax.lax.iota(float, n) * 2. * alpha
 ms: float = -1. / jax.lax.tan(spikes)
-sgn: float = np.where(jax.lax.gt(spikes, np.pi), -1., 1.)
+sgn: float = np.where(jax.lax.ge(spikes, np.pi), 1., -1.)
 dists: float = sgn * (ms * x - y) / jax.lax.sqrt(1 + ms ** 2)
 dists: float = np.where(lax.eq(np.abs(ms), np.inf), x, dists)
-pol: float = jax.lax.lt(dists, rmax).prod(axis = -1) 
+edges: float = jax.lax.lt(dists, rmax)
+pol: float = edges.prod(axis = -1) 
+
+fig = plt.figure()
+axes = fig.subplots(1, n)
+for i in range(n):
+    c: object = axes[i].imshow(edges[:, :, i])
+    _: object = fig.colorbar(c, ax=axes[i])
+plt.show()    
 
 plt.imshow(pol)
 
