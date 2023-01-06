@@ -244,17 +244,37 @@ def transform_coords(
     return coordinates
 
 
+def soften(distances: float) -> float:
+    steepness = 3. / softening * distances.shape[-1]
+    return (np.tanh(steepness * distances) + 1.) / 2.
+
+
+def soft_edged(coordinates: float) -> float:
+    rho = np.hypot(coordinates[0], coordinates[1])
+    return soften(rho - rmin) * soften(- rho + rmax)
+
+
+def hard_edged(coordinates:float) -> float:
+    rho = np.hypot(coordinates[0], coordinates[1])
+    return ((rho > self.rmin) * (rho < self.rmax)).astype(float)
+
+
+def annular_aperture(coordinates: Array) -> Array:
+    coordinates = transform_coords(coordinates) 
+
+    aperture = lax.cond(
+        (self.softening != 0.).any(),
+        lambda coords: soft_edged(coords),
+        lambda coords: hard_edged(coords).astype(float),
+        coordinates)
+
+    if self.occulting:
+        aperture = (1. - aperture)
+
+    return aperture
+
+
 centre_: float = np.zeros((2,), dtype=float)
 strain_: float = np.zeros((2,), dtype=float)
 rotation_: float = np.zeros((), dtype=float)
 compression_: float = np.ones((2,), dtype=float)
-
-test: object = jax.jit(transform_coords).lower(ccoords, centre_, compression_, strain_, rotation_)
-
-dir(test)
-
-print(test.compile().as_text())
-
-jax.make_jaxpr(transform_coords)(ccoords, centre_, compression_, strain_, rotation_)
-
-
