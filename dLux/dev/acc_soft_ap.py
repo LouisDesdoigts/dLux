@@ -281,26 +281,66 @@ def soften_v2(distances: float, nsoft: float, pixel_scale: float) -> float:
     return edge
 
 
-plt.imshow(soften_v0(ccoords[0], nsoft, pixel_scale))
-plt.colorbar()
+@ft.partial(jax.jit, inline=True)
+def circular_aperture_v0(ccoords: float, r: float, pixel_scale: float) -> float:
+    rho: float = hypotenuse(ccoords)
+    return soften_v0(r - rho, 3., pixel_scale)
 
-plt.imshow(soften_v1(ccoords[0], nsoft, pixel_scale))
-plt.colorbar()
 
-plt.imshow(soften_v2(ccoords[0], nsoft, pixel_scale))
-plt.colorbar()
+@ft.partial(jax.jit, inline=True)
+def circular_aperture_v1(ccoords: float, r: float, pixel_scale: float) -> float:
+    rho: float = hypotenuse(ccoords)
+    return soften_v1(r - rho, 3., pixel_scale)
+
+
+@ft.partial(jax.jit, inline=True)
+def circular_aperture_v2(ccoords: float, r: float, pixel_scale: float) -> float:
+    rho: float = hypotenuse(ccoords)
+    return soften_v2(r - rho, 3., pixel_scale)
+
 
 nsoft: float = 3.
 pixel_scale: float = 2. / 1024.
 
-# %%timeit
-_: float = soften_v0(ccoords[0], nsoft, pixel_scale)
+plt.imshow(circular_aperture_v0(ccoords, 1., pixel_scale)[0])
+plt.colorbar()
+
+plt.imshow(circular_aperture_v1(ccoords, 1., pixel_scale)[0])
+plt.colorbar()
+
+plt.imshow(circular_aperture_v2(ccoords, 1., pixel_scale)[0])
+plt.colorbar()
 
 # %%timeit
-_: float = soften_v1(ccoords[0], nsoft, pixel_scale)
+_: float = circular_aperture_v0(ccoords, 1., pixel_scale)
 
 # %%timeit
-_: float = soften_v2(ccoords[0], nsoft, pixel_scale)
+_: float = circular_aperture_v1(ccoords, 1., pixel_scale)
+
+# %%timeit
+_: float = circular_aperture_v2(ccoords, 1., pixel_scale)
+
+
+@jax.value_and_grad
+def power_v0(radius: float) -> float:
+    return circular_aperture_v0(ccoords, radius, pixel_scale).sum()
+
+
+@jax.value_and_grad
+def power_v1(radius: float) -> float:
+    return circular_aperture_v1(ccoords, radius, pixel_scale).sum()
+
+
+@jax.value_and_grad
+def power_v2(radius: float) -> float:
+    return circular_aperture_v2(ccoords, radius, pixel_scale).sum()
+
+
+power_v0(1.)
+
+power_v1(1.)
+
+power_v2(1.)
 
 
 # The idea is to use clip and then make sure that we divide nsoft by the pixel scale to rescale it correctly. Great I can just get the pixel scale out of the wavefront. 
@@ -455,5 +495,3 @@ comp_simp_annular_aperture: callable = jax.jit(simp_annular_aperture)
 
 # %%timeit
 comp_simp_annular_aperture(ccoords)
-
-
