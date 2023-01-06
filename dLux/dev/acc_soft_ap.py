@@ -244,37 +244,80 @@ def transform_coords(
     return coordinates
 
 
-def soften(distances: float) -> float:
+def soften(distances: float, softening: float) -> float:
     steepness = 3. / softening * distances.shape[-1]
     return (np.tanh(steepness * distances) + 1.) / 2.
 
 
-def soft_edged(coordinates: float) -> float:
+def soft_edged(coordinates: float, rmin: float, rmax: float, softening: float) -> float:
     rho = np.hypot(coordinates[0], coordinates[1])
-    return soften(rho - rmin) * soften(- rho + rmax)
+    return soften(rho - rmin, softening) * soften(- rho + rmax, softening)
 
 
-def hard_edged(coordinates:float) -> float:
+def hard_edged(coordinates:float, rmin: float, rmax: float) -> float:
     rho = np.hypot(coordinates[0], coordinates[1])
-    return ((rho > self.rmin) * (rho < self.rmax)).astype(float)
+    return ((rho > rmin) * (rho < rmax)).astype(float)
 
 
-def annular_aperture(coordinates: Array) -> Array:
-    coordinates = transform_coords(coordinates) 
+def annular_aperture(
+        coordinates: float, 
+        centre: float, 
+        compression: float, 
+        strains: float,
+        rotation: float,
+        softening: float,
+        occulting: bool, 
+        rmin: float,
+        rmax: float) -> float:
+    coordinates = transform_coords(coordinates, centre, compression, strains, rotation) 
 
-    aperture = lax.cond(
-        (self.softening != 0.).any(),
-        lambda coords: soft_edged(coords),
-        lambda coords: hard_edged(coords).astype(float),
-        coordinates)
+    aperture = jax.lax.cond(
+        (softening != 0.).any(),
+        lambda coords: soft_edged(coords, rmin, rmax, softening),
+        lambda coords: hard_edged(coords, rmin, rmax),
+        coordinates
+    )
 
-    if self.occulting:
-        aperture = (1. - aperture)
+    jax.lax.cond(
+        occulting,
+        lambda ap: (1. - ap),
+        lambda ap: ap,
+        aperture
+    )
 
     return aperture
 
+
+jax.make_jaxpr(annular_aperture)(
+    ccoords, 
+    centre_, 
+    compression_, 
+    strain_, 
+    rotation_, 
+    softening_, 
+    occulting_,
+    rmin,
+    rmax
+)
+
+comp_annular_aperture: callable = jax.jit(annular_aperture)
+
+# %%timeit
+comp_annular_aperture(
+    ccoords, 
+    centre_, 
+    compression_, 
+    strain_, 
+    rotation_, 
+    softening_, 
+    occulting_,
+    rmin,
+    rmax
+)
 
 centre_: float = np.zeros((2,), dtype=float)
 strain_: float = np.zeros((2,), dtype=float)
 rotation_: float = np.zeros((), dtype=float)
 compression_: float = np.ones((2,), dtype=float)
+softening_: float = np.ones((), dtype=float)
+occulting_: bool = False
