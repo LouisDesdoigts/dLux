@@ -265,18 +265,32 @@ def soften_v0(distances: float, softening: float) -> float:
     return (np.tanh(steepness * distances) + 1.) / 2.
 
 
-@jax.jit
-def soften_v0(distances: float, softening: float) -> float:
-    steepness = 3. / softening * distances.shape[-1]
-    return (np.tanh(steepness * distances) + 1.) / 2.
+@ft.partial(jax.jit, inline=True)
+def soften_v1(distances: float, nsoft: float, pixel_scale: float) -> float:
+    lower: float = jax.lax.full_like(distances, 0., dtype=float)
+    upper: float = jax.lax.full_like(distances, 1., dtype=float)
+    inside: float = jax.lax.max(distances, lower)
+    scaled: float = inside / nsoft / pixel_scale
+    aperture: float = jax.lax.min(scaled, upper)
+    return aperture
 
+
+jax.make_jaxpr(soften_v2)(ccoords[0], nsoft, pixel_scale)
+
+nsoft: float = 1.
+pixel_scale: float = 2. / 1024.
 
 # %%timeit
-soften_v0(ccoords, 5.)
+_: float = soften_v1(ccoords[0], nsoft, pixel_scale)
+
+# %%timeit
+_: float = soften_v0(ccoords, 5.)
 
 plt.imshow(np.clip(ccoords[0], -.5, .5))
 
 jax.make_jaxpr(np.clip)(ccoords[0], np.array(-.5, dtype=float), np.array(.5, dtype=float))
+
+# The idea is to use clip and then make sure that we divide nsoft by the pixel scale to rescale it correctly. Great I can just get the pixel scale out of the wavefront. 
 
 # %%timeit
 
