@@ -37,7 +37,7 @@ def coords(n: int, rad: float) -> float:
 # +
 def hypotenuse(ccoords: float) -> float:
     x: float = jax.lax.index_in_dim(ccoords, 0)
-    y: float = jax.lax.index_in_dim(ccoords, 0)
+    y: float = jax.lax.index_in_dim(ccoords, 1)
     return _hypotenuse(x, y)
 
 def _hypotenuse(x: float, y: float) -> float:
@@ -104,25 +104,21 @@ def annular_power(rmax: float) -> float:
     return annulus.sum()
 
 
+r: float = jax.lax.squeeze(hypotenuse(ccoords), (0,))
+
+circ: float = jax.lax.lt(r, 1.).astype(float)
+perim: float = (jax.lax.lt(r, 1.025) & ~jax.lax.lt(r, 1.)).astype(float)
+
+fig: object = plt.figure()
+axes: object = fig.subplots(1, 2)
+_: object = axes[0].imshow(circ)
+_: object = axes[1].imshow(perim)
+
 comp_dl_annular_aperture: callable = jax.jit(dl.AnnularAperture(1., .5)._aperture, inline=True)
 
 dl_annular_aperture: callable = dl.AnnularAperture(1., .5)._aperture
 
 comp_soft_annular_aperture: callable = jax.jit(soft_annular_aperture, inline=True)
-
-jax.make_jaxpr(dl_annular_aperture)(ccoords)
-
-jax.make_jaxpr(soft_annular_aperture)(rmin, rmax, ccoords)
-
-# %%timeit
-comp_soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
-
-# %%timeit
-comp_dl_annular_aperture(ccoords).block_until_ready()
-
-plt.imshow(dl_annular_aperture(ccoords))
-
-plt.imshow(soft_annular_aperture(rmin, rmax, ccoords))
 
 
 @ft.partial(jax.jit, inline=True)
