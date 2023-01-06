@@ -223,25 +223,38 @@ def transform_coords(
         compression: float, 
         strains: float,
         rotation: float) -> float:
+    
     is_trans = (centre != np.zeros((2,), float)).any()
-    coordinates = jax.lax.cond(is_trans,
-        lambda: translate(coordinates, centre),
-        lambda: coordinates)
+    coordinates = jax.lax.cond(
+        is_trans,
+        lambda coords: translate(coords, centre),
+        lambda coords: coords, 
+        coordinates
+    )
 
     is_compr = (compression != np.ones((2,), float)).any()
-    coordinates = jax.lax.cond(is_compr,
-        lambda: compress(coordinates, compression),
-        lambda: coordinates)
+    coordinates = jax.lax.cond(
+        is_compr,
+        lambda coords: compress(coords, compression),
+        lambda coords: coords,
+        coordinates
+    )
 
     is_strain = (strains != np.zeros((2,), float)).any()
-    coordinates = jax.lax.cond(is_strain,
-        lambda: strain(coordinates, strains),
-        lambda: coordinates)
+    coordinates = jax.lax.cond(
+        is_strain,
+        lambda coords: strain(coords, strains),
+        lambda coords: coords,
+        coordinates
+    )
 
     is_rot = (rotation != 0.)
-    coordinates = jax.lax.cond(is_rot,
-        lambda: rotate(coordinates, rotation),
-        lambda: coordinates)
+    coordinates = jax.lax.cond(
+        is_rot,
+        lambda coords: rotate(coords, rotation),
+        lambda coords: coords,
+        coordinates
+    )
 
     return coordinates
 
@@ -261,7 +274,7 @@ def hard_edged(coordinates:float, rmin: float, rmax: float) -> float:
     return ((rho > rmin) * (rho < rmax)).astype(float)
 
 
-def annular_aperture(
+def annular_aperture_v0(
         coordinates: float, 
         centre: float, 
         compression: float, 
@@ -273,6 +286,66 @@ def annular_aperture(
         rmax: float) -> float:
     coordinates = transform_coords(coordinates, centre, compression, strains, rotation) 
 
+    aperture = jax.lax.cond(
+        (softening != 0.).any(),
+        lambda coords: soft_edged(coords, rmin, rmax, softening),
+        lambda coords: hard_edged(coords, rmin, rmax),
+        coordinates
+    )
+
+    jax.lax.cond(
+        occulting,
+        lambda ap: (1. - ap),
+        lambda ap: ap,
+        aperture
+    )
+
+    return aperture
+
+
+def annular_aperture_v1(
+        coordinates: float, 
+        centre: float, 
+        compression: float, 
+        strains: float,
+        rotation: float,
+        softening: float,
+        occulting: bool, 
+        rmin: float,
+        rmax: float) -> float:
+    
+    is_trans = (centre != np.zeros((2,), float)).any()
+    coordinates = jax.lax.cond(
+        is_trans,
+        lambda coords: translate(coords, centre),
+        lambda coords: coords, 
+        coordinates
+    )
+
+    is_compr = (compression != np.ones((2,), float)).any()
+    coordinates = jax.lax.cond(
+        is_compr,
+        lambda coords: compress(coords, compression),
+        lambda coords: coords,
+        coordinates
+    )
+
+    is_strain = (strains != np.zeros((2,), float)).any()
+    coordinates = jax.lax.cond(
+        is_strain,
+        lambda coords: strain(coords, strains),
+        lambda coords: coords,
+        coordinates
+    )
+
+    is_rot = (rotation != 0.)
+    coordinates = jax.lax.cond(
+        is_rot,
+        lambda coords: rotate(coords, rotation),
+        lambda coords: coords,
+        coordinates
+    )
+    
     aperture = jax.lax.cond(
         (softening != 0.).any(),
         lambda coords: soft_edged(coords, rmin, rmax, softening),
@@ -310,7 +383,7 @@ def simp_annular_aperture(coordinates: float) -> float:
     return aperture
 
 
-comp_annular_aperture: callable = jax.jit(annular_aperture)
+comp_annular_aperture: callable = jax.jit(annular_aperture_v0)
 
 # %%timeit
 comp_annular_aperture(
