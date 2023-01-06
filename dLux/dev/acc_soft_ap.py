@@ -271,7 +271,7 @@ def soften_v1(distances: float, nsoft: float, pixel_scale: float) -> float:
     upper: float = jax.lax.full_like(distances, 1., dtype=float)
     inside: float = jax.lax.max(distances, lower)
     scaled: float = inside / nsoft / pixel_scale
-    aperture: float = jax.lax.min(scaled, upper)
+    aperture: float = np.nanmin(scaled, upper)
     return aperture
 
 
@@ -282,33 +282,33 @@ def soften_v2(distances: float, nsoft: float, pixel_scale: float) -> float:
 
 
 @ft.partial(jax.jit, inline=True)
-def circular_aperture_v0(ccoords: float, r: float, pixel_scale: float) -> float:
+def circular_aperture_v0(ccoords: float, r: float, pixel_scale: float, nsoft: float) -> float:
     rho: float = hypotenuse(ccoords)
-    return soften_v0(r - rho, 3., pixel_scale)
+    return soften_v0(r - rho, nsoft, pixel_scale)
 
 
 @ft.partial(jax.jit, inline=True)
-def circular_aperture_v1(ccoords: float, r: float, pixel_scale: float) -> float:
+def circular_aperture_v1(ccoords: float, r: float, pixel_scale: float, nsoft: float) -> float:
     rho: float = hypotenuse(ccoords)
-    return soften_v1(r - rho, 3., pixel_scale)
+    return soften_v1(r - rho, nsoft, pixel_scale)
 
 
 @ft.partial(jax.jit, inline=True)
-def circular_aperture_v2(ccoords: float, r: float, pixel_scale: float) -> float:
+def circular_aperture_v2(ccoords: float, r: float, pixel_scale: float, nsoft: float) -> float:
     rho: float = hypotenuse(ccoords)
-    return soften_v2(r - rho, 3., pixel_scale)
+    return soften_v2(r - rho, nsoft, pixel_scale)
 
 
 nsoft: float = 3.
 pixel_scale: float = 2. / 1024.
 
-plt.imshow(circular_aperture_v0(ccoords, 1., pixel_scale)[0])
+plt.imshow(circular_aperture_v0(ccoords, 1., pixel_scale, 0.)[0])
 plt.colorbar()
 
-plt.imshow(circular_aperture_v1(ccoords, 1., pixel_scale)[0])
+plt.imshow(circular_aperture_v1(ccoords, 1., pixel_scale, 0.)[0])
 plt.colorbar()
 
-plt.imshow(circular_aperture_v2(ccoords, 1., pixel_scale)[0])
+plt.imshow(circular_aperture_v2(ccoords, 1., pixel_scale, 0.)[0])
 plt.colorbar()
 
 # %%timeit
@@ -323,17 +323,17 @@ _: float = circular_aperture_v2(ccoords, 1., pixel_scale)
 
 @jax.value_and_grad
 def power_v0(radius: float) -> float:
-    return circular_aperture_v0(ccoords, radius, pixel_scale).sum()
+    return circular_aperture_v0(ccoords, radius, pixel_scale, 0.).sum()
 
 
 @jax.value_and_grad
 def power_v1(radius: float) -> float:
-    return circular_aperture_v1(ccoords, radius, pixel_scale).sum()
+    return circular_aperture_v1(ccoords, radius, pixel_scale, 0.).sum()
 
 
 @jax.value_and_grad
 def power_v2(radius: float) -> float:
-    return circular_aperture_v2(ccoords, radius, pixel_scale).sum()
+    return circular_aperture_v2(ccoords, radius, pixel_scale, 0.).sum()
 
 
 power_v0(1.)
