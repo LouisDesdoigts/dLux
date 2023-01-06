@@ -260,8 +260,8 @@ def transform_coords(
 
 
 @jax.jit
-def soften_v0(distances: float, softening: float) -> float:
-    steepness = 3. / softening * distances.shape[-1]
+def soften_v0(distances: float, nsoft: float, pixel_scale: float) -> float:
+    steepness = 3. / nsoft / pixel_scale
     return (np.tanh(steepness * distances) + 1.) / 2.
 
 
@@ -281,7 +281,11 @@ def soften_v2(distances: float, nsoft: float, pixel_scale: float) -> float:
     return edge
 
 
-jax.make_jaxpr(soften_v2)(ccoords[0], nsoft, pixel_scale)
+plt.imshow(soften_v0(ccoords[0], nsoft, pixel_scale))
+plt.colorbar()
+
+plt.imshow(soften_v1(ccoords[0], nsoft, pixel_scale))
+plt.colorbar()
 
 plt.imshow(soften_v2(ccoords[0], nsoft, pixel_scale))
 plt.colorbar()
@@ -290,10 +294,10 @@ nsoft: float = 3.
 pixel_scale: float = 2. / 1024.
 
 # %%timeit
-_: float = soften_v1(ccoords[0], nsoft, pixel_scale)
+_: float = soften_v0(ccoords[0], nsoft, pixel_scale)
 
 # %%timeit
-_: float = soften_v0(ccoords[0], 5.)
+_: float = soften_v1(ccoords[0], nsoft, pixel_scale)
 
 # %%timeit
 _: float = soften_v2(ccoords[0], nsoft, pixel_scale)
