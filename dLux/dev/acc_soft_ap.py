@@ -195,3 +195,66 @@ prmax: float = np.array(.8, dtype=float)
 ccoords: float = coords(1024, np.array([1.], dtype=float))
 
 
+def rotate(coordinates: float, rotation: float) -> float:
+    x, y = coordinates[0], coordinates[1]
+    new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
+    new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
+    return np.array([new_x, new_y])
+
+
+def translate(coordinates: float, centre: float) -> float:
+    return coordinates - centre[:, None, None]
+
+
+def strain(coordinates: float, strain: float) -> float:
+    trans_coordinates: float = np.transpose(coordinates, (0, 2, 1))
+    return coordinates + trans_coordinates * strain[:, None, None]
+
+
+def compress(coordinates: float, compression: float) -> float:
+    return coordinates * compression[:, None, None]
+
+
+def transform_coords(
+        coordinates: float, 
+        centre: float, 
+        compression: float, 
+        strains: float,
+        rotation: float) -> float:
+    is_trans = (centre != np.zeros((2,), float)).any()
+    coordinates = jax.lax.cond(is_trans,
+        lambda: translate(coordinates, centre),
+        lambda: coordinates)
+
+    is_compr = (compression != np.ones((2,), float)).any()
+    coordinates = jax.lax.cond(is_compr,
+        lambda: compress(coordinates, compression),
+        lambda: coordinates)
+
+    is_strain = (strains != np.zeros((2,), float)).any()
+    coordinates = jax.lax.cond(is_strain,
+        lambda: strain(coordinates, strains),
+        lambda: coordinates)
+
+    is_rot = (rotation != 0.)
+    coordinates = jax.lax.cond(is_rot,
+        lambda: rotate(coordinates, rotation),
+        lambda: coordinates)
+
+    return coordinates
+
+
+centre_: float = np.zeros((2,), dtype=float)
+strain_: float = np.zeros((2,), dtype=float)
+rotation_: float = np.zeros((), dtype=float)
+compression_: float = np.ones((2,), dtype=float)
+
+test: object = jax.jit(transform_coords).lower(ccoords, centre_, compression_, strain_, rotation_)
+
+dir(test)
+
+print(test.compile().as_text())
+
+jax.make_jaxpr(transform_coords)(ccoords, centre_, compression_, strain_, rotation_)
+
+
