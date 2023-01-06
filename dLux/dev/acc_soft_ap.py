@@ -194,30 +194,4 @@ n: int = 6
 prmax: float = np.array(.8, dtype=float)
 ccoords: float = coords(1024, np.array([1.], dtype=float))
 
-plt.imshow(soft_annular_aperture(rmin, rmax, ccoords))
 
-plt.imshow(soft_circular_aperture(rmax, ccoords))
-
-plt.imshow(soft_square_aperture(width, ccoords)[0])
-
-plt.imshow(soft_rectangular_aperture(width, height, ccoords))
-
-plt.imshow(soft_regular_polygonal_aperture(n, prmax, ccoords))
-
-# %%timeit
-soft_circular_aperture(rmax, ccoords).block_until_ready()
-
-# %%timeit
-soft_annular_aperture(rmin, rmax, ccoords).block_until_ready()
-
-# %%timeit
-soft_square_aperture(width, ccoords).block_until_ready()
-
-# %%timeit
-soft_regular_polygonal_aperture(n, prmax, ccoords).block_until_ready()
-
-# %%timeit
-_soft_square_aperture(width, ccoords)
-
-# %%timeit
-soft_square_aperture(width, ccoords)
