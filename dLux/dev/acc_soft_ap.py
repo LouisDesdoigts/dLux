@@ -259,9 +259,29 @@ def transform_coords(
     return coordinates
 
 
-def soften(distances: float, softening: float) -> float:
+@jax.jit
+def soften_v0(distances: float, softening: float) -> float:
     steepness = 3. / softening * distances.shape[-1]
     return (np.tanh(steepness * distances) + 1.) / 2.
+
+
+@jax.jit
+def soften_v0(distances: float, softening: float) -> float:
+    steepness = 3. / softening * distances.shape[-1]
+    return (np.tanh(steepness * distances) + 1.) / 2.
+
+
+# %%timeit
+soften_v0(ccoords, 5.)
+
+plt.imshow(np.clip(ccoords[0], -.5, .5))
+
+jax.make_jaxpr(np.clip)(ccoords[0], np.array(-.5, dtype=float), np.array(.5, dtype=float))
+
+# %%timeit
+
+
+plt.imshow(soften_v0(ccoords[0], 5.))
 
 
 def soft_edged(coordinates: float, rmin: float, rmax: float, softening: float) -> float:
