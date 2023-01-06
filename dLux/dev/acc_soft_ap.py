@@ -195,6 +195,8 @@ prmax: float = np.array(.8, dtype=float)
 ccoords: float = coords(1024, np.array([1.], dtype=float))
 
 
+# This is a barrier.
+
 def rotate(coordinates: float, rotation: float) -> float:
     x, y = coordinates[0], coordinates[1]
     new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
@@ -288,17 +290,25 @@ def annular_aperture(
     return aperture
 
 
-jax.make_jaxpr(annular_aperture)(
-    ccoords, 
-    centre_, 
-    compression_, 
-    strain_, 
-    rotation_, 
-    softening_, 
-    occulting_,
-    rmin,
-    rmax
-)
+def simp_annular_aperture(coordinates: float) -> float:
+    coordinates = transform_coords(coordinates, centre_, compression_, strain_, rotation_) 
+
+    aperture = jax.lax.cond(
+        (softening_ != 0.).any(),
+        lambda coords: soft_edged(coords, rmin, rmax, softening_),
+        lambda coords: hard_edged(coords, rmin, rmax),
+        coordinates
+    )
+
+    jax.lax.cond(
+        occulting_,
+        lambda ap: (1. - ap),
+        lambda ap: ap,
+        aperture
+    )
+
+    return aperture
+
 
 comp_annular_aperture: callable = jax.jit(annular_aperture)
 
@@ -326,5 +336,10 @@ dl_comp_annular_aperture: callable = jax.jit(dl.AnnularAperture(1., .5)._apertur
 
 # %%timeit
 dl_comp_annular_aperture(ccoords)
+
+comp_simp_annular_aperture: callable = jax.jit(simp_annular_aperture)
+
+# %%timeit
+comp_simp_annular_aperture(ccoords)
 
 
