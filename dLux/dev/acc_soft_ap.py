@@ -275,28 +275,31 @@ def soften_v1(distances: float, nsoft: float, pixel_scale: float) -> float:
     return aperture
 
 
+@ft.partial(jax.jit, inline=True)
+def soften_v2(distances: float, nsoft: float, pixel_scale: float) -> float:
+    edge: float = 1. / (1. + jax.lax.exp(- distances / pixel_scale * 4. / nsoft))
+    return edge
+
+
 jax.make_jaxpr(soften_v2)(ccoords[0], nsoft, pixel_scale)
 
-nsoft: float = 1.
+plt.imshow(soften_v2(ccoords[0], nsoft, pixel_scale))
+plt.colorbar()
+
+nsoft: float = 3.
 pixel_scale: float = 2. / 1024.
 
 # %%timeit
 _: float = soften_v1(ccoords[0], nsoft, pixel_scale)
 
 # %%timeit
-_: float = soften_v0(ccoords, 5.)
-
-plt.imshow(np.clip(ccoords[0], -.5, .5))
-
-jax.make_jaxpr(np.clip)(ccoords[0], np.array(-.5, dtype=float), np.array(.5, dtype=float))
-
-# The idea is to use clip and then make sure that we divide nsoft by the pixel scale to rescale it correctly. Great I can just get the pixel scale out of the wavefront. 
+_: float = soften_v0(ccoords[0], 5.)
 
 # %%timeit
+_: float = soften_v2(ccoords[0], nsoft, pixel_scale)
 
 
-plt.imshow(soften_v0(ccoords[0], 5.))
-
+# The idea is to use clip and then make sure that we divide nsoft by the pixel scale to rescale it correctly. Great I can just get the pixel scale out of the wavefront. 
 
 def soft_edged(coordinates: float, rmin: float, rmax: float, softening: float) -> float:
     rho = np.hypot(coordinates[0], coordinates[1])
