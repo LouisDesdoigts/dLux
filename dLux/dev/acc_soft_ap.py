@@ -321,3 +321,10 @@ rotation_: float = np.zeros((), dtype=float)
 compression_: float = np.ones((2,), dtype=float)
 softening_: float = np.ones((), dtype=float)
 occulting_: bool = False
+
+dl_comp_annular_aperture: callable = jax.jit(dl.AnnularAperture(1., .5)._aperture)
+
+# %%timeit
+dl_comp_annular_aperture(ccoords)
+
+
