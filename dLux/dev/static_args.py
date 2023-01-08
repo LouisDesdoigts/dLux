@@ -52,20 +52,41 @@ def cartesian_to_polar(coords: float) -> float:
 ccoords: float = coords(1024, 1.)
 
 
-class CircularAperture(eqx.Module):
-    def linear_soften(self: object, distances: float, nsoft: float, pixel_scale: float) -> float:
+class Wavefront(eqx.Module):
+    wavelength: float
+    radius: float
+    npix: float
+    pixel_scale:float
+        
+    def __init__(self: object, wavelength: float, radius: float, npix: int) -> object:
+        self.wavelength = np.asarray(wavelength).astype(float)
+        self.radius = np.asarray(radius).astype(float)
+        self.npix = int(npix)
+        self.pixel_scale = np.asarray(2. * radius / npix).astype(float)
+        
+    def __call__(self: object) -> float:
+        return coords(self.npix, self.radius)
+
+
+class Aperture(eqx.Module):
+    nsoft: int
+    radius: float
+        
+    def __init__(self: object, nsoft: int, radius: float) -> object:
+        self.nsoft = int(nsoft)
+        self.radius = np.asarray(radius).astype(float)
+        
+    def __call__(self: object, ccoords: float, pixel_scale: float) -> float:
+        rho: float = hypotenuse(ccoords)
+        distances: float = r - rho
         lower: float = jax.lax.full_like(distances, 0., dtype=float)
-        upper: float = jax.lax.full_like(distances, 1., dtype=float)
+        upper: float = jax.lax.full_like(distances, self.radius, dtype=float)
         inside: float = jax.lax.max(distances, lower)
-        scaled: float = inside / nsoft / pixel_scale
+        scaled: float = inside / self.nsoft / pixel_scale
         aperture: float = np.nanmin(scaled, upper)
         return aperture
 
 
-def soften_v1() -> float:
+Aperture(3, 1.)
 
 
-
-def circular_aperture_v0(ccoords: float, r: float, pixel_scale: float, nsoft: float) -> float:
-    rho: float = hypotenuse(ccoords)
-    return soften_v0(r - rho, nsoft, pixel_scale)
