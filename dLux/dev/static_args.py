@@ -1,20 +1,21 @@
 import equinox as eqx
 import jax
 import jax.numpy as np
+import functools as ft
 
 DLUX_ARCHITECTURE = "CPU"
 
 
 def hypotenuse_cpu(ccoords: float) -> float:
-    x: float = jax.lax.index_in_dim(ccoords, 0)
-    y: float = jax.lax.index_in_dim(ccoords, 1)
+    x: float = jax.lax.index_in_dim(ccoords, 0, keepdims=False)
+    y: float = jax.lax.index_in_dim(ccoords, 1, keepdims=False)
     x_sq: float = jax.lax.integer_pow(x, 2)
     y_sq: float = jax.lax.integer_pow(y, 2)
     return jax.lax.sqrt(x_sq + y_sq)
 
 
 def hypotenuse_gpu(ccoords: float) -> float:
-    return jax.lax.sqrt(jax.lax.integer_pow(ccoords).sum(axis = 0))
+    return jax.lax.sqrt(jax.lax.integer_pow(ccoords, 2).sum(axis = 0))
 
 
 # +
@@ -25,14 +26,13 @@ if DLUX_ARCHITECTURE == "CPU":
 elif DLUX_ARCHITECTURE == "GPU":
     hypotenuse: callable = hypotenuse_gpu
 
-# +
-
-hypotenuse_cpu
-
 
 # -
 
-def mesh(grid: float) -> float:
+def coords(n: int, rad: float) -> float:
+    arange: float = jax.lax.iota(float, n)
+    max_: float = np.array(n - 1, dtype=float)
+    grid: float = arange * 2. * rad / max_ - rad
     s: int = grid.size
     shape: tuple = (1, s, s) 
     x: float = jax.lax.broadcast_in_dim(grid, shape, (2,))
@@ -40,27 +40,30 @@ def mesh(grid: float) -> float:
     return jax.lax.concatenate([x, y], 0)
 
 
-def coords(n: int, rad: float) -> float:
-    arange: float = jax.lax.iota(float, n)
-    max_: float = np.array(n - 1, dtype=float)
-    axes: float = arange * 2. * rad / max_ - rad
-    return mesh(axes)
-
-
-
-def cart_to_polar(coords: float) -> float:
+def cartesian_to_polar(coords: float) -> float:
     x: float = jax.lax.index_in_dim(coords, 0)
     y: float = jax.lax.index_in_dim(coords, 1)
-    return jax.lax.concatenate([_hypotenuse(x, y), jax.lax.atan2(x, y)], 0)
+    x_sq: float = jax.lax.integer_pow(x, 2)
+    y_sq: float = jax.lax.integer_pow(y, 2)
+    hypot: float = jax.lax.sqrt(x_sq + y_sq)
+    return jax.lax.concatenate([hypot, jax.lax.atan2(x, y)], 0)
 
 
-def soften_v1(distances: float, nsoft: float, pixel_scale: float) -> float:
-    lower: float = jax.lax.full_like(distances, 0., dtype=float)
-    upper: float = jax.lax.full_like(distances, 1., dtype=float)
-    inside: float = jax.lax.max(distances, lower)
-    scaled: float = inside / nsoft / pixel_scale
-    aperture: float = np.nanmin(scaled, upper)
-    return aperture
+ccoords: float = coords(1024, 1.)
+
+
+class CircularAperture(eqx.Module):
+    def linear_soften(self: object, distances: float, nsoft: float, pixel_scale: float) -> float:
+        lower: float = jax.lax.full_like(distances, 0., dtype=float)
+        upper: float = jax.lax.full_like(distances, 1., dtype=float)
+        inside: float = jax.lax.max(distances, lower)
+        scaled: float = inside / nsoft / pixel_scale
+        aperture: float = np.nanmin(scaled, upper)
+        return aperture
+
+
+def soften_v1() -> float:
+
 
 
 def circular_aperture_v0(ccoords: float, r: float, pixel_scale: float, nsoft: float) -> float:
