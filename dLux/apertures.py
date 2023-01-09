@@ -2990,7 +2990,8 @@ class StaticAperture(ApertureLayer):
         name: str = 'StaticAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
-        if not isinstance(aperture, DynamicAperture):
+        if not isinstance(aperture, DynamicAperture) or \
+                isinstance(aperture, CompositeAperture):
             raise ValueError(
                 "You did not provide an Aperture." + \
                 "If you meant to use an AberratedAperture" +\
