@@ -102,7 +102,7 @@ class Aperture(eqx.Module):
 
 wavelength: float = 550e-09
 radius: float = 1.
-npix: int = 128
+npix: int = 1024
 nsoft: int = 3
 
 wavefront: object = Wavefront(wavelength, radius, npix)
@@ -173,7 +173,7 @@ rotation: float = 0.
 pixel_scale: float = 2. * radius / npix
 
 jit_circ_ap_func: callable = jax.jit(circ_ap_func)
-static_jit_circ_ap_func: callable = jax.jit(circ_ap_func, inline=True, static_argnums=(2))
+static_jit_circ_ap_func: callable = jax.jit(circ_ap_func, inline=True, static_argnums=(0, 1, 2, 3, 4))
 
 # %%timeit
 jit_circ_ap_func(radius, x, y, rotation, nsoft, pixel_scale).block_until_ready()
