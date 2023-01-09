@@ -3051,6 +3051,7 @@ class StaticAberratedAperture(StaticAperture):
     def __init__(
             self        : ApertureLayer, 
             aperture    : ApertureLayer, 
+            coefficients: Array,
             npixels     : int = None, 
             pixel_scale : float = None,
             coordinates : Array = None,
@@ -3080,6 +3081,7 @@ class StaticAberratedAperture(StaticAperture):
             coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
 
         self.name = name
+        self.coefficients = np.asarray(coefficients).astype(float)
         coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
         self.aperture = aperture._aperture(coordinates)
 
