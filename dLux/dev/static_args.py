@@ -2,6 +2,12 @@ import equinox as eqx
 import jax
 import jax.numpy as np
 import functools as ft
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+# %matplotlib qt
+
+mpl.rcParams["image.cmap"] = "Greys"
 
 DLUX_ARCHITECTURE = "CPU"
 
@@ -40,13 +46,17 @@ def coords(n: int, rad: float) -> float:
     return jax.lax.concatenate([x, y], 0)
 
 
-def cartesian_to_polar(coords: float) -> float:
-    x: float = jax.lax.index_in_dim(coords, 0)
-    y: float = jax.lax.index_in_dim(coords, 1)
+def cartesian_to_polar(ccoords: float) -> float:
+    x: float = jax.lax.index_in_dim(ccoords, 0)
+    y: float = jax.lax.index_in_dim(ccoords, 1)
     x_sq: float = jax.lax.integer_pow(x, 2)
     y_sq: float = jax.lax.integer_pow(y, 2)
     hypot: float = jax.lax.sqrt(x_sq + y_sq)
     return jax.lax.concatenate([hypot, jax.lax.atan2(x, y)], 0)
+
+
+def normalise(arr: float) -> float:
+    return (arr - arr.min()) / (arr.max() - arr.min())
 
 
 ccoords: float = coords(1024, 1.)
@@ -76,17 +86,32 @@ class Aperture(eqx.Module):
         self.nsoft = int(nsoft)
         self.radius = np.asarray(radius).astype(float)
         
-    def __call__(self: object, ccoords: float, pixel_scale: float) -> float:
+    def __call__(self: object, wavefront: object) -> float:
+        ccoords: float = wavefront()
+        pixel_scale: float = wavefront.pixel_scale
         rho: float = hypotenuse(ccoords)
-        distances: float = r - rho
+        distances: float = self.radius - rho
         lower: float = jax.lax.full_like(distances, 0., dtype=float)
-        upper: float = jax.lax.full_like(distances, self.radius, dtype=float)
+        upper: float = jax.lax.full_like(distances, 1., dtype=float)
         inside: float = jax.lax.max(distances, lower)
         scaled: float = inside / self.nsoft / pixel_scale
-        aperture: float = np.nanmin(scaled, upper)
+        aperture: float = jax.lax.min(scaled, upper)
         return aperture
 
 
-Aperture(3, 1.)
+wavelength: float = 550e-09
+radius: float = 1.
+npix: int = 128
+nsoft: int = 3
+
+wavefront: object = Wavefront(wavelength, radius, npix)
+aperture: object = Aperture(nsoft, radius)
+
+aberrations: float = jax.random.normal(jax.random.PRNGKey(0), (npix, npix))
+
+pupil_psf: float = normalise(normalise(aberrations) + aperture(wavefront))
+
+plt.imshow(pupil_psf)
+plt.colorbar()
 
 
