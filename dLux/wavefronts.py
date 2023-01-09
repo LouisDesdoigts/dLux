@@ -214,7 +214,7 @@ class Wavefront(ExtendedBase, ABC):
             The coordinates of the centers of each pixel representing the
             wavefront.
         """
-        return get_pixel_coordinates(self.npix, 2. * self.radius / self.npix)
+        return get_pixel_coordinates(self.npixels, self.pixel_scale)
 
 
     @property
