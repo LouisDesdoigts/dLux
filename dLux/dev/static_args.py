@@ -114,15 +114,19 @@ pupil_data: float = normalise(normalise(aberrations) + aperture(wavefront))
 plt.imshow(pupil_data)
 plt.colorbar()
 
+model_args: object = jax.tree_map(lambda _: False, aperture)
 
-@ft.partial(eqx.filter_jit, inline=True)
-def loss(model: object, wavefront: object) -> float:
+model_args: object = eqx.tree_at(lambda x: x.radius, model_args, True)
+
+
+@ft.partial(eqx.filter_jit, inline=True, args=(True, True, False))
+def loss(data: float, model: object, wavefront: object) -> float:
     psf: float = model(wavefront)
-    return jax.lax.integer_pow(pupil_data - psf, 2).sum()
+    return jax.lax.integer_pow(data - psf, 2).sum()
 
 
 # %%timeit
-loss(aperture, wavefront)
+loss(pupil_data, aperture, wavefront)
 
 eqx.filter_make_jaxpr(loss)(aperture, wavefront)
 
