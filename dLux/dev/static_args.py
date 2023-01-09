@@ -107,6 +107,14 @@ nsoft: int = 3
 wavefront: object = Wavefront(wavelength, radius, npix)
 aperture: object = Aperture(nsoft, radius)
 
+
+class Array(jax.Array):
+    def __hash__(self: object) -> float:
+        return 1
+
+
+Array()
+
 aberrations: float = jax.random.normal(jax.random.PRNGKey(0), (npix, npix))
 
 pupil_data: float = normalise(normalise(aberrations) + aperture(wavefront))
