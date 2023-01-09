@@ -85,7 +85,7 @@ class Aperture(eqx.Module):
     def __init__(self: object, nsoft: int, radius: float) -> object:
         self.nsoft = int(nsoft)
         self.radius = np.asarray(radius).astype(float)
-        
+                
     def __call__(self: object, wavefront: object) -> float:
         ccoords: float = wavefront()
         pixel_scale: float = wavefront.pixel_scale
@@ -116,14 +116,14 @@ plt.colorbar()
 
 
 @ft.partial(eqx.filter_jit, inline=True)
-def loss(data: float, model: object, wavefront: object) -> float:
+def loss(model: object, wavefront: object) -> float:
     psf: float = model(wavefront)
-    return jax.lax.integer_pow(data - psf, 2).sum()
+    return jax.lax.integer_pow(pupil_data - psf, 2).sum()
 
 
 # %%timeit
-loss(pupil_data, aperture, wavefront)
+loss(aperture, wavefront)
 
-eqx.filter_make_jaxpr(loss)(pupil_data, aperture, wavefront)
+eqx.filter_make_jaxpr(loss)(aperture, wavefront)
 
 
