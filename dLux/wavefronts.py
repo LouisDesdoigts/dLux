@@ -60,7 +60,6 @@ class Wavefront(ExtendedBase, ABC):
     plane_type  : PlaneType
     amplitude   : Array
     phase       : Array
-    coordinates : Array
 
 
     def __init__(self        : Wavefront,
@@ -89,7 +88,6 @@ class Wavefront(ExtendedBase, ABC):
         self.pixel_scale = np.asarray(pixel_scale, dtype=float)
         self.amplitude   = np.asarray(amplitude,   dtype=float)
         self.phase       = np.asarray(phase,       dtype=float)
-        self.coordinates = get_pixel_coordinates(self.npixels, pixel_scale)
         self.plane_type  = plane_type
 
         # Input checks
@@ -216,7 +214,7 @@ class Wavefront(ExtendedBase, ABC):
             The coordinates of the centers of each pixel representing the
             wavefront.
         """
-        return self.coordinates
+        return get_pixel_coordinates(self.npix, 2. * self.radius / self.npix)
 
 
     @property
