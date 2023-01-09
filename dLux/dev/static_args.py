@@ -109,9 +109,21 @@ aperture: object = Aperture(nsoft, radius)
 
 aberrations: float = jax.random.normal(jax.random.PRNGKey(0), (npix, npix))
 
-pupil_psf: float = normalise(normalise(aberrations) + aperture(wavefront))
+pupil_data: float = normalise(normalise(aberrations) + aperture(wavefront))
 
-plt.imshow(pupil_psf)
+plt.imshow(pupil_data)
 plt.colorbar()
+
+
+@ft.partial(eqx.filter_jit, inline=True)
+def loss(data: float, model: object, wavefront: object) -> float:
+    psf: float = model(wavefront)
+    return jax.lax.integer_pow(data - psf, 2).sum()
+
+
+# %%timeit
+loss(pupil_data, aperture, wavefront)
+
+eqx.filter_make_jaxpr(loss)(pupil_data, aperture, wavefront)
 
 
