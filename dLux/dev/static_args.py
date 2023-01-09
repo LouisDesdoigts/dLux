@@ -73,7 +73,8 @@ class Wavefront(eqx.Module):
         self.radius = np.asarray(radius).astype(float)
         self.npix = int(npix)
         self.pixel_scale = np.asarray(2. * radius / npix).astype(float)
-        
+    
+    @ft.partial(jax.jit, inline=True, static_argnums=0)
     def __call__(self: object) -> float:
         return coords(self.npix, self.radius)
 
@@ -107,14 +108,6 @@ nsoft: int = 3
 wavefront: object = Wavefront(wavelength, radius, npix)
 aperture: object = Aperture(nsoft, radius)
 
-
-class Array(jax.Array):
-    def __hash__(self: object) -> float:
-        return 1
-
-
-Array()
-
 aberrations: float = jax.random.normal(jax.random.PRNGKey(0), (npix, npix))
 
 pupil_data: float = normalise(normalise(aberrations) + aperture(wavefront))
@@ -133,9 +126,61 @@ def loss(data: float, model: object, wavefront: object) -> float:
     return jax.lax.integer_pow(data - psf, 2).sum()
 
 
-# %%timeit
-loss(pupil_data, aperture, wavefront)
+def circ_ap_func(
+        radius: float, 
+        x: float, 
+        y: float,
+        rotation: float, 
+        nsoft: float,
+        pixel_scale: float) -> float:
+    # Passing arguments to safe types. 
+    centre: float = np.asarray([x, y]).astype(float)
+    radius: float = np.asarray(radius).astype(float)
+    rotation: float = np.asarray(rotation).astype(float)
+    nsoft: float = np.asarray(nsoft).astype(float)
+    
+    # Organising coords
+    ccoords: float = coords(npix, radius)
+    
+    # Translation 
+    ccoords: float = ccoords - centre[:, None, None]
+        
+    # Rotation
+    sin_alpha: float = jax.lax.sin(rotation)
+    cos_alpha: float = jax.lax.cos(rotation)
+    x: float = jax.lax.index_in_dim(ccoords, 0)
+    y: float = jax.lax.index_in_dim(ccoords, 1)
+    new_x: float = x * cos_alpha - y * sin_alpha
+    new_y: float = x * sin_alpha + y * cos_alpha
+    ccoords: float = jax.lax.concatenate([new_x, new_y], 0)        
+        
+    # Transformation 
+    rho: float = hypotenuse(ccoords)
+        
+    # Linear softening
+    distances: float = radius - rho
+    lower: float = jax.lax.full_like(distances, 0., dtype=float)
+    upper: float = jax.lax.full_like(distances, 1., dtype=float)
+    inside: float = jax.lax.max(distances, lower)
+    scaled: float = inside / nsoft / pixel_scale
+    aperture: float = jax.lax.min(scaled, upper)
+    return aperture
 
-eqx.filter_make_jaxpr(loss)(aperture, wavefront)
+
+x: float = 0.
+y: float = 0.
+rotation: float = 0.
+pixel_scale: float = 2. * radius / npix
+
+jit_circ_ap_func: callable = jax.jit(circ_ap_func)
+static_jit_circ_ap_func: callable = jax.jit(circ_ap_func, inline=True, static_argnums=(2))
+
+# %%timeit
+jit_circ_ap_func(radius, x, y, rotation, nsoft, pixel_scale).block_until_ready()
+
+# %%timeit
+static_jit_circ_ap_func(radius, x, y, rotation, nsoft, pixel_scale).block_until_ready()
+
+plt.imshow()
 
 
