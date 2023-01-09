@@ -2991,7 +2991,7 @@ class StaticAperture(ApertureLayer):
             The name of the layer, which is used to index the layers dictionary.
         """
         if (
-            (not isinstance(aperture, DynamicAperture)) or \
+            (not isinstance(aperture, DynamicAperture)) and \
             (not isinstance(aperture, CompositeAperture))
         ):
             raise ValueError(
@@ -3071,12 +3071,17 @@ class StaticAberratedAperture(StaticAperture):
         if not isinstance(aperture, AberratedAperture):
             raise ValueError("I expected an AberratedAperture.")
 
-        super().__init__(
-            name = name, 
-            aperture = aperture, 
-            npixels = npixels,
-            pixel_scale = pixel_scale,
-            coordinates = coordinates)
+        if not coordinates and not npixels or not pixel_scale:
+            raise ValueError(
+                "Please provide either npixels and pixel_scale" +\
+                "or coordinates")
+
+        if not coordinates:
+            coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
+
+        self.name = name
+        coordinates = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
+        self.aperture = aperture._aperture(coordinates)
 
         self.basis = aperture._basis(coordinates)
 
