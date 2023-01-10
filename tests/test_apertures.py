@@ -3,6 +3,8 @@ import jax
 import jax.numpy as np
 import typing
 
+jax.config.update("jax_debug_nans", True)
+
 Aperture = typing.TypeVar("Aperture")
 Array = typing.TypeVar("Array")
 Spider = typing.TypeVar("Spider")
