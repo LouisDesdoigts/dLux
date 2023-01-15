@@ -88,12 +88,12 @@ nav:
             - Square Aperture:              apertures/api/square_aperture.md
             - Regular Polygonal Aperture:   apertures/api/regular_polygonal_aperture.md
             - Irregular Polygonal Aperture: apertures/api/irregular_polygonal_aperture.md
-            - Aberrated Aperture:           apertures/api/aberrated_aperture.md
-            - Static Aperture:              apertures/api/static_aperture.md
-            - Static Aberrated Aperture:    apertures/api/static_aberrated_aperture.md
             - Uniform Spider:               apertures/api/uniform_spider.md
+            - Aberrated Aperture:           apertures/api/aberrated_aperture.md
             - Compound Aperture:            apertures/api/compound_aperture.md
             - Multi Aperture:               apertures/api/multi_aperture.md
+            - Static Aperture:              apertures/api/static_aperture.md
+            - Static Aberrated Aperture:    apertures/api/static_aberrated_aperture.md
 
 
         - Propagators:
@@ -143,7 +143,7 @@ nav:
             - translate:              utils/coordinates/translate.md
             - rotate:                 utils/coordinates/rotate.md
             - compress:               utils/coordinates/compress.md
-            - strain:                 utils/coordinates/strain.md
+            - shear:                  utils/coordinates/shear.md
             - cartesian to polar:     utils/coordinates/cartesian_to_polar.md
             - polar to cartesian:     utils/coordinates/polar_to_cartesian.md
             - get coordinates vector: utils/coordinates/get_coordinates_vector.md

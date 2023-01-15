@@ -5,7 +5,7 @@ __all__ = ["cartesian_to_polar", "polar_to_cartesian",
            "get_positions_vector",  "get_pixel_positions",
            "get_polar_positions",   "get_coordinates_vector",
            "get_pixel_coordinates", "get_polar_coordinates",
-           "rotate", "translate", "strain", "compress"]
+           "rotate", "translate", "shear", "compress"]
 
 
 Array = np.ndarray
@@ -259,25 +259,25 @@ def translate(coordinates: Array, centre: Array) -> Array:
     return coordinates - centre[:, None, None]
 
 
-def strain(coordinates: Array, strain: Array) -> Array:
+def shear(coordinates: Array, shear: Array) -> Array:
     """
-    Apply a strain to the coordinate system. 
+    Apply a shear to the coordinate system. 
 
     Parameters
     ----------
     coordinates : Array, meters
         The (x, y) coordinates with the dimensions 
         (2, npix, npix).
-    strain : Array
-        The (x, y) strain with dimensions (2,)
+    shear : Array
+        The (x, y) shear with dimensions (2,)
 
     Returns
     -------
     coordinates: Array, meters
-        The strained coordinate system. 
+        The sheared coordinate system. 
     """
     trans_coordinates: Array = np.transpose(coordinates, (0, 2, 1))
-    return coordinates + trans_coordinates * strain[:, None, None]
+    return coordinates + trans_coordinates * shear[:, None, None]
 
 
 def compress(coordinates: Array, compression: Array) -> Array:
