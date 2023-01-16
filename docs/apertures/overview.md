@@ -9,7 +9,7 @@ have implemented are **minimally paramtrised**. *Minimal* is perhaps a
 misnomer as we have allowed for **flexible manipulation** of the apertures. 
 
 
-In general the apertures can be, *strained, compressed, rotated* and 
+In general the apertures can be, *sheared, compressed, rotated* and 
 *translated* arround the plane. However, the effect on the point spread 
 function (psf) due to changes in the aperture is one of the smallest 
 sources of error in most cases. A notable counter example is the hubble 
@@ -114,7 +114,7 @@ of $1m$ using,
 ```python 
 circ = CircularAperture(1.) # Default w. radius: 1m
 circ = CircularAperture(1., centre=[.5, .5])
-circ = CircularAperture(1., strain=[.05, .05])
+circ = CircularAperture(1., shear=[.05, .05])
 circ = CircularAperture(1., compression=[1.05, .95])
 circ = CircularAperture(1., softening=True)
 circ = CircularAperture(1., occulting=True)
