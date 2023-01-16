@@ -116,7 +116,7 @@ class TestUniformSpider(object):
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Strained 
-        spider = create_uniform_spider(strain=[.05, .05], softening=0.)
+        spider = create_uniform_spider(shear=[.05, .05], softening=0.)
         aperture = spider._aperture(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
@@ -147,7 +147,7 @@ class TestUniformSpider(object):
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Strained 
-        spider = create_uniform_spider(strain=[.05, .05], softening=0.)
+        spider = create_uniform_spider(shear=[.05, .05], softening=0.)
         aperture = spider._aperture(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()

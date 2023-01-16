@@ -844,7 +844,7 @@ def create_square_aperture() -> callable:
     def _create_square_aperture(  
             width       : Array = 1., 
             centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
+            shear      : Array = [0., 0.],
             compression : Array = [1., 1.],
             rotation    : Array = 0.,
             occulting   : bool = False, 
@@ -856,9 +856,9 @@ def create_square_aperture() -> callable:
         -----------
         centre: float, meters
             The centre of the coordinate system in the paraxial coordinates.
-        strain: Array
+        shear: Array
             Linear stretching of the x and y axis representing a 
-            strain of the coordinate system.
+            shear of the coordinate system.
         compression: Array 
             The x and y compression of the coordinate system. This 
             is a constant. 
@@ -880,7 +880,7 @@ def create_square_aperture() -> callable:
         """
         return dLux.SquareAperture(width,
             centre,
-            strain,
+            shear,
             compression,
             rotation,
             occulting,
@@ -904,7 +904,7 @@ def create_rectangular_aperture()-> callable:
                                     length      : Array = 0.5, 
                                     width       : Array = 1., 
                                     centre      : Array = [0., 0.],
-                                    strain      : Array = [0., 0.],
+                                    shear      : Array = [0., 0.],
                                     compression : Array = [1., 1.],
                                     rotation    : Array = 0.,
                                     occulting   : bool = False, 
@@ -937,7 +937,7 @@ def create_rectangular_aperture()-> callable:
                                                 length      , 
                                                 width       , 
                                                 centre      ,
-                                                strain      ,
+                                                shear      ,
                                                 compression ,
                                                 rotation    ,
                                                 occulting   , 
@@ -959,14 +959,14 @@ def create_circular_aperture() -> callable:
     def _create_circular_aperture( 
             radius      : Array = 1., 
             centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
+            shear      : Array = [0., 0.],
             compression : Array = [1., 1.],
             occulting   : bool = False, 
             softening   : Array = 0.) -> Aperture:
         return dLux.apertures.CircularAperture(
             radius,
             centre,
-            strain,
+            shear,
             compression,
             occulting,
             softening)
@@ -988,7 +988,7 @@ def create_hexagonal_aperture() -> callable:
     def _create_hexagonal_aperture( 
             radius      : Array = 1., 
             centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
+            shear      : Array = [0., 0.],
             compression : Array = [1., 1.],
             rotation    : Array = 0.,
             occulting   : bool = False, 
@@ -996,7 +996,7 @@ def create_hexagonal_aperture() -> callable:
         return dLux.apertures.HexagonalAperture(
             radius,
             centre,
-            strain,
+            shear,
             compression,
             rotation,
             occulting,
@@ -1020,7 +1020,7 @@ def create_annular_aperture() -> callable:
             rmax        : Array = 1.2, 
             rmin        : Array = 0.5, 
             centre      : Array = [0., 0.],
-            strain      : Array = [0., 0.],
+            shear      : Array = [0., 0.],
             compression : Array = [1., 1.],
             occulting   : bool = False, 
             softening   : Array = 0.) -> Aperture:
@@ -1028,7 +1028,7 @@ def create_annular_aperture() -> callable:
             rmax,
             rmin,
             centre,
-            strain,
+            shear,
             compression,
             occulting,
             softening)
@@ -1139,7 +1139,7 @@ def create_uniform_spider() -> callable:
             number_of_struts: int = 4,
             width_of_struts: float = .05,
             centre      : Array = [0., 0.], 
-            strain      : Array = [0., 0.],
+            shear      : Array = [0., 0.],
             compression : Array = [1., 1.],
             rotation    : Array = 0., 
             softening   : bool = False) -> OpticalLayer:
@@ -1147,7 +1147,7 @@ def create_uniform_spider() -> callable:
             number_of_struts, 
             width_of_struts,
             centre=centre,
-            strain=strain,
+            shear=shear,
             compression=compression,
             rotation=rotation,
             softening=softening)
