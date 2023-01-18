@@ -4,7 +4,8 @@ import dLux
 __all__ = ["cartesian_to_polar", "polar_to_cartesian",
            "get_positions_vector",  "get_pixel_positions",
            "get_polar_positions",   "get_coordinates_vector",
-           "get_pixel_coordinates", "get_polar_coordinates"]
+           "get_pixel_coordinates", "get_polar_coordinates",
+           "rotate", "translate", "shear", "compress"]
 
 
 Array = np.ndarray
@@ -210,5 +211,92 @@ def get_polar_coordinates(npixels     : int,
     return pixel_scaler * get_polar_positions(npixels,
                                               x_offset / pixel_scale,
                                               y_offset / pixel_scale)
+
+
+def rotate(coordinates: Array, rotation: Array) -> Array:
+    """
+    Rotate the coordinate system by a pre-specified amount.
+
+    Parameters
+    ----------
+    coordinates : Array, meters
+        A `(2, npix, npix)` representation of the coordinate 
+        system. The leading dimensions specifies the x and then 
+        the y coordinates in that order. 
+    rotation : Array, radians
+        The counter-clockwise rotation to apply.
+
+    Returns
+    -------
+    coordinates : Array, meters
+        The rotated coordinate system. 
+    """
+    x, y = coordinates[0], coordinates[1]
+    new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
+    new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
+    return np.array([new_x, new_y])
+
+
+def translate(coordinates: Array, centre: Array) -> Array:
+    """
+    Move the center of the coordinate system by some 
+    amount (centre). 
+
+    Parameters
+    ----------
+    coordinates : Array, meters
+        The (x, y) coordinates with the dimensions 
+        (2, npix, npix).
+    centre : Array, meters
+        The (x, y) coordinates of the new centre 
+        with dimensions (2,)
+
+    Returns
+    -------
+    coordinates: Array, meters
+        The translated coordinate system. 
+    """
+    return coordinates - centre[:, None, None]
+
+
+def shear(coordinates: Array, shear: Array) -> Array:
+    """
+    Apply a shear to the coordinate system. 
+
+    Parameters
+    ----------
+    coordinates : Array, meters
+        The (x, y) coordinates with the dimensions 
+        (2, npix, npix).
+    shear : Array
+        The (x, y) shear with dimensions (2,)
+
+    Returns
+    -------
+    coordinates: Array, meters
+        The sheared coordinate system. 
+    """
+    trans_coordinates: Array = np.transpose(coordinates, (0, 2, 1))
+    return coordinates + trans_coordinates * shear[:, None, None]
+
+
+def compress(coordinates: Array, compression: Array) -> Array:
+    """
+    Apply a compression to the coordinates.
+
+    Parameters
+    ----------
+    coordinates : Array, meters
+        The (x, y) coordinates with the dimensions 
+        (2, npix, npix).
+    compression : Array
+        The (x, y) compression with dimensions (2,)
+
+    Returns
+    -------
+    coordinates : Array, meters
+        The compressed coordinates. 
+    """
+    return coordinates * compression[:, None, None]
 
 
