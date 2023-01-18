@@ -3482,6 +3482,8 @@ class SimpleAperture():
         
         # Spiders
         if nstruts > 0:
+            if strut_ratio == 0:
+                raise ValueError("strut_ratio must be > 0 if nstruts > 0")
             strut_rel = aperutre_ratio * strut_ratio
             full_rotation = strut_rotation + rotation
             apertures.append(UniformSpider(
