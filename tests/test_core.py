@@ -1,196 +1,26 @@
 from __future__ import annotations
-from utilities import Utility, UtilityUser
 import jax.numpy as np
 import pytest
 import dLux
-from sources import PointSourceUtility
-from jax import config
-config.update("jax_debug_nans", True)
-
+# from jax import config
+# config.update("jax_debug_nans", True)
 
 Array = np.ndarray
 
-
-class OpticsUtility(Utility):
-    """
-    Utility for the Optics class.
-    """
-    layers : list
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Optics Utility.
-        """
-        self.layers = [
-            dLux.optics.CreateWavefront(16, 1),
-            dLux.optics.CompoundAperture([0.5]),
-            dLux.optics.NormaliseWavefront(),
-            dLux.propagators.CartesianMFT(16, 1., 1e-6)
-        ]
-
-
-    def construct(self : Utility, layers : list = None) -> Optics:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        layers = self.layers if layers is None else layers
-        return dLux.core.Optics(layers)
-
-
-class DetectorUtility(Utility):
-    """
-    Utility for the Detector class.
-    """
-    layers : list
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Detector Utility.
-        """
-        self.layers = [
-            dLux.detectors.AddConstant(1.)
-        ]
-
-
-    def construct(self : Utility, layers : list = None) -> Detector:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        layers = self.layers if layers is None else layers
-        return dLux.core.Detector(layers)
-
-
-class SceneUtility(Utility):
-    """
-    Utility for the Scene class.
-    """
-    sources : list
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Scene Utility.
-        """
-        self.sources = [
-            PointSourceUtility().construct()
-        ]
-
-
-    def construct(self : Utility, sources : list = None) -> Scene:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        sources = self.sources if sources is None else sources
-        return dLux.core.Scene(sources)
-
-
-class FilterUtility(Utility):
-    """
-    Utility for the Filter class.
-    """
-    wavelengths : Array
-    throughput  : Array
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Filter Utility.
-        """
-        self.wavelengths = np.linspace(1e-6, 10e-6, 10)
-        self.throughput  = np.linspace(0, 1, len(self.wavelengths))
-        self.order       = int(1)
-
-
-    def construct(self        : Utility,
-                  wavelengths : Array = None,
-                  throughput  : Array = None,
-                  filter_name : str   = None) -> Filter:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        wavelengths = self.wavelengths if wavelengths is None else wavelengths
-        throughput  = self.throughput  if throughput  is None else throughput
-
-        if filter_name is None:
-            return dLux.core.Filter(wavelengths, throughput)
-        else:
-            return dLux.core.Filter(wavelengths, throughput, \
-                                    filter_name=filter_name)
-
-
-class InstrumentUtility(Utility):
-    """
-    Utility for the Instrument class.
-    """
-    optics   : Optics
-    scene    : Scene
-    detector : Detector
-    filter   : Filter
-
-
-    def __init__(self : Utility) -> Utility:
-        """
-        Constructor for the Instrument Utility.
-        """
-        self.optics   = OpticsUtility().construct()
-        self.scene    = SceneUtility().construct()
-        self.detector = DetectorUtility().construct()
-        # self.filter   = FilterUtility().construct()
-        self.filter   = None
-
-
-    def construct(self            : Utility,
-                  optics          : Optics   = None,
-                  scene           : Scene    = None,
-                  detector        : Detector = None,
-                  filter          : Filter   = None,
-                  optical_layers  : list     = None,
-                  sources         : list     = None,
-                  detector_layers : list     = None,
-                  input_layers    : bool     = False,
-                  input_both      : bool     = False) -> Instrument:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        optics   = self.optics   if optics   is None else optics
-        scene    = self.scene    if scene    is None else scene
-        detector = self.detector if detector is None else detector
-        filter   = self.filter   if filter   is None else filter
-
-        if input_both:
-            return dLux.core.Instrument(optics=optics,
-                                        scene=scene,
-                                        detector=detector,
-                                        filter=filter,
-                                        optical_layers=optical_layers,
-                                        sources=sources,
-                                        detector_layers=detector_layers)
-        elif not input_layers:
-            return dLux.core.Instrument(optics=optics,
-                                        scene=scene,
-                                        detector=detector,
-                                        filter=filter)
-        else:
-            return dLux.core.Instrument(filter=filter,
-                                        optical_layers=optical_layers,
-                                        sources=sources,
-                                        detector_layers=detector_layers)
-
-
-#############
-### Tests ###
-#############
-def test_model():
+def test_model(
+        create_optics: callable,
+        create_detector: callable,
+        create_scene: callable,
+        create_filter: callable, 
+        create_point_source: callable) -> None:
     """
     Test the model function
     """
-    optics = OpticsUtility().construct()
-    detector = DetectorUtility().construct()
-    scene = SceneUtility().construct()
-    filter = FilterUtility().construct()
-    source = PointSourceUtility().construct()
+    optics = create_optics()
+    detector = create_detector()
+    scene = create_scene()
+    filter = create_filter()
+    source = create_point_source()
     sources = [source, source]
 
     # Test non-optics input
@@ -320,31 +150,30 @@ def test_model():
     assert not np.isinf(out).all()
 
 
-class TestOptics(UtilityUser):
+class TestOptics(object):
     """
     Tests the Optics class.
     """
-    utility : OpticsUtility = OpticsUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_optics: callable) -> None:
         """
         Tests the constructor.
         """
         # Test non-list inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(layers={})
+            create_optics(layers={})
 
         # Test list input with non Optics Layer input
         with pytest.raises(AssertionError):
-            self.utility.construct(layers=[10.])
+            create_optics(layers=[10.])
 
 
-    def test_propagate_mono(self):
+    def test_propagate_mono(self, create_optics: callable) -> None:
         """
         Tests the propagate_mono method.
         """
-        osys = self.utility.construct()
+        osys = create_optics() 
 
         # Test inputs
         with pytest.raises(AssertionError):
@@ -362,11 +191,11 @@ class TestOptics(UtilityUser):
         assert not np.isinf(psf).all()
 
 
-    def test_propagate_multi(self):
+    def test_propagate_multi(self, create_optics: callable) -> None:
         """
         Tests the propagate_multi method.
         """
-        osys = self.utility.construct()
+        osys = create_optics()
 
         # Test inputs
         with pytest.raises(AssertionError):
@@ -387,11 +216,11 @@ class TestOptics(UtilityUser):
         assert not np.isinf(psf).all()
 
 
-    def test_debug_prop(self):
+    def test_debug_prop(self, create_optics: callable) -> None:
         """
         Tests the debug_prop method.
         """
-        osys = self.utility.construct()
+        osys = create_optics()
 
         # Test inputs
         with pytest.raises(AssertionError):
@@ -409,42 +238,43 @@ class TestOptics(UtilityUser):
         assert not np.isinf(psf).all()
 
 
-    def test_model(self):
+    def test_model(self, 
+            create_optics: callable, 
+            create_point_source: callable) -> None:
         """
         Tests the model method
         """
-        osys = self.utility.construct()
-        psf = osys.model(source=PointSourceUtility().construct())
+        osys = create_optics()
+        psf = osys.model(source=create_point_source())
         assert not np.isnan(psf).all()
         assert not np.isinf(psf).all()
 
 
-class TestScene(UtilityUser):
+class TestScene(object):
     """
     Tests the Scene class.
     """
-    utility : SceneUtility = SceneUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_scene: callable) -> None:
         """
         Tests the constructor.
         """
         # Test non-list inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(sources={})
+            create_scene(sources={})
 
         # Test list input with non Source input
         with pytest.raises(AssertionError):
-            self.utility.construct(sources=[10.])
+            create_scene(sources=[10.])
 
 
-    def test_normalise(self):
+    def test_normalise(self, create_scene: callable) -> None:
         """
         Tests the normalise method.
         """
         # Test all sources in the scene are normalised
-        scene = self.utility.construct()
+        scene = create_scene()
         normalised_scene = scene.normalise()
         for source in normalised_scene.sources.values():
             assert np.allclose(source.get_weights().sum(), 1.)
@@ -452,41 +282,42 @@ class TestScene(UtilityUser):
                 assert np.allclose(source.get_distribution(), 1.)
 
 
-    def test_model(self):
+    def test_model(self, 
+            create_scene: callable, 
+            create_optics: callable) -> None:
         """
         Tests the model method
         """
-        scene = self.utility.construct()
-        psf = scene.model(OpticsUtility().construct())
+        scene = create_scene()
+        psf = scene.model(create_optics())
         assert not np.isnan(psf).all()
         assert not np.isinf(psf).all()
 
 
-class TestDetector(UtilityUser):
+class TestDetector(object):
     """
     Tests the Detector class.
     """
-    utility : DetectorUtility = DetectorUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_detector: callable) -> None:
         """
         Tests the constructor.
         """
         # Test non-list inputs
         with pytest.raises(AssertionError):
-            self.utility.construct(layers={})
+            create_detector(layers={})
 
         # Test list input with non Optics Layer input
         with pytest.raises(AssertionError):
-            self.utility.construct(layers=[10.])
+            create_detector(layers=[10.])
 
 
-    def test_apply_detector(self):
+    def test_apply_detector(self, create_detector: callable) -> None:
         """
         Tests the apply_detector method.
         """
-        detector = self.utility.construct()
+        detector = create_detector()
 
         # Test inputs
         with pytest.raises(AssertionError):
@@ -506,11 +337,11 @@ class TestDetector(UtilityUser):
         assert not np.isinf(image).all()
 
 
-    def test_debug_apply_detector(self):
+    def test_debug_apply_detector(self, create_detector: callable) -> None:
         """
         Tests the debug_apply_detector method.
         """
-        detector = self.utility.construct()
+        detector = create_detector()
 
         # Test inputs
         with pytest.raises(AssertionError):
@@ -530,66 +361,68 @@ class TestDetector(UtilityUser):
         assert not np.isinf(image).all()
 
 
-    def test_model(self):
+    def test_model(self,
+            create_detector: callable,
+            create_scene: callable,
+            create_optics: callable) -> None:
         """
         Tests the model method
         """
-        detector = self.utility.construct()
-        scene = SceneUtility().construct()
-        psf = detector.model(OpticsUtility().construct(), scene=scene)
+        detector = create_detector()
+        scene = create_scene()
+        psf = detector.model(create_optics(), scene=scene)
         assert not np.isnan(psf).all()
         assert not np.isinf(psf).all()
 
 
-class TestFilter(UtilityUser):
+class TestFilter(object):
     """
     Tests the Filter class.
     """
-    utility : FilterUtility = FilterUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_filter: callable) -> None:
         """
         Tests the constructor.
         """
         # Test adding filter name
         with pytest.raises(NotImplementedError):
-            self.utility.construct(filter_name='Test')
+            create_filter(filter_name='Test')
 
         # Test 2d wavelengths input
         with pytest.raises(AssertionError):
-            self.utility.construct(np.ones((2,2)))
+            create_filter(2,2)
 
         # Test 2d throughput input
         with pytest.raises(AssertionError):
-            self.utility.construct(throughput=np.ones((2,2)))
+            create_filter(2,2)
 
         # Test different shape wavelengths and throughput
         with pytest.raises(AssertionError):
-            self.utility.construct(np.ones(5), np.ones(4))
+            create_filter(4)
 
         # Test negative wavelengths
         with pytest.raises(AssertionError):
-            self.utility.construct(np.array([-1, 1]))
+            create_filter([-1, 1])
 
         # Test negative throughputs
         with pytest.raises(AssertionError):
-            self.utility.construct(throughput=np.array([-1, 1]))
+            create_filter([-1, 1])
 
         # Test throughputs greater than 1
         with pytest.raises(AssertionError):
-            self.utility.construct(throughput=np.array([0, 1.5]))
+            create_filter([0, 1.5])
 
         # Test reverse order wavelengths
         with pytest.raises(AssertionError):
-            self.utility.construct(wavelengths=np.array([1, 0.5]))
+            create_filter([1, 0.5])
 
 
-    def test_get_throughput(self):
+    def test_get_throughput(self, create_filter: callable) -> None:
         """
         Test the get_throughput method.
         """
-        filt = self.utility.construct()
+        filt = create_filter()
 
         # Test scalar input
         throughput = filt.get_throughput(np.array([1e-6, 2e-6]))
@@ -624,66 +457,63 @@ class TestFilter(UtilityUser):
     #     assert not np.isinf(psf).all()
 
 
-class TestInstrument(UtilityUser):
+class TestInstrument(object):
     """
     Tests the Optics class.
     """
-    utility : InstrumentUtility = InstrumentUtility()
 
 
-    def test_constructor(self):
+    def test_constructor(self, create_instrument: callable) -> None:
         """
         Tests the constructor.
         """
         # Test optic and optical_layers input
         with pytest.raises(ValueError):
-            self.utility.construct(optics=[], optical_layers=[], 
-                                   input_both=True)
+            create_instrument(optics=[], optical_layers=[], input_both=True)
 
         # Test detector and detector_layers input
         with pytest.raises(ValueError):
-            self.utility.construct(detector=[], detector_layers=[], 
-                                   input_both=True)
+            create_instrument(detector=[], detector_layers=[], input_both=True)
 
         # Test scene and sources input
         with pytest.raises(ValueError):
-            self.utility.construct(scene=[], sources=[], input_both=True)
+            create_instrument(scene=[], sources=[], input_both=True)
 
         # Test non optics input
         with pytest.raises(AssertionError):
-            self.utility.construct(optics=[])
+            create_instrument(optics=[])
 
         # Test non detector input
         with pytest.raises(AssertionError):
-            self.utility.construct(detector=[])
+            create_instrument(detector=[])
 
         # Test non scene input
         with pytest.raises(AssertionError):
-            self.utility.construct(scene=[])
+            create_instrument(scene=[])
 
         # Test non filter input
         with pytest.raises(AssertionError):
-            self.utility.construct(filter=[])
+            create_instrument(filter=[])
 
         # Test non list optical_layers input
         with pytest.raises(AssertionError):
-            self.utility.construct(optical_layers={}, input_layers=True)
+            create_instrument(optical_layers={}, input_layers=True)
 
         # Test non list detector_layers input
         with pytest.raises(AssertionError):
-            self.utility.construct(detector_layers={}, input_layers=True)
+            create_instrument(detector_layers={}, input_layers=True)
 
         # Test non list sources input
         with pytest.raises(AssertionError):
-            self.utility.construct(sources={}, input_layers=True)
+            create_instrument(sources={}, input_layers=True)
 
 
-    def test_normalise(self):
+    def test_normalise(self, create_instrument: callable) -> None:
         """
         Tests the normalise method.
         """
         # Test all sources in the scene are normalised
-        instrument = self.utility.construct()
+        instrument = create_instrument()
         normalised_instrument = instrument.normalise()
         for source in normalised_instrument.scene.sources.values():
             assert np.allclose(source.get_weights().sum(), 1.)
@@ -691,13 +521,15 @@ class TestInstrument(UtilityUser):
                 assert np.allclose(source.get_distribution(), 1.)
 
 
-    def test_model(self):
+    def test_model(self, 
+            create_instrument: callable, 
+            create_point_source: callable) -> None:
         """
         Tests the model method.
         """
-        instrument = self.utility.construct()
-        sources = [PointSourceUtility().construct()]
-        source = PointSourceUtility().construct()
+        instrument = create_instrument()
+        sources = [create_point_source()]
+        source = create_point_source()
 
         # Test modelling
         psf = instrument.model()

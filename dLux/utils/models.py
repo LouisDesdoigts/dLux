@@ -107,22 +107,25 @@ def simple_optical_system(aperture_diameter         : Array,
         layers = [dLux.optics.CreateWavefront(wavefront_npixels,
                                               aperture_diameter)]
 
-    # Aperture
+    # Construct aperture
     if secondary_mirror_diameter is not None:
-        layers += [dLux.optics.CompoundAperture(aperture_diameter/2,
-                                    occulter_radii=secondary_mirror_diameter/2)]
+        secondary_ratio = secondary_mirror_diameter/aperture_diameter
     else:
-        layers += [dLux.optics.CompoundAperture(aperture_diameter/2)]
-
-    # Zernikes
+        secondary_ratio = 0.
+    
     if nzernike is not None:
-        zernike_basis = dLux.utils.zernike_basis(nzernike + 3,
-                                                 wavefront_npixels,
-                                                 outside=0.)[3:]
+        zernikes = np.arange(3, nzernike + 3)
         if zernike_coefficients is not None:
-            layers += [dLux.ApplyBasisOPD(zernike_basis, zernike_coefficients)]
+            coeffs = zernike_coefficients
         else:
-            layers += [dLux.ApplyBasisOPD(zernike_basis)]
+            coeffs = np.zeros(nzernike)
+    else:
+        zernikes = None
+        coeffs = None
+    
+    layers +=[dLux.SimpleAperture(wavefront_npixels, 
+                secondary_ratio=secondary_ratio, zernikes=zernikes, 
+                coefficients=coeffs)]
 
     # Extra Layers
     if extra_layers is not None:

@@ -1,0 +1,1 @@
+::: dLux.apertures.StaticAperture
