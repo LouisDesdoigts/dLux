@@ -191,7 +191,7 @@ class VariableSamplingPropagator(Propagator, ABC):
         """
         input_scale, output_scale = pixel_scales
         pixels_input, npixels_out = npixels
-        sign = -1 if self.inverse else 1
+        sign = 1 if self.inverse else -1
 
         input_coordinates = get_coordinates_vector(pixels_input, input_scale,
                                                    pixel_offset/input_scale)
