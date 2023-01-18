@@ -81,6 +81,7 @@ nav:
 
         - Apertures:
             - Overview:                     apertures/overview.md
+            - Simple Aperture:              apertures/api/simple_aperture.md
             - Circular Aperture:            apertures/api/circular_aperture.md
             - Annular Aperture:             apertures/api/annular_aperture.md
             - Hexagonal Aperture:           apertures/api/hexagonal_aperture.md
