@@ -8,7 +8,7 @@
 [![Documentation](https://github.com/LouisDesdoigts/dLux/actions/workflows/documentation.yml/badge.svg)](https://louisdesdoigts.github.io/dLux/)
 
 Contributors: [Louis Desdoigts](https://github.com/LouisDesdoigts), [Benjamin Pope](https://github.com/benjaminpope), [Jordan
-Dennis](https://github.com/Jordan-Dennis), [Peter Tuthill](https://github.com/ptuthill)
+Dennis](https://github.com/Jordan-Dennis), [Adam Taras](https://github.com/ataras2), [Peter Tuthill](https://github.com/ptuthill)
 
 ## What is ∂Lux?
 
