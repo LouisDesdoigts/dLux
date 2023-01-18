@@ -8,8 +8,8 @@ from . import interpolation
 from . import units
 from . import optics
 from . import bayes
+from . import math
 from . import models
-from . import zernike
 
 # Dont import all functions from modules
 from .coordinates     import *
@@ -20,9 +20,9 @@ from .units           import *
 from .optics          import *
 from .bayes           import *
 from .models          import *
-from .zernike         import *
+from .math            import *
 
 # Add to __all__
 __all__ = coordinates.__all__ + helpers.__all__ + gradient_energy.__all__ + \
             interpolation.__all__ + units.__all__ + optics.__all__ + \
-                bayes.__all__ + models.__all__ + zernike.__all__
+                bayes.__all__ + models.__all__ + math.__all__

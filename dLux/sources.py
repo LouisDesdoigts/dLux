@@ -226,7 +226,7 @@ class ResolvedSource(Source, ABC):
 
 
     @abstractmethod
-    def get_distribution(self):
+    def get_distribution(self): # pragma: no cover
         """
         Abstract method for returning the distribution of the resolved source.
 
