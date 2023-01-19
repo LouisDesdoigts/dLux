@@ -119,7 +119,7 @@ class VariableSamplingPropagator(Propagator, ABC):
             per pixel for Cartesian or Angular Wavefront respectively.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
-        pixel_shift : bool
+        pixel_shift : bool = False
             Should the shift value be considered in units of pixel, or in the
             physical units of the output plane (ie pixels or meters, radians). =
             True interprets the shift value in pixel units.
@@ -536,7 +536,7 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
             represents propagation from a focal to a pupil plane.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
-        pixel_shift : bool
+        pixel_shift : bool = False
             Should the shift value be considered in units of pixel, or in the
             physical units of the output plane (ie pixels or meters, radians).
         name : str = 'CartesianMFT'
@@ -620,7 +620,7 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
             represents propagation from a focal to a pupil plane.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
-        pixel_shift : bool
+        pixel_shift : bool = False
             Should the shift value be considered in units of pixel, or in the
             physical units of the output plane (ie pixels or meters, radians).
         name : str = 'AngularMFT'
@@ -824,7 +824,7 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
             represents propagation from a focal to a pupil plane.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
-        pixel_shift : bool
+        pixel_shift : bool = False
             Should the shift value be considered in units of pixel, or in the
             physical units of the output plane (ie pixels or meters, radians).
         name : str = 'CartesianFresnel'
