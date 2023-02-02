@@ -3241,7 +3241,7 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
         if self.coefficients.ndim == 1:
             return (self.basis * self.coefficients[:, None, None]).sum(0)
         else:
-            return self.basis * self.coefficients[:, :, None, None].sum((0, 1))
+            return (self.basis * self.coefficients[:, :, None, None]).sum((0, 1))
 
 
     def get_opd(self : ApertureLayer, **kwargs) -> Array:
