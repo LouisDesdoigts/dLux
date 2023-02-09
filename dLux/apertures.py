@@ -1130,16 +1130,14 @@ class IrregularPolygonalAperture(PolygonalAperture):
     vertices : Array
     
     
-    def __init__(self        : ApertureLayer, 
-                 vertices    : Array,
-                 centre      : Array = np.array([0., 0.]), 
-                 shear       : Array = np.array([0., 0.]),
-                 compression : Array = np.array([1., 1.]),
-                 rotation    : Array = np.array(0.),
-                 occulting   : bool  = False, 
-                 softening   : Array = np.array(1.),
-                 name        : str   = "IrregularPolygonalAperture"
-                 ) -> ApertureLayer:
+    def __init__(self   : ApertureLayer, 
+            vertices    : Array,
+            strain      : Array = np.array([0., 0.]),
+            compression : Array = np.array([1., 1.]),
+            rotation    : Array = np.array(0.),
+            occulting   : bool = False, 
+            softening   : Array = np.array(1.),
+            name        : str = "IrregularPolygonalAperture") -> ApertureLayer:
         """
         Constructor for the IrregularPolygonalAperture class.
 
@@ -1164,14 +1162,16 @@ class IrregularPolygonalAperture(PolygonalAperture):
         name: str = 'IrregularPolygonalAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(centre = centre, 
-                         shear = shear, 
-                         compression = compression,
-                         rotation = rotation,
-                         occulting = occulting,
-                         softening = softening,
-                         name = name)
-        
+        centre = vertices.mean(axis = 0)
+        vertices = vertices - centre
+        super().__init__(
+            centre = centre, 
+            strain = strain, 
+            compression = compression,
+            rotation = rotation,
+            occulting = occulting,
+            softening = softening,
+            name = name)
         self.vertices = np.array(vertices).astype(float)
         dLux.exceptions.validate_bc_attr_dims(
             (1, 2), self.vertices.shape, "vertices")
