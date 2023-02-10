@@ -213,7 +213,7 @@ def rotate_field(field          : Array,
         rotator = vmap(padded_rotate, in_axes=(0, None))
     else:
         order_rotate = partial(rotate, order=order)
-        rotator = vmap(rotate, in_axes=(0, None))
+        rotator = vmap(order_rotate, in_axes=(0, None))
 
     # Rotate
     rotated_field = rotator(field, angle)
