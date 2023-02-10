@@ -2,7 +2,8 @@ import jax.numpy as np
 from jax import vmap
 from jax.scipy.ndimage import map_coordinates
 from functools import partial
-from dLux.utils.coordinates import get_polar_positions, polar_to_cartesian
+import dLux.utils.coordinates as c
+
 
 
 __all__ = ["scale_array", "generate_coordinates", "interpolate_field",
@@ -175,6 +176,7 @@ def rotate_field(field          : Array,
                  angle          : Array,
                  real_imaginary : bool = False,
                  fourier        : bool = False,
+                 order          : int  = 1,
                  padding        : int  = 2) -> Array:
     """
     Paraxially rotates a wavefront field (either in ampltude and phase, or
@@ -195,6 +197,8 @@ def rotate_field(field          : Array,
     fourier : bool = False
         Should the fourier rotation method be used (True), or regular
         interpolation method be used (False).
+    order : int = 2
+        The interpolation order to use. Must be 0, 1, or 3.
     padding : int = 2
         The amount of fourier padding to use. Only applies if fourier is True.
 
@@ -208,6 +212,7 @@ def rotate_field(field          : Array,
         padded_rotate = partial(fourier_rotate, padding=padding)
         rotator = vmap(padded_rotate, in_axes=(0, None))
     else:
+        order_rotate = partial(rotate, order=order)
         rotator = vmap(rotate, in_axes=(0, None))
 
     # Rotate
@@ -223,7 +228,7 @@ def rotate_field(field          : Array,
     return np.array([amplitude, phase])
 
 
-def rotate(array : Array, angle : Array) -> Array:
+def rotate(array : Array, angle : Array, order : int = 3) -> Array:
     """
     Rotates an array by the angle, using linear interpolation.
 
@@ -239,16 +244,16 @@ def rotate(array : Array, angle : Array) -> Array:
     array : Array
         The rotated array.
     """
+    if order not in (0, 1, 3):
+        raise ValueError("Order must be 0, 1, or 3.")
     # Get coordinates
     npixels = array.shape[0]
     centre = (npixels - 1) / 2
-    coordinates = get_polar_positions(npixels)
-    coordinates += np.array([0., angle])[:, None, None]
-    coordinates_rotated = np.roll(polar_to_cartesian(coordinates) + centre,
-                                  shift=1, axis=0)
+    coordinates = c.get_pixel_positions((npixels, npixels))
+    coordinates_rotated = c.rotate(coordinates, angle) + centre
 
     # Interpolate
-    return map_coordinates(array, coordinates_rotated, order=1)
+    return map_coordinates(array, coordinates_rotated, order=order)
 
 
 def fourier_rotate(array   : Array,

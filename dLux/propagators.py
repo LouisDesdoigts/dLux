@@ -2,7 +2,7 @@ from __future__ import annotations
 import jax.numpy as np
 from equinox import tree_at
 from abc import ABC, abstractmethod
-from dLux.utils.coordinates import get_pixel_coordinates, get_coordinates_vector
+from dLux.utils.coordinates import get_pixel_positions
 import dLux
 
 
@@ -193,11 +193,11 @@ class VariableSamplingPropagator(Propagator, ABC):
         pixels_input, npixels_out = npixels
         sign = 1 if self.inverse else -1
 
-        input_coordinates = get_coordinates_vector(pixels_input, input_scale,
-                                                   pixel_offset/input_scale)
+        input_coordinates = get_pixel_positions(pixels_input, input_scale,
+                                                    pixel_offset * input_scale)
 
-        output_coordinates = get_coordinates_vector(npixels_out, output_scale,
-                                                    pixel_offset/output_scale)
+        output_coordinates = get_pixel_positions(npixels_out, output_scale,
+                                                    pixel_offset * output_scale)
 
         input_to_output = np.outer(input_coordinates, output_coordinates)
 
@@ -935,8 +935,9 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         offsets = self.get_shift()
 
         input_positions = wavefront.pixel_coordinates
-        output_positions = get_pixel_coordinates(self.npixels_out,
-                                                 self.pixel_scale_out)
+        output_positions = get_pixel_positions(
+                            (self.npixels_out, self.npixels_out), 
+                            (self.pixel_scale_out, self.pixel_scale_out))
 
         propagation_distance = self.focal_length + self.propagation_shift
 

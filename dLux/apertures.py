@@ -4,7 +4,9 @@ from abc import ABC, abstractmethod
 from jax import numpy as np, lax, vmap
 from jax.tree_util import tree_map, tree_flatten
 from equinox import filter, static_field
-from dLux.utils import get_pixel_coordinates, coordinates as c, opd_to_phase, \
+# from dLux.utils import get_pixel_coordinates, coordinates as c, opd_to_phase, \
+#     factorial, cartesian_to_polar, list_to_dictionary
+from dLux.utils import get_pixel_positions, coordinates as c, opd_to_phase, \
     factorial, cartesian_to_polar, list_to_dictionary
 
 
@@ -87,7 +89,9 @@ class ApertureLayer(OpticalLayer, ABC):
         aperture : Array 
             The array representing the transmission of the aperture.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter / npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._aperture(coordinates)
 
 
@@ -2041,7 +2045,9 @@ class AberratedAperture(AbstractAberratedAperture):
         aperture : Array 
             The array representing the transmission of the aperture.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter / npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self.aperture._aperture(coordinates)
 
 
@@ -2096,7 +2102,9 @@ class AberratedAperture(AbstractAberratedAperture):
         basis : Array 
             The array of the basis vectors of the aperture aberrations.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter / npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._basis(coordinates)
  
 
@@ -2137,7 +2145,9 @@ class AberratedAperture(AbstractAberratedAperture):
         basis : Array 
             The array of the total opd of the aperture aberrations.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter / npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._opd(coordinates)
 
 
@@ -2548,7 +2558,9 @@ class CompositeAperture(AbstractDynamicAperture, ABC):
         aperture : Array 
             The array representing the transmission of the aperture.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter/npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._aperture(coordinates)
 
 
@@ -2594,7 +2606,9 @@ class CompositeAperture(AbstractDynamicAperture, ABC):
         basis : Array 
             The array of the basis vectors of the aperture aberrations.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter/npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._basis(coordinates)
 
 
@@ -2685,7 +2699,9 @@ class CompositeAperture(AbstractDynamicAperture, ABC):
         basis : Array 
             The array of the total opd of the aperture aberrations.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter/npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._opd(coordinates)
 
 
@@ -2987,7 +3003,10 @@ class AbstractStaticAperture(ApertureLayer):
         
         # Generate coordinates if not provided
         if coordinates is None:
-            coordinates = get_pixel_coordinates(npixels, diameter/npixels)
+            print(diameter, npixels)
+            npixels_in = (npixels, npixels)
+            pixel_scales = (diameter / npixels, diameter / npixels)
+            coordinates = get_pixel_positions(npixels_in, pixel_scales)
 
         super().__init__(name = name)
         self.aperture = aperture._aperture(coordinates)
@@ -3159,7 +3178,9 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
         
         # Generate coordinates if not provided
         if coordinates is None:
-            coordinates = get_pixel_coordinates(npixels, diameter/npixels)
+            npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
 
         super().__init__(aperture=aperture, coordinates=coordinates, 
             coefficients=aperture.coefficients, name=name)

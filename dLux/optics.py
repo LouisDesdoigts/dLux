@@ -751,7 +751,8 @@ class CompoundAperture(OpticalLayer):
 
         # Generate coordinate grid
         pixel_scale = diameter/npixels
-        xycoords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
+        xycoords = dLux.utils.get_pixel_positions((npixels, npixels), 
+                                                  (pixel_scale, pixel_scale))
 
         # Generate aperture/occulters
         outer_apers = mapped_aperture(self.aperture_radii, \
