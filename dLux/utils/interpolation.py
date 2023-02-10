@@ -228,7 +228,7 @@ def rotate_field(field          : Array,
     return np.array([amplitude, phase])
 
 
-def rotate(array : Array, angle : Array, order : int = 3) -> Array:
+def rotate(array : Array, angle : Array, order : int = 1) -> Array:
     """
     Rotates an array by the angle, using linear interpolation.
 
