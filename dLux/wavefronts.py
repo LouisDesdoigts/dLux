@@ -5,7 +5,6 @@ from equinox import tree_at
 from zodiax import ExtendedBase
 from enum import IntEnum
 from abc import ABC
-# from dLux.utils.coordinates import get_pixel_coordinates
 from dLux.utils.coordinates import get_pixel_positions
 from dLux.utils.interpolation import interpolate_field, rotate_field
 import dLux

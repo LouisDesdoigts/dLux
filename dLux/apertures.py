@@ -4,8 +4,6 @@ from abc import ABC, abstractmethod
 from jax import numpy as np, lax, vmap
 from jax.tree_util import tree_map, tree_flatten
 from equinox import filter, static_field
-# from dLux.utils import get_pixel_coordinates, coordinates as c, opd_to_phase, \
-#     factorial, cartesian_to_polar, list_to_dictionary
 from dLux.utils import get_pixel_positions, coordinates as c, opd_to_phase, \
     factorial, cartesian_to_polar, list_to_dictionary
 
