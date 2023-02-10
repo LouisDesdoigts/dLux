@@ -617,11 +617,11 @@ class Wavefront(ExtendedBase, ABC):
         if field.shape[1] == 1:
             new_amplitude, new_phase = \
             rotate_field(field[:, 0], angle, fourier=fourier,
-                         real_imaginary=real_imaginary)[:, None, :, :]
+                    real_imaginary=real_imaginary, order=order)[:, None, :, :]
         else:
             rotator = vmap(rotate_field, in_axes=(1, None))
             new_amplitude, new_phase = rotator(field, angle, fourier=fourier,
-                                               real_imaginary=real_imaginary)
+                                    real_imaginary=real_imaginary, order=order)
 
         # Update parameters
         return tree_at(lambda wavefront: (wavefront.amplitude, wavefront.phase),
