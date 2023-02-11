@@ -13,7 +13,7 @@ import dLux
 
 __all__ = ["CreateWavefront", "TiltWavefront", "NormaliseWavefront", 
            "ApplyBasisOPD", "AddPhase", "AddOPD", "TransmissiveOptic", 
-           "ApplyBasisCLIMB", "Rotate", "CompundAperture"]
+           "ApplyBasisCLIMB", "Rotate", "CompoundAperture"]
 
 
 Array = np.ndarray
