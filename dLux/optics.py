@@ -11,10 +11,9 @@ from inspect import signature
 import dLux
 
 
-__all__ = ["CreateWavefront", "TiltWavefront",
-           "NormaliseWavefront", "ApplyBasisOPD", "AddPhase", "AddOPD",
-           "TransmissiveOptic", "CompoundAperture", "ApplyBasisCLIMB",
-           "Rotate"]
+__all__ = ["CreateWavefront", "TiltWavefront", "NormaliseWavefront", 
+           "ApplyBasisOPD", "AddPhase", "AddOPD", "TransmissiveOptic", 
+           "ApplyBasisCLIMB", "Rotate"]
 
 
 Array = np.ndarray
@@ -103,6 +102,33 @@ class OpticalLayer(ExtendedBase, ABC):
 
         # Return updated parameters dictionary
         return parameters
+    
+
+    # @abstractmethod
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        pass
 
 
 class CreateWavefront(OpticalLayer):
@@ -224,6 +250,33 @@ class CreateWavefront(OpticalLayer):
             return wavefront, parameters
         else:
             return wavefront
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"Creates a {self.wavefront_type} wavefront of size " 
+                f"{self.npixels} pixels and diameter {self.diameter} m.")
 
 
 class TiltWavefront(OpticalLayer):
@@ -279,6 +332,46 @@ class TiltWavefront(OpticalLayer):
         return wavefront.tilt_wavefront(self.tilt_angles)
 
 
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        if angular_units not in ('radians', 'degrees', 'arcseconds', 
+                                 'arcminutes'):
+            raise ValueError(f"unit must be one of 'radians', 'degrees', "
+                             f"'arcseconds' or 'arcminutes'.")
+        
+        if angular_units == 'radians':
+            angles = self.tilt_angles
+        elif angular_units == 'degrees':
+            angles = dLux.utils.r2d(self.tilt_angles)
+        elif angular_units == 'arcseconds':
+            angles = dLux.utils.r2s(self.tilt_angles)
+        elif angular_units == 'arcminutes':
+            angles = dLux.utils.r2m(self.tilt_angles)
+        return (f"Tilts the wavefront by {angles:.{sigfigs}} {angular_units} "
+                "in the (x, y) dimension.")
+
+
 class NormaliseWavefront(OpticalLayer):
     """
     Normalises the input wavefront using the in-built wavefront normalisation
@@ -320,6 +413,32 @@ class NormaliseWavefront(OpticalLayer):
             The wavefront with the wavefront normalisation method applied.
         """
         return wavefront.normalise()
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return "Normalises the wavefront to unity power."
 
 
 class ApplyBasisOPD(OpticalLayer):
@@ -406,6 +525,33 @@ class ApplyBasisOPD(OpticalLayer):
             The wavefront with the appropriate phase applied.
         """
         return wavefront.add_opd(self.get_total_opd())
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"Applies an Optical Path Difference (OPD) to the wavefront "
+                f"calculated from the basis vectors and coefficients.")
 
 
 class AddPhase(OpticalLayer):
@@ -432,8 +578,8 @@ class AddPhase(OpticalLayer):
         ----------
         phase : Array, radians
             Array of phase values to be applied to the input wavefront. This
-            must a 0, 2 or 3 dimensional array with equal to that of the wavefront
-            at time of aplication.
+            must a 0, 2 or 3 dimensional array with equal to that of the 
+            wavefront at time of aplication.
         name : str = 'AddPhase'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -460,6 +606,32 @@ class AddPhase(OpticalLayer):
             The wavefront with the phase added.
         """
         return wavefront.add_phase(self.phase)
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return "Add an array of phase values to the wavefront."
 
 
 class AddOPD(OpticalLayer):
@@ -514,6 +686,33 @@ class AddOPD(OpticalLayer):
             The wavefront with the OPD added.
         """
         return wavefront.add_opd(self.opd)
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return ("Add an array of Optical Path Differences (OPD) to the "
+                "wavefront.")
 
 
 class TransmissiveOptic(OpticalLayer):
@@ -571,246 +770,272 @@ class TransmissiveOptic(OpticalLayer):
             The wavefront with the tranmission applied.
         """
         return wavefront.multiply_amplitude(self.transmission)
+    
 
-
-class CompoundAperture(OpticalLayer):
-    """
-    Applies a series of soft-edged, circular aperture and occulters, defined by
-    their physical (x, y) positions and radii. Coordinates are taken from the
-    wavefront.
-
-    Attributes
-    ----------
-    aperture_radii : Array, meters
-        The array of radii of the apertures.
-    aperture_coords : Array, meters
-        The array of (x, y) coordinates of the centers of the apertures.
-    occulter_radii : Array, meters
-        The array of radii of the occulters.
-    occulter_coords : Array, meters
-        The array of (x, y) coordinates of the centers of the occulters.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    aperture_radii  : Array
-    aperture_coords : Array
-    occulter_radii  : Array
-    occulter_coords : Array
-
-
-    def __init__(self            : OpticalLayer,
-                 aperture_radii  : Array,
-                 aperture_coords : Array = None,
-                 occulter_radii  : Array = None,
-                 occulter_coords : Array = None,
-                 name            : str   = 'CompoundAperture') -> OpticalLayer:
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
         """
-        Constructor for the CompoundAperture class.
+        Returns a summary of the class.
 
         Parameters
         ----------
-        aperture_radii : Array, meters
-            The array of radii of the apertures.
-        aperture_coords : Array, meters
-            The array of (x, y) coordinates of the centers of the apertures.
-        occulter_radii : Array, meters
-            The array of radii of the occulters.
-        occulter_coords : Array, meters
-            The array of (x, y) coordinates of the centers of the occulters.
-        name : str = 'CompoundAperture'.
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-
-        # Get aperture radii and propmote to at least 1d
-        self.aperture_radii = np.asarray(aperture_radii, dtype=float)
-        self.aperture_radii = np.atleast_1d(self.aperture_radii)
-
-        # Ensure corred dimensionality before using shape
-        assert self.aperture_radii.ndim == 1, \
-        ("aperture_radii must be one dimensional.")
-
-        # Construct an empty occulter radii if none is provided
-        self.occulter_radii = np.array([]) if occulter_radii is None else \
-                              np.asarray(occulter_radii, dtype=float)
-        self.occulter_radii = np.atleast_1d(self.occulter_radii)
-
-        # Ensure corred dimensionality before using shape
-        assert self.occulter_radii.ndim == 1, \
-        ("occulter_radii must be one dimensional.")
-
-        # Construct at center if no coordinates are supplied
-        if aperture_coords is None:
-            self.aperture_coords = np.zeros([self.aperture_radii.shape[0], 2])
-        else:
-            self.aperture_coords = np.asarray(aperture_coords, dtype=float)
-            assert self.aperture_coords.ndim == 2 and \
-            self.aperture_coords.shape[0] == self.aperture_radii.shape[0] and \
-            self.aperture_coords.shape[1] == 2, \
-            ("aperture_coords must a 2d array with leading dimension equal to "
-            "The length of aperture_radii, and second dimension equal to 2, ie "
-            "shape == (napertures, 2) ie [(x0, y0), (x1, y1) ...]")
-
-        # Construct at center if no coordinates are supplied
-        if occulter_coords is None:
-            self.occulter_coords = np.zeros([self.occulter_radii.shape[0], 2])
-        else:
-            self.occulter_coords = np.asarray(occulter_coords, dtype=float)
-            assert self.occulter_coords.ndim == 2 and \
-            self.occulter_coords.shape[0] == self.occulter_radii.shape[0] and \
-            self.occulter_coords.shape[1] == 2, \
-            ("occulter_coords must a 2d array with leading dimension equal to "
-            "The length of occulter_radii, and second dimension equal to 2, ie "
-            "shape == (nocculters, 2) ie [(x0, y0), (x1, y1) ...]")
-
-
-    def make_aperture(self        : OpticalLayer,
-                      radius      : Array,
-                      center      : Array,
-                      xycoords    : Array,
-                      is_aperture : Array,
-                      vmin        : float = 0.,
-                      vmax        : float = 1.) -> Array:
-        """
-        Constructs a soft-edged aperture or occulter.
-
-        Parameters
-        ----------
-        radius : Array, meters
-            The radius of the aperture/occulter.
-        center : Array, meters
-            The (x, y) center of the aperture/occulter.
-        xycoords : Array, meters
-            The (xcoordinates, ycoordinates) arrays to calculate the
-            apertures/occulters upon.
-        is_aperture : bool
-            Determines whether an aperture (True) or occulter (False) is
-            calculated.
-        vmin : float = 0.
-            The minimum value to set the transmission to, default is 1e-8 in
-            order to keep gradients stable.
-        vmax : float = 1.
-            The maximum value to set the transmission to, default is 1.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
 
         Returns
         -------
-        aperture : Array
-            The corresponding aperture or occuler, depending on the is_aperture
-            parameter.
+        summary : str
+            A summary of the class.
         """
-        # Shift coordinates
-        xycoords -= center.reshape(2, 1, 1)
-        rcoords = np.hypot(xycoords[0], xycoords[1])
-        thetacoords = np.arctan2(xycoords[1], xycoords[0])
-
-        # Wrap theta values around circle
-        thetas_mapped = (thetacoords + np.pi/4)%(np.pi/2) - np.pi/4
-
-        # Calculate projected pixel size
-        npixels = xycoords.shape[-1]
-        pixel_scale = (np.max(xycoords) - np.min(xycoords))/(npixels-1)
-        angle = (pixel_scale/2)*np.hypot(1, np.tan(thetas_mapped))
-
-        # Get projected radial distance
-        distance = radius - rcoords
-        if not is_aperture:
-            distance *= -1
-
-        # Fit linear slop slong projected pixel sizes/radial distances
-        m = (vmax-vmin)/(2*angle)
-        b = (vmax-vmin)/2
-        grey = m * distance + b
-
-        # Clip to desired range
-        aperture = np.clip(grey, a_min=vmin, a_max=vmax)
-        return aperture
+        return ("Applies an array of tranmission values to the Wavefront.")
 
 
-    def construct_combined_aperture(self     : OpticalLayer,
-                                    diameter : Array,
-                                    npixels  : int) -> Array:
-        """
-        Constructs the various apertures and occulters from the stored
-        parameters and combines them into a single transmission array.
+# class CompoundAperture(OpticalLayer):
+#     """
+#     Applies a series of soft-edged, circular aperture and occulters, defined by
+#     their physical (x, y) positions and radii. Coordinates are taken from the
+#     wavefront.
 
-        Parameters
-        ----------
-        diameter : Array, meters
-            The diameter of the wavefront to calculate the aperture on.
-        npixels : int
-            The linear size of the array to calculate the aperture on.
-
-        Returns
-        -------
-        aperture : Array
-            The final combined aperture.
-        """
-        # Map aperture function
-        mapped_aperture = vmap(self.make_aperture,
-                                   in_axes=(0, 0, None, None))
-
-        # Generate coordinate grid
-        pixel_scale = diameter/npixels
-        xycoords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
-
-        # Generate aperture/occulters
-        outer_apers = mapped_aperture(self.aperture_radii, \
-                                      self.aperture_coords, xycoords, True)
-        inner_apers = mapped_aperture(self.occulter_radii, \
-                                      self.occulter_coords, xycoords, False)
-
-        # Bound values
-        outer_comb = np.clip(outer_apers.sum(0), a_min=0., a_max=1.)
-        inner_comb = np.prod(inner_apers, axis=0)
-
-        # Combine
-        return outer_comb * inner_comb
+#     Attributes
+#     ----------
+#     aperture_radii : Array, meters
+#         The array of radii of the apertures.
+#     aperture_coords : Array, meters
+#         The array of (x, y) coordinates of the centers of the apertures.
+#     occulter_radii : Array, meters
+#         The array of radii of the occulters.
+#     occulter_coords : Array, meters
+#         The array of (x, y) coordinates of the centers of the occulters.
+#     name : str
+#         The name of the layer, which is used to index the layers dictionary.
+#     """
+#     aperture_radii  : Array
+#     aperture_coords : Array
+#     occulter_radii  : Array
+#     occulter_coords : Array
 
 
-    def get_aperture(self     : OpticalLayer,
-                     diameter : Array = None,
-                     npixels  : int   = 512) -> Array:
-        """
-        Constructs the various apertures and occulters from the stored
-        parameters and combines them into a single transmission array. By
-        defualt this method takes the largest aperture and uses that as the
-        diameters, and defaults to 512 pixels.
+#     def __init__(self            : OpticalLayer,
+#                  aperture_radii  : Array,
+#                  aperture_coords : Array = None,
+#                  occulter_radii  : Array = None,
+#                  occulter_coords : Array = None,
+#                  name            : str   = 'CompoundAperture') -> OpticalLayer:
+#         """
+#         Constructor for the CompoundAperture class.
 
-        Parameters
-        ----------
-        diameter : Array, meters = None
-            The diameter of the wavefront to calculate the aperture on. Uses
-            the largest aperture by default
-        npixels : int = 512
-            The linear size of the array to calculate the aperture on.
+#         Parameters
+#         ----------
+#         aperture_radii : Array, meters
+#             The array of radii of the apertures.
+#         aperture_coords : Array, meters
+#             The array of (x, y) coordinates of the centers of the apertures.
+#         occulter_radii : Array, meters
+#             The array of radii of the occulters.
+#         occulter_coords : Array, meters
+#             The array of (x, y) coordinates of the centers of the occulters.
+#         name : str = 'CompoundAperture'.
+#             The name of the layer, which is used to index the layers dictionary.
+#         """
+#         super().__init__(name)
 
-        Returns
-        -------
-        aperture : Array
-            The final combined aperture.
-        """
-        diameter = 2*self.aperture_radii.max() if diameter is None else diameter
-        return self.construct_combined_aperture(diameter, npixels)
+#         # Get aperture radii and propmote to at least 1d
+#         self.aperture_radii = np.asarray(aperture_radii, dtype=float)
+#         self.aperture_radii = np.atleast_1d(self.aperture_radii)
+
+#         # Ensure corred dimensionality before using shape
+#         assert self.aperture_radii.ndim == 1, \
+#         ("aperture_radii must be one dimensional.")
+
+#         # Construct an empty occulter radii if none is provided
+#         self.occulter_radii = np.array([]) if occulter_radii is None else \
+#                               np.asarray(occulter_radii, dtype=float)
+#         self.occulter_radii = np.atleast_1d(self.occulter_radii)
+
+#         # Ensure corred dimensionality before using shape
+#         assert self.occulter_radii.ndim == 1, \
+#         ("occulter_radii must be one dimensional.")
+
+#         # Construct at center if no coordinates are supplied
+#         if aperture_coords is None:
+#             self.aperture_coords = np.zeros([self.aperture_radii.shape[0], 2])
+#         else:
+#             self.aperture_coords = np.asarray(aperture_coords, dtype=float)
+#             assert self.aperture_coords.ndim == 2 and \
+#             self.aperture_coords.shape[0] == self.aperture_radii.shape[0] and \
+#             self.aperture_coords.shape[1] == 2, \
+#             ("aperture_coords must a 2d array with leading dimension equal to "
+#             "The length of aperture_radii, and second dimension equal to 2, ie "
+#             "shape == (napertures, 2) ie [(x0, y0), (x1, y1) ...]")
+
+#         # Construct at center if no coordinates are supplied
+#         if occulter_coords is None:
+#             self.occulter_coords = np.zeros([self.occulter_radii.shape[0], 2])
+#         else:
+#             self.occulter_coords = np.asarray(occulter_coords, dtype=float)
+#             assert self.occulter_coords.ndim == 2 and \
+#             self.occulter_coords.shape[0] == self.occulter_radii.shape[0] and \
+#             self.occulter_coords.shape[1] == 2, \
+#             ("occulter_coords must a 2d array with leading dimension equal to "
+#             "The length of occulter_radii, and second dimension equal to 2, ie "
+#             "shape == (nocculters, 2) ie [(x0, y0), (x1, y1) ...]")
 
 
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Generates and applies the combined apertures transmission array to the
-        wavefront.
+#     def make_aperture(self        : OpticalLayer,
+#                       radius      : Array,
+#                       center      : Array,
+#                       xycoords    : Array,
+#                       is_aperture : Array,
+#                       vmin        : float = 0.,
+#                       vmax        : float = 1.) -> Array:
+#         """
+#         Constructs a soft-edged aperture or occulter.
 
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
+#         Parameters
+#         ----------
+#         radius : Array, meters
+#             The radius of the aperture/occulter.
+#         center : Array, meters
+#             The (x, y) center of the aperture/occulter.
+#         xycoords : Array, meters
+#             The (xcoordinates, ycoordinates) arrays to calculate the
+#             apertures/occulters upon.
+#         is_aperture : bool
+#             Determines whether an aperture (True) or occulter (False) is
+#             calculated.
+#         vmin : float = 0.
+#             The minimum value to set the transmission to, default is 1e-8 in
+#             order to keep gradients stable.
+#         vmax : float = 1.
+#             The maximum value to set the transmission to, default is 1.
 
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the combined aperture applied.
-        """
-        aper = self.construct_combined_aperture(wavefront.diameter,
-                                                wavefront.npixels)
-        return wavefront.multiply_amplitude(aper)
+#         Returns
+#         -------
+#         aperture : Array
+#             The corresponding aperture or occuler, depending on the is_aperture
+#             parameter.
+#         """
+#         # Shift coordinates
+#         xycoords -= center.reshape(2, 1, 1)
+#         rcoords = np.hypot(xycoords[0], xycoords[1])
+#         thetacoords = np.arctan2(xycoords[1], xycoords[0])
+
+#         # Wrap theta values around circle
+#         thetas_mapped = (thetacoords + np.pi/4)%(np.pi/2) - np.pi/4
+
+#         # Calculate projected pixel size
+#         npixels = xycoords.shape[-1]
+#         pixel_scale = (np.max(xycoords) - np.min(xycoords))/(npixels-1)
+#         angle = (pixel_scale/2)*np.hypot(1, np.tan(thetas_mapped))
+
+#         # Get projected radial distance
+#         distance = radius - rcoords
+#         if not is_aperture:
+#             distance *= -1
+
+#         # Fit linear slop slong projected pixel sizes/radial distances
+#         m = (vmax-vmin)/(2*angle)
+#         b = (vmax-vmin)/2
+#         grey = m * distance + b
+
+#         # Clip to desired range
+#         aperture = np.clip(grey, a_min=vmin, a_max=vmax)
+#         return aperture
+
+
+#     def construct_combined_aperture(self     : OpticalLayer,
+#                                     diameter : Array,
+#                                     npixels  : int) -> Array:
+#         """
+#         Constructs the various apertures and occulters from the stored
+#         parameters and combines them into a single transmission array.
+
+#         Parameters
+#         ----------
+#         diameter : Array, meters
+#             The diameter of the wavefront to calculate the aperture on.
+#         npixels : int
+#             The linear size of the array to calculate the aperture on.
+
+#         Returns
+#         -------
+#         aperture : Array
+#             The final combined aperture.
+#         """
+#         # Map aperture function
+#         mapped_aperture = vmap(self.make_aperture,
+#                                    in_axes=(0, 0, None, None))
+
+#         # Generate coordinate grid
+#         pixel_scale = diameter/npixels
+#         xycoords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
+
+#         # Generate aperture/occulters
+#         outer_apers = mapped_aperture(self.aperture_radii, \
+#                                       self.aperture_coords, xycoords, True)
+#         inner_apers = mapped_aperture(self.occulter_radii, \
+#                                       self.occulter_coords, xycoords, False)
+
+#         # Bound values
+#         outer_comb = np.clip(outer_apers.sum(0), a_min=0., a_max=1.)
+#         inner_comb = np.prod(inner_apers, axis=0)
+
+#         # Combine
+#         return outer_comb * inner_comb
+
+
+#     def get_aperture(self     : OpticalLayer,
+#                      diameter : Array = None,
+#                      npixels  : int   = 512) -> Array:
+#         """
+#         Constructs the various apertures and occulters from the stored
+#         parameters and combines them into a single transmission array. By
+#         defualt this method takes the largest aperture and uses that as the
+#         diameters, and defaults to 512 pixels.
+
+#         Parameters
+#         ----------
+#         diameter : Array, meters = None
+#             The diameter of the wavefront to calculate the aperture on. Uses
+#             the largest aperture by default
+#         npixels : int = 512
+#             The linear size of the array to calculate the aperture on.
+
+#         Returns
+#         -------
+#         aperture : Array
+#             The final combined aperture.
+#         """
+#         diameter = 2*self.aperture_radii.max() if diameter is None else diameter
+#         return self.construct_combined_aperture(diameter, npixels)
+
+
+#     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+#         """
+#         Generates and applies the combined apertures transmission array to the
+#         wavefront.
+
+#         Parameters
+#         ----------
+#         wavefront : Wavefront
+#             The wavefront to operate on.
+
+#         Returns
+#         -------
+#         wavefront : Wavefront
+#             The wavefront with the combined aperture applied.
+#         """
+#         aper = self.construct_combined_aperture(wavefront.diameter,
+#                                                 wavefront.npixels)
+#         return wavefront.multiply_amplitude(aper)
 
 
 class ApplyBasisCLIMB(OpticalLayer):
@@ -934,7 +1159,8 @@ class ApplyBasisCLIMB(OpticalLayer):
 
 
     def lsq_params(self, img):
-        xx, yy = np.meshgrid(np.linspace(0,1,img.shape[0]),np.linspace(0,1,img.shape[1]))
+        xx, yy = np.meshgrid(np.linspace(0,1,img.shape[0]),
+                             np.linspace(0,1,img.shape[1]))
         A = np.vstack([xx.ravel(), yy.ravel(), np.ones_like(xx).ravel()]).T
         matrix = np.linalg.inv(np.dot(A.T,A)).dot(A.T)
         return matrix, xx, yy, A
@@ -947,7 +1173,9 @@ class ApplyBasisCLIMB(OpticalLayer):
 
     def area(self, img, epsilon = 1e-15):
         a,b,c = self.lsq(img)
-        a, b, c = np.where(a==0,epsilon,a), np.where(b==0,epsilon,b), np.where(c==0,epsilon,c)
+        a,= np.where(a==0,epsilon,a)
+        b = np.where(b==0,epsilon,b)
+        c = np.where(c==0,epsilon,c)
         x1 = (-b-c)/(a) # don't divide by zero
         x2 = -c/(a) # don't divide by zero
         x1, x2 = np.min(np.array([x1,x2])), np.max(np.array([x1,x2]))
@@ -986,6 +1214,33 @@ class ApplyBasisCLIMB(OpticalLayer):
         soft_bin = vmap_mask(flat).reshape(ppsz, ppsz)
 
         return soft_bin
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return ("Applies a binary OPD to the Wavefront using the CLIMB "
+                "algorithm.")
 
 
 class Rotate(OpticalLayer):
@@ -1024,7 +1279,8 @@ class Rotate(OpticalLayer):
         Parameters
         ----------
         angle: float, radians
-            The angle by which to rotate the wavefront in the clockwise direction.
+            The angle by which to rotate the wavefront in the clockwise 
+            direction.
         real_imaginary : bool = False
             Should the rotation be performed on the amplitude and phase array
             or the real and imaginary arrays.
@@ -1062,3 +1318,54 @@ class Rotate(OpticalLayer):
         args = [self.angle, self.real_imaginary, self.fourier]
         args += [self.padding] if self.padding is not None else []
         return wavefront.rotate(*args)
+
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        if angular_units not in ('radians', 'degrees', 'arcseconds', 
+                                 'arcminutes'):
+            raise ValueError(f"unit must be one of 'radians', 'degrees', "
+                             f"'arcseconds' or 'arcminutes'.")
+        
+        if angular_units == 'radians':
+            angle = self.angle
+        elif angular_units == 'degrees':
+            angle = dLux.utils.r2d(self.angle)
+        elif angular_units == 'arcseconds':
+            angle = dLux.utils.r2s(self.angle)
+        elif angular_units == 'arcminutes':
+            angle = dLux.utils.r2m(self.angle)
+        
+        if self.fourier:
+            method = f"a Fourier method with padding of {self.padding}"
+        else:
+            method = "an Interpolation method of order 1"
+
+        if self.real_imaginary:
+            wf_type = "real and imaginary arrays"
+        else:
+            wf_type = "amplitude and phase arrays"
+
+        return (f"Applies a {angle:.{sigfigs}} {angular_units} rotation to the "
+                f"wavefront {wf_type} using {method}.")
