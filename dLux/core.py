@@ -439,6 +439,35 @@ class Instrument(ExtendedBase):
         """
         return tree_at(lambda instrument: instrument.scene, self, \
                            self.scene.normalise())
+    
+
+    def summarise(self : Instrument) -> None:
+        """
+        Prints a summary of all the instrument
+        """
+        print("Optics summary:")
+        self.optics.summarise()
+        print("Detector summary:")
+        self.detector.summarise()
+
+
+    def plot(self       : Optics, 
+             wavelength : Array, 
+             offset     : Array = np.zeros(2)) -> None:
+        """
+        Prints the summary of all the planes and then plots a wavefront as it
+        propagates through the optics.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians = np.zeros(2)
+            The (x, y) offset from the optical axis of the source.
+        """
+        wf = self.optics.plot(wavelength, offset)
+        self.detector.plot(wf.psf)
 
 
     def model(self : Instrument, **kwargs):

@@ -313,8 +313,8 @@ class CreateWavefront(OpticalLayer):
         summary : str
             A summary of the class.
         """
-        return (f"Creates a {self.wavefront_type} wavefront of size " 
-                f"{self.npixels} pixels and diameter {self.diameter} m.")
+        return (f"{self.name}: Creates a {self.wavefront_type} wavefront of " 
+                f"size {self.npixels} pixels and diameter {self.diameter} m.")
 
 
 class TiltWavefront(OpticalLayer):
@@ -394,8 +394,8 @@ class TiltWavefront(OpticalLayer):
             A summary of the class.
         """
         angles = convert_angular(self.tilt_angles, 'radians', angular_units)
-        return (f"Tilts the wavefront by {angles:.{sigfigs}} {angular_units} "
-                "in the (x, y) dimension.")
+        return (f"{self.name}: Tilts the wavefront by {angles:.{sigfigs}} "
+                f"{angular_units} in the (x, y) dimension.")
 
 
 class NormaliseWavefront(OpticalLayer):
@@ -464,7 +464,7 @@ class NormaliseWavefront(OpticalLayer):
         summary : str
             A summary of the class.
         """
-        return "Normalises the wavefront to unity power."
+        return f"{self.name}: Normalises the wavefront to unity power."
 
 
 class ApplyBasisOPD(OpticalLayer):
@@ -576,8 +576,8 @@ class ApplyBasisOPD(OpticalLayer):
         summary : str
             A summary of the class.
         """
-        return (f"Applies an Optical Path Difference (OPD) to the wavefront "
-                f"calculated from the basis vectors and coefficients.")
+        return (f"{self.name}: Applies an Optical Path Difference (OPD) to the "
+            f"wavefront calculated from the basis vectors and coefficients.")
 
 
 class AddPhase(OpticalLayer):
@@ -657,7 +657,7 @@ class AddPhase(OpticalLayer):
         summary : str
             A summary of the class.
         """
-        return "Add an array of phase values to the wavefront."
+        return f"{self.name}: Add an array of phase values to the wavefront."
 
 
 class AddOPD(OpticalLayer):
@@ -737,8 +737,8 @@ class AddOPD(OpticalLayer):
         summary : str
             A summary of the class.
         """
-        return ("Add an array of Optical Path Differences (OPD) to the "
-                "wavefront.")
+        return (f"{self.name}: Add an array of Optical Path Differences (OPD) "
+                "to the wavefront.")
 
 
 class TransmissiveOptic(OpticalLayer):
@@ -821,7 +821,8 @@ class TransmissiveOptic(OpticalLayer):
         summary : str
             A summary of the class.
         """
-        return ("Applies an array of tranmission values to the Wavefront.")
+        return (f"{self.name}: Applies an array of tranmission values to the "
+                "Wavefront.")
 
 
 class CompoundAperture(OpticalLayer):
@@ -1266,8 +1267,8 @@ class ApplyBasisCLIMB(OpticalLayer):
         summary : str
             A summary of the class.
         """
-        return ("Applies a binary OPD to the Wavefront using the CLIMB "
-                "algorithm.")
+        return (f"{self.name}: Applies a binary OPD to the Wavefront using the "
+                "CLIMB algorithm.")
 
 
 class Rotate(OpticalLayer):
@@ -1393,5 +1394,5 @@ class Rotate(OpticalLayer):
         else:
             wf_type = "amplitude and phase arrays"
 
-        return (f"Applies a {angle:.{sigfigs}} {angular_units} rotation to the "
-                f"wavefront {wf_type} using {method}.")
+        return (f"{self.name}: Applies a {angle:.{sigfigs}} {angular_units} "
+                f"rotation to the wavefront {wf_type} using {method}.")

@@ -185,7 +185,7 @@ class ApplyPixelResponse(DetectorLayer):
         summary : str
             A summary of the class.
         """
-        return "Applies the pixel response to the image."
+        return f"{self.name}: Applies the pixel response to the image."
 
 
 class ApplyJitter(DetectorLayer):
@@ -285,7 +285,8 @@ class ApplyJitter(DetectorLayer):
         summary : str
             A summary of the class.
         """
-        return f"Applies a jitter of {self.jitter:.{sigfigs}} pixels."
+        return (f"{self.name}: Applies a jitter of {self.jitter:.{sigfigs}} "
+                "pixels.")
 
 
 class ApplySaturation(DetectorLayer):
@@ -362,7 +363,8 @@ class ApplySaturation(DetectorLayer):
         summary : str
             A summary of the class.
         """
-        return f"Applies a saturation of {self.saturation:.{sigfigs}} counts."
+        return (f"{self.name}: Applies a saturation of "
+                f"{self.saturation:.{sigfigs}} counts.")
 
 
 class AddConstant(DetectorLayer):
@@ -438,7 +440,8 @@ class AddConstant(DetectorLayer):
         summary : str
             A summary of the class.
         """
-        return f"Adds a constant value of {self.value:.{sigfigs}} counts."
+        return (f"{self.name}: Adds a constant value of "
+                f"{self.value:.{sigfigs}} counts.")
 
 
 class IntegerDownsample(DetectorLayer):
@@ -543,7 +546,8 @@ class IntegerDownsample(DetectorLayer):
         summary : str
             A summary of the class.
         """
-        return f"Downsamples the image by {self.kernel_size} pixels."
+        return (f"{self.name}: Downsamples the image by {self.kernel_size} "
+                f"pixels.")
 
 
 class Rotate(DetectorLayer):
@@ -644,5 +648,5 @@ class Rotate(DetectorLayer):
         else:
             method = "an Interpolation method of order 1"
 
-        return (f"Applies a {angle:.{sigfigs}} {angular_units} rotation to the "
-                f"image using {method}.")
+        return (f"{self.name}: Applies a {angle:.{sigfigs}} {angular_units} "
+                f"rotation to the image using {method}.")
