@@ -104,7 +104,7 @@ class OpticalLayer(ExtendedBase, ABC):
         return parameters
     
 
-    # @abstractmethod
+    @abstractmethod
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
@@ -127,6 +127,36 @@ class OpticalLayer(ExtendedBase, ABC):
         -------
         summary : str
             A summary of the class.
+        """
+        pass
+
+
+    def display(self            : OpticalLayer, 
+                figsize         : tuple = (10, 4),
+                cmap            : str = 'inferno',
+                dpi             : int = 120,
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> None:
+        """
+        Displays a plot of the wavefront amplitude and opd or phase.
+
+        Parameters
+        ----------
+        figsize : tuple = (10, 4)
+            The size of the figure to display.
+        cmap : str = 'inferno'
+            The colour map to use.
+        dpi : int = 120
+            The resolution of the figure.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
         """
         pass
 
@@ -552,6 +582,39 @@ class ApplyBasisOPD(OpticalLayer):
         """
         return (f"Applies an Optical Path Difference (OPD) to the wavefront "
                 f"calculated from the basis vectors and coefficients.")
+
+
+    def display(self            : OpticalLayer, 
+                figsize         : tuple = (10, 4),
+                cmap            : str = 'inferno',
+                dpi             : int = 120,
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> None:
+        """
+        Displays a plot of the wavefront amplitude and opd or phase.
+
+        Parameters
+        ----------
+        figsize : tuple = (10, 4)
+            The size of the figure to display.
+        cmap : str = 'inferno'
+            The colour map to use.
+        dpi : int = 120
+            The resolution of the figure.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+        """
+        amplitude = np.ones(opd.shape)
+        opd = self.get_total_opd()
+        dLux.utils.two_image_plot(amplitude, opd, figsize=figsize, 
+                        title1="Amplitude", title2="OPD", cmap=cmap, dpi=dpi)
 
 
 class AddPhase(OpticalLayer):
