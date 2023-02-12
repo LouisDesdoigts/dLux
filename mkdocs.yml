@@ -133,17 +133,19 @@ nav:
             - simple optical system: utils/models/simple_optical_system.md
             - toliman:               utils/models/toliman.md
         - Units:
-            - radians to arcseconds: utils/units/radians_to_arcseconds.md
-            - radians to degrees: utils/units/radians_to_degrees.md
-            - radians to arcminutes: utils/units/radians_to_arcminutes.md
-            - degrees to radians: utils/units/degrees_to_radians.md
-            - degrees to arcminutes: utils/units/degrees_to_arcminutes.md
-            - degrees to arcseconds: utils/units/degrees_to_arcseconds.md
-            - arcminutes to radians: utils/units/arcminutes_to_radians.md
-            - arcminutes to degrees: utils/units/arcminutes_to_degrees.md
+            - convert cartesian:        utils/units/convert_cartesian.md
+            - convert angular:          utils/units/convert_angular.md
+            - radians to arcseconds:    utils/units/radians_to_arcseconds.md
+            - radians to degrees:       utils/units/radians_to_degrees.md
+            - radians to arcminutes:    utils/units/radians_to_arcminutes.md
+            - degrees to radians:       utils/units/degrees_to_radians.md
+            - degrees to arcminutes:    utils/units/degrees_to_arcminutes.md
+            - degrees to arcseconds:    utils/units/degrees_to_arcseconds.md
+            - arcminutes to radians:    utils/units/arcminutes_to_radians.md
+            - arcminutes to degrees:    utils/units/arcminutes_to_degrees.md
             - arcminutes to arcseconds: utils/units/arcminutes_to_arcseconds.md
-            - arcseconds to radians: utils/units/arcseconds_to_radians.md
-            - arcseconds to degrees: utils/units/arcseconds_to_degrees.md
+            - arcseconds to radians:    utils/units/arcseconds_to_radians.md
+            - arcseconds to degrees:    utils/units/arcseconds_to_degrees.md
             - arcseconds to arcminutes: utils/units/arcseconds_to_arcminutes.md
         - Math:
             - factorial: utils/math/factorial.md
@@ -188,3 +190,4 @@ nav:
             - get radial mask: utils/gradient_energy/get_radial_mask.md
         - Helpers:
             - list to dictionary: utils/helpers/list_to_dictionary.md
+            - two image plot:     utils/helpers/two_image_plot.md
