@@ -515,7 +515,7 @@ class PointSource(Source):
         flux = self.flux
         return (f"{self.name}: A Point Source with flux {flux:.{sigfigs}} "
                 f"photons at offset from the optical axis by {position} "
-                f"{angular_units} with spectrum {spectrum_str}")
+                f"{angular_units} with spectrum\n  {spectrum_str}")
 
 
 class MultiPointSource(Source):
@@ -667,7 +667,7 @@ class MultiPointSource(Source):
         n = len(self.flux)
         return (f"{self.name}: {n} Point Sources with fluxes "
                 f"{self.flux:.{sigfigs}} photons at offsets from the optical "
-                f"axis by {position} {angular_units} with spectrum "
+                f"axis by {position} {angular_units} with spectrum\n  "
                 f"{spectrum_str}")
 
 
@@ -798,7 +798,7 @@ class ArrayDistribution(ResolvedSource):
                                                 sigfigs)
         return (f"{self.name}: A Resolved Source with flux "
                 f"{self.flux:.{sigfigs}} photons at offset from the optical "
-                f"axis by {position} {angular_units} with spectrum "
+                f"axis by {position} {angular_units} with spectrum\n  "
                 f"{spectrum_str}")
 
 
@@ -959,7 +959,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
                 f"offset from the optical axis by {position} "
                 f"{angular_units} with separation {separation:.{sigfigs}} "
                 f"{angular_units}, position angle {position_angle:.{sigfigs}} "
-                f"{angular_units} and spectrum {spectrum_str}")
+                f"{angular_units} and spectrum\n  {spectrum_str}")
 
 
 class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
@@ -1112,7 +1112,7 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
         return (f"{self.name}: A Point and Resolved Source with mean flux "
                 f"{self.flux:.{sigfigs}} photons and constrast "
                 f"{self.contrast:.{sigfigs}} offset from the optical axis by "
-                f"{position} {angular_units} and spectrum "
+                f"{position} {angular_units} and spectrum\n  "
                 f"{spectrum_str}")
 
 
@@ -1268,4 +1268,4 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
         return (f"{self.name}: A Point and Resolved Source with mean flux "
                 f"{self.flux} photons and constrast {self.contrast} offset "
                 f"from the optical axis by {position} "
-                f"{angular_units} and spectrum {spectrum_str}")
+                f"{angular_units} and spectrum\n  {spectrum_str}")

@@ -443,7 +443,7 @@ class Instrument(ExtendedBase):
 
     def summarise(self : Instrument) -> None:
         """
-        Prints a summary of all the instrument
+        Prints a summary of all instrument
         """
         print("Optics summary:")
         self.optics.summarise()
@@ -943,6 +943,14 @@ class Scene(ExtendedBase):
                 is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
 
         return tree_at(lambda scene: scene.sources, self, normalised_sources)
+    
+
+    def summarise(self : Instrument) -> None:
+        """
+        Prints a summary of all the Scene.
+        """
+        for source in self.sources.values():
+            print(source.summary())
 
 
     def model(self : Scene, optics : Optics, **kwargs):
