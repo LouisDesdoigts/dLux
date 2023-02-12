@@ -249,7 +249,7 @@ def rotate(array : Array, angle : Array, order : int = 1) -> Array:
     # Get coordinates
     npixels = array.shape[0]
     centre = (npixels - 1) / 2
-    coordinates = c.get_pixel_positions((npixels, npixels))
+    coordinates = c.get_pixel_positions((npixels, npixels), indexing='ij')
     coordinates_rotated = c.rotate(coordinates, angle) + centre
 
     # Interpolate
