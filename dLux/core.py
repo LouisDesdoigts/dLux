@@ -746,7 +746,7 @@ class Optics(ExtendedBase):
         return planes
 
 
-    def summarise_planes(self : Optics) -> None:
+    def summarise(self : Optics) -> None:
         """
         Prints a summary of all the planes in the optical system.
         """
@@ -757,12 +757,12 @@ class Optics(ExtendedBase):
             print(f'Plane {i}')
             for layer in planes[i]:
                 print(f"  {layer.summary(angular_units='arcseconds')}")
-        print('\n\n')
+        print('\n')
 
 
-    def plot_planes(self       : Optics, 
-                    wavelength : Array, 
-                    offset     : Array = np.zeros(2)) -> None:
+    def plot(self       : Optics, 
+             wavelength : Array, 
+             offset     : Array = np.zeros(2)) -> None:
         """
         Prints the summary of all the planes and then plots a wavefront as it
         propagates through the optics.
@@ -774,21 +774,27 @@ class Optics(ExtendedBase):
             layers.
         offset : Array, radians = np.zeros(2)
             The (x, y) offset from the optical axis of the source.
+        
+        Returns
+        -------
+        wf : Wavefront
+            The final wavefront after being propagated through the optical
+            layers.
         """
         planes = self.get_planes()
-        self.summarise_planes()
+        self.summarise()
 
         for i in range(len(planes)):
             print(f'Plane {i}')
             for layer in planes[i]:
                 print(f"  {layer.summary()}")
-
                 if isinstance(layer, dLux.CreateWavefront):
                     wf, _ = layer(None, 
                                   {"wavelength": wavelength, 'offset': offset})
                 else:
                     wf = layer(wf)
                 layer.display(wf)
+        return wf
 
 
     def model(self : Optics, **kwargs):
@@ -1066,6 +1072,37 @@ class Detector(ExtendedBase):
             intermediate_images.append(image.copy())
             intermediate_layers.append(deepcopy(layer))
         return image, intermediate_images, intermediate_layers
+    
+
+    def summarise(self : Detector) -> None:
+        """
+        Prints a summary of all the layers in the detector.
+        """
+        print("Text summary:")
+        keys = self.layers.keys()
+        for key in keys:
+            layer = self.layers[key]
+            print(f"  {layer.summary()}")
+        print('\n')
+
+
+    def plot(self : Optics, image : Array) -> None:
+        """
+        Prints the summary of all the layers and then plots a image as it
+        propagates through the detector layer.
+
+        Parameters
+        ----------
+        iamge : Array
+            The image to propagate through the detector.
+        """
+        self.summarise()
+        keys = self.layers.keys()
+        for key in keys:
+            layer = self.layers[key]
+            print(f"{layer.summary()}")
+            image = layer(image)
+            layer.display(image)
 
 
     def model(self : Detector, optics : Optics, **kwargs):

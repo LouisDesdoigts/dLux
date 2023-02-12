@@ -135,7 +135,6 @@ class OpticalLayer(ExtendedBase, ABC):
     def display(self            : OpticalLayer, 
                 wavefront       : Wavefront,
                 figsize         : tuple = (10, 4),
-                # cmap            : str = 'inferno',
                 dpi             : int = 120,
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
