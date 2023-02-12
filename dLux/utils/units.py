@@ -1,6 +1,7 @@
 import jax.numpy as np
 
-__all__ = ["radians_to_arcseconds", "radians_to_degrees", 
+__all__ = ["convert_cartesian", "convert_angular",
+           "radians_to_arcseconds", "radians_to_degrees", 
            "radians_to_arcminutes", "degrees_to_radians", 
            "degrees_to_arcminutes", "degrees_to_arcseconds", 
            "arcminutes_to_radians", "arcminutes_to_degrees", 
@@ -10,6 +11,115 @@ __all__ = ["radians_to_arcseconds", "radians_to_degrees",
            "m2r", "m2d", "m2s", "s2r", "s2d", "s2m"]
 
 Array = np.ndarray
+
+
+# General conversion classes:
+def convert_cartesian(values : Array, 
+                      input  : str = 'meters', 
+                      output : str = 'meters') -> Array:
+    """
+    Converts the input values from one unit to another.
+
+    Parameters
+    ----------
+    values : Array
+        The input values to be converted.
+    input : str = 'meters'
+        The input units. Must be one of 'meters', 'millimeters', or 'microns'.
+    output : str = 'meters'
+        The output units. Must be one of 'meters', 'millimeters', or 'microns'.
+    
+    Returns
+    -------
+    values : Array
+        The input values converted into the output units.
+    """
+    if input not in ('meters', 'millimeters', 'microns'):
+        raise ValueError("input must be 'meters', 'millimeters', or 'microns'.")
+    if output not in ('meters', 'millimeters', 'microns'):
+        raise ValueError("output must be 'meters', 'millimeters', or "
+                         "'microns'.")
+    
+    if input == output:
+        factor = 1
+    elif input == 'meters':
+        if output == 'millimeters':
+            factor = 1e-3
+        elif output == 'microns':
+            factor = 1e-6
+    elif input == 'millimeter':
+        if output == 'meters':
+            factor = 1e3
+        elif output == 'microns':
+            factor = 1e-3
+    elif input == 'microns':
+        if output == 'meters':
+            factor = 1e6
+        elif output == 'millimeters':
+            factor = 1e3
+    return values * factor
+
+
+def convert_angular(values : Array,
+                    input  : str = 'radians',
+                    output : str = 'radians') -> Array:
+    """
+    Converts the input values from one unit to another.
+
+    Parameters
+    ----------
+    values : Array
+        The input values to be converted.
+    input : str = 'radians'
+        The input units. Must be one of 'radians', 'degrees', 'arcseconds', or
+        'arcminutes'.
+    output : str = 'radians'
+        The output units. Must be one of 'radians', 'degrees', 'arcseconds', or
+        'arcminutes'.
+    
+    Returns
+    -------
+    values : Array
+        The input values converted into the output units.
+    """
+    if input not in ('radians', 'degrees', 'arcseconds', 'arcminutes'):
+        raise ValueError(f"input must be one of 'radians', 'degrees', "
+                         f"'arcseconds' or 'arcminutes'.")
+    if output not in ('radians', 'degrees', 'arcseconds', 'arcminutes'):
+        raise ValueError(f"output must be one of 'radians', 'degrees', "
+                         f"'arcseconds' or 'arcminutes'.")
+
+    if input == output:
+        factor = 1
+    elif input == 'radians':
+        if output == 'degrees':
+            factor = r2d(1)
+        elif output == 'arcminutes':
+            factor = r2m(1)
+        elif output == 'arcseconds':
+            factor = r2s(1)
+    elif input == 'degrees':
+        if output == 'radians':
+            factor = d2r(1)
+        elif output == 'arcminutes':
+            factor = d2m(1)
+        elif output == 'arcseconds':
+            factor = d2s(1)
+    elif input == 'arcminutes':
+        if output == 'radians':
+            factor = m2r(1)
+        elif output == 'degrees':
+            factor = m2d(1)
+        elif output == 'arcseconds':
+            factor = m2s(1)
+    elif input == 'arcseconds':
+        if output == 'radians':
+            factor = s2r(1)
+        elif output == 'degrees':
+            factor = s2d(1)
+        elif output == 'arcminutes':
+            factor = s2m(1)
+    return values * factor
 
 
 # Radians to:
