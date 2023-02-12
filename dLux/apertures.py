@@ -6,6 +6,8 @@ from jax.tree_util import tree_map, tree_flatten
 from equinox import filter, static_field
 from dLux.utils import get_pixel_coordinates, coordinates as c, opd_to_phase, \
     factorial, cartesian_to_polar, list_to_dictionary
+from dLux.utils.helpers import two_image_plot
+from dLux.utils.units import convert_angular, convert_cartesian
 
 
 Array = np.ndarray
@@ -553,20 +555,8 @@ class CircularAperture(DynamicAperture):
         summary : str
             A summary of the class.
         """
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            radius = self.radius * 1e-3
-            center = self.center * 1e-3
-        elif cartesian_units == 'microns':
-            radius = self.radius * 1e-6
-            center = self.center * 1e-6
-        else:
-            radius = self.radius
-            center = self.center
-
+        radius = convert_cartesian(self.radius, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
         transmissive = "transmissive" if not self.occulting else "occulting"
 
         summary = (f"Applies a {transmissive} Circular Aperture with radius "
@@ -574,16 +564,12 @@ class CircularAperture(DynamicAperture):
         
         if self.softening != np.array(0):
             summary += f" softened by ~{self.softening} pixels"
-
         if self.center != np.array([0., 0.]):
             summary += f" centred at {center}"
-        
         if self.shear != np.array([0., 0.]):
             summary += f" sheared by {self.shear}"
-        
         if self.compression != np.array([1., 1.]):
             summary += f" compressed by {self.compression}"
-
         return summary + "."
 
 
@@ -737,23 +723,9 @@ class AnnularAperture(DynamicAperture):
         summary : str
             A summary of the class.
         """
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            rmin = self.rmin * 1e-3
-            rmax = self.rmax * 1e-3
-            center = self.center * 1e-3
-        elif cartesian_units == 'microns':
-            rmin = self.rmin * 1e-6
-            rmax = self.rmax * 1e-6
-            center = self.center * 1e-6
-        else:
-            rmin = self.rmin
-            rmax = self.rmax
-            center = self.center
-
+        rmin = convert_cartesian(self.rmin, 'meters', cartesian_units)
+        rmax = convert_cartesian(self.rmax, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
         transmissive = "transmissive" if not self.occulting else "occulting"
 
         summary = (f"Applies a {transmissive} Annular Aperture with inner "
@@ -762,16 +734,12 @@ class AnnularAperture(DynamicAperture):
         
         if self.softening != np.array(0):
             summary += f" softened by ~{self.softening} pixels"
-
         if self.center != np.array([0., 0.]):
             summary += f" centred at {center}"
-        
         if self.shear != np.array([0., 0.]):
             summary += f" sheared by {self.shear}"
-        
         if self.compression != np.array([1., 1.]):
             summary += f" compressed by {self.compression}"
-
         return summary + "."
 
 
@@ -931,32 +899,10 @@ class RectangularAperture(DynamicAperture):
         summary : str
             A summary of the class.
         """
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            height = self.height * 1e-3
-            width = self.width * 1e-3
-            center = self.center * 1e-3
-        elif cartesian_units == 'microns':
-            height = self.height * 1e-6
-            width = self.width * 1e-6
-            center = self.center * 1e-6
-        else:
-            height = self.height
-            width = self.width
-            center = self.center
-
-        if angular_units == 'radians':
-            rotation = self.rotation
-        elif angular_units == 'degrees':
-            rotation = dLux.utils.r2d(self.rotation)
-        elif angular_units == 'arcseconds':
-            rotation = dLux.utils.r2s(self.rotation)
-        elif angular_units == 'arcminutes':
-            rotation = dLux.utils.r2m(self.rotation)
-
+        height = convert_cartesian(self.height, 'meters', cartesian_units)
+        width = convert_cartesian(self.width, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
         transmissive = "transmissive" if not self.occulting else "occulting"
 
         summary = (f"Applies a {transmissive} Rectangular Aperture with height "
@@ -965,19 +911,14 @@ class RectangularAperture(DynamicAperture):
         
         if self.softening != np.array(0):
             summary += f" softened by ~{self.softening} pixels"
-
         if self.center != np.array([0., 0.]):
             summary += f" centred at {center}"
-
         if self.rotation != np.array(0.):
             summary += f" rotated by {rotation} {angular_units}"
-        
         if self.shear != np.array([0., 0.]):
             summary += f" sheared by {self.shear}"
-        
         if self.compression != np.array([1., 1.]):
             summary += f" compressed by {self.compression}"
-
         return summary + "."
 
 
@@ -1129,29 +1070,9 @@ class SquareAperture(DynamicAperture):
         summary : str
             A summary of the class.
         """
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            width = self.width * 1e-3
-            center = self.center * 1e-3
-        elif cartesian_units == 'microns':
-            width = self.width * 1e-6
-            center = self.center * 1e-6
-        else:
-            width = self.width
-            center = self.center
-
-        if angular_units == 'radians':
-            rotation = self.rotation
-        elif angular_units == 'degrees':
-            rotation = dLux.utils.r2d(self.rotation)
-        elif angular_units == 'arcseconds':
-            rotation = dLux.utils.r2s(self.rotation)
-        elif angular_units == 'arcminutes':
-            rotation = dLux.utils.r2m(self.rotation)
-
+        width = convert_cartesian(self.width, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
         transmissive = "transmissive" if not self.occulting else "occulting"
 
         summary = (f"Applies a {transmissive} Rectangular Aperture with width "
@@ -1159,19 +1080,14 @@ class SquareAperture(DynamicAperture):
         
         if self.softening != np.array(0):
             summary += f" softened by ~{self.softening} pixels"
-
         if self.center != np.array([0., 0.]):
             summary += f" centred at {center}"
-
         if self.rotation != np.array(0.):
             summary += f" rotated by {rotation} {angular_units}"
-        
         if self.shear != np.array([0., 0.]):
             summary += f" sheared by {self.shear}"
-        
         if self.compression != np.array([1., 1.]):
             summary += f" compressed by {self.compression}"
-
         return summary + "."
 
 
@@ -1582,45 +1498,22 @@ class IrregularPolygonalAperture(PolygonalAperture):
         summary : str
             A summary of the class.
         """
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            center = self.center * 1e-3
-        elif cartesian_units == 'microns':
-            center = self.center * 1e-6
-        else:
-            center = self.center
-
-        if angular_units == 'radians':
-            rotation = self.rotation
-        elif angular_units == 'degrees':
-            rotation = dLux.utils.r2d(self.rotation)
-        elif angular_units == 'arcseconds':
-            rotation = dLux.utils.r2s(self.rotation)
-        elif angular_units == 'arcminutes':
-            rotation = dLux.utils.r2m(self.rotation)
-
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
         transmissive = "transmissive" if not self.occulting else "occulting"
 
         summary = f"Applies a {transmissive} Irregular Polygonal Aperture"
         
         if self.softening != np.array(0):
             summary += f" softened by ~{self.softening} pixels"
-
         if self.center != np.array([0., 0.]):
             summary += f" centred at {center}"
-
         if self.rotation != np.array(0.):
             summary += f" rotated by {rotation} {angular_units}"
-        
         if self.shear != np.array([0., 0.]):
             summary += f" sheared by {self.shear}"
-        
         if self.compression != np.array([1., 1.]):
             summary += f" compressed by {self.compression}"
-
         return summary + "."
 
 
@@ -1809,29 +1702,9 @@ class RegularPolygonalAperture(PolygonalAperture):
         summary : str
             A summary of the class.
         """
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            center = self.center * 1e-3
-            rmax = self.rmax * 1e-3
-        elif cartesian_units == 'microns':
-            center = self.center * 1e-6
-            rmax = self.rmax * 1e-6
-        else:
-            center = self.center
-            rmax = self.rmax
-
-        if angular_units == 'radians':
-            rotation = self.rotation
-        elif angular_units == 'degrees':
-            rotation = dLux.utils.r2d(self.rotation)
-        elif angular_units == 'arcseconds':
-            rotation = dLux.utils.r2s(self.rotation)
-        elif angular_units == 'arcminutes':
-            rotation = dLux.utils.r2m(self.rotation)
-
+        rmax = convert_cartesian(self.rmax, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
         transmissive = "transmissive" if not self.occulting else "occulting"
 
         summary = (f"Applies a {transmissive} {self.nsides} sided Regular "
@@ -1840,19 +1713,14 @@ class RegularPolygonalAperture(PolygonalAperture):
         
         if self.softening != np.array(0):
             summary += f" softened by ~{self.softening} pixels"
-
         if self.center != np.array([0., 0.]):
             summary += f" centred at {center}"
-
         if self.rotation != np.array(0.):
             summary += f" rotated by {rotation} {angular_units}"
-        
         if self.shear != np.array([0., 0.]):
             summary += f" sheared by {self.shear}"
-        
         if self.compression != np.array([1., 1.]):
             summary += f" compressed by {self.compression}"
-
         return summary + "."
 
 
@@ -1952,29 +1820,9 @@ class HexagonalAperture(RegularPolygonalAperture):
         summary : str
             A summary of the class.
         """
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            center = self.center * 1e-3
-            rmax = self.rmax * 1e-3
-        elif cartesian_units == 'microns':
-            center = self.center * 1e-6
-            rmax = self.rmax * 1e-6
-        else:
-            center = self.center
-            rmax = self.rmax
-
-        if angular_units == 'radians':
-            rotation = self.rotation
-        elif angular_units == 'degrees':
-            rotation = dLux.utils.r2d(self.rotation)
-        elif angular_units == 'arcseconds':
-            rotation = dLux.utils.r2s(self.rotation)
-        elif angular_units == 'arcminutes':
-            rotation = dLux.utils.r2m(self.rotation)
-
+        rmax = convert_cartesian(self.rmax, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
         transmissive = "transmissive" if not self.occulting else "occulting"
 
         summary = (f"Applies a {transmissive} Hexagonal Aperture of max radius "
@@ -1982,19 +1830,14 @@ class HexagonalAperture(RegularPolygonalAperture):
         
         if self.softening != np.array(0):
             summary += f" softened by ~{self.softening} pixels"
-
         if self.center != np.array([0., 0.]):
             summary += f" centred at {center}"
-
         if self.rotation != np.array(0.):
             summary += f" rotated by {rotation} {angular_units}"
-        
         if self.shear != np.array([0., 0.]):
             summary += f" sheared by {self.shear}"
-        
         if self.compression != np.array([1., 1.]):
             summary += f" compressed by {self.compression}"
-
         return summary + "."
 
 
@@ -2259,48 +2102,23 @@ class UniformSpider(Spider):
         summary : str
             A summary of the class.
         """
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            center = self.center * 1e-3
-            width = self.strut_width * 1e-3
-        elif cartesian_units == 'microns':
-            center = self.center * 1e-6
-            width = self.strut_width * 1e-6
-        else:
-            center = self.center
-            width = self.strut_width
-
-        if angular_units == 'radians':
-            rotation = self.rotation
-        elif angular_units == 'degrees':
-            rotation = dLux.utils.r2d(self.rotation)
-        elif angular_units == 'arcseconds':
-            rotation = dLux.utils.r2s(self.rotation)
-        elif angular_units == 'arcminutes':
-            rotation = dLux.utils.r2m(self.rotation)
-
+        width = convert_cartesian(self.strut_width, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
 
         summary = (f"Applies a {self.nstrut} strut spider with widths {width} "
                    f"{cartesian_units}")
         
         if self.softening != np.array(0):
             summary += f" softened by ~{self.softening} pixels"
-
         if self.center != np.array([0., 0.]):
             summary += f" centred at {center}"
-
         if self.rotation != np.array(0.):
             summary += f" rotated by {rotation} {angular_units}"
-        
         if self.shear != np.array([0., 0.]):
             summary += f" sheared by {self.shear}"
-        
         if self.compression != np.array([1., 1.]):
             summary += f" compressed by {self.compression}"
-
         return summary + "."
 
 

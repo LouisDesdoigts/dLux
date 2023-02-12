@@ -8,6 +8,8 @@ from equinox import tree_at, static_field
 from zodiax import ExtendedBase
 from abc import ABC, abstractmethod
 from inspect import signature
+from dLux.utils.helpers import two_image_plot
+from dLux.utils.units import convert_angular, convert_cartesian
 import dLux
 
 
@@ -385,19 +387,7 @@ class TiltWavefront(OpticalLayer):
         summary : str
             A summary of the class.
         """
-        if angular_units not in ('radians', 'degrees', 'arcseconds', 
-                                 'arcminutes'):
-            raise ValueError(f"unit must be one of 'radians', 'degrees', "
-                             f"'arcseconds' or 'arcminutes'.")
-        
-        if angular_units == 'radians':
-            angles = self.tilt_angles
-        elif angular_units == 'degrees':
-            angles = dLux.utils.r2d(self.tilt_angles)
-        elif angular_units == 'arcseconds':
-            angles = dLux.utils.r2s(self.tilt_angles)
-        elif angular_units == 'arcminutes':
-            angles = dLux.utils.r2m(self.tilt_angles)
+        angles = convert_angular(self.tilt_angles, 'radians', angular_units)
         return (f"Tilts the wavefront by {angles:.{sigfigs}} {angular_units} "
                 "in the (x, y) dimension.")
 
@@ -611,10 +601,12 @@ class ApplyBasisOPD(OpticalLayer):
         sigfigs : int = 4
             The number of significant figures to use in the summary.
         """
+        opd = convert_cartesian(self.get_total_opd(), "meters", cartesian_units)
         amplitude = np.ones(opd.shape)
-        opd = self.get_total_opd()
-        dLux.utils.two_image_plot(amplitude, opd, figsize=figsize, 
-                        title1="Amplitude", title2="OPD", cmap=cmap, dpi=dpi)
+        two_image_plot(amplitude, opd, figsize=figsize, 
+                       titles=("Amplitude", "OPD"), 
+                       cbar_labels=("Amplitude", f"OPD ({cartesian_units})"), 
+                       cmap=cmap, dpi=dpi)
 
 
 class AddPhase(OpticalLayer):
@@ -695,7 +687,41 @@ class AddPhase(OpticalLayer):
             A summary of the class.
         """
         return "Add an array of phase values to the wavefront."
+    
 
+    def display(self            : OpticalLayer, 
+                figsize         : tuple = (10, 4),
+                cmap            : str = 'inferno',
+                dpi             : int = 120,
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> None:
+        """
+        Displays a plot of the wavefront amplitude and opd or phase.
+
+        Parameters
+        ----------
+        figsize : tuple = (10, 4)
+            The size of the figure to display.
+        cmap : str = 'inferno'
+            The colour map to use.
+        dpi : int = 120
+            The resolution of the figure.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+        """
+        phase = convert_angular(self.phase, 'radians', angular_units)
+        amplitude = np.ones(phase.shape)
+        two_image_plot(amplitude, phase, figsize=figsize, 
+                       titles=("Amplitude", "Phase"), 
+                       cbar_labels=("Amplitude", f"Phase ({angular_units})"), 
+                       cmap=cmap, dpi=dpi)
 
 class AddOPD(OpticalLayer):
     """
@@ -776,6 +802,41 @@ class AddOPD(OpticalLayer):
         """
         return ("Add an array of Optical Path Differences (OPD) to the "
                 "wavefront.")
+    
+
+    def display(self            : OpticalLayer, 
+                figsize         : tuple = (10, 4),
+                cmap            : str = 'inferno',
+                dpi             : int = 120,
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> None:
+        """
+        Displays a plot of the wavefront amplitude and opd or phase.
+
+        Parameters
+        ----------
+        figsize : tuple = (10, 4)
+            The size of the figure to display.
+        cmap : str = 'inferno'
+            The colour map to use.
+        dpi : int = 120
+            The resolution of the figure.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+        """
+        opd = convert_cartesian(self.opd, "meters", cartesian_units)
+        amplitude = np.ones(opd.shape)
+        two_image_plot(amplitude, opd, figsize=figsize, 
+                       titles=("Amplitude", "OPD"), 
+                       cbar_labels=("Amplitude", f"OPD ({cartesian_units})"), 
+                       cmap=cmap, dpi=dpi)
 
 
 class TransmissiveOptic(OpticalLayer):
@@ -859,6 +920,41 @@ class TransmissiveOptic(OpticalLayer):
             A summary of the class.
         """
         return ("Applies an array of tranmission values to the Wavefront.")
+    
+
+    def display(self            : OpticalLayer, 
+                figsize         : tuple = (10, 4),
+                cmap            : str = 'inferno',
+                dpi             : int = 120,
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> None:
+        """
+        Displays a plot of the wavefront amplitude and opd or phase.
+
+        Parameters
+        ----------
+        figsize : tuple = (10, 4)
+            The size of the figure to display.
+        cmap : str = 'inferno'
+            The colour map to use.
+        dpi : int = 120
+            The resolution of the figure.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+        """
+        transmission = self.transmission
+        opd = np.zeros(transmission.shape)
+        two_image_plot(transmission, opd, figsize=figsize, 
+                       titles=("Transmission", "OPD"), 
+                       cbar_labels=("Transmission", f"OPD ({cartesian_units})"), 
+                       cmap=cmap, dpi=dpi)
 
 
 class CompoundAperture(OpticalLayer):
@@ -1304,6 +1400,44 @@ class ApplyBasisCLIMB(OpticalLayer):
         """
         return ("Applies a binary OPD to the Wavefront using the CLIMB "
                 "algorithm.")
+    
+
+    def display(self            : OpticalLayer, 
+                figsize         : tuple = (10, 4),
+                cmap            : str = 'inferno',
+                dpi             : int = 120,
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> None:
+        """
+        Displays a plot of the wavefront amplitude and opd or phase.
+
+        Parameters
+        ----------
+        figsize : tuple = (10, 4)
+            The size of the figure to display.
+        cmap : str = 'inferno'
+            The colour map to use.
+        dpi : int = 120
+            The resolution of the figure.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+        """
+        latent = self.get_opd(self.basis, self.coefficients)
+        binary_phase = np.pi*self.CLIMB(latent, ppsz=3*self.basis.shape[1:])
+        opd = self.phase_to_opd(binary_phase, self.ideal_wavelength)
+        opd = convert_cartesian(opd, 'meters', cartesian_units)
+        amplitude = np.ones(opd.shape)
+        two_image_plot(amplitude, opd, figsize=figsize, 
+                       titles=("Amplitude", "OPD"), 
+                       cbar_labels=("Amplitude", f"OPD ({cartesian_units})"), 
+                       cmap=cmap, dpi=dpi)
 
 
 class Rotate(OpticalLayer):
@@ -1406,19 +1540,7 @@ class Rotate(OpticalLayer):
         summary : str
             A summary of the class.
         """
-        if angular_units not in ('radians', 'degrees', 'arcseconds', 
-                                 'arcminutes'):
-            raise ValueError(f"unit must be one of 'radians', 'degrees', "
-                             f"'arcseconds' or 'arcminutes'.")
-        
-        if angular_units == 'radians':
-            angle = self.angle
-        elif angular_units == 'degrees':
-            angle = dLux.utils.r2d(self.angle)
-        elif angular_units == 'arcseconds':
-            angle = dLux.utils.r2s(self.angle)
-        elif angular_units == 'arcminutes':
-            angle = dLux.utils.r2m(self.angle)
+        angle = convert_angular(self.angle, 'radians', angular_units)
         
         if self.fourier:
             method = f"a Fourier method with padding of {self.padding}"

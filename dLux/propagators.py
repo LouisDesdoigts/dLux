@@ -3,6 +3,8 @@ import jax.numpy as np
 from equinox import tree_at
 from abc import ABC, abstractmethod
 from dLux.utils.coordinates import get_pixel_coordinates, get_coordinates_vector
+from dLux.utils.helpers import two_image_plot
+from dLux.utils.units import convert_angular, convert_cartesian
 import dLux
 
 
@@ -596,22 +598,12 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         """
         plane_out = 'pupil' if self.inverse else 'focal'
 
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            pixel_scale = self.pixel_scale_out * 1e-3
-            focal_length = self.focal_length * 1e-3
-            shift = self.shift * 1e-3 if not self.pixel_shift else self.shift
-        elif cartesian_units == 'microns':
-            pixel_scale = self.pixel_scale_out * 1e-6
-            focal_length = self.focal_length * 1e-6
-            shift = self.shift * 1e-6 if not self.pixel_shift else self.shift
-        else:
-            pixel_scale = self.pixel_scale_out
-            focal_length = self.focal_length
-            shift = self.shift
+        pixel_scale = convert_cartesian(self.pixel_scale_out, 'meters', 
+                                        cartesian_units)
+        focal_length = convert_cartesian(self.focal_length, 'meters', 
+                                        cartesian_units)
+        shift = convert_cartesian(self.shift, 'meters', cartesian_units) \
+            if not self.pixel_shift else self.shift
 
         prop_string = (f"Propagates the Wavefront {focal_length} "
                        f"{cartesian_units} to a {plane_out} plane "
@@ -737,27 +729,11 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
             A summary of the class.
         """
         plane_out = 'pupil' if self.inverse else 'focal'
-
-        if angular_units not in ('radians', 'degrees', 'arcseconds', 
-                                 'arcminutes'):
-            raise ValueError(f"unit must be one of 'radians', 'degrees', "
-                             f"'arcseconds' or 'arcminutes'.")
-
-        if angular_units == 'radians':
-            pixel_scale = self.pixel_scale_out
-            shift = self.shift
-        elif angular_units == 'degrees':
-            pixel_scale = dLux.utils.r2d(self.pixel_scale_out)
-            shift = dLux.utils.r2d(self.shift) if not self.pixel_shift \
-                else self.shift
-        elif angular_units == 'arcseconds':
-            pixel_scale = dLux.utils.r2s(self.pixel_scale_out)
-            shift = dLux.utils.r2s(self.shift) if not self.pixel_shift \
-                else self.shift
-        elif angular_units == 'arcminutes':
-            pixel_scale = dLux.utils.r2m(self.pixel_scale_out)
-            shift = dLux.utils.r2m(self.shift) if not self.pixel_shift \
-                else self.shift
+            
+        pixel_scale = convert_angular(self.pixel_scale_out, 'radians', 
+                                        angular_units)
+        shift = convert_angular(self.shift, 'radians', angular_units) \
+            if not self.pixel_shift else self.shift
 
         prop_string = (f"Propagates the Wavefront to a {plane_out} plane "
                        f"with {self.npixels_out}x{self.npixels_out} pixels of "
@@ -855,17 +831,8 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
             A summary of the class.
         """
         plane_out = 'pupil' if self.inverse else 'focal'
-
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            focal_length = self.focal_length * 1e-3
-        elif cartesian_units == 'microns':
-            focal_length = self.focal_length * 1e-6
-        else:
-            focal_length = self.focal_length
+        focal_length = convert_cartesian(self.focal_length, 'meters', 
+                                        cartesian_units)
 
         return (f"Propagates the Wavefront {focal_length} {cartesian_units} to "
                 f"a {plane_out} plane using a FFT.")
@@ -1168,25 +1135,15 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         """
         plane_out = 'pupil' if self.inverse else 'focal'
 
-        if cartesian_units not in ('meters', 'millimeters', 'microns'):
-            raise ValueError("cartesian_units must be 'meters', 'millimeters', "
-                             "or 'microns'.")
-        
-        if cartesian_units == 'millimeters':
-            pixel_scale = self.pixel_scale_out * 1e-3
-            prop_distance = (self.focal_length + self.propagation_shift) * 1e-3
-            defocus = self.propagation_shift * 1e-3
-            shift = self.shift * 1e-3 if not self.pixel_shift else self.shift
-        elif cartesian_units == 'microns':
-            pixel_scale = self.pixel_scale_out * 1e-6
-            prop_distance = (self.focal_length + self.propagation_shift) * 1e-6
-            defocus = self.propagation_shift * 1e-6
-            shift = self.shift * 1e-6 if not self.pixel_shift else self.shift
-        else:
-            pixel_scale = self.pixel_scale_out
-            prop_distance = self.focal_length + self.propagation_shift
-            defocus = self.propagation_shift
-            shift = self.shift
+        pixel_scale = convert_cartesian(self.pixel_scale_out, 'meters', 
+                                        cartesian_units)
+        prop_distance = convert_cartesian(self.focal_length, 'meters', 
+                                        cartesian_units)
+        defocus = convert_cartesian(self.propagation_shift, 'meters', 
+                                        cartesian_units)
+        shift = convert_cartesian(self.shift, 'meters', cartesian_units) \
+            if not self.pixel_shift else self.shift
+
 
         prop_string = (f"Propagates the Wavefront {prop_distance} "
                        f"{cartesian_units} to a {plane_out} plane "
