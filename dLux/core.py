@@ -445,6 +445,8 @@ class Instrument(ExtendedBase):
         """
         Prints a summary of all instrument
         """
+        print("Scene summary:")
+        self.scene.summarise()
         print("Optics summary:")
         self.optics.summarise()
         print("Detector summary:")
