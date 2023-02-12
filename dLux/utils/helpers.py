@@ -1,8 +1,9 @@
 import jax.numpy as np
 from collections import OrderedDict
+import matplotlib.pyplot as plt
 
 
-__all__ = ["list_to_dictionary"]
+__all__ = ["list_to_dictionary", "two_image_plot"]
 
 
 Array = np.ndarray
@@ -69,3 +70,49 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
         # dict_out[names[i]] = list_in[i].set_name(names[i])
 
     return dict_out
+
+
+def two_image_plot(array1      : Array, 
+                   array2      : Array, 
+                   figsize     : tuple = (10, 4), 
+                   titles      : tuple = ("Array 1", "Array 2"),
+                   cbar_labels : tuple = (None, None),
+                   title1      : str = "Array 1", 
+                   title2      : str = "Array 2",
+                   cmap        : str = "Inferno", 
+                   dpi         : int = 120) -> None:
+    """
+    Plots two images side by side.
+
+    Parameters
+    ----------
+    array1 : Array
+        The first array to plot.
+    array2 : Array
+        The second array to plot.
+    figsize : tuple = (10, 4)
+        The size of the figure to display.
+    title1 : str = "Array 1"
+        The title of the first array.
+    title2 : str = "Array 2"
+        The title of the second array.
+    cmap : str = "Inferno"
+        The colour map to use.
+    dpi : int = 120
+        The resolution of the figure.
+    """
+    plt.figure(figsize=figsize)
+    plt.subplot(1, 2, 1)
+    plt.title(titles[0])
+    plt.imshow(array1)
+    cbar = plt.colorbar()
+    if cbar_labels[0] is not None:
+        cbar.set_label(cbar_labels[0])
+
+    plt.subplot(1, 2, 2)
+    plt.title(titles[0])
+    plt.imshow(array2)
+    cbar = plt.colorbar()
+    if cbar_labels[1] is not None:
+        cbar.set_label(cbar_labels[1])
+    plt.show()
