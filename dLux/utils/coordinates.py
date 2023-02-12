@@ -1,11 +1,10 @@
 import jax.numpy as np
+from jax.tree_util import tree_map
+from typing import Union
 import dLux
 
 __all__ = ["cartesian_to_polar", "polar_to_cartesian",
-           "get_positions_vector",  "get_pixel_positions",
-           "get_polar_positions",   "get_coordinates_vector",
-           "get_pixel_coordinates", "get_polar_coordinates",
-           "rotate", "translate", "shear", "compress"]
+           "get_pixel_positions", "rotate", "translate", "shear", "compress"]
 
 
 Array = np.ndarray
@@ -53,166 +52,116 @@ def polar_to_cartesian(coordinates : Array) -> Array:
 
 
 ### Positions Calculations ###
-def get_positions_vector(npixels      : int,
-                         pixel_offset : Array = np.array(0.)) -> Array:
+def get_pixel_positions(npixels      : Union[int, tuple], 
+                        pixel_scales : Union[tuple, float, None] = None,
+                        offsets      : Union[tuple, float, None] = None,
+                        polar        : bool = False,
+                        indexing     : str = 'xy') -> Array:
     """
-    Generate the vector pixel positions relative to the center.
-
+    Calculates the positions of the pixel centers for the given input. All 
+    coordinates are output in units of meters. 
+    
+    The indexing argument is the same
+    as in numpy.meshgrid., ie:  Giving the string ‘ij’ returns a meshgrid with 
+    matrix indexing, while ‘xy’ returns a meshgrid with Cartesian indexing. In 
+    the 2-D case with inputs of length M and N, the outputs are of shape (N, M) 
+    for ‘xy’ indexing and (M, N) for ‘ij’ indexing. In the 3-D case with inputs 
+    of length M, N and P, outputs are of shape (N, M, P) for ‘xy’ indexing and 
+    (M, N, P) for ‘ij’ indexing. If the output is in polar coordainates, 
+    indexing is set to 'xy' and the input must be 2d
+    
     Parameters
     ----------
-    npixels : int
-        The number of pixels in the vector.
-    pixel_offset : Array = np.array(0.)
-        The number of pixels to offset from the center.
-
+    npixels : Union[int, tuple]
+        The number of pixels in each dimension.
+    pixel_scales : Union[tuple, float, None] = None
+        The pixel scales in each dimension. If a tuple, the length
+        of the tuple must match the number of dimensions. If a float, the same
+        scale is applied to all dimensions. If None, the scale is set to 1.
+    offsets : Union[tuple, float, None] = None
+        The offset of the pixel centers in each dimension. If a tuple, the 
+        length of the tuple must match the number of dimensions. If a float, 
+        the same offset is applied to all dimensions. If None, the offset is 
+        set to 0.
+    polar : bool = False
+        If True, the output is in polar coordinates. If False, the output is in
+        cartesian coordinates. Default is False.
+    indexing : str = 'xy'
+        The indexing of the output. Default is 'xy'. See numpy.meshgrid for more
+        details.
+    
     Returns
     -------
     positions : Array
-        The vector of pixel positions.
+        The positions of the pixel centers in the given dimensions.
     """
-    return np.arange(npixels) - \
-            (npixels - 1) / 2. - pixel_offset
+    if indexing not in ['xy', 'ij']:
+        raise ValueError("indexing must be either 'xy' or 'ij'.")
+    
+    if polar and indexing == 'ij':
+        indexing = 'xy'
+
+    # Turn inputs into tuples
+    if isinstance(npixels, int):
+        npixels = (npixels,)
+
+        if offsets is None:
+            offsets = (0.,)
+        elif not isinstance(offsets, (float, Array)):
+            raise ValueError("offset must be an be a float or Array if npixels "
+                             "is an int.")
+        else:
+            offsets = (offsets,)
+
+        if pixel_scales is None:
+            pixel_scales = (1.,)
+        elif not isinstance(pixel_scales, (float, Array)):
+            raise ValueError("pixel_scales must be an be a float if npixels is an int.")
+        else:
+            pixel_scales = (pixel_scales,)
+        
+    # Check input 
+    else:
+        if offsets is None:
+            offsets = tuple([0.]*len(npixels))
+        elif not isinstance(offsets, tuple):
+            raise ValueError("offset must be an be a float or Array if npixels "
+                             "is an int.")
+        else:
+            if len(offsets) != len(npixels):
+                raise ValueError("offset must have the same length as npixels.")
+            
+        if pixel_scales is None:
+            pixel_scales = tuple([1.]*len(npixels))
+        elif isinstance(pixel_scales, float):
+            pixel_scales = tuple([pixel_scales]*len(npixels))
+        elif not isinstance(pixel_scales, tuple):
+            raise ValueError("pixel_scales must be a tuple if npixels is a tuple.")
+        else:
+            if len(pixel_scales) != len(npixels):
+                raise ValueError("pixel_scales must have the same length as npixels.")
+    
+    def pixel_fn(n, offset, scale):
+        pix = np.arange(n) - (n - 1) / 2.
+        pix *= scale
+        pix -= offset
+        return pix
+    
+    pixels = tree_map(pixel_fn, npixels, offsets, pixel_scales)
+
+    # ouput (x, y) for 2d, else in order
+    positions = np.array(np.meshgrid(*pixels, indexing=indexing))
+
+    if polar:
+        if len(npixels) != 2:
+            raise ValueError("polar coordinates are only defined for 2D arrays.")
+        return cartesian_to_polar(positions)
+
+    # Squeeze for empty axis removal with 1d
+    return np.squeeze(positions)
 
 
-def get_pixel_positions(npixels        : int,
-                        x_pixel_offset : Array = np.array(0.),
-                        y_pixel_offset : Array = np.array(0.)) -> Array:
-    """
-    Returns arrays of pixel positions relative to the (central) optical axis.
-
-    Parameters
-    ----------
-    npixels : int
-        The number of pixels along the side of the output array.
-    x_pixel_offset : Array, pixels = np.array(0.)
-        The x offset of the centre of the coordinate system in the
-        square output array.
-    y_pixel_offset : Array, pixels = np.array(0.)
-        The y offset of the centre of the coordinate system in the
-        square output array.
-
-    Returns
-    -------
-    positions : Array
-        The (x, y) array of pixel positions.
-    """
-    x = get_positions_vector(npixels, x_pixel_offset)
-    y = get_positions_vector(npixels, y_pixel_offset)
-    return np.array(np.meshgrid(x, y))
-
-
-def get_polar_positions(npixels        : int,
-                        x_pixel_offset : Array = np.array(0.),
-                        y_pixel_offset : Array = np.array(0.)) -> Array:
-    """
-    Generate the polar positions of each pixel.
-
-    Parameters
-    ----------
-    npixels : int
-        The number of pixels along one edge of the square array.
-    x_pixel_offset : Array = np.array(0.)
-        The x offset of the centre of the coordinate system in the
-        square output array.
-    y_pixel_offset : Array = np.array(0.)
-        The y offset of the centre of the coordinate system in the
-        square output array.
-
-    Returns
-    -------
-    positions : Array
-        The (r, phi) array of the radial coordinates.
-    """
-    positions = get_pixel_positions(npixels, x_pixel_offset, y_pixel_offset)
-    return cartesian_to_polar(positions)
-
-
-### Coordinate Calculations ###
-def get_coordinates_vector(npixels     : int,
-                           pixel_scale : Array,
-                           offset      : Array = np.array(0.)) -> Array:
-    """
-    Generate the vector pixel coordinates relative to the center.
-
-    Parameters
-    ----------
-    npixels : int
-        The number of pixels in the vector.
-    offset : Array, meters = np.array(0.)
-        The offset from the center.
-
-    Returns
-    -------
-    x : Array
-        The vector of pixel coordinates.
-    """
-    return pixel_scale * get_positions_vector(npixels, pixel_scale * offset)
-
-
-def get_pixel_coordinates(npixels     : int,
-                          pixel_scale : Array,
-                          x_offset    : Array = np.array(0.),
-                          y_offset    : Array = np.array(0.)) -> Array:
-    """
-    Returns the physical (x, y) coordinate array of pixel
-    positions relative to the (central) optical axis.
-
-    Parameters
-    ----------
-    npixels : int
-        The number of pixels along the side of the output array.
-    pixel_scale : Array, meters
-        The physical size of each pixel
-    x_offset : Array = np.array(0.), meters
-        The x offset of the centre of the coordinate system in the
-        square output array.
-    y_offset : Array = np.array(0.), meters
-        The y offset of the centre of the coordinate system in the
-        square output array.
-
-    Returns
-    -------
-    pixel_positions : Array
-        The (x, y) coordinate arrays in the square output array with the
-        correct offsets.
-    """
-    return pixel_scale * get_pixel_positions(npixels,
-                                             pixel_scale * x_offset,
-                                             pixel_scale * y_offset)
-
-
-def get_polar_coordinates(npixels     : int,
-                          pixel_scale : Array,
-                          x_offset    : Array = np.array(0.),
-                          y_offset    : Array = np.array(0.)) -> Array:
-    """
-    Generate the (r, phi) polar coordinates of each pixel.
-
-    Parameters
-    ----------
-    npixels : int
-        The number of pixels along one edge of the square array.
-    pixel_scale : Array, meters
-        The physical size of each pixel
-    x_offset : Array = np.array(0.).
-        The x offset of the centre of the coordinate system in the
-        square output array.
-    y_offset : Array = np.array(0.)
-        The y offset of the centre of the coordinate system in the
-        square output array.
-
-    Returns
-    -------
-    positions : Array
-        The (r, phi) coordinate arrays in the square output array with the
-        correct offsets
-    """
-    pixel_scaler = np.array([pixel_scale, 1.])[:, None, None]
-    return pixel_scaler * get_polar_positions(npixels,
-                                              x_offset / pixel_scale,
-                                              y_offset / pixel_scale)
-
-
+### Coordinates Transformations ###
 def rotate(coordinates: Array, rotation: Array) -> Array:
     """
     Rotate the coordinate system by a pre-specified amount.

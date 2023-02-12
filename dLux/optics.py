@@ -1002,7 +1002,8 @@ class CompoundAperture(OpticalLayer):
 
         # Generate coordinate grid
         pixel_scale = diameter/npixels
-        xycoords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
+        xycoords = dLux.utils.get_pixel_positions((npixels, npixels), 
+                                                  (pixel_scale, pixel_scale))
 
         # Generate aperture/occulters
         outer_apers = mapped_aperture(self.aperture_radii, \
@@ -1282,6 +1283,9 @@ class Rotate(OpticalLayer):
         or the real and imaginary arrays.
     fourier : bool
         Should the rotation be done using fourier methods or interpolation.
+    order : int = 1
+        The order of the interpolation to use. Only applies if fourier is
+        False. Must be 0, 1, or 3.
     padding : int
         The amount of padding to use if the fourier method is used.
     name : str
@@ -1290,6 +1294,7 @@ class Rotate(OpticalLayer):
     angle          : Array
     real_imaginary : bool
     fourier        : bool
+    order          : int
     padding        : int
 
 
@@ -1297,6 +1302,7 @@ class Rotate(OpticalLayer):
                  angle          : Array,
                  real_imaginary : bool = False,
                  fourier        : bool = False,
+                 order          : int  = 1,
                  padding        : int  = None,
                  name           : str  = 'Rotate') -> OpticalLayer:
         """
@@ -1313,6 +1319,9 @@ class Rotate(OpticalLayer):
         fourier : bool = False
             Should the fourier rotation method be used (True), or regular
             interpolation method be used (False).
+        order : int = 1
+            The order of the interpolation to use. Only applies if fourier is
+            False. Must be 0, 1, or 3.
         padding : int = None
             The amount of fourier padding to use. Only applies if fourier is
             True.
@@ -1322,6 +1331,9 @@ class Rotate(OpticalLayer):
         super().__init__(name)
         self.angle          = np.asarray(angle, dtype=float)
         self.real_imaginary = bool(real_imaginary)
+        if order not in (0, 1, 3):
+            raise ValueError("Order must be 0, 1, or 3.")
+        self.order = int(order)
         self.fourier        = bool(fourier)
         self.padding = padding if padding is None else int(padding)
         assert self.angle.ndim == 0, ("angle must be scalar array.")
@@ -1341,7 +1353,7 @@ class Rotate(OpticalLayer):
         wavefront : Wavefront
             The rotated wavefront.
         """
-        args = [self.angle, self.real_imaginary, self.fourier]
+        args = [self.angle, self.real_imaginary, self.fourier, self.order]
         args += [self.padding] if self.padding is not None else []
         return wavefront.rotate(*args)
 
