@@ -77,10 +77,9 @@ def two_image_plot(array1      : Array,
                    figsize     : tuple = (10, 4), 
                    titles      : tuple = ("Array 1", "Array 2"),
                    cbar_labels : tuple = (None, None),
-                   title1      : str = "Array 1", 
-                   title2      : str = "Array 2",
-                   cmap        : str = "Inferno", 
-                   dpi         : int = 120) -> None:
+                   cmaps       : tuple = ("inferno", "inferno"),
+                   bounds      : tuple = (None, None),
+                   dpi         : int   = 120) -> None:
     """
     Plots two images side by side.
 
@@ -92,26 +91,30 @@ def two_image_plot(array1      : Array,
         The second array to plot.
     figsize : tuple = (10, 4)
         The size of the figure to display.
-    title1 : str = "Array 1"
-        The title of the first array.
-    title2 : str = "Array 2"
-        The title of the second array.
-    cmap : str = "Inferno"
-        The colour map to use.
+    titles : tuple = ("Array 1", "Array 2")
+        The titles of the arrays.
+    cmaps : tuple = ("inferno", "inferno")
+        The colour maps to use.
+    bounds : tuple = (None, None)
+        The bounds of the colour maps.
     dpi : int = 120
         The resolution of the figure.
     """
     plt.figure(figsize=figsize)
     plt.subplot(1, 2, 1)
     plt.title(titles[0])
-    plt.imshow(array1)
+    if bounds[0] is not None:
+        array1 = array1 % bounds[0]
+    plt.imshow(array1, cmap=cmaps[0])
     cbar = plt.colorbar()
     if cbar_labels[0] is not None:
         cbar.set_label(cbar_labels[0])
 
     plt.subplot(1, 2, 2)
-    plt.title(titles[0])
-    plt.imshow(array2)
+    plt.title(titles[1])
+    if bounds[1] is not None:
+        array2 = array2 % bounds[1]
+    plt.imshow(array2, cmap=cmaps[1])
     cbar = plt.colorbar()
     if cbar_labels[1] is not None:
         cbar.set_label(cbar_labels[1])
