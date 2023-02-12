@@ -21,12 +21,16 @@ class Spectrum(ExtendedBase, ABC):
     ----------
     wavelengths : Array, meters
         The array of wavelengths at which the spectrum is defined.
+    name : str
+        The name of the spectrum.
     """
+    name        : str
     wavelengths : Array
 
 
     def __init__(self        : Spectrum,
-                 wavelengths : Array) -> Spectrum:
+                 wavelengths : Array,
+                 name        : str = 'Spectrum') -> Spectrum:
         """
         Constructor for the Spectrum class.
 
@@ -34,7 +38,10 @@ class Spectrum(ExtendedBase, ABC):
         ----------
         wavelengths : Array, meters
             The array of wavelengths at which the spectrum is defined.
+        name : str = 'Spectrum'
+            The name of the spectrum.
         """
+        self.name = name
         self.wavelengths = np.asarray(wavelengths, dtype=float)
 
         # Input checking
@@ -74,7 +81,7 @@ class Spectrum(ExtendedBase, ABC):
         return
     
 
-    def summary(self            : OpticalLayer, 
+    def summary(self            : Spectrum, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
                 sigfigs         : int = 4) -> str:
@@ -111,13 +118,16 @@ class ArraySpectrum(Spectrum):
         The array of wavelengths at which the spectrum is defined.
     weights : Array
         The relative weights of each wavelength.
+    name : str
+        The name of the spectrum.
     """
     weights : Array
 
 
     def __init__(self        : Spectrum,
                  wavelengths : Array,
-                 weights     : Array = None) -> Spectrum:
+                 weights     : Array = None,
+                 name        : str = 'ArraySpectrum') -> Spectrum:
         """
         Constructor for the ArraySpectrum class.
 
@@ -128,8 +138,10 @@ class ArraySpectrum(Spectrum):
         weights : Array = None
             The relative weights of each wavelength. Defaults to uniform
             spectrum. Weights are automatically normalised to a sum of 1.
+        name : str = 'ArraySpectrum'
+            The name of the spectrum.
         """
-        super().__init__(wavelengths)
+        super().__init__(wavelengths, name)
         weights = np.ones(len(self.wavelengths))/len(wavelengths) \
                                     if weights is None else weights
         weights = np.asarray(weights, dtype=float)
@@ -214,6 +226,8 @@ class PolynomialSpectrum(Spectrum):
         The degree of the polynomial.
     coefficients : Array
         The array of polynomial coefficient values.
+    name : str
+        The name of the spectrum.
     """
     degree       : int # Just a helper
     coefficients : Array
@@ -221,7 +235,8 @@ class PolynomialSpectrum(Spectrum):
 
     def __init__(self         : Spectrum,
                  wavelengths  : Array,
-                 coefficients : Array) -> Spectrum:
+                 coefficients : Array,
+                 name        : str = 'PolynomialSpectrum') -> Spectrum:
         """
         Constructor for the PolynomialSpectrum class.
 
@@ -231,8 +246,10 @@ class PolynomialSpectrum(Spectrum):
             The array of wavelengths at which the spectrum is defined.
         coefficients : Array
             The array of polynomial coefficient values.
+        name : str = 'PolynomialSpectrum'
+            The name of the spectrum.
         """
-        super().__init__(wavelengths)
+        super().__init__(wavelengths, name)
 
         self.coefficients = np.asarray(coefficients, dtype=float)
 
@@ -326,12 +343,15 @@ class CombinedSpectrum(ArraySpectrum):
     weights : Array
         The (2, n) relative weights of each wavelength. Defaults to uniform
         throughput.
+    name : str
+        The name of the spectrum.
     """
 
 
     def __init__(self        : Spectrum,
                  wavelengths : Array,
-                 weights     : Array = None) -> Spectrum:
+                 weights     : Array = None,
+                 name        : str = 'CombinedSpectrum') -> Spectrum:
         """
         Constructor for the CombinedSpectrum class. Expects wavelengths and
         weights to have the same dimensionality, ie (nsources, nwavelengths).
@@ -344,6 +364,8 @@ class CombinedSpectrum(ArraySpectrum):
         weights : Array (optional)
             The (2, n) relative weights of each wavelength. Defaults to uniform
             throughput.
+        name : str = 'CombinedSpectrum'
+            The name of the spectrum.
         """
         super() # Access methods but don't instatiate attributes
         self.wavelengths = np.asarray(wavelengths, dtype=float)
