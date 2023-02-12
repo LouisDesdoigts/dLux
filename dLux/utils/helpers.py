@@ -1,8 +1,9 @@
 import jax.numpy as np
 from collections import OrderedDict
+import matplotlib.pyplot as plt
 
 
-__all__ = ["list_to_dictionary"]
+__all__ = ["list_to_dictionary", "single_image_plot", "two_image_plot"]
 
 
 Array = np.ndarray
@@ -69,3 +70,88 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
         # dict_out[names[i]] = list_in[i].set_name(names[i])
 
     return dict_out
+
+
+def single_image_plot(array       : Array, 
+                      figsize     : tuple = (5, 4), 
+                      title       : str   = "Array",
+                      cbar_label  : str   = None,
+                      cmap        : str   = "inferno",
+                      bound       : float = None,
+                      dpi         : int   = 120) -> None:
+    """
+    Plots a  single image.
+
+    Parameters
+    ----------
+    array : Array
+        The first array to plot.
+    figsize : tuple = (5, 4)
+        The size of the figure to display.
+    title : str = "Array"
+        The title of the array.
+    cmap : str = "inferno"
+        The colour map to use.
+    bound : float = None
+        The bound of the colour map.
+    dpi : int = 120
+        The resolution of the figure.
+    """
+    plt.figure(figsize=figsize)
+    plt.title(title)
+    if bound is not None:
+        array = array % bound
+    plt.imshow(array, cmap=cmap)
+    cbar = plt.colorbar()
+    if cbar_label is not None:
+        cbar.set_label(cbar_label)
+    plt.show()
+
+
+def two_image_plot(array1      : Array, 
+                   array2      : Array, 
+                   figsize     : tuple = (10, 4), 
+                   titles      : tuple = ("Array 1", "Array 2"),
+                   cbar_labels : tuple = (None, None),
+                   cmaps       : tuple = ("inferno", "inferno"),
+                   bounds      : tuple = (None, None),
+                   dpi         : int   = 120) -> None:
+    """
+    Plots two images side by side.
+
+    Parameters
+    ----------
+    array1 : Array
+        The first array to plot.
+    array2 : Array
+        The second array to plot.
+    figsize : tuple = (10, 4)
+        The size of the figure to display.
+    titles : tuple = ("Array 1", "Array 2")
+        The titles of the arrays.
+    cmaps : tuple = ("inferno", "inferno")
+        The colour maps to use.
+    bounds : tuple = (None, None)
+        The bounds of the colour maps.
+    dpi : int = 120
+        The resolution of the figure.
+    """
+    plt.figure(figsize=figsize)
+    plt.subplot(1, 2, 1)
+    plt.title(titles[0])
+    if bounds[0] is not None:
+        array1 = array1 % bounds[0]
+    plt.imshow(array1, cmap=cmaps[0])
+    cbar = plt.colorbar()
+    if cbar_labels[0] is not None:
+        cbar.set_label(cbar_labels[0])
+
+    plt.subplot(1, 2, 2)
+    plt.title(titles[1])
+    if bounds[1] is not None:
+        array2 = array2 % bounds[1]
+    plt.imshow(array2, cmap=cmaps[1])
+    cbar = plt.colorbar()
+    if cbar_labels[1] is not None:
+        cbar.set_label(cbar_labels[1])
+    plt.show()
