@@ -1201,7 +1201,7 @@ class ApplyBasisCLIMB(OpticalLayer):
 
     def area(self, img, epsilon = 1e-15):
         a,b,c = self.lsq(img)
-        a,= np.where(a==0,epsilon,a)
+        a = np.where(a==0,epsilon,a)
         b = np.where(b==0,epsilon,b)
         c = np.where(c==0,epsilon,c)
         x1 = (-b-c)/(a) # don't divide by zero
