@@ -5,7 +5,8 @@ from jax import vmap
 from equinox import tree_at, static_field
 from zodiax import ExtendedBase
 from abc import ABC, abstractmethod
-from dLux.utils.units import convert_angular
+from dLux.utils.units import convert_angular, convert_cartesian
+from dLux.utils.helpers import spectrum_plot
 import dLux
 
 
@@ -190,6 +191,36 @@ class Source(ExtendedBase, ABC):
             A summary of the class.
         """
         return (f"{self.name} has no summary method yet.")
+    
+
+    def display(self            : Source, 
+                figsize         : tuple = (6, 3),
+                dpi             : int = 120,
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> None:
+        """
+        Displays a plot of the wavefront amplitude and opd or phase.
+
+        Parameters
+        ----------
+        figsize : tuple = (6, 3)
+            The size of the figure to display.
+        cmap : str = 'inferno'
+            The colour map to use.
+        dpi : int = 120
+            The resolution of the figure.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+        """
+        self.spectrum.normalise().display(figsize=figsize, dpi=dpi, 
+            angular_units=angular_units, cartesian_units=cartesian_units)
 
 
     def model(self      : Source,
