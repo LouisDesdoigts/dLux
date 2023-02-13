@@ -3,7 +3,8 @@ from collections import OrderedDict
 import matplotlib.pyplot as plt
 
 
-__all__ = ["list_to_dictionary", "single_image_plot", "two_image_plot"]
+__all__ = ["list_to_dictionary", "single_image_plot", "two_image_plot",
+           "spectrum_plot"]
 
 
 Array = np.ndarray
@@ -154,4 +155,45 @@ def two_image_plot(array1      : Array,
     cbar = plt.colorbar()
     if cbar_labels[1] is not None:
         cbar.set_label(cbar_labels[1])
+    plt.show()
+
+
+def spectrum_plot(wavelengths     : Array, 
+                  weights         : Array, 
+                  figsize         : tuple = (6, 3),
+                  labels          : tuple = None, 
+                  cartesian_units : str = 'meters',
+                  dpi             : int = 120) -> None:
+    """
+    Plots a spectrum based on wavelgths and weights.
+
+    Parameters
+    ----------
+    wavelengths : Array, meters
+        The wavelengths of the spectrum.
+    weights : Array
+        The weights of the spectrum.
+    figsize : tuple = (6, 3)
+        The size of the figure to display.
+    labels : tuple = None
+        The labels of the spectra.
+    cartesian_units : str = 'meters'
+        The units of the wavelengths.
+    dpi : int = 120
+        The resolution of the figure.
+    """
+    nspectra = 1 if wavelengths.ndim == 1 else len(wavelengths)
+    if labels is None:
+        labels = ['Spectrum {}'.format(i) for i in range(nspectra)]
+    
+    plt.figure(figsize=figsize, dpi=dpi)
+    if nspectra == 1:
+        plt.scatter(wavelengths, weights, label=labels[0])
+    else:
+        for i in range(nspectra):
+            plt.scatter(wavelengths[i], weights[i], label=labels[i])
+    plt.legend()
+    plt.xlabel(f"Wavelengths {cartesian_units}")
+    plt.ylabel("Weights")
+    plt.ylim(-0.01)
     plt.show()
