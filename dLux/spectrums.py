@@ -338,11 +338,11 @@ class CombinedSpectrum(ArraySpectrum):
     Attributes
     ----------
     wavelengths : Array, meters
-        The (2, n) array of wavelengths at which the spectrum is defined.
-        Input can also be a 1d
+        The (nspectra, nwavels) array of wavelengths at which the spectrum is 
+        defined. Input can also be a 1d
     weights : Array
-        The (2, n) relative weights of each wavelength. Defaults to uniform
-        throughput.
+        The (nspectra, nwavels) relative weights of each wavelength. Defaults 
+        to uniform throughput.
     name : str
         The name of the spectrum.
     """
@@ -359,15 +359,16 @@ class CombinedSpectrum(ArraySpectrum):
         Parameters
         ----------
         wavelengths : Array, meters
-            The (2, n) array of wavelengths at which the spectrum is defined.
-            Input can also be a 1d
+            The (nspectra, nwavels) array of wavelengths at which the spectrum 
+            is defined. Input can also be a 1d
         weights : Array (optional)
-            The (2, n) relative weights of each wavelength. Defaults to uniform
-            throughput.
+            The (nspectra, nwavels) relative weights of each wavelength. 
+            Defaults to uniform throughput.
         name : str = 'CombinedSpectrum'
             The name of the spectrum.
         """
         super() # Access methods but don't instatiate attributes
+        self.name = str(name)
         self.wavelengths = np.asarray(wavelengths, dtype=float)
 
         # Wavelengths
