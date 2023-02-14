@@ -3430,7 +3430,6 @@ class AbstractStaticAperture(ApertureLayer):
         
         # Generate coordinates if not provided
         if coordinates is None:
-            print(diameter, npixels)
             npixels_in = (npixels, npixels)
             pixel_scales = (diameter / npixels, diameter / npixels)
             coordinates = get_pixel_positions(npixels_in, pixel_scales)
