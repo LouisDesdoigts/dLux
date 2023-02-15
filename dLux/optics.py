@@ -8,13 +8,14 @@ from equinox import tree_at, static_field
 from zodiax import ExtendedBase
 from abc import ABC, abstractmethod
 from inspect import signature
+from dLux.utils.helpers import two_image_plot
+from dLux.utils.units import convert_angular, convert_cartesian
 import dLux
 
 
-__all__ = ["CreateWavefront", "TiltWavefront",
-           "NormaliseWavefront", "ApplyBasisOPD", "AddPhase", "AddOPD",
-           "TransmissiveOptic", "CompoundAperture", "ApplyBasisCLIMB",
-           "Rotate"]
+__all__ = ["CreateWavefront", "TiltWavefront", "NormaliseWavefront", 
+           "ApplyBasisOPD", "AddPhase", "AddOPD", "TransmissiveOptic", 
+           "ApplyBasisCLIMB", "Rotate", "CompoundAperture"]
 
 
 Array = np.ndarray
@@ -103,6 +104,69 @@ class OpticalLayer(ExtendedBase, ABC):
 
         # Return updated parameters dictionary
         return parameters
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return f"{self.name} layer has no summary method yet."
+
+
+    def display(self            : OpticalLayer, 
+                wavefront       : Wavefront,
+                figsize         : tuple = (10, 4),
+                dpi             : int = 120,
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> None:
+        """
+        Displays a plot of the wavefront amplitude and opd or phase.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The dummy wavefront to propagate though the optics.
+        figsize : tuple = (10, 4)
+            The size of the figure to display.
+        cmap : str = 'inferno'
+            The colour map to use.
+        dpi : int = 120
+            The resolution of the figure.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+        """
+        amplitude = wavefront.amplitude
+        phase = convert_angular(wavefront.phase, "radians", angular_units)
+        two_image_plot(amplitude[0], phase[0], figsize=figsize, 
+            titles=("Amplitude", "Phase"), cbar_labels=("Intensity", 
+            f"Phase ({angular_units})"), cmaps=('inferno', 'twilight'), 
+            bounds=(None, 2*np.pi), dpi=dpi)
 
 
 class CreateWavefront(OpticalLayer):
@@ -224,6 +288,33 @@ class CreateWavefront(OpticalLayer):
             return wavefront, parameters
         else:
             return wavefront
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"{self.name}: Creates a {self.wavefront_type} wavefront of " 
+                f"size {self.npixels} pixels and diameter {self.diameter} m.")
 
 
 class TiltWavefront(OpticalLayer):
@@ -279,6 +370,34 @@ class TiltWavefront(OpticalLayer):
         return wavefront.tilt_wavefront(self.tilt_angles)
 
 
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        angles = convert_angular(self.tilt_angles, 'radians', angular_units)
+        return (f"{self.name}: Tilts the wavefront by {angles:.{sigfigs}} "
+                f"{angular_units} in the (x, y) dimension.")
+
+
 class NormaliseWavefront(OpticalLayer):
     """
     Normalises the input wavefront using the in-built wavefront normalisation
@@ -320,6 +439,32 @@ class NormaliseWavefront(OpticalLayer):
             The wavefront with the wavefront normalisation method applied.
         """
         return wavefront.normalise()
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return f"{self.name}: Normalises the wavefront to unity power."
 
 
 class ApplyBasisOPD(OpticalLayer):
@@ -406,6 +551,33 @@ class ApplyBasisOPD(OpticalLayer):
             The wavefront with the appropriate phase applied.
         """
         return wavefront.add_opd(self.get_total_opd())
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"{self.name}: Applies an Optical Path Difference (OPD) to the "
+            f"wavefront calculated from the basis vectors and coefficients.")
 
 
 class AddPhase(OpticalLayer):
@@ -432,8 +604,8 @@ class AddPhase(OpticalLayer):
         ----------
         phase : Array, radians
             Array of phase values to be applied to the input wavefront. This
-            must a 0, 2 or 3 dimensional array with equal to that of the wavefront
-            at time of aplication.
+            must a 0, 2 or 3 dimensional array with equal to that of the 
+            wavefront at time of aplication.
         name : str = 'AddPhase'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -460,6 +632,32 @@ class AddPhase(OpticalLayer):
             The wavefront with the phase added.
         """
         return wavefront.add_phase(self.phase)
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return f"{self.name}: Add an array of phase values to the wavefront."
 
 
 class AddOPD(OpticalLayer):
@@ -514,6 +712,33 @@ class AddOPD(OpticalLayer):
             The wavefront with the OPD added.
         """
         return wavefront.add_opd(self.opd)
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"{self.name}: Add an array of Optical Path Differences (OPD) "
+                "to the wavefront.")
 
 
 class TransmissiveOptic(OpticalLayer):
@@ -571,6 +796,33 @@ class TransmissiveOptic(OpticalLayer):
             The wavefront with the tranmission applied.
         """
         return wavefront.multiply_amplitude(self.transmission)
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"{self.name}: Applies an array of tranmission values to the "
+                "Wavefront.")
 
 
 class CompoundAperture(OpticalLayer):
@@ -751,7 +1003,8 @@ class CompoundAperture(OpticalLayer):
 
         # Generate coordinate grid
         pixel_scale = diameter/npixels
-        xycoords = dLux.utils.get_pixel_coordinates(npixels, pixel_scale)
+        xycoords = dLux.utils.get_pixel_positions((npixels, npixels), 
+                                                  (pixel_scale, pixel_scale))
 
         # Generate aperture/occulters
         outer_apers = mapped_aperture(self.aperture_radii, \
@@ -934,7 +1187,8 @@ class ApplyBasisCLIMB(OpticalLayer):
 
 
     def lsq_params(self, img):
-        xx, yy = np.meshgrid(np.linspace(0,1,img.shape[0]),np.linspace(0,1,img.shape[1]))
+        xx, yy = np.meshgrid(np.linspace(0,1,img.shape[0]),
+                             np.linspace(0,1,img.shape[1]))
         A = np.vstack([xx.ravel(), yy.ravel(), np.ones_like(xx).ravel()]).T
         matrix = np.linalg.inv(np.dot(A.T,A)).dot(A.T)
         return matrix, xx, yy, A
@@ -947,7 +1201,9 @@ class ApplyBasisCLIMB(OpticalLayer):
 
     def area(self, img, epsilon = 1e-15):
         a,b,c = self.lsq(img)
-        a, b, c = np.where(a==0,epsilon,a), np.where(b==0,epsilon,b), np.where(c==0,epsilon,c)
+        a = np.where(a==0,epsilon,a)
+        b = np.where(b==0,epsilon,b)
+        c = np.where(c==0,epsilon,c)
         x1 = (-b-c)/(a) # don't divide by zero
         x2 = -c/(a) # don't divide by zero
         x1, x2 = np.min(np.array([x1,x2])), np.max(np.array([x1,x2]))
@@ -986,6 +1242,33 @@ class ApplyBasisCLIMB(OpticalLayer):
         soft_bin = vmap_mask(flat).reshape(ppsz, ppsz)
 
         return soft_bin
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"{self.name}: Applies a binary OPD to the Wavefront using the "
+                "CLIMB algorithm.")
 
 
 class Rotate(OpticalLayer):
@@ -1001,6 +1284,9 @@ class Rotate(OpticalLayer):
         or the real and imaginary arrays.
     fourier : bool
         Should the rotation be done using fourier methods or interpolation.
+    order : int = 1
+        The order of the interpolation to use. Only applies if fourier is
+        False. Must be 0, 1, or 3.
     padding : int
         The amount of padding to use if the fourier method is used.
     name : str
@@ -1009,6 +1295,7 @@ class Rotate(OpticalLayer):
     angle          : Array
     real_imaginary : bool
     fourier        : bool
+    order          : int
     padding        : int
 
 
@@ -1016,6 +1303,7 @@ class Rotate(OpticalLayer):
                  angle          : Array,
                  real_imaginary : bool = False,
                  fourier        : bool = False,
+                 order          : int  = 1,
                  padding        : int  = None,
                  name           : str  = 'Rotate') -> OpticalLayer:
         """
@@ -1024,13 +1312,17 @@ class Rotate(OpticalLayer):
         Parameters
         ----------
         angle: float, radians
-            The angle by which to rotate the wavefront in the clockwise direction.
+            The angle by which to rotate the wavefront in the clockwise 
+            direction.
         real_imaginary : bool = False
             Should the rotation be performed on the amplitude and phase array
             or the real and imaginary arrays.
         fourier : bool = False
             Should the fourier rotation method be used (True), or regular
             interpolation method be used (False).
+        order : int = 1
+            The order of the interpolation to use. Only applies if fourier is
+            False. Must be 0, 1, or 3.
         padding : int = None
             The amount of fourier padding to use. Only applies if fourier is
             True.
@@ -1040,6 +1332,9 @@ class Rotate(OpticalLayer):
         super().__init__(name)
         self.angle          = np.asarray(angle, dtype=float)
         self.real_imaginary = bool(real_imaginary)
+        if order not in (0, 1, 3):
+            raise ValueError("Order must be 0, 1, or 3.")
+        self.order = int(order)
         self.fourier        = bool(fourier)
         self.padding = padding if padding is None else int(padding)
         assert self.angle.ndim == 0, ("angle must be scalar array.")
@@ -1059,6 +1354,45 @@ class Rotate(OpticalLayer):
         wavefront : Wavefront
             The rotated wavefront.
         """
-        args = [self.angle, self.real_imaginary, self.fourier]
+        args = [self.angle, self.real_imaginary, self.fourier, self.order]
         args += [self.padding] if self.padding is not None else []
         return wavefront.rotate(*args)
+
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        angle = convert_angular(self.angle, 'radians', angular_units)
+        
+        if self.fourier:
+            method = f"a Fourier method with padding of {self.padding}"
+        else:
+            method = "an Interpolation method of order 1"
+
+        if self.real_imaginary:
+            wf_type = "real and imaginary arrays"
+        else:
+            wf_type = "amplitude and phase arrays"
+
+        return (f"{self.name}: Applies a {angle:.{sigfigs}} {angular_units} "
+                f"rotation to the wavefront {wf_type} using {method}.")
