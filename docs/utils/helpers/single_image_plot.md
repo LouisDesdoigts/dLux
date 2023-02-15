@@ -1,0 +1,1 @@
+::: dLux.utils.helpers.single_image_plot

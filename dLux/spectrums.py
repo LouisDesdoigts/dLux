@@ -4,6 +4,8 @@ import jax.numpy as np
 from equinox import tree_at
 from zodiax import ExtendedBase
 from jax import vmap
+from dLux.utils.units import convert_cartesian
+from dLux.utils.helpers import spectrum_plot
 import dLux
 
 
@@ -21,12 +23,16 @@ class Spectrum(ExtendedBase, ABC):
     ----------
     wavelengths : Array, meters
         The array of wavelengths at which the spectrum is defined.
+    name : str
+        The name of the spectrum.
     """
+    name        : str
     wavelengths : Array
 
 
     def __init__(self        : Spectrum,
-                 wavelengths : Array) -> Spectrum:
+                 wavelengths : Array,
+                 name        : str = 'Spectrum') -> Spectrum:
         """
         Constructor for the Spectrum class.
 
@@ -34,7 +40,10 @@ class Spectrum(ExtendedBase, ABC):
         ----------
         wavelengths : Array, meters
             The array of wavelengths at which the spectrum is defined.
+        name : str = 'Spectrum'
+            The name of the spectrum.
         """
+        self.name = name
         self.wavelengths = np.asarray(wavelengths, dtype=float)
 
         # Input checking
@@ -72,6 +81,64 @@ class Spectrum(ExtendedBase, ABC):
         classes.
         """
         return
+    
+
+    def summary(self            : Spectrum, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return f"{self.name} layer has no summary method yet."
+    
+
+    def display(self            : Spectrum, 
+                figsize         : tuple = (6, 3),
+                dpi             : int = 120,
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> None:
+        """
+        Displays a plot of the wavefront amplitude and opd or phase.
+
+        Parameters
+        ----------
+        figsize : tuple = (6, 3)
+            The size of the figure to display.
+        cmap : str = 'inferno'
+            The colour map to use.
+        dpi : int = 120
+            The resolution of the figure.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+        """
+        wavelengths = convert_cartesian(self.wavelengths, "meters", 
+                                        cartesian_units)
+        spectrum_plot(wavelengths, self.get_weights(), figsize=figsize,
+                      cartesian_units=cartesian_units, dpi=dpi)
 
 
 class ArraySpectrum(Spectrum):
@@ -85,13 +152,16 @@ class ArraySpectrum(Spectrum):
         The array of wavelengths at which the spectrum is defined.
     weights : Array
         The relative weights of each wavelength.
+    name : str
+        The name of the spectrum.
     """
     weights : Array
 
 
     def __init__(self        : Spectrum,
                  wavelengths : Array,
-                 weights     : Array = None) -> Spectrum:
+                 weights     : Array = None,
+                 name        : str = 'ArraySpectrum') -> Spectrum:
         """
         Constructor for the ArraySpectrum class.
 
@@ -102,8 +172,10 @@ class ArraySpectrum(Spectrum):
         weights : Array = None
             The relative weights of each wavelength. Defaults to uniform
             spectrum. Weights are automatically normalised to a sum of 1.
+        name : str = 'ArraySpectrum'
+            The name of the spectrum.
         """
-        super().__init__(wavelengths)
+        super().__init__(wavelengths, name)
         weights = np.ones(len(self.wavelengths))/len(wavelengths) \
                                     if weights is None else weights
         weights = np.asarray(weights, dtype=float)
@@ -143,6 +215,33 @@ class ArraySpectrum(Spectrum):
         total_power = self.get_weights().sum()
         norm_weights = self.get_weights()/total_power
         return tree_at(lambda spectrum: spectrum.weights, self, norm_weights)
+    
+
+    def summary(self            : Spectrum, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"{self.name}: Applies a spectrum with weights stored as an "
+                "array.")
 
 
 class PolynomialSpectrum(Spectrum):
@@ -161,6 +260,8 @@ class PolynomialSpectrum(Spectrum):
         The degree of the polynomial.
     coefficients : Array
         The array of polynomial coefficient values.
+    name : str
+        The name of the spectrum.
     """
     degree       : int # Just a helper
     coefficients : Array
@@ -168,7 +269,8 @@ class PolynomialSpectrum(Spectrum):
 
     def __init__(self         : Spectrum,
                  wavelengths  : Array,
-                 coefficients : Array) -> Spectrum:
+                 coefficients : Array,
+                 name        : str = 'PolynomialSpectrum') -> Spectrum:
         """
         Constructor for the PolynomialSpectrum class.
 
@@ -178,8 +280,10 @@ class PolynomialSpectrum(Spectrum):
             The array of wavelengths at which the spectrum is defined.
         coefficients : Array
             The array of polynomial coefficient values.
+        name : str = 'PolynomialSpectrum'
+            The name of the spectrum.
         """
-        super().__init__(wavelengths)
+        super().__init__(wavelengths, name)
 
         self.coefficients = np.asarray(coefficients, dtype=float)
 
@@ -227,6 +331,33 @@ class PolynomialSpectrum(Spectrum):
             The unmodified spectrum object
         """
         return self
+    
+
+    def summary(self            : Spectrum, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"{self.name}: Applies a spectrum with weights parametried by "
+                f"a polynomial of degree {self.degree}.")
 
 
 class CombinedSpectrum(ArraySpectrum):
@@ -241,17 +372,20 @@ class CombinedSpectrum(ArraySpectrum):
     Attributes
     ----------
     wavelengths : Array, meters
-        The (2, n) array of wavelengths at which the spectrum is defined.
-        Input can also be a 1d
+        The (nspectra, nwavels) array of wavelengths at which the spectrum is 
+        defined. Input can also be a 1d
     weights : Array
-        The (2, n) relative weights of each wavelength. Defaults to uniform
-        throughput.
+        The (nspectra, nwavels) relative weights of each wavelength. Defaults 
+        to uniform throughput.
+    name : str
+        The name of the spectrum.
     """
 
 
     def __init__(self        : Spectrum,
                  wavelengths : Array,
-                 weights     : Array = None) -> Spectrum:
+                 weights     : Array = None,
+                 name        : str = 'CombinedSpectrum') -> Spectrum:
         """
         Constructor for the CombinedSpectrum class. Expects wavelengths and
         weights to have the same dimensionality, ie (nsources, nwavelengths).
@@ -259,13 +393,16 @@ class CombinedSpectrum(ArraySpectrum):
         Parameters
         ----------
         wavelengths : Array, meters
-            The (2, n) array of wavelengths at which the spectrum is defined.
-            Input can also be a 1d
+            The (nspectra, nwavels) array of wavelengths at which the spectrum 
+            is defined. Input can also be a 1d
         weights : Array (optional)
-            The (2, n) relative weights of each wavelength. Defaults to uniform
-            throughput.
+            The (nspectra, nwavels) relative weights of each wavelength. 
+            Defaults to uniform throughput.
+        name : str = 'CombinedSpectrum'
+            The name of the spectrum.
         """
         super() # Access methods but don't instatiate attributes
+        self.name = str(name)
         self.wavelengths = np.asarray(wavelengths, dtype=float)
 
         # Wavelengths
@@ -313,3 +450,30 @@ class CombinedSpectrum(ArraySpectrum):
         total_power = weights.sum(1).reshape((len(weights), 1))
         norm_weights = weights/total_power
         return tree_at(lambda spectrum: spectrum.weights, self, norm_weights)
+    
+
+    def summary(self            : Spectrum, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"{self.name}: Applies a two spectrums with weights stored as "
+                "arrays.")

@@ -41,8 +41,7 @@ class TestAperturesCommonInterfaces():
             self._test_single_aperture_class(ctor)
     
     def _test_single_aperture_class(self, aperture_fixture):
-        
-        coordinates = dLux.utils.get_pixel_coordinates(512, 2./512)
+        coordinates = dLux.utils.get_pixel_positions((16, 16), (2./16, 2./16))
         
         x_offset = 1.
         y_offset = 1.
@@ -101,9 +100,11 @@ class TestUniformSpider(object):
         """
         Checks that the apertures fall into the correct range.
         """
-        npix = 128
+        npix = 16
         width = 2.
-        coordinates = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        pixel_scale = width / npix
+        coordinates = dLux.utils.get_pixel_positions((npix,npix), 
+                                                    (pixel_scale, pixel_scale))
 
         # Case Translated 
         spider = create_uniform_spider(centre=[1., 1.], softening=0.)
@@ -130,9 +131,11 @@ class TestUniformSpider(object):
         """
         Checks that the aperture falls into the correct range.
         """
-        npix = 128
+        npix = 16
         width = 2.
-        coordinates = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        pixel_scale = width / npix
+        coordinates = dLux.utils.get_pixel_positions((npix,npix), 
+                                                    (pixel_scale, pixel_scale))
 
         # Case Translated 
         spider = create_uniform_spider(centre=[1., 1.], softening=0.)
@@ -185,9 +188,11 @@ class TestAberratedAperture(object):
         """
         jax.config.update("jax_debug_nans", True)
         
+        npix = 16
         width = 2.
-        npix = 128
-        coordinates = dLux.utils.get_pixel_coordinates(npix, width / npix)
+        pixel_scale = width / npix
+        coordinates = dLux.utils.get_pixel_positions((npix,npix), 
+                                                    (pixel_scale, pixel_scale))
 
         ap = create_circular_aperture()
 
