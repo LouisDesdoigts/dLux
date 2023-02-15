@@ -4,8 +4,10 @@ from abc import ABC, abstractmethod
 from jax import numpy as np, lax, vmap
 from jax.tree_util import tree_map, tree_flatten
 from equinox import filter, static_field
-from dLux.utils import get_pixel_coordinates, coordinates as c, opd_to_phase, \
+from dLux.utils import get_pixel_positions, coordinates as c, opd_to_phase, \
     factorial, cartesian_to_polar, list_to_dictionary
+from dLux.utils.helpers import two_image_plot
+from dLux.utils.units import convert_angular, convert_cartesian
 
 
 Array = np.ndarray
@@ -87,7 +89,9 @@ class ApertureLayer(OpticalLayer, ABC):
         aperture : Array 
             The array representing the transmission of the aperture.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter / npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._aperture(coordinates)
 
 
@@ -447,10 +451,6 @@ class CircularAperture(DynamicAperture):
                  occulting   : bool = False, 
                  softening   : Array = np.array(1.),
                  name        : str = "CircularAperture",
-
-                 static = False,
-                 npixels = None,
-                 diameter = None,
                  ) -> Array:
         """
         Constructor for the CircularAperture class.
@@ -532,6 +532,47 @@ class CircularAperture(DynamicAperture):
             The maximum distance from the centre to edge of aperture.
         """
         return self.radius
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        radius = convert_cartesian(self.radius, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        transmissive = "transmissive" if not self.occulting else "occulting"
+
+        summary = (f"Applies a {transmissive} Circular Aperture with radius "
+                   f"{radius} {cartesian_units}")
+        
+        if self.softening != np.array(0):
+            summary += f" softened by ~{self.softening} pixels"
+        if self.center != np.array([0., 0.]):
+            summary += f" centred at {center}"
+        if self.shear != np.array([0., 0.]):
+            summary += f" sheared by {self.shear}"
+        if self.compression != np.array([1., 1.]):
+            summary += f" compressed by {self.compression}"
+        return summary + "."
 
 
 class AnnularAperture(DynamicAperture):
@@ -659,6 +700,49 @@ class AnnularAperture(DynamicAperture):
             The maximum distance from the centre to edge of aperture.
         """
         return self.rmax
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        rmin = convert_cartesian(self.rmin, 'meters', cartesian_units)
+        rmax = convert_cartesian(self.rmax, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        transmissive = "transmissive" if not self.occulting else "occulting"
+
+        summary = (f"Applies a {transmissive} Annular Aperture with inner "
+                   f"radius {rmin} {cartesian_units} and outer radius {rmax} "
+                   f"{cartesian_units}")
+        
+        if self.softening != np.array(0):
+            summary += f" softened by ~{self.softening} pixels"
+        if self.center != np.array([0., 0.]):
+            summary += f" centred at {center}"
+        if self.shear != np.array([0., 0.]):
+            summary += f" sheared by {self.shear}"
+        if self.compression != np.array([1., 1.]):
+            summary += f" compressed by {self.compression}"
+        return summary + "."
 
 
 class RectangularAperture(DynamicAperture):
@@ -792,6 +876,52 @@ class RectangularAperture(DynamicAperture):
             The maximum distance from the centre to edge of aperture.
         """
         return np.hypot(self.height / 2., self.width / 2.)
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        height = convert_cartesian(self.height, 'meters', cartesian_units)
+        width = convert_cartesian(self.width, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
+        transmissive = "transmissive" if not self.occulting else "occulting"
+
+        summary = (f"Applies a {transmissive} Rectangular Aperture with height "
+                   f"{height} {cartesian_units} and width {width} "
+                   f"{cartesian_units}")
+        
+        if self.softening != np.array(0):
+            summary += f" softened by ~{self.softening} pixels"
+        if self.center != np.array([0., 0.]):
+            summary += f" centred at {center}"
+        if self.rotation != np.array(0.):
+            summary += f" rotated by {rotation} {angular_units}"
+        if self.shear != np.array([0., 0.]):
+            summary += f" sheared by {self.shear}"
+        if self.compression != np.array([1., 1.]):
+            summary += f" compressed by {self.compression}"
+        return summary + "."
 
 
 class SquareAperture(DynamicAperture):
@@ -917,6 +1047,50 @@ class SquareAperture(DynamicAperture):
             The maximum distance from the centre to edge of aperture.
         """
         return np.sqrt(2) * self.width / 2.
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        width = convert_cartesian(self.width, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
+        transmissive = "transmissive" if not self.occulting else "occulting"
+
+        summary = (f"Applies a {transmissive} Rectangular Aperture with width "
+                   f"{width} {cartesian_units}")
+        
+        if self.softening != np.array(0):
+            summary += f" softened by ~{self.softening} pixels"
+        if self.center != np.array([0., 0.]):
+            summary += f" centred at {center}"
+        if self.rotation != np.array(0.):
+            summary += f" rotated by {rotation} {angular_units}"
+        if self.shear != np.array([0., 0.]):
+            summary += f" sheared by {self.shear}"
+        if self.compression != np.array([1., 1.]):
+            summary += f" compressed by {self.compression}"
+        return summary + "."
 
 
 class PolygonalAperture(DynamicAperture, ABC):
@@ -1301,6 +1475,48 @@ class IrregularPolygonalAperture(PolygonalAperture):
         edges = (dist_from_edges * dist_sgn) > 0.
 
         return (edges).prod(axis=0)
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
+        transmissive = "transmissive" if not self.occulting else "occulting"
+
+        summary = f"Applies a {transmissive} Irregular Polygonal Aperture"
+        
+        if self.softening != np.array(0):
+            summary += f" softened by ~{self.softening} pixels"
+        if self.center != np.array([0., 0.]):
+            summary += f" centred at {center}"
+        if self.rotation != np.array(0.):
+            summary += f" rotated by {rotation} {angular_units}"
+        if self.shear != np.array([0., 0.]):
+            summary += f" sheared by {self.shear}"
+        if self.compression != np.array([1., 1.]):
+            summary += f" compressed by {self.compression}"
+        return summary + "."
 
 
 class RegularPolygonalAperture(PolygonalAperture):
@@ -1465,6 +1681,51 @@ class RegularPolygonalAperture(PolygonalAperture):
         return dist.prod(axis=0)
 
 
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        rmax = convert_cartesian(self.rmax, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
+        transmissive = "transmissive" if not self.occulting else "occulting"
+
+        summary = (f"Applies a {transmissive} {self.nsides} sided Regular "
+                   f"Polygonal Aperture of max radius {rmax:.{sigfigs}} "
+                   f"{cartesian_units}")
+        
+        if self.softening != np.array(0):
+            summary += f" softened by ~{self.softening} pixels"
+        if self.center != np.array([0., 0.]):
+            summary += f" centred at {center}"
+        if self.rotation != np.array(0.):
+            summary += f" rotated by {rotation} {angular_units}"
+        if self.shear != np.array([0., 0.]):
+            summary += f" sheared by {self.shear}"
+        if self.compression != np.array([1., 1.]):
+            summary += f" compressed by {self.compression}"
+        return summary + "."
+
+
 class HexagonalAperture(RegularPolygonalAperture):
     """
     A hexagonal aperture parameterised by the maximum radius to the vertices 
@@ -1538,6 +1799,48 @@ class HexagonalAperture(RegularPolygonalAperture):
                          name = name)
 
 
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        rmax = convert_cartesian(self.rmax, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
+        transmissive = "transmissive" if not self.occulting else "occulting"
+
+        summary = (f"Applies a {transmissive} Hexagonal Aperture of max radius "
+                   f"{rmax:.{sigfigs}} {cartesian_units}")
+        
+        if self.softening != np.array(0):
+            summary += f" softened by ~{self.softening} pixels"
+        if self.center != np.array([0., 0.]):
+            summary += f" centred at {center}"
+        if self.rotation != np.array(0.):
+            summary += f" rotated by {rotation} {angular_units}"
+        if self.shear != np.array([0., 0.]):
+            summary += f" sheared by {self.shear}"
+        if self.compression != np.array([1., 1.]):
+            summary += f" compressed by {self.compression}"
+        return summary + "."
 
 
 ###############
@@ -1777,6 +2080,48 @@ class UniformSpider(Spider):
         struts = self._stacked_struts(coordinates) > self.strut_width / 2. 
         return struts.prod(axis=0)
 
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        width = convert_cartesian(self.strut_width, 'meters', cartesian_units)
+        center = convert_cartesian(self.center, 'meters', cartesian_units)
+        rotation = convert_angular(self.rotation, 'radians', angular_units)
+
+        summary = (f"Applies a {self.nstrut} strut spider with widths {width} "
+                   f"{cartesian_units}")
+        
+        if self.softening != np.array(0):
+            summary += f" softened by ~{self.softening} pixels"
+        if self.center != np.array([0., 0.]):
+            summary += f" centred at {center}"
+        if self.rotation != np.array(0.):
+            summary += f" rotated by {rotation} {angular_units}"
+        if self.shear != np.array([0., 0.]):
+            summary += f" sheared by {self.shear}"
+        if self.compression != np.array([1., 1.]):
+            summary += f" compressed by {self.compression}"
+        return summary + "."
 
 
 
@@ -2041,7 +2386,9 @@ class AberratedAperture(AbstractAberratedAperture):
         aperture : Array 
             The array representing the transmission of the aperture.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter / npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self.aperture._aperture(coordinates)
 
 
@@ -2096,7 +2443,9 @@ class AberratedAperture(AbstractAberratedAperture):
         basis : Array 
             The array of the basis vectors of the aperture aberrations.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter / npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._basis(coordinates)
  
 
@@ -2137,7 +2486,9 @@ class AberratedAperture(AbstractAberratedAperture):
         basis : Array 
             The array of the total opd of the aperture aberrations.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter / npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._opd(coordinates)
 
 
@@ -2409,7 +2760,33 @@ class AberratedAperture(AbstractAberratedAperture):
                     np.sqrt((intermediate ** 2).sum() / pixel_area))
         
         return basis
+    
 
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        summary = super().summary(angular_units, cartesian_units, sigfigs)
+        return summary[:-1] + f" with {len(self.coefficients)} aberrations."
 
 
 
@@ -2548,7 +2925,9 @@ class CompositeAperture(AbstractDynamicAperture, ABC):
         aperture : Array 
             The array representing the transmission of the aperture.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter/npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._aperture(coordinates)
 
 
@@ -2594,7 +2973,9 @@ class CompositeAperture(AbstractDynamicAperture, ABC):
         basis : Array 
             The array of the basis vectors of the aperture aberrations.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter/npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._basis(coordinates)
 
 
@@ -2685,7 +3066,9 @@ class CompositeAperture(AbstractDynamicAperture, ABC):
         basis : Array 
             The array of the total opd of the aperture aberrations.
         """
-        coordinates = get_pixel_coordinates(npixels, diameter/npixels)
+        npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._opd(coordinates)
 
 
@@ -2824,6 +3207,37 @@ class CompoundAperture(CompositeAperture):
         """
         aps = self._stacked_apertures(coordinates)
         return aps.prod(axis=0)
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        summary = ("Applies a Compound Aperture with the following "
+                   "sub-apertures: \n")
+        for ap in self.apertures:
+            ap_summary = ap.summary(angular_units, cartesian_units, sigfigs)
+            summary += ap_summary + "\n"
+        return summary
 
 
 class MultiAperture(CompositeAperture):
@@ -2932,6 +3346,35 @@ class MultiAperture(CompositeAperture):
         return tree_flatten(aberrated, is_leaf=is_aberrated)[0]
 
 
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        summary = ("Applies a Multi Aperture with the following "
+                   "sub-apertures: \n")
+        for ap in self.apertures:
+            ap_summary = ap.summary(angular_units, cartesian_units, sigfigs)
+            summary += ap_summary + "\n"
+        return summary
 
 
 ########################
@@ -2987,7 +3430,9 @@ class AbstractStaticAperture(ApertureLayer):
         
         # Generate coordinates if not provided
         if coordinates is None:
-            coordinates = get_pixel_coordinates(npixels, diameter/npixels)
+            npixels_in = (npixels, npixels)
+            pixel_scales = (diameter / npixels, diameter / npixels)
+            coordinates = get_pixel_positions(npixels_in, pixel_scales)
 
         super().__init__(name = name)
         self.aperture = aperture._aperture(coordinates)
@@ -3098,6 +3543,33 @@ class StaticAperture(AbstractStaticAperture):
                          diameter = diameter, 
                          coordinates = coordinates, 
                          name = name)
+        
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return "Applies a pre-calculated Static Aperture."
+
 
 
 class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture):
@@ -3159,7 +3631,9 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
         
         # Generate coordinates if not provided
         if coordinates is None:
-            coordinates = get_pixel_coordinates(npixels, diameter/npixels)
+            npixels_in = (npixels, npixels)
+        pixel_scales = (diameter / npixels, diameter / npixels)
+        coordinates = get_pixel_positions(npixels_in, pixel_scales)
 
         super().__init__(aperture=aperture, coordinates=coordinates, 
             coefficients=aperture.coefficients, name=name)
@@ -3274,6 +3748,33 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
             The array of the total opd of the aperture aberrations.
         """
         return self._opd()
+    
+
+    def summary(self            : OpticalLayer, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"Applies a pre-calculated Static Aperture with "
+                f"{len(self.coefficients)} aberrations.")
 
 
 

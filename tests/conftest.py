@@ -166,8 +166,9 @@ def create_rotate() -> callable:
             angle: Array = np.array(np.pi),
             real_imaginary: bool = False,
             fourier: bool = False,
+            order: int = 1,
             padding: int = 2) -> OpticalLayer:
-        return dLux.optics.Rotate(angle, real_imaginary, fourier, padding)
+        return dLux.optics.Rotate(angle, real_imaginary, fourier, order, padding)
     return _create_rotate
 
 

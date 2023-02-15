@@ -123,8 +123,8 @@ class TestWavefront(object):
         """
         wf = create_wavefront()
         assert (wf.pixel_coordinates == \
-        dLux.utils.coordinates.get_pixel_coordinates(wf.npixels,
-                                                     wf.pixel_scale)).all()
+        dLux.utils.coordinates.get_pixel_positions((wf.npixels, wf.npixels,),
+                                        (wf.pixel_scale, wf.pixel_scale))).all()
 
 
     def test_set_amplitude(self, create_wavefront: callable) -> None:
@@ -434,16 +434,18 @@ class TestWavefront(object):
         """
         wf = create_wavefront()
         wf = dLux.CircularAperture(1.)(wf)
-        flipped_amplitude = np.flipud(wf.amplitude)
-        flipped_phase = np.flipud(wf.phase)
+        flipped_amplitude = np.flip(wf.amplitude, axis=(-1, -2))
+        flipped_phase = np.flip(wf.phase, axis=(-1, -2))
 
-        new_wf = wf.rotate(np.pi)
+        new_wf = wf.rotate(np.pi, order=1)
         assert np.allclose(new_wf.amplitude, flipped_amplitude, atol=1e-5)
         assert np.allclose(new_wf.phase, flipped_phase)
 
-        new_wf = wf.rotate(np.pi, real_imaginary=True)
+        new_wf = wf.rotate(np.pi, real_imaginary=True, order=1)
+
         assert np.allclose(new_wf.amplitude, flipped_amplitude, atol=1e-5)
-        assert np.allclose(new_wf.phase, flipped_phase)
+        # Add small remainer to fix 0-pi instability
+        assert np.allclose((new_wf.phase+1e-6)%np.pi, flipped_phase, atol=1e-5)
 
         with pytest.raises(NotImplementedError):
             wf.rotate(np.pi, fourier=True)

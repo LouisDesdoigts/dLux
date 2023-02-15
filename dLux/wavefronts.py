@@ -5,7 +5,7 @@ from equinox import tree_at
 from zodiax import ExtendedBase
 from enum import IntEnum
 from abc import ABC
-from dLux.utils.coordinates import get_pixel_coordinates
+from dLux.utils.coordinates import get_pixel_positions
 from dLux.utils.interpolation import interpolate_field, rotate_field
 import dLux
 
@@ -214,7 +214,9 @@ class Wavefront(ExtendedBase, ABC):
             The coordinates of the centers of each pixel representing the
             wavefront.
         """
-        return get_pixel_coordinates(self.npixels, self.pixel_scale)
+        # return get_pixel_coordinates(self.npixels, self.pixel_scale)
+        return get_pixel_positions((self.npixels, self.npixels), 
+                                   (self.pixel_scale, self.pixel_scale))
 
 
     @property
@@ -571,6 +573,7 @@ class Wavefront(ExtendedBase, ABC):
                angle          : Array,
                real_imaginary : bool = False,
                fourier        : bool = False,
+               order          : int  = 1,
                padding        : int  = 2) -> Wavefront:
         """
         Performs a paraxial rotation on the wavefront, determined by the
@@ -591,6 +594,8 @@ class Wavefront(ExtendedBase, ABC):
         fourier : bool = False
             Should the fourier rotation method be used (True), or regular
             interpolation method be used (False).
+        order : int = 2
+            The interpolation order to use. Must be 0, 1, or 3.
         padding : int = 2
             The amount of fourier padding to use. Only applies if fourier is
             True.
@@ -611,11 +616,11 @@ class Wavefront(ExtendedBase, ABC):
         if field.shape[1] == 1:
             new_amplitude, new_phase = \
             rotate_field(field[:, 0], angle, fourier=fourier,
-                         real_imaginary=real_imaginary)[:, None, :, :]
+                    real_imaginary=real_imaginary, order=order)[:, None, :, :]
         else:
             rotator = vmap(rotate_field, in_axes=(1, None))
             new_amplitude, new_phase = rotator(field, angle, fourier=fourier,
-                                               real_imaginary=real_imaginary)
+                                    real_imaginary=real_imaginary, order=order)
 
         # Update parameters
         return tree_at(lambda wavefront: (wavefront.amplitude, wavefront.phase),

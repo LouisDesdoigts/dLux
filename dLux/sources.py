@@ -5,6 +5,8 @@ from jax import vmap
 from equinox import tree_at, static_field
 from zodiax import ExtendedBase
 from abc import ABC, abstractmethod
+from dLux.utils.units import convert_angular, convert_cartesian
+from dLux.utils.helpers import spectrum_plot
 import dLux
 
 
@@ -163,6 +165,62 @@ class Source(ExtendedBase, ABC):
         normalised_spectrum = self.spectrum.normalise()
         return tree_at(
             lambda source : source.spectrum, self, normalised_spectrum)
+    
+
+    def summary(self            : Source, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        return (f"{self.name} has no summary method yet.")
+    
+
+    def display(self            : Source, 
+                figsize         : tuple = (6, 3),
+                dpi             : int = 120,
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> None:
+        """
+        Displays a plot of the wavefront amplitude and opd or phase.
+
+        Parameters
+        ----------
+        figsize : tuple = (6, 3)
+            The size of the figure to display.
+        cmap : str = 'inferno'
+            The colour map to use.
+        dpi : int = 120
+            The resolution of the figure.
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+        """
+        self.spectrum.normalise().display(figsize=figsize, dpi=dpi, 
+            angular_units=angular_units, cartesian_units=cartesian_units)
 
 
     def model(self      : Source,
@@ -458,6 +516,39 @@ class PointSource(Source):
         super().__init__(position, flux, spectrum, name=name)
 
 
+    def summary(self            : Source, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        position = np.array_str(convert_angular(self.position, 'radians', 
+                                            angular_units), precision=sigfigs)
+        spectrum_str = self.spectrum.summary(angular_units, cartesian_units,
+                                                sigfigs)
+        flux = self.flux
+        return (f"{self.name}: A Point Source with flux {flux:.{sigfigs}} "
+                f"photons at offset from the optical axis by {position} "
+                f"{angular_units} with spectrum\n  {spectrum_str}")
+
+
 class MultiPointSource(Source):
     """
     Concrete Class for multiple unresolved point source objects.
@@ -575,6 +666,40 @@ class MultiPointSource(Source):
 
         # Apply detector if supplied
         return psf if detector is None else detector.apply_detector(psf)
+    
+
+    def summary(self            : Source, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        position = np.array_str(convert_angular(self.position, 'radians', 
+                                            angular_units), precision=sigfigs)
+        spectrum_str = self.spectrum.summary(angular_units, cartesian_units,
+                                                sigfigs)
+        n = len(self.flux)
+        return (f"{self.name}: {n} Point Sources with fluxes "
+                f"{self.flux:.{sigfigs}} photons at offsets from the optical "
+                f"axis by {position} {angular_units} with spectrum\n  "
+                f"{spectrum_str}")
 
 
 class ArrayDistribution(ResolvedSource):
@@ -673,6 +798,39 @@ class ArrayDistribution(ResolvedSource):
         return tree_at(
             lambda source : (source.spectrum, source.distribution), self, \
                             (normalised_spectrum, normalised_distribution))
+    
+
+    def summary(self            : Source, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        position = np.array_str(convert_angular(self.position, 'radians', 
+                                            angular_units), precision=sigfigs)
+        spectrum_str = self.spectrum.summary(angular_units, cartesian_units,
+                                                sigfigs)
+        return (f"{self.name}: A Resolved Source with flux "
+                f"{self.flux:.{sigfigs}} photons at offset from the optical "
+                f"axis by {position} {angular_units} with spectrum\n  "
+                f"{spectrum_str}")
 
 
 class BinarySource(RelativePositionSource, RelativeFluxSource):
@@ -795,6 +953,44 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
 
         # Apply detector if supplied
         return psf if detector is None else detector.apply_detector(psf)
+    
+
+    def summary(self            : Source, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        position = np.array_str(convert_angular(self.position, 'radians', 
+                                            angular_units), precision=sigfigs)
+        separation = convert_angular(self.separation, 'radians', angular_units)
+        position_angle = convert_angular(self.position_angle, 'radians', 
+                                         angular_units)
+        spectrum_str = self.spectrum.summary(angular_units, cartesian_units,
+                                                sigfigs)
+        return (f"{self.name}: A Binary Source with mean flux "
+                f"{self.flux:.{sigfigs}} photons and constrast {self.contrast} "
+                f"offset from the optical axis by {position} "
+                f"{angular_units} with separation {separation:.{sigfigs}} "
+                f"{angular_units}, position angle {position_angle:.{sigfigs}} "
+                f"{angular_units} and spectrum\n  {spectrum_str}")
 
 
 class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
@@ -915,7 +1111,40 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
 
         # Apply detector if supplied
         return psf if detector is None else detector.apply_detector(psf)
+    
 
+    def summary(self            : Source, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        position = np.array_str(convert_angular(self.position, 'radians', 
+                                            angular_units), precision=sigfigs)
+        spectrum_str = self.spectrum.summary(angular_units, cartesian_units,
+                                                sigfigs)
+        return (f"{self.name}: A Point and Resolved Source with mean flux "
+                f"{self.flux:.{sigfigs}} photons and constrast "
+                f"{self.contrast:.{sigfigs}} offset from the optical axis by "
+                f"{position} {angular_units} and spectrum\n  "
+                f"{spectrum_str}")
 
 
 class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
@@ -1038,3 +1267,36 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
 
         # Apply detector if supplied
         return psf if detector is None else detector.apply_detector(psf)
+    
+
+    def summary(self            : Source, 
+                angular_units   : str = 'radians', 
+                cartesian_units : str = 'meters', 
+                sigfigs         : int = 4) -> str:
+        """
+        Returns a summary of the class.
+
+        Parameters
+        ----------
+        angular_units : str = 'radians'
+            The angular units to use in the summary. Options are 'radians', 
+            'degrees', 'arcseconds' and 'arcminutes'.
+        cartesian_units : str = 'meters'
+            The cartesian units to use in the summary. Options are 'meters',
+            'millimeters' and 'microns'.
+        sigfigs : int = 4
+            The number of significant figures to use in the summary.
+
+        Returns
+        -------
+        summary : str
+            A summary of the class.
+        """
+        position = np.array_str(convert_angular(self.position, 'radians', 
+                                            angular_units), precision=sigfigs)
+        spectrum_str = self.spectrum.summary(angular_units, cartesian_units,
+                                                sigfigs)
+        return (f"{self.name}: A Point and Resolved Source with mean flux "
+                f"{self.flux} photons and constrast {self.contrast} offset "
+                f"from the optical axis by {position} "
+                f"{angular_units} and spectrum\n  {spectrum_str}")
