@@ -1494,6 +1494,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../units/convert_cartesian/" class="md-nav__link">
+        convert cartesian
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../units/convert_angular/" class="md-nav__link">
+        convert angular
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../units/radians_to_arcseconds/" class="md-nav__link">
         radians to arcseconds
       </a>
@@ -1508,8 +1536,148 @@
   
   
     <li class="md-nav__item">
+      <a href="../../units/radians_to_degrees/" class="md-nav__link">
+        radians to degrees
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../units/radians_to_arcminutes/" class="md-nav__link">
+        radians to arcminutes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../units/degrees_to_radians/" class="md-nav__link">
+        degrees to radians
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../units/degrees_to_arcminutes/" class="md-nav__link">
+        degrees to arcminutes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../units/degrees_to_arcseconds/" class="md-nav__link">
+        degrees to arcseconds
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../units/arcminutes_to_radians/" class="md-nav__link">
+        arcminutes to radians
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../units/arcminutes_to_degrees/" class="md-nav__link">
+        arcminutes to degrees
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../units/arcminutes_to_arcseconds/" class="md-nav__link">
+        arcminutes to arcseconds
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../units/arcseconds_to_radians/" class="md-nav__link">
         arcseconds to radians
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../units/arcseconds_to_degrees/" class="md-nav__link">
+        arcseconds to degrees
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../units/arcseconds_to_arcminutes/" class="md-nav__link">
+        arcseconds to arcminutes
       </a>
     </li>
   
@@ -1686,34 +1854,6 @@
               
   
   
-  
-    <li class="md-nav__item">
-      <a href="../get_coordinates_vector/" class="md-nav__link">
-        get coordinates vector
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../get_positions_vector/" class="md-nav__link">
-        get positions vector
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
     
   
   
@@ -1756,48 +1896,6 @@
   
 </nav>
       
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../get_pixel_coordinates/" class="md-nav__link">
-        get pixel coordinates
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../get_polar_positions/" class="md-nav__link">
-        get polar positions
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../get_polar_coordinates/" class="md-nav__link">
-        get polar coordinates
-      </a>
     </li>
   
 
@@ -2290,6 +2388,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helpers/two_image_plot/" class="md-nav__link">
+        two image plot
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -2362,7 +2474,16 @@
 <a id="dLux.utils.coordinates.get_pixel_positions"></a>
   <div class="doc doc-contents first">
   
-      <p>Returns arrays of pixel positions relative to the (central) optical axis.</p>
+      <p>Calculates the positions of the pixel centers for the given input. All 
+coordinates are output in units of meters. </p>
+<p>The indexing argument is the same
+as in numpy.meshgrid., ie:  Giving the string ‘ij’ returns a meshgrid with 
+matrix indexing, while ‘xy’ returns a meshgrid with Cartesian indexing. In 
+the 2-D case with inputs of length M and N, the outputs are of shape (N, M) 
+for ‘xy’ indexing and (M, N) for ‘ij’ indexing. In the 3-D case with inputs 
+of length M, N and P, outputs are of shape (N, M, P) for ‘xy’ indexing and 
+(M, N, P) for ‘ij’ indexing. If the output is in polar coordainates, 
+indexing is set to 'xy' and the input must be 2d</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2378,33 +2499,58 @@
         <tr>
           <td><code>npixels</code></td>
           <td>
-                <code>int</code>
+                <code><span title="typing.Union">Union</span>[int, tuple]</code>
           </td>
-          <td><p>The number of pixels along the side of the output array.</p></td>
+          <td><p>The number of pixels in each dimension.</p></td>
           <td>
               <em>required</em>
           </td>
         </tr>
         <tr>
-          <td><code>x_pixel_offset</code></td>
+          <td><code>pixel_scales</code></td>
           <td>
-                <code><span title="dLux.utils.coordinates.Array">Array</span>, pixels</code>
+                <code><span title="typing.Union">Union</span>[tuple, float, None]</code>
           </td>
-          <td><p>The x offset of the centre of the coordinate system in the
-square output array.</p></td>
+          <td><p>The pixel scales in each dimension. If a tuple, the length
+of the tuple must match the number of dimensions. If a float, the same
+scale is applied to all dimensions. If None, the scale is set to 1.</p></td>
           <td>
-                <code>np.array(0.0)</code>
+                <code>None</code>
           </td>
         </tr>
         <tr>
-          <td><code>y_pixel_offset</code></td>
+          <td><code>offsets</code></td>
           <td>
-                <code><span title="dLux.utils.coordinates.Array">Array</span>, pixels</code>
+                <code><span title="typing.Union">Union</span>[tuple, float, None]</code>
           </td>
-          <td><p>The y offset of the centre of the coordinate system in the
-square output array.</p></td>
+          <td><p>The offset of the pixel centers in each dimension. If a tuple, the 
+length of the tuple must match the number of dimensions. If a float, 
+the same offset is applied to all dimensions. If None, the offset is 
+set to 0.</p></td>
           <td>
-                <code>np.array(0.0)</code>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>polar</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>If True, the output is in polar coordinates. If False, the output is in
+cartesian coordinates. Default is False.</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>indexing</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>The indexing of the output. Default is 'xy'. See numpy.meshgrid for more
+details.</p></td>
+          <td>
+                <code>&#39;xy&#39;</code>
           </td>
         </tr>
     </tbody>
@@ -2423,7 +2569,7 @@ square output array.</p></td>
 <td><code>positions</code></td>          <td>
                 <code><span title="dLux.utils.coordinates.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) array of pixel positions.</p></td>
+          <td><p>The positions of the pixel centers in the given dimensions.</p></td>
         </tr>
     </tbody>
   </table>
@@ -2451,7 +2597,7 @@ square output array.</p></td>
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../get_positions_vector/" class="md-footer__link md-footer__link--prev" aria-label="Previous: get positions vector" rel="prev">
+        <a href="../polar_to_cartesian/" class="md-footer__link md-footer__link--prev" aria-label="Previous: polar to cartesian" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -2460,20 +2606,20 @@ square output array.</p></td>
               <span class="md-footer__direction">
                 Previous
               </span>
-              get positions vector
+              polar to cartesian
             </div>
           </div>
         </a>
       
       
         
-        <a href="../get_pixel_coordinates/" class="md-footer__link md-footer__link--next" aria-label="Next: get pixel coordinates" rel="next">
+        <a href="../../interpolation/scale_array/" class="md-footer__link md-footer__link--next" aria-label="Next: scale array" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              get pixel coordinates
+              scale array
             </div>
           </div>
           <div class="md-footer__button md-icon">
