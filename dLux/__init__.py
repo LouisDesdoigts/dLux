@@ -1,5 +1,5 @@
 name = "dLux"
-__version__ = "0.10.0"
+__version__ = "0.10.1"
 
 # Import as modules
 from . import core
@@ -32,4 +32,6 @@ __all__ = core.__all__ + detectors.__all__ + optics.__all__ + \
 # Check for 64-bit
 from jax import config
 if not config.x64_enabled:
-    print("dLux: Jax is running in 32-bit, to enable 64-bit visit:\nhttps://jax.readthedocs.io/en/latest/notebooks/Common_Gotchas_in_JAX.html#double-64bit-precision")
+    print("dLux: Jax is running in 32-bit, to enable 64-bit visit: "
+          "https://jax.readthedocs.io/en/latest/notebooks/"
+          "Common_Gotchas_in_JAX.html#double-64bit-precision")
