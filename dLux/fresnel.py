@@ -4,19 +4,10 @@ import jax
 import jax.numpy as np
 import equinox as eqx
 
-Scalar = typing.TypeVar("Scalar") # 0d
-Vector = typing.TypeVar("Vector") # 1d
-Array =  typing.TypeVar("Array") # 2d +
-
-Wavefront   = typing.TypeVar("Wavefront")
-Propagator  = typing.TypeVar("Propagator")
-PlaneType   = typing.TypeVar("PlaneType")
-Layer       = typing.TypeVar("Layers")
-
-
 __all__ = ["GaussianWavefront", "GaussianPropagator", "GaussianLens"]
 __author__ = "Jordan Dennis"
 
+def overrides(fn: callable) -> callable: return fn
 
 class GaussianWavefront(dLux.wavefronts.Wavefront):
     """
@@ -101,9 +92,8 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
 
         
     ### Getters ###
-    # NOTE: The pixel scale cannot be set when self.angular == True
-    # NOTE: This has the correct units always/
-    def get_pixel_scale(self : Wavefront):
+    @property
+    def get_pixel_scale(self: Wavefront):
         """
         
         NOTE - This seems dodgey, becuase if we enfore only using
@@ -120,7 +110,23 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             lambda : self.pixel_scale / self.focal_length,
             lambda : self.pixel_scale)
 
+    @overrides
+    @property
+    def pixel_coordinates(self: Wavefront) -> Array:
+        """
+        Returns the physical positions of the wavefront pixels in meters.
 
+        Returns
+        -------
+        pixel_positions : Array
+            The coordinates of the centers of each pixel representing the
+            wavefront.
+        """
+        shape: tuple = (self.npixels, self.npixels)
+        scale: tuple = (self.get_pixel_scale, self.get_pixel_scale)
+        return get_pixel_positions(shape, scale)
+
+    @property
     def rayleigh_distance(self : Wavefront) -> Scalar:
         """
         Calculates the rayleigh distance of the Gaussian beam.
@@ -130,7 +136,7 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
         rayleigh_distance : float
             The Rayleigh distance of the wavefront in metres.
         """
-        return np.pi * self.get_waist_radius() ** 2 / self.get_wavelength()
+        return np.pi * self.waist_radius ** 2 / self.wavelength
     
     
     ### Setters ###
