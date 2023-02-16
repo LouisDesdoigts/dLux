@@ -139,26 +139,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
         return np.pi * self.waist_radius ** 2 / self.wavelength
     
     
-    # NOTE: ordering convention: dunder, _..., ..._at, ..._after, 
-    # set_... get_...
-    # NOTE: naming conventself._outside_to_outsideion: position -> absolute place on optical
-    # axis and distance -> movement.
-    def set_waist_position(self : Wavefront, waist_position : Scalar) -> Wavefront:
-        """
-        Parameters
-        ----------
-        waist_position : float, meters 
-            The absolute position of the waist of the wavefront.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The `Wavefront` with the updated parameters.  
-        """
-        return eqx.tree_at(lambda wave : wave.waist_position,
-            self, waist_position)    
-    
-
     def set_waist_radius(self : Wavefront, waist_radius : Scalar) -> Wavefront:
         """
         Parameters
