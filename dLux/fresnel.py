@@ -101,19 +101,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
 
         
     ### Getters ###
-    def get_position(self : Wavefront) -> float:
-        """
-        Accessor for the position of the wavefront. 
-
-        Returns 
-        -------
-        position : float 
-            The position of the `Wavefront` from its starting point 
-            in meters.
-        """
-        return self.position
-    
-
     def get_phase_radius(self : Wavefront) -> float:
         """
         Accessor for the phase radius of the wavefront.
