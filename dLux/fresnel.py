@@ -139,30 +139,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
         return np.pi * self.waist_radius ** 2 / self.wavelength
     
     
-    ### Setters ###
-    # NOT USED
-    def set_position(self : Wavefront, 
-            position : float) -> Wavefront:
-        """
-        Mutator for the position of the wavefront. Changes the 
-        pixel_scale which is a function of the position.  
-
-        Parameters
-        ----------
-        position : float
-            The new position of the wavefront from its starting point 
-            assumed to be in meters. 
-        
-        Returns
-        -------
-        wavefront : Wavefront
-            This wavefront at the new position. 
-        """
-        return eqx.tree_at(
-            lambda wavefront : wavefront.position, self, position,
-            is_leaf = lambda leaf : leaf is None)
-    
-    
     # NOT UESD
     def set_phase_radius(self : Wavefront, 
             phase_radius : float) -> Wavefront:
