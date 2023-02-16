@@ -137,23 +137,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             The Rayleigh distance of the wavefront in metres.
         """
         return np.pi * self.waist_radius ** 2 / self.wavelength
-
-
-    def set_spherical(self : Wavefront, spherical : bool) -> Wavefront:
-        """
-        Parameters
-        ----------
-        spherical : bool
-            Toggle the state of the `Wavefront` to and from `spherical`.
-        
-        Returns
-        -------
-        wavefront : Wavefront 
-            The `Wavefront` with the parameters modified. 
-        """
-        
-        # Pretty sure the 'spherical' input need to wrapped into a jnp array
-        return eqx.tree_at(lambda wave : wave.spherical, self, spherical)
     
 
     # TODO: Do I even want to include this functionality as it is 
