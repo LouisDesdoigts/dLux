@@ -101,12 +101,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
 
         
     ### Getters ###
-    def is_angular(self : Wavefront) -> bool:
-        """
-        
-        """
-        return self.angular
-    
     # NOTE: The pixel scale cannot be set when self.angular == True
     # NOTE: This has the correct units always/
     def get_pixel_scale(self : Wavefront):
