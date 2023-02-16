@@ -101,19 +101,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
 
         
     ### Getters ###
-    def get_pixel_positions(self : Wavefront) -> Array:
-        """
-        Returns
-        -------
-        positions : Tensor, meters
-            The position of each pixel aligned according to the `fft` 
-            algorithm that is implemented by `numpy`.
-        """
-        pixels = self.npix()
-        positions = np.array(np.indices((pixels, pixels)) - pixels / 2.)
-        return self.get_pixel_scale() * positions
-
-
     def is_angular(self : Wavefront) -> bool:
         """
         
