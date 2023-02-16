@@ -139,26 +139,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
         return np.pi * self.waist_radius ** 2 / self.wavelength
     
     
-    # NOT UESD
-    def set_phase_radius(self : Wavefront, 
-            phase_radius : float) -> Wavefront:
-        """
-        Mutator for the phase_radius.
-
-        Parameters
-        ----------
-        phase_radius : float
-            The new phase_radius in meters.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            A modified Wavefront with the new phase_radius.
-        """
-        return eqx.tree_at(lambda wavefront : wavefront.phase_radius, 
-            self, phase_radius, is_leaf = lambda leaf : leaf is None)
-    
-    
     # NOTE: ordering convention: dunder, _..., ..._at, ..._after, 
     # set_... get_...
     # NOTE: naming conventself._outside_to_outsideion: position -> absolute place on optical
