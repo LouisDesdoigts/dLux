@@ -116,18 +116,9 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             representing the `Wavefront`. Note that this differs
             from `poppy` because it includes the oversample. 
         """
-        return jax.lax.cond(self.is_angular(),
+        return jax.lax.cond(self.angular,
             lambda : self.pixel_scale / self.focal_length,
             lambda : self.pixel_scale)
-    
-    
-    def get_waist_radius(self : Wavefront):
-        """
-        Calculates the current waist radius as half of the diameter
-        
-        Mainly just exists to keep consistency with textbook terms
-        """
-        return self.waist_radius
 
 
     def rayleigh_distance(self : Wavefront) -> Scalar:
