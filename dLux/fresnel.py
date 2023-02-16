@@ -293,25 +293,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
         pixel_scale = self.wavelength * np.abs(distance) / width
         return self.set_pixel_scale(pixel_scale)
 
-    
-    def position_after(self: Wavefront, distance: Scalar) -> Wavefront:
-        """
-        Move the wavefront forward by `distance`.
-
-        Parameters
-        ----------
-        distance: float, meters
-            The distance of propagation.
-        
-        Returns
-        -------
-        wavefront: Wavefront 
-            The `Wavefront` with the `position` leaf updated.
-        """
-        position = self.position + distance
-        return eqx.tree_at(lambda wave: wave.position, self, position)
-
-
 
 class GaussianPropagator(eqx.Module):
     """
