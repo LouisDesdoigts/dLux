@@ -139,25 +139,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
         return np.pi * self.waist_radius ** 2 / self.wavelength
     
 
-    # TODO: Do I even want to include this functionality as it is 
-    # only for the translation between the angular and the physical
-    # coordinates. I'm not sure that we need this. 
-    def set_focal_length(self : Wavefront, focal_length : Scalar) -> Wavefront:
-        """
-        Parameters
-        ----------
-        focal_length : float, meters
-            The `focal_length` of the `Wavefront`.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The `Wavefront` with the parameters modified. 
-        """
-        return eqx.tree_at(lambda wave : wave.focal_length,
-            self, focal_length)
-
-
     # NOT USED
     def calculate_pixel_scale(self: Wavefront, position: float) -> None:
         """
