@@ -137,22 +137,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             The Rayleigh distance of the wavefront in metres.
         """
         return np.pi * self.waist_radius ** 2 / self.wavelength
-    
-    
-    def set_waist_radius(self : Wavefront, waist_radius : Scalar) -> Wavefront:
-        """
-        Parameters
-        ----------
-        beam_radius : float
-            The new beam_radius in meters.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            A modified `Wavefront` with the new `beam_radius`.
-        """
-        return eqx.tree_at(lambda wave : wave.waist_radius,
-            self, waist_radius)
 
 
     def set_spherical(self : Wavefront, spherical : bool) -> Wavefront:
