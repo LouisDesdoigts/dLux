@@ -135,7 +135,7 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             The position of each pixel aligned according to the `fft` 
             algorithm that is implemented by `numpy`.
         """
-        pixels = self.number_of_pixels()
+        pixels = self.npix()
         positions = np.array(np.indices((pixels, pixels)) - pixels / 2.)
         return self.get_pixel_scale() * positions
 
@@ -315,7 +315,7 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             in metres.
         """
         new_pixel_scale = self.get_wavelength() * np.abs(position) / \
-            self.number_of_pixels() / self.get_pixel_scale()  
+            self.npix() / self.get_pixel_scale()  
         return new_pixel_scale 
         
     
@@ -385,9 +385,9 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
         x, y = positions[0], positions[1]
         rho_squared = \
             (x / (self.get_pixel_scale() ** 2 \
-                * self.number_of_pixels())) ** 2 + \
+                * self.npix())) ** 2 + \
             (y / (self.get_pixel_scale() ** 2 \
-                * self.number_of_pixels())) ** 2
+                * self.npix())) ** 2
         # Transfer Function of diffraction propagation eq. 22, eq. 87
         return np.exp(-1.j * np.pi * self.wavelength * \
                 distance * rho_squared)
@@ -479,7 +479,7 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             The wavefront but the pixel_scale has been updated.
         """
         pixel_scale = self.get_wavelength() * np.abs(distance) /\
-            (self.number_of_pixels() * self.get_pixel_scale())
+            (self.npix() * self.get_pixel_scale())
         return self.set_pixel_scale(pixel_scale)
 
     
