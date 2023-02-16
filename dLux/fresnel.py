@@ -101,19 +101,6 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
 
         
     ### Getters ###
-    def get_phase_radius(self : Wavefront) -> float:
-        """
-        Accessor for the phase radius of the wavefront.
-
-        Returns
-        -------
-        phase_radius : float 
-            The phase radius of the wavefront. This is a unitless 
-            quantity.
-        """
-        return self.phase_radius
-    
-    
     def get_pixel_positions(self : Wavefront) -> Array:
         """
         Returns
