@@ -206,17 +206,11 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             A phase representing the evolution of the wavefront over 
             the distance. 
         """
-        positions = self.get_pixel_positions()
-        x, y = positions[0], positions[1]
-        rho_squared = \
-            (x / (self.get_pixel_scale() ** 2 \
-                * self.npix())) ** 2 + \
-            (y / (self.get_pixel_scale() ** 2 \
-                * self.npix())) ** 2
         # Transfer Function of diffraction propagation eq. 22, eq. 87
-        return np.exp(-1.j * np.pi * self.wavelength * \
-                distance * rho_squared)
-
+        positions = self.pixel_positions
+        scaling = self.get_pixel_scale ** 2 * self.npix
+        rho_squared = np.pow((positions / scaling), 2).sum(0)
+        return np.exp(-1.j * np.pi * self.wavelength * distance * rho_squared)
 
     def curvature_at(self: Wavefront, position: float) -> float:
         """
@@ -235,9 +229,8 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             The radius of phase curvature for the wavefront. 
         """
         relative_position = position - self.waist_position
-        return relative_position + \
-            self.rayleigh_distance() ** 2 / relative_position
-
+        near_curvature =  self.rayleigh_distance ** 2 / relative_position
+        return relative_position + near_curvature
 
     def radius_at(self: Wavefront, position: Scalar) -> Scalar:
         """
@@ -255,11 +248,9 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             The radius of the beam. 
         """
         relative_position = position - self.waist_position
-        return self.get_waist_radius() * \
-            np.sqrt(1.0 + \
-                (relative_position / self.rayleigh_distance()) ** 2)
-
-    
+        relative_distance = relative_position / self.rayleigh_distance
+        return self.waist_radius * np.sqrt(1.0 + (relative_distance) ** 2)
+ 
     def is_planar_at(self: Wavefront, position: Scalar) -> bool:
         """ 
         Determines whether a point at along the axis of propagation 
@@ -277,15 +268,10 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
             true if the point is within the rayleigh distance false 
             otherwise.
         """
-        return np.abs(self.waist_position - position) \
-            < self.rayleigh_distance()
+        dist_from_waist = np.abs(self.waist_position - position) 
+        return dist_from_waist < self.rayleigh_distance
 
-    
-    # NOTE: Also updates, so I want better names for these rather than 
-    # after. 
-    # NOTE: This is only for transitions from planar to spherical 
-    # or vice versa so it needs a much better name than current. 
-    def pixel_scale_after(self: Wavefront, distance: float) -> Wavefront:
+    def set_to_pixel_scale_after(self: Wavefront, distance: float) -> Wavefront:
         """
         Calculate and assign the pixel scale of the `Wavefront` after
         travelling distance. Note that this transformation is dependent
@@ -303,13 +289,12 @@ class GaussianWavefront(dLux.wavefronts.Wavefront):
         wavefront: Wavefront
             The wavefront but the pixel_scale has been updated.
         """
-        pixel_scale = self.get_wavelength() * np.abs(distance) /\
-            (self.npix() * self.get_pixel_scale())
+        width = self.npix * self.get_pixel_scale
+        pixel_scale = self.wavelength * np.abs(distance) / width
         return self.set_pixel_scale(pixel_scale)
 
     
-    def position_after(self: Wavefront, 
-            distance: Scalar) -> Wavefront:
+    def position_after(self: Wavefront, distance: Scalar) -> Wavefront:
         """
         Move the wavefront forward by `distance`.
 
@@ -475,7 +460,7 @@ class GaussianPropagator(eqx.Module):
         field *= np.fft.fftshift(wavefront.quadratic_phase(distance)) # Wavelength dependent
         field = self._propagate(field, distance) # Wrapper for forwards/reverse FFTs
         wavefront =  wavefront\
-            .pixel_scale_after(distance)\
+            .set_to_pixel_scale_after(distance)\
             .position_after(distance)\
             .set_phase(np.angle(field))\
             .set_amplitude(np.abs(field))\
@@ -506,7 +491,7 @@ class GaussianPropagator(eqx.Module):
         # Lawrence eq. 89
         field = wavefront.get_complex_form()
         field = self._propagate(field, distance)
-        wavefront = wavefront.pixel_scale_after(distance)
+        wavefront = wavefront.set_to_pixel_scale_after(distance)
         field *= np.fft.fftshift(wavefront.quadratic_phase(distance)) # Wavelength dependent
         
         wavefront = wavefront\
