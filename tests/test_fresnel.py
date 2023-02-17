@@ -119,3 +119,127 @@ class TestGaussianWavefront(object) -> None:
            A GaussianWavefront with legitimate parameters. 
         """
         assert np.isinf(def_gauss_wavefront.focal_length)
+
+    # NOTE: It so happens that having a different pixel scale depending 
+    #       on the get_pixel_scale parameter means that a lot of methods
+    #       kind of need to be tested twice. Is this necessary or can I 
+    #       assume that get_pixel_scale works so everything that depends 
+    #       on it works. 
+
+    def test_get_pixel_scale_when_angular() -> None:
+        pass 
+
+    def test_get_pixel_scale_when_planar() -> None:
+        pass
+
+    def test_pixel_coordinates_is_linear() -> None:
+        pass
+
+    def test_pixel_coordinates_is_increasing() -> None:
+        pass 
+
+    def test_pixel_coordinates_x_is_broadcast() -> None:
+        pass
+
+    def test_pixel_coordinates_y_is_broadcast() -> None:
+        pass
+
+    # NOTE: So I do not think that rayleigh_distance needs testing,
+    #       but I could add a test to make sure that it is not producing 
+    #       errors.
+
+    @pytest.parametrize("position", [])
+    def test_calculate_pixel_scale_at_when_angular() -> None:
+        pass
+
+    # NOTE: Hmmm, there is an interesting case in testing the is_inside 
+    #       function. Without manually doing the calculations it will be 
+    #       hard to know. However, this does lead to some interesting 
+    #       thoughts about what values are allowed for the rayleigh distance
+    #       and what the rayleigh distance actually means. For example,
+    #       can the rayleigh distance be infinite or zero? In general,
+    #       I think I need to try and work out the properties of the 
+    #       rayleigh distance and is_inside function. For example, the 
+    #       is_inside function should be discontinuous at rayleigh 
+    #       distance and that is something that I can test right there. 
+
+    def test_is_inside_is_discontinuous_at_the_rayleigh_distance() -> None:
+        pass
+
+    # NOTE: The quadratic phase is another great one to test. For example,
+    #       I can consider the second derivative and verify that it is 
+    #       approximately linear in log space. I can also test that the 
+    #       gradient passes through zero at the centre along both axes. 
+    #       Except I just checked and it is radially quadratic. This presents
+    #       more difficulty. I can still slice it along the x and y axis 
+    #       and do this. That would be a really cool usage of parametrize
+    #       to test both axis separately. Then I can craft a really cool 
+    #       way of testing that the function is increasing radially. 
+    #       Basically, generate a grid which represents the coordinates
+    #       select pixel wide bands and then calculate the average within 
+    #       the band. Make sure that this sequence is increasing. This is 
+    #       going to be so fucking sick.
+
+    @pytest.mark.parametrize("axis", [0, 1])
+    def test_quadratic_phase_has_linear_slope_along_axis_in_log_space() -> None:
+        pass
+
+    def test_quadratic_phase_is_radially_increasing_in_log_space() -> None:
+        pass
+
+    # NOTE: Since I know that multiplication by 1.0j can be undone by 
+    #       division etc. I simply take the logarithms and multiply
+    #       by i cubed.
+
+    # NOTE: The transfer function has very similar properties. The problem
+    #       is that the exponential is imaginary which transforms the properties
+    #       in ways that I don't fully understand. 
+
+    @pytest.mark.parametrize("axis", [0, 1])
+    def test_transfer_function_has_linear_slope_along_axis_in_log_space() -> None:
+        pass
+
+    def test_transfer_function_is_radially_increasing_in_log_space() -> None:
+        pass
+
+    # NOTE: curvature_at is going to be a fun function to analyse. The functional
+    #       form has a discontinuity and, perhaps more exitingly there are 
+    #       two distinct asymptotic behaviours. Firstly, and this is my favourite 
+    #       the linear behaviour dominates for very far away positions. This 
+    #       will be fun to test. The problem is that the scale is in rayleigh
+    #       distances. The second asymtote is towards zero (or in this case)
+    #       the waist_position. This is where the discontinuity is also.
+
+    def test_curvature_at_is_discontinuous_at_the_beam_waist() -> None:
+        pass
+
+    def test_curvature_at_is_approximately_linear_very_far_from_the_beam_waist() -> None:
+        pass
+
+    # NOTE: Again radius_at has beautiful asymptotic behaviour, tending towards
+    #       a linear function as we approach infinity. This makes for excellent
+    #       testing and a nice use for parametrize (sign). Also it is 
+    #       guaranteed to be position and have a minimum at the waist. Hence
+    #       I can test for said minimum, but I am not sure how to do the positive
+    #       part.
+
+    def test_radius_at_is_asymptotically_linear() -> None:
+        pass
+
+    # NOTE: Then there is the problem of how to tests something assymptotically
+    #       is linear on a computer. There are obviously infinitely many 
+    #       values that it can take. Now, if this were analysis I would do it
+    #       by taking some property and at an arbitrary point. The problem,
+    #       is that one a computer that doesn't really work does it. Although,
+    #       there is an interesting thought about compositions of functions 
+    #       lurking in here somewhere. Anyway, what I think is good enough is
+    #       is it infinite at infinity? or is the gradient a constant at infinity
+    #       and then pick some large numbers. Could also subtract the function 
+    #       x away and does it approach zero. This is much similar to how 
+    #       you would do it in analysis, then tried to prove that it was 
+    #       monotonically decreasing. I think we just show it is decreasing 
+    #       for some sample and assume generality. 
+
+    def test_radius_at_has_a_minimum_at_the_waist() -> None:
+        pass
+
