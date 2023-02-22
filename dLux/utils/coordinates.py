@@ -108,7 +108,7 @@ def get_pixel_positions(npixels      : Union[int, tuple],
         if offsets is None:
             offsets = (0.,)
         elif not isinstance(offsets, (float, Array)):
-            raise ValueError("offset must be an be a float or Array if npixels "
+            raise ValueError("offset must be a float or Array if npixels "
                              "is an int.")
         else:
             offsets = (offsets,)
@@ -116,7 +116,8 @@ def get_pixel_positions(npixels      : Union[int, tuple],
         if pixel_scales is None:
             pixel_scales = (1.,)
         elif not isinstance(pixel_scales, (float, Array)):
-            raise ValueError("pixel_scales must be an be a float if npixels is an int.")
+            raise ValueError("pixel_scales must be a float or Array if npixels "
+                             "is an int.")
         else:
             pixel_scales = (pixel_scales,)
         
