@@ -3,8 +3,31 @@
 ---
 ---
 
+---
+## Units:
+All units wihin dLux are SI!
+
+---
+## Adding to doccumentation
+When adding to the doccumentation, there are a few steps that need to be done:
+1. Create the class or function and add the docstring
+2. Create a .md file in the docs/ directory
+3. Point to the class/function as so `::: dLux.module.new_class`
+4. Edit the mkdocs.yml file to add the new class
+5. Run `mkdocs serve` to deploy the docs locally at `localhost:8000` (put this into a browser)
+
+---
+## Building and running unit-tests
+Any added functionality should be unit-tested! This is done with pytest in the tests/ directory. Please have a look at the testing module and try to create tests the match the style!
+
+There are three main things we want to test:
+1. Constructor assert statements and input types. Ensure that the correct error is thrown and that classes cant be constructed with non compatiable inputs.
+2. Test that the different run time logic branches evaluate.
+3. Test that the different run time logic branches do not return nan or infinite values.
+---
+
 ## Typing conventions
-So we have worked out a general typing convetion for the software. There are two main data-types we care about, Jax data types and others. We denote any jax-types with the `Array` typing hint. This is simply defined as as a`jax.numpy.ndarray`, so at the start of any files one should have `Array = np.ndarray`. *Any* jax arrays should use this type-hit, regardless of data-type. All other type-hints for dLux type objects should refer to the *base* object type assuming it is not defined inside that script, ie:
+So we have worked out a general typing convention for the software. There are two main data-types we care about, Jax data types and others. We denote any jax-types with the `Array` typing hint. This is simply defined as as a`jax.numpy.ndarray`, so at the start of any files one should have `Array = np.ndarray`. *Any* jax arrays should use this type-hit, regardless of data-type. All other type-hints for dLux type objects should refer to the *base* object type assuming it is not defined inside that script, ie:
 > dLux.wavefronts.Wavefront
 > dLux.propagators.Propagator
 > dLux.optics.OpticalLayer
@@ -94,9 +117,6 @@ assert self.parameter.ndim == 0, \
 > In general hidden class methods should be avoided and classes should try to implement methods that allow for them to used stand-alone. For example the `CompoundAperture` class implements the `construct_combined_aperture` and `get_aperture` methods that allow for users to dirctly construct and output the internally stored apertures, or use the `make_aperture` method to construcut individual apertures.
 
 
----
-## Units:
-All units wihin dLux are SI!
 
 ---
 ## Non-Circular imports
@@ -104,21 +124,3 @@ To prevent circular imports, you can not import any specific classes or methods 
 
 > exception: The utils package
 > The utils package is the collection of functions that operate *independently* of the package, and so so can be imported as normal, ie `from dLux.utils.coordinates import radians_to_arcseconds` etc.
-
----
-## Adding to doccumentation
-When adding to the doccumentation, there are a few steps that need to be done:
-1. Create the class or function and add the docstring
-2. Create a .md file in the docs/ directory
-3. Point to the class/function as so `::: dLux.module.new_class`
-4. Edit the mkdocs.yml file to add the new class
-5. Run `mkdocs serve` to deploy the docs locally at `localhost:8000` (put this into a browser)
-
----
-## Building and running unit-tests
-Any added functionality should be unit-tested! This is done with pytest in the tests/ directory. Please have a look at the testing module and try to create tests the match the style!
-
-There are three main things we want to test:
-1. Constructor assert statements and input types. Ensure that the correct error is thrown and that classes cant be constructed with non compatiable inputs.
-2. Test that the different run time logic branches evaluate.
-3. Test that the different run time logic branches do not return nan or infinite values.
