@@ -3,7 +3,8 @@ import jax.numpy as np
 from jax import vmap
 from jax.tree_util import tree_map, tree_flatten
 from jax.scipy.ndimage import map_coordinates
-from equinox import tree_at, static_field
+# from equinox import tree_at, static_field
+from equinox import tree_at
 from zodiax import ExtendedBase
 from collections import OrderedDict
 from copy import deepcopy
@@ -208,7 +209,9 @@ class Instrument(ExtendedBase):
     filter      : Filter
     observation : dict
 
-
+    def _construct():
+        return Instrument(optical_layers=[])
+    
     def __init__(self : Instrument,
 
                  # Class inputs
@@ -320,15 +323,18 @@ class Instrument(ExtendedBase):
             ("filter must be a Filter object.")
             self.filter = filter
 
-        if observation is not None:
-            assert isinstance(observation, dict) and \
-            'fn' in observation.keys() and 'args' in observation.keys(), \
-            ("observation must be a dictionary with the keys 'fn' and 'args'.")
+        # if observation is not None:
+        #     assert isinstance(observation, dict) and \
+        #     'fn' in observation.keys() and 'args' in observation.keys(), \
+        #     ("observation must be a dictionary with the keys 'fn' and 'args'.")
+
+        # TODO: Type checking for observation class
         self.observation = observation
 
 
     def observe(self : Instrument, **kwargs) -> Any:
         """
+        TODO: Update docstring
         Call the function stored within the observation attribute at key 'fn',
         passing in the instrument (self) as the first argument and 'args' as
         the second.
@@ -339,61 +345,18 @@ class Instrument(ExtendedBase):
             The output of the function store in the observation at 'fn' with
             arguments (instrument, observation['args']).
         """
-        return self.observation['fn'](self, self.observation['args'], **kwargs)
+        # return self.observation['fn'](self, self.observation['args'], **kwargs)
+        return self.observation.observe(self)
 
 
-    def dither_position(self : Instrument, dither : Array) -> Instrument:
-        """
-        Dithers the position of the source objects by dither.
 
-        Parameters
-        ----------
-        dither : Array, radians
-            The (x, y) dither to apply to the source positions.
-
-        Returns
-        -------
-        instrument : Instrument
-            The instrument with the sources dithered.
-        """
-        assert dither.shape == (2,), ("dither must have shape (2,) ie (x, y)")
-        # Define the dither function
-        dither_fn = lambda source: source.add('position', dither)
-
-        # Map the dithers across the sources
-        dithered_sources = tree_map(dither_fn, self.scene.sources, \
-                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-
-        # Apply updates
-        return tree_at(lambda instrument: instrument.scene.sources, self, \
-                       dithered_sources)
-
-
-    def dither_and_model(self    : Instrument,
-                         dithers : Array,
-                         **kwargs) -> Any:
-        """
-        Applies a series of dithers to the instrument sources and calls the
-        .model() method after applying each dither.
-
-        Parameters
-        ----------
-        dithers : Array, radians
-            The array of dithers to apply to the source positions.
-
-        Returns
-        -------
-        psfs : Array
-            The psfs generated after applying the dithers to the source
-            positions.
-        """
-        dith_fn = lambda dither: self.dither_position(dither).model(**kwargs)
-        return vmap(dith_fn, in_axes=(0))(dithers)
 
 
 
     def __getattr__(self : Instrument, key : str) -> object:
         """
+        TODO: Update class to search for parameters in observation class
+
         Magic method designed to allow accessing of the various items within
         the sub-dictionaries of this class via the 'class.attribute' method.
         It is recommended that each dictionary key in the optical layers,
@@ -412,15 +375,18 @@ class Instrument(ExtendedBase):
         item : object
             The item corresponding to the supplied key in the sub-dictionaries.
         """
-        if 'optics' in vars(self) and hasattr(self.optics, 'layers') and \
-                                        key in self.optics.layers.keys():
+        if hasattr(self.optics, 'layers') and \
+            key in self.optics.layers.keys():
             return self.optics.layers[key]
-        elif 'detector' in vars(self) and hasattr(self.detector, 'layers') and \
-                                        key in self.detector.layers.keys():
+        elif hasattr(self.detector, 'layers') and \
+            key in self.detector.layers.keys():
             return self.detector.layers[key]
-        elif 'scene' in vars(self) and hasattr(self.scene, 'sources') and \
-                                        key in self.scene.sources.keys():
+        elif hasattr(self.scene, 'sources') and \
+            key in self.scene.sources.keys():
             return self.scene.sources[key]
+        elif hasattr(self.observation, key):
+            return getattr(self.observation, key)
+
         else:
             raise AttributeError("'{}' object has no attribute '{}'"\
                                  .format(type(self), key))
@@ -545,6 +511,9 @@ class Optics(ExtendedBase):
         and operations upon some input wavefront through an optical system.
     """
     layers : OrderedDict
+
+    def _construct():
+        return Optics([])
 
 
     def __init__(self : Optics, layers : list) -> Optics:
@@ -884,6 +853,9 @@ class Scene(ExtendedBase):
     """
     sources: dict
 
+    def _construct():
+        return Scene([])
+
 
     def __init__(self, sources : list) -> Scene:
         """
@@ -1025,6 +997,9 @@ class Detector(ExtendedBase):
         and operations upon some input psf as it interacts with the detector.
     """
     layers : OrderedDict
+
+    def _construct():
+        return Detector([])
 
 
     def __init__(self : Detector, layers : list) -> Instrument:
@@ -1219,7 +1194,11 @@ class Filter(ExtendedBase):
     """
     wavelengths  : Array
     throughput   : Array
-    filter_name  : str = static_field()
+    # filter_name  : str = static_field()
+    filter_name  : str
+
+    def _construct():
+        return Filter(np.array([]))
 
 
     def __init__(self        : Filter,

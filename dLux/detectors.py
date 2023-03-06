@@ -3,7 +3,8 @@ import jax.numpy as np
 from abc import ABC, abstractmethod
 from jax.scipy.signal import convolve
 from jax.scipy.stats import norm
-from equinox import tree_at, static_field
+# from equinox import tree_at, static_field
+from equinox import tree_at
 from zodiax import ExtendedBase
 from dLux.utils.interpolation import rotate, fourier_rotate
 from dLux.utils.units import convert_angular, convert_cartesian
@@ -28,7 +29,7 @@ class DetectorLayer(ExtendedBase, ABC):
     name : str
         The name of the layer, which is used to index the layers dictionary.
     """
-    name : str = static_field()
+    name : str
 
 
     def __init__(self : DetectorLayer,

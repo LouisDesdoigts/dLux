@@ -3,7 +3,8 @@ import dLux
 from abc import ABC, abstractmethod
 from jax import numpy as np, lax, vmap
 from jax.tree_util import tree_map, tree_flatten
-from equinox import filter, static_field
+# from equinox import filter, static_field
+from equinox import filter
 from dLux.utils import get_pixel_positions, coordinates as c, opd_to_phase, \
     factorial, cartesian_to_polar, list_to_dictionary
 from dLux.utils.helpers import two_image_plot
@@ -442,6 +443,8 @@ class CircularAperture(DynamicAperture):
     """
     radius : Array
    
+    def _construct():
+        return CircularAperture(np.array(0.))
  
     def __init__(self        : ApertureLayer, 
                  radius      : Array, 
@@ -603,7 +606,9 @@ class AnnularAperture(DynamicAperture):
     rmin : Array
     rmax : Array
 
-
+    def _construct():
+        return AnnularAperture(np.array(0.), np.array(0.))
+    
     def __init__(self        : ApertureLayer, 
                  rmax        : Array, 
                  rmin        : Array, 
@@ -775,6 +780,8 @@ class RectangularAperture(DynamicAperture):
     height : Array
     width  : Array
 
+    def _construct():
+        return RectangularAperture(np.array(0.), np.array(0.))
 
     def __init__(self        : ApertureLayer, 
                  height      : Array, 
@@ -951,6 +958,8 @@ class SquareAperture(DynamicAperture):
     """
     width : Array
    
+    def _construct():
+        return SquareAperture(np.array(0.))
  
     def __init__(self        : ApertureLayer, 
                  width       : Array, 
@@ -1302,6 +1311,9 @@ class IrregularPolygonalAperture(PolygonalAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
     vertices : Array
+
+    def _construct():
+        return IrregularPolygonalAperture(np.zeros((1, 2)))
     
     
     def __init__(self        : ApertureLayer, 
@@ -1549,6 +1561,9 @@ class RegularPolygonalAperture(PolygonalAperture):
     """
     nsides : int
     rmax   : Array
+
+    def _construct():
+        return RegularPolygonalAperture(3, np.array(0.))
         
     
     def __init__(self        : ApertureLayer, 
@@ -1754,6 +1769,8 @@ class HexagonalAperture(RegularPolygonalAperture):
     """
     rmax : Array
     
+    def _construct():
+        return RegularPolygonalAperture(np.array(0.))
     
     def __init__(self        : ApertureLayer, 
                  rmax        : Array,
@@ -1975,7 +1992,9 @@ class UniformSpider(Spider):
     nstruts     : int
     strut_width : Array
 
-
+    def _construct():
+        return UniformSpider(1, np.array(0.))
+    
     def __init__(self         : ApertureLayer, 
                  nstruts      : int,
                  strut_width  : Array,
@@ -2267,9 +2286,12 @@ class AberratedAperture(AbstractAberratedAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
     aperture    : ApertureLayer
-    basis_funcs : list = static_field()
+    # basis_funcs : list = static_field()
+    basis_funcs : list
  
- 
+    def _construct():
+        return AberratedAperture(CircularAperture._construct(), np.array(0))
+    
     def __init__(self         : ApertureLayer, 
                  aperture     : ApertureLayer, 
                  noll_inds    : Array,
@@ -3144,6 +3166,8 @@ class CompoundAperture(CompositeAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
 
+    def _construct():
+        return CompoundAperture([CircularAperture._construct()])
 
     def __init__(self        : ApertureLayer,
                  apertures   : list,
@@ -3267,7 +3291,9 @@ class MultiAperture(CompositeAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
 
-
+    def _construct():
+        return CompoundAperture([CircularAperture._construct()])
+    
     def __init__(self        : ApertureLayer,
                  apertures   : list,
                  centre      : Array = np.array([0., 0.]), 
@@ -3505,6 +3531,8 @@ class StaticAperture(AbstractStaticAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
 
+    def _construct():
+        return StaticAperture(CircularAperture._construct(), 2, np.array(0.))
 
     def __init__(self        : ApertureLayer, 
                  aperture    : ApertureLayer, 
@@ -3589,6 +3617,8 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
     """
     basis : Array
 
+    def _construct():
+        return StaticAberratedAperture(AberratedAperture._construct(), 2, np.array(0.))
 
     def __init__(self        : ApertureLayer, 
                  aperture    : ApertureLayer, 
