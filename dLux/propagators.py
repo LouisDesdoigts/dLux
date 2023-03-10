@@ -854,7 +854,7 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
         The name for this propagator.
     """
 
-    
+
     def __init__(self    : Propagator,
                  inverse : bool = False,
                  name    : str = 'AngularFFT') -> Propagator:

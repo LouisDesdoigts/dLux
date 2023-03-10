@@ -2,13 +2,10 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import vmap
 from jax.tree_util import tree_map, tree_flatten
-from jax.scipy.ndimage import map_coordinates
-# from equinox import tree_at, static_field
 from equinox import tree_at
 from zodiax import ExtendedBase
 from collections import OrderedDict
 from copy import deepcopy
-from functools import partial
 from typing import Union
 import dLux
 
@@ -1183,7 +1180,6 @@ class Filter(ExtendedBase):
     """
     wavelengths  : Array
     throughput   : Array
-    # filter_name  : str = static_field()
     filter_name  : str
 
 

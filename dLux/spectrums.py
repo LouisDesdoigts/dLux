@@ -6,7 +6,6 @@ from zodiax import ExtendedBase
 from jax import vmap
 from dLux.utils.units import convert_cartesian
 from dLux.utils.helpers import spectrum_plot
-import dLux
 
 
 __all__ = ["ArraySpectrum", "PolynomialSpectrum", "CombinedSpectrum"]
@@ -266,7 +265,7 @@ class PolynomialSpectrum(Spectrum):
     degree       : int # Just a helper
     coefficients : Array
 
-    
+
     def __init__(self         : Spectrum,
                  wavelengths  : Array,
                  coefficients : Array,
@@ -381,7 +380,7 @@ class CombinedSpectrum(ArraySpectrum):
         The name of the spectrum.
     """
 
-    
+
     def __init__(self        : Spectrum,
                  wavelengths : Array,
                  weights     : Array = None,

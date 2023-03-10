@@ -3,11 +3,9 @@ import dLux
 from abc import ABC, abstractmethod
 from jax import numpy as np, lax, vmap
 from jax.tree_util import tree_map, tree_flatten
-# from equinox import filter, static_field
 from equinox import filter
 from dLux.utils import get_pixel_positions, coordinates as c, opd_to_phase, \
-    factorial, cartesian_to_polar, list_to_dictionary
-from dLux.utils.helpers import two_image_plot
+    list_to_dictionary
 from dLux.utils.units import convert_angular, convert_cartesian
 
 
