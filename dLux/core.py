@@ -2,12 +2,10 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import vmap
 from jax.tree_util import tree_map, tree_flatten
-from jax.scipy.ndimage import map_coordinates
-from equinox import tree_at, static_field
+from equinox import tree_at
 from zodiax import ExtendedBase
 from collections import OrderedDict
 from copy import deepcopy
-from functools import partial
 from typing import Union
 import dLux
 
@@ -176,6 +174,7 @@ def model(optics      : Optics,
         return image.flatten() if flatten else image
 
 
+Observation = lambda : dLux.observations.AbstractObservation
 class Instrument(ExtendedBase):
     """
     A high level class desgined to model the behaviour of a telescope. It
@@ -196,19 +195,18 @@ class Instrument(ExtendedBase):
     filter : Filter
         A Filter object that is used to model the effective
         throughput of each wavelength though the optical system.
-    observation : dict
-        A dictionary that must have the keys 'fn' and 'args'. The 'fn' key must
-        refer to a function that takes in the argument stored in 'args'. This
-        is to allow flexibility in the different kind of observations, ie
-        applying dithers, switching filters, etc.
+    observation : Observation
+        An class that inherits from Observation. This is to allow flexibility
+        in the different kind of observations, ie applying dithers, switching
+        filters, etc.
     """
     optics      : Optics
     scene       : Scene
     detector    : Detector
     filter      : Filter
-    observation : dict
+    observation : Observation
 
-
+    
     def __init__(self : Instrument,
 
                  # Class inputs
@@ -223,7 +221,7 @@ class Instrument(ExtendedBase):
                  detector_layers : list = None,
 
                  # Obervation
-                 observation : dict = None,
+                 observation : Observation = None,
                  ) -> Instrument:
         """
         Constructor for the Instrument class.
@@ -252,11 +250,10 @@ class Instrument(ExtendedBase):
         filter : Filter = None
             A Filter object that is used to model the effective throughput of
             each wavelength though the Instrument.
-        observation : dict = None
-            A dictionary that must have the keys 'fn' and 'args'. The 'fn' key
-            must refer to a function that takes in the argument stored in
-            'args'. This is to allow flexibility in the different kind of
-            observations, ie applying dithers, switching filters, etc.
+        observation : Observation = None
+            An class that inherits from Observation. This is to allow
+            flexibility in the different kind of observations, ie applying
+            dithers, switching filters, etc.
         """
         # Optics
         if optics is None and optical_layers is None:
@@ -321,75 +318,24 @@ class Instrument(ExtendedBase):
             self.filter = filter
 
         if observation is not None:
-            assert isinstance(observation, dict) and \
-            'fn' in observation.keys() and 'args' in observation.keys(), \
-            ("observation must be a dictionary with the keys 'fn' and 'args'.")
-        self.observation = observation
+            assert isinstance(observation, Observation), ("observation must be"
+                "an Observation object.")
+            self.observation = observation
+        else:
+            self.observation = None
 
 
     def observe(self : Instrument, **kwargs) -> Any:
         """
-        Call the function stored within the observation attribute at key 'fn',
-        passing in the instrument (self) as the first argument and 'args' as
-        the second.
+        TODO: Update docstring
+        Calls the stored observation class.
 
         Returns
         -------
          : Any
-            The output of the function store in the observation at 'fn' with
-            arguments (instrument, observation['args']).
+            The output of the stored observation class.
         """
-        return self.observation['fn'](self, self.observation['args'], **kwargs)
-
-
-    def dither_position(self : Instrument, dither : Array) -> Instrument:
-        """
-        Dithers the position of the source objects by dither.
-
-        Parameters
-        ----------
-        dither : Array, radians
-            The (x, y) dither to apply to the source positions.
-
-        Returns
-        -------
-        instrument : Instrument
-            The instrument with the sources dithered.
-        """
-        assert dither.shape == (2,), ("dither must have shape (2,) ie (x, y)")
-        # Define the dither function
-        dither_fn = lambda source: source.add('position', dither)
-
-        # Map the dithers across the sources
-        dithered_sources = tree_map(dither_fn, self.scene.sources, \
-                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-
-        # Apply updates
-        return tree_at(lambda instrument: instrument.scene.sources, self, \
-                       dithered_sources)
-
-
-    def dither_and_model(self    : Instrument,
-                         dithers : Array,
-                         **kwargs) -> Any:
-        """
-        Applies a series of dithers to the instrument sources and calls the
-        .model() method after applying each dither.
-
-        Parameters
-        ----------
-        dithers : Array, radians
-            The array of dithers to apply to the source positions.
-
-        Returns
-        -------
-        psfs : Array
-            The psfs generated after applying the dithers to the source
-            positions.
-        """
-        dith_fn = lambda dither: self.dither_position(dither).model(**kwargs)
-        return vmap(dith_fn, in_axes=(0))(dithers)
-
+        return self.observation.observe(self, **kwargs)
 
 
     def __getattr__(self : Instrument, key : str) -> object:
@@ -412,15 +358,17 @@ class Instrument(ExtendedBase):
         item : object
             The item corresponding to the supplied key in the sub-dictionaries.
         """
-        if 'optics' in vars(self) and hasattr(self.optics, 'layers') and \
-                                        key in self.optics.layers.keys():
+        if hasattr(self.optics, 'layers') and \
+            key in self.optics.layers.keys():
             return self.optics.layers[key]
-        elif 'detector' in vars(self) and hasattr(self.detector, 'layers') and \
-                                        key in self.detector.layers.keys():
+        elif hasattr(self.detector, 'layers') and \
+            key in self.detector.layers.keys():
             return self.detector.layers[key]
-        elif 'scene' in vars(self) and hasattr(self.scene, 'sources') and \
-                                        key in self.scene.sources.keys():
+        elif hasattr(self.scene, 'sources') and \
+            key in self.scene.sources.keys():
             return self.scene.sources[key]
+        elif hasattr(self.observation, key):
+            return getattr(self.observation, key)
         else:
             raise AttributeError("'{}' object has no attribute '{}'"\
                                  .format(type(self), key))
@@ -1219,7 +1167,7 @@ class Filter(ExtendedBase):
     """
     wavelengths  : Array
     throughput   : Array
-    filter_name  : str = static_field()
+    filter_name  : str
 
 
     def __init__(self        : Filter,

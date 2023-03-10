@@ -2,11 +2,10 @@ from __future__ import annotations
 import jax.numpy as np
 from jax.scipy.signal import convolve
 from jax import vmap
-from equinox import tree_at, static_field
+from equinox import tree_at
 from zodiax import ExtendedBase
 from abc import ABC, abstractmethod
 from dLux.utils.units import convert_angular, convert_cartesian
-from dLux.utils.helpers import spectrum_plot
 import dLux
 
 
@@ -58,7 +57,7 @@ class Source(ExtendedBase, ABC):
     position : Array
     flux     : Array
     spectrum : Spectrum
-    name     : str = static_field()
+    name     : str
 
 
     def __init__(self     : Source,

@@ -9,6 +9,7 @@ OpticalLayer = dLux.optics.OpticalLayer
 Spectrum = dLux.spectrums.Spectrum
 Source = dLux.sources.Source
 Aperture = dLux.apertures.ApertureLayer
+AbstractObservation = dLux.observations.AbstractObservation
 
 
 @pytest.fixture
@@ -726,7 +727,7 @@ def create_optics() -> callable:
     def _create_optics(
             layers = [
                 dLux.optics.CreateWavefront(16, 1),
-                dLux.optics.CompoundAperture([0.5]),
+                dLux.apertures.ApertureFactory(16),
                 dLux.optics.NormaliseWavefront(),
                 dLux.propagators.CartesianMFT(16, 1., 1e-6)
             ]) -> OpticalLayer:
@@ -798,7 +799,6 @@ def create_instrument(
             optics          : OpticalLayer  = create_optics(),
             scene           : OpticalLayer  = create_scene(),
             detector        : OpticalLayer  = create_detector(),
-            # filter        : OpticalLayer  = create_filter(),
             filter          : OpticalLayer  = None,
             optical_layers  : list          = None,
             sources         : list          = None,
@@ -1178,3 +1178,17 @@ def create_aberrated_aperture(create_circular_aperture: callable) -> callable:
     return _create_aberrated_aperture
     
 
+@pytest.fixture
+def create_dither() -> callable:
+    """
+    Returns:
+    --------
+    _create_dither: callable
+        A function that has all keyword arguments and can be
+        used to create a `Dither` class for testing.
+    """
+    def _create_dither(
+            dithers: Array = np.ones((5, 2))) -> AbstractObservation:
+        return dLux.observations.Dither(dithers)
+    
+    return _create_dither

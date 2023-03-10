@@ -57,12 +57,12 @@ nav:
         - Parameter Inference:      notebooks/HMC.ipynb
 
     - Core:
-        - Telescope: core/instrument.md
-        - Optics:    core/optics.md
-        - Scene:     core/scene.md
-        - Detector:  core/detector.md
-        - Filter:    core/filter.md
-        - model:     core/model.md
+        - Instrument: core/instrument.md
+        - Optics:     core/optics.md
+        - Scene:      core/scene.md
+        - Detector:   core/detector.md
+        - Filter:     core/filter.md
+        - model:      core/model.md
         - Optical System (depreceated): core/optical_system.md
 
     - Optical Layers:
@@ -78,7 +78,7 @@ nav:
 
         - Apertures:
             - Overview:                     apertures/overview.md
-            - Simple Aperture:              apertures/api/simple_aperture.md
+            - Aperture Factory:             apertures/api/aperture_factory.md
             - Circular Aperture:            apertures/api/circular_aperture.md
             - Annular Aperture:             apertures/api/annular_aperture.md
             - Hexagonal Aperture:           apertures/api/hexagonal_aperture.md
@@ -100,6 +100,15 @@ nav:
             - Cartesian FFT:     propagators/concrete/cartesian_fft.md
             - Angular FFT:       propagators/concrete/angular_fft.md
             - Cartesian Fresnel: propagators/concrete/cartesian_fresnel.md
+    
+    - Aberrations:
+        - Zernike:            aberrations/zernike.md
+        - Zenike Basis:       aberrations/zernike_basis.md
+        - Aberration Factory: aberrations/aberration_factory.md
+    
+    - Observations:
+        - Abstract Observation: observations/abstract_observation.md
+        - Dither:               observations/dither.md
 
     - Wavefronts:
         - Wavefront:                   wavefronts/wavefront.md
