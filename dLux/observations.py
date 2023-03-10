@@ -117,8 +117,8 @@ class Dither(AbstractObservation):
                 is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
 
         # Apply updates
-        return tree_at(lambda instrument: instrument.scene.sources, instrument, \
-                       dithered_sources)
+        return tree_at(lambda instrument: instrument.scene.sources, 
+                       instrument, dithered_sources)
 
 
     def observe(self       : Dither,

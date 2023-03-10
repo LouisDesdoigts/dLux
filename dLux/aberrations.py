@@ -119,6 +119,8 @@ class Zernike(ExtendedBase):
         j : int
             The Zernike (noll) index.
         """
+        if int(j) < 1:
+            raise ValueError('The Zernike index must be greater than 0.')
         self.j = int(j)
         self.n, self.m = self._noll_index(self.j)
         self.name = zernike_names[int(self.j)] if self.j >= 1 and self.j <= 36 \
