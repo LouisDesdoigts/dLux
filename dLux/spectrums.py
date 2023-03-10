@@ -6,7 +6,6 @@ from zodiax import ExtendedBase
 from jax import vmap
 from dLux.utils.units import convert_cartesian
 from dLux.utils.helpers import spectrum_plot
-import dLux
 
 
 __all__ = ["ArraySpectrum", "PolynomialSpectrum", "CombinedSpectrum"]
