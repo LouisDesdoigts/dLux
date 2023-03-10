@@ -53,3 +53,5 @@ jobs:
       - name: aperture tests
         run: pytest --quiet tests/test_apertures.py
 
+      - name: observations tests
+        run: pytest --quiet tests/test_observations.py
