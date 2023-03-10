@@ -318,40 +318,27 @@ class Instrument(ExtendedBase):
             ("filter must be a Filter object.")
             self.filter = filter
 
-        # if observation is not None:
-        #     assert isinstance(observation, dict) and \
-        #     'fn' in observation.keys() and 'args' in observation.keys(), \
-        #     ("observation must be a dictionary with the keys 'fn' and 'args'.")
-
         # TODO: Type checking for observation class
+        assert isinstance(observation, dLux.observations.AbstractObservation), \
+        ("observation must be a dLux.observations.AbstractObservation object.")
         self.observation = observation
 
 
     def observe(self : Instrument, **kwargs) -> Any:
         """
         TODO: Update docstring
-        Call the function stored within the observation attribute at key 'fn',
-        passing in the instrument (self) as the first argument and 'args' as
-        the second.
+        Calls the stored observation class.
 
         Returns
         -------
          : Any
-            The output of the function store in the observation at 'fn' with
-            arguments (instrument, observation['args']).
+            The output of the stored observation class.
         """
-        # return self.observation['fn'](self, self.observation['args'], **kwargs)
-        return self.observation.observe(self)
-
-
-
-
+        return self.observation.observe(self, **kwargs)
 
 
     def __getattr__(self : Instrument, key : str) -> object:
         """
-        TODO: Update class to search for parameters in observation class
-
         Magic method designed to allow accessing of the various items within
         the sub-dictionaries of this class via the 'class.attribute' method.
         It is recommended that each dictionary key in the optical layers,
@@ -381,7 +368,6 @@ class Instrument(ExtendedBase):
             return self.scene.sources[key]
         elif hasattr(self.observation, key):
             return getattr(self.observation, key)
-
         else:
             raise AttributeError("'{}' object has no attribute '{}'"\
                                  .format(type(self), key))
