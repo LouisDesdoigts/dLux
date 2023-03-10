@@ -13,7 +13,7 @@
     
     
       
-        <title>Simple Aperture - ∂Lux - Differentiable Optical Simulation</title>
+        <title>Aperture Factory - ∂Lux - Differentiable Optical Simulation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dLux.apertures.SimpleAperture" class="md-skip">
+        <a href="#dLux.apertures.ApertureFactory" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Simple Aperture
+              Aperture Factory
             
           </span>
         </div>
@@ -366,7 +366,7 @@
   
     <li class="md-nav__item">
       <a href="../../../core/instrument/" class="md-nav__link">
-        Telescope
+        Instrument
       </a>
     </li>
   
@@ -675,12 +675,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Simple Aperture
+          Aperture Factory
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Simple Aperture
+        Aperture Factory
       </a>
       
         
@@ -697,21 +697,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.apertures.SimpleAperture" class="md-nav__link">
-    dLux.apertures.SimpleAperture
+  <a href="#dLux.apertures.ApertureFactory" class="md-nav__link">
+    dLux.apertures.ApertureFactory
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.apertures.SimpleAperture.__init__" class="md-nav__link">
+  <a href="#dLux.apertures.ApertureFactory.__init__" class="md-nav__link">
     __init__()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.apertures.SimpleAperture.__new__" class="md-nav__link">
+  <a href="#dLux.apertures.ApertureFactory.__new__" class="md-nav__link">
     __new__()
   </a>
   
@@ -1041,12 +1041,150 @@
       
       
         <label class="md-nav__link" for="__nav_6">
+          Aberrations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Aberrations" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Aberrations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../aberrations/zernike/" class="md-nav__link">
+        Zernike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../aberrations/zernike_basis/" class="md-nav__link">
+        Zenike Basis
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../aberrations/aberration_factory/" class="md-nav__link">
+        Aberration Factory
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7">
+          Observations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Observations" data-md-level="1">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Observations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../observations/abstract_observation/" class="md-nav__link">
+        Abstract Observation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../observations/dither/" class="md-nav__link">
+        Dither
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8">
           Wavefronts
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Wavefronts" data-md-level="1">
-        <label class="md-nav__title" for="__nav_6">
+        <label class="md-nav__title" for="__nav_8">
           <span class="md-nav__icon md-icon"></span>
           Wavefronts
         </label>
@@ -1125,18 +1263,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_7">
+        <label class="md-nav__link" for="__nav_9">
           Sources
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Sources" data-md-level="1">
-        <label class="md-nav__title" for="__nav_7">
+        <label class="md-nav__title" for="__nav_9">
           <span class="md-nav__icon md-icon"></span>
           Sources
         </label>
@@ -1243,18 +1381,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_8">
+        <label class="md-nav__link" for="__nav_10">
           Spectrums
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Spectrums" data-md-level="1">
-        <label class="md-nav__title" for="__nav_8">
+        <label class="md-nav__title" for="__nav_10">
           <span class="md-nav__icon md-icon"></span>
           Spectrums
         </label>
@@ -1319,18 +1457,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11" type="checkbox" id="__nav_11" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_9">
+        <label class="md-nav__link" for="__nav_11">
           Detectors
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Detectors" data-md-level="1">
-        <label class="md-nav__title" for="__nav_9">
+        <label class="md-nav__title" for="__nav_11">
           <span class="md-nav__icon md-icon"></span>
           Detectors
         </label>
@@ -1437,18 +1575,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12" type="checkbox" id="__nav_12" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_10">
+        <label class="md-nav__link" for="__nav_12">
           Utils
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Utils" data-md-level="1">
-        <label class="md-nav__title" for="__nav_10">
+        <label class="md-nav__title" for="__nav_12">
           <span class="md-nav__icon md-icon"></span>
           Utils
         </label>
@@ -1463,18 +1601,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10_1" type="checkbox" id="__nav_10_1" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12_1" type="checkbox" id="__nav_12_1" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_10_1">
+        <label class="md-nav__link" for="__nav_12_1">
           Models
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Models" data-md-level="2">
-        <label class="md-nav__title" for="__nav_10_1">
+        <label class="md-nav__title" for="__nav_12_1">
           <span class="md-nav__icon md-icon"></span>
           Models
         </label>
@@ -1524,18 +1662,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10_2" type="checkbox" id="__nav_10_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12_2" type="checkbox" id="__nav_12_2" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_10_2">
+        <label class="md-nav__link" for="__nav_12_2">
           Units
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Units" data-md-level="2">
-        <label class="md-nav__title" for="__nav_10_2">
+        <label class="md-nav__title" for="__nav_12_2">
           <span class="md-nav__icon md-icon"></span>
           Units
         </label>
@@ -1753,18 +1891,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10_3" type="checkbox" id="__nav_10_3" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12_3" type="checkbox" id="__nav_12_3" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_10_3">
+        <label class="md-nav__link" for="__nav_12_3">
           Math
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Math" data-md-level="2">
-        <label class="md-nav__title" for="__nav_10_3">
+        <label class="md-nav__title" for="__nav_12_3">
           <span class="md-nav__icon md-icon"></span>
           Math
         </label>
@@ -1800,18 +1938,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10_4" type="checkbox" id="__nav_10_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12_4" type="checkbox" id="__nav_12_4" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_10_4">
+        <label class="md-nav__link" for="__nav_12_4">
           Coordinates
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Coordinates" data-md-level="2">
-        <label class="md-nav__title" for="__nav_10_4">
+        <label class="md-nav__title" for="__nav_12_4">
           <span class="md-nav__icon md-icon"></span>
           Coordinates
         </label>
@@ -1931,18 +2069,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10_5" type="checkbox" id="__nav_10_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12_5" type="checkbox" id="__nav_12_5" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_10_5">
+        <label class="md-nav__link" for="__nav_12_5">
           Interpolation
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Interpolation" data-md-level="2">
-        <label class="md-nav__title" for="__nav_10_5">
+        <label class="md-nav__title" for="__nav_12_5">
           <span class="md-nav__icon md-icon"></span>
           Interpolation
         </label>
@@ -2048,18 +2186,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10_6" type="checkbox" id="__nav_10_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12_6" type="checkbox" id="__nav_12_6" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_10_6">
+        <label class="md-nav__link" for="__nav_12_6">
           Optics
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Optics" data-md-level="2">
-        <label class="md-nav__title" for="__nav_10_6">
+        <label class="md-nav__title" for="__nav_12_6">
           <span class="md-nav__icon md-icon"></span>
           Optics
         </label>
@@ -2165,18 +2303,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10_7" type="checkbox" id="__nav_10_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12_7" type="checkbox" id="__nav_12_7" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_10_7">
+        <label class="md-nav__link" for="__nav_12_7">
           Bayes
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Bayes" data-md-level="2">
-        <label class="md-nav__title" for="__nav_10_7">
+        <label class="md-nav__title" for="__nav_12_7">
           <span class="md-nav__icon md-icon"></span>
           Bayes
         </label>
@@ -2282,18 +2420,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10_8" type="checkbox" id="__nav_10_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12_8" type="checkbox" id="__nav_12_8" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_10_8">
+        <label class="md-nav__link" for="__nav_12_8">
           Gradient Energy
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Gradient Energy" data-md-level="2">
-        <label class="md-nav__title" for="__nav_10_8">
+        <label class="md-nav__title" for="__nav_12_8">
           <span class="md-nav__icon md-icon"></span>
           Gradient Energy
         </label>
@@ -2371,18 +2509,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10_9" type="checkbox" id="__nav_10_9" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12_9" type="checkbox" id="__nav_12_9" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_10_9">
+        <label class="md-nav__link" for="__nav_12_9">
           Helpers
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Helpers" data-md-level="2">
-        <label class="md-nav__title" for="__nav_10_9">
+        <label class="md-nav__title" for="__nav_12_9">
           <span class="md-nav__icon md-icon"></span>
           Helpers
         </label>
@@ -2454,21 +2592,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#dLux.apertures.SimpleAperture" class="md-nav__link">
-    dLux.apertures.SimpleAperture
+  <a href="#dLux.apertures.ApertureFactory" class="md-nav__link">
+    dLux.apertures.ApertureFactory
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.apertures.SimpleAperture.__init__" class="md-nav__link">
+  <a href="#dLux.apertures.ApertureFactory.__init__" class="md-nav__link">
     __init__()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dLux.apertures.SimpleAperture.__new__" class="md-nav__link">
+  <a href="#dLux.apertures.ApertureFactory.__new__" class="md-nav__link">
     __new__()
   </a>
   
@@ -2488,18 +2626,18 @@
                 
                   
 
-  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/apertures/api/simple_aperture.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/LouisDesdoigts/dLux/edit/master/docs/apertures/api/aperture_factory.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-  <h1>Simple Aperture</h1>
+  <h1>Aperture Factory</h1>
 
 <div class="doc doc-object doc-class">
 
 
-<a id="dLux.apertures.SimpleAperture"></a>
+<a id="dLux.apertures.ApertureFactory"></a>
   <div class="doc doc-contents first">
 
   
@@ -2583,7 +2721,7 @@ plt.show()
 
 
 
-<h2 id="dLux.apertures.SimpleAperture.__init__" class="doc doc-heading">
+<h2 id="dLux.apertures.ApertureFactory.__init__" class="doc doc-heading">
 <code class="highlight language-python"><span class="fm">__init__</span><span class="p">()</span></code>
 
 </h2>
@@ -2757,7 +2895,7 @@ StaticAberratedAperture, depending on if zernikes are provided.</p></td>
 
 
 
-<h2 id="dLux.apertures.SimpleAperture.__new__" class="doc doc-heading">
+<h2 id="dLux.apertures.ApertureFactory.__new__" class="doc doc-heading">
 <code class="highlight language-python"><span class="fm">__new__</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">nsides</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">aperutre_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">secondary_ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">secondary_nsides</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nstruts</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">strut_ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">strut_rotation</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">zernikes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
