@@ -174,6 +174,7 @@ def model(optics      : Optics,
         return image.flatten() if flatten else image
 
 
+Observation = lambda : dLux.observations.AbstractObservation
 class Instrument(ExtendedBase):
     """
     A high level class desgined to model the behaviour of a telescope. It
@@ -194,17 +195,16 @@ class Instrument(ExtendedBase):
     filter : Filter
         A Filter object that is used to model the effective
         throughput of each wavelength though the optical system.
-    observation : dict
-        A dictionary that must have the keys 'fn' and 'args'. The 'fn' key must
-        refer to a function that takes in the argument stored in 'args'. This
-        is to allow flexibility in the different kind of observations, ie
-        applying dithers, switching filters, etc.
+    observation : Observation
+        An class that inherits from Observation. This is to allow flexibility
+        in the different kind of observations, ie applying dithers, switching
+        filters, etc.
     """
     optics      : Optics
     scene       : Scene
     detector    : Detector
     filter      : Filter
-    observation : dict
+    observation : Observation
 
     
     def __init__(self : Instrument,
@@ -221,7 +221,7 @@ class Instrument(ExtendedBase):
                  detector_layers : list = None,
 
                  # Obervation
-                 observation : dict = None,
+                 observation : Observation = None,
                  ) -> Instrument:
         """
         Constructor for the Instrument class.
@@ -250,11 +250,10 @@ class Instrument(ExtendedBase):
         filter : Filter = None
             A Filter object that is used to model the effective throughput of
             each wavelength though the Instrument.
-        observation : dict = None
-            A dictionary that must have the keys 'fn' and 'args'. The 'fn' key
-            must refer to a function that takes in the argument stored in
-            'args'. This is to allow flexibility in the different kind of
-            observations, ie applying dithers, switching filters, etc.
+        observation : Observation = None
+            An class that inherits from Observation. This is to allow
+            flexibility in the different kind of observations, ie applying
+            dithers, switching filters, etc.
         """
         # Optics
         if optics is None and optical_layers is None:
@@ -318,10 +317,12 @@ class Instrument(ExtendedBase):
             ("filter must be a Filter object.")
             self.filter = filter
 
-        # TODO: Type checking for observation class
-        assert isinstance(observation, dLux.observations.AbstractObservation), \
-        ("observation must be a dLux.observations.AbstractObservation object.")
-        self.observation = observation
+        if observation is not None:
+            assert isinstance(observation, Observation), ("observation must be"
+                "an Observation object.")
+            self.observation = observation
+        else:
+            self.observation = None
 
 
     def observe(self : Instrument, **kwargs) -> Any:
