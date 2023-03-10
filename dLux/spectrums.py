@@ -157,8 +157,6 @@ class ArraySpectrum(Spectrum):
     """
     weights : Array
 
-    def _construct():
-        return ArraySpectrum([0.])
 
     def __init__(self        : Spectrum,
                  wavelengths : Array,
@@ -268,8 +266,6 @@ class PolynomialSpectrum(Spectrum):
     degree       : int # Just a helper
     coefficients : Array
 
-    def _construct():
-        return PolynomialSpectrum([0.], [0.])
     
     def __init__(self         : Spectrum,
                  wavelengths  : Array,
@@ -385,8 +381,6 @@ class CombinedSpectrum(ArraySpectrum):
         The name of the spectrum.
     """
 
-    def _construct():
-        return CombinedSpectrum([0.])
     
     def __init__(self        : Spectrum,
                  wavelengths : Array,

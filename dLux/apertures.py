@@ -20,7 +20,7 @@ __all__ = ["CircularAperture", "SquareAperture", "HexagonalAperture",
            "RegularPolygonalAperture", "IrregularPolygonalAperture", 
            "StaticAperture", "AberratedAperture", "StaticAberratedAperture", 
            "AnnularAperture", "RectangularAperture", "CompoundAperture", 
-           "MultiAperture", "UniformSpider", "SimpleAperture"]
+           "MultiAperture", "UniformSpider", "ApertureFactory"]
 
 
 two_pi = 2. * np.pi
@@ -442,9 +442,7 @@ class CircularAperture(DynamicAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
     radius : Array
-   
-    def _construct():
-        return CircularAperture(np.array(0.))
+
  
     def __init__(self        : ApertureLayer, 
                  radius      : Array, 
@@ -606,8 +604,6 @@ class AnnularAperture(DynamicAperture):
     rmin : Array
     rmax : Array
 
-    def _construct():
-        return AnnularAperture(np.array(0.), np.array(0.))
     
     def __init__(self        : ApertureLayer, 
                  rmax        : Array, 
@@ -780,8 +776,6 @@ class RectangularAperture(DynamicAperture):
     height : Array
     width  : Array
 
-    def _construct():
-        return RectangularAperture(np.array(0.), np.array(0.))
 
     def __init__(self        : ApertureLayer, 
                  height      : Array, 
@@ -957,9 +951,7 @@ class SquareAperture(DynamicAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
     width : Array
-   
-    def _construct():
-        return SquareAperture(np.array(0.))
+
  
     def __init__(self        : ApertureLayer, 
                  width       : Array, 
@@ -1311,9 +1303,6 @@ class IrregularPolygonalAperture(PolygonalAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
     vertices : Array
-
-    def _construct():
-        return IrregularPolygonalAperture(np.zeros((1, 2)))
     
     
     def __init__(self        : ApertureLayer, 
@@ -1561,9 +1550,6 @@ class RegularPolygonalAperture(PolygonalAperture):
     """
     nsides : int
     rmax   : Array
-
-    def _construct():
-        return RegularPolygonalAperture(3, np.array(0.))
         
     
     def __init__(self        : ApertureLayer, 
@@ -1768,9 +1754,7 @@ class HexagonalAperture(RegularPolygonalAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
     rmax : Array
-    
-    def _construct():
-        return RegularPolygonalAperture(np.array(0.))
+
     
     def __init__(self        : ApertureLayer, 
                  rmax        : Array,
@@ -1992,8 +1976,6 @@ class UniformSpider(Spider):
     nstruts     : int
     strut_width : Array
 
-    def _construct():
-        return UniformSpider(1, np.array(0.))
     
     def __init__(self         : ApertureLayer, 
                  nstruts      : int,
@@ -2285,12 +2267,9 @@ class AberratedAperture(AbstractAberratedAperture):
     name: str
         The name of the layer, which is used to index the layers dictionary.
     """
-    aperture    : ApertureLayer
-    # basis_funcs : list = static_field()
-    basis_funcs : list
- 
-    def _construct():
-        return AberratedAperture(CircularAperture._construct(), np.array(0))
+    aperture : ApertureLayer
+    basis    : dLux.aberrations.ZernikeBasis
+
     
     def __init__(self         : ApertureLayer, 
                  aperture     : ApertureLayer, 
@@ -2329,12 +2308,8 @@ class AberratedAperture(AbstractAberratedAperture):
         # Set Aperture
         self.aperture = aperture
 
-        # Generate basis functions based on the aperture type.
-        if isinstance(aperture, RegularPolygonalAperture):
-            n = aperture.nsides
-            self.basis_funcs = [self.jth_polike(j, n) for j in noll_inds]
-        else:
-            self.basis_funcs = [self.jth_zernike(j) for j in noll_inds]
+        # Set Basis
+        self.basis = dLux.aberrations.ZernikeBasis(noll_inds)
 
         # Initialise the coefficinets
         coefficients = np.zeros(len(noll_inds)) if coefficients is None \
@@ -2431,8 +2406,10 @@ class AberratedAperture(AbstractAberratedAperture):
         """
         coordinates = self.aperture._normalised_coordinates(coordinates)
 
-        ikes = tree_map(lambda bfunc: bfunc(coordinates), self.basis_funcs)
-        ikes = np.array(ikes)
+        if isinstance(self.aperture, RegularPolygonalAperture):
+            ikes = self.basis.calculate_basis(coordinates, self.aperture.nsides)
+        else:
+            ikes = self.basis.calculate_basis(coordinates)
 
         is_reg_pol = isinstance(self.aperture, RegularPolygonalAperture)
         is_circ = isinstance(self.aperture, CircularAperture)
@@ -2512,234 +2489,6 @@ class AberratedAperture(AbstractAberratedAperture):
         pixel_scales = (diameter / npixels, diameter / npixels)
         coordinates = get_pixel_positions(npixels_in, pixel_scales)
         return self._opd(coordinates)
-
-
-    def noll_index(self : ApertureLayer, j : int) -> tuple:
-        """
-        Decode the jth noll index of the zernike polynomials. This arrises 
-        because the zernike polynomials are parametrised by a pair numbers, 
-        e.g. n, m, but we want to impose an order.The noll indices are the 
-        standard way to do this see [this](https://oeis.org/A176988) for more 
-        detail. The top of the mapping between the noll index and the pair of 
-        numbers is shown below:
-     
-        n, m Indices
-        ------------
-        (0, 0)
-        (1, -1), (1, 1)
-        (2, -2), (2, 0), (2, 2)
-        (3, -3), (3, -1), (3, 1), (3, 3)
-     
-        Noll Indices
-        ------------
-        1
-        3, 2
-        5, 4, 6
-        9, 7, 8, 10
-     
-        Parameters
-        ----------
-        j : int
-            The noll index to decode.
-        
-        Returns
-        -------
-        n, m : tuple
-            The n, m parameters of the zernike polynomial.
-        """
-        # To retrive the row that we are in we use the formula for 
-        # the sum of the integers:
-        #  
-        #  n      n(n + 1)
-        # sum i = -------- = x_{n}
-        # i=0        2
-        # 
-        # However, `j` is a number between x_{n - 1} and x_{n} to 
-        # retrieve the 0th based index we want the upper bound. 
-        # Applying the quadratic formula:
-        # 
-        # n = -1/2 + sqrt(1 + 8x_{n})/2
-        #
-        # We know that n is an integer and hence of x_{n} -> j where 
-        # j is not an exact solution the row can be found by taking 
-        # the floor of the calculation. 
-        #
-        # n = (-1/2 + sqrt(1 + 8j)/2) // 1
-        #
-        # All the odd noll indices map to negative m integers and also 
-        # 0. The sign can therefore be determined by -(j & 1). 
-        # This works because (j & 1) returns the rightmost bit in 
-        # binary representation of j. This is equivalent to -(j % 2).
-        # 
-        # The m indices range from -n to n in increments of 2. The last 
-        # thing to do is work out how many times to add two to -n. 
-        # This can be done by banding j away from the smallest j in 
-        # the row. 
-        #
-        # The smallest j in the row can be calculated using the sum of
-        # integers formula in the comments above with n = (n - 1) and
-        # then adding one. Let this number be (x_{n - 1} + 1). We can 
-        # then subtract j from it to get r = (j - x_{n - 1} + 1)
-        #
-        # The odd and even cases work differently. I have included the 
-        # formula below:
-        # odd : p = (j - x_{n - 1}) // 2 
-       
-        # even: p = (j - x_{n - 1} + 1) // 2
-        # where p represents the number of times 2 needs to be added
-        # to the base case. The 1 required for the even case can be 
-        # generated in place using ~(j & 1) + 2, which is 1 for all 
-        # even numbers and 0 for all odd numbers.
-        #
-        # For odd n the base case is 1 and for even n it is 0. This 
-        # is the result of the bitwise operation j & 1 or alternatively
-        # (j % 2). The final thing is adding the sign to m which is 
-        # determined by whether j is even or odd hence -(j & 1).
-        n = (np.ceil(-1 / 2 + np.sqrt(1 + 8 * j) / 2) - 1).astype(int)
-        smallest_j_in_row = n * (n + 1) / 2 + 1 
-        number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
-        sign_of_shift = -(j & 1) + ~(j & 1) + 2
-        base_case = (n & 1)
-        m = (sign_of_shift * (base_case + number_of_shifts * 2)).astype(int)
-        return n, m
-
-
-    def jth_radial_zernike(self : ApertureLayer, n : int, m : int) -> callable:
-        """
-        The radial zernike polynomial.
-
-        Parameters
-        ----------
-        n : int
-            The first index number of the zernike polynomial to forge
-        m : int 
-            The second index number of the zernike polynomial to forge.
-
-        Returns
-        -------
-        radial : Array
-            An npixels by npixels stack of radial zernike polynomials.
-        """
-        m, n = np.abs(m), np.abs(n)
-
-        # NOTE: Old discussion. 
-        # k is the dummy index. It is only meant to 
-        # go up to upper, however, due to the conshearts 
-        # of the compiler it is over-extended to a constant value.
-        # k = np.arange(MAX_DIFF) # Dummy index.
-        # mask = (k < upper)
-        k = np.arange(((n - m) / 2).astype(int) + 1, dtype=float)
-
-        sign = lax.pow(-1., k)
-        _fact_1 = factorial(np.abs(n - k))
-        _fact_2 = factorial(k)
-        _fact_3 = factorial(((n + m) / 2).astype(int) - k)
-        _fact_4 = factorial(((n - m) / 2).astype(int) - k)
-        coefficients =  sign * _fact_1 / _fact_2 / _fact_3 / _fact_4 
-               
-        def _jth_radial_zernike(rho: list) -> list:
-            rads = lax.pow(rho[:, :, None], (n - 2 * k)[None, None, :])
-            return (coefficients * rads).sum(axis = 2)
-                
-        return _jth_radial_zernike
-        
-
-    def jth_polar_zernike(self : ApertureLayer, n : int, m : int) -> callable:
-        """
-        Generates a function representing the polar component of the jth 
-        Zernike polynomial.
-
-        Parameters
-        ----------
-        n: int 
-            The first index number of the Zernike polynomial.
-        m: int 
-            The second index number of the Zernike polynomials.
-
-        Returns
-        -------
-        polar: Array
-            The polar component of the jth Zernike polynomials.
-        """
-        is_m_zero = (m != 0).astype(int)
-        norm_coeff = (1 + (np.sqrt(2) - 1) * is_m_zero) * np.sqrt(n + 1)
-
-        # When m < 0 we have the odd zernike polynomials which are 
-        # the radial zernike polynomials multiplied by a sine term.
-        # When m > 0 we have the even sernike polynomials which are 
-        # the radial polynomials multiplies by a cosine term. 
-        # To produce this result without logic we can use the fact
-        # that sine and cosine are separated by a phase of pi / 2
-        # hence by casting int(m < 0) we can add the nessecary phase.
-
-        phase_mod = (m < 0).astype(int) * np.pi / 2
-        abs_m = np.abs(m)
-
-        def _jth_polar_zernike(theta: list) -> list:
-            return norm_coeff * np.cos(abs_m * theta - phase_mod)
-
-        return _jth_polar_zernike  
-
-
-    def jth_zernike(self : ApertureLayer, j : int) -> callable:
-        """
-        Calculate the zernike basis on a square pixel grid. 
-     
-        Parameters
-        ----------
-        noll_index: int
-            The noll index corresponding to the zernike to generate.
-     
-        Returns
-        -------
-        zernike : Array 
-            The zernike polynomials evaluated until number. The shape of the 
-            output tensor is number by pixels by pixels. 
-        """
-        n, m = self.noll_index(j)
-        _jth_rad_zern = self.jth_radial_zernike(n, m)
-        _jth_pol_zern = self.jth_polar_zernike(n, m)
-     
-        def _jth_zernike(coordinates: list) -> list:
-            polar_coordinates = cartesian_to_polar(coordinates)
-            rho = polar_coordinates[0]
-            theta = polar_coordinates[1]
-            aperture = rho <= 1.
-            return aperture * _jth_rad_zern(rho) * _jth_pol_zern(theta)
-        
-        return _jth_zernike 
-
-
-    def jth_polike(self : ApertureLayer, j : int, n : int) -> callable:
-        """
-        The jth polike as a function. 
-     
-        Parameters
-        ----------
-        j: int
-            The noll index of the requested zernike.
-        n: int
-            The number of sides on the regular polygon.
-     
-        Returns
-        -------
-        hexike: callable
-            A function representing the jth hexike that is evaluated on a 
-            cartesian coordinate grid. 
-        """
-        _jth_zernike = self.jth_zernike(j)
-     
-        def _jth_polike(coordinates: Array) -> Array:
-            polar = cartesian_to_polar(coordinates)
-            rho = polar[0]
-            alpha = np.pi / n
-            phi = polar[1] + alpha 
-            wedge = np.floor((phi + alpha) / (2. * alpha))
-            u_alpha = phi - wedge * (2 * alpha)
-            r_alpha = np.cos(alpha) / np.cos(u_alpha)
-            return 1 / r_alpha * _jth_zernike(coordinates / r_alpha)
-     
-        return _jth_polike
 
 
     def _orthonormalise(self     : ApertureLayer, 
@@ -3166,8 +2915,6 @@ class CompoundAperture(CompositeAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
 
-    def _construct():
-        return CompoundAperture([CircularAperture._construct()])
 
     def __init__(self        : ApertureLayer,
                  apertures   : list,
@@ -3291,8 +3038,6 @@ class MultiAperture(CompositeAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
 
-    def _construct():
-        return CompoundAperture([CircularAperture._construct()])
     
     def __init__(self        : ApertureLayer,
                  apertures   : list,
@@ -3531,8 +3276,6 @@ class StaticAperture(AbstractStaticAperture):
         The name of the layer, which is used to index the layers dictionary.
     """
 
-    def _construct():
-        return StaticAperture(CircularAperture._construct(), 2, np.array(0.))
 
     def __init__(self        : ApertureLayer, 
                  aperture    : ApertureLayer, 
@@ -3617,8 +3360,6 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
     """
     basis : Array
 
-    def _construct():
-        return StaticAberratedAperture(AberratedAperture._construct(), 2, np.array(0.))
 
     def __init__(self        : ApertureLayer, 
                  aperture    : ApertureLayer, 
@@ -3812,7 +3553,8 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
 #############################
 ### Aperture Construction ###
 #############################
-class SimpleAperture():
+# class SimpleAperture():
+class ApertureFactory():
     """
     This class is not actually ever instatiated, but is rather a class used to 
     give a simple constructor interface that is used to construct the most
@@ -3885,7 +3627,7 @@ class SimpleAperture():
     plt.show()
     ```
     """
-    def __new__(cls              : SimpleAperture, 
+    def __new__(cls              : ApertureFactory, 
                 npixels          : int, 
                 nsides           : int   = 0,
                 rotation         : float = 0., 

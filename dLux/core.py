@@ -209,8 +209,6 @@ class Instrument(ExtendedBase):
     filter      : Filter
     observation : dict
 
-    def _construct():
-        return Instrument(optical_layers=[])
     
     def __init__(self : Instrument,
 
@@ -511,9 +509,6 @@ class Optics(ExtendedBase):
         and operations upon some input wavefront through an optical system.
     """
     layers : OrderedDict
-
-    def _construct():
-        return Optics([])
 
 
     def __init__(self : Optics, layers : list) -> Optics:
@@ -853,9 +848,6 @@ class Scene(ExtendedBase):
     """
     sources: dict
 
-    def _construct():
-        return Scene([])
-
 
     def __init__(self, sources : list) -> Scene:
         """
@@ -997,9 +989,6 @@ class Detector(ExtendedBase):
         and operations upon some input psf as it interacts with the detector.
     """
     layers : OrderedDict
-
-    def _construct():
-        return Detector([])
 
 
     def __init__(self : Detector, layers : list) -> Instrument:
@@ -1196,9 +1185,6 @@ class Filter(ExtendedBase):
     throughput   : Array
     # filter_name  : str = static_field()
     filter_name  : str
-
-    def _construct():
-        return Filter(np.array([]))
 
 
     def __init__(self        : Filter,

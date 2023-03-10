@@ -123,7 +123,7 @@ def simple_optical_system(aperture_diameter         : Array,
         zernikes = None
         coeffs = None
     
-    layers +=[dLux.SimpleAperture(wavefront_npixels, 
+    layers +=[dLux.ApertureFactory(wavefront_npixels, 
                 secondary_ratio=secondary_ratio, zernikes=zernikes, 
                 coefficients=coeffs)]
 

@@ -194,10 +194,6 @@ class CreateWavefront(OpticalLayer):
     wavefront_type : str
 
 
-    def _construct():
-        return CreateWavefront(0, np.array(0.))
-
-
     def __init__(self           : OpticalLayer,
                  npixels        : int,
                  diameter       : Array,
@@ -337,10 +333,6 @@ class TiltWavefront(OpticalLayer):
     tilt_angles : Array
 
 
-    def _construct():
-        return TiltWavefront(np.zeros(2))
-
-
     def __init__(self        : OpticalLayer,
                  tilt_angles : Array,
                  name        : str = 'TiltWavefront') -> OpticalLayer:
@@ -418,10 +410,6 @@ class NormaliseWavefront(OpticalLayer):
     name : str
         The name of the layer, which is used to index the layers dictionary.
     """
-
-
-    def _construct():
-        return NormaliseWavefront()
     
 
     def __init__(self : OpticalLayer,
@@ -500,8 +488,6 @@ class ApplyBasisOPD(OpticalLayer):
     basis        : Array
     coefficients : Array
 
-    def _construct():
-        return ApplyBasisOPD(np.zeros((1, 1, 1)))
 
     def __init__(self         : OpticalLayer,
                  basis        : Array,
@@ -538,7 +524,7 @@ class ApplyBasisOPD(OpticalLayer):
         "First dimension of the basis array.")
 
 
-    def get_total_opd(self : OpticalLayer) -> Array:
+    def get_opd(self : OpticalLayer) -> Array:
         """
         A function to calculate the total OPD from the basis vector and the
         coefficients.
@@ -566,7 +552,7 @@ class ApplyBasisOPD(OpticalLayer):
         wavefront : Wavefront
             The wavefront with the appropriate phase applied.
         """
-        return wavefront.add_opd(self.get_total_opd())
+        return wavefront.add_opd(self.get_opd())
     
 
     def summary(self            : OpticalLayer, 
@@ -609,8 +595,6 @@ class AddPhase(OpticalLayer):
     """
     phase : Array
 
-    def _construct():
-        return AddPhase(np.array([]))
 
     def __init__(self  : OpticalLayer,
                  phase : Array,
@@ -690,10 +674,6 @@ class AddOPD(OpticalLayer):
         The name of the layer, which is used to index the layers dictionary.
     """
     opd : Array
-
-
-    def _construct():
-        return AddOPD(np.array([]))
 
 
     def __init__(self : OpticalLayer,
@@ -778,10 +758,6 @@ class TransmissiveOptic(OpticalLayer):
         The name of the layer, which is used to index the layers dictionary.
     """
     transmission: Array
-
-    def _construct():
-        return TransmissiveOptic(np.array([]))
-
 
 
     def __init__(self         : OpticalLayer,
@@ -1122,9 +1098,6 @@ class ApplyBasisCLIMB(OpticalLayer):
     coefficients     : Array
     ideal_wavelength : Array
 
-    def _construct():
-        return ApplyBasisCLIMB(np.array([]), np.array([]))
-
 
     def __init__(self             : OpticalLayer,
                  basis            : Array,
@@ -1327,9 +1300,6 @@ class Rotate(OpticalLayer):
     order          : int
     padding        : int
 
-
-    def _construct():
-        return Rotate(np.array([]))
 
     def __init__(self           : OpticalLayer,
                  angle          : Array,

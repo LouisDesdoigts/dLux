@@ -484,9 +484,6 @@ class PointSource(Source):
         The name for this object.
     """
 
-    def _construct():
-        return PointSource(wavelengths=[0.])
-
 
     def __init__(self        : Source,
                  position    : Array    = np.array([0., 0.]),
@@ -571,8 +568,6 @@ class MultiPointSource(Source):
         The name for this object.
     """
 
-    def _construct():
-        return MultiPointSource(wavelengths=[0.])
 
     def __init__(self        : Source,
                  position    : Array,
@@ -729,8 +724,6 @@ class ArrayDistribution(ResolvedSource):
     """
     distribution : Array
 
-    def _construct():
-        return MultiPointSource(wavelengths=[0.], distribution=1.)
 
     def __init__(self         : Source,
                  position     : Array    = np.array([0., 0.]),
@@ -865,8 +858,6 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         The name for this object.
     """
 
-    def _construct():
-        return BinarySource(wavelengths=[0.])
 
     def __init__(self           : Source,
                  position       : Array    = np.array([0., 0.]),
@@ -1031,8 +1022,6 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
         The name for this object.
     """
 
-    def _construct():
-        return PointExtendedSource(wavelengths=[0.])
 
     def __init__(self         : Source,
                  position     : Array    = np.array([0., 0.]),
@@ -1187,8 +1176,6 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
         The name for this object.
     """
 
-    def _construct():
-        return PointAndExtendedSource(wavelengths=[0.])
 
     def __init__(self         : Source,
                  position     : Array    = np.array([0., 0.]),

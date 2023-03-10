@@ -726,7 +726,7 @@ def create_optics() -> callable:
     def _create_optics(
             layers = [
                 dLux.optics.CreateWavefront(16, 1),
-                dLux.optics.CompoundAperture([0.5]),
+                dLux.apertures.ApertureFactory(16),
                 dLux.optics.NormaliseWavefront(),
                 dLux.propagators.CartesianMFT(16, 1., 1e-6)
             ]) -> OpticalLayer:

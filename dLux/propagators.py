@@ -514,9 +514,6 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         The name for this propagator.
     """
 
-    def _construct():
-        return CartesianMFT(1, 0., 0.)
-
 
     def __init__(self            : Propagator,
                  npixels_out     : int,
@@ -652,8 +649,6 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
         The name for this propagator.
     """
 
-    def _construct():
-        return AngularMFT(1, 0.)
 
     def __init__(self            : Propagator,
                  npixels_out     : int,
@@ -773,8 +768,6 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
         The name for this propagator.
     """
 
-    def _construct():
-        return CartesianFFT(0.)
 
     def __init__(self         : Propagator,
                  focal_length : Array,
@@ -861,8 +854,6 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
         The name for this propagator.
     """
 
-    def _construct():
-        return AngularFFT()
     
     def __init__(self    : Propagator,
                  inverse : bool = False,
@@ -960,8 +951,6 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         The name for this propagator.
     """
 
-    def _construct():
-        return AngularFFT(1, 0., 0., 0.)
 
     def __init__(self              : Propagator,
                  npixels_out       : Array,
