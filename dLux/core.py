@@ -175,6 +175,7 @@ def model(optics      : Optics,
 
 
 Observation = lambda : dLux.observations.AbstractObservation
+# Observation = dLux.observations.AbstractObservation
 class Instrument(ExtendedBase):
     """
     A high level class desgined to model the behaviour of a telescope. It
@@ -318,8 +319,8 @@ class Instrument(ExtendedBase):
             self.filter = filter
 
         if observation is not None:
-            assert isinstance(observation, Observation), ("observation must be"
-                "an Observation object.")
+            assert isinstance(observation, Observation()), ("observation must "
+            "be an Observation object.")
             self.observation = observation
         else:
             self.observation = None
