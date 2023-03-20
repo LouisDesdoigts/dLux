@@ -3,7 +3,7 @@ import jax.numpy as np
 from abc import ABC, abstractmethod
 from jax.scipy.signal import convolve
 from jax.scipy.stats import norm
-from zodiax import ExtendedBase
+from zodiax import Base
 from dLux.utils.interpolation import rotate, fourier_rotate
 from dLux.utils.units import convert_angular
 from dLux.utils.helpers import single_image_plot
@@ -16,7 +16,7 @@ __all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
 Array = np.ndarray
 
 
-class DetectorLayer(ExtendedBase, ABC):
+class DetectorLayer(Base, ABC):
     """
     A base Detector layer class to help with type checking throuhgout the rest
     of the software.
