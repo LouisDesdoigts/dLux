@@ -3,7 +3,7 @@ import jax.numpy as np
 from jax import vmap
 from jax.tree_util import tree_map
 from jax.lax import stop_gradient
-from zodiax import ExtendedBase
+from zodiax import Base
 from abc import ABC, abstractmethod
 from inspect import signature
 from dLux.utils.helpers import two_image_plot
@@ -19,7 +19,7 @@ __all__ = ["CreateWavefront", "TiltWavefront", "NormaliseWavefront",
 Array = np.ndarray
 
 
-class OpticalLayer(ExtendedBase, ABC):
+class OpticalLayer(Base, ABC):
     """
     A base Optical layer class to help with type checking throuhgout the rest
     of the software. Instantiates the apply method which inspects the function
@@ -988,9 +988,8 @@ class ApplyBasisCLIMB(OpticalLayer):
 
     def CLIMB(self, wf, ppsz = 256):
         psz = ppsz * 3
-
-        dummy = np.array(wf.split(ppsz))
-        dummy = np.array(dummy.split(ppsz, axis = 2))
+        dummy = np.array(np.split(wf, ppsz))
+        dummy = np.array(np.split(np.array(dummy), ppsz, axis = 2))
         subarray = dummy[:,:,0,0]
 
         flat = dummy.reshape(-1, 3, 3)
