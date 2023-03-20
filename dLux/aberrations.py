@@ -1,5 +1,5 @@
 from __future__ import annotations
-from zodiax import ExtendedBase
+from zodiax import Base
 import jax.numpy as np
 from jax import lax
 import jax.tree_util as jtu
@@ -69,7 +69,7 @@ zernike_names = {
 }
 
 
-class Zernike(ExtendedBase):
+class Zernike(Base):
     """
     A class to generate Zernike polynomials dynamically.
 
@@ -287,7 +287,7 @@ class Zernike(ExtendedBase):
             return self.calculate_polike(coordinates, nsides)
 
     
-class ZernikeBasis(ExtendedBase):
+class ZernikeBasis(Base):
     """
     A class to calculate a set of Zernike polynomials on a dynamic set of
     coordiantes.

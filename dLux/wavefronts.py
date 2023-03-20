@@ -2,7 +2,7 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import vmap
 from equinox import tree_at
-from zodiax import ExtendedBase
+from zodiax import Base
 from enum import IntEnum
 from abc import ABC
 from dLux.utils.coordinates import get_pixel_positions
@@ -30,7 +30,7 @@ class PlaneType(IntEnum):
     Intermediate = 3
 
 
-class Wavefront(ExtendedBase, ABC):
+class Wavefront(Base, ABC):
     """
     A class representing some wavefront, designed to track the various
     parameters such as wavelength, pixel_scale, amplitude and phase, as well as

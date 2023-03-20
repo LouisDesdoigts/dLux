@@ -1,5 +1,5 @@
 from __future__ import annotations
-from zodiax import ExtendedBase
+from zodiax import Base
 from jax.tree_util import tree_map
 import jax.numpy as np
 from jax import vmap
@@ -15,7 +15,7 @@ Array = np.ndarray
 __all__ = ["AbstractObservation", "Dither"]
 
 
-class AbstractObservation(ExtendedBase):
+class AbstractObservation(Base):
     """
     Abstract base class for observations. All observations should inherit from
     this class and must implement an `.observe()` method that only takes in a
