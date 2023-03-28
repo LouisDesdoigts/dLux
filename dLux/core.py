@@ -591,10 +591,10 @@ class Optics(Base):
         return weight * psf
 
 
-    def propagate_multi(self        : Optics,
-                        wavelengths : Array,
-                        offset      : Array = np.zeros(2),
-                        weights     : Array = None) -> Array:
+    def propagate(self        : Optics,
+                  wavelengths : Array,
+                  offset      : Array = np.zeros(2),
+                  weights     : Array = None) -> Array:
         """
         Propagates a broadband point source through the optical layers.
 
@@ -623,7 +623,7 @@ class Optics(Base):
 
         # Format weights input
         if weights is None:
-            weights = np.ones(len(wavelengths))
+            weights = np.ones(len(wavelengths))/len(wavelengths)
         elif not isinstance(weights, np.ndarray):
             weights = np.asarray(weights, dtype=float)
         assert weights.ndim == 1, "weights must be 1 dimensional."
