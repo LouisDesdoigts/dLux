@@ -239,7 +239,7 @@ class CreateWavefront(OpticalLayer):
             input conventions determied by the apply method of OpticalLayers.
         parameters : dict
             A dictionary of parameters needed to construct the wavefront.
-        returns_parametrs: bool = True
+        returns_parameters : bool = True
             Determines if the class returns the parameters dictionary.
 
         Returns

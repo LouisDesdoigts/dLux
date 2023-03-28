@@ -2927,7 +2927,7 @@ class CompoundAperture(CompositeAperture):
         Parameters
         ----------
         apertures: list[Aperture]
-           The sub-apertures that make up the full aperture.
+            The sub-apertures that make up the full aperture.
         centre: Array, meters = np.array([0., 0.])
             The (x, y) coordinates of the centre of the aperture.
         shear: Array = np.array([0., 0.])
@@ -3023,7 +3023,7 @@ class MultiAperture(CompositeAperture):
     Attributes
     ----------
     apertures: dict(str, Aperture)
-       The sub-apertures that make up the full aperture.
+        The sub-apertures that make up the full aperture.
     centre: Array, meters
         The (x, y) coordinates of the centre of the aperture.
     shear: Array
@@ -3050,7 +3050,7 @@ class MultiAperture(CompositeAperture):
         Parameters
         ----------
         apertures: list[Aperture]
-           The sub-apertures that make up the full aperture.
+            The sub-apertures that make up the full aperture.
         centre: Array, meters = np.array([0., 0.])
             The (x, y) coordinates of the centre of the aperture.
         shear: Array = np.array([0., 0.])
@@ -3452,13 +3452,6 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
         """
         Compute the basis vectors of the aperture aberrations.
 
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
-
         Returns
         -------
         basis : Array 
@@ -3470,11 +3463,6 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
     def _opd(self : ApertureLayer, **kwargs) -> Array:
         """
         Compute the total optical path difference of the aperture aberrations.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the opd on.
 
         Returns
         -------
@@ -3490,13 +3478,6 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
     def get_opd(self : ApertureLayer, **kwargs) -> Array:
         """
         Compute the total optical path difference of the aperture aberrations.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
 
         Returns
         -------
@@ -3779,7 +3760,27 @@ class ApertureFactory():
         return static
 
 
-    def __init__(self):
+    def __init__(self             : ApertureFactory, 
+                 npixels          : int, 
+                 nsides           : int   = 0,
+                 rotation         : float = 0., 
+
+                 # Sizing
+                 aperutre_ratio   : float = 1.0,
+                 secondary_ratio  : float = 0.,
+                 secondary_nsides : int = 0,
+
+                 # Spiders
+                 nstruts          : int   = 0,
+                 strut_ratio      : float = 0.,
+                 strut_rotation   : float = 0.,
+                
+                 # Aberrations
+                 zernikes         : Array = None, 
+                 coefficients     : Array = None, 
+
+                 # name
+                 name             : str = None):
         """
         Constructs a basic single static aperture, either with or without 
         aberrations.
