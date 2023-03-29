@@ -10,8 +10,7 @@ from typing import Union
 import dLux
 
 
-__all__ = ["model", "OpticalSystem", "Instrument", "Optics", "Scene",
-           "Filter", "Detector"]
+__all__ = ["model", "Instrument", "Optics", "Scene", "Filter", "Detector"]
 
 
 Array = np.ndarray
