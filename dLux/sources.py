@@ -1299,3 +1299,90 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
                 f"{self.flux} photons and constrast {self.contrast} offset "
                 f"from the optical axis by {position} "
                 f"{angular_units} and spectrum\n  {spectrum_str}")
+
+
+# Lookup based methods of forming objects
+from astroquery.simbad import Simbad
+import pysynphot
+
+class CatalogueStarFactory:
+    """
+        given a star name and a target band, get a dLux source that corresponds to the target
+
+        Currently only uses SIMBAD queries, and the pheonix model
+    """
+    def from_simbad(star_name, band) -> None:
+        _load_SIMBAD_spectal_params(star_name, band)
+        band = band
+        self.bandpass = pysynphot.ObsBandpass(self.band)
+
+
+
+    def _load_SIMBAD_spectal_params(self, star_name, band):
+        """
+        Using astroquery, find the parameters needed to model the spectrum from SIMBAD
+        """
+        custom_simbad = Simbad()
+
+        # ask for the flux and flux system (to verify it is Vega)
+        # the fe_h query also returns T_eff, log_g and fe_H (aka metallicity)
+        custom_simbad.add_votable_fields(f'flux({band})', f'flux_system({band})', "fe_h")
+
+        result_table = custom_simbad.query_object(star_name)
+
+        # check if magnitude is masked
+        self.magnitude = None
+        if result_table[0][f"FLUX_{band}"] is not np.ma.masked:
+            if result_table[0][f"FLUX_SYSTEM_{band}"] == 'Vega':
+                self.magnitude = result_table[0][f"FLUX_{band}"]
+
+        if self.magnitude is None:
+            UserWarning("magnitude not found, add magnitude in Vega magnitudes manually")
+            
+        # metallicity, teff and log_g all follow the same pattern
+        keys = ["Fe_H_Teff","Fe_H_log_g","Fe_H_Fe_H"]
+
+        if result_table[0]["Fe_H_Teff"] is not np.ma.masked: 
+            self.T_eff = result_table[0]["Fe_H_Teff"]
+        else:
+            UserWarning("T_eff not found, add T_eff manually")
+        
+        if result_table[0]["Fe_H_log_g"] is not np.ma.masked: 
+            self.log_g = result_table[0]["Fe_H_log_g"]
+        else:
+            UserWarning("log_g not found, add log_g manually")
+
+        if result_table[0]["Fe_H_Fe_H"] is not np.ma.masked: 
+            self.Fe_H = result_table[0]["Fe_H_Fe_H"]
+        else:
+            UserWarning("Fe_H not found, add Fe_H manually")
+
+    def generate_spectrum(self):
+        try:
+            norm_spectrum = pysynphot.Icat(
+                                "phoenix",
+                                self.T_eff,
+                                self.Fe_H,
+                                self.log_g,
+                            )
+        except:
+            ImportError("Make sure pysynphot is setup correctly with all relevant files")
+            # might need to run
+            #     S.setref(graphtable='mtab/57g1733im_tmg.fits',
+            # comptable='mtab/6cf2109gm_tmc.fits',
+            # thermtable='mtab/3241637sm_tmt.fits',
+            # not sure
+        return norm_spectrum.renorm(RNval=self.magnitude, RNUnits='vegamag', band=pysynphot.ObsBandpass(self.band))
+
+    def get_flux_per_area(self):
+        obs = pysynphot.Observation(self.generate_spectrum(), self.bandpass)
+        return obs.integrate()
+    
+    def get_flux_over_telescope(spectrum, bandpass, telescope_area, exposure_time):
+        """
+            return value in photons
+        """
+        return CatalogueStar.get_flux_per_area(spectrum, bandpass)*telescope_area*exposure_time
+
+
+
