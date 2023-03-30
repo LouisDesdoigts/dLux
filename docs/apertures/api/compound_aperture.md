@@ -1,1 +1,0 @@
-::: dLux.apertures.CompoundAperture

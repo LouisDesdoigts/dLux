@@ -1,197 +1,338 @@
-# ===== mkdocs.yml =====
-# Configuration file for the automatic generation of package
-# documentation formatted with markdown.
+# Great resource: https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#with-section-index-pages
+# https://squidfunk.github.io/mkdocs-material/reference/buttons/
 
-# ===== Setup and Themes =====
+site_name: dLux
+docs_dir: .
+site_description: Documentation for dLux.
+site_author: Louis Desdoigts
+site_url: https://louisdesdoigts.github.io/dlux/
+repo_url: https://github.com/LouisDesdoigts/dlux
+repo_name: louisdesdoigts/dlux
+edit_uri: "" 
+
+strict: false  # Allow warnings during the build process (change later)
+
+plugins:
+  - mkdocs-jupyter
+  - search
+  - same-dir
+  - autorefs
+  - simple:
+      ignore_folders:
+        - tests
+        - dLux
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            docstring_style: "numpy"
+
 markdown_extensions:
-  # - mkdocs_graphviz
-  - pymdownx.arithmatex:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.arithmatex:  # Render LaTeX via MathJax
       generic: true
+  - pymdownx.snippets:  # Include one Markdown file into another
+      base_path: docs
+  - admonition
+  - toc:
+      permalink: "¤"  # Adds a clickable permalink to each section heading
+      toc_depth: 4
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list # Allows images
+  - md_in_html # Allows images
 
-extra_javascript:
+extra_javascript: # Used for MathJax
   - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-  - https://cdn.jsdelivr.net/gh/rod2ik/cdn@main/mkdocs/javascripts/mkdocs-graphviz.js
 
-site_name: ∂Lux - Differentiable Optical Simulation
-repo_url: https://github.com/LouisDesdoigts/dLux
 
 theme:
   palette:
     scheme: slate
   logo: assets/logo.jpg
-  favicon: assets/logo.jpg
+  favicon: material/telescope
   name: material
   icon:
     logo: material/telescope
 
-# ===== Plugins =====
-plugins:
-  - search
-  - mkdocs-jupyter
-  - mkdocstrings:
-      default_handler: python
-      handlers:
-        python:
-          selection:
-            docstring_style: "numpy"
-          setup_commands:
-            - import sys
-            - sys.path.append("dLux")
-          rendering:
-            show_source: false
-            show_if_no_docstring: yes
-      custom_templates: templates
+theme:
+  logo: assets/logo.jpg
+  favicon: material/telescope
+  icon:
+    logo: material/telescope
+    # repo: fontawesome/brands/github
+    # logo: fontawesome/regular/moon
+    # logo: octicons/moon-16
+  name: material
+  features:
+    # - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes 
+    - navigation.top
+    - content.code.copy
+    # - navigation.tabs # Adds tabs for High Level settings
+    # - navigation.tabs.sticky
+    - toc.integrate  # Table of contents is integrated on the left; does not appear separately on the right.
+    # - toc.integrate
+    # - content.action.view
+  palette:
+    # Light mode / dark mode
+    # We deliberately don't automatically use `media` to check a user's preferences. We default to light mode as
+    # (a) it looks more professional, and (b) is more obvious about the fact that it offers a (dark mode) toggle.
+    - scheme: default
+      primary: white
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+
+
+
+
+# # ===== Setup and Themes =====
+# markdown_extensions:
+#   # - mkdocs_graphviz
+#   - pymdownx.arithmatex:
+#       generic: true
+
+# extra_javascript:
+#   - javascripts/mathjax.js
+#   - https://polyfill.io/v3/polyfill.min.js?features=es6
+#   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+#   - https://cdn.jsdelivr.net/gh/rod2ik/cdn@main/mkdocs/javascripts/mkdocs-graphviz.js
+
+# site_name: ∂Lux - Differentiable Optical Simulation
+# repo_url: https://github.com/LouisDesdoigts/dLux
+
+# theme:
+#   palette:
+#     scheme: slate
+#   logo: assets/logo.jpg
+#   favicon: material/telescope
+#   name: material
+#   icon:
+#     logo: material/telescope
+
+# # ===== Plugins =====
+# plugins:
+#   - search
+#   - mkdocs-jupyter
+#   - mkdocstrings:
+#       default_handler: python
+#       handlers:
+#         python:
+#           selection:
+#             docstring_style: "numpy"
+#           setup_commands:
+#             - import sys
+#             - sys.path.append("dLux")
+#           rendering:
+#             show_source: false
+#             show_if_no_docstring: yes
+#       custom_templates: templates
+
+
+
 
 # ===== Navigation =====
 nav:
-    - Home: index.md
+    # - Home: index.md
+    - Home: README.md
     - Installation: installation.md
 
     - Tutorials:
-        - Phase Retrieval:          notebooks/phase_retrieval_demo.ipynb
-        - Phase Mask Design:        notebooks/designing_a_mask.ipynb
-        - Pixel Level Calibration:  notebooks/flatfield_calibration.ipynb
-        - Fisher Information:       notebooks/fisher_information.ipynb
-        - Parameter Inference:      notebooks/HMC.ipynb
+        - Usage:                    docs/usage.md
+        - Creating a Layer:         docs/creating_a_layer.md
+        - Phase Retrieval:          docs/notebooks/phase_retrieval_demo.ipynb
+        - Phase Mask Design:        docs/notebooks/designing_a_mask.ipynb
+        - Pixel Level Calibration:  docs/notebooks/flatfield_calibration.ipynb
+        - Fisher Information:       docs/notebooks/fisher_information.ipynb
+        - Parameter Inference:      docs/notebooks/HMC.ipynb
 
-    - Core:
-        - Instrument: core/instrument.md
-        - Optics:     core/optics.md
-        - Scene:      core/scene.md
-        - Detector:   core/detector.md
-        - Filter:     core/filter.md
-        - model:      core/model.md
-        - Optical System (depreceated): core/optical_system.md
+    - dLux API: 
+        - Overview:     docs/API/api.md
+        - Core:         docs/API/core.md
+        - Optics:       docs/API/optics.md
+        - Apertures:    docs/API/apertures.md
+        - Aberrations:  docs/API/aberrations.md
+        - Propagators:  docs/API/propagators.md
+        - Wavefronts:   docs/API/wavefronts.md
+        - Detectors:    docs/API/detectors.md
+        - Sources:      docs/API/sources.md
+        - Spectrums:    docs/API/spectrums.md
+        - Observations: docs/API/observations.md
 
-    - Optical Layers:
-        - Create Wavefront:    optics/create_wavefront.md
-        - Normalise Wavefront: optics/normalise_wavefront.md
-        - Tilt Wavefront:      optics/tilt_wavefront.md
-        - Transmissive Optic:  optics/transmissive_optic.md
-        - Add Phase:           optics/add_phase.md
-        - Add OPD:             optics/add_opd.md
-        - Apply Basis OPD:     optics/apply_basis_opd.md
-        - Apply Basis CLIMB:   optics/apply_basis_climb.md
-        - Rotate:              optics/rotate.md
+    - Utils API:
+        - Overview:      docs/API/utils.md
+        - Optics:        docs/API/optics_util.md
+        - Models:        docs/API/models.md
+        - Units:         docs/API/units.md
+        - Math:          docs/API/math.md
+        - Coordinates:   docs/API/coordinates.md
+        - Interpolation: docs/API/interpolation.md
+        - Bayes:         docs/API/bayes.md
+        - Helpers:       docs/API/helpers.md
 
-        - Apertures:
-            - Overview:                     apertures/overview.md
-            - Aperture Factory:             apertures/api/aperture_factory.md
-            - Circular Aperture:            apertures/api/circular_aperture.md
-            - Annular Aperture:             apertures/api/annular_aperture.md
-            - Hexagonal Aperture:           apertures/api/hexagonal_aperture.md
-            - Rectangular Aperture:         apertures/api/rectangular_aperture.md
-            - Square Aperture:              apertures/api/square_aperture.md
-            - Regular Polygonal Aperture:   apertures/api/regular_polygonal_aperture.md
-            - Irregular Polygonal Aperture: apertures/api/irregular_polygonal_aperture.md
-            - Uniform Spider:               apertures/api/uniform_spider.md
-            - Aberrated Aperture:           apertures/api/aberrated_aperture.md
-            - Compound Aperture:            apertures/api/compound_aperture.md
-            - Multi Aperture:               apertures/api/multi_aperture.md
-            - Static Aperture:              apertures/api/static_aperture.md
-            - Static Aberrated Aperture:    apertures/api/static_aberrated_aperture.md
+    - FAQ & Troubleshooting: docs/faq.md
+    - Change Log: CHANGELOG.md
+    - Contributing: CONTRIBUTING.md
 
 
-        - Propagators:
-            - Cartesian MFT:     propagators/concrete/cartesian_mft.md
-            - Angular MFT:       propagators/concrete/angular_mft.md
-            - Cartesian FFT:     propagators/concrete/cartesian_fft.md
-            - Angular FFT:       propagators/concrete/angular_fft.md
-            - Cartesian Fresnel: propagators/concrete/cartesian_fresnel.md
+
+
+
+
+
+
+    # - Core:
+    #     - Instrument: docs/core/instrument.md
+    #     - Optics:     docs/core/optics.md
+    #     - Scene:      docs/core/scene.md
+    #     - Detector:   docs/core/detector.md
+    #     - Filter:     docs/core/filter.md
+    #     - model:      docs/core/model.md
+
+    # - Optical Layers:
+    #     - Create Wavefront:    docs/optics/create_wavefront.md
+    #     - Normalise Wavefront: docs/optics/normalise_wavefront.md
+    #     - Tilt Wavefront:      docs/optics/tilt_wavefront.md
+    #     - Transmissive Optic:  docs/optics/transmissive_optic.md
+    #     - Add Phase:           docs/optics/add_phase.md
+    #     - Add OPD:             docs/optics/add_opd.md
+    #     - Apply Basis OPD:     docs/optics/apply_basis_opd.md
+    #     - Apply Basis CLIMB:   docs/optics/apply_basis_climb.md
+    #     - Rotate:              docs/optics/rotate.md
+
+    #     - Apertures:
+    #         - Overview:                     docs/apertures/overview.md
+    #         - Aperture Factory:             docs/apertures/api/aperture_factory.md
+    #         - Circular Aperture:            docs/apertures/api/circular_aperture.md
+    #         - Annular Aperture:             docs/apertures/api/annular_aperture.md
+    #         - Hexagonal Aperture:           docs/apertures/api/hexagonal_aperture.md
+    #         - Rectangular Aperture:         docs/apertures/api/rectangular_aperture.md
+    #         - Square Aperture:              docs/apertures/api/square_aperture.md
+    #         - Regular Polygonal Aperture:   docs/apertures/api/regular_polygonal_aperture.md
+    #         - Irregular Polygonal Aperture: docs/apertures/api/irregular_polygonal_aperture.md
+    #         - Uniform Spider:               docs/apertures/api/uniform_spider.md
+    #         - Aberrated Aperture:           docs/apertures/api/aberrated_aperture.md
+    #         - Compound Aperture:            docs/apertures/api/compound_aperture.md
+    #         - Multi Aperture:               docs/apertures/api/multi_aperture.md
+    #         - Static Aperture:              docs/apertures/api/static_aperture.md
+    #         - Static Aberrated Aperture:    docs/apertures/api/static_aberrated_aperture.md
+
+
+    #     - Propagators:
+    #         - Cartesian MFT:     docs/propagators/concrete/cartesian_mft.md
+    #         - Angular MFT:       docs/propagators/concrete/angular_mft.md
+    #         - Cartesian FFT:     docs/propagators/concrete/cartesian_fft.md
+    #         - Angular FFT:       docs/propagators/concrete/angular_fft.md
+    #         - Cartesian Fresnel: docs/propagators/concrete/cartesian_fresnel.md
     
-    - Aberrations:
-        - Zernike:            aberrations/zernike.md
-        - Zenike Basis:       aberrations/zernike_basis.md
-        - Aberration Factory: aberrations/aberration_factory.md
+    # - Aberrations:
+    #     - Zernike:            docs/aberrations/zernike.md
+    #     - Zenike Basis:       docs/aberrations/zernike_basis.md
+    #     - Aberration Factory: docs/aberrations/aberration_factory.md
     
-    - Observations:
-        - Abstract Observation: observations/abstract_observation.md
-        - Dither:               observations/dither.md
+    # - Observations:
+    #     - Abstract Observation: docs/observations/abstract_observation.md
+    #     - Dither:               docs/observations/dither.md
 
-    - Wavefronts:
-        - Wavefront:                   wavefronts/wavefront.md
-        - Cartesian Wavefront:         wavefronts/cartesian_wavefront.md
-        - Angular Wavefront:           wavefronts/angular_wavefront.md
-        - Far Field Fresnel Wavefront: wavefronts/far_field_fresnel_wavefront.md
+    # - Wavefronts:
+    #     - Wavefront:                   docs/wavefronts/wavefront.md
+    #     - Cartesian Wavefront:         docs/wavefronts/cartesian_wavefront.md
+    #     - Angular Wavefront:           docs/wavefronts/angular_wavefront.md
+    #     - Far Field Fresnel Wavefront: docs/wavefronts/far_field_fresnel_wavefront.md
 
-    - Sources:
-        - Point Source:              sources/point_source.md
-        - Multiple Point Sources:    sources/multi_point_source.md
-        - Binary Source:             sources/binary_source.md
-        - Array Distribution:        sources/array_distribution.md
-        - Point Extended Source:     sources/point_extended_source.md
-        - Point And Extended Source: sources/point_and_extended_source.md
+    # - Sources:
+    #     - Point Source:              docs/sources/point_source.md
+    #     - Multiple Point Sources:    docs/sources/multi_point_source.md
+    #     - Binary Source:             docs/sources/binary_source.md
+    #     - Array Distribution:        docs/sources/array_distribution.md
+    #     - Point Extended Source:     docs/sources/point_extended_source.md
+    #     - Point And Extended Source: docs/sources/point_and_extended_source.md
 
-    - Spectrums:
-        - Array Spectrum:      spectrums/array_spectrum.md
-        - Polynomial Spectrum: spectrums/polynomial_spectrum.md
-        - Combined Spectrum:   spectrums/combined_spectrum.md
+    # - Spectrums:
+    #     - Array Spectrum:      docs/spectrums/array_spectrum.md
+    #     - Polynomial Spectrum: docs/spectrums/polynomial_spectrum.md
+    #     - Combined Spectrum:   docs/spectrums/combined_spectrum.md
 
-    - Detectors:
-        - Apply Pixel Response:  detectors/apply_pixel_response.md
-        - Apply Jitter:          detectors/apply_jitter.md
-        - Apply Saturation:      detectors/apply_saturation.md
-        - Add Constant:          detectors/add_constant.md
-        - Integer Downsample:    detectors/integer_downsample.md
-        - Rotate:                detectors/rotate.md
+    # - Detectors:
+    #     - Apply Pixel Response:  docs/detectors/apply_pixel_response.md
+    #     - Apply Jitter:          docs/detectors/apply_jitter.md
+    #     - Apply Saturation:      docs/detectors/apply_saturation.md
+    #     - Add Constant:          docs/detectors/add_constant.md
+    #     - Integer Downsample:    docs/detectors/integer_downsample.md
+    #     - Rotate:                docs/detectors/rotate.md
 
-    - Utils:
-        - Models:
-            - simple optical system: utils/models/simple_optical_system.md
-            - toliman:               utils/models/toliman.md
-        - Units:
-            - convert cartesian:        utils/units/convert_cartesian.md
-            - convert angular:          utils/units/convert_angular.md
-            - radians to arcseconds:    utils/units/radians_to_arcseconds.md
-            - radians to degrees:       utils/units/radians_to_degrees.md
-            - radians to arcminutes:    utils/units/radians_to_arcminutes.md
-            - degrees to radians:       utils/units/degrees_to_radians.md
-            - degrees to arcminutes:    utils/units/degrees_to_arcminutes.md
-            - degrees to arcseconds:    utils/units/degrees_to_arcseconds.md
-            - arcminutes to radians:    utils/units/arcminutes_to_radians.md
-            - arcminutes to degrees:    utils/units/arcminutes_to_degrees.md
-            - arcminutes to arcseconds: utils/units/arcminutes_to_arcseconds.md
-            - arcseconds to radians:    utils/units/arcseconds_to_radians.md
-            - arcseconds to degrees:    utils/units/arcseconds_to_degrees.md
-            - arcseconds to arcminutes: utils/units/arcseconds_to_arcminutes.md
-        - Math:
-            - factorial: utils/math/factorial.md
-        - Coordinates:
-            - translate:              utils/coordinates/translate.md
-            - rotate:                 utils/coordinates/rotate.md
-            - compress:               utils/coordinates/compress.md
-            - shear:                  utils/coordinates/shear.md
-            - cartesian to polar:     utils/coordinates/cartesian_to_polar.md
-            - polar to cartesian:     utils/coordinates/polar_to_cartesian.md
-            - get pixel positions:    utils/coordinates/get_pixel_positions.md
-        - Interpolation:
-            - scale array:          utils/interpolation/scale_array.md
-            - generate coordinates: utils/interpolation/generate_coordinates.md
-            - interpolate:          utils/interpolation/interpolate.md
-            - interpolate field:    utils/interpolation/interpolate_field.md
-            - rotate:               utils/interpolation/rotate.md
-            - fourier_rotate:       utils/interpolation/fourier_rotate.md
-        - Optics:
-            - opd to phase:          utils/optics/opd_to_phase.md
-            - phase to opd:          utils/optics/phase_to_opd.md
-            - get fringe size:       utils/optics/get_fringe_size.md
-            - get pixels per fringe: utils/optics/get_pixels_per_fringe.md
-            - get pixel scale:       utils/optics/get_pixel_scale.md
-            - get airy pixel scale:  utils/optics/get_airy_pixel_scale.md
-        - Bayes:
-            - poisson likelihood:     utils/bayes/poisson_likelihood.md
-            - poisson log likelihood: utils/bayes/poisson_log_likelihood.md
-            - chi2 likelihood:        utils/bayes/chi2_likelihood.md
-            - chi2 log likelihood:    utils/bayes/chi2_log_likelihood.md
-            - calculate covariance:   utils/bayes/calculate_covariance.md
-            - calculate entropy:      utils/bayes/calculate_entropy.md
-        - Gradient Energy:
-            - get GE:          utils/gradient_energy/get_GE.md
-            - get RGE:         utils/gradient_energy/get_RGE.md
-            - get RWGE:        utils/gradient_energy/get_RWGE.md
-            - get radial mask: utils/gradient_energy/get_radial_mask.md
-        - Helpers:
-            - list to dictionary: utils/helpers/list_to_dictionary.md
-            - two image plot:     utils/helpers/two_image_plot.md
+    # - Utils:
+    #     - Models:
+    #         - simple optical system: docs/utils/models/simple_optical_system.md
+    #         - toliman:               docs/utils/models/toliman.md
+    #     - Units:
+    #         - convert cartesian:        docs/utils/units/convert_cartesian.md
+    #         - convert angular:          docs/utils/units/convert_angular.md
+    #         - radians to arcseconds:    docs/utils/units/radians_to_arcseconds.md
+    #         - radians to degrees:       docs/utils/units/radians_to_degrees.md
+    #         - radians to arcminutes:    docs/utils/units/radians_to_arcminutes.md
+    #         - degrees to radians:       docs/utils/units/degrees_to_radians.md
+    #         - degrees to arcminutes:    docs/utils/units/degrees_to_arcminutes.md
+    #         - degrees to arcseconds:    docs/utils/units/degrees_to_arcseconds.md
+    #         - arcminutes to radians:    docs/utils/units/arcminutes_to_radians.md
+    #         - arcminutes to degrees:    docs/utils/units/arcminutes_to_degrees.md
+    #         - arcminutes to arcseconds: docs/utils/units/arcminutes_to_arcseconds.md
+    #         - arcseconds to radians:    docs/utils/units/arcseconds_to_radians.md
+    #         - arcseconds to degrees:    docs/utils/units/arcseconds_to_degrees.md
+    #         - arcseconds to arcminutes: docs/utils/units/arcseconds_to_arcminutes.md
+    #     - Math:
+    #         - factorial: docs/utils/math/factorial.md
+    #     - Coordinates:
+    #         - translate:              docs/utils/coordinates/translate.md
+    #         - rotate:                 docs/utils/coordinates/rotate.md
+    #         - compress:               docs/utils/coordinates/compress.md
+    #         - shear:                  docs/utils/coordinates/shear.md
+    #         - cartesian to polar:     docs/utils/coordinates/cartesian_to_polar.md
+    #         - polar to cartesian:     docs/utils/coordinates/polar_to_cartesian.md
+    #         - get pixel positions:    docs/utils/coordinates/get_pixel_positions.md
+    #     - Interpolation:
+    #         - scale array:          docs/utils/interpolation/scale_array.md
+    #         - generate coordinates: docs/utils/interpolation/generate_coordinates.md
+    #         - interpolate:          docs/utils/interpolation/interpolate.md
+    #         - interpolate field:    docs/utils/interpolation/interpolate_field.md
+    #         - rotate:               docs/utils/interpolation/rotate.md
+    #         - fourier_rotate:       docs/utils/interpolation/fourier_rotate.md
+    #     - Optics:
+    #         - opd to phase:          docs/utils/optics/opd_to_phase.md
+    #         - phase to opd:          docs/utils/optics/phase_to_opd.md
+    #         - get fringe size:       docs/utils/optics/get_fringe_size.md
+    #         - get pixels per fringe: docs/utils/optics/get_pixels_per_fringe.md
+    #         - get pixel scale:       docs/utils/optics/get_pixel_scale.md
+    #         - get airy pixel scale:  docs/utils/optics/get_airy_pixel_scale.md
+    #     - Bayes:
+    #         - poisson likelihood:     docs/utils/bayes/poisson_likelihood.md
+    #         - poisson log likelihood: docs/utils/bayes/poisson_log_likelihood.md
+    #         - chi2 likelihood:        docs/utils/bayes/chi2_likelihood.md
+    #         - chi2 log likelihood:    docs/utils/bayes/chi2_log_likelihood.md
+    #         - calculate covariance:   docs/utils/bayes/calculate_covariance.md
+    #         - calculate entropy:      docs/utils/bayes/calculate_entropy.md
+    #     - Gradient Energy:
+    #         - get GE:          docs/utils/gradient_energy/get_GE.md
+    #         - get RGE:         docs/utils/gradient_energy/get_RGE.md
+    #         - get RWGE:        docs/utils/gradient_energy/get_RWGE.md
+    #         - get radial mask: docs/utils/gradient_energy/get_radial_mask.md
+    #     - Helpers:
+    #         - list to dictionary: docs/utils/helpers/list_to_dictionary.md
+    #         - two image plot:     docs/utils/helpers/two_image_plot.md

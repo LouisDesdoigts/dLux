@@ -1,2 +1,0 @@
-::: dLux.wavefronts.Wavefront
-    
