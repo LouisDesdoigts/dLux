@@ -10,44 +10,36 @@ from typing import Union
 import dLux
 
 
-__all__ = ["model", "Instrument", "Optics", "Scene", "Filter", "Detector"]
+__all__ = ["model", "Instrument", "Optics", "Detector"]
 
 
 Array = np.ndarray
+Observation = lambda : dLux.observations.AbstractObservation
+Source = lambda : dLux.sources.Source
 
 
 ###############
 ### Methods ###
 ###############
 def model(optics      : Optics,
-          detector    : Detector            = None,
-          filter      : Filter              = None,
-          scene       : Scene               = None,
-          sources     : Union[dict, list]   = None,
-          source      : dLux.sources.Source = None,
-          normalise   : bool                = True,
-          flatten     : bool                = False,
-          return_tree : bool                = False) -> Array:
+          sources     : Union[dict, list, Source],
+          detector    : Detector = None,
+          normalise   : bool     = True,
+          flatten     : bool     = False,
+          return_tree : bool     = False) -> Array:
     """
     A base level modelling function designed to robustly handle the different
     combinations of inputs. Models the sources through the instrument optics
-    and detector. Users must provide optics and some form of source, either via
-    a scene, sources or single source input, but not multiple.
+    and detector. Users must provide optics and source.
 
     Parameters
     ----------
     optics : Optics
         The optics through which to model the source objects.
+    sources : Union[dict, list, Source]
+        The sources to observe.
     detector : Detector = None
         The detector to use with the observation.
-    filter : Filter = None
-        The filter through which the source is being observed.
-    scene : Scene = None
-        The scene to observe.
-    sources : Union[dict, list) = None
-        The sources to observe.
-    source : dLux.sources.Source = None
-        The source to observe.
     normalise : bool = None
         Whether to normalise the sources before modelling. Default is True.
     flatten : bool = False
@@ -72,71 +64,42 @@ def model(optics      : Optics,
     assert isinstance(detector, (Detector, type(None))), \
     ("detector must be a Detector object.")
 
-    # Check that filter input is a Filter object if specified.
-    assert isinstance(filter, (Filter, type(None))), \
-    ("filter must be a Filter object.")
+    # Check that sources is a dict object.
+    assert isinstance(sources, (dict, list, tuple, Source())), \
+    ("sources must be a Source object, dict, list, or tuple object.")
 
-    # Make sure that some form of source is speficied
-    assert scene is not None or sources is not None or source is not None, \
-    ("Either a scene, source, or sources must be specified")
-
-    # Make sure that input types are correct
-    # scene is specified
-    if scene is not None:
-        # Check for other inputs
-        assert sources is None and source is None, \
-        ("If scene is specified, sources and source can not be specified.")
-
-        # Check that scene is a Scehen object.
-        assert isinstance(scene, Scene), \
-        ("scene must be a Scene object.")
-
-        # Get sources
-        sources_in = scene.normalise().sources if normalise \
-                                                       else scene.sources
-
-    # Check sources as next input
-    elif sources is not None:
-        # Check for other inputs
-        assert source is None, \
-        ("If sources is specified, scene and source can not be specified.")
-
-        # Check that sources is a dict object.
-        assert isinstance(sources, (dict, list, tuple)), \
-        ("sources must be a dict, list, or tuple object.")
-
-        # Check that all inputs are dLux.sources.Source objects
+    # Check that all inputs are Source objects
+    if not isinstance(sources, Source()):
         source_vals = sources.values() if isinstance(sources, dict) else sources
         for source in source_vals:
-            assert isinstance(source, dLux.sources.Source), \
-            ("All entries within sources must be a dLux.sources.Source object.")
-
-        # Get sources
-        if normalise:
-            # Define the normalisation function
-            normalise_fn = lambda source: source.normalise()
-
-            # Map the normalisation function across the sources
-            sources_in = tree_map(normalise_fn, sources, \
-                   is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-        else:
-            sources_in = sources
-
-    # source is provided
+            assert isinstance(source, Source()), \
+            ("All entries within sources must be a Source object.")
+    
+    # Turn single source object into a list for mapping
     else:
-        assert isinstance(source, dLux.sources.Source), \
-        ("source must be a dLux.sources.Source object.")
+        sources = [sources]
+
+    # Normalise Sources
+    if normalise:
+        # Define the normalisation function
+        normalise_fn = lambda source: source.normalise()
+
+        # Map the normalisation function across the sources
+        sources_in = tree_map(normalise_fn, sources, \
+                is_leaf = lambda leaf: isinstance(leaf, Source()))
+    else:
+        sources_in = sources
 
         # Get sources
         sources_in = source.normalise() if normalise else source
 
     '''Begin modelling'''
     # Apply optional inputs
-    model_fn = lambda source: source.model(optics, filter_in=filter)
+    model_fn = lambda source: source.model(optics)
 
     # Map the model_source function across the sources
     psf_tree = tree_map(model_fn, sources_in, 
-            is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
+            is_leaf = lambda leaf: isinstance(leaf, Source()))
 
     # Return psfs in the same structure as the sources
     if return_tree:
@@ -145,7 +108,7 @@ def model(optics      : Optics,
         if detector is not None:
             detector_fn = lambda psf: detector.apply_detector(psf)
             image_tree = tree_map(detector_fn, psf_tree, 
-                            is_leaf = lambda leaf: isinstance(leaf, np.ndarray))
+                is_leaf = lambda leaf: isinstance(leaf, np.ndarray))
         else:
             image_tree = psf_tree
 
@@ -153,7 +116,7 @@ def model(optics      : Optics,
         if flatten:
             flatten_fn = lambda image: image.flatten()
             tree_out = tree_map(flatten_fn, image_tree,
-                            is_leaf = lambda leaf: isinstance(leaf, np.ndarray))
+                is_leaf = lambda leaf: isinstance(leaf, np.ndarray))
         else:
             tree_out = image_tree
 
@@ -173,8 +136,6 @@ def model(optics      : Optics,
         return image.flatten() if flatten else image
 
 
-Observation = lambda : dLux.observations.AbstractObservation
-# Observation = dLux.observations.AbstractObservation
 class Instrument(Base):
     """
     A high level class desgined to model the behaviour of a telescope. It
@@ -186,41 +147,27 @@ class Instrument(Base):
     ----------
     optics : Optics
         A Optics object that defines some optical configuration.
-    sources : Scene
-        A Scene that stores the various source objects that the
-        instrument is observing.
+    sources : dict
+        A dictionary of the various source objects that the instrument is
+        observing.
     detector : Detector
         A Detector object that is used to model the various
         instrumental effects on a psf.
-    filter : Filter
-        A Filter object that is used to model the effective
-        throughput of each wavelength though the optical system.
     observation : Observation
         An class that inherits from Observation. This is to allow flexibility
         in the different kind of observations, ie applying dithers, switching
         filters, etc.
     """
     optics      : Optics
-    scene       : Scene
+    sources     : dict
     detector    : Detector
-    filter      : Filter
     observation : Observation
 
     
-    def __init__(self : Instrument,
-
-                 # Class inputs
-                 optics   : Optics    = None,
-                 scene    : Scene     = None,
-                 detector : Detector  = None,
-                 filter   : Filter    = None,
-
-                 # List inputs
-                 optical_layers  : list = None,
-                 sources         : list = None,
-                 detector_layers : list = None,
-
-                 # Obervation
+    def __init__(self        : Instrument,
+                 optics      : Optics,
+                 sources     : Union[list, Source],
+                 detector    : Detector    = None,
                  observation : Observation = None,
                  ) -> Instrument:
         """
@@ -228,107 +175,48 @@ class Instrument(Base):
 
         Parameters
         ----------
-        optics : Optics, = None
-            A pre-configured Optics object. Can not be specified if
-            optical layers in specified.
-        optical_layers : list, = None
-            A list of dLux optical layer classes that define the optical
-            transformations within some optical configuration. Can not be
-            specified if optics is specified.
-        scene : Scene, = None
-            A pre-configured Scene object. Can not be specified if
-            sources is specified.
-        sources : list, = None
-            A list of dLux source objects that the telescope is observing.
+        optics : Optics
+            A pre-configured Optics object.
+        sources : Union[list, Source]
+            Either a list of sources or an individual Source object.
         detector : Detector = None
-            A pre-configured Detector object. Can not be specified if
-            detector_layers is specified.
-        detector_layers : list = None
-            An list of dLux detector layer classes that define the instrumental
-            effects for some detector. Can not be specified if detector is
-            specified.
-        filter : Filter = None
-            A Filter object that is used to model the effective throughput of
-            each wavelength though the Instrument.
+            A pre-configured Detector object.
         observation : Observation = None
             An class that inherits from Observation. This is to allow
             flexibility in the different kind of observations, ie applying
             dithers, switching filters, etc.
         """
         # Optics
-        if optics is None and optical_layers is None:
-            self.optics = None
-        elif optics is not None and optical_layers is not None:
-            raise ValueError("Either optics OR optical_layers can be "
-            "specified, not both.")
-        elif optics is not None and optical_layers is None:
-            assert isinstance(optics, Optics), "If optics is specified "
-            "it must a Optics object."
-            self.optics = optics
-        elif optics is None and optical_layers is not None:
-            assert isinstance(optical_layers, list), "If optical_layers is "
-            "specified it must be a list."
-            self.optics = Optics(optical_layers)
-        else:
-            raise ValueError("How did you get here? Please raise a bug report "
-            "to help improve the software.")
+        if not isinstance(optics, Optics):
+            raise ValueError("optics must be an Optics object.")
+        self.optics = optics
+        
+        # Sources
+        if isinstance(sources, Source()):
+            sources = [sources]
+        elif isinstance(sources, list):
+            for source in sources:
+                if not isinstance(source, Source()):
+                    raise ValueError(
+                        "sources must be a list of Source objects.")
+        self.sources = dLux.utils.list_to_dictionary(sources, ordered=False)
 
         # Detector
-        if detector is None and detector_layers is None:
-            self.detector = None
-        elif detector is not None and detector_layers is not None:
-            raise ValueError("Either detector OR detector_layers can be "
-            "specified, not both.")
-        elif detector is not None and detector_layers is None:
-            assert isinstance(detector, Detector), "If detector is specified "
-            "it must a Detector object."
-            self.detector = detector
-        elif detector is None and detector_layers is not None:
-            assert isinstance(detector_layers, list), "If detector_layers is "
-            "specified it must be a list."
-            self.detector = Detector(detector_layers)
-        else:
-            raise ValueError("How did you get here? Please raise a bug report "
-            "to help improve the software.")
+        if not isinstance(detector, (Detector, type(None))):
+            raise ValueError("detector must be an Detector object. "
+                f"Got type {type(detector)}")
+        self.detector = detector
 
-        # Scene
-        if scene is None and sources is None:
-            self.scene = None
-        elif scene is not None and sources is not None:
-            raise ValueError("Either scene OR sources can be "
-            "specified, not both.")
-        elif scene is not None and sources is None:
-            assert isinstance(scene, Scene), "If scene is specified it must a "
-            "Scene object."
-            self.scene = scene
-        elif scene is None and sources is not None:
-            assert isinstance(sources, list), "If sources is specified it "
-            "must be a list."
-            self.scene = Scene(sources)
-        else:
-            raise ValueError("How did you get here? Please raise a bug report "
-            "to help improve the software.")
-
-        # Filter
-        if filter is None:
-            self.filter = None
-        else:
-            assert isinstance(filter, Filter), \
-            ("filter must be a Filter object.")
-            self.filter = filter
-
-        if observation is not None:
-            assert isinstance(observation, Observation()), ("observation must "
-            "be an Observation object.")
-            self.observation = observation
-        else:
-            self.observation = None
+        # Observation
+        if not isinstance(observation, (Observation(), type(None))):
+            raise ValueError("observation must be an Observation object.")
+        self.observation = observation
 
 
     def observe(self : Instrument, **kwargs) -> Any:
         """
-        TODO: Update docstring
-        Calls the stored observation class.
+        Calls the `observe` method of the stored observation class, passing in
+        any extra keyword arguments.
 
         Returns
         -------
@@ -358,15 +246,12 @@ class Instrument(Base):
         item : object
             The item corresponding to the supplied key in the sub-dictionaries.
         """
-        if hasattr(self.optics, 'layers') and \
-            key in self.optics.layers.keys():
+        if key in self.optics.layers.keys():
             return self.optics.layers[key]
-        elif hasattr(self.detector, 'layers') and \
-            key in self.detector.layers.keys():
+        elif key in self.sources.keys():
+            return self.sources[key]
+        elif key in self.detector.layers.keys():
             return self.detector.layers[key]
-        elif hasattr(self.scene, 'sources') and \
-            key in self.scene.sources.keys():
-            return self.scene.sources[key]
         elif hasattr(self.observation, key):
             return getattr(self.observation, key)
         else:
@@ -385,19 +270,22 @@ class Instrument(Base):
             A new version of the instrument with the interally stored scene
             normalised.
         """
-        return tree_at(lambda instrument: instrument.scene, self, \
-                           self.scene.normalise())
+        normalise_fn = lambda source: source.normalise()
+        return tree_at(lambda instrument: instrument.sources, self,
+            tree_map(normalise_fn, self.sources))
     
 
     def summarise(self : Instrument) -> None:
         """
         Prints a summary of all instrument
         """
-        if self.scene is not None:
-            print("Scene summary:")
-            self.scene.summarise()
+        print("Sources summary:")
+        summary_fn = lambda source: source.summarise()
+        tree_map(summary_fn, self.sources)
+
         print("Optics summary:")
         self.optics.summarise()
+        
         if self.detector is not None:
             print("Detector summary:")
             self.detector.summarise()
@@ -422,63 +310,35 @@ class Instrument(Base):
         self.detector.plot(wf.psf)
 
 
-    def model(self : Instrument, **kwargs):
+    def model(self              : Instrument,
+              normalise_sources : bool = True,
+              flatten           : bool = False,
+              return_tree       : bool = False) -> Union(Array, dict):
         """
         A base level modelling function designed to robustly handle the
         different combinations of inputs. Models the sources through the
-        instrument optics and detector. Users must provide optics and some form
-        of source, either via a scene, sources or single source input, but not
-        multiple.
+        instrument optics and detector.
 
         Parameters
         ----------
-        optics : Optics = None
-            The optics through which to model the source objects. Defaults to
-            the internally stored value.
-        detector : Detector = None
-            The detector to use with the observation. Defaults to the
-            internally stored value.
-        filter : Filter = None
-            The filter through which the source is being observed. Defaults to
-            the internally stored value.
-        scene : Scene = None
-            The scene to observe. Defaults to the internally stored value.
-        sources : Union[dict, list, tuple) = None
-            The sources to observe.
-        source : dLux.sources.Source = None
-            The source to observe.
         normalise_sources : bool = True
-            Whether to normalise the sources before modelling. Default is True.
+            Whether to normalise the sources before modelling.
         flatten : bool = False
-            Whether the output image should be flattened. Default is False.
+            Whether the output image should be flattened.
         return_tree : bool = False
             Whether to return a Pytree like object with matching tree structure
-            as the input scene/sources/source. Default is False.
+            as the input sources (ie dict).
 
         Returns
         -------
-        image : Array, Pytree
+        image : Array, dict
             The image of the scene modelled through the optics with detector and
             filter effects applied if they are supplied. Returns either as a
-            single array (if return_tree is false), or a pytree like object
-            with matching tree strucutre as the input scene/sources/source.
+            single array (if return_tree is false), or a dict of the output for
+            each source.
         """
-        if 'optics' in kwargs:
-            optics = kwargs['optics']
-            kwargs.pop('optics')
-        else:
-            optics = self.optics
-        kwargs['detector'] = self.detector if 'detector' not in kwargs \
-                                                        else kwargs['detector']
-        kwargs['filter']   = self.filter   if 'filter'   not in kwargs \
-                                                        else kwargs['filter']
-        if 'scene' not in kwargs and \
-           'source' not in kwargs and \
-           'sources' not in kwargs:
-            kwargs['scene'] = self.scene
-
-        return model(optics,
-                     **kwargs)
+        return model(self.optics, self.sources, self.detector, 
+            normalise_sources, flatten, return_tree)
 
 
 class Optics(Base):
@@ -532,7 +392,7 @@ class Optics(Base):
         item : object
             The item corresponding to the supplied key in the layers dictionary.
         """
-        if 'layers' in vars(self) and key in self.layers.keys():
+        if key in self.layers.keys():
             return self.layers[key]
         else:
             raise AttributeError("'{}' object has no attribute '{}'"\
@@ -778,187 +638,37 @@ class Optics(Base):
         return wf
 
 
-    def model(self : Optics, **kwargs):
+    def model(self              : Optics,
+              sources           : Union[dict, list, Source],
+              normalise_sources : bool = True,
+              flatten           : bool = False,
+              return_tree       : bool = False) -> Union(Array, dict):
         """
-        A base level modelling function designed to robustly handle the
-        different combinations of inputs. Models the sources through the
-        instrument optics and detector. Users must provide optics and some form
-        of source, either via a scene, sources or single source input, but not
-        multiple.
+        A base level modelling function for modelling the optical system.
+        Models the sources through the optics.
 
         Parameters
         ----------
-        detector : Detector = None
-            The detector to use with the observation. Defaults to the
-            internally stored value.
-        filter : Filter = None
-            The filter through which the source is being observed. Defaults to
-            the internally stored value.
-        scene : Scene = None
-            The scene to observe. Defaults to the internally stored value.
-        sources : Union[dict, list, tuple) = None
+        sources : Union[dict, list, Source]
             The sources to observe.
-        source : dLux.sources.Source = None
-            The source to observe.
         normalise_sources : bool = True
-            Whether to normalise the sources before modelling. Default is True.
+            Whether to normalise the sources before modelling.
         flatten : bool = False
-            Whether the output image should be flattened. Default is False.
+            Whether the output image should be flattened.
         return_tree : bool = False
             Whether to return a Pytree like object with matching tree structure
-            as the input scene/sources/source. Default is False.
+            as the input sources (ie dict).
 
         Returns
         -------
-        image : Array, Pytree
-            The image of the scene modelled through the optics with detector and
-            filter effects applied if they are supplied. Returns either as a
-            single array (if return_tree is false), or a pytree like object
-            with matching tree strucutre as the input scene/sources/source.
+        image : Array, dict
+            The image of the scene modelled through the optics. Returns either
+            as a single array (if return_tree is false), or a dict of the output
+            for each source.
         """
-        return model(self, **kwargs)
-
-
-class Scene(Base):
-    """
-    A high level class representing some 'astrophysical scene', which is
-    composed of dLux.sources.Sources.
-
-    Attributes
-    ----------
-    sources : dict
-        A dictionary containing all the of sources that comprise the
-        astrophysical scene.
-    """
-    sources: dict
-
-
-    def __init__(self, sources : list) -> Scene:
-        """
-        Constructor for the Scene class.
-
-        Parameters
-        ----------
-        sources : list
-            a list of individual source objects that is automatically converted
-            into a dictionary
-        """
-        assert isinstance(sources, list), ("Input sources must be a list, it" \
-        " is automatically converted to a dictionary.")
-
-        # Ensure all entries are dLux dLux.sources.Sources
-        for source in sources:
-            assert isinstance(source, dLux.sources.Source), ("All entries " \
-            "within sources must be a dLux.sources.Source object.")
-
-        self.sources = dLux.utils.list_to_dictionary(sources, ordered=False)
-
-
-    def __getattr__(self : Scene, key : str) -> object:
-        """
-        Magic method designed to allow accessing of the various items within
-        the sources dictionary of this class via the 'class.attribute' method.
-
-        Parameters
-        ----------
-        key : str
-            The key of the item to be searched for in the sources dictionary.
-
-        Returns
-        -------
-        item : object
-            The item corresponding to the supplied key in the sources
-            dictionary.
-        """
-        if 'sources' in vars(self) and key in self.sources.keys():
-            return self.sources[key]
-        else:
-            raise AttributeError("'{}' object has no attribute '{}'"\
-                                 .format(type(self), key))
-
-
-    def normalise(self : Scene) -> Scene:
-        """
-        Normalises the internally stores sources of the scene.
-
-        Returns
-        -------
-        scene : Scene
-            A new version of the scene with the interally stored sources
-            normalised.
-        """
-        # Define the normalisation function
-        normalise_fn = lambda source: source.normalise()
-
-        # Map the model_source function across the sources
-        normalised_sources = tree_map(normalise_fn, self.sources, \
-                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
-
-        return tree_at(lambda scene: scene.sources, self, normalised_sources)
-    
-
-    def summarise(self : Scene) -> None:
-        """
-        Prints a summary of all the Scene.
-        """
-        for source in self.sources.values():
-            print(source.summary())
-
-
-    def plot(self : Scene) -> None:
-        """
-        Prints the summary of all the planes and then plots a wavefront as it
-        propagates through the optics.
-
-        Parameters
-        ----------
-        wavelength : Array, meters
-            The wavelength of the wavefront to propagate through the optical
-            layers.
-        offset : Array, radians = np.zeros(2)
-            The (x, y) offset from the optical axis of the source.
-        """
-        for source in self.sources.values():
-            print(source.summary())
-            source.display()
-
-
-    def model(self : Scene, optics : Optics, **kwargs):
-        """
-        A base level modelling function designed to robustly handle the
-        different combinations of inputs. Models the sources through the
-        instrument optics and detector. Users must provide optics and some form
-        of source, either via a scene, sources or single source input, but not
-        multiple.
-
-        Parameters
-        ----------
-        optics : Optics
-            The optics through which to model the source objects. Defaults to
-            the internally stored value.
-        detector : Detector = None
-            The detector to use with the observation. Defaults to the
-            internally stored value.
-        filter : Filter = None
-            The filter through which the source is being observed. Defaults to
-            the internally stored value.
-        normalise_sources : bool = True
-            Whether to normalise the sources before modelling. Default is True.
-        flatten : bool = False
-            Whether the output image should be flattened. Default is False.
-        return_tree : bool = False
-            Whether to return a Pytree like object with matching tree structure
-            as the input scene/sources/source. Default is False.
-
-        Returns
-        -------
-        image : Array, Pytree
-            The image of the scene modelled through the optics with detector and
-            filter effects applied if they are supplied. Returns either as a
-            single array (if return_tree is false), or a pytree like object
-            with matching tree strucutre as the input scene/sources/source.
-        """
-        return model(optics, scene=self, **kwargs)
+        # None for the detector
+        return model(self.optics, sources, None, normalise_sources, flatten,
+            return_tree)
 
 
 class Detector(Base):
@@ -1014,15 +724,14 @@ class Detector(Base):
         item : object
             The item corresponding to the supplied key in the layers dictionary.
         """
-        if 'layers' in vars(self) and key in self.layers.keys():
+        if key in self.layers.keys():
             return self.layers[key]
         else:
             raise AttributeError("'{}' object has no attribute '{}'"\
                                  .format(type(self), key))
 
 
-    def apply_detector(self  : Instrument,
-                       image : Array) -> Array:
+    def apply_detector(self : Instrument, image : Array) -> Array:
         """
         Applied the stored detector layers to the input image.
 
@@ -1112,48 +821,27 @@ class Detector(Base):
             layer.display(image)
 
 
-    def model(self : Detector, optics : Optics, **kwargs):
+    def model(self : Detector, image: Array) -> Array:
         """
-        A base level modelling function designed to robustly handle the
-        different combinations of inputs. Models the sources through the
-        instrument optics and detector. Users must provide optics and some form
-        of source, either via a scene, sources or single source input, but not
-        multiple.
+        A function to apply the detector layers to the input image.
 
         Parameters
         ----------
-        optics : Optics
-            The optics through which to model the source objects.
-        filter : Filter = None
-            The filter through which the source is being observed. Defaults to
-            the internally stored value.
-        scene : Scene = None
-            The scene to observe. Defaults to the internally stored value.
-        sources : Union[dict, list, tuple) = None
-            The sources to observe.
-        source : dLux.sources.Source = None
-            The source to observe.
-        normalise_sources : bool = True
-            Whether to normalise the sources before modelling. Default is True.
-        flatten : bool = False
-            Whether the output image should be flattened. Default is False.
-        return_tree : bool = False
-            Whether to return a Pytree like object with matching tree structure
-            as the input scene/sources/source. Default is False.
+        image: Array
+            The image to be transformed by the detector layers.
 
         Returns
         -------
-        image : Array, Pytree
-            The image of the scene modelled through the optics with detector and
-            filter effects applied if they are supplied. Returns either as a
-            single array (if return_tree is false), or a pytree like object
-            with matching tree strucutre as the input scene/sources/source.
+        image : Array
+            The image after being transformed by the detector layers.
         """
-        return model(optics, detector=self, **kwargs)
+        return self.apply_detector(image)
 
 
 class Filter(Base):
     """
+    NOTE: This class is under development.
+
     A class for modelling optical filters.
 
     Attributes
