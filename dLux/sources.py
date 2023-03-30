@@ -1311,14 +1311,15 @@ class CatalogueStarFactory:
 
         Currently only uses SIMBAD queries, and the pheonix model
     """
-    def from_simbad(star_name, band) -> None:
-        _load_SIMBAD_spectal_params(star_name, band)
-        band = band
-        self.bandpass = pysynphot.ObsBandpass(self.band)
+    def from_simbad(star_name, band, telescope_area, exposure_time) -> None:
+        params = CatalogueStarFactory._load_SIMBAD_spectal_params(star_name, band)
+        bandpass = pysynphot.ObsBandpass(band)
+        spectrum = CatalogueStarFactory._generate_spectrum(params, bandpass)
 
+        return dLux.sources.PointSource(flux=CatalogueStarFactory.get_flux_over_telescope(spectrum, bandpass, telescope_area, exposure_time),
+                                        spectrum=dLux.spectrums.ArraySpectrum(spectrum.wave, spectrum.flux))
 
-
-    def _load_SIMBAD_spectal_params(self, star_name, band):
+    def _load_SIMBAD_spectral_params(star_name, band):
         """
         Using astroquery, find the parameters needed to model the spectrum from SIMBAD
         """
@@ -1330,40 +1331,35 @@ class CatalogueStarFactory:
 
         result_table = custom_simbad.query_object(star_name)
 
+        params = {}
         # check if magnitude is masked
-        self.magnitude = None
+        params['magnitude'] = None
         if result_table[0][f"FLUX_{band}"] is not np.ma.masked:
             if result_table[0][f"FLUX_SYSTEM_{band}"] == 'Vega':
-                self.magnitude = result_table[0][f"FLUX_{band}"]
+                params['magnitude'] = result_table[0][f"FLUX_{band}"]
 
-        if self.magnitude is None:
+        if params['magnitude'] is None:
             UserWarning("magnitude not found, add magnitude in Vega magnitudes manually")
             
         # metallicity, teff and log_g all follow the same pattern
-        keys = ["Fe_H_Teff","Fe_H_log_g","Fe_H_Fe_H"]
+        keys = ["Teff","log_g","Fe_H"]
+        prefix = "Fe_H_"
 
-        if result_table[0]["Fe_H_Teff"] is not np.ma.masked: 
-            self.T_eff = result_table[0]["Fe_H_Teff"]
-        else:
-            UserWarning("T_eff not found, add T_eff manually")
+        for k in keys:
+            if result_table[0][prefix + k] is not np.ma.masked: 
+                params[k] = result_table[0]["Fe_H_Teff"]
+            else:
+                LookupError(f"{k} not found")
         
-        if result_table[0]["Fe_H_log_g"] is not np.ma.masked: 
-            self.log_g = result_table[0]["Fe_H_log_g"]
-        else:
-            UserWarning("log_g not found, add log_g manually")
+        return params
 
-        if result_table[0]["Fe_H_Fe_H"] is not np.ma.masked: 
-            self.Fe_H = result_table[0]["Fe_H_Fe_H"]
-        else:
-            UserWarning("Fe_H not found, add Fe_H manually")
-
-    def generate_spectrum(self):
+    def _generate_spectrum(params, bandpass):
         try:
             norm_spectrum = pysynphot.Icat(
                                 "phoenix",
-                                self.T_eff,
-                                self.Fe_H,
-                                self.log_g,
+                                params['T_eff'],
+                                params['Fe_H'],
+                                params['log_g'],
                             )
         except:
             ImportError("Make sure pysynphot is setup correctly with all relevant files")
@@ -1372,17 +1368,17 @@ class CatalogueStarFactory:
             # comptable='mtab/6cf2109gm_tmc.fits',
             # thermtable='mtab/3241637sm_tmt.fits',
             # not sure
-        return norm_spectrum.renorm(RNval=self.magnitude, RNUnits='vegamag', band=pysynphot.ObsBandpass(self.band))
+        return norm_spectrum.renorm(RNval=params['magnitude'], RNUnits='vegamag', band=bandpass)
 
-    def get_flux_per_area(self):
-        obs = pysynphot.Observation(self.generate_spectrum(), self.bandpass)
+    def get_flux_per_area(spectrum, bandpass):
+        obs = pysynphot.Observation(spectrum, bandpass)
         return obs.integrate()
     
     def get_flux_over_telescope(spectrum, bandpass, telescope_area, exposure_time):
         """
             return value in photons
         """
-        return CatalogueStar.get_flux_per_area(spectrum, bandpass)*telescope_area*exposure_time
+        return CatalogueStarFactory.get_flux_per_area(spectrum, bandpass)*telescope_area*exposure_time
 
 
 
