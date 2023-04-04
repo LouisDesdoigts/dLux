@@ -15,7 +15,7 @@
         <link rel="next" href="../../core/instrument/">
       
       <link rel="icon" href="../../assets/logo.jpg">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.3">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.5">
     
     
       
@@ -23,7 +23,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.c4a75a56.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7a7fce14.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.a0c5b2b5.min.css">
@@ -3625,7 +3625,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="Numpyro-and-Hamiltonian-Monte-Carlo">Numpyro and Hamiltonian Monte Carlo<a class="anchor-link" href="#Numpyro-and-Hamiltonian-Monte-Carlo">&#182;</a></h1><p>In this tutorial we will see how we to integrate our ∂Lux optical models with a Probablistic Programming Language (PPL) Numpyro. This allows us to run a subset of MCMC algorithms known as HMC, that take advantage of autodiff in order to infer the relationship between a large number of parameters.</p>
+<h1 id="numpyro-and-hamiltonian-monte-carlo">Numpyro and Hamiltonian Monte Carlo<a class="anchor-link" href="#numpyro-and-hamiltonian-monte-carlo">&#182;</a></h1><p>In this tutorial we will see how we to integrate our ∂Lux optical models with a Probablistic Programming Language (PPL) Numpyro. This allows us to run a subset of MCMC algorithms known as HMC, that take advantage of autodiff in order to infer the relationship between a large number of parameters.</p>
 <p>In this example we will simulate a binary star through a simple optical system, and simultanesouly infer the parameters of the stars and the state of the optical system at the same time.</p>
 <hr />
 
@@ -4039,18 +4039,18 @@ class="
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <hr />
-<h1 id="Inference-with-Numpyro">Inference with Numpyro<a class="anchor-link" href="#Inference-with-Numpyro">&#182;</a></h1><p>Awesome, now we are going to try and infer these parameters using an MCMC algortihm. There a few different parameters we want to learn:</p>
-<h2 id="Binary-parameters">Binary parameters<a class="anchor-link" href="#Binary-parameters">&#182;</a></h2><ul>
+<h1 id="inference-with-numpyro">Inference with Numpyro<a class="anchor-link" href="#inference-with-numpyro">&#182;</a></h1><p>Awesome, now we are going to try and infer these parameters using an MCMC algortihm. There a few different parameters we want to learn:</p>
+<h2 id="binary-parameters">Binary parameters<a class="anchor-link" href="#binary-parameters">&#182;</a></h2><ul>
 <li>The (x,y) mean position (2 parameters)</li>
 <li>The separation (1 parameter)</li>
 <li>The position angle (1 parameter)</li>
 <li>The mean flux (1 parameter)</li>
 <li>The contrast ratio (1 parameter)</li>
 </ul>
-<h2 id="Optical-parameters">Optical parameters<a class="anchor-link" href="#Optical-parameters">&#182;</a></h2><ul>
+<h2 id="optical-parameters">Optical parameters<a class="anchor-link" href="#optical-parameters">&#182;</a></h2><ul>
 <li>The zernike aberration coefficients (7 parameters)</li>
 </ul>
-<h2 id="Detector-parameters">Detector parameters<a class="anchor-link" href="#Detector-parameters">&#182;</a></h2><ul>
+<h2 id="detector-parameters">Detector parameters<a class="anchor-link" href="#detector-parameters">&#182;</a></h2><ul>
 <li>The mean detector noise (1 parameter)</li>
 </ul>
 <p>This gives us a total of 14 parameters, which is quite high dimensional for regular MCMC algortihms.</p>
@@ -4786,7 +4786,7 @@ class="
     <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.efa0ade1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.407015b8.min.js"></script>
       
         <script src="../../javascripts/mathjax.js"></script>
       
