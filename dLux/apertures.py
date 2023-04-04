@@ -2881,6 +2881,27 @@ class CompositeAperture(AbstractDynamicAperture, ABC):
         phase = wavefront.phase + opd_to_phase(opd, wavefront.wavelength)
         amplitude = wavefront.amplitude * aper
         return wavefront.set_phasor(amplitude, phase)
+    
+    def __getattr__(self : ApertureLayer, key : str) -> Any:
+        """
+        Get the attribute of the aberrated apertures.
+
+        TODO: Needs testing
+
+        Parameters
+        ----------
+        key: str
+            The attribute to get.
+        
+        Returns
+        -------
+        attribute: Any
+            The attribute of the aberrated apertures.
+        """
+        if key in self.apertures:
+            return self.apertures[key]
+        else:
+            raise AttributeError(f"{key} not in {self.apertures.keys()}")
 
 
 class CompoundAperture(CompositeAperture):
