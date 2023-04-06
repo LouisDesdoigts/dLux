@@ -3024,7 +3024,7 @@ class CompoundAperture(CompositeAperture):
         """
         summary = ("Applies a Compound Aperture with the following "
                    "sub-apertures: \n")
-        for ap in self.apertures:
+        for ap in self.apertures.values():
             ap_summary = ap.summary(angular_units, cartesian_units, sigfigs)
             summary += ap_summary + "\n"
         return summary
@@ -3161,7 +3161,7 @@ class MultiAperture(CompositeAperture):
         """
         summary = ("Applies a Multi Aperture with the following "
                    "sub-apertures: \n")
-        for ap in self.apertures:
+        for ap in self.apertures.values():
             ap_summary = ap.summary(angular_units, cartesian_units, sigfigs)
             summary += ap_summary + "\n"
         return summary
