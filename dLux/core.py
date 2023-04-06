@@ -6,6 +6,7 @@ from equinox import tree_at
 from zodiax import Base
 from collections import OrderedDict
 from copy import deepcopy
+from inspect import signature
 from typing import Union
 import dLux
 
@@ -771,10 +772,23 @@ class Optics(Base):
             for layer in planes[i]:
                 print(f"  {layer.summary()}")
                 if isinstance(layer, dLux.CreateWavefront):
-                    wf, _ = layer(None, 
-                                  {"wavelength": wavelength, 'offset': offset})
+                    wf, parameters = layer(None, 
+                                  {"wavelength": wavelength, 'offset': offset},returns_parameters=True)
                 else:
-                    wf = layer(wf)
+                    # Inspect apply function to see if it takes/returns the parameters dict
+                    input_parameters = signature(layer).parameters
+
+                    # Method does not take in the parameters, update in place
+                    if 'parameters' not in input_parameters:
+                        wf = layer(wf)
+
+                    # Method takes and return updated parameters
+                    elif input_parameters['returns_parameters'].default == True:
+                        wf, parameters = layer(wf, parameters)
+
+                    # Method takes but does not return parameters
+                    else:
+                        wf = layer(wf, parameters)
                 layer.display(wf)
         return wf
 
