@@ -31,7 +31,6 @@ The `Instrument` class is the primary class that users will interact with. It is
 - `Detector`
 - `Source` (Not a core class)
 - `Observation` (Not a core class)
-- `Filter` (Under development)
 
 Lets have a look at these different classes and what they do.
 
