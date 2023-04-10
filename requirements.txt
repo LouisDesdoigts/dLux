@@ -1,11 +1,10 @@
 # Core
 jax
 jaxlib
-equinox
-optax
-zodiax
+zodiax>=0.3.1
 
 # Extra
+optax
 matplotlib
 jupyter
 jupyterlab
