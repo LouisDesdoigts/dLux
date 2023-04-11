@@ -193,7 +193,7 @@ class CreateWavefront(OpticalLayer):
     def __init__(self           : OpticalLayer,
                  npixels        : int,
                  diameter       : Array,
-                 wavefront_type : str = 'Cartesian',
+                 wavefront_type : str = 'Angular',
                  name           : str = 'CreateWavefront') -> OpticalLayer:
         """
         Constructor for the CreateWavefront class.
@@ -204,7 +204,7 @@ class CreateWavefront(OpticalLayer):
             The number of pixels used to represent the wavefront.
         diameter: Array, meters
             The diameter of the wavefront in the Pupil plane.
-        wavefront_type: str = 'Cartesian'
+        wavefront_type: str = 'Angular'
             Determines the type of wavefront class to create. Currently supports
             'Cartesian', 'Angular', 'FarFieldFresnel'.
         name : str = 'CreateWavefront'
