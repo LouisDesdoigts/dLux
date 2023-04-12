@@ -8,6 +8,8 @@
 
 ∂Lux is an open-source differentiable optical modelling framework harnessing the structural isomorphism between optical systems and neural networks, giving forwards models of optical system as a _parametric neural network_. In ∂Lux we represent optical systems as a series of layers, each of which applies some transformation to either a wavefront or PSF. The layers are connected in a feed-forward manner, with the output of each layer as the input to the next. This construction allows for very complex optical systems to be parameterised by these layers and for each monochromatic wavefront calculation to be performed in parallel and optimised by Jax.
 
+dLux is designed to be verbose about what is happening under the hood. We think that in order for users to be confident in their results that it is important to be clear about what goes in to that model. Becuase of this dLux tries to avoid 'pre-built' classes and optical systes, allowing users to be flexible in the way they model their systems. This helps users become more familiar with the underlying physics and computational methods and allows them to build more complex configurations.
+
 !!! note Units
     All units within ∂Lux are SI units. This means that all lengths are in meters, angles are in radians and wavelengths are in meters.
 
@@ -32,9 +34,6 @@
 5. `Observation`: These are clases that can be used to model complex observation schemes by allowing for the `Instrument` class to be manipulated in order to create data sets, time series PSFs and more.
 
 In this tutorial we will cover the basics of these classes and how to use them together!
-
-TODO: Find somewhere for this:
-    dLux is designed to be verbose about what is happening under the hood. We think that in order for users to be confident in their results that it is important to be verbose about what goes in to that model. Becuase of this dLux tries to avoid 'pre-built' classes and optical systes, allowing users to be flexible in the way they model their systems. This helps users become more familiar with the underlying physics and computational methids dan allows them to build more complex configurations.
 
 ---
 
@@ -341,7 +340,7 @@ source = dl.BinarySource(separation  = separation,
                          name        = 'Source')
 
 # Model the PSF
-psf = optics.model(source=source)
+psf = optics.model(source)
 ```
 
 ??? abstract "Plotting code"

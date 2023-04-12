@@ -38,6 +38,9 @@ The `Optics` class is the core class that controls the diffraction of wavefronts
     optics = dl.Optics(layers)
     ```
 
+??? info "Constructor API"
+    :::dLux.core.Optics.__init__
+
 !!! info "A Basic Optical Setup"
     In dLux the four layers shown above form a very basic optical train and these layers are used in almost every example.
 
@@ -124,6 +127,9 @@ It also has the methods `normalise`, `plot` and `summarise`. `normalise` will no
     instrument = dl.Instrument(optics, [source1, source2])
     ```
 
+??? info "Constructor API"
+    :::dLux.core.Instrument.__init__
+
 !!! tip "Accessing Parameters"
     The Instrument class is set up with a `__getattr__` method that is able to raise parameters from the `optics`, `detector`, `sources` and `observation` classes if they are present. Say we have a Instrument with an `Optics` class that applies optical aberrations via a layer called `Aberrations` set via its name parameter. We would normally need to use the following path to access the `name` parameter:
 
@@ -172,6 +178,9 @@ The `Detector` class is a high level class that is designed to control the trans
 
     detector = dl.Detector(layers)
     ```
+
+??? info "Constructor API"
+    :::dLux.core.Detector.__init__
 
 !!! tip "Accessing Parameters"
     The Detector class is set up with a `__getattr__` method that is able to raise parameters from the `layers` attribute such that they can be accessed as class parameters via their name. Taking the example from above, we can access `Jitter` layer via:

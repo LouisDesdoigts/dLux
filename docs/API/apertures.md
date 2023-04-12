@@ -1,159 +1,158 @@
-# An Overview of the Apertures.
+# An Overview of the Apertures
+
 ## Introduction
-`dLux` implements a number of aperture components for telescopes. Because
-`dLux` is powered by autodiff, the shape of the aperture can be learned. 
-Theoretically, you could learn the value of every pixel in the aperture. 
-Learning by pixel would be computationally expensive and the model could 
-chase noise making the results meaningless. Instead the apertures that we 
-have implemented are **minimally paramtrised**. *Minimal* is perhaps a 
-misnomer as we have allowed for **flexible manipulation** of the apertures. 
 
+`dLux` implements a number of aperture components for telescopes. Because `dLux` is powered by autodiff, the shape of the aperture can be learned. Theoretically, you could learn the value of every pixel in the aperture. Learning by pixel would be computationally expensive and the model could chase noise making the results meaningless. Instead the apertures that we have implemented are **parametrised**. In general the apertures can be, *translated*, *sheared, compressed androtated*, all in a differentiable manner by softening the hard bounary using a sigmoid.
 
-In general the apertures can be, *sheared, compressed, rotated* and 
-*translated* arround the plane. However, the effect on the point spread 
-function (psf) due to changes in the aperture is one of the smallest 
-sources of error in most cases. A notable counter example is the hubble 
-space telescope, upon which the two apertures are missaligned considerably.
-Anomalies aside, before trying to learn a deformation in your aperture 
-ask make sure your model is accounting for more common, larger sources 
-of error. 
+There are four different aperture types: Dynamic, Static, Aberrated and Composite. The dynamic apertures are the most flexible and can be used to learn the shape of the aperture. The static apertures pre-compute the aperture and use the fixed array representation. The aberrated apertures are used to learn the shape of the aperture and the basis functions for phase retrieval. The compound apertures are used to combine multiple apertures into a single aperture. There are also spider apertures that are used to model secondary mirror supports.
 
+## Dynamic Apertures
 
-When working with gradients we found that it was best to avoid discontinuous 
-functions. However, an aperture is discontinuous across the boundary. 
-To avoid the undefined gradients that this can lead to we developed a 
-system of soft-edging the apertures. In particular we avoided using a 
-nearest-neighbour interpolator (or linear interpolator) by choosing a 
-sigmoid like function across the boundary. Naturally this leads to a 
-degree of approximation, but in general works.
+The dynamic apertures are form the basis for the rest of the apertures and contains 7 classes: `CircularAperture`, `AnnularAperture`, `HexagonalAperture`, `RectangularAperture`, `SquareAperture`, `RegularPolygonAperture`, `IrregularPolygonAperture`. Each of these classes has a seriers of common parameters: `translation`, `rotation`, `shear`, `compression`, `softening` and `occulting`. The `translation` and `rotation` parameters are used to move and rotate the aperture. The `shear` and `compression` parameters are used to change the shape of the aperture. The `softening` parameter is used to soften the hard boundary of the aperture, and `occulting` controls if the aperture is transmissive or occulting.
 
+Each of these classes then has a different parameterisation of the aperture itself, for example the `CircularAperture` has a `radius` parameter, the `AnnularAperture` has `inner_radius` and `outer_radius` parameters.
+
+??? info "Circular Aperture API"
+    :::dLux.apertures.CircularAperture
+
+??? info "Annular Aperture API"
+    :::dLux.apertures.AnnularAperture
+
+??? info "Hexagonal Aperture API"
+    :::dLux.apertures.HexagonalAperture
+
+??? info "Rectangular Aperture API"
+    :::dLux.apertures.RectangularAperture
+
+??? info "Square Aperture API"
+    :::dLux.apertures.SquareAperture
+
+??? info "Regular Polygonal Aperture API"
+    :::dLux.apertures.RegularPolygonalAperture
+
+??? info "Irregular Polygonal Aperture API"
+    :::dLux.apertures.IrregularPolygonalAperture
 
 ## Static Apertures
-The inbuild flexibility of the `dLux.apertures` module is not all good.
-The evaluation of the apertures remains much cheaper than the calculations
-that carry the wavefront from one plane to another, but in situations 
-where speed matters they are a burden. Moreover, we anticipate that most
-models **will not** need to learn the parameters of the aperture. To 
-avoid extra calculations we created a related class `StaticAperture` that
-works to pre-compute the aperture making optimisation faster. As well as 
-providing `StaticAperture` we also created `StaticAberratedAperture` to 
-pre-compute basis functions. 
 
+The inbuild flexibility of the `dLux.apertures` module is very powerful but unlikely to be needed in most cases. For this reason Dynamic apertures can be turned into static apertures where the array of tranmission values are calculated once, and then kept fixed to avoid re-calculation of the aperture every evaluation.
+
+??? info "Static Aperture API"
+    :::dLux.apertures.StaticAperture
 
 ## Aberrated Apertures
-Phase retrieval is synonomous with modern physical optics. `dLux` provides 
-a streamlined, **physical interface** for phase retrieval in the 
-`dLux.apertures` using the `AberratedAperture` class. This class wraps 
-a standard `dLux.apertures.Aperture` in a set of basis vectors of your 
-chosing. In general, these basis vectors are derived from the *Zernike*
-polynomials, via orthonormalisation. However, orthonormalisation is 
-expensive and a large amount of work has gone into optimising it. 
 
+Both dynamic and static apertures can have aberations applied to them using the `AberratedAperture` class. This class takes an aperture as an argument and then applies a set of basis vectors to the aperture. The basis vectors are derived from the *Zernike* polynomials and calculated to be orthonormal on all regular-polygon apertures. The underlying aberrations are generated in the aberations module.
 
-For regular polygons, the orthonormalisation has analytic solutions. 
-We have implemented this along with a mechanism to pre-evaluate the 
-coefficients of the basis vectors. This means that the evaluation is 
-**very fast** allowing the shape of the aperture to be learned along 
-with the basis and the coefficients. The basis will be updated to 
-follow the shape of the aperture. This works by transforming the 
-paraxial coordinates of wavefront into those of the apertures. 
+??? info "Aberrated Aperture API"
+    :::dLux.apertures.AberratedAperture
 
+??? info "Static Aberrated Aperture API"
+    :::dLux.apertures.StaticAberratedAperture
 
-An important result is that the basis vectors might lose their 
-orthonormality. This is OK. Since a typical model does not use an 
-infinite number of basis vectors it does not make sense to split hairs 
-of the set is not completely orhtonormal. All that matters is if the 
-correct order of error is spanned. This will depend upon your scenario.
-The orthonormalisation step is debatebly important. Depending on the 
-number of terms and their order, it can essentially reduce to just 
-cutting an aperture-shaped hole in the corresponding *Zernike*.
+## Composite Apertures
 
+The Composite apertures are designed to take in a series of dynamic aperture and combine them to create arbirary aperture shapes. There are two types of composite aperture, Compound and Multi apertures. The CompoundAperture is used to combine apertures that are overlapping, and the MultiAperture is used to combine apertures that are not overlapping. For example if we wanted to create a HST-like aperture we would combine an annular aperture with a spiders class. If we wanted to create an aperture mask, we would combine a series of circular apertures in a MultiAperture class.
 
-We have implemented special cases for `CircularAperture` and 
-`HexagonalAperture` because these are common cases. Outside of regular
-polygons, circles and hexagons, the orthonormalisation needs to be 
-performed at each pass. This presents a major barrier to learning 
-the shape of an `AberratedAperture` because it significantly increases
-the computation complexity. An active avenue of improvent is in the 
-handling of arbitrary apertures.
+??? info "Compound Aperture API"
+    :::dLux.apertures.CompoundAperture
 
+??? info "Multi Aperture API"
+    :::dLux.apertures.MultiAperture
 
-## Usage and Examples
-Here is a complete list of the apertures that we have implemented.
- - Simple, shaped apertures:
-   - `AnnularAperture`
-   - `CircularAperture`
-   - `HexagonalAperture`
-   - `SquareAperture`
-   - `RectangularAperture`
-   - `RegularPolygonalAperture`
-   - `IrregularPolygonalAperture`
- - Composite apertures:
-   - `CompoundAperture`
-   - `MultiAperture`
- - `AberratedAperture`
- - Static apertures:
-   - `StaticAperture`
-   - `StaticAberratedAperture`
- - `UniformSpider`
-In general they function as you might intuitively expect. The 
-notable exception to this rule is the composite apertures, of 
-which there are two. The `CompoundAperture` is for overlapping 
-apertures that you wish to treat as a single aperture. For example,
-the components of a spider that is fused to an obstruction and 
-pupil will not move very much with respect to one another. 
-Indeed for all intents and purposes we can treat this as static.
-However, **it might** move with respect to a secondary pupil 
-acting as the camera lens. This particular circumstance was the 
-case on the Hubble Space Telescope.
+## Spiders
 
+The spiders class are just a specific parametrisation of rectangular apertures for simplicity.
 
-Now let's write some code. We can create a basic circular aperture
-at the centre of the paraxial coordinate system and with radius 
-of $1m$ using,
-```python 
-circ = CircularAperture(1.) # Default w. radius: 1m
-circ = CircularAperture(1., centre=[.5, .5])
-circ = CircularAperture(1., shear=[.05, .05])
-circ = CircularAperture(1., compression=[1.05, .95])
-circ = CircularAperture(1., softening=True)
-circ = CircularAperture(1., occulting=True)
+??? info "Uniform Spider API"
+    :::dLux.apertures.UniformSpider
+
+# Usage and Examples
+
+Now let's write some code. We can create a basic circular aperture at the centre of the coordinate system with a 1m radius like so:
+
+```python
+import dLux as dl
+
+apertures = [
+    dl.CircularAperture(1.),
+    dl.CircularAperture(1., centre=[.5, .5]),
+    dl.CircularAperture(1., shear=[.05, .05]),
+    dl.CircularAperture(1., compression=[1.05, .95]),
+    dl.CircularAperture(1., softening=20),
+    dl.CircularAperture(1., occulting=True)
+]
 ```
-Running this script produces the output shown in Fig. 1.
-![Fig. 1.](assets/circles.png)
 
+??? abstract "Plotting code"
+    ```python
+    import matplotlib.pyplot as plt
 
-The same can be done for all of the other apertures which in 
-general have only a few non-default parameters, such as length 
-and width for the `RectangularAperture`. The notable exception 
-to this rule is `IrregularPolygonalAperture` which takes a 
-list of vertices as a non-default parameter. This class can be 
-used to generate many of the other pre-loaded parameters but the 
-cost of generality is performance. Moreover, it is very unlikely
-that learning the position of the vertices is ever going to be 
-necessary, but it is possible. Fig. 2. shows plots of all the apertures. 
-![Fig. 2.](assets/apertures.png)
+    plt.figure(figsize=(30, 4))
+    for i in range(len(apertures)):
+        plt.subplot(1, 6, i+1)
+        plt.imshow(apertures[i].get_aperture(256, 2))
+    plt.tight_layout()
+    plt.savefig("assets/apertures.png")
+    ```
 
+![apertures](../assets/apertures.png)
 
-The `AberratedApertures`, which contain basis implementation in 
-`dLux` takes in three parameters. The *noll indices* of the basis 
-vectors, the *aperture* and the *coefficients* of those basis 
-vectors. The basis vectors shown in Fig. 3. were generated using 
-the following code,
-```python 
-shape = 10
-aber_circ = AberratedAperture(
-    noll_inds = np.arange(1, shape, dtype=float),
-    coeffs = np.ones(shape),
-    aperture = CircularAperture(1.)
-)
+## Aperture Factory
+
+Most users will not need to use the dynamic apertures, so the `ApertureFactory` class is designed to provide a simple interface to generate the most common apertures. It is able to construct hard-edged circular or regular poygonal apertures. Secondary mirrors obscurations with the same aperture shape can be constructed, along with uniformly spaced struts. Aberrations can also be applied to the aperture. The ratio of the primary aperture opening to the array size is determined by the aperture_ratio parameter, with secondary mirror obscurations and struts being scaled relative to the aperture diameter.
+
+??? info "Aperture Factory API"
+    :::dLux.apertures.ApertureFactory
+
+Lets look at an example of how to construct a simple circular aperture with a secondary mirror obscurtion held by 4 struts and some low-order aberrations. For this example lets take a 2m diameter aperutre, with a 20cm secondary mirror held by 3 struts with a width of 2cm. In this example the secondary mirror is 10% of the primary aperture diameter and the struts are 1% of the primary aperture diameter, giving us values of 0.1 and 0.01 for the secondary_ratio and strut_ratio parameters. Let calcualte this for a 512x512 array with the aperture spanning the full array.
+
+```python
+import dLux as dl
+from jax import numpy as np, random as jr
+
+# Construct Zernikes
+zernikes = np.arange(4, 11)
+coefficients = jr.normal(jr.PRNGKey(0), (zernikes.shape[0],))
+
+# Construct aperture
+aperture = dl.ApertureFactory(
+    npixels         = 512,
+    secondary_ratio = 0.1, 
+    nstruts         = 4, 
+    strut_ratio     = 0.01, 
+    zernikes        = zernikes, 
+    coefficients    = coefficients,
+    name            = 'Aperture')
+
+print(aperture)
 ```
-The benefit of this representation is that we can simultaneously 
-learn abitrary aberrations represented using *Zernike* polynomials 
-and the shape/position of the aperture. Although this is unlikely 
-to be something that is often required it is an interesting piece 
-of functionality. 
-![Fig. 3.](assets/aberrated_apertures.png)
 
+```python
+> StaticAberratedAperture(
+>   name='Aperture',
+>   aperture=f32[512,512],
+>   coefficients=f32[7],
+>   basis=f32[7,512,512]
+> )
+```
 
+As we can see the resulting aperture class has three parameters, `aperture`, `basis` and `coefficients`. Lets have a look at the resulting aperture and aberrations.
 
+??? abstract "Plotting code"
+    ```python
+    import matplotlib.pyplot as plt
+
+    plt.figure(figsize=(10, 4))
+    plt.subplot(1, 2, 1)
+    plt.imshow(aperture.aperture)
+    plt.colorbar()
+
+    plt.subplot(1, 2, 2)
+    plt.imshow(aperture.opd)
+    plt.colorbar()
+    plt.tight_layout()
+    plt.savefig("assets/aperture_factory.png")
+    ```
+
+![aperture_factory](../assets/aperture_factory.png)
