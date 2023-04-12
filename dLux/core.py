@@ -250,9 +250,9 @@ class Instrument(Base):
             return self.optics.layers[key]
         elif key in self.sources.keys():
             return self.sources[key]
-        elif key in self.detector.layers.keys():
+        elif self.detector is not None and key in self.detector.layers.keys():
             return self.detector.layers[key]
-        elif hasattr(self.observation, key):
+        elif self.observation is not None and hasattr(self.observation, key):
             return getattr(self.observation, key)
         else:
             raise AttributeError("'{}' object has no attribute '{}'"\
@@ -639,18 +639,18 @@ class Optics(Base):
 
 
     def model(self              : Optics,
-              sources           : Union[dict, list, Source],
+              sources           : Union[Source, dict, list],
               normalise_sources : bool = True,
               flatten           : bool = False,
               return_tree       : bool = False) -> Union(Array, dict):
         """
         A base level modelling function for modelling the optical system.
-        Models the sources through the optics.
+        Models the source or sources through the optics.
 
         Parameters
         ----------
-        sources : Union[dict, list, Source]
-            The sources to observe.
+        sources : Union[Source, dict, list]
+            The source or sources to observe.
         normalise_sources : bool = True
             Whether to normalise the sources before modelling.
         flatten : bool = False
@@ -666,8 +666,8 @@ class Optics(Base):
             as a single array (if return_tree is false), or a dict of the output
             for each source.
         """
-        # None for the detector
-        return model(self.optics, sources, None, normalise_sources, flatten,
+        # None input is for the detector
+        return model(self, sources, None, normalise_sources, flatten,
             return_tree)
 
 
