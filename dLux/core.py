@@ -270,9 +270,10 @@ class Instrument(Base):
             A new version of the instrument with the interally stored scene
             normalised.
         """
+        leaf_fn = lambda source: isinstance(source, Source())
         normalise_fn = lambda source: source.normalise()
         return tree_at(lambda instrument: instrument.sources, self,
-            tree_map(normalise_fn, self.sources))
+            tree_map(normalise_fn, self.sources, is_leaf=leaf_fn))
     
 
     def summarise(self : Instrument) -> None:
