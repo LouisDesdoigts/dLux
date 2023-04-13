@@ -1,643 +1,358 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/CHANGELOG/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/CODE_OF_CONDUCT/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/CONTRIBUTING/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/LICENSE/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/setup/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/__init__/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/aberrations/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/apertures/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/core/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/detectors/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/exceptions/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/observations/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/optics/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/propagators/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/sources/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/spectrums/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/wavefronts/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/dev/FFTfresnel/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/dev/constants/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/utils/__init__/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/utils/bayes/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/utils/coordinates/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/utils/gradient_energy/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/utils/helpers/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/utils/interpolation/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/utils/math/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/utils/models/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/utils/optics/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/dLux/utils/units/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/creating_a_layer/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/faq/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/installation/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/usage/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/aberrations/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/apertures/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/api/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/bayes/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/coordinates/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/core/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/detectors/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/helpers/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/interpolation/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/maths/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/models/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/observations/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/optics/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/optics_util/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/propagators/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/sources/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/spectrums/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/units/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/utils/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/API/wavefronts/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/notebooks/Core_classes/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/notebooks/HMC/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/notebooks/designing_a_mask/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/notebooks/fisher_information/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/notebooks/flatfield_calibration/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/docs/notebooks/phase_retrieval_demo/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/conftest/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/test_apertures/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/test_core/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/test_detectors/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/test_installation/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/test_observations/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/test_optics/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/test_propagators/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/test_sources/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/test_spectrums/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-04-10</lastmod>
+         <loc>https://louisdesdoigts.github.io/dlux/tests/test_wavefronts/</loc>
+         <lastmod>2023-04-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
