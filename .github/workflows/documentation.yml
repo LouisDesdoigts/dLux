@@ -28,6 +28,7 @@ jobs:
       - name: install environment
         run: |
           pip install mkdocs
+          pip install mkdocs-jupyter
           pip install mkdocs-same-dir
           pip install pymdown-extensions
           pip install mkdocs-pymdownx-material-extras
