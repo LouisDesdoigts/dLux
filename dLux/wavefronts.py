@@ -1,36 +1,19 @@
 from __future__ import annotations
 import jax.numpy as np
 from jax import vmap
-from equinox import tree_at
 from zodiax import Base
-from enum import IntEnum
-from abc import ABC
 from dLux.utils.coordinates import get_pixel_positions
 from dLux.utils.interpolation import interpolate_field, rotate_field
 import dLux
 
 
-__all__ = ["PlaneType", "CartesianWavefront", "AngularWavefront",
-           'FarFieldFresnelWavefront']
+__all__ = ["Wavefront"]
 
 
 Array = np.ndarray
 
 
-class PlaneType(IntEnum):
-    """
-    Enumeration object to keep track of plane types. This may prove to be
-    redundant.
-
-    NOTE: Propagtors are not currently set up to ever set the PlaneType to
-    Intermediate. This will be done with the Near-Field Fresnel implementation.
-    """
-    Pupil = 1
-    Focal = 2
-    Intermediate = 3
-
-
-class Wavefront(Base, ABC):
+class Wavefront(Base):
     """
     A class representing some wavefront, designed to track the various
     parameters such as wavelength, pixel_scale, amplitude and phase, as well as
@@ -57,9 +40,10 @@ class Wavefront(Base, ABC):
     """
     wavelength  : Array
     pixel_scale : Array
-    plane_type  : PlaneType
     amplitude   : Array
     phase       : Array
+    plane_type  : str
+    units       : str
 
 
     def __init__(self        : Wavefront,
@@ -67,7 +51,8 @@ class Wavefront(Base, ABC):
                  pixel_scale : Array,
                  amplitude   : Array,
                  phase       : Array,
-                 plane_type  : PlaneType) -> Wavefront:
+                 plane       : str,
+                 units       : str) -> Wavefront:
         """
         Constructor for the wavefront.
 
@@ -88,21 +73,29 @@ class Wavefront(Base, ABC):
         self.pixel_scale = np.asarray(pixel_scale, dtype=float)
         self.amplitude   = np.asarray(amplitude,   dtype=float)
         self.phase       = np.asarray(phase,       dtype=float)
-        self.plane_type  = plane_type
 
         # Input checks
         assert self.wavelength.shape == (), \
         ("wavelength must be a scalar Array.")
         assert self.pixel_scale.shape == (), \
         ("pixel_scale must be a scalar Array.")
-        assert self.amplitude.ndim == 3, \
-        ("amplitude must a 3d array (nfields, npix, npix).")
-        assert self.phase.ndim == 3, \
-        ("phase must a 3d array (nfields, npix, npix).")
+        assert self.amplitude.ndim == 2, \
+        ("amplitude must a 2d array (npix, npix).")
+        assert self.phase.ndim == 2, \
+        ("phase must a 2d array (npix, npix).")
         assert self.amplitude.shape == self.phase.shape, \
         ("The amplitude and phase arrays must have the same shape.")
-        assert isinstance(plane_type, PlaneType), \
-        ("plane_type must a PlaneType object.")
+
+        # Set by Propagators
+        # Can eventually be 'Fresnel', 'Intermediate' 
+        if plane not in ("Pupil", "Focal"):
+            raise ValueError("plane must be either 'Pupil' or 'Focal'.")
+        self.plane = str(plane)
+
+        # Set by Propagators
+        if units not in ("Cartesian", "Angular"):
+            raise ValueError("unit must be either 'Cartesian' or 'Angular'.")
+        self.units = str(units)
 
 
     ########################
@@ -134,20 +127,6 @@ class Wavefront(Base, ABC):
             The number of pixels that represent the `Wavefront`.
         """
         return self.amplitude.shape[-1]
-
-
-    @property
-    def nfields(self : Wavefront) -> int:
-        """
-        Returns the number of polarisation fields currently representing the
-        wavefront. Taken from the amplitude array first dimension.
-
-        Returns
-        -------
-        pixels : int
-            The number of polarisation fields that represent the `Wavefront`.
-        """
-        return self.amplitude.shape[0]
 
 
     @property
@@ -214,7 +193,6 @@ class Wavefront(Base, ABC):
             The coordinates of the centers of each pixel representing the
             wavefront.
         """
-        # return get_pixel_coordinates(self.npixels, self.pixel_scale)
         return get_pixel_positions((self.npixels, self.npixels), 
                                    (self.pixel_scale, self.pixel_scale))
 
@@ -230,120 +208,6 @@ class Wavefront(Base, ABC):
             The wavenumber of the wavefront.
         """
         return 2 * np.pi / self.wavelength
-
-
-    ########################
-    ### Setter Functions ###
-    ########################
-    def set_amplitude(self : Wavefront, amplitude : Array) -> Wavefront:
-        """
-        Mutator for the amplitude attribute.
-
-        Parameters
-        ---------
-        amplitude : Array, power
-            The electric field amplitude of the `Wavefront`.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` with the updated amplitude.
-        """
-        assert isinstance(amplitude, Array) and amplitude.ndim == 3, \
-        ("amplitude must be a 3d array.")
-        return tree_at(
-            lambda wavefront : wavefront.amplitude, self, amplitude)
-
-
-    def set_phase(self : Wavefront, phase : Array) -> Wavefront:
-        """
-        Mutator for the phase attribute.
-
-        Parameters
-        ----------
-        phase : Array, radians
-            The phases of each pixel on the `Wavefront`.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` with the updated phase.
-        """
-        assert isinstance(phase, Array) and phase.ndim == 3, \
-        ("phase must be a 3d array.")
-        return tree_at(
-            lambda wavefront : wavefront.phase, self, phase)
-
-
-    def set_pixel_scale(self : Wavefront, pixel_scale : Array) -> Wavefront:
-        """
-        Mutator for the pixel_scale attribute.
-
-        Parameters
-        ----------
-        pixel_scale : Array
-            The new pixel_scale associated with the wavefront.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new Wavefront object with the updated pixel_scale.
-        """
-        assert isinstance(pixel_scale, Array) and pixel_scale.ndim == 0, \
-        ("pixel_scale must be a scalar array.")
-        return tree_at(
-            lambda wavefront : wavefront.pixel_scale, self, pixel_scale)
-
-
-    def set_plane_type(self : Wavefront, plane : PlaneType) -> Wavefront:
-        """
-        Mutator for the PlaneType attribute.
-
-        Parameters
-        ----------
-        plane : PlaneType
-            A PlaneType object describing the plane that the `Wavefront` is
-            currently in.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` with the update plate_type information.
-        """
-        assert isinstance(plane, PlaneType), \
-        ("plane must be a PlaneType object.")
-        return tree_at(
-            lambda wavefront : wavefront.plane_type, self, plane)
-
-
-    def set_phasor(self      : Wavefront,
-                      amplitude : Array,
-                      phase     : Array) -> Wavefront:
-        """
-        Updates the phasor of the wavefront (ie both the amplitude and the
-        phase).
-
-        Parameters
-        ----------
-        amplitude : Array, power
-            The new electric field amplitude of the wavefront.
-        phase : Array, radians
-            The new electric field phase of the wavefront.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` with updated amplitude and phase.
-        """
-        assert isinstance(amplitude, Array) and amplitude.ndim == 3, \
-        ("amplitude must be a 3d array.")
-        assert isinstance(phase, Array) and phase.ndim == 3, \
-        ("phase must be a 3d array.")
-        assert amplitude.shape == phase.shape, \
-        ("amplitude and phase arrays must have the same shape.")
-        return tree_at(
-            lambda wavefront : (wavefront.amplitude, wavefront.phase), self,
-                               (amplitude, phase))
 
 
     #######################
@@ -367,57 +231,7 @@ class Wavefront(Base, ABC):
         ("tilt_angles must be an array with shape (2,) ie. (x, y).")
 
         opds = tilt_angles[:, None, None] * self.pixel_coordinates
-        return self.add_phase(- self.wavenumber * opds.sum(0))
-
-
-    def multiply_amplitude(self : Wavefront, array_like : Array) -> Wavefront:
-        """
-        Multiply the amplitude of the `Wavefront` by either a float or array.
-
-        Parameters
-        ----------
-        array_like : Array
-            An array or float that has the same dimensions as amplitude that is
-            multipled by the current ampltide.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` with the updated amplitude.
-        """
-        amplitude = self.amplitude
-        assert isinstance(array_like, Array) and array_like.ndim in (0, 2, 3), \
-        ("array_like must be either a scalar array or array with 2 or 3 "
-         "dimensions.")
-        if array_like.ndim in (2, 3):
-            assert array_like.shape[-2:] == amplitude.shape[-2:], \
-            ("array_like shape must be equal to the current ampltude array.")
-        return self.set_amplitude(amplitude * array_like)
-
-
-    def add_phase(self : Wavefront, array_like : Array) -> Wavefront:
-        """
-        Add to the phase of the `Wavefront` by either a float or array.
-
-        Parameters
-        ----------
-        array_like : Array
-            An array or float that has the same dimensions as phase that is
-            added to the current phase.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` with the updated phase.
-        """
-        phase = self.phase
-        assert isinstance(array_like, Array) and array_like.ndim in (0, 2, 3), \
-        ("array_like must be either a scalar array or array with 2 or 3 "
-         "dimensions.")
-        if array_like.ndim in (2, 3):
-            assert array_like.shape[-2:] == phase.shape[-2:], \
-            ("array_like shape must be equal to the current phase array.")
-        return self.set_phase(phase + array_like)
+        return self.add('phase', - self.wavenumber * opds.sum(0))
 
 
     def add_opd(self: Wavefront, path_difference : Array) -> Wavefront:
@@ -437,11 +251,8 @@ class Wavefront(Base, ABC):
             The new wavefront with the phases updated according to the supplied
             path_difference
         """
-        assert isinstance(path_difference, Array) and \
-        path_difference.ndim in (0, 2, 3), ("path_difference must be either a "
-        "scalar array or array with 2 or 3 dimensions.")
         phase_difference = self.wavenumber * path_difference
-        return self.add_phase(phase_difference)
+        return self.add('phase', phase_difference)
 
 
     def normalise(self : Wavefront) -> Wavefront:
@@ -453,11 +264,10 @@ class Wavefront(Base, ABC):
         wavefront : Wavefront
             The new wavefront with the normalised electric field amplitudes.
         """
-        return self.multiply_amplitude(1 / np.linalg.norm(self.amplitude))
+        return self.multiply('amplitude', (1 / np.linalg.norm(self.amplitude)))
 
 
-    def wavefront_to_psf(self             : Wavefront,
-                         return_polarised : bool = False) -> Array:
+    def wavefront_to_psf(self: Wavefront) -> Array:
         """
         Calculates the Point Spread Function (PSF), ie the squared modulus
         of the complex wavefront.
@@ -470,7 +280,7 @@ class Wavefront(Base, ABC):
         psf : Array
             The PSF of the wavefront.
         """
-        return np.sum(self.amplitude ** 2, axis=0)
+        return self.amplitude ** 2
 
 
     def invert_x_and_y(self : Wavefront) -> Wavefront:
@@ -483,9 +293,9 @@ class Wavefront(Base, ABC):
             The new `Wavefront` with the phase and amplitude arrays reversed
             along both axes.
         """
-        new_amplitude = np.flip(self.amplitude, axis=(-1, -2))
-        new_phase = np.flip(self.phase, axis=(-1, -2))
-        return self.set_phasor(new_amplitude, new_phase)
+        amplitude = np.flip(self.amplitude, axis=(-1, -2))
+        phase = np.flip(self.phase, axis=(-1, -2))
+        return self.set(['amplitude', 'phase'], [amplitude, phase])
 
 
     def invert_x(self : Wavefront) -> Wavefront:
@@ -498,9 +308,9 @@ class Wavefront(Base, ABC):
             The new `Wavefront` with the phase and amplitude arrays reversed
             along the x axis.
         """
-        new_amplitude = np.flip(self.amplitude, axis=-1)
-        new_phase = np.flip(self.phase, axis=-1)
-        return self.set_phasor(new_amplitude, new_phase)
+        amplitude = np.flip(self.amplitude, axis=-1)
+        phase = np.flip(self.phase, axis=-1)
+        return self.set(['amplitude', 'phase'], [amplitude, phase])
 
 
     def invert_y(self : Wavefront) -> Wavefront:
@@ -513,9 +323,9 @@ class Wavefront(Base, ABC):
             The new wavefront with the phase and amplitude arrays reversed
             along the y axis.
         """
-        new_amplitude = np.flip(self.amplitude, axis=-2)
-        new_phase = np.flip(self.phase, axis=-2)
-        return self.set_phasor(new_amplitude, new_phase)
+        amplitude = np.flip(self.amplitude, axis=-2)
+        phase = np.flip(self.phase, axis=-2)
+        return self.set(['amplitude', 'phase'], [amplitude, phase])
 
 
     def interpolate(self            : Wavefront,
@@ -554,19 +364,11 @@ class Wavefront(Base, ABC):
         else:
             field = np.array([self.amplitude, self.phase])
 
-        if field.shape[1] == 1:
-            new_amplitude, new_phase = \
-            interpolate_field(field[:, 0], npixels_out, sampling_ratio,
-                              real_imaginary=real_imaginary)[:, None, :, :]
-        else:
-            interpolator = vmap(interpolate_field, in_axes=(1, None, None))
-            new_amplitude, new_phase = interpolator(field, npixels_out,
-                                sampling_ratio, real_imaginary=real_imaginary)
+        amplitude, phase = interpolate_field(field[:, 0], npixels_out, 
+            sampling_ratio, real_imaginary=real_imaginary)[:, None, :, :]
 
-        # Update parameters
-        return tree_at(lambda wavefront:
-                 (wavefront.amplitude, wavefront.phase, wavefront.pixel_scale),
-                        self, (new_amplitude, new_phase, pixel_scale_out))
+        return self.set(['amplitude', 'phase', 'pixel_scale'], 
+            [amplitude, phase, pixel_scale_out])
 
 
     def rotate(self           : Wavefront,
@@ -613,18 +415,9 @@ class Wavefront(Base, ABC):
             field = np.array([self.amplitude, self.phase])
 
         # Rotate
-        if field.shape[1] == 1:
-            new_amplitude, new_phase = \
-            rotate_field(field[:, 0], angle, fourier=fourier,
-                    real_imaginary=real_imaginary, order=order)[:, None, :, :]
-        else:
-            rotator = vmap(rotate_field, in_axes=(1, None))
-            new_amplitude, new_phase = rotator(field, angle, fourier=fourier,
-                                    real_imaginary=real_imaginary, order=order)
-
-        # Update parameters
-        return tree_at(lambda wavefront: (wavefront.amplitude, wavefront.phase),
-                                   self, (new_amplitude, new_phase))
+        amplitude, phase = rotate_field(field[:, 0], angle, fourier=fourier,
+            real_imaginary=real_imaginary, order=order)[:, None, :, :]
+        return self.set(['amplitude', 'phase'], [amplitude, phase])
 
 
     def pad_to(self : Wavefront, npixels_out : int) -> Wavefront:
@@ -655,15 +448,15 @@ class Wavefront(Base, ABC):
         remainder = npixels_in  % 2
         padded = np.zeros([self.nfields, npixels_out, npixels_out])
 
-        new_amplitude = padded.at[:,
+        amplitude = padded.at[:,
                 new_centre - centre : centre + new_centre + remainder,
                 new_centre - centre : centre + new_centre + remainder
             ].set(self.amplitude)
-        new_phase = padded.at[:,
+        phase = padded.at[:,
                 new_centre - centre : centre + new_centre + remainder,
                 new_centre - centre : centre + new_centre + remainder
             ].set(self.phase)
-        return self.set_phasor(new_amplitude, new_phase)
+        return self.set(['amplitude', 'phase'], [amplitude, phase])
 
 
     def crop_to(self : Wavefront, npixels_out : int) -> Wavefront:
@@ -692,167 +485,11 @@ class Wavefront(Base, ABC):
         new_centre = npixels_in  // 2
         centre = npixels_out // 2
 
-        new_amplitude = self.amplitude[:,
+        amplitude = self.amplitude[:,
             new_centre - centre : new_centre + centre,
             new_centre - centre : new_centre + centre]
-        new_phase = self.phase[:,
+        phase = self.phase[:,
             new_centre - centre : new_centre + centre,
             new_centre - centre : new_centre + centre]
 
-        return self.set_phasor(new_amplitude, new_phase)
-
-
-class CartesianWavefront(Wavefront):
-    """
-    A class representing some wavefront, designed to track the various
-    parameters such as wavelength, pixel_scale, amplitude and phase, as well as
-    a helper parmeter, plane_type. CartesianWavefronts have pixel scales in
-    units of meters per pixel in all planes.
-
-    Attributes
-    ----------
-    wavelength : float, meters
-        The wavelength of the `Wavefront`.
-    amplitude : Array, power
-        The electric field amplitude of the `Wavefront`.
-    phase : Array, radians
-        The electric field phase of the `Wavefront`.
-    pixel_scale : float, meters/pixel
-        The physical dimensions of the pixels representing the wavefront.
-    plane_type : enum.IntEnum.PlaneType
-        The current plane type of wavefront, can be Pupil, Focal or
-        Intermediate.
-    """
-
-
-    def __init__(self        : Wavefront,
-                 wavelength  : Array,
-                 pixel_scale : Array,
-                 amplitude   : Array,
-                 phase       : Array,
-                 plane_type  : PlaneType) -> Wavefront:
-        """
-        Constructor for Cartesian wavefronts.
-
-        Parameters
-        ----------
-        wavelength : float, meters
-            The wavelength of the `Wavefront`.
-        pixel_scale : float, meters/pixel
-            The physical dimensions of each pixel.
-        amplitude : Array, power
-            The electric field amplitude of the `Wavefront`.
-        phase : Array, radians
-            The electric field phase of the `Wavefront`.
-        plane_type : enum.IntEnum.PlaneType
-            The current plane of wavefront, can be Pupil, Focal.
-        """
-        super().__init__(wavelength, pixel_scale,
-                         amplitude, phase, plane_type)
-
-
-class AngularWavefront(Wavefront):
-    """
-    A class representing some wavefront, designed to track the various
-    parameters such as wavelength, pixel_scale, amplitude and phase, as well as
-    a helper parmeter, plane_type. AngularWavefronts have pixel scales in
-    units of meters per pixel in Pupil planes and radians per pixel in Focal
-    planes.
-
-    Attributes
-    ----------
-    wavelength : float, meters
-        The wavelength of the `Wavefront`.
-    amplitude : Array, power
-        The electric field amplitude of the `Wavefront`.
-    phase : Array, radians
-        The electric field phase of the `Wavefront`.
-    pixel_scale : float, meters/pixel or radians/pixel
-        The physical dimensions of the pixels representing the wavefront. This
-        is in units of meters per pixel in pupil planes and radians per pixel
-        in focal planes.
-    plane_type : enum.IntEnum.PlaneType
-        The current plane type of wavefront, can be Pupil, Focal or
-        Intermediate.
-    """
-
-
-    def __init__(self        : Wavefront,
-                 wavelength  : Array,
-                 pixel_scale : Array,
-                 amplitude   : Array,
-                 phase       : Array,
-                 plane_type  : PlaneType) -> Wavefront:
-        """
-        Constructor for Angular wavefronts.
-
-        Parameters
-        ----------
-        wavelength : float, meters
-            The wavelength of the `Wavefront`.
-        pixel_scale : float, meters/pixel or radians/pixel
-            The physical dimensions of each pixel. Units are in meters
-            per pixel in Pupil planes and radians per pixel in Focal planes.
-        amplitude : Array, power
-            The electric field amplitude of the `Wavefront`.
-        phase : Array, radians
-            The electric field phase of the `Wavefront`.
-        plane_type : enum.IntEnum.PlaneType
-            The current plane of wavefront, can be Pupil, Focal.
-        """
-        super().__init__(wavelength, pixel_scale,
-                         amplitude, phase, plane_type)
-
-
-class FarFieldFresnelWavefront(Wavefront):
-    """
-    A class representing some wavefront, designed to track the various
-    parameters such as wavelength, pixel_scale, amplitude and phase, as well as
-    a helper parmeter, plane_type. FarFieldFresnelWavefronts are designed to
-    work with FarFieldFresnel Propagators, and are better able to represent the
-    behaviour of wavefronts outside of the focal planes, in the far-field
-    approximation.
-
-    Attributes
-    ----------
-    wavelength : float, meters
-        The wavelength of the `Wavefront`.
-    amplitude : Array, power
-        The electric field amplitude of the `Wavefront`.
-    phase : Array, radians
-        The electric field phase of the `Wavefront`.
-    pixel_scale : float, meters/pixel
-        The physical dimensions of the pixels representing the wavefront.
-    plane_type : enum.IntEnum.PlaneType
-        The current plane type of wavefront, can be Pupil, Focal or
-        Intermediate.
-    """
-
-
-    def __init__(self        : Wavefront,
-                 wavelength  : Array,
-                 pixel_scale : Array,
-                 amplitude   : Array,
-                 phase       : Array,
-                 plane_type  : PlaneType) -> Wavefront:
-        """
-        Constructor for FarFieldFresnel wavefronts.
-
-        Parameters
-        ----------
-        wavelength : float, meters
-            The wavelength of the `Wavefront`.
-        pixel_scale : float, meters/pixel or radians.pixl
-            The physical dimensions of each pixel. Units are in meters
-            per pixel in Pupil planes and meters per pixel or radians per pixel
-            in Focal planes depending on if Cartesian or Angular Propagators
-            are used respectively.
-        amplitude : Array, power
-            The electric field amplitude of the `Wavefront`.
-        phase : Array, radians
-            The electric field phase of the `Wavefront`.
-        plane_type : enum.IntEnum.PlaneType
-            The current plane of wavefront, can be Pupil, Focal.
-        """
-        super().__init__(wavelength, pixel_scale,
-                         amplitude, phase, plane_type)
+        return self.set(['amplitude', 'phase'], [amplitude, phase])
