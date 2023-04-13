@@ -28,10 +28,14 @@ jobs:
       - name: install environment
         run: |
           pip install mkdocs
+          pip install mkdocs-same-dir
+          pip install pymdown-extensions
+          pip install mkdocs-pymdownx-material-extras
+          pip install mkdocs-autorefs  
+          pip install mkdocs-simple-plugin
           pip install mkdocstrings
           pip install mkdocstrings[python]
           pip install mkdocs-material
-          pip install mkdocs-jupyter
 
       - name: generate and deploy documentation
         run: mkdocs gh-deploy -d https://louisdesdoigts.github.io/dLux
