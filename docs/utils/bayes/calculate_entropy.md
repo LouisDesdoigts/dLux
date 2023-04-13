@@ -1,1 +1,0 @@
-::: dLux.utils.bayes.calculate_entropy

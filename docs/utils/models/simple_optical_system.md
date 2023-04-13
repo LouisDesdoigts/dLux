@@ -1,1 +1,0 @@
-::: dLux.utils.models.simple_optical_system

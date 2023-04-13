@@ -486,7 +486,20 @@ class AberrationFactory():
         return dLux.optics.ApplyBasisOPD(basis, coefficients, name=name)
 
 
-    def __init__(self):
+    def __init__(self              : AberrationFactory, 
+                npixels          : int, 
+                nsides           : int   = 0,
+                rotation         : float = 0., 
+
+                # Sizing
+                aperutre_ratio   : float = 1.0,
+
+                # Aberrations
+                zernikes         : Array = None, 
+                coefficients     : Array = None, 
+
+                # name
+                name             : str = None):
         """
         Constructs a basic single static aberration class.
 

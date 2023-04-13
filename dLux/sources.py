@@ -102,6 +102,26 @@ class Source(Base, ABC):
 
         # Input name checking
         assert isinstance(self.name, str), "Name must be a string."
+    
+
+    def __getattr__(self : Source, key : str) -> Any:
+        """
+        Getter method for the spectrum object.
+
+        Parameters
+        ----------
+        key : str
+            The key to get from the spectrum object.
+
+        Returns
+        -------
+        value : Any
+            The value of the key.
+        """
+        if hasattr(self.spectrum, key):
+            return getattr(self.spectrum, key)
+        else:
+            raise AttributeError(f"{self.name} has no attribute {key}.")
 
 
     def get_flux(self : Source) -> Array:
