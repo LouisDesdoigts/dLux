@@ -40,7 +40,7 @@ Doccumentataion: [https://louisdesdoigts.github.io/dLux/](https://louisdesdoigts
 
 Installation: ```pip install dLux```
 
-Requires: Python 3.10+, Jax 0.4.3+, Zodiax 0.3.1+
+Requires: Python 3.8+, Jax 0.4.3+, Zodiax 0.3.1+
 
 ## Collaboration & Development
 
