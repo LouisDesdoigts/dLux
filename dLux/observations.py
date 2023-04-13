@@ -88,7 +88,7 @@ class Dither(AbstractObservation):
         super().__init__(name)
         self.dithers = np.asarray(dithers, float)
         dLux.exceptions.validate_bc_attr_dims(self.dithers.shape, (1, 2), 
-                                              'dithers')
+            'dithers')
 
 
     def dither_position(self       : Dither, 
@@ -113,12 +113,12 @@ class Dither(AbstractObservation):
         dither_fn = lambda source: source.add('position', dither)
 
         # Map the dithers across the sources
-        dithered_sources = tree_map(dither_fn, instrument.scene.sources, \
-                is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
+        dithered_sources = tree_map(dither_fn, instrument.sources, \
+            is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
 
         # Apply updates
-        return tree_at(lambda instrument: instrument.scene.sources, 
-                       instrument, dithered_sources)
+        return tree_at(lambda instrument: instrument.sources, instrument, 
+            dithered_sources)
 
 
     def observe(self       : Dither,
@@ -141,5 +141,5 @@ class Dither(AbstractObservation):
             positions.
         """
         dith_fn = lambda dither: self.dither_position(instrument, 
-                                                dither).model(*args, **kwargs)
+            dither).model(*args, **kwargs)
         return vmap(dith_fn, 0)(self.dithers)

@@ -751,21 +751,6 @@ def create_detector() -> callable:
 
 
 @pytest.fixture
-def create_scene(create_point_source) -> callable:
-    """
-    Returns:
-    --------
-    _create_scene: callable
-        A function that has all keyword arguments and can be
-        used to create a `Scene` layer for testing.
-    """
-    def _create_scene(
-            sources = [create_point_source()]) -> OpticalLayer:
-        return dLux.core.Scene(sources)
-    return _create_scene
-
-
-@pytest.fixture
 def create_filter() -> callable:
     """
     Returns:
@@ -785,7 +770,7 @@ def create_filter() -> callable:
 @pytest.fixture
 def create_instrument(
         create_optics: callable, 
-        create_scene: callable, 
+        create_point_source: callable, 
         create_detector: callable,
         create_filter: callable) -> callable:
     """
@@ -797,36 +782,15 @@ def create_instrument(
     """
     def _create_instrument(
             optics          : OpticalLayer  = create_optics(),
-            scene           : OpticalLayer  = create_scene(),
+            sources         : OpticalLayer  = create_point_source(),
             detector        : OpticalLayer  = create_detector(),
-            filter          : OpticalLayer  = None,
-            optical_layers  : list          = None,
-            sources         : list          = None,
-            detector_layers : list          = None,
-            input_layers    : bool          = False,
-            input_both      : bool          = False) -> OpticalLayer:
+            ) -> OpticalLayer:
 
-        if input_both:
-            return dLux.core.Instrument(
-                optics=optics,
-                scene=scene,
-                detector=detector,
-                filter=filter,
-                optical_layers=optical_layers,
-                sources=sources,
-                detector_layers=detector_layers)
-        elif not input_layers:
-            return dLux.core.Instrument(
-                optics=optics,
-                scene=scene,
-                detector=detector,
-                filter=filter)
-        else:
-            return dLux.core.Instrument(
-                filter=filter,
-                optical_layers=optical_layers,
-                sources=sources,
-                detector_layers=detector_layers)
+        # if input_both:
+        return dLux.core.Instrument(
+            optics=optics,
+            detector=detector,
+            sources=sources)
     return _create_instrument
 
 
