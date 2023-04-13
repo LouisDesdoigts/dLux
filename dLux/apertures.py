@@ -2257,7 +2257,7 @@ class AberratedAperture(AbstractAberratedAperture):
     ----------
     aperture: ApertureLayer
         The aperture on which the aberration basis is defined.
-    basis_funcs: list[callable]
+    basis: list[Zernike]
         A list of basis functions that represent the basis. The exact 
         polynomials that are represented will depend on the aperture shape. 
     coefficients: Array
@@ -2948,7 +2948,7 @@ class CompoundAperture(CompositeAperture):
         Parameters
         ----------
         apertures: list[Aperture]
-           The sub-apertures that make up the full aperture.
+            The sub-apertures that make up the full aperture.
         centre: Array, meters = np.array([0., 0.])
             The (x, y) coordinates of the centre of the aperture.
         shear: Array = np.array([0., 0.])
@@ -3044,7 +3044,7 @@ class MultiAperture(CompositeAperture):
     Attributes
     ----------
     apertures: dict(str, Aperture)
-       The sub-apertures that make up the full aperture.
+        The sub-apertures that make up the full aperture.
     centre: Array, meters
         The (x, y) coordinates of the centre of the aperture.
     shear: Array
@@ -3071,7 +3071,7 @@ class MultiAperture(CompositeAperture):
         Parameters
         ----------
         apertures: list[Aperture]
-           The sub-apertures that make up the full aperture.
+            The sub-apertures that make up the full aperture.
         centre: Array, meters = np.array([0., 0.])
             The (x, y) coordinates of the centre of the aperture.
         shear: Array = np.array([0., 0.])
@@ -3473,13 +3473,6 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
         """
         Compute the basis vectors of the aperture aberrations.
 
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
-
         Returns
         -------
         basis : Array 
@@ -3491,11 +3484,6 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
     def _opd(self : ApertureLayer, **kwargs) -> Array:
         """
         Compute the total optical path difference of the aperture aberrations.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the opd on.
 
         Returns
         -------
@@ -3511,13 +3499,6 @@ class StaticAberratedAperture(AbstractAberratedAperture, AbstractStaticAperture)
     def get_opd(self : ApertureLayer, **kwargs) -> Array:
         """
         Compute the total optical path difference of the aperture aberrations.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
 
         Returns
         -------
@@ -3652,7 +3633,7 @@ class ApertureFactory():
                 rotation         : float = 0., 
 
                 # Sizing
-                aperutre_ratio   : float = 1.0,
+                aperture_ratio   : float = 1.0,
                 secondary_ratio  : float = 0.,
                 secondary_nsides : int = 0,
 
@@ -3682,7 +3663,7 @@ class ApertureFactory():
             aperture. All other other values of three and above are supported.
         rotation : float, radians = 0
             The global rotation of the aperture in radians.
-        aperutre_ratio : float = 1.
+        aperture_ratio : float = 1.
             The ratio of the aperture size to the array size. A value of 1. 
             results in an aperture that fully spans the array, a value of 0.5 
             retuls in an aperure that is half the size of the array, which is 
@@ -3727,7 +3708,7 @@ class ApertureFactory():
         if secondary_nsides < 3 and secondary_nsides != 0:
             raise ValueError("secondary_nsides must be either 0 or >=3")
         
-        if aperutre_ratio <= 0:
+        if aperture_ratio <= 0:
             raise ValueError("aperture_ratio must be > 0")
         
         if secondary_ratio < 0:
@@ -3752,15 +3733,15 @@ class ApertureFactory():
 
         # Circular Primary
         if nsides == 0:
-            apertures.append(CircularAperture(aperutre_ratio/2, softening=0))
+            apertures.append(CircularAperture(aperture_ratio/2, softening=0))
         # Polygonal Primary
         else: 
             apertures.append(RegularPolygonalAperture(
-                nsides, aperutre_ratio/2, softening=0, rotation=rotation))
+                nsides, aperture_ratio/2, softening=0, rotation=rotation))
 
         # Secondary
         if secondary_ratio != 0:
-            secondary_rel = aperutre_ratio * secondary_ratio
+            secondary_rel = aperture_ratio * secondary_ratio
 
             # Circular
             if secondary_nsides == 0: 
@@ -3776,7 +3757,7 @@ class ApertureFactory():
         if nstruts > 0:
             if strut_ratio == 0:
                 raise ValueError("strut_ratio must be > 0 if nstruts > 0")
-            strut_rel = aperutre_ratio * strut_ratio
+            strut_rel = aperture_ratio * strut_ratio
             full_rotation = strut_rotation + rotation
             apertures.append(UniformSpider(
                 nstruts, strut_rel, rotation=full_rotation, softening=0))
@@ -3800,7 +3781,27 @@ class ApertureFactory():
         return static
 
 
-    def __init__(self):
+    def __init__(self             : ApertureFactory, 
+                 npixels          : int, 
+                 nsides           : int   = 0,
+                 rotation         : float = 0., 
+
+                 # Sizing
+                 aperture_ratio   : float = 1.0,
+                 secondary_ratio  : float = 0.,
+                 secondary_nsides : int = 0,
+
+                 # Spiders
+                 nstruts          : int   = 0,
+                 strut_ratio      : float = 0.,
+                 strut_rotation   : float = 0.,
+                
+                 # Aberrations
+                 zernikes         : Array = None, 
+                 coefficients     : Array = None, 
+
+                 # name
+                 name             : str = None):
         """
         Constructs a basic single static aperture, either with or without 
         aberrations.
@@ -3814,7 +3815,7 @@ class ApertureFactory():
             aperture. All other other values of three and above are supported.
         rotation : float, radians = 0
             The global rotation of the aperture in radians.
-        aperutre_ratio : float = 1.
+        aperture_ratio : float = 1.
             The ratio of the aperture size to the array size. A value of 1. 
             results in an aperture that fully spans the array, a value of 0.5 
             retuls in an aperure that is half the size of the array, which is 

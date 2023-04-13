@@ -1,1 +1,0 @@
-::: dLux.utils.bayes.poisson_likelihood

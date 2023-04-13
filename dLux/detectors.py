@@ -193,10 +193,10 @@ class ApplyJitter(DetectorLayer):
 
     Attributes
     ----------
-    kernel_size : int
-        The size of the convolution kernel to use.
     sigma : Array, pixels
         The standard deviation of the guassian kernel, in units of pixels.
+    kernel_size : int
+        The size of the convolution kernel to use.
     name : str
         The name of the layer, which is used to index the layers dictionary.
     """

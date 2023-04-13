@@ -1,1 +1,0 @@
-::: dLux.utils.bayes.chi2_likelihood

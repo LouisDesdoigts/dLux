@@ -1,1 +1,0 @@
-::: dLux.utils.interpolation.scale_array

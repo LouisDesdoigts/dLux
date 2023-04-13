@@ -1,1 +1,0 @@
-::: dLux.utils.math.factorial
