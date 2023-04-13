@@ -3612,7 +3612,7 @@ class ApertureFactory():
                 rotation         : float = 0., 
 
                 # Sizing
-                aperutre_ratio   : float = 1.0,
+                aperture_ratio   : float = 1.0,
                 secondary_ratio  : float = 0.,
                 secondary_nsides : int = 0,
 
@@ -3642,7 +3642,7 @@ class ApertureFactory():
             aperture. All other other values of three and above are supported.
         rotation : float, radians = 0
             The global rotation of the aperture in radians.
-        aperutre_ratio : float = 1.
+        aperture_ratio : float = 1.
             The ratio of the aperture size to the array size. A value of 1. 
             results in an aperture that fully spans the array, a value of 0.5 
             retuls in an aperure that is half the size of the array, which is 
@@ -3687,7 +3687,7 @@ class ApertureFactory():
         if secondary_nsides < 3 and secondary_nsides != 0:
             raise ValueError("secondary_nsides must be either 0 or >=3")
         
-        if aperutre_ratio <= 0:
+        if aperture_ratio <= 0:
             raise ValueError("aperture_ratio must be > 0")
         
         if secondary_ratio < 0:
@@ -3712,15 +3712,15 @@ class ApertureFactory():
 
         # Circular Primary
         if nsides == 0:
-            apertures.append(CircularAperture(aperutre_ratio/2, softening=0))
+            apertures.append(CircularAperture(aperture_ratio/2, softening=0))
         # Polygonal Primary
         else: 
             apertures.append(RegularPolygonalAperture(
-                nsides, aperutre_ratio/2, softening=0, rotation=rotation))
+                nsides, aperture_ratio/2, softening=0, rotation=rotation))
 
         # Secondary
         if secondary_ratio != 0:
-            secondary_rel = aperutre_ratio * secondary_ratio
+            secondary_rel = aperture_ratio * secondary_ratio
 
             # Circular
             if secondary_nsides == 0: 
@@ -3736,7 +3736,7 @@ class ApertureFactory():
         if nstruts > 0:
             if strut_ratio == 0:
                 raise ValueError("strut_ratio must be > 0 if nstruts > 0")
-            strut_rel = aperutre_ratio * strut_ratio
+            strut_rel = aperture_ratio * strut_ratio
             full_rotation = strut_rotation + rotation
             apertures.append(UniformSpider(
                 nstruts, strut_rel, rotation=full_rotation, softening=0))
@@ -3766,7 +3766,7 @@ class ApertureFactory():
                  rotation         : float = 0., 
 
                  # Sizing
-                 aperutre_ratio   : float = 1.0,
+                 aperture_ratio   : float = 1.0,
                  secondary_ratio  : float = 0.,
                  secondary_nsides : int = 0,
 
@@ -3794,7 +3794,7 @@ class ApertureFactory():
             aperture. All other other values of three and above are supported.
         rotation : float, radians = 0
             The global rotation of the aperture in radians.
-        aperutre_ratio : float = 1.
+        aperture_ratio : float = 1.
             The ratio of the aperture size to the array size. A value of 1. 
             results in an aperture that fully spans the array, a value of 0.5 
             retuls in an aperure that is half the size of the array, which is 
