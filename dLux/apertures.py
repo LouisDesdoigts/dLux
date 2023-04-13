@@ -2257,7 +2257,7 @@ class AberratedAperture(AbstractAberratedAperture):
     ----------
     aperture: ApertureLayer
         The aperture on which the aberration basis is defined.
-    basis_funcs: list[callable]
+    basis: list[Zernike]
         A list of basis functions that represent the basis. The exact 
         polynomials that are represented will depend on the aperture shape. 
     coefficients: Array
