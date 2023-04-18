@@ -1,13 +1,11 @@
 import jax.numpy as np
+from jax import Array
 from jax.tree_util import tree_map
 from typing import Union
 import dLux
 
 __all__ = ["cartesian_to_polar", "polar_to_cartesian",
            "get_pixel_positions", "rotate", "translate", "shear", "compress"]
-
-
-Array = np.ndarray
 
 
 ### Coordinates convertions ###

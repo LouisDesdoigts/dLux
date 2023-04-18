@@ -1,5 +1,6 @@
 from __future__ import annotations
 import jax.numpy as np
+from jax import Array
 from equinox import tree_at
 from abc import ABC, abstractmethod
 from dLux.utils.coordinates import get_pixel_positions
@@ -11,8 +12,6 @@ import dLux
 __all__ = ["CartesianMFT", "AngularMFT", "CartesianFFT", "AngularFFT",
            "CartesianFresnel"]
 
-
-Array = np.ndarray
 
 
 ########################
@@ -32,11 +31,9 @@ class Propagator(dLux.optics.OpticalLayer, ABC):
     name : str
         The name for this propagator.
     """
-    inverse : bool
 
 
     def __init__(self    : Propagator,
-                 inverse : bool = False,
                  **kwargs) -> Propagator:
         """
         Constructor for the Propagator.
@@ -49,27 +46,7 @@ class Propagator(dLux.optics.OpticalLayer, ABC):
             represents propagation from a focal to a pupil plane.
         """
         super().__init__(**kwargs)
-        assert isinstance(inverse, bool), ("inverse must be a boolean.")
-        self.inverse = bool(inverse)
-
-
-    @abstractmethod
-    def propagate(self : Propagator, wavefront : Wavefront) -> Array: # pragma: no cover
-        """
-        Performs the propagation as a directional wrapper to the fourier methods
-        of the class.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The `Wavefront to propagate.
-
-        Returns
-        -------
-        field : Array
-            The normalised electric field of the wavefront after propagation.
-        """
-        return
+        # assert isinstance(inverse, bool), ("inverse must be a boolean.")
 
 
 class VariableSamplingPropagator(Propagator, ABC):
@@ -80,9 +57,9 @@ class VariableSamplingPropagator(Propagator, ABC):
 
     Attributes
     ----------
-    npixels_out : int
+    npixels : int
         The number of pixels in the output plane.
-    pixel_scale_out : Array, meters/pixel or radians/pixel
+    pixel_scale : Array, meters/pixel or radians/pixel
         The pixel scale in the output plane, measured in meters or radians per
         pixel for Cartesian or Angular Wavefront respectively.
     shift : Array
@@ -98,25 +75,25 @@ class VariableSamplingPropagator(Propagator, ABC):
     name : str
         The name for this propagator.
     """
-    npixels_out     : int
-    pixel_scale_out : Array
-    shift           : Array
-    pixel_shift     : bool
+    npixels     : int
+    pixel_scale : Array
+    shift       : Array
+    pixel       : bool
 
-    def __init__(self            : Propagator,
-                 pixel_scale_out : Array,
-                 npixels_out     : int,
-                 shift           : Array = np.array([0., 0.]),
-                 pixel_shift     : bool  = False,
+    def __init__(self        : Propagator,
+                 pixel_scale : Array,
+                 npixels     : int,
+                 shift       : Array = np.zeros(2),
+                 pixel       : bool  = False,
                  **kwargs) -> Propagator:
         """
         Constructor for VariableSampling propagators.
 
         Parameters
         ----------
-        npixels_out : int
+        npixels : int
             The number of pixels in the output plane.
-        pixel_scale_out : Array, meters/pixel or radians/pixel
+        pixel_scale : Array, meters/pixel or radians/pixel
             The pixel scale in the output plane, measured in meters or radians
             per pixel for Cartesian or Angular Wavefront respectively.
         shift : Array = np.array([0., 0.])
@@ -127,157 +104,14 @@ class VariableSamplingPropagator(Propagator, ABC):
             True interprets the shift value in pixel units.
         """
         super().__init__(**kwargs)
-        self.pixel_scale_out = np.asarray(pixel_scale_out, dtype=float)
-        self.npixels_out     = int(npixels_out)
-        self.shift           = np.asarray(shift, dtype=float)
-        self.pixel_shift     = bool(pixel_shift)
-        assert self.pixel_scale_out.ndim == 0, \
-        ("pixel_scale_out must be a scalar.")
+        self.pixel_scale = np.asarray(pixel_scale, dtype=float)
+        self.npixels     = int(npixels)
+        self.shift       = np.asarray(shift, dtype=float)
+        self.pixel       = bool(pixel)
+        assert self.pixel_scale.ndim == 0, \
+        ("pixel_scale must be a scalar.")
         assert self.shift.shape == (2,), \
         ("shift must be an array of shape (2,) ie (x, y).")
-
-
-    @abstractmethod
-    def get_nfringes(self : Propagator, wavefront : Wavefront) -> Array: # pragma: no cover
-        """
-        The number of diffraction fringes in the output plane.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront being propagated.
-
-        Returns
-        -------
-        fringes : Array
-            The number of diffraction fringes in the output plane.
-        """
-        return
-
-
-    def get_shift(self : Propagator) -> Array:
-        """
-        Accessor for the shift parameter. Converts to units of pixels if the
-        pixel_shift parameter is True.
-
-        Returns
-        -------
-        shift : Array
-            The (x, y) shift to apply to the wavefront throughout the
-            propagation.
-        """
-        return self.shift if self.pixel_shift else \
-               self.shift / self.pixel_scale_out
-
-
-    def _generate_transfer_matrices(self         : Propagator,
-                                    pixel_offset : Array,
-                                    pixel_scales : tuple,
-                                    npixels      : tuple) -> Array:
-        """
-        The transfer matrices for the fourier transforms.
-
-        Parameters
-        ----------
-        pixel_offset : Array, pixels
-            The offset in units of pixels.
-        pixel_scales : tuple
-            The pixel_scale values at the input and output planes respectively.
-        npixels : tuple
-            The number of pixels at the input and output planes respectively.
-
-        Returns
-        -------
-        transfer_matrices : Array
-            The transfer matrices.
-        """
-        input_scale, output_scale = pixel_scales
-        pixels_input, npixels_out = npixels
-        sign = 1 if self.inverse else -1
-
-        input_coordinates = get_pixel_positions(pixels_input, input_scale,
-                                                    pixel_offset * input_scale)
-
-        output_coordinates = get_pixel_positions(npixels_out, output_scale,
-                                                    pixel_offset * output_scale)
-
-        input_to_output = np.outer(input_coordinates, output_coordinates)
-
-        return np.exp(-2. * sign * np.pi * 1j * input_to_output)
-
-
-    def propagate(self      : Propagator,
-                  wavefront : Wavefront) -> Array:
-        """
-        Propagates the wavefront from the input plane to the output plane using
-        a Matrix Fourier Transform.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront being propagated.
-
-        Returns
-        -------
-        field : Array
-            The normalised electric field phasor after the propagation.
-        """
-        field = wavefront.phasor
-        nfields = wavefront.nfields
-
-        input_scale = 1.0 / wavefront.npixels
-        output_scale = self.get_nfringes(wavefront) / self.npixels_out
-        npixels_in = wavefront.npixels
-        npixels_out = self.npixels_out
-        x_offset, y_offset = self.get_shift()
-
-        x_matrix = np.tile(self._generate_transfer_matrices(
-                    x_offset, (input_scale, output_scale),
-                    (npixels_in, npixels_out)), (nfields, 1, 1))
-
-        y_matrix = np.tile(self._generate_transfer_matrices(
-                    y_offset, (input_scale, output_scale),
-                    (npixels_in, npixels_out)).T, (nfields, 1, 1))
-
-        output_field = (y_matrix @ field) @ x_matrix
-
-        normalising_factor = np.exp(np.log(self.get_nfringes(wavefront)) - \
-                            (np.log(npixels_in) + np.log(npixels_out)))
-
-        return output_field * normalising_factor
-
-
-    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
-        """
-        Propagates the `Wavefront`.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to propagate.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the optical layer applied.
-        """
-        phasor = self.propagate(wavefront)
-
-        new_amplitude  = np.abs(phasor)
-        new_phase      = np.angle(phasor)
-        new_plane_type = dLux.PlaneType.Pupil if self.inverse else \
-                         dLux.PlaneType.Focal
-
-        return tree_at(lambda wavefront: \
-                       (wavefront.amplitude,
-                        wavefront.phase,
-                        wavefront.plane_type,
-                        wavefront.pixel_scale),
-                        wavefront,
-                       (new_amplitude,
-                        new_phase,
-                        new_plane_type,
-                        self.pixel_scale_out))
 
 
 class FixedSamplingPropagator(Propagator, ABC):
@@ -300,92 +134,14 @@ class FixedSamplingPropagator(Propagator, ABC):
     name : str
         The name for this propagator.
     """
+    pad : int
 
-
-    def __init__(self : Propagator, **kwargs) -> Propagator:
+    def __init__(self : Propagator, pad : int = 2, **kwargs) -> Propagator:
         """
         Constructor for FixedSampling propagators.
         """
         super().__init__(**kwargs)
-
-
-    @abstractmethod
-    def get_pixel_scale_out(self     : Propagator,
-                           wavefront : Wavefront) -> Array: # pragma: no cover
-        """
-        Calculates the pixel scale in the output plane.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront that is being propagated.
-
-        Returns
-        -------
-        pixel_scale : Array, meters/pixel or radians/pixel
-            The pixel scale in the output plane, measured in meters or radians
-            per pixel for Cartesian or Angular Wavefront respectively.
-        """
-        return
-
-
-    def propagate(self       : Propagator,
-                   wavefront : Wavefront) -> Array:
-        """
-        Propagates the wavefront by perfroming a Fast Fourier Transform.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to propagate.
-
-        Returns
-        -------
-        field : Array
-            The normalised electric field phasor after the propagation.
-        """
-        if self.inverse:
-            output_field = np.fft.fft2(np.fft.ifftshift(wavefront.phasor))
-        else:
-            output_field = np.fft.fftshift(np.fft.ifft2(wavefront.phasor))
-
-        normalising_factor = self.inverse / wavefront.npixels + \
-                             (1 - self.inverse) * wavefront.npixels
-
-        return output_field * normalising_factor
-
-
-    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
-        """
-        Propagates the `Wavefront`.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to propagate.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the optical layer applied.
-        """
-        phasor = self.propagate(wavefront)
-
-        new_amplitude  = np.abs(phasor)
-        new_phase      = np.angle(phasor)
-        new_plane_type = dLux.PlaneType.Pupil if self.inverse else \
-                         dLux.PlaneType.Focal
-
-        return tree_at(lambda wavefront: \
-                       (wavefront.amplitude,
-                        wavefront.phase,
-                        wavefront.plane_type,
-                        wavefront.pixel_scale),
-                        wavefront,
-                       (new_amplitude,
-                        new_phase,
-                        new_plane_type,
-                        self.get_pixel_scale_out(wavefront)))
+        self.pad = int(pad)
 
 
 class CartesianPropagator(Propagator, ABC):
@@ -449,14 +205,14 @@ class AngularPropagator(Propagator, ABC):
 
 class FarFieldFresnel(Propagator, ABC):
     """
-    A propagator class to store the propagation_shift parameter required for
+    A propagator class to store the focal_shift parameter required for
     Far-Field fresnel propagations. These classes implement algorithms that use
     quadratic phase factors to better represent out-of-plane behaviour of
     wavefronts, close to the focal plane.
 
     Attributes
     ----------
-    propagation_shift : Array, meters
+    focal_shift : Array, meters
         The shift in the propagation distance of the wavefront.
     inverse : bool
         Is this an 'inverse' propagation. Non-inverse propagations represents
@@ -465,22 +221,22 @@ class FarFieldFresnel(Propagator, ABC):
     name : str
         The name for this propagator.
     """
-    propagation_shift : Array
+    focal_shift : Array
 
 
-    def __init__(self, propagation_shift, **kwargs) -> Propagator:
+    def __init__(self, focal_shift, **kwargs) -> Propagator:
         """
         Constructor for FarFieldFresnel propagators.
 
         Parameters
         ----------
-        propagation_shift : Array, meters
+        focal_shift : Array, meters
             The shift in the propagation distance of the wavefront.
         """
         super().__init__(**kwargs)
-        self.propagation_shift  = np.asarray(propagation_shift,  dtype=float)
-        assert self.propagation_shift.ndim == 0, \
-        ("propagation_shift must be scalar array.")
+        self.focal_shift  = np.asarray(focal_shift,  dtype=float)
+        assert self.focal_shift.ndim == 0, \
+        ("focal_shift must be scalar array.")
 
 
 ########################
@@ -494,9 +250,9 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
 
     Attributes
     ----------
-    npixels_out : int
+    npixels : int
         The number of pixels in the output plane.
-    pixel_scale_out : Array, meters/pixel
+    pixel_scale : Array, meters/pixel
         The pixel scale in the output plane, measured in meters per pixel.
     focal_length : Array, meters
         The focal_length of the lens/mirror this propagator represents.
@@ -515,20 +271,19 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
     """
 
 
-    def __init__(self            : Propagator,
-                 npixels_out     : int,
-                 pixel_scale_out : Array,
-                 focal_length    : Array,
-                 inverse         : bool  = False,
-                 shift           : Array = np.array([0., 0.]),
-                 pixel_shift     : bool  = False,
-                 name            : str   = 'CartesianMFT') -> Propagator:
+    def __init__(self         : Propagator,
+                 npixels      : int,
+                 pixel_scale  : Array,
+                 focal_length : Array,
+                 shift        : Array = np.array([0., 0.]),
+                 pixel        : bool  = False,
+                 name         : str   = 'CartesianMFT') -> Propagator:
         """
         Parameters
         ----------
-        npixels_out : int
+        npixels : int
             The number of pixels in the output plane.
-        pixel_scale_out : Array, meters/pixel
+        pixel_scale : Array, meters/pixel
             The pixel scale in the output plane, measured in meters per pixel.
         focal_length : Array, meters
             The focal_length of the lens/mirror this propagator represents.
@@ -544,34 +299,31 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         name : str = 'CartesianMFT'
             The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name            = name,
-                         inverse         = inverse,
-                         shift           = shift,
-                         pixel_shift     = pixel_shift,
-                         focal_length    = focal_length,
-                         pixel_scale_out = pixel_scale_out,
-                         npixels_out     = npixels_out)
+        super().__init__(name         = name,
+                         pixel        = pixel,
+                         shift        = shift,
+                         focal_length = focal_length,
+                         pixel_scale  = pixel_scale,
+                         npixels      = npixels)
+        
 
-
-    def get_nfringes(self      : Propagator,
-                     wavefront : Wavefront) -> Array:
+    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
         """
-        The number of diffraction fringes in the output plane.
+        Propagates the `Wavefront`.
 
         Parameters
         ----------
         wavefront : Wavefront
-            The wavefront being propagated.
+            The wavefront to propagate.
 
         Returns
         -------
-        fringes : Array
-            The number of diffraction fringes in the output plane.
+        wavefront : Wavefront
+            The wavefront with the optical layer applied.
         """
-        size_in = wavefront.diameter
-        size_out = self.pixel_scale_out * self.npixels_out
-        return size_in * size_out / self.focal_length / wavefront.wavelength
-    
+        return wavefront.shifted_MFT(self.npixels, self.pixel_scale, 
+            self.shift, self.focal_length, self.pixel)
+
 
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
@@ -596,9 +348,9 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         summary : str
             A summary of the class.
         """
-        plane_out = 'pupil' if self.inverse else 'focal'
+        # plane_out = 'pupil' if self.inverse else 'focal'
 
-        pixel_scale = convert_cartesian(self.pixel_scale_out, 'meters', 
+        pixel_scale = convert_cartesian(self.pixel_scale, 'meters', 
                                         cartesian_units)
         focal_length = convert_cartesian(self.focal_length, 'meters', 
                                         cartesian_units)
@@ -607,7 +359,7 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
 
         prop_string = (f"Propagates the Wavefront {focal_length} "
                        f"{cartesian_units} to a {plane_out} plane "
-                       f"with {self.npixels_out}x{self.npixels_out} pixels of "
+                       f"with {self.npixels}x{self.npixels} pixels of "
                        f"size {pixel_scale:.{sigfigs}} {cartesian_units} ")
         
         if (self.shift == np.zeros(2)).all():
@@ -630,9 +382,9 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
 
     Attributes
     ----------
-    npixels_out : int
+    npixels : int
         The number of pixels in the output plane.
-    pixel_scale_out : Array, meters/pixel or radians/pixel
+    pixel_scale : Array, meters/pixel or radians/pixel
         The pixel scale in the output plane, measured in meters per pixel in
         pupil plane and radians per pixel in focal planes.
     inverse : bool
@@ -650,19 +402,18 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
     """
 
 
-    def __init__(self            : Propagator,
-                 npixels_out     : int,
-                 pixel_scale_out : Array,
-                 inverse         : bool  = False,
-                 shift           : Array = np.array([0., 0.]),
-                 pixel_shift     : bool  = False,
-                 name            : str   = 'AngularMFT') -> Propagator:
+    def __init__(self        : Propagator,
+                 npixels     : int,
+                 pixel_scale : Array,
+                 shift       : Array = np.zeros(2),
+                 pixel       : bool  = False,
+                 name        : str   = 'AngularMFT') -> Propagator:
         """
         Parameters
         ----------
-        npixels_out : int
+        npixels : int
             The number of pixels in the output plane.
-        pixel_scale_out : Array, radians/pixel, meters/pixel
+        pixel_scale : Array, radians/pixel, meters/pixel
             The pixel scale in the output plane, measured in meters per pixel in
             pupil planes and radians per pixel in focal planes.
         inverse : bool = False
@@ -677,33 +428,30 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
         name : str = 'AngularMFT'
             The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name            = name,
-                         inverse         = inverse,
-                         shift           = shift,
-                         pixel_shift     = pixel_shift,
-                         pixel_scale_out = pixel_scale_out,
-                         npixels_out     = npixels_out)
+        super().__init__(name        = name,
+                         shift       = shift,
+                         pixel       = pixel,
+                         pixel_scale = pixel_scale,
+                         npixels     = npixels)
 
 
-    def get_nfringes(self      : Propagator,
-                     wavefront : Wavefront) -> Array:
+    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
         """
-        The number of diffraction fringes in the output plane.
+        Propagates the `Wavefront`.
 
         Parameters
         ----------
         wavefront : Wavefront
-            The wavefront being propagated.
+            The wavefront to propagate.
 
         Returns
         -------
-        fringes : Array
-            The number of diffraction fringes in the output plane.
+        wavefront : Wavefront
+            The wavefront with the optical layer applied.
         """
-        fringe_size = wavefront.wavelength / wavefront.diameter
-        detector_size = self.npixels_out * self.pixel_scale_out
-        return detector_size / fringe_size
-    
+        return wavefront.shifted_MFT(self.npixels, self.pixel_scale,
+            self.shift, pixel=self.pixel)
+
 
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
@@ -730,13 +478,13 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
         """
         plane_out = 'pupil' if self.inverse else 'focal'
             
-        pixel_scale = convert_angular(self.pixel_scale_out, 'radians', 
+        pixel_scale = convert_angular(self.pixel_scale, 'radians', 
                                         angular_units)
         shift = convert_angular(self.shift, 'radians', angular_units) \
             if not self.pixel_shift else self.shift
 
         prop_string = (f"Propagates the Wavefront to a {plane_out} plane "
-                       f"with {self.npixels_out}x{self.npixels_out} pixels of "
+                       f"with {self.npixels}x{self.npixels} pixels of "
                        f"size {pixel_scale:.{sigfigs}} {angular_units} ")
         
         if (self.shift == np.zeros(2)).all():
@@ -771,7 +519,7 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
 
     def __init__(self         : Propagator,
                  focal_length : Array,
-                 inverse      : bool = False,
+                 pad          : int = 2,
                  name         : str  = 'CartesianFFT') -> Propagator:
         """
         Parameters
@@ -786,25 +534,25 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
             The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(name         = name,
-                         inverse      = inverse,
+                         pad          = pad,
                          focal_length = focal_length)
+    
 
-
-    def get_pixel_scale_out(self : Propagator, wavefront : Wavefront) -> Array:
+    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
         """
-        The pixel scale in the output plane.
+        Propagates the `Wavefront`.
 
         Parameters
         ----------
         wavefront : Wavefront
-            The `Wavefront` that is being propagted.
+            The wavefront to propagate.
 
         Returns
         -------
-        pixel_scale_out : Array, meters/pixel
-            The pixel scale in the output plane.
+        wavefront : Wavefront
+            The wavefront with the optical layer applied.
         """
-        return self.focal_length * wavefront.wavelength / wavefront.diameter
+        return wavefront.FFT(self.pad, self.focal_length)
     
 
     def summary(self            : Propagator, 
@@ -855,9 +603,9 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
     """
 
 
-    def __init__(self    : Propagator,
-                 inverse : bool = False,
-                 name    : str = 'AngularFFT') -> Propagator:
+    def __init__(self : Propagator,
+                 pad  : int = 2,
+                 name : str = 'AngularFFT') -> Propagator:
         """
         Constructor for the AngularFFT propagator.
 
@@ -870,26 +618,25 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
         name : str = 'AngularFFT'
             The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name = name, inverse = inverse)
+        super().__init__(name = name, pad = pad)
 
 
-    def get_pixel_scale_out(self : Propagator, wavefront : Wavefront) -> Array:
+    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
         """
-        Calculate the pixel scale in the output plane in units of radians per
-        pixel.
+        Propagates the `Wavefront`.
 
         Parameters
         ----------
         wavefront : Wavefront
-            The wavefront that is being propagated.
+            The wavefront to propagate.
 
         Returns
         -------
-        pixel_scale_out : Array, radians/pixel
-            The pixel scale in the output plane.
+        wavefront : Wavefront
+            The wavefront with the optical layer applied.
         """
-        return wavefront.wavelength / wavefront.diameter
-    
+        return wavefront.FFT(self.pad)
+
 
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
@@ -929,13 +676,13 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
 
     Attributes
     ----------
-    npixels_out : int
+    npixels : int
         The number of pixels in the output plane.
-    pixel_scale_out : Array, meters/pixel
+    pixel_scale : Array, meters/pixel
         The pixel scale in the output plane, measured in meters per pixel.
     focal_length : Array, meters
         The focal_length of the lens/mirror this propagator represents.
-    propagation_shift : Array, meters
+    focal_shift : Array, meters
         The shift in the propagation distance of the wavefront.
     inverse : bool
         Is this an 'inverse' propagation. Non-inverse propagations represents
@@ -952,27 +699,26 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
     """
 
 
-    def __init__(self              : Propagator,
-                 npixels_out       : Array,
-                 pixel_scale_out   : Array,
-                 focal_length      : Array,
-                 propagation_shift : Array,
-                 inverse           : bool  = False,
-                 shift             : Array = np.array([0., 0.]),
-                 pixel_shift       : bool  = False,
-                 name              : str   = 'CartesianFresnel') -> Propagator:
+    def __init__(self         : Propagator,
+                 npixels      : Array,
+                 pixel_scale  : Array,
+                 focal_length : Array,
+                 focal_shift  : Array,
+                 shift        : Array = np.zeros(2),
+                 pixel        : bool  = False,
+                 name         : str   = 'CartesianFresnel') -> Propagator:
         """
         Constructor for the CartesianFresnel propagator
 
         Parameters
         ----------
-        pixel_scale_out : Array, meters/pixel
+        pixel_scale : Array, meters/pixel
             The pixel scale in the output plane, measured in meters per pixel.
-        npixels_out : int
+        npixels : int
             The number of pixels in the output plane.
         focal_length : Array, meters
             The focal_length of the lens/mirror this propagator represents.
-        propagation_shift : Array, meters
+        focal_shift : Array, meters
             The shift in the propagation distance of the wavefront.
         inverse : bool = False
             Is this an 'inverse' propagation. Non-inverse propagations
@@ -986,96 +732,18 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         name : str = 'CartesianFresnel'
             The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name               = name,
-                         inverse            = inverse,
-                         shift              = shift,
-                         pixel_shift        = pixel_shift,
-                         focal_length       = focal_length,
-                         pixel_scale_out    = pixel_scale_out,
-                         npixels_out        = npixels_out,
-                         propagation_shift  = propagation_shift)
+        super().__init__(name         = name,
+                         shift        = shift,
+                         pixel        = pixel,
+                         focal_length = focal_length,
+                         pixel_scale  = pixel_scale,
+                         npixels      = npixels,
+                         focal_shift  = focal_shift)
 
 
-    def get_nfringes(self      : Propagator,
-                     wavefront : Wavefront) -> Array:
+    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
         """
-        The number of diffraction fringes in the output plane.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront being propagated.
-
-        Returns
-        -------
-        fringes : Array
-            The number of diffraction fringes in the output plane.
-        """
-        propagation_distance = self.focal_length + self.propagation_shift
-        size_in = wavefront.diameter
-        size_out = self.pixel_scale_out * self.npixels_out
-        return size_in * size_out / wavefront.wavelength / propagation_distance
-
-
-    def quadratic_phase(self          : Propagator,
-                        x_coordinates : Array,
-                        y_coordinates : Array,
-                        wavelength    : Array,
-                        distance      : Array) -> Array:
-        """
-        A convinience function for calculating quadratic phase factors.
-
-        Parameters
-        ----------
-        x_coordinates : Array
-            The x coordinates of the pixels in meters. This will be different
-            in the plane of propagation and the initial plane.
-        y_coordinates : Array
-            The y coordinates of the pixels in meters. This will be different
-            in the plane of propagation and the initial plane.
-        wavelength : Array, meters
-            The wavelength of the wavefront.
-        distance : Array, meters
-            The distance that is to be propagated in meters.
-
-        Returns
-        -------
-        quadratic_phase : Array
-            A set of phase factors that are useful in optical calculations.
-        """
-        wavenumber = 2 * np.pi / wavelength
-        radial_coordinates = np.hypot(x_coordinates, y_coordinates)
-        return np.exp(0.5j * wavenumber * radial_coordinates ** 2 / distance)
-
-
-    def transfer_function(self      : Propagator,
-                          wavefront : Wavefront,
-                          distance  : Array) -> Array:
-        """
-        The Optical Transfer Function defining the phase evolution of the
-        wavefront when propagating to a non-conjugate plane.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to propagate.
-        distance : Array, meters
-            The distance that is being propagated in meters.
-
-        Returns
-        -------
-        field : Array
-            The field that represents the optical transfer.
-        """
-        return np.exp(1.0j * wavefront.wavenumber * distance)
-
-
-    def propagate(self : Propagator, wavefront : Wavefront) -> Array:
-        """
-        Propagates the wavefront from the input plane to the output plane using
-        a Matrix Fourier Transform.
-
-        TODO: Set plane type to intermediate
+        Propagates the `Wavefront`.
 
         Parameters
         ----------
@@ -1084,32 +752,12 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
 
         Returns
         -------
-        field : Array
-            The normalised electric field phasor after the propagation.
+        wavefront : Wavefront
+            The wavefront with the optical layer applied.
         """
-        # See gihub issue #52
-        offsets = self.get_shift()
+        return wavefront.shifted_fresnel_prop(self.npixels, self.pixel_scale,
+            self.shift, self.focal_length, self.focal_shift, self.pixel)
 
-        input_positions = wavefront.pixel_coordinates
-        output_positions = get_pixel_positions(
-                            (self.npixels_out, self.npixels_out), 
-                            (self.pixel_scale_out, self.pixel_scale_out))
-
-        propagation_distance = self.focal_length + self.propagation_shift
-
-        field = wavefront.phasor
-        field *= self.quadratic_phase(*input_positions,
-            wavefront.wavelength, - self.focal_length)
-        field *= self.quadratic_phase(*input_positions,
-            wavefront.wavelength, propagation_distance)
-        wavefront = wavefront.set_phasor(np.abs(field), np.angle(field))
-
-        field = super().propagate(wavefront)
-        field *= self.transfer_function(wavefront, propagation_distance)
-        field *= self.quadratic_phase(*output_positions,
-            wavefront.wavelength, propagation_distance)
-        return field
-    
 
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
@@ -1136,11 +784,11 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         """
         plane_out = 'pupil' if self.inverse else 'focal'
 
-        pixel_scale = convert_cartesian(self.pixel_scale_out, 'meters', 
+        pixel_scale = convert_cartesian(self.pixel_scale, 'meters', 
                                         cartesian_units)
         prop_distance = convert_cartesian(self.focal_length, 'meters', 
                                         cartesian_units)
-        defocus = convert_cartesian(self.propagation_shift, 'meters', 
+        defocus = convert_cartesian(self.focal_shift, 'meters', 
                                         cartesian_units)
         shift = convert_cartesian(self.shift, 'meters', cartesian_units) \
             if not self.pixel_shift else self.shift
@@ -1148,7 +796,7 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
 
         prop_string = (f"Propagates the Wavefront {prop_distance} "
                        f"{cartesian_units} to a {plane_out} plane "
-                       f"with {self.npixels_out}x{self.npixels_out} pixels of "
+                       f"with {self.npixels}x{self.npixels} pixels of "
                        f"size {pixel_scale:.{sigfigs}} {cartesian_units} ")
         
         defocus_string = (f"with a defocus of {defocus} {cartesian_units} "

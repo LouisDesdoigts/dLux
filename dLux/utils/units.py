@@ -1,4 +1,6 @@
 import jax.numpy as np
+from jax import Array
+
 
 __all__ = ["convert_cartesian", "convert_angular",
            "radians_to_arcseconds", "radians_to_degrees", 
@@ -9,8 +11,6 @@ __all__ = ["convert_cartesian", "convert_angular",
            "arcseconds_to_degrees", "arcseconds_to_arcminutes",
            "r2s", "r2d", "r2m", "d2r", "d2m", "d2s", 
            "m2r", "m2d", "m2s", "s2r", "s2d", "s2m"]
-
-Array = np.ndarray
 
 
 # General conversion classes:

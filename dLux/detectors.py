@@ -1,6 +1,7 @@
 from __future__ import annotations
 import jax.numpy as np
 from abc import ABC, abstractmethod
+from jax import Array
 from jax.scipy.signal import convolve
 from jax.scipy.stats import norm
 from zodiax import Base
@@ -11,9 +12,6 @@ from dLux.utils.helpers import single_image_plot
 
 __all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
            "AddConstant", "IntegerDownsample", "Rotate"]
-
-
-Array = np.ndarray
 
 
 class DetectorLayer(Base, ABC):

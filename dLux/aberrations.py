@@ -1,7 +1,7 @@
 from __future__ import annotations
 from zodiax import Base
 import jax.numpy as np
-from jax import lax
+from jax import lax, Array
 import jax.tree_util as jtu
 import dLux
 from dLux.utils.math import factorial
@@ -9,9 +9,6 @@ from dLux.utils.coordinates import cartesian_to_polar, get_pixel_positions
 
 
 __all__ = ['Zernike', 'ZernikeBasis', 'AberrationFactory']
-
-
-Array = np.ndarray
 
 
 zernike_names = {
@@ -286,6 +283,8 @@ class Zernike(Base):
         else:
             return self.calculate_polike(coordinates, nsides)
 
+
+
     
 class ZernikeBasis(Base):
     """
@@ -462,7 +461,7 @@ class AberrationFactory():
                 "nsides > 8. Please provide a name.")
             sides = ["Circular", "Triangular", "Square", "Pentagonal", 
                 "Hexagonal", "Heptagonal", "Octagonal"]
-            name = sides[np.maximum(nsides-2, 0)] + "Aperture"
+            name = sides[np.maximum(nsides-2, 0)] + "Aberrations"
 
 
         # Construct coordinates

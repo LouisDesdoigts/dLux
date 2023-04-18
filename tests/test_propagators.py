@@ -2,7 +2,7 @@ from __future__ import annotations
 import jax.numpy as np
 import pytest
 import dLux
-from jax import config
+from jax import config, Array
 config.update("jax_debug_nans", True)
 
 
@@ -26,14 +26,11 @@ class TestCartesianMFT():
         """
         wl, npix, f_pscale, fl = 1e-6, 32, 1e-6, 5.
         p_pscale = 1/npix
-        amplitude = np.ones((1, npix, npix))
-        phase = np.zeros((1, npix, npix))
-        plane_type = dLux.PlaneType.Pupil
 
         # Construct
-        wf = dLux.CartesianWavefront(wl, p_pscale, amplitude, phase, plane_type)
+        wf = dLux.Wavefront(npix, npix*p_pscale, wl)
         prop = create_cartesian_mft(npix, f_pscale, fl)
-        inv_prop = create_cartesian_mft(npix, p_pscale, fl, inverse=True)
+        inv_prop = create_cartesian_mft(npix, p_pscale, fl)
 
         # Prop
         focal = prop(wf)
@@ -50,7 +47,7 @@ class TestCartesianMFT():
         # Construct
         prop_shift = create_cartesian_mft(npix, f_pscale, fl, shift=shift)
         prop_shift_pix = create_cartesian_mft(npix, f_pscale, fl, 
-                                            shift=shift_pix, pixel_shift=True)
+                                            shift=shift_pix, pixel=True)
 
         # Prop
         focal_shift = prop_shift(wf)
@@ -67,6 +64,7 @@ class TestAngularMFT():
     Test the AngularMFT class.
     """
 
+
     def test_constructor(self, create_angular_mft : callable):
         """
         Tests the constructor.
@@ -81,14 +79,11 @@ class TestAngularMFT():
         """
         wl, npix, f_pscale = 1e-6, 32, 2e-7
         p_pscale = 1/npix
-        amplitude = np.ones((1, npix, npix))
-        phase = np.zeros((1, npix, npix))
-        plane_type = dLux.PlaneType.Pupil
 
         # Construct
-        wf = dLux.AngularWavefront(wl, p_pscale, amplitude, phase, plane_type)
+        wf = dLux.Wavefront(npix, npix*p_pscale, wl)
         prop = create_angular_mft(npix, f_pscale)
-        inv_prop = create_angular_mft(npix, p_pscale, inverse=True)
+        inv_prop = create_angular_mft(npix, p_pscale)
 
         # Prop
         focal = prop(wf)
@@ -103,9 +98,8 @@ class TestAngularMFT():
         shift = f_pscale * np.ones(2)
 
         # Construct
-        prop_shift = create_angular_mft(npix, f_pscale, shift=shift)
-        prop_shift_pix = create_angular_mft(npix, f_pscale, 
-                                            shift=shift_pix, pixel_shift=True)
+        prop_shift = create_angular_mft(npix, f_pscale, shift)
+        prop_shift_pix = create_angular_mft(npix, f_pscale, shift_pix, True)
 
         # Prop
         focal_shift = prop_shift(wf)
@@ -137,14 +131,9 @@ class TestCartesianFFT():
         """
         wl, npix, fl = 1e-6, 32, 5.
         p_pscale = 1/npix
-        amplitude = np.ones((1, npix, npix))
-        phase = np.zeros((1, npix, npix))
-        plane_type = dLux.PlaneType.Pupil
-
-        # Construct
-        wf = dLux.CartesianWavefront(wl, p_pscale, amplitude, phase, plane_type)
+        wf = dLux.Wavefront(npix, npix*p_pscale, wl)
         prop = create_cartesian_fft(fl)
-        inv_prop = create_cartesian_fft(fl, inverse=True)
+        inv_prop = create_cartesian_fft(fl)
 
         # Prop
         focal = prop(wf.pad_to(npix * 5))
@@ -153,6 +142,7 @@ class TestCartesianFFT():
         # Test
         assert not np.isnan(focal.psf).any()
         assert not np.isnan(pupil.psf).any()
+
 
 class TestAngularFFT():
     """
@@ -174,14 +164,9 @@ class TestAngularFFT():
         """
         wl, npix = 1e-6, 32
         p_pscale = 1/npix
-        amplitude = np.ones((1, npix, npix))
-        phase = np.zeros((1, npix, npix))
-        plane_type = dLux.PlaneType.Pupil
-
-        # Construct
-        wf = dLux.AngularWavefront(wl, p_pscale, amplitude, phase, plane_type)
+        wf = dLux.Wavefront(npix, npix*p_pscale, wl)
         prop = create_angular_fft()
-        inv_prop = create_angular_fft(inverse=True)
+        inv_prop = create_angular_fft()
 
         # Prop
         focal = prop(wf.pad_to(npix * 5))
@@ -213,23 +198,18 @@ class TestCartesianFresnel():
         """
         wl, npix, f_pscale, fl = 1e-6, 32, 2e-7, 5.
         p_pscale = 1/npix
-        amplitude = np.ones((1, npix, npix))
-        phase = np.zeros((1, npix, npix))
-        plane_type = dLux.PlaneType.Pupil
-
-        # Construct
-        wf = dLux.FarFieldFresnelWavefront(wl, p_pscale, amplitude, phase, 
-                                         plane_type)
+        wf = dLux.FresnelWavefront(npix, npix*p_pscale, wl)
         fresnel_prop = create_cartesian_fresnel(npix, f_pscale, fl, 5e-5)
         focal_prop = dLux.CartesianFresnel(npix, f_pscale, fl, 0.)
-        inv_prop = create_cartesian_fresnel(npix, p_pscale, fl, 1e0, inverse=True)
+        inv_prop = create_cartesian_fresnel(npix, p_pscale, fl, 1e0)
 
         # Prop
         fresnel = fresnel_prop(wf)
         focal = focal_prop(wf)
-        pupil = inv_prop(focal)
-
+        
         # Test
         assert not np.isnan(fresnel.psf).any()
         assert not np.isnan(focal.psf).any()
-        assert not np.isnan(pupil.psf).any()
+
+        with pytest.raises(ValueError):
+            inv_prop(fresnel)

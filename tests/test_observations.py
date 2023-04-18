@@ -1,14 +1,13 @@
 import dLux 
-import jax
 import jax.numpy as np
 import typing
 from dLux.exceptions import DimensionError
 import pytest
+from jax import config, Array
+config.update("jax_debug_nans", True)
 
-jax.config.update("jax_debug_nans", True)
 
 Dither = dLux.observations.Dither
-Array = typing.TypeVar("Array")
 
 
 class TestDither(object):

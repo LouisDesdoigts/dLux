@@ -2,14 +2,11 @@ from __future__ import annotations
 from zodiax import Base
 from jax.tree_util import tree_map
 import jax.numpy as np
-from jax import vmap
+from jax import vmap, Array
 from abc import abstractmethod
 from equinox import tree_at
 from typing import Any
 import dLux
-
-
-Array = np.ndarray
 
 
 __all__ = ["AbstractObservation", "Dither"]

@@ -1,14 +1,11 @@
 import jax.numpy as np
-from jax import hessian, grad
+from jax import hessian, grad, Array
 from jax.scipy.stats import poisson
 from typing import Callable
 
 __all__ = ["poisson_likelihood", "poisson_log_likelihood",
            "chi2_likelihood", "chi2_log_likelihood",
            "calculate_covariance", "calculate_entropy"]
-
-
-Array = np.ndarray
 
 
 def poisson_likelihood(X         : Array,

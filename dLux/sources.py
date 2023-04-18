@@ -1,7 +1,7 @@
 from __future__ import annotations
 import jax.numpy as np
 from jax.scipy.signal import convolve
-from jax import vmap
+from jax import vmap, Array
 from equinox import tree_at
 from zodiax import Base
 from abc import ABC, abstractmethod
@@ -13,7 +13,7 @@ __all__ = ["PointSource", "MultiPointSource", "ArrayDistribution",
            "BinarySource", "PointExtendedSource", "PointAndExtendedSource"]
 
 
-Array = np.ndarray
+# TODO: Remove all Filter objects from the source objects.
 
 
 ########################

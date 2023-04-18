@@ -3,15 +3,12 @@ from abc import ABC, abstractmethod
 import jax.numpy as np
 from equinox import tree_at
 from zodiax import Base
-from jax import vmap
+from jax import vmap, Array
 from dLux.utils.units import convert_cartesian
 from dLux.utils.helpers import spectrum_plot
 
 
 __all__ = ["ArraySpectrum", "PolynomialSpectrum", "CombinedSpectrum"]
-
-
-Array = np.ndarray
 
 
 class Spectrum(Base, ABC):

@@ -1,9 +1,9 @@
 import pytest
 import jax.numpy as np
 import dLux
+from jax import Array
 
 
-Array = np.ndarray
 Wavefront = dLux.wavefronts.Wavefront
 OpticalLayer = dLux.optics.OpticalLayer
 Spectrum = dLux.spectrums.Spectrum
@@ -22,13 +22,11 @@ def create_wavefront() -> callable:
         used to create a wavefront for testing.
     """
     def _create_wavefront(
-            wavelength: Array = np.array(550e-09),
-            pixel_scale: Array = np.array(1.),
-            plane_type: int = dLux.PlaneType.Pupil,
-            amplitude: Array = np.ones((1, 16, 16)),
-            phase: Array = np.zeros((1, 16, 16))) -> Wavefront:
+            npixels : int = 16,
+            diameter : Array = np.array(1.),
+            wavelength: Array = np.array(550e-09)) -> Wavefront:
         return dLux.wavefronts.Wavefront(
-            wavelength, pixel_scale, amplitude, phase, plane_type)
+            npixels, diameter, wavelength)
     return _create_wavefront
 
 
@@ -43,9 +41,8 @@ def create_create_wavefront() -> callable:
     """
     def _create_create_wavefront(
             npixels = 16,
-            diameter = np.array(1.),
-            wavefront_type = "Cartesian") -> OpticalLayer:
-        return dLux.optics.CreateWavefront(npixels, diameter, wavefront_type)
+            diameter = np.array(1.)) -> OpticalLayer:
+        return dLux.optics.CreateWavefront(npixels, diameter)
     return _create_create_wavefront
 
 
@@ -306,25 +303,16 @@ def create_cartesian_mft() -> callable:
     """
 
     def _create_cartesian_mft(
-                            npixels_out     : int   = 16,
-                            pixel_scale_out : Array = np.array(1.),
-                            focal_length    : Array = np.array(1.),
-                            shift           : Array = np.zeros(2),
-                            pixel_shift     : bool  = False,
-                            inverse         : bool  = False) -> OpticalLayer:
+                            npixels      : int   = 16,
+                            pixel_scale  : Array = np.array(1.),
+                            focal_length : Array = np.array(1.),
+                            shift        : Array = np.zeros(2),
+                            pixel        : bool  = False) -> OpticalLayer:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
-        pixel_scale_out = pixel_scale_out if pixel_scale_out is None \
-                                                        else pixel_scale_out
-        focal_length = focal_length if focal_length is None \
-                                                        else focal_length
-        npixels_out = npixels_out if npixels_out is None else npixels_out
-        shift       = shift       if shift       is None else shift
-        pixel_shift = pixel_shift if pixel_shift is None else pixel_shift
-        inverse     = inverse     if inverse     is None else inverse
-        return dLux.propagators.CartesianMFT(npixels_out, pixel_scale_out,
-                                     focal_length, inverse, shift, pixel_shift)
+        return dLux.propagators.CartesianMFT(npixels, pixel_scale,
+            focal_length, shift, pixel)
     return _create_cartesian_mft
 
 
@@ -337,17 +325,14 @@ def create_angular_mft() -> callable:
         a function that has all keyword arguments and can be
         used to create a `AngularMFT` layer for testing.
     """
-    def _create_angular_mft(
-                  npixels_out     : int   = 16,
-                  pixel_scale_out : float = np.array(1.),
-                  inverse         : bool  = False,
-                  shift           : Array = np.zeros(2),
-                  pixel_shift     : bool  = False) -> OpticalLayer:
+    def _create_angular_mft(npixels      : int   = 16,
+                            pixel_scale  : Array = np.array(1.),
+                            shift        : Array = np.zeros(2),
+                            pixel        : bool  = False) -> OpticalLayer:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
-        return dLux.propagators.AngularMFT(npixels_out, pixel_scale_out,
-                                           inverse, shift, pixel_shift)
+        return dLux.propagators.AngularMFT(npixels, pixel_scale, shift, pixel)
     return _create_angular_mft
 
 
@@ -362,15 +347,11 @@ def create_cartesian_fft():
     """
 
     def _create_cartesian_fft(
-                  focal_length : Array = np.array(1.),
-                  inverse      : bool  = False) -> OpticalLayer:
+            focal_length : Array = np.array(1.)) -> OpticalLayer:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
-        focal_length = focal_length if focal_length is None \
-                                                        else focal_length
-        inverse = inverse if inverse is None else inverse
-        return dLux.propagators.CartesianFFT(focal_length, inverse)
+        return dLux.propagators.CartesianFFT(focal_length)
     return _create_cartesian_fft
 
 @pytest.fixture
@@ -383,11 +364,11 @@ def create_angular_fft() -> callable:
         used to create a `AngularFFT` layer for testing.
     """
 
-    def _create_angular_fft(inverse : bool = False) -> OpticalLayer:
+    def _create_angular_fft() -> OpticalLayer:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
-        return dLux.propagators.AngularFFT(inverse)
+        return dLux.propagators.AngularFFT()
     return _create_angular_fft
 
 
@@ -401,18 +382,17 @@ def create_cartesian_fresnel() -> callable:
         used to create a `CartesianFresnel` layer for testing.
     """
     def _create_cartesian_fresnel(
-                  npixels_out       : int   = 16,
-                  pixel_scale_out   : float = np.array(1.),
-                  focal_length      : Array = np.array(1.),
-                  propagation_shift : Array = np.array(1e-3),
-                  inverse           : bool  = False,
-                  shift             : Array = np.zeros(2),
-                  pixel_shift       : bool  = False) -> OpticalLayer:
+                  npixels      : int   = 16,
+                  pixel_scale  : float = np.array(1.),
+                  focal_length : Array = np.array(1.),
+                  focal_shift  : Array = np.array(1e-3),
+                  shift        : Array = np.zeros(2),
+                  pixel        : bool  = False) -> OpticalLayer:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
-        return dLux.propagators.CartesianFresnel(npixels_out, pixel_scale_out,
-                 focal_length, propagation_shift, inverse, shift, pixel_shift)
+        return dLux.propagators.CartesianFresnel(npixels, pixel_scale,
+                 focal_length, focal_shift, shift, pixel)
     return _create_cartesian_fresnel
 
 
@@ -478,8 +458,8 @@ def create_relative_position_source() -> callable:
     def _create_relative_position_source(
                   position       : Array    = np.array([0., 0.]),
                   flux           : Array    = np.array(1.),
-                  spectrum       : OpticalLayer = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
-                                                                 600e-9, 10)),
+                  spectrum       : Spectrum = dLux.spectrums.ArraySpectrum(
+                    np.linspace(500e-9, 600e-9, 10)),
                   separation     : Array    = np.array(1.),
                   position_angle : Array    = np.array(0.),
                   name           : str      = "RelativePositionSource") -> Source:
@@ -506,8 +486,8 @@ def create_point_source() -> callable:
     def _create_point_source(
                   position    : Array    = np.array([0., 0.]),
                   flux        : Array    = np.array(1.),
-                  spectrum    : OpticalLayer = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, \
-                                                                 600e-9, 10)),
+                  spectrum    : Spectrum = dLux.spectrums.ArraySpectrum(
+                    np.linspace(500e-9, 600e-9, 10)),
                   name        : str      = "PointSource") -> Source:
         """
         Safe constructor for the dLuxModule, associated with this utility.
@@ -729,7 +709,7 @@ def create_optics() -> callable:
                 dLux.optics.CreateWavefront(16, 1),
                 dLux.apertures.ApertureFactory(16),
                 dLux.optics.NormaliseWavefront(),
-                dLux.propagators.CartesianMFT(16, 1., 1e-6)
+                dLux.propagators.CartesianMFT(16, 1e-6, 1)
             ]) -> OpticalLayer:
         return dLux.core.Optics(layers)
     return _create_optics

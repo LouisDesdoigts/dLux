@@ -2,10 +2,9 @@ from __future__ import annotations
 import jax.numpy as np
 import pytest
 import dLux
-from jax import config
+from jax import config, Array
 config.update("jax_debug_nans", True)
 
-Array = np.ndarray
 
 def test_model(
         create_optics: callable,
@@ -107,9 +106,6 @@ class TestOptics(object):
         with pytest.raises(AssertionError):
             osys.propagate_mono(1e-6, [0.])
 
-        with pytest.raises(AssertionError):
-            osys.propagate_mono(1e-6, weight=[0.])
-
         # Test propagation
         psf = osys.propagate_mono(4e-6)
         assert not np.isnan(psf).all()
@@ -137,28 +133,6 @@ class TestOptics(object):
 
         # Test propagation
         psf = osys.propagate([4e-6, 5e-6])
-        assert not np.isnan(psf).all()
-        assert not np.isinf(psf).all()
-
-
-    def test_debug_prop(self, create_optics: callable) -> None:
-        """
-        Tests the debug_prop method.
-        """
-        osys = create_optics()
-
-        # Test inputs
-        with pytest.raises(AssertionError):
-            osys.debug_prop([1e-6])
-
-        with pytest.raises(AssertionError):
-            osys.debug_prop(1e-6, [0.])
-
-        with pytest.raises(AssertionError):
-            osys.debug_prop(1e-6, weight=[0.])
-
-        # Test propagation
-        psf, _, _ = osys.debug_prop(4e-6)
         assert not np.isnan(psf).all()
         assert not np.isinf(psf).all()
 

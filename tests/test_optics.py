@@ -2,10 +2,8 @@ from __future__ import annotations
 import jax.numpy as np
 import pytest
 import dLux
-from jax import config
+from jax import config, Array
 config.update("jax_debug_nans", True)
-
-Array = np.ndarray
 
 
 class TestCreateWavefront(object):
@@ -22,10 +20,6 @@ class TestCreateWavefront(object):
         with pytest.raises(AssertionError):
             create_create_wavefront(diameter=np.array([]))
 
-        # Test wrong string input
-        with pytest.raises(AssertionError):
-            create_create_wavefront(wavefront_type='cartesian')
-
         # Test functioning
         create_create_wavefront()
 
@@ -34,8 +28,7 @@ class TestCreateWavefront(object):
         """
         Tests the __call__ method.
         """
-        params = {'wavelength': np.array(1e-6), 'offset': np.zeros(2)}
-        create_create_wavefront()(None, params)
+        create_create_wavefront()(1e-6, np.array([0, 0]))
 
 
 class TestTiltWavefront(object):
@@ -296,9 +289,8 @@ class TestApplyBasisCLIMB(object):
         """
         Tests the __call__ method.
         """
-        wf = create_wavefront(amplitude = np.ones((1, 256, 256)),
-                            phase = np.zeros((1, 256, 256))) 
-        npix = wf.npixels
+        npix = 256
+        wf = create_wavefront(npixels = npix) 
         basis = np.ones((3, 3*npix, 3*npix))
         create_basis_climb(basis=basis)(wf)
 

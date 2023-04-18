@@ -1,10 +1,9 @@
 import jax.numpy as np
 import pytest
 import dLux
-from jax import config
+from jax import config, Array
 config.update("jax_debug_nans", True)
 
-Array = np.ndarray
 
 class TestWavefront(object):
     """
@@ -27,39 +26,6 @@ class TestWavefront(object):
         with pytest.raises(AssertionError):
             create_wavefront(wavelength=[1e3, 1e4])
 
-        # Test empty array
-        with pytest.raises(AssertionError):
-            create_wavefront(pixel_scale=[])
-
-        # Test 1d array
-        with pytest.raises(AssertionError):
-            create_wavefront(pixel_scale=[1e3, 1e4])
-
-        # Test non 3d amplitude array
-        with pytest.raises(AssertionError):
-            create_wavefront(amplitude=np.ones((3, 3)))
-
-        # Test non 3d amplitude array
-        with pytest.raises(AssertionError):
-            create_wavefront(amplitude=np.ones((3, 3, 3, 3)))
-
-        # Test non 3d phase array
-        with pytest.raises(AssertionError):
-            create_wavefront(phase=np.ones((3, 3)))
-
-        # Test non 3d phase array
-        with pytest.raises(AssertionError):
-            create_wavefront(phase=np.ones((3, 3, 3, 3)))
-
-        # Test different amplitude/phase array shapes
-        with pytest.raises(AssertionError):
-            create_wavefront(amplitude=np.ones((4, 4, 4)),
-                                   phase=np.ones((3, 3, 3)))
-
-        # Test non-planetype plane_type
-        with pytest.raises(AssertionError):
-            create_wavefront(plane_type=[1])
-
 
     def test_npixels(self, create_wavefront: callable) -> None:
         """
@@ -67,14 +33,6 @@ class TestWavefront(object):
         """
         wf = create_wavefront()
         assert wf.npixels == wf.amplitude.shape[-1]
-
-
-    def test_nfields(self, create_wavefront: callable) -> None:
-        """
-        Tests the nfields property.
-        """
-        wf = create_wavefront()
-        assert wf.nfields == wf.amplitude.shape[0]
 
 
     def test_diameter(self, create_wavefront: callable) -> None:
@@ -124,132 +82,7 @@ class TestWavefront(object):
         wf = create_wavefront()
         assert (wf.pixel_coordinates == \
         dLux.utils.coordinates.get_pixel_positions((wf.npixels, wf.npixels,),
-                                        (wf.pixel_scale, wf.pixel_scale))).all()
-
-
-    def test_set_amplitude(self, create_wavefront: callable) -> None:
-        """
-        Tests the set_amplitude method.
-        """
-        wf = create_wavefront()
-
-        # Test string inputs
-        with pytest.raises(AssertionError):
-            wf.set_amplitude("some string")
-
-        # Test list inputs
-        with pytest.raises(AssertionError):
-            wf.set_amplitude([])
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.set_amplitude(np.ones((16, 16)))
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.set_amplitude(np.ones((1, 1, 16, 16)))
-
-        # Test correct behaviour
-        new_ampl = 0.5*np.ones((1, 16, 16))
-        assert (wf.set_amplitude(new_ampl).amplitude == new_ampl).all()
-
-
-    def test_set_phase(self, create_wavefront: callable) -> None:
-        """
-        Tests the set_phase method.
-        """
-        wf = create_wavefront()
-
-        # Test string inputs
-        with pytest.raises(AssertionError):
-            wf.set_phase("some string")
-
-        # Test list inputs
-        with pytest.raises(AssertionError):
-            wf.set_phase([])
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.set_phase(np.ones((16, 16)))
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.set_phase(np.ones((1, 1, 16, 16)))
-
-        # Test correct behaviour
-        new_phase = 0.5*np.ones((1, 16, 16))
-        assert (wf.set_phase(new_phase).phase == new_phase).all()
-
-
-    def test_set_pixel_scale(self, create_wavefront: callable) -> None:
-        """
-        Tests the set_pixel_scale method.
-        """
-        wf = create_wavefront()
-
-        # Test string inputs
-        with pytest.raises(AssertionError):
-            wf.set_pixel_scale("some string")
-
-        # Test list inputs
-        with pytest.raises(AssertionError):
-            wf.set_pixel_scale([])
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.set_pixel_scale(np.array([]))
-
-        # Test correct behaviour
-        new_pixscale = np.array(1.5)
-        assert wf.set_pixel_scale(new_pixscale).pixel_scale == new_pixscale
-
-
-    def test_set_plane_type(self, create_wavefront: callable) -> None:
-        """
-        Tests the set_plane_type method.
-        """
-        wf = create_wavefront()
-
-        # Test string inputs
-        with pytest.raises(AssertionError):
-            wf.set_plane_type("some string")
-
-        # Test correct behaviour
-        new_plane_type = dLux.PlaneType.Focal
-        assert wf.set_plane_type(new_plane_type).plane_type == new_plane_type
-
-
-    def test_set_phasor(self, create_wavefront: callable) -> None:
-        """
-        Tests the set_phasor method.
-        """
-        wf = create_wavefront()
-
-        # Test string inputs
-        with pytest.raises(AssertionError):
-            wf.set_phasor("some string", "some_string")
-
-        # Test list inputs
-        with pytest.raises(AssertionError):
-            wf.set_phasor([], [])
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.set_phasor(np.ones((16, 16)), np.ones((16, 16)))
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.set_phasor(np.ones((1, 1, 16, 16)), np.ones((1, 1, 16, 16)))
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.set_phasor(np.ones((1, 16, 16)), np.ones((1, 15, 15)))
-
-        # Test correct behaviour
-        new_ampl = 0.5*np.ones((1, 16, 16))
-        new_phase = 0.5*np.ones((1, 16, 16))
-        assert (wf.set_phasor(new_ampl, new_phase).amplitude == new_ampl).all()
-        assert (wf.set_phasor(new_ampl, new_phase).phase == new_phase).all()
+            (wf.pixel_scale, wf.pixel_scale))).all()
 
 
     def test_tilt_wavefront(self, create_wavefront: callable) -> None:
@@ -278,81 +111,6 @@ class TestWavefront(object):
         wf.tilt_wavefront(np.ones(2))
 
 
-    def test_multiply_amplitude(self, create_wavefront: callable) -> None:
-        """
-        Tests the multiply_amplitude method.
-        """
-        wf = create_wavefront()
-
-        # Test string inputs
-        with pytest.raises(AssertionError):
-            wf.multiply_amplitude("some string")
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.multiply_amplitude(np.ones(1))
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.multiply_amplitude(np.ones((1, 1, 1, 1)))
-
-        # Test basic behaviour
-        npix = wf.npixels
-        wf.multiply_amplitude(np.array(1.))
-        wf.multiply_amplitude(np.ones((npix, npix)))
-        wf.multiply_amplitude(np.ones((1, npix, npix)))
-
-
-    def test_add_phase(self, create_wavefront: callable) -> None:
-        """
-        Tests the add_phase method.
-        """
-        wf = create_wavefront()
-
-        # Test string inputs
-        with pytest.raises(AssertionError):
-            wf.add_phase("some string")
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.add_phase(np.ones(1))
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.add_phase(np.ones((1, 1, 1, 1)))
-
-        # Test basic behaviour
-        npix = wf.npixels
-        wf.add_phase(np.array(1.))
-        wf.add_phase(np.ones((npix, npix)))
-        wf.add_phase(np.ones((1, npix, npix)))
-
-
-    def test_add_opd(self, create_wavefront: callable) -> None:
-        """
-        Tests the add_opd method.
-        """
-        wf = create_wavefront()
-
-        # Test string inputs
-        with pytest.raises(AssertionError):
-            wf.add_opd("some string")
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.add_opd(np.ones(1))
-
-        # Test wrong shapes
-        with pytest.raises(AssertionError):
-            wf.add_opd(np.ones((1, 1, 1, 1)))
-
-        # Test basic behaviour
-        npix = wf.npixels
-        wf.add_opd(np.array(1.))
-        wf.add_opd(np.ones((npix, npix)))
-        wf.add_opd(np.ones((1, npix, npix)))
-
-
     def test_normalise(self, create_wavefront: callable) -> None:
         """
         Tests the normalise method.
@@ -361,14 +119,6 @@ class TestWavefront(object):
 
         new_wf = wf.normalise()
         assert np.sum(new_wf.amplitude**2) == 1.
-
-
-    def test_wavefront_to_psf(self, create_wavefront: callable) -> None:
-        """
-        Tests the wavefront_to_psf method.
-        """
-        wf = create_wavefront()
-        wf.wavefront_to_psf()
 
 
     def test_invert_x_and_y(self, create_wavefront: callable) -> None:
@@ -422,7 +172,7 @@ class TestWavefront(object):
         k = 2
         new_wf = wf.interpolate(npix//k, pixscale*k)
         new_wf2 = wf.interpolate(npix//k, pixscale*k, real_imaginary=True)
-        small_ampl = dLux.IntegerDownsample(k)(wf.amplitude[0])/k**2
+        small_ampl = dLux.IntegerDownsample(k)(wf.amplitude)/k**2
 
         assert np.allclose(new_wf.amplitude[0], small_ampl)
         assert np.allclose(new_wf2.amplitude[0], small_ampl)
@@ -455,10 +205,9 @@ class TestWavefront(object):
         """
         Tests the pad_to method.
         """
-        even_wf = create_wavefront()
-        odd_wf = create_wavefront(amplitude=np.ones((1, 15, 15)),
-                                        phase=np.ones((1, 15, 15)))
-
+        even_wf = create_wavefront(npixels=16)
+        odd_wf = create_wavefront(npixels=15)
+        
         # Smaller value
         with pytest.raises(AssertionError):
             even_wf.pad_to(14)
@@ -478,9 +227,8 @@ class TestWavefront(object):
         """
         Tests the crop_to method.
         """
-        even_wf = create_wavefront()
-        odd_wf = create_wavefront(amplitude=np.ones((1, 15, 15)),
-                                        phase=np.ones((1, 15, 15)))
+        even_wf = create_wavefront(npixels=16)
+        odd_wf = create_wavefront(npixels=15)
 
         # Smaller value
         with pytest.raises(AssertionError):

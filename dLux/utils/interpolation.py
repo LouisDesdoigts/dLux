@@ -1,5 +1,5 @@
 import jax.numpy as np
-from jax import vmap
+from jax import vmap, Array
 from jax.scipy.ndimage import map_coordinates
 from functools import partial
 import dLux.utils.coordinates as c
@@ -8,9 +8,6 @@ import dLux.utils.coordinates as c
 
 __all__ = ["scale_array", "generate_coordinates", "interpolate_field",
            "interpolate", "rotate_field", "rotate", "fourier_rotate"]
-
-
-Array =  np.ndarray
 
 
 def scale_array(array    : Array,
@@ -192,7 +189,7 @@ def rotate_field(field          : Array,
     angle : Array, radians
         The angle by which to rotate the wavefront in a {}wise direction.
     real_imaginary : bool = False
-        Whether to rotate the real and imaginary representation of the
+        Whether the input field is a real and imaginary representation of the
         wavefront as opposed to the the amplitude and phase representation.
     fourier : bool = False
         Should the fourier rotation method be used (True), or regular
@@ -238,6 +235,8 @@ def rotate(array : Array, angle : Array, order : int = 1) -> Array:
         The array to rotate.
     angle : Array, radians
         The angle to rotate the array by.
+    order : int = 1
+        The interpolation order to use. Must be 0, 1, or 3.
 
     Returns
     -------

@@ -2,11 +2,8 @@ from __future__ import annotations
 import jax.numpy as np
 import pytest
 import dLux
-from jax import config
+from jax import config, Array
 config.update("jax_debug_nans", True)
-
-
-Array = np.ndarray
 
 
 class TestSource():
@@ -87,6 +84,7 @@ class TestSource():
         """
         source = create_source()
         assert (source.get_weights() == source.spectrum.weights).all()
+
 
 class TestResolvedSource():
     """

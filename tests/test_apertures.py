@@ -2,11 +2,12 @@ import dLux
 import jax
 import jax.numpy as np
 import typing
+from jax import Array
+
 
 jax.config.update("jax_debug_nans", True)
 
 Aperture = typing.TypeVar("Aperture")
-Array = typing.TypeVar("Array")
 Spider = typing.TypeVar("Spider")
 
 
@@ -72,7 +73,7 @@ class TestAperturesCommonInterfaces():
                             actual_kwargs["rotation"] = rotation
                             
                         
-                        aperture = aperture_fixture(**actual_kwargs)._aperture(coordinates)
+                        aperture = aperture_fixture(**actual_kwargs)._transmission(coordinates)
                         
                         msg = f'{actual_kwargs}, on ctor {aperture_fixture}'
                         
@@ -108,22 +109,22 @@ class TestUniformSpider(object):
 
         # Case Translated 
         spider = create_uniform_spider(centre=[1., 1.], softening=0.)
-        aperture = spider._aperture(coordinates)
+        aperture = spider._transmission(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Rotated 
         spider = create_uniform_spider(rotation=np.pi/4., softening=0.)
-        aperture = spider._aperture(coordinates)
+        aperture = spider._transmission(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Strained 
         spider = create_uniform_spider(shear=[.05, .05], softening=0.)
-        aperture = spider._aperture(coordinates)
+        aperture = spider._transmission(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
         # Case Compression
         spider = create_uniform_spider(compression=[1.05, .95], softening=0.)
-        aperture = spider._aperture(coordinates)
+        aperture = spider._transmission(coordinates)
         assert ((aperture == 1.) | (aperture == 0.)).all()
 
 
@@ -139,25 +140,25 @@ class TestUniformSpider(object):
 
         # Case Translated 
         spider = create_uniform_spider(centre=[1., 1.], softening=0.)
-        aperture = spider._aperture(coordinates)
+        aperture = spider._transmission(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Rotated 
         spider = create_uniform_spider(rotation=np.pi/4., softening=0.)
-        aperture = spider._aperture(coordinates)
+        aperture = spider._transmission(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Strained 
         spider = create_uniform_spider(shear=[.05, .05], softening=0.)
-        aperture = spider._aperture(coordinates)
+        aperture = spider._transmission(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
         # Case Compression
         spider = create_uniform_spider(compression=[1.05, .95], softening=0.)
-        aperture = spider._aperture(coordinates)
+        aperture = spider._transmission(coordinates)
         assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
         assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
 
@@ -197,7 +198,7 @@ class TestAberratedAperture(object):
         ap = create_circular_aperture()
 
         aber_ap = create_aberrated_aperture(aperture=ap)._basis(coordinates)
-        ap = ap._aperture(coordinates)
+        ap = ap._transmission(coordinates)
 
         abers = np.where(ap == 0., aber_ap, 0.)
         assert (abers == 0.).all()

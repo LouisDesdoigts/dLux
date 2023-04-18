@@ -1,11 +1,9 @@
 import jax.numpy as np
 import dLux
+from jax import Array
 
 
 __all__ = ["simple_optical_system", "toliman"]
-
-
-Array = np.ndarray
 
 
 def simple_optical_system(aperture_diameter         : Array,

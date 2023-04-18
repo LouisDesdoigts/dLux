@@ -1,6 +1,6 @@
 from __future__ import annotations
 import jax.numpy as np
-from jax import vmap
+from jax import vmap, Array
 from jax.tree_util import tree_map
 from jax.lax import stop_gradient
 from zodiax import Base
@@ -14,9 +14,6 @@ import dLux
 __all__ = ["CreateWavefront", "TiltWavefront", "NormaliseWavefront", 
            "ApplyBasisOPD", "AddPhase", "AddOPD", "TransmissiveOptic", 
            "ApplyBasisCLIMB", "Rotate"]
-
-
-Array = np.ndarray
 
 
 class OpticalLayer(Base, ABC):
@@ -65,10 +62,14 @@ class OpticalLayer(Base, ABC):
         return
 
 
-    def apply(self : OpticalLayer, parameters : dict) -> dict:
+    def apply(self : OpticalLayer, 
+              wavefront, 
+              parameters : dict) -> dict:
         """
         Unpacks the wavefront object from the parameters dictionary and applies
-        the layers __call__ method upon it.
+        the layers __call__ method upon it. This allows for extra meta-data
+        to be passed between the layers to allow for more complex interactions
+        between optical components (such as pupil-remapping).
 
         Parameters
         ----------
@@ -87,21 +88,19 @@ class OpticalLayer(Base, ABC):
 
         # Method does not take in the parameters, update in place
         if 'parameters' not in input_parameters:
-            parameters["Wavefront"] = self.__call__(parameters["Wavefront"])
+            # parameters["Wavefront"] = self.__call__(parameters["Wavefront"])
+            wavefront = self.__call__(wavefront)
 
         # Method takes and return updated parameters
         elif input_parameters['returns_parameters'].default == True:
-            wavefront, parameters = self.__call__(parameters["Wavefront"],
-                                                  parameters)
-            parameters["Wavefront"] = wavefront
+            wavefront, parameters = self.__call__(wavefront, parameters)
 
         # Method takes but does not return parameters
         else:
-            parameters["Wavefront"] = self.__call__(parameters["Wavefront"],
-                                                    parameters)
+            wavefront = self.__call__(wavefront, parameters)
 
         # Return updated parameters dictionary
-        return parameters
+        return wavefront, parameters
     
 
     def summary(self            : OpticalLayer, 
@@ -187,13 +186,11 @@ class CreateWavefront(OpticalLayer):
     """
     npixels        : int
     diameter       : Array
-    wavefront_type : str
 
 
     def __init__(self           : OpticalLayer,
                  npixels        : int,
                  diameter       : Array,
-                 wavefront_type : str = 'Angular',
                  name           : str = 'CreateWavefront') -> OpticalLayer:
         """
         Constructor for the CreateWavefront class.
@@ -214,20 +211,19 @@ class CreateWavefront(OpticalLayer):
         super().__init__(name)
         self.npixels        = int(npixels)
         self.diameter       = np.asarray(diameter, dtype=float)
-        self.wavefront_type = str(wavefront_type)
+        # self.wavefront_type = str(wavefront_type)
 
         # Input checks
         assert self.diameter.ndim == 0, ("diameter must be "
         "a scalar array.")
-        assert wavefront_type in ('Cartesian', 'Angular', 'FarFieldFresnel'), \
-        ("wavefront_type must be either 'Cartesian', 'Angular' or "
-         "'FarFieldFresnel'")
+        # assert wavefront_type in ('Cartesian', 'Angular', 'FarFieldFresnel'), \
+        # ("wavefront_type must be either 'Cartesian', 'Angular' or "
+        #  "'FarFieldFresnel'")
 
 
-    def __call__(self               : OpticalLayer,
-                 wavefront          : Wavefront,
-                 parameters         : dict,
-                 returns_parameters : bool = True) -> Wavefront:
+    def __call__(self       : OpticalLayer,
+                 wavelength : Arary,
+                 offset     : Array = np.zeros(2)) -> Wavefront:
         """
         Constructs a wavefront obect based on the parameters of the class and
         the parameters within the parameters dictionary.
@@ -249,43 +245,9 @@ class CreateWavefront(OpticalLayer):
             dictionary. If returns_parameters is False, only the wavefront is
             returned.
         """
-        # Get the wavelength
-        wavelength = parameters["wavelength"]
-
-        # Determine the pixel scale
-        pixel_scale = self.diameter/self.npixels
-
-        # Construct normalised Amplitude
-        amplitude = np.ones((1, self.npixels, self.npixels))
-        amplitude /= np.linalg.norm(amplitude)
-
-        # Construct empty phases
-        phase = np.zeros(((1, self.npixels, self.npixels)))
-
-        # Get correct Wavefront type
-        wavefront_constructor = getattr(dLux.wavefronts,
-                                        self.wavefront_type + "Wavefront")
-
-        # Construct Wavefront
-        wavefront = wavefront_constructor(wavelength, pixel_scale, amplitude,
-                                      phase, dLux.wavefronts.PlaneType.Pupil)
-
-        # Tilt wavefront from source offset
-        wavefront = wavefront.tilt_wavefront(parameters["offset"])
-
-        # Kill PlaneType Gradients
-        is_leaf = lambda x: isinstance(x, dLux.wavefronts.PlaneType)
-        kill_gradient = lambda x: stop_gradient(x.value) if is_leaf(x) else x
-        wavefront = tree_map(kill_gradient, wavefront, is_leaf=is_leaf)
-
-        # Update the parameters dictionary with the constructed wavefront
-        parameters["Wavefront"] = wavefront
-
-        # Return either the wavefront or wavefront and parameters dictionary
-        if returns_parameters:
-            return wavefront, parameters
-        else:
-            return wavefront
+        wavefront = dLux.wavefronts.Wavefront(self.npixels, self.diameter, 
+            wavelength)
+        return wavefront.tilt_wavefront(offset)
     
 
     def summary(self            : OpticalLayer, 
@@ -465,7 +427,18 @@ class NormaliseWavefront(OpticalLayer):
         return f"{self.name}: Normalises the wavefront to unity power."
 
 
-class ApplyBasisOPD(OpticalLayer):
+class AberrationLayer(OpticalLayer):
+    # No coefficinets here becuase it might be a static OPD
+
+    def __init__(self, name, **kwargs):
+        super().__init__(name = name, **kwargs)
+
+    @abstractmethod
+    def get_opd(self):
+        pass
+
+# class ApplyBasisOPD(OpticalLayer):
+class ApplyBasisOPD(AberrationLayer):
     """
     Adds an array of phase values to the input wavefront calculated from the
     Optical Path Difference (OPD). The OPDs are calculated from the basis
@@ -629,7 +602,7 @@ class AddPhase(OpticalLayer):
         wavefront : Wavefront
             The wavefront with the phase added.
         """
-        return wavefront.add_phase(self.phase)
+        return wavefront + self.phase / wavefront.wavenumber
     
 
     def summary(self            : OpticalLayer, 
@@ -739,7 +712,19 @@ class AddOPD(OpticalLayer):
                 "to the wavefront.")
 
 
-class TransmissiveOptic(OpticalLayer):
+class TransmissiveLayer(OpticalLayer):
+    """
+    Base class to hold tranmissive layers embuing them with a normalise 
+    parameter.
+    """
+    normalise : bool
+
+    def __init__(self, normalise=False, name='TransmissiveLayer', **kwargs):
+        super().__init__(name=name, **kwargs)
+        self.normalise = bool(normalise)
+
+
+class TransmissiveOptic(TransmissiveLayer):
     """
     Represents an arbitrary transmissive optic.
 
@@ -758,7 +743,9 @@ class TransmissiveOptic(OpticalLayer):
 
     def __init__(self         : OpticalLayer,
                  transmission : Array,
-                 name         : str = 'TransmissiveOptic') -> OpticalLayer:
+                 normalise    : bool = False,
+                 name         : str = 'TransmissiveOptic', 
+                 **kwargs) -> OpticalLayer:
         """
         Constructor for the TransmissiveOptic class.
 
@@ -771,7 +758,7 @@ class TransmissiveOptic(OpticalLayer):
         name : str = 'TransmissiveOptic'
             The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name)
+        super().__init__(normalise=normalise, name=name, **kwargs)
         self.transmission = np.asarray(transmission, dtype=float)
 
         # Input checks
@@ -793,7 +780,10 @@ class TransmissiveOptic(OpticalLayer):
         wavefront : Wavefront
             The wavefront with the tranmission applied.
         """
-        return wavefront.multiply_amplitude(self.transmission)
+        wavefront *= self.transmission
+        if self.normalise:
+            return wavefront.normalise()
+        return wavefront
     
 
     def summary(self            : OpticalLayer, 

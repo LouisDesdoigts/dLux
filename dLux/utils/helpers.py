@@ -1,13 +1,11 @@
 import jax.numpy as np
 from collections import OrderedDict
 import matplotlib.pyplot as plt
+from jax import Array
 
 
 __all__ = ["list_to_dictionary", "single_image_plot", "two_image_plot",
            "spectrum_plot"]
-
-
-Array = np.ndarray
 
 
 def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:

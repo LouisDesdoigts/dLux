@@ -1,10 +1,8 @@
 import jax.numpy as np
 import dLux
+from jax import Array
 
 __all__ = ["get_GE", "get_RGE", "get_RWGE", "get_radial_mask"]
-
-
-Array = np.ndarray
 
 
 def get_GE(array : Array) -> Array:

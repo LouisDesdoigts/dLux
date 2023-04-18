@@ -1,6 +1,6 @@
 from __future__ import annotations
 import jax.numpy as np
-from jax import vmap
+from jax import vmap, Array
 from jax.tree_util import tree_map, tree_flatten
 from equinox import tree_at
 from zodiax import Base
@@ -14,9 +14,9 @@ import dLux
 __all__ = ["model", "Instrument", "Optics", "Detector"]
 
 
-Array = np.ndarray
 Observation = lambda : dLux.observations.AbstractObservation
 Source = lambda : dLux.sources.Source
+CreateWavefront = lambda : dLux.optics.CreateWavefront
 
 
 ###############
@@ -404,7 +404,8 @@ class Optics(Base):
     def propagate_mono(self       : Optics,
                        wavelength : Array,
                        offset     : Array = np.zeros(2),
-                       weight     : Array = np.array(1.)) -> Array:
+                       return_wf  : bool = False,
+                       return_all : bool = False) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
 
@@ -419,6 +420,8 @@ class Optics(Base):
         weight : Array, = np.array(1.)
             The relative weighting of the wavelength. Simply scales the output
             psf.
+        return_wf : bool = False
+            Whether to return the wavefront object after propagation.
 
         Returns
         -------
@@ -428,34 +431,45 @@ class Optics(Base):
         """
         # Ensure jax arrays
         wavelength = np.asarray(wavelength, dtype=float) \
-                    if not isinstance(wavelength, np.ndarray) else wavelength
+            if not isinstance(wavelength, np.ndarray) else wavelength
         offset = np.asarray(offset, dtype=float) \
-                    if not isinstance(offset, np.ndarray) else offset
-        weight = np.asarray(weight, dtype=float) \
-                    if not isinstance(weight, np.ndarray) else weight
+            if not isinstance(offset, np.ndarray) else offset
 
         # Ensure dimensionality
         assert wavelength.shape == (), "wavelength must be a scalar."
         assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
-        assert weight.shape == (), "weight must be a scalar."
 
-        # Construct parameters dictionary
-        params_dict = {"Wavefront"  : None,
-                       "optics"     : self,
-                       "wavelength" : wavelength,
-                       "offset"     : offset}
+        # Runtime check for CreateWavefront layer (Maybe move to constructor?)
+        layers = list(self.layers.values())
+        if not isinstance(layers[0], CreateWavefront()):
+            raise ValueError("First layer must be a CreateWavefront layer")
+        WF = layers[0](wavelength, offset)
 
-        # Propagate though layers
-        for key, layer in self.layers.items():
-            params_dict = layer.apply(params_dict)
-        psf = params_dict["Wavefront"].wavefront_to_psf()
-        return weight * psf
+        # Construct parameters
+        parameters = {"optics" : self}
+
+        # Propagate though the rest of the layers
+        if not return_all:
+            for layer in layers[1:]:
+                WF, parameters = layer.apply(WF, parameters)
+            if return_wf:
+                return WF
+            else:
+                return WF.psf
+        
+        else:
+            WF_list = [WF]
+            for layer in layers[1:]:
+                WF, parameters = layer.apply(WF, parameters)
+                WF_list.append(WF)
+            return WF_list
 
 
     def propagate(self        : Optics,
                   wavelengths : Array,
                   offset      : Array = np.zeros(2),
-                  weights     : Array = None) -> Array:
+                  weights     : Array = None,
+                  return_wfs  : bool = False) -> Array:
         """
         Propagates a broadband point source through the optical layers.
 
@@ -498,72 +512,28 @@ class Optics(Base):
                  if not isinstance(offset, np.ndarray) else offset
         assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
 
-        # Propagate
-        propagator = vmap(self.propagate_mono, in_axes=(0, None, 0))
-        psfs = propagator(wavelengths, offset, weights)
-        return psfs.sum(0)
+        # Construct Propagate
+        propagator = vmap(self.propagate_mono, in_axes=(0, None))
 
+        # TODO: Test if speed can be improved by initialising a single wavefront
+        # here and vmapping a 'propagate_wavefront' function, rather than
+        # vmapping the 'propagate_mono' function which initialises the WF.
+        # This poses a potential issue with the tilting of the wavefront, which
+        # presently done in the CreateWavefront layer. Possibly a small lambda
+        # function can be used to do this. Should primarily check if this has 
+        # any speed and memory benefits.
 
-    def debug_prop(self       : Optics,
-                   wavelength : Array,
-                   offset     : Array = np.zeros(2),
-                   weight     : Array = np.array(1.)) -> Array:
-        """
-        Propagates a monochromatic point source through the optical layers,
-        while also returning the intermediate state of the parameter dictionary
-        and layers after each layer application.
+        # For now this should work fine, but it is something to keep in mind.
 
-        Parameters
-        ----------
-        wavelength : Array, meters
-            The wavelength of the wavefront to propagate through the optical
-            layers.
-        offset : Array, radians = np.zeros(2)
-            The (x, y) offset from the optical axis of the source. Default
-            value is (0, 0), on axis.
-        weight : Array, = np.array(1.)
-            The relative weighting of the wavelength. Simply scales the output
-            psf.
-
-        Returns
-        -------
-        psf : Array
-            The monochromatic point spread function after being propagated
-            though the optical layers.
-        intermediate_dicts : list
-            The intermediate states of the parameters dictionary.
-        intermediate_layers : list
-            The intermediate states of each layer after being applied to the
-            wavefront.
-        """
-        # Ensure jax arrays
-        wavelength = np.asarray(wavelength, dtype=float) \
-                    if not isinstance(wavelength, np.ndarray) else wavelength
-        offset = np.asarray(offset, dtype=float) \
-                    if not isinstance(offset, np.ndarray) else offset
-        weight = np.asarray(weight, dtype=float) \
-                    if not isinstance(weight, np.ndarray) else weight
-
-        # Ensure dimensionality
-        assert wavelength.shape == (), "wavelength must be a scalar."
-        assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
-        assert weight.shape == (), "weight must be a scalar."
-
-        # Construct parameters dictionary
-        params_dict = {"Wavefront"  : None,
-                       "optics"     : self,
-                       "wavelength" : wavelength,
-                       "offset"     : offset}
-
-        intermediate_dicts = []
-        intermediate_layers = []
-        for key, layer in self.layers.items():
-            params_dict = layer.apply(params_dict)
-            intermediate_dicts.append(params_dict.copy())
-            intermediate_layers.append(deepcopy(layer))
-
-        return params_dict["Wavefront"].wavefront_to_psf(), \
-                                intermediate_dicts, intermediate_layers
+        # Calc and Return
+        if not return_wfs:
+            psfs = propagator(wavelengths, offset)
+            psfs *= weights[:, None, None]
+            return psfs.sum(0)
+        else:
+            psfs, wfs = propagator(wavelengths, offset, return_wf=True)
+            psfs *= weights[:, None, None]
+            return psfs.sum(0), wfs
     
 
     def get_planes(self : Optics) -> list:
