@@ -166,6 +166,29 @@ class OpticalLayer(Base, ABC):
             bounds=(None, 2*np.pi), dpi=dpi)
 
 
+class AberrationLayer(OpticalLayer):
+    # No coefficinets here becuase it might be a static OPD
+
+    def __init__(self, name, **kwargs):
+        super().__init__(name = name, **kwargs)
+
+    @abstractmethod
+    def get_opd(self):
+        pass
+
+
+class TransmissiveLayer(OpticalLayer):
+    """
+    Base class to hold tranmissive layers embuing them with a normalise 
+    parameter.
+    """
+    normalise : bool
+
+    def __init__(self, normalise=False, name='TransmissiveLayer', **kwargs):
+        super().__init__(name=name, **kwargs)
+        self.normalise = bool(normalise)
+        
+
 class CreateWavefront(OpticalLayer):
     """
     Initialises the relevant Wavefront class with the specified attributes.
@@ -178,9 +201,6 @@ class CreateWavefront(OpticalLayer):
         The number of pixels used to represent the wavefront.
     diameter: Array, meters
         The diameter of the wavefront in the Pupil plane.
-    wavefront_type: str
-        Determines the type of wavefront class to create. Currently supports
-        'Cartesian', 'Angular', 'FarFieldFresnel'.
     name : str
         The name of the layer, which is used to index the layers dictionary.
     """
@@ -188,10 +208,10 @@ class CreateWavefront(OpticalLayer):
     diameter       : Array
 
 
-    def __init__(self           : OpticalLayer,
-                 npixels        : int,
-                 diameter       : Array,
-                 name           : str = 'CreateWavefront') -> OpticalLayer:
+    def __init__(self     : OpticalLayer,
+                 npixels  : int,
+                 diameter : Array,
+                 name     : str = 'CreateWavefront') -> OpticalLayer:
         """
         Constructor for the CreateWavefront class.
 
@@ -201,24 +221,16 @@ class CreateWavefront(OpticalLayer):
             The number of pixels used to represent the wavefront.
         diameter: Array, meters
             The diameter of the wavefront in the Pupil plane.
-        wavefront_type: str = 'Angular'
-            Determines the type of wavefront class to create. Currently supports
-            'Cartesian', 'Angular', 'FarFieldFresnel'.
         name : str = 'CreateWavefront'
             The name of the layer, which is used to index the layers dictionary.
-            Default is 'CreateWavefront'.
         """
         super().__init__(name)
-        self.npixels        = int(npixels)
-        self.diameter       = np.asarray(diameter, dtype=float)
-        # self.wavefront_type = str(wavefront_type)
+        self.npixels  = int(npixels)
+        self.diameter = np.asarray(diameter, dtype=float)
 
         # Input checks
         assert self.diameter.ndim == 0, ("diameter must be "
         "a scalar array.")
-        # assert wavefront_type in ('Cartesian', 'Angular', 'FarFieldFresnel'), \
-        # ("wavefront_type must be either 'Cartesian', 'Angular' or "
-        #  "'FarFieldFresnel'")
 
 
     def __call__(self       : OpticalLayer,
@@ -230,20 +242,17 @@ class CreateWavefront(OpticalLayer):
 
         Parameters
         ----------
-        wavefront : None
-            Any empty None type input to the class in order to maintain the
-            input conventions determied by the apply method of OpticalLayers.
-        parameters : dict
-            A dictionary of parameters needed to construct the wavefront.
-        returns_parameters : bool = True
-            Determines if the class returns the parameters dictionary.
+        wavelength : Array
+            The wavelength of the wavefront.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
 
         Returns
         -------
-        wavefront, parameters : (Wavefront, dict)
-            Returns the constructed wavefront and the updated parameters
-            dictionary. If returns_parameters is False, only the wavefront is
-            returned.
+        wavefront : Wavefront
+            Returns the constructed wavefront with approprately set parameters,
+            optionally tilted by offset.
         """
         wavefront = dLux.wavefronts.Wavefront(self.npixels, self.diameter, 
             wavelength)
@@ -427,15 +436,6 @@ class NormaliseWavefront(OpticalLayer):
         return f"{self.name}: Normalises the wavefront to unity power."
 
 
-class AberrationLayer(OpticalLayer):
-    # No coefficinets here becuase it might be a static OPD
-
-    def __init__(self, name, **kwargs):
-        super().__init__(name = name, **kwargs)
-
-    @abstractmethod
-    def get_opd(self):
-        pass
 
 # class ApplyBasisOPD(OpticalLayer):
 class ApplyBasisOPD(AberrationLayer):
@@ -712,16 +712,7 @@ class AddOPD(OpticalLayer):
                 "to the wavefront.")
 
 
-class TransmissiveLayer(OpticalLayer):
-    """
-    Base class to hold tranmissive layers embuing them with a normalise 
-    parameter.
-    """
-    normalise : bool
 
-    def __init__(self, normalise=False, name='TransmissiveLayer', **kwargs):
-        super().__init__(name=name, **kwargs)
-        self.normalise = bool(normalise)
 
 
 class TransmissiveOptic(TransmissiveLayer):

@@ -417,11 +417,10 @@ class Optics(Base):
         offset : Array, radians, = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
-        weight : Array, = np.array(1.)
-            The relative weighting of the wavelength. Simply scales the output
-            psf.
         return_wf : bool = False
             Whether to return the wavefront object after propagation.
+        return_all : bool = False
+            Whether to return the all intermediate wavefront objects.
 
         Returns
         -------
@@ -482,8 +481,9 @@ class Optics(Base):
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
         weights : Array = None
-            The relative weighting of the wavelengths. Simply scales the output
-            psf.
+            The relative to apply to the monochromatic psfs.
+        return_wfs : bool = False
+            Whether to return the wavefront objects after propagation.
 
         Returns
         -------

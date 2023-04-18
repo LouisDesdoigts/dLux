@@ -24,29 +24,16 @@ class Propagator(dLux.optics.OpticalLayer, ABC):
 
     Attributes
     ----------
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
     name : str
         The name for this propagator.
     """
 
 
-    def __init__(self    : Propagator,
-                 **kwargs) -> Propagator:
+    def __init__(self : Propagator, **kwargs) -> Propagator:
         """
         Constructor for the Propagator.
-
-        Parameters
-        ----------
-        inverse : bool = False
-            Is this an 'inverse' propagation. Non-inverse propagations
-            represents propagation from a pupil to a focal plane, and inverse
-            represents propagation from a focal to a pupil plane.
         """
         super().__init__(**kwargs)
-        # assert isinstance(inverse, bool), ("inverse must be a boolean.")
 
 
 class VariableSamplingPropagator(Propagator, ABC):
@@ -64,14 +51,10 @@ class VariableSamplingPropagator(Propagator, ABC):
         pixel for Cartesian or Angular Wavefront respectively.
     shift : Array
         The (x, y) shift to apply to the wavefront in the output plane.
-    pixel_shift : bool
+    pixel : bool
         Should the shift value be considered in units of pixels, or in the
         physical units of the output plane (ie pixels or meters, radians). True
         interprets the shift value in pixel units.
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
     name : str
         The name for this propagator.
     """
@@ -79,6 +62,7 @@ class VariableSamplingPropagator(Propagator, ABC):
     pixel_scale : Array
     shift       : Array
     pixel       : bool
+
 
     def __init__(self        : Propagator,
                  pixel_scale : Array,
@@ -98,7 +82,7 @@ class VariableSamplingPropagator(Propagator, ABC):
             per pixel for Cartesian or Angular Wavefront respectively.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
-        pixel_shift : bool = False
+        pixel : bool = False
             Should the shift value be considered in units of pixel, or in the
             physical units of the output plane (ie pixels or meters, radians). =
             True interprets the shift value in pixel units.
@@ -127,14 +111,14 @@ class FixedSamplingPropagator(Propagator, ABC):
 
     Attributes
     ----------
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
+    pad : int
+        The padding factory to apply to the input wavefront before performing
+        the FFT.
     name : str
         The name for this propagator.
     """
     pad : int
+
 
     def __init__(self : Propagator, pad : int = 2, **kwargs) -> Propagator:
         """
@@ -154,10 +138,6 @@ class CartesianPropagator(Propagator, ABC):
     ----------
     focal_length : Array, meters
         The focal_length of the lens/mirror this propagator represents.
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
     name : str
         The name for this propagator.
     """
@@ -187,10 +167,6 @@ class AngularPropagator(Propagator, ABC):
 
     Attributes
     ----------
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
     name : str
         The name for this propagator.
     """
@@ -214,10 +190,6 @@ class FarFieldFresnel(Propagator, ABC):
     ----------
     focal_shift : Array, meters
         The shift in the propagation distance of the wavefront.
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
     name : str
         The name for this propagator.
     """
@@ -256,13 +228,9 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         The pixel scale in the output plane, measured in meters per pixel.
     focal_length : Array, meters
         The focal_length of the lens/mirror this propagator represents.
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
     shift : Array
         The (x, y) shift to apply to the wavefront in the output plane.
-    pixel_shift : bool
+    pixel : bool
         Should the shift value be considered in units of pixels, or in the
         physical units of the output plane (ie pixels or meters, radians). True
         interprets the shift value in pixel units.
@@ -287,13 +255,9 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
             The pixel scale in the output plane, measured in meters per pixel.
         focal_length : Array, meters
             The focal_length of the lens/mirror this propagator represents.
-        inverse : bool = False
-            Is this an 'inverse' propagation. Non-inverse propagations
-            represents propagation from a pupil to a focal plane, and inverse
-            represents propagation from a focal to a pupil plane.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
-        pixel_shift : bool = False
+        pixel : bool = False
             Should the shift value be considered in units of pixel, or in the
             physical units of the output plane (ie pixels or meters, radians).
         name : str = 'CartesianMFT'
@@ -348,14 +312,12 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         summary : str
             A summary of the class.
         """
-        # plane_out = 'pupil' if self.inverse else 'focal'
-
         pixel_scale = convert_cartesian(self.pixel_scale, 'meters', 
                                         cartesian_units)
         focal_length = convert_cartesian(self.focal_length, 'meters', 
                                         cartesian_units)
         shift = convert_cartesian(self.shift, 'meters', cartesian_units) \
-            if not self.pixel_shift else self.shift
+            if not self.pixel else self.shift
 
         prop_string = (f"Propagates the Wavefront {focal_length} "
                        f"{cartesian_units} to a {plane_out} plane "
@@ -365,7 +327,7 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         if (self.shift == np.zeros(2)).all():
             return prop_string +  "using a 2-sided MFT."
         else:
-            if self.pixel_shift:
+            if self.pixel:
                 shift_string = (f"shifted by {shift} pixels in the (x, y) "
                                 "dimension ")
             else:
@@ -387,13 +349,9 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
     pixel_scale : Array, meters/pixel or radians/pixel
         The pixel scale in the output plane, measured in meters per pixel in
         pupil plane and radians per pixel in focal planes.
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
     shift : Array
         The (x, y) shift to apply to the wavefront in the output plane.
-    pixel_shift : bool
+    pixel : bool
         Should the shift value be considered in units of pixels, or in the
         physical units of the output plane (ie pixels or meters, radians). True
         interprets the shift value in pixel units.
@@ -416,13 +374,9 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
         pixel_scale : Array, radians/pixel, meters/pixel
             The pixel scale in the output plane, measured in meters per pixel in
             pupil planes and radians per pixel in focal planes.
-        inverse : bool = False
-            Is this an 'inverse' propagation. Non-inverse propagations
-            represents propagation from a pupil to a focal plane, and inverse
-            represents propagation from a focal to a pupil plane.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
-        pixel_shift : bool = False
+        pixel : bool = False
             Should the shift value be considered in units of pixel, or in the
             physical units of the output plane (ie pixels or meters, radians).
         name : str = 'AngularMFT'
@@ -481,7 +435,7 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
         pixel_scale = convert_angular(self.pixel_scale, 'radians', 
                                         angular_units)
         shift = convert_angular(self.shift, 'radians', angular_units) \
-            if not self.pixel_shift else self.shift
+            if not self.pixel else self.shift
 
         prop_string = (f"Propagates the Wavefront to a {plane_out} plane "
                        f"with {self.npixels}x{self.npixels} pixels of "
@@ -490,7 +444,7 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
         if (self.shift == np.zeros(2)).all():
             return prop_string +  "using a 2-sided MFT."
         else:
-            if self.pixel_shift:
+            if self.pixel:
                 shift_string = (f"shifted by {shift} pixels in the (x, y) "
                                 "dimension ")
             else:
@@ -508,10 +462,8 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
     ----------
     focal_length : Array, meters
         The focal_length of the lens/mirror this propagator represents.
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
+    pad : int
+        The amount of padding to apply to the wavefront before propagating.
     name : str
         The name for this propagator.
     """
@@ -526,10 +478,8 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
         ----------
         focal_length : Array, meters
             The focal_length of the lens/mirror this propagator represents.
-        inverse : bool = False
-            Is this an 'inverse' propagation. Non-inverse propagations
-            represents propagation from a pupil to a focal plane, and inverse
-            represents propagation from a focal to a pupil plane.
+        pad : int = 2
+            The amount of padding to apply to the wavefront before propagating.
         name : str = 'CartesianFFT'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -594,10 +544,8 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
 
     Attributes
     ----------
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
+    pad : int
+        The amount of padding to apply to the wavefront before propagating.
     name : str
         The name for this propagator.
     """
@@ -611,10 +559,8 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
 
         Parameters
         ----------
-        inverse : bool = False
-            Is this an 'inverse' propagation. Non-inverse propagations
-            represents propagation from a pupil to a focal plane, and inverse
-            represents propagation from a focal to a pupil plane.
+        pad : int = 2
+            The amount of padding to apply to the wavefront before propagating.
         name : str = 'AngularFFT'
             The name of the layer, which is used to index the layers dictionary.
         """
@@ -684,13 +630,9 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         The focal_length of the lens/mirror this propagator represents.
     focal_shift : Array, meters
         The shift in the propagation distance of the wavefront.
-    inverse : bool
-        Is this an 'inverse' propagation. Non-inverse propagations represents
-        propagation from a pupil to a focal plane, and inverse represents
-        propagation from a focal to a pupil plane.
     shift : Array
         The (x, y) shift to apply to the wavefront in the output plane.
-    pixel_shift : bool
+    pixel : bool
         Should the shift value be considered in units of pixels, or in the
         physical units of the output plane (ie pixels or meters, radians). True
         interprets the shift value in pixel units.
@@ -720,13 +662,9 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
             The focal_length of the lens/mirror this propagator represents.
         focal_shift : Array, meters
             The shift in the propagation distance of the wavefront.
-        inverse : bool = False
-            Is this an 'inverse' propagation. Non-inverse propagations
-            represents propagation from a pupil to a focal plane, and inverse
-            represents propagation from a focal to a pupil plane.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
-        pixel_shift : bool = False
+        pixel : bool = False
             Should the shift value be considered in units of pixel, or in the
             physical units of the output plane (ie pixels or meters, radians).
         name : str = 'CartesianFresnel'
@@ -791,7 +729,7 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         defocus = convert_cartesian(self.focal_shift, 'meters', 
                                         cartesian_units)
         shift = convert_cartesian(self.shift, 'meters', cartesian_units) \
-            if not self.pixel_shift else self.shift
+            if not self.pixel else self.shift
 
 
         prop_string = (f"Propagates the Wavefront {prop_distance} "
@@ -805,7 +743,7 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         if (self.shift == np.zeros(2)).all():
             return prop_string +  defocus_string
         else:
-            if self.pixel_shift:
+            if self.pixel:
                 shift_string = (f"shifted by {shift} pixels in the (x, y) "
                                 "dimension ")
             else:

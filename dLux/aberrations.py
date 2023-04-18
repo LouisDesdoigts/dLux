@@ -283,8 +283,6 @@ class Zernike(Base):
         else:
             return self.calculate_polike(coordinates, nsides)
 
-
-
     
 class ZernikeBasis(Base):
     """
@@ -412,7 +410,7 @@ class AberrationFactory():
                 coefficients     : Array = None, 
 
                 # name
-                name             : str = None):
+                name             : str = 'Aberrations'):
         """
         Constructs a basic single static aberration class.
 
@@ -439,7 +437,7 @@ class AberrationFactory():
         coefficients : Array = None
             The zernike cofficients to be applied to the aberrations. Defaults 
             to an array of zeros.
-        name : str = None
+        name : str = 'Aberrations'
             The name of the aperture used to index the layers dictionary. If 
             not supplied, the aperture will be named based on the number of
             sides. However this is only supported up to 8 sides, and a name
@@ -498,7 +496,7 @@ class AberrationFactory():
                 coefficients     : Array = None, 
 
                 # name
-                name             : str = None):
+                name             : str = 'Aberrations'):
         """
         Constructs a basic single static aberration class.
 
@@ -523,7 +521,7 @@ class AberrationFactory():
         coefficients : Array = None
             The zernike cofficients to be applied to the aberrations. Defaults 
             to an array of zeros.
-        name : str = None
+        name : str = 'Aberrations'
             The name of the aperture used to index the layers dictionary. If 
             not supplied, the aperture will be named based on the number of
             sides. However this is only supported up to 8 sides, and a name
