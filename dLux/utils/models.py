@@ -97,13 +97,8 @@ def simple_optical_system(aperture_diameter         : Array,
     assert isinstance(return_layers, bool), "return_layers must be a boolean."
 
     # Create wavefront
-    if angular:
-        layers = [dLux.optics.CreateWavefront(wavefront_npixels,
-                                              aperture_diameter,
-                                              wavefront_type="Angular")]
-    else:
-        layers = [dLux.optics.CreateWavefront(wavefront_npixels,
-                                              aperture_diameter)]
+    layers = [dLux.optics.CreateWavefront(wavefront_npixels,
+                                            aperture_diameter)]
 
     # Construct aperture
     if secondary_mirror_diameter is not None:
@@ -111,19 +106,20 @@ def simple_optical_system(aperture_diameter         : Array,
     else:
         secondary_ratio = 0.
     
+    layers += [dLux.ApertureFactory(wavefront_npixels, 
+        secondary_ratio=secondary_ratio)]
+
+    # Aberrations
     if nzernike is not None:
         zernikes = np.arange(3, nzernike + 3)
         if zernike_coefficients is not None:
             coeffs = zernike_coefficients
         else:
             coeffs = np.zeros(nzernike)
-    else:
-        zernikes = None
-        coeffs = None
-    
-    layers +=[dLux.ApertureFactory(wavefront_npixels, 
-                secondary_ratio=secondary_ratio, zernikes=zernikes, 
-                coefficients=coeffs)]
+        
+        layers += [dLux.AberrationFactory(wavefront_npixels, zernikes=zernikes,
+            coefficients=coeffs)]
+
 
     # Extra Layers
     if extra_layers is not None:

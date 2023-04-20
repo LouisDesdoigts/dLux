@@ -18,14 +18,16 @@ __all__ = ["model", "Instrument", "SimpleOptics", "MaskedOptics", "Optics",
 
 
 # Alias classes for simplified type-checking
+CreateWavefront   = lambda : dLux.optics.CreateWavefront
 TransmissiveOptic = lambda : dLux.optics.TransmissiveOptic
-AberrationLayer = lambda : dLux.optics.AberrationLayer
-OpticalLayer = lambda : dLux.optics.OpticalLayer
-AddOPD = lambda : dLux.optics.AddOPD
-AddPhase = lambda : dLux.optics.AddPhase
-Propagator = lambda : dLux.propagators.Propagator
-Propagator = lambda : dLux.propagators.Propagator
-FarFieldFresnel = lambda : dLux.propagators.FarFieldFresnel
+AberrationLayer   = lambda : dLux.optics.AberrationLayer
+OpticalLayer      = lambda : dLux.optics.OpticalLayer
+AddOPD            = lambda : dLux.optics.AddOPD
+AddPhase          = lambda : dLux.optics.AddPhase
+Propagator        = lambda : dLux.propagators.Propagator
+FarFieldFresnel   = lambda : dLux.propagators.FarFieldFresnel
+Source            = lambda : dLux.sources.Source
+Observation       = lambda : dLux.observations.AbstractObservation
 
 
 ###############
@@ -68,7 +70,6 @@ def model(optics      : Optics,
     """
     '''Input checking and formatting'''
     # Check that optics input is an Optics object.
-    # assert isinstance(optics, (Optics)), ("optics must be an Optics object.")
     assert isinstance(optics, BaseOptics), ("optics must be an Optics object.")
 
     # Check that detector input is a Detector object if specified.
@@ -1154,7 +1155,7 @@ class Instrument(Base):
             dithers, switching filters, etc.
         """
         # Optics
-        if not isinstance(optics, Optics):
+        if not isinstance(optics, BaseOptics):
             raise ValueError("optics must be an Optics object.")
         self.optics = optics
         
@@ -1213,8 +1214,10 @@ class Instrument(Base):
         item : object
             The item corresponding to the supplied key in the sub-dictionaries.
         """
-        if key in self.optics.layers.keys():
-            return self.optics.layers[key]
+        if hasattr(self.optics, key):
+            return getattr(self.optics, key)
+        # if key in self.optics.layers.keys():
+            # return self.optics.layers[key]
         elif key in self.sources.keys():
             return self.sources[key]
         elif self.detector is not None and key in self.detector.layers.keys():
