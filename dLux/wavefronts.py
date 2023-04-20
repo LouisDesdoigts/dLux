@@ -15,6 +15,8 @@ Aperture = lambda : dLux.apertures.ApertureLayer
 TransmissiveLayer = lambda : dLux.optics.TransmissiveLayer
 AberrationLayer = lambda : dLux.optics.AberrationLayer
 Propagator = lambda : dLux.propagators.Propagator
+OpticalLayer = lambda : dLux.optics.OpticalLayer
+
 
 class Wavefront(Base):
     """
@@ -167,13 +169,13 @@ class Wavefront(Base):
 
 
     @property
-    def pixel_coordinates(self : Wavefront) -> Array:
+    def coordinates(self : Wavefront) -> Array:
         """
         Returns the physical positions of the wavefront pixels in meters.
 
         Returns
         -------
-        pixel_positions : Array
+        coordinates : Array
             The coordinates of the centers of each pixel representing the
             wavefront.
         """
@@ -192,6 +194,22 @@ class Wavefront(Base):
             The wavenumber of the wavefront.
         """
         return 2 * np.pi / self.wavelength
+
+
+    @property
+    def fringe_size(self : Wavefront) -> Array:
+        """
+        Returns the size of the fringes in angular units.
+
+        # TODO Units check
+        # TODO Possibly output in unit based on units attribute
+        # TODO make methods use this
+        Returns
+        -------
+        fringe_size : Array, radians
+            The wavenumber of the wavefront.
+        """
+        return self.wavelength / self.diameter
 
 
     #####################
@@ -214,14 +232,14 @@ class Wavefront(Base):
         -------
         wavefront : Wavefront
             The output wavefront.
-        """        
+        """
+        # None Type
+        if other is None:
+            return self
+
         # Array based inputs
         if isinstance(other, Array):
             return self.add('phase', other * self.wavenumber)
-        
-        # Layer inputs
-        elif isinstance(other, AberrationLayer()):
-            return other(self)
         
         # Other
         else:
@@ -268,21 +286,28 @@ class Wavefront(Base):
         wavefront : Wavefront
             The output wavefront.
         """
+        # None Type
+        if other is None:
+            return self
+        
         # Array based inputs
         if isinstance(other, Array):
             return self.multiply('amplitude', other)
+        
+        elif isinstance(other, OpticalLayer()):
+            return other(self)
 
-        # Aperture Layer inputs
-        elif isinstance(other, Aperture()):
-            return other(self)
+        # # Aperture Layer inputs
+        # elif isinstance(other, Aperture()):
+        #     return other(self)
         
-        # Aberration Layer inputs
-        elif isinstance(other, AberrationLayer()):
-            return other(self)
+        # # Aberration Layer inputs
+        # elif isinstance(other, AberrationLayer()):
+        #     return other(self)
         
-        # Propagators
-        elif isinstance(other, Propagator()):
-            return other(self)
+        # # Propagators
+        # elif isinstance(other, Propagator()):
+        #     return other(self)
         
         # TODO: Maybe add this? Doesnt seem like it is useful.
         # # Wavefronts
@@ -321,10 +346,11 @@ class Wavefront(Base):
     #############################
     ### Propagation Functions ###
     #############################
-    def _FFT_output(self : Wavefront, focal_length : Array = None) -> tuple:
+    def _FFT_output(self         : Wavefront, 
+                    focal_length : Array = None, 
+                    inverse      : bool = False) -> tuple:
         """
-        Calculates the output plane, unit, pixel scale, and returns the
-        appropriate propagation function
+        Calculates the output plane, unit, and pixel scale.
 
         Parameters
         ----------
@@ -332,7 +358,9 @@ class Wavefront(Base):
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
             'cartesian' propagation.
-        
+        inverse : bool = False
+            If True, the propagation is treated as an inverse FFT.
+
         Returns
         -------
         plane : str
@@ -341,8 +369,6 @@ class Wavefront(Base):
             The units of the output plane.
         pixel_scale : Array
             The pixel scale of the output plane.
-        propagator : function
-            The propagation function to use.
         """
         if focal_length is None:
             units = 'Angular'
@@ -356,25 +382,47 @@ class Wavefront(Base):
                 raise ValueError("focal_length can not be specific when"
                     "propagating from a Focal plane with angular units.")
         
-        if self.plane == 'Focal':
+        # Check planes
+        if inverse:
+            if self.plane != 'Focal':
+                raise ValueError("Can only do an IMFT from a Focal plane, "
+                    f"current plane is {self.plane}.")
             plane = 'Pupil'
-            propagator = lambda phasor: \
-                np.fft.fft2(np.fft.ifftshift(phasor)) / phasor.shape[-1]
-            units = 'Cartesian' # Always cartesian in pupil plane
-        elif self.plane == 'Pupil':
-            plane = 'Focal'
-            propagator = lambda phasor: \
-                np.fft.fftshift(np.fft.ifft2(phasor)) * phasor.shape[-1]
+            units = 'Cartesian'
         else:
-
-            # Check for invalid propagation
-            raise ValueError("plane must be either 'Pupil' or 'Focal'. "
-                f"Got {self.plane}")
+            if self.plane != 'Pupil':
+                raise ValueError("Can only do an MFT from a Pupil plane, "
+                    f"current plane is {self.plane}.")
+            plane = 'Focal'
         
-        return plane, units, pixel_scale, propagator
+        return plane, units, pixel_scale
 
 
-    def FFT(self         : Wavefront, 
+    def _FFT(self         : Wavefront, 
+             phasor       : Array,
+             focal_length : Array = None, 
+             inverse      : bool  = False) -> tuple:
+        """
+        Calculates the output plane, unit, pixel scale, and returns the
+        appropriate propagation function
+
+        Parameters
+        ----------
+        inverse : bool = False
+            If True, the inverse FFT is used.
+        
+        Returns
+        -------
+        phasor : Array
+            The propagated phasor.
+        """
+        if inverse:
+            return np.fft.fft2(np.fft.ifftshift(phasor)) / phasor.shape[-1]
+        else:
+            return np.fft.fftshift(np.fft.ifft2(phasor)) * phasor.shape[-1]
+
+
+    def FFT(self         : Wavefront,
             pad          : int = 2,
             focal_length : Array = None) -> Wavefront:
         """
@@ -396,20 +444,60 @@ class Wavefront(Base):
             The propagated wavefront.
         """
         # Calculate
-        plane, units, pixel_scale, propagator = self._FFT_output(focal_length)
+        plane, units, pixel_scale = self._FFT_output(focal_length)
 
         # Pad must be int
         npixels = (self.npixels * (pad - 1)) // 2
         ampltide = np.pad(self.amplitude, npixels)
         phase = np.pad(self.phase, npixels)
-        phasor = propagator(ampltide * np.exp(1j * phase))
+        phasor = ampltide * np.exp(1j * phase)
+        phasor = self._FFT(phasor, focal_length)
 
         # Return new wavefront
         return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
             [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
 
 
-    def _MFT_output(self : Wavefront, focal_length : Array = None) -> tuple:
+    def IFFT(self         : Wavefront, 
+             pad          : int = 2,
+             focal_length : Array = None) -> Wavefront:
+        """
+        Propagates the wavefront by perfroming a, Inverse Fast Fourier
+        Transform.
+
+        Parameters
+        ----------
+        pad : int = 2
+            The padding factory to apply to the input wavefront before
+            performing the FFT.
+        focal_length : Array = None
+            The focal length of the propagation. If None, the propagation is
+            treated as an 'angular' propagation, else it is treated as a
+            'cartesian' propagation.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The propagated wavefront.
+        """
+        # Calculate
+        plane, units, pixel_scale = self._FFT_output(focal_length, inverse=True)
+
+        # Pad must be int
+        npixels = (self.npixels * (pad - 1)) // 2
+        ampltide = np.pad(self.amplitude, npixels)
+        phase = np.pad(self.phase, npixels)
+        phasor = ampltide * np.exp(1j * phase)
+        phasor = self._FFT(phasor, focal_length, inverse=True)
+
+        # Return new wavefront
+        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
+            [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
+
+
+    def _MFT_output(self         : Wavefront, 
+                    focal_length : Array = None, 
+                    inverse      : bool = False) -> tuple:
         """
         Calculates the output plane and unit for the MFT
 
@@ -419,6 +507,8 @@ class Wavefront(Base):
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
             'cartesian' propagation.
+        inverse : bool = False
+            If True, the inverse MFT is used.
         
         Returns
         -------
@@ -437,18 +527,19 @@ class Wavefront(Base):
             if self.units == 'Angular':
                 raise ValueError("focal_length can not be specific when"
                     "propagating from a Focal plane with angular units.")
-        
-        # Get Plane
-        if self.plane == 'Focal':
-            plane = 'Pupil'
-            units = 'Cartesian' # Always cartesian in pupil plane
-        elif self.plane == 'Pupil':
-            plane = 'Focal'
-        else:
 
-            # Check for invalid propagation
-            raise ValueError("plane must be either 'Pupil' or 'Focal'. "
-                f"Got {self.plane}")
+        # Check planes
+        if inverse:
+            if self.plane != 'Focal':
+                raise ValueError("Can only do an IMFT from a Focal plane, "
+                    f"current plane is {self.plane}.")
+            plane = 'Pupil'
+            units = 'Cartesian'
+        else:
+            if self.plane != 'Pupil':
+                raise ValueError("Can only do an MFT from a Pupil plane, "
+                    f"current plane is {self.plane}.")
+            plane = 'Focal'
         
         return plane, units
 
@@ -477,22 +568,22 @@ class Wavefront(Base):
             The number of fringes in the output plane.
         """
         output_size = npixels * pixel_scale
-        fringe_size = self.wavelength / self.diameter
 
         # Angular
         if focal_length is None:
-            return output_size / fringe_size
+            return output_size / self.fringe_size
         
         # Cartesian
         else:
-            return output_size / (fringe_size * focal_length)
+            return output_size / (self.fringe_size * focal_length)
 
     
     def _transfer_matrix(self         : Wavefront, 
                          npixels      : int,
                          pixel_scale  : Array,
                          shift        : Array = 0.,
-                         focal_length : Array = None) -> Array:
+                         focal_length : Array = None,
+                         inverse      : bool = False) -> Array:
         """
         Calculates the transfer matrix for the MFT.
 
@@ -508,6 +599,8 @@ class Wavefront(Base):
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
             'cartesian' propagation.
+        inverse : bool = False
+            Is this a forward or inverse MFT.
         
         Returns
         -------
@@ -519,20 +612,18 @@ class Wavefront(Base):
         in_vec = get_pixel_positions(self.npixels, scale_in, shift * scale_in)
         out_vec = get_pixel_positions(npixels, scale_out, shift * scale_out)
 
-        if self.plane == 'Pupil':
+        if not inverse:
             return np.exp(2j * np.pi * np.outer(in_vec, out_vec))
-        elif self.plane == 'Focal':
-            return np.exp(-2j * np.pi * np.outer(in_vec, out_vec))
         else:
-            raise ValueError("plane must be either 'Pupil' or 'Focal'. "
-                f"Got {self.plane}")
+            return np.exp(-2j * np.pi * np.outer(in_vec, out_vec))
 
 
     def _MFT(self         : Wavefront, 
              npixels      : int, 
              pixel_scale  : Array,
              focal_length : Array = None,
-             shift        : Array = np.zeros(2)) -> Array:
+             shift        : Array = np.zeros(2),
+             inverse      : bool = False) -> Array:
         """
         Performs the actual phasor propagation and normalises the output
 
@@ -548,12 +639,19 @@ class Wavefront(Base):
             'cartesian' propagation.
         shift : Array = np.zeros(2)
             The shift in the center of the output plane.
+        inverse : bool = False
+            Is this a forward or inverse MFT.
+        
+        Returns
+        -------
+        phasor : Array
+            The propagated phasor.
         """
         # Transfer Matrices
         x_matrix = self._transfer_matrix(npixels, pixel_scale, shift[0], 
-            focal_length)
+            focal_length, inverse=inverse)
         y_matrix = self._transfer_matrix(npixels, pixel_scale, shift[1], 
-            focal_length).T
+            focal_length, inverse=inverse).T
 
         # Propagation
         phasor = (y_matrix @ self.phasor) @ x_matrix
@@ -590,6 +688,40 @@ class Wavefront(Base):
         # Calculate
         plane, units = self._MFT_output(focal_length)
         phasor = self._MFT(npixels, pixel_scale, focal_length)
+
+        # Return new wavefront
+        pixel_scale = np.array(pixel_scale) # Allow float input
+        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
+            [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
+
+
+    def IMFT(self         : Wavefront, 
+             npixels      : int, 
+             pixel_scale  : Array,
+             focal_length : Array = None) -> Wavefront:
+        """
+        Propagates the wavefront by perfroming a, inverse 2-sided Matrix Fourier
+        Transform. TODO: Add link to Soumer et al. 2007(?).
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels in the output wavefront.
+        pixel_scale : Array
+            The pixel scale of the output wavefront.
+        focal_length : Array = None
+            The focal length of the propagation. If None, the propagation is
+            treated as an 'angular' propagation, else it is treated as a
+            'cartesian' propagation.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The propagated wavefront.
+        """
+        # Calculate
+        plane, units = self._MFT_output(focal_length, inverse=True)
+        phasor = self._MFT(npixels, pixel_scale, focal_length, inverse=True)
 
         # Return new wavefront
         pixel_scale = np.array(pixel_scale) # Allow float input
@@ -638,6 +770,48 @@ class Wavefront(Base):
             [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
 
 
+    def shifted_IMFT(self         : Wavefront, 
+                    npixels      : int, 
+                    pixel_scale  : Array,
+                    shift        : Array,
+                    focal_length : Array = None,
+                    pixel        : bool  = True) -> Wavefront:
+        """
+        Propagates the wavefront by perfroming a, Inverse 2-sided Matrix Fourier
+        Transform with a shift in the center of the output plane.
+        TODO: Add link to Soumer et al. 2007(?), 
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels in the output wavefront.
+        pixel_scale : Array
+            The pixel scale of the output wavefront.
+        shift : Array
+            The shift in the center of the output plane.
+        focal_length : Array = None
+            The focal length of the propagation. If None, the propagation is
+            treated as an 'angular' propagation, else it is treated as a
+            'cartesian' propagation.
+        pixel : bool = True
+            Whether the shift is in pixels or the units of pixel_scale.
+        
+        Returns
+        -------
+        wavefront : Wavefront
+            The propagated wavefront.
+        """
+        # Calculate
+        plane, units = self._MFT_output(focal_length, inverse=True)
+        shift = shift if pixel else shift / pixel_scale
+        phasor = self._MFT(npixels, pixel_scale, focal_length, shift,
+            inverse=True)
+
+        # Return new wavefront
+        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
+            [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
+
+
     #######################
     ### Other Functions ###
     #######################
@@ -658,7 +832,7 @@ class Wavefront(Base):
         assert isinstance(tilt_angles, Array) and tilt_angles.shape == (2,), \
         ("tilt_angles must be an array with shape (2,) ie. (x, y).")
 
-        opds = tilt_angles[:, None, None] * self.pixel_coordinates
+        opds = tilt_angles[:, None, None] * self.coordinates
         return self.add('phase', - self.wavenumber * opds.sum(0))
 
 
@@ -996,14 +1170,13 @@ class FresnelWavefront(Wavefront):
         """
         propagation_distance = focal_length + focal_shift
         output_size = npixels * pixel_scale
-        fringe_size = self.wavelength / self.diameter
 
         # # Angular - Not Implemented
         # if focal_length is None:
-        #     return output_size / fringe_size
+        #     return output_size / self.fringe_size
         
         # Cartesian
-        return output_size / (fringe_size * propagation_distance)
+        return output_size / (self.fringe_size * propagation_distance)
 
 
     # Move to utils as thinlens?
@@ -1172,7 +1345,7 @@ class FresnelWavefront(Wavefront):
         """
         # Coordinates
         prop_dist = focal_length + focal_shift
-        input_positions = self.pixel_coordinates
+        input_positions = self.coordinates
         output_positions = get_pixel_positions(
             (npixels, npixels), (pixel_scale, pixel_scale))
 

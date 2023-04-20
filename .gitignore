@@ -3,4 +3,6 @@
 **.DS_Store
 dist/
 .vscode/
+build/
+dLux.egg-info/
 docs/notebooks/files

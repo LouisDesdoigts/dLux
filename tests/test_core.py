@@ -85,11 +85,11 @@ class TestOptics(object):
         Tests the constructor.
         """
         # Test non-list inputs
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             create_optics(layers={})
 
         # Test list input with non Optics Layer input
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             create_optics(layers=[10.])
 
 

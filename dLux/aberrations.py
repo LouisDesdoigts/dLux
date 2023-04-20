@@ -346,7 +346,9 @@ class ZernikeBasis(Base):
                                      is_leaf=leaf_fn))
 
 
-
+###############
+### Factory ###
+###############
 class AberrationFactory():
     """
     This class is not actually ever instatiated, but is rather a class used to 
@@ -368,49 +370,41 @@ class AberrationFactory():
     coefficients = jr.normal(jr.PRNGKey(0), (zernikes.shape[0],))
 
     # Construct aberrations
-    aberrations = AberrationFactory(512, zernikes=zernikes, 
-                                    coefficients=coefficients)
+    aberrations = AberrationFactory(512, zernikes, coefficients)
     ```
     
     The resulting aperture class has two parameters, `.basis` and 
-    `.coefficients`. We can then examine the opd like so:
-
-    ```python
-    import matplotlib.pyplot as plt
-    plt.figure(figsize=(5, 4))
-    plt.imshow(aberrations.get_opd())
-    plt.colorbar()
-    plt.show()
-    ```
+    `.coefficients`.
 
     We can also easily change this to a hexagonal aperture:
 
     ```python
     # Construct aberrations
-    aberrations = AberrationFactory(512, nsides=6, zernikes=zernikes, 
-                                    coefficients=coefficients)
-    
-    # Examine
-    plt.figure(figsize=(5, 4))
+    hexagonal_aberrations = AberrationFactory(512, nsides=6, zernikes, 
+        coefficients)
+    ```
+
+    ```python
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(10, 4))
+    plt.subplot(1, 2, 1)
     plt.imshow(aberrations.get_opd())
+    plt.colorbar()
+
+    plt.subplot(1, 2, 2)
+    plt.imshow(hexagonal_aberrations.get_opd())
     plt.colorbar()
     plt.show()
     ```
     """
     def __new__(cls              : AberrationFactory, 
                 npixels          : int, 
+                zernikes         : Array, 
+                coefficients     : Array = None, 
+                aperutre_ratio   : float = 1.0,
                 nsides           : int   = 0,
                 rotation         : float = 0., 
-
-                # Sizing
-                aperutre_ratio   : float = 1.0,
-
-                # Aberrations
-                zernikes         : Array = None, 
-                coefficients     : Array = None, 
-
-                # name
-                name             : str = 'Aberrations'):
+                name             : str   = 'Aberrations'):
         """
         Constructs a basic single static aberration class.
 
@@ -420,23 +414,23 @@ class AberrationFactory():
         ----------
         npixels : int
             Number of pixels used to represent the aperture.
-        nsides : int = 0
-            Number of sides of the aperture. A zero input results in a circular
-            aperture. All other other values of three and above are supported.
-        rotation : float, radians = 0
-            The global rotation of the aperture in radians.
-        aperutre_ratio : float = 1.
-            The ratio of the aperture size to the array size. A value of 1. 
-            results in an aperture that fully spans the array, a value of 0.5 
-            retuls in an aperure that is half the size of the array, which is 
-            equivilent to a padding factor of 2.
-        zernikes : Array = None
+        zernikes : Array
             The zernike noll indices to be used for the aberrations. Please 
             refer to (this)[Add this link] docstring to see which indicides 
             correspond to which aberrations. Typical values are range(4, 11).
         coefficients : Array = None
             The zernike cofficients to be applied to the aberrations. Defaults 
             to an array of zeros.
+        aperutre_ratio : float = 1.
+            The ratio of the aperture size to the array size. A value of 1. 
+            results in an aperture that fully spans the array, a value of 0.5 
+            retuls in an aperure that is half the size of the array, which is 
+            equivilent to a padding factor of 2.
+        nsides : int = 0
+            Number of sides of the aperture. A zero input results in a circular
+            aperture. All other other values of three and above are supported.
+        rotation : float, radians = 0
+            The global rotation of the aperture in radians.
         name : str = 'Aberrations'
             The name of the aperture used to index the layers dictionary. If 
             not supplied, the aperture will be named based on the number of
@@ -451,16 +445,6 @@ class AberrationFactory():
         # Check vaid inputs
         if nsides < 3 and nsides != 0:
             raise ValueError("nsides must be either 0 or >=3")
-        
-        # Auto-name
-        if name is None:
-            if nsides > 8:
-                raise ValueError("Warning: Auto-naming not supported for " + \
-                "nsides > 8. Please provide a name.")
-            sides = ["Circular", "Triangular", "Square", "Pentagonal", 
-                "Hexagonal", "Heptagonal", "Octagonal"]
-            name = sides[np.maximum(nsides-2, 0)] + "Aberrations"
-
 
         # Construct coordinates
         coords = get_pixel_positions((npixels, npixels), (1/npixels, 1/npixels))
@@ -483,44 +467,40 @@ class AberrationFactory():
         return dLux.optics.ApplyBasisOPD(basis, coefficients, name=name)
 
 
-    def __init__(self              : AberrationFactory, 
-                npixels          : int, 
-                nsides           : int   = 0,
-                rotation         : float = 0., 
-
-                # Sizing
-                aperutre_ratio   : float = 1.0,
-
-                # Aberrations
-                zernikes         : Array = None, 
-                coefficients     : Array = None, 
-
-                # name
-                name             : str = 'Aberrations'):
+    def __init__(self           : AberrationFactory, 
+                 npixels        : int, 
+                 zernikes       : Array, 
+                 coefficients   : Array = None, 
+                 aperutre_ratio : float = 1.0,
+                 nsides         : int   = 0,
+                 rotation       : float = 0., 
+                 name           : str   = 'Aberrations'):
         """
         Constructs a basic single static aberration class.
+
+        TODO: Add link to the zenike noll indicies
 
         Parameters
         ----------
         npixels : int
             Number of pixels used to represent the aperture.
-        nsides : int = 0
-            Number of sides of the aperture. A zero input results in a circular
-            aperture. All other other values of three and above are supported.
-        rotation : float, radians = 0
-            The global rotation of the aperture in radians.
-        aperutre_ratio : float = 1.
-            The ratio of the aperture size to the array size. A value of 1. 
-            results in an aperture that fully spans the array, a value of 0.5 
-            retuls in an aperure that is half the size of the array, which is 
-            equivilent to a padding factor of 2.
-        zernikes : Array = None
+        zernikes : Array
             The zernike noll indices to be used for the aberrations. Please 
             refer to (this)[Add this link] docstring to see which indicides 
             correspond to which aberrations. Typical values are range(4, 11).
         coefficients : Array = None
             The zernike cofficients to be applied to the aberrations. Defaults 
             to an array of zeros.
+        aperutre_ratio : float = 1.
+            The ratio of the aperture size to the array size. A value of 1. 
+            results in an aperture that fully spans the array, a value of 0.5 
+            retuls in an aperure that is half the size of the array, which is 
+            equivilent to a padding factor of 2.
+        nsides : int = 0
+            Number of sides of the aperture. A zero input results in a circular
+            aperture. All other other values of three and above are supported.
+        rotation : float, radians = 0
+            The global rotation of the aperture in radians.
         name : str = 'Aberrations'
             The name of the aperture used to index the layers dictionary. If 
             not supplied, the aperture will be named based on the number of

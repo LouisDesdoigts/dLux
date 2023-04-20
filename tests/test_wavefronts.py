@@ -75,12 +75,12 @@ class TestWavefront(object):
         assert (wf.psf == wf.amplitude**2).all()
 
 
-    def test_pixel_coordinates(self, create_wavefront: callable) -> None:
+    def test_coordinates(self, create_wavefront: callable) -> None:
         """
-        Tests the pixel_coordinates property.
+        Tests the coordinates property.
         """
         wf = create_wavefront()
-        assert (wf.pixel_coordinates == \
+        assert (wf.coordinates == \
         dLux.utils.coordinates.get_pixel_positions((wf.npixels, wf.npixels,),
             (wf.pixel_scale, wf.pixel_scale))).all()
 

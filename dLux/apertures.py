@@ -119,7 +119,7 @@ class ApertureLayer(TransmissiveLayer(), ABC):
         wavefront: Wavefront
             The wavefront after encountering the aperture.
         """
-        wavefront *= self._transmission(wavefront.pixel_coordinates)
+        wavefront *= self._transmission(wavefront.coordinates)
         if self.normalise:
             return wavefront.normalise()
         return wavefront
@@ -530,6 +530,7 @@ class CircularAperture(DynamicAperture):
         aperture: Array
             The softed edged aperture shape.
         """
+        scale = coordinates[0, 1] - coordinates[0, 0]
         coordinates = np.hypot(coordinates[0], coordinates[1])
         return self._soften(- coordinates + self.radius)
 
@@ -1231,7 +1232,7 @@ class PolygonalAperture(DynamicAperture, ABC):
                                ys   : Array) -> Array:
         """
         Calcualtes the perpendicular distance of the cartesian (x, y) 
-        coordaintes from a line. The line is parameteried by its gradient m and
+        coordinates from a line. The line is parameteried by its gradient m and
         a point (x1, y1) that lies on the line.
         
         Parameters
@@ -2436,7 +2437,7 @@ class AberratedAperture(AbstractAberratedAperture):
             The wavefront after passing through the aperture.
         """
         # Calculate aperture and opd
-        coordinates = wavefront.pixel_coordinates
+        coordinates = wavefront.coordinates
         transmission = self.aperture._transmission(coordinates)
         phase = wavefront.phase + self._opd(coordinates) * wavefront.wavenumber
         amplitude = transmission * wavefront.amplitude
@@ -2982,7 +2983,7 @@ class CompositeAperture(AbstractDynamicAperture):
         wavefront: Wavefront
             The outgoing wavefront.
         """
-        coordinates = wavefront.pixel_coordinates
+        coordinates = wavefront.coordinates
         aper = self._transmission(coordinates)
         opd = self._opd(coordinates)
 
@@ -3361,6 +3362,19 @@ class AbstractStaticAperture(TransmissiveOptic(), ApertureLayer):
         transmission = aperture._transmission(coordinates)
         super().__init__(name = name, normalise = normalise, 
             transmission=transmission, **kwargs)
+
+
+    @property
+    def shape(self : ApertureLayer) -> tuple:
+        """
+        The shape of the aperture array.
+
+        Returns
+        -------
+        shape : tuple
+            The shape of the aperture transmission array.
+        """
+        return self.transmission.shape
     
 
     def _transmission(self : ApertureLayer, **kwargs) -> Array:
@@ -3681,119 +3695,81 @@ class StaticAberratedAperture(AbstractStaticAperture,
                 f"{len(self.coefficients)} aberrations.")
 
 
-#############################
-### Aperture Construction ###
-#############################
+###############
+### Factory ###
+###############
 class ApertureFactory():
     """
     This class is not actually ever instatiated, but is rather a class used to 
     give a simple constructor interface that is used to construct the most
     commonly used apertures. It is able to construct hard-edged circular or 
     regular poygonalal apertures. Secondary mirrors obscurations with the same
-    aperture shape can be constructed, along with uniformly spaced struts. 
-    Aberrations can also be applied to the aperture. The ratio of the primary
-    aperture opening to the array size is determined by the `aperture_ratio`
-    parameter, with secondary mirror obscurations and struts being scaled
-    relative to the aperture diameter. 
+    aperture shape can be constructed, along with uniformly spaced struts. The
+    ratio of the primary aperture opening to the array size is determined by
+    the `aperture_ratio` parameter, with secondary mirror obscurations and
+    struts being scaled relative to the aperture diameter. 
 
     Lets look at an example of how to construct a simple circular aperture with
-    a secondary mirror obscurtion held by 4 struts and some low-order 
-    aberrations. For this example lets take a 2m diameter aperutre, with a 20cm 
-    secondary mirror held by 3 struts with a width of 2cm. In this example the
-    secondary mirror is 10% of the primary aperture diameter and the struts are
-    1% of the primary aperture diameter, giving us values of 0.1 and 0.01 for
-    the `secondary_ratio` and `strut_ratio` parameters. Let calcualte this for
-    a 512x512 array with the aperture spanning the full array.
+    a secondary mirror obscurtion held by 4 struts. For this example lets take
+    a 2m diameter aperutre, with a 20cm secondary mirror held by 3 struts with
+    a width of 2cm. In this example the secondary mirror is 10% of the primary
+    aperture diameter and the struts are 1% of the primary aperture diameter,
+    giving us values of 0.1 and 0.01 for the `secondary_ratio` and
+    `strut_ratio` parameters. Let calcualte this for a 512x512 array with the
+    aperture spanning the full array.
 
     ```python
-    from dLux import SimpleAperture
+    from dLux import ApertureFactory
     import jax.numpy as np
     import jax.random as jr
-    
-    # Construct Zernikes
-    zernikes = np.arange(4, 11)
-    coefficients = jr.normal(jr.PRNGKey(0), (zernikes.shape[0],))
 
     # Construct aperture
-    aperture = SimpleAperture(512, secondary_ratio=0.1, nstruts=4, 
-                              strut_ratio=0.01, zernikes=zernikes, 
-                              coefficients=coefficients)
+    aperture = ApertureFactory(512, secondary_ratio=0.1, nstruts=4, 
+        strut_ratio=0.01)
     ```
     
-    The resulting aperture class has three parameters, `.aperture`, `.basis`
-    and `.coefficients`. We can examine the aperture and opd like so:
-
-    ```python
-    import matplotlib.pyplot as plt
-
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
-    plt.imshow(aperture.aperture)
-    plt.colorbar()
-
-    plt.subplot(1, 2, 2)
-    plt.imshow(aperture.opd)
-    plt.colorbar()
-    plt.show()
+    The resulting aperture class has onc parameters, `.transmission` which
+    represents the transmission of the aperture.
     ```
 
     We can also easily change this to a hexagonal aperture with 3 struts:
 
     ```python
     # Make aperture
-    aperture = SimpleAperture(512, nsides=6, secondary_ratio=0.1, nstruts=3, 
-                              strut_ratio=0.01, zernikes=zernikes, 
-                              coefficients=coefficients)
+    hexagonal_aperture = ApertureFactory(512, nsides=6, secondary_ratio=0.1,
+        nstruts=3, strut_ratio=0.01)
     
     # Examine
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 2, 1)
-    plt.imshow(aperture.aperture)
+    plt.imshow(aperture.transmission)
     plt.colorbar()
 
     plt.subplot(1, 2, 2)
-    plt.imshow(aperture.opd)
+    plt.imshow(hexagonal_aperture.transmission)
     plt.colorbar()
     plt.show()
     ```
     """
     def __new__(cls              : ApertureFactory, 
                 npixels          : int, 
-                nsides           : int   = 0,
-                rotation         : float = 0., 
-
-                # Sizing
                 aperture_ratio   : float = 1.0,
                 secondary_ratio  : float = 0.,
-                secondary_nsides : int = 0,
-
-                # Spiders
+                nsides           : int   = 0,
+                secondary_nsides : int   = 0,
+                rotation         : float = 0., 
                 nstruts          : int   = 0,
                 strut_ratio      : float = 0.,
                 strut_rotation   : float = 0.,
-                
-                # Aberrations
-                zernikes         : Array = None, 
-                coefficients     : Array = None, 
-
-                # Other
-                normalise        : bool = True,
-                name             : str  = None):
+                normalise        : bool  = True,
+                name             : str   = 'Aperture'):
         """
-        Constructs a basic single static aperture, either with or without 
-        aberrations.
-
-        TODO: Add link to the zenike noll indicies
+        Constructs a basic single static aperture.
 
         Parameters
         ----------
         npixels : int
             Number of pixels used to represent the aperture.
-        nsides : int = 0
-            Number of sides of the aperture. A zero input results in a circular
-            aperture. All other other values of three and above are supported.
-        rotation : float, radians = 0
-            The global rotation of the aperture in radians.
         aperture_ratio : float = 1.
             The ratio of the aperture size to the array size. A value of 1. 
             results in an aperture that fully spans the array, a value of 0.5 
@@ -3803,34 +3779,28 @@ class ApertureFactory():
             The ratio of the secondary mirror obsuration diameter to the 
             aperture diameter. A value of 0. results in no secondary mirror 
             obsuration.
+        nsides : int = 0
+            Number of sides of the aperture. A zero input results in a circular
+            aperture. All other other values of three and above are supported.
         secondary_nsides : int = 0
             The number of sides of the secondary mirror obsuration. A zero input
             results in a circular aperture. All other other values of three and 
             above are supported.
+        rotation : float, radians = 0
+            The global rotation of the aperture in radians.
         nstruts : int = 0
             The number of uniformly spaced struts holding the secondary mirror. 
         strut_ratio : float = 0.
             The ratio of the width of the strut to the aperture diameter.
         strut_rotation : float = 0
             The rotation of the struts in radians.
-        zernikes : Array = None
-            The zernike noll indices to be used for the aberrations. Please 
-            refer to (this)[Add this link] docstring to see which indicides 
-            correspond to which aberrations. Typical values are range(4, 11).
-        coefficients : Array = None
-            The zernike cofficients to be applied to the aberrations. Defaults 
-            to an array of zeros.
-        name : str = None
-            The name of the aperture used to index the layers dictionary. If 
-            not supplied, the aperture will be named based on the number of
-            sides. However this is only supported up to 8 sides, and a name
-            must be supplied for apertures with more than 8 sides.
+        name : str = 'Aperture'
+            The name of the aperture used to index the layers dictionary.
         
         Returns
         -------
-        aperture : Union[StaticAperture, StaticAberratedAperture]
-            Returns an appropriately constructed StaticAperture or 
-            StaticAberratedAperture, depending on if zernikes are provided.
+        aperture : StaticAperture
+            Returns an appropriately constructed StaticAperture.
         """
         # Check vaid inputs
         if nsides < 3 and nsides != 0:
@@ -3847,17 +3817,6 @@ class ApertureFactory():
         
         if strut_ratio < 0:
             raise ValueError("strut_ratio must be >= 0")
-
-        
-        # Auto-name
-        if name is None:
-            if nsides > 8:
-                raise ValueError("Warning: Auto-naming not supported for " + \
-                "nsides > 8. Please provide a name.")
-            sides = ["Circular", "Triangular", "Square", "Pentagonal", 
-                "Hexagonal", "Heptagonal", "Octagonal"]
-            name = sides[np.maximum(nsides-2, 0)] + "Aperture"
-
 
         # Construct components
         apertures = []
@@ -3893,60 +3852,32 @@ class ApertureFactory():
             apertures.append(UniformSpider(
                 nstruts, strut_rel, rotation=full_rotation, softening=0))
 
-
-        # Add aberrations and make static
-        if zernikes is not None:
-            # Construct Aberrations
-            apertures[0] = AberratedAperture(apertures[0], zernikes, 
-                                                coefficients)
-
-            # Construct CompoundAperture
-            full_aperture = CompoundAperture(apertures, normalise=normalise)
-            static = StaticAberratedAperture(full_aperture, npixels, 1, 
-                                                name=name)
-        else:
-            # Construct CompoundAperture
-            full_aperture = CompoundAperture(apertures, normalise=normalise)
-            static = StaticAperture(full_aperture, npixels, 1, name=name)
+        # Construct CompoundAperture
+        full_aperture = CompoundAperture(apertures, normalise=normalise)
+        static = StaticAperture(full_aperture, npixels, 1, name=name)
 
         return static
 
 
     def __init__(self             : ApertureFactory, 
                  npixels          : int, 
-                 nsides           : int   = 0,
-                 rotation         : float = 0., 
-
-                 # Sizing
                  aperture_ratio   : float = 1.0,
                  secondary_ratio  : float = 0.,
-                 secondary_nsides : int = 0,
-
-                 # Spiders
+                 nsides           : int   = 0,
+                 secondary_nsides : int   = 0,
+                 rotation         : float = 0., 
                  nstruts          : int   = 0,
                  strut_ratio      : float = 0.,
                  strut_rotation   : float = 0.,
-                
-                 # Aberrations
-                 zernikes         : Array = None, 
-                 coefficients     : Array = None, 
-
-                 # Other
-                 normalise        : bool = True,
-                 name             : str  = None):
+                 normalise        : bool  = True,
+                 name             : str   = 'Aperture'):
         """
-        Constructs a basic single static aperture, either with or without 
-        aberrations.
+        Constructs a basic single static aperture.
 
         Parameters
         ----------
         npixels : int
             Number of pixels used to represent the aperture.
-        nsides : int = 0
-            Number of sides of the aperture. A zero input results in a circular
-            aperture. All other other values of three and above are supported.
-        rotation : float, radians = 0
-            The global rotation of the aperture in radians.
         aperture_ratio : float = 1.
             The ratio of the aperture size to the array size. A value of 1. 
             results in an aperture that fully spans the array, a value of 0.5 
@@ -3956,28 +3887,26 @@ class ApertureFactory():
             The ratio of the secondary mirror obsuration diameter to the 
             aperture diameter. A value of 0. results in no secondary mirror 
             obsuration.
+        nsides : int = 0
+            Number of sides of the aperture. A zero input results in a circular
+            aperture. All other other values of three and above are supported.
+        secondary_nsides : int = 0
+            The number of sides of the secondary mirror obsuration. A zero input
+            results in a circular aperture. All other other values of three and 
+            above are supported.
+        rotation : float, radians = 0
+            The global rotation of the aperture in radians.
         nstruts : int = 0
             The number of uniformly spaced struts holding the secondary mirror. 
         strut_ratio : float = 0.
             The ratio of the width of the strut to the aperture diameter.
         strut_rotation : float = 0
             The rotation of the struts in radians.
-        zernikes : Array = None
-            The zernike noll indices to be used for the aberrations. Please 
-            refer to (this)[Add this link] docstring to see which indicides 
-            correspond to which aberrations. Typical values are range(4, 11).
-        coefficients : Array = None
-            The zernike cofficients to be applied to the aberrations. Defaults 
-            to an array of zeros.
-        name : str = None
-            The name of the aperture used to index the layers dictionary. If 
-            not supplied, the aperture will be named based on the number of
-            sides. However this is only supported up to 8 sides, and a name
-            must be supplied for apertures with more than 8 sides.
+        name : str = 'Aperture'
+            The name of the aperture used to index the layers dictionary.
         
         Returns
         -------
-        aperture : Union[StaticAperture, StaticAberratedAperture]
-            Returns an appropriately constructed StaticAperture or 
-            StaticAberratedAperture, depending on if zernikes are provided.
+        aperture : StaticAperture
+            Returns an appropriately constructed StaticAperture.
         """
