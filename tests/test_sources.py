@@ -183,14 +183,19 @@ class TestPointSource():
     """
 
 
-    def test_model(self, create_point_source : callable) -> None:
+    def test_model(self, 
+        create_point_source : callable, 
+        create_optics : callable,
+        create_detector) -> None:
         """
         Tests the model method.
         """
         # TODO: this has no asserts?
         source = create_point_source()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        # optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
+        # detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        optics = create_optics()
+        detector = create_detector()
         # filter_in = dLux.Filter()
         source.model(optics)
         source.model(optics, detector)
@@ -249,13 +254,19 @@ class TestMultiPointSource():
             create_multi_point_source(name=[])
 
 
-    def test_model(self, create_multi_point_source : callable) -> None:
+    def test_model(self, 
+        create_multi_point_source : callable,
+        create_point_source : callable, 
+        create_optics : callable,
+        create_detector) -> None:
         """
         Tests the model method.
         """
         source = create_multi_point_source()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        # optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
+        # detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        optics = create_optics()
+        detector = create_detector()
         # filter_in = dLux.Filter()
         source.model(optics)
         source.model(optics, detector)
@@ -304,13 +315,19 @@ class TestArrayDistribution():
         assert np.allclose(new_source.distribution.sum(), 1.)
 
 
-    def test_model(self, create_array_distribution : callable) -> None:
+    def test_model(self, 
+        create_array_distribution : callable,
+        create_point_source : callable, 
+        create_optics : callable,
+        create_detector) -> None:
         """
         Tests the model method.
         """
         source = create_array_distribution()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        # optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
+        # detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        optics = create_optics()
+        detector = create_detector()
         # filter_in = dLux.Filter()
         source.model(optics)
         source.model(optics, detector)
@@ -324,14 +341,20 @@ class TestBinarySource():
     """
 
 
-    def test_model(self, create_binary_source : callable) -> None:
+    def test_model(self, 
+        create_binary_source : callable,
+        create_point_source : callable, 
+        create_optics : callable,
+        create_detector) -> None:
         """
         Tests the model method.
         """
         # TODO add tests
         source = create_binary_source()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        # optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
+        # detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        optics = create_optics()
+        detector = create_detector()
         # filter_in = dLux.Filter()
         source.model(optics)
         source.model(optics, detector)
@@ -343,13 +366,19 @@ class TestPointExtendedSource():
     Tests the PointExtendedSource class.
     """
 
-    def test_model(self, create_point_extended_source : callable) -> None:
+    def test_model(self, 
+        create_point_extended_source : callable,
+        create_point_source : callable, 
+        create_optics : callable,
+        create_detector) -> None:
         """
         Tests the model method.
         """
         source = create_point_extended_source()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        # optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
+        # detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        optics = create_optics()
+        detector = create_detector()
         # filter_in = dLux.Filter()
         source.model(optics)
         source.model(optics, detector)
@@ -374,13 +403,19 @@ class TestPointAndExtendedSource():
             create_point_and_extended_source(spectrum=spec)
 
 
-    def test_model(self, create_point_and_extended_source : callable) -> None:
+    def test_model(self, 
+        create_point_and_extended_source : callable,
+        create_point_source : callable, 
+        create_optics : callable,
+        create_detector) -> None:
         """
         Tests the model method.
         """
         source = create_point_and_extended_source()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        # optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
+        # detector = dLux.core.Detector([dLux.AddConstant(0.)])
+        optics = create_optics()
+        detector = create_detector()
         # filter_in = dLux.Filter()
         source.model(optics)
         source.model(optics, detector)

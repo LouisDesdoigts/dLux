@@ -82,7 +82,7 @@ class Spectrum(Base, ABC):
     def summary(self            : Spectrum, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -110,7 +110,7 @@ class Spectrum(Base, ABC):
                 dpi             : int = 120,
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> None:
+                sigfigs         : int = 4) -> None: # pragma: no cover
         """
         Displays a plot of the wavefront amplitude and opd or phase.
 
@@ -216,7 +216,7 @@ class ArraySpectrum(Spectrum):
     def summary(self            : Spectrum, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -332,7 +332,7 @@ class PolynomialSpectrum(Spectrum):
     def summary(self            : Spectrum, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -451,7 +451,7 @@ class CombinedSpectrum(ArraySpectrum):
     def summary(self            : Spectrum, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 

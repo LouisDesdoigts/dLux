@@ -87,6 +87,3 @@ def validate_bc_attr_dims(
         raise DimensionError(
             bc_attr_dims_message.format(
                 correct_shape, attr_shape, attr_name))
-
-
-

@@ -10,8 +10,63 @@ Spectrum = dLux.spectrums.Spectrum
 Source = dLux.sources.Source
 Aperture = dLux.apertures.ApertureLayer
 AbstractObservation = dLux.observations.AbstractObservation
+Zernike = dLux.aberrations.Zernike
 
 
+### Aberrations ###
+@pytest.fixture
+def create_zernike() -> callable:
+    """
+    Returns:
+    --------
+    create_zernike: callable
+        A function that has all keyword arguments and can be 
+        used to create a Zernike for testing.
+    """
+    def _create_zernike(j : int = 1) -> Zernike:
+        return dLux.aberrations.Zernike(j)
+    return _create_zernike
+
+
+@pytest.fixture
+def create_zernike_basis() -> callable:
+    """
+    Returns:
+    --------
+    create_zernike_basis: callable
+        A function that has all keyword arguments and can be 
+        used to create a ZernikeBasis for testing.
+    """
+    def _create_zernike_basis(
+            js : Array = np.arange(1, 4)) -> dLux.aberrations.ZernikeBasis:
+        return dLux.aberrations.ZernikeBasis(js)
+    return _create_zernike_basis
+
+
+@pytest.fixture
+def create_aberration_factory() -> callable:
+    """
+    Returns:
+    --------
+    create_aberration_factory: callable
+        A function that has all keyword arguments and can be 
+        used to create an AberrationFactory for testing.
+    """
+    def _create_aberration_factory(
+            npixels        : int   = 16,
+            zernikes       : Array = np.arange(1, 4), 
+            coefficients   : Array = np.ones(3), 
+            aperutre_ratio : float = 1.0,
+            nsides         : int   = 0,
+            rotation       : float = 0., 
+            name           : str   = 'Aberrations',
+            ) -> dLux.aberrations.AberrationFactory:
+        return dLux.aberrations.AberrationFactory(npixels, zernikes, coefficients,
+            aperutre_ratio, nsides, rotation, name)
+    return _create_aberration_factory
+
+
+### Wavefronts ###
 @pytest.fixture
 def create_wavefront() -> callable:
     """
@@ -30,6 +85,9 @@ def create_wavefront() -> callable:
     return _create_wavefront
 
 
+# TODO: Fresnel Wavefront
+
+### Optics ###
 @pytest.fixture
 def create_create_wavefront() -> callable:
     """
@@ -170,65 +228,65 @@ def create_rotate() -> callable:
     return _create_rotate
 
 
-@pytest.fixture
-def create_propagator() -> callable:
-    """
-    Returns:
-    --------
-    _create_propagator: callable
-        a function that has all keyword arguments and can be
-        used to create a `Propagator` layer for testing.
-    """
-    def _create_propagator(
-            inverse : bool = False) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        inverse = inverse if inverse is None else False
-        return dLux.propagators.Propagator(inverse=inverse)
-    return _create_propagator
+### Propagators ###
+# @pytest.fixture
+# def create_propagator() -> callable:
+#     """
+#     Returns:
+#     --------
+#     _create_propagator: callable
+#         a function that has all keyword arguments and can be
+#         used to create a `Propagator` layer for testing.
+#     """
+#     def _create_propagator(
+#             inverse : bool = False) -> OpticalLayer:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         inverse = inverse if inverse is None else False
+#         return dLux.propagators.Propagator(inverse=inverse)
+#     return _create_propagator
 
 
-@pytest.fixture
-def create_fixed_sampling_propagator() -> callable:
-    """
-    Returns:
-    --------
-    _create_fixed_sampling_propagator_utility: callable
-        a function that has all keyword arguments and can be
-        used to create a `FixedSamplingPropagator` layer for testing.
-    """
-    def _create_fixed_sampling_propagator_utility() -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        return dLux.propagators.FixedSamplingPropagator()
-    return _create_fixed_sampling_propagator_utility
+# @pytest.fixture
+# def create_fixed_sampling_propagator() -> callable:
+#     """
+#     Returns:
+#     --------
+#     _create_fixed_sampling_propagator_utility: callable
+#         a function that has all keyword arguments and can be
+#         used to create a `FixedSamplingPropagator` layer for testing.
+#     """
+#     def _create_fixed_sampling_propagator_utility() -> OpticalLayer:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         return dLux.propagators.FixedSamplingPropagator()
+#     return _create_fixed_sampling_propagator_utility
 
 
-@pytest.fixture
-def create_variable_sampling_propagator() -> callable:
-    """
-    Returns:
-    --------
-    create_variable_sampling_propagator: callable
-        a function that has all keyword arguments and can be
-        used to create a `VariableSamplingPropagator` layer for testing.
-    """
-    def _create_variable_sampling_propagator_utility(
-                                                     npixels_out     : int   = 16,
-                                                     pixel_scale_out : Array = np.array(1.),
-                                                     shift           : Array = np.zeros(2),
-                                                     pixel_shift     : bool  = False,
-                                                     inverse         : bool  = None
-                                                     ) -> OpticalLayer:
-        """
-        Safe constructor for the dLuxModule, associated with this utility.
-        """
-        return dLux.propagators.VariableSamplingPropagator(pixel_scale_out,
-                            npixels_out, shift, pixel_shift)
-    return _create_variable_sampling_propagator_utility
-
+# @pytest.fixture
+# def create_variable_sampling_propagator() -> callable:
+#     """
+#     Returns:
+#     --------
+#     create_variable_sampling_propagator: callable
+#         a function that has all keyword arguments and can be
+#         used to create a `VariableSamplingPropagator` layer for testing.
+#     """
+#     def _create_variable_sampling_propagator_utility(
+#                                                      npixels_out     : int   = 16,
+#                                                      pixel_scale_out : Array = np.array(1.),
+#                                                      shift           : Array = np.zeros(2),
+#                                                      pixel_shift     : bool  = False,
+#                                                      inverse         : bool  = None
+#                                                      ) -> OpticalLayer:
+#         """
+#         Safe constructor for the dLuxModule, associated with this utility.
+#         """
+#         return dLux.propagators.VariableSamplingPropagator(pixel_scale_out,
+#                             npixels_out, shift, pixel_shift)
+#     return _create_variable_sampling_propagator_utility
 
 
 @pytest.fixture
@@ -270,7 +328,6 @@ def create_angular_propagator() -> callable:
     return _create_angular_propagator
 
 
-
 @pytest.fixture
 def create_far_field_fresnel() -> callable:
     """
@@ -302,18 +359,42 @@ def create_cartesian_mft() -> callable:
         used to create a `CartesianMFT` layer for testing.
     """
 
-    def _create_cartesian_mft(
-                            npixels      : int   = 16,
-                            pixel_scale  : Array = np.array(1.),
-                            focal_length : Array = np.array(1.),
-                            shift        : Array = np.zeros(2),
-                            pixel        : bool  = False) -> OpticalLayer:
+    def _create_cartesian_mft(npixels      : int   = 16,
+                              pixel_scale  : Array = np.array(1.),
+                              focal_length : Array = np.array(1.),
+                              inverse      : bool = False,
+                              ) -> OpticalLayer:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
         return dLux.propagators.CartesianMFT(npixels, pixel_scale,
-            focal_length, shift, pixel)
+            focal_length, inverse)
     return _create_cartesian_mft
+
+
+@pytest.fixture
+def create_shifted_cartesian_mft() -> callable:
+    """
+    Returns:
+    --------
+    _create_shifted_cartesian_mft: callable
+        a function that has all keyword arguments and can be
+        used to create a `CartesianMFT` layer for testing.
+    """
+
+    def _create_shifted_cartesian_mft(
+                            npixels      : int   = 16,
+                            pixel_scale  : Array = np.array(1.),
+                            focal_length : Array = np.array(1.),
+                            shift        : Array = np.zeros(2),
+                            pixel        : bool  = False,
+                            inverse      : bool  = False,) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.propagators.ShiftedCartesianMFT(npixels, pixel_scale,
+            focal_length, shift, pixel, inverse)
+    return _create_shifted_cartesian_mft
 
 
 @pytest.fixture
@@ -327,13 +408,36 @@ def create_angular_mft() -> callable:
     """
     def _create_angular_mft(npixels      : int   = 16,
                             pixel_scale  : Array = np.array(1.),
-                            shift        : Array = np.zeros(2),
-                            pixel        : bool  = False) -> OpticalLayer:
+                            inverse      : bool  = False,
+                            ) -> OpticalLayer:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
-        return dLux.propagators.AngularMFT(npixels, pixel_scale, shift, pixel)
+        return dLux.propagators.AngularMFT(npixels, pixel_scale, 
+            inverse=inverse)
     return _create_angular_mft
+
+
+@pytest.fixture
+def create_shifted_angular_mft() -> callable:
+    """
+    Returns:
+    --------
+    _create_shifted_angular_mft: callable
+        a function that has all keyword arguments and can be
+        used to create a `ShiftedAngularMFT` layer for testing.
+    """
+    def _create_shifted_angular_mft(npixels      : int   = 16,
+                            pixel_scale  : Array = np.array(1.),
+                            shift        : Array = np.zeros(2),
+                            pixel        : bool  = False,
+                            inverse      : bool  = False,) -> OpticalLayer:
+        """
+        Safe constructor for the dLuxModule, associated with this utility.
+        """
+        return dLux.propagators.ShiftedAngularMFT(npixels, pixel_scale, shift, 
+            pixel, inverse=inverse)
+    return _create_shifted_angular_mft
 
 
 @pytest.fixture
@@ -347,11 +451,12 @@ def create_cartesian_fft():
     """
 
     def _create_cartesian_fft(
-            focal_length : Array = np.array(1.)) -> OpticalLayer:
+            focal_length : Array = np.array(1.),
+            inverse      : bool = False,) -> OpticalLayer:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
-        return dLux.propagators.CartesianFFT(focal_length)
+        return dLux.propagators.CartesianFFT(focal_length, inverse=inverse)
     return _create_cartesian_fft
 
 @pytest.fixture
@@ -364,11 +469,11 @@ def create_angular_fft() -> callable:
         used to create a `AngularFFT` layer for testing.
     """
 
-    def _create_angular_fft() -> OpticalLayer:
+    def _create_angular_fft(inverse : bool = False) -> OpticalLayer:
         """
         Safe constructor for the dLuxModule, associated with this utility.
         """
-        return dLux.propagators.AngularFFT()
+        return dLux.propagators.AngularFFT(inverse=inverse)
     return _create_angular_fft
 
 
@@ -396,6 +501,7 @@ def create_cartesian_fresnel() -> callable:
     return _create_cartesian_fresnel
 
 
+### Sources ###
 @pytest.fixture
 def create_source() -> callable:
     """
@@ -635,6 +741,7 @@ def create_point_and_extended_source():
     return _create_point_and_extended_source
 
 
+### Spectrums ###
 @pytest.fixture
 def create_array_spectrum() -> callable:
     """
@@ -695,6 +802,7 @@ def create_combined_spectrum() -> callable:
     return _create_combined_spectrum
 
 
+### Core ###
 @pytest.fixture
 def create_optics() -> callable:
     """
@@ -713,6 +821,52 @@ def create_optics() -> callable:
             ]) -> OpticalLayer:
         return dLux.core.Optics(layers)
     return _create_optics
+
+
+### Core ###
+@pytest.fixture
+def create_simple_optics() -> callable:
+    """
+    Returns:
+    --------
+    _create_simple_optics: callable
+        A function that has all keyword arguments and can be
+        used to create a `Optics` layer for testing.
+    """
+    def _create_simple_optics(
+        diameter : float = 1.,
+        aperture = dLux.apertures.ApertureFactory(npixels=16),
+        aberrations = dLux.AberrationFactory(npixels=16, 
+            zernikes=np.arange(1, 7)),
+        propagator = dLux.propagators.PropagatorFactory(npixels=16, 
+            pixel_scale=1e-7)
+        ) -> OpticalLayer:
+        return dLux.core.SimpleOptics(diameter=diameter, aperture=aperture, 
+            aberrations=aberrations, propagator=propagator)
+    return _create_simple_optics
+
+
+@pytest.fixture
+def create_masked_optics() -> callable:
+    """
+    Returns:
+    --------
+    _create_masked_optics: callable
+        A function that has all keyword arguments and can be
+        used to create a `Optics` layer for testing.
+    """
+    def _create_masked_optics(
+        diameter : float = 1.,
+        aperture = dLux.apertures.ApertureFactory(npixels=16),
+        aberrations = dLux.AberrationFactory(npixels=16, 
+            zernikes=np.arange(1, 7)),
+        mask = np.ones((16, 16)),
+        propagator = dLux.propagators.PropagatorFactory(npixels=16, 
+            pixel_scale=1e-7)
+        ) -> OpticalLayer:
+        return dLux.core.MaskedOptics(diameter=diameter, aperture=aperture, 
+            mask=mask, aberrations=aberrations, propagator=propagator)
+    return _create_masked_optics
 
 
 @pytest.fixture
@@ -774,170 +928,92 @@ def create_instrument(
     return _create_instrument
 
 
-#####  Apertures ######
-
+### Apertures ###
 @pytest.fixture
 def create_square_aperture() -> callable:
-    """
-    Returns:
-    --------
-    _create_filter: callable
-        A function that has all keyword arguments and can be
-        used to create a `Filter` layer for testing.
-    """
 
     def _create_square_aperture(  
             width       : Array = 1., 
             centre      : Array = [0., 0.],
-            shear      : Array = [0., 0.],
+            shear       : Array = [0., 0.],
             compression : Array = [1., 1.],
             rotation    : Array = 0.,
             occulting   : bool = False, 
-            softening   : Array = 0.) -> Aperture:
-        """
-        Construct's an instance of `SquareAperture` making 
-        it easy to toggle a single parameter. 
-        Parameters:
-        -----------
-        centre: float, meters
-            The centre of the coordinate system in the paraxial coordinates.
-        shear: Array
-            Linear stretching of the x and y axis representing a 
-            shear of the coordinate system.
-        compression: Array 
-            The x and y compression of the coordinate system. This 
-            is a constant. 
-        rotation: float, radians
-            The rotation of the aperture away from the positive 
-            x-axis. 
-        softening: bool 
-            True if the aperture is soft edged otherwise False. A
-            soft edged aperture has a small layer of non-binary 
-            pixels. This is to prevent undefined gradients. 
-        occulting: bool 
-            True if the aperture is occulting else False. An 
-            occulting aperture is zero inside and one outside. 
-        theta: float, radians
-            The rotation of the aperture away from the positive 
-            x-axis. 
-        width: float, meters
-            The side length of the square. 
-        """
+            softening   : Array = 0.,
+            normalise   : bool = False) -> Aperture:
         return dLux.SquareAperture(width,
             centre,
             shear,
             compression,
             rotation,
             occulting,
-            softening)
+            softening,
+            normalise)
 
     return _create_square_aperture
 
 
-
 @pytest.fixture
 def create_rectangular_aperture()-> callable:
-    """
-    Returns:
-    --------
-    _create_rectangular_aperture: callable
-        A function that has all keyword arguments and can be
-        used to create a `RectangularAperture` layer for testing.
-    """
 
     def _create_rectangular_aperture(
                                     length      : Array = 0.5, 
                                     width       : Array = 1., 
                                     centre      : Array = [0., 0.],
-                                    shear      : Array = [0., 0.],
+                                    shear       : Array = [0., 0.],
                                     compression : Array = [1., 1.],
                                     rotation    : Array = 0.,
                                     occulting   : bool = False, 
-                                    softening   : Array = 0.) -> Aperture:
-        """
-        Construct's an instance of `SquareAperture` making 
-        it easy to toggle a single parameter. 
-        Parameters:
-        -----------
-        occulting: bool = None
-            True if light passes through the aperture. 
-            False if light is blocked by the aperture. 
-        softening: bool = None
-            True is the aperture has soft pixels on the 
-            edges else false. 
-        x_offset: float = None, meters
-            The distance along the x axis that the aperture 
-            is moved from the centre of the coordinate system. 
-        y_offset: float = None, meters
-            The distance along the y axis that the aperture 
-            is moved from the centre of the coordinate system.
-        width: float = None, meters
-            The width of the aperture.
-        length: float = None, meters 
-            The length of the aperture.
-        theta: float = None, radians
-            The rotation of the aperture.
-        """
+                                    softening   : Array = 0.,
+                                    normalise   : bool = False) -> Aperture:
         return dLux.apertures.RectangularAperture(
-                                                length      , 
-                                                width       , 
-                                                centre      ,
-                                                shear      ,
-                                                compression ,
-                                                rotation    ,
-                                                occulting   , 
-                                                softening)
+                                                length,
+                                                width,
+                                                centre,
+                                                shear,
+                                                compression,
+                                                rotation,
+                                                occulting,
+                                                softening,
+                                                normalise)
     return _create_rectangular_aperture
 
 
 @pytest.fixture
 def create_circular_aperture() -> callable:
-    """
-    Returns:
-    --------
-    _create_circular_aperture: callable
-        A function that has all keyword arguments and can be
-        used to create a `CircularAperture` layer for testing.
-    """
-
 
     def _create_circular_aperture( 
             radius      : Array = 1., 
             centre      : Array = [0., 0.],
-            shear      : Array = [0., 0.],
+            shear       : Array = [0., 0.],
             compression : Array = [1., 1.],
             occulting   : bool = False, 
-            softening   : Array = 0.) -> Aperture:
+            softening   : Array = 0.,
+            normalise   : bool = False) -> Aperture:
         return dLux.apertures.CircularAperture(
             radius,
             centre,
             shear,
             compression,
             occulting,
-            softening)
+            softening,
+            normalise)
 
     return _create_circular_aperture
 
 
 @pytest.fixture
 def create_hexagonal_aperture() -> callable:
-    """
-    Returns:
-    --------
-    _create_hexagonal_aperture: callable
-        A function that has all keyword arguments and can be
-        used to create a `HexagonalAperture` layer for testing.
-    """
-
 
     def _create_hexagonal_aperture( 
             radius      : Array = 1., 
             centre      : Array = [0., 0.],
-            shear      : Array = [0., 0.],
+            shear       : Array = [0., 0.],
             compression : Array = [1., 1.],
             rotation    : Array = 0.,
             occulting   : bool = False, 
-            softening   : Array = 0.) -> Aperture:
+            softening   : Array = 0.,
+            normalise   : bool = False) -> Aperture:
         return dLux.apertures.HexagonalAperture(
             radius,
             centre,
@@ -945,30 +1021,24 @@ def create_hexagonal_aperture() -> callable:
             compression,
             rotation,
             occulting,
-            softening)
+            softening,
+            normalise)
 
     return _create_hexagonal_aperture
 
 
 @pytest.fixture
 def create_annular_aperture() -> callable:
-    """
-    Returns:
-    --------
-    _create_annular_aperture: callable
-        A function that has all keyword arguments and can be
-        used to create a `AnnularAperture` layer for testing.
-    """
-
 
     def _create_annular_aperture( 
             rmax        : Array = 1.2, 
             rmin        : Array = 0.5, 
             centre      : Array = [0., 0.],
-            shear      : Array = [0., 0.],
+            shear       : Array = [0., 0.],
             compression : Array = [1., 1.],
             occulting   : bool = False, 
-            softening   : Array = 0.) -> Aperture:
+            softening   : Array = 0.,
+            normalise   : bool = False) -> Aperture:
         return dLux.apertures.AnnularAperture(
             rmax,
             rmin,
@@ -976,11 +1046,166 @@ def create_annular_aperture() -> callable:
             shear,
             compression,
             occulting,
-            softening)
+            softening,
+            normalise)
 
     return _create_annular_aperture
 
 
+@pytest.fixture
+def create_irregular_polygonal_aperture() -> callable:
+
+    def _create_irregular_polygonal_aperture( 
+            vertices    : Array = np.array([[0.5,   0.5], [0.5, -0.5], 
+                                            [-0.5, -0.5], [-0.5, 0.5]]),
+            centre      : Array = [0., 0.],
+            shear       : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0.,
+            occulting   : bool = False, 
+            softening   : Array = 0.,
+            normalise   : bool = False) -> Aperture:
+        return dLux.apertures.IrregularPolygonalAperture(
+            vertices,
+            centre,
+            shear,
+            compression,
+            rotation,
+            occulting,
+            softening,
+            normalise)
+
+    return _create_irregular_polygonal_aperture
+
+
+@pytest.fixture
+def create_uniform_spider() -> callable:
+
+    def _create_uniform_spider(
+            number_of_struts: int = 4,
+            width_of_struts: float = .05,
+            centre      : Array = [0., 0.], 
+            shear       : Array = [0., 0.],
+            compression : Array = [1., 1.],
+            rotation    : Array = 0., 
+            softening   : bool = False,
+            normalise   : bool = False) -> OpticalLayer:
+        return dLux.apertures.UniformSpider(
+            number_of_struts, 
+            width_of_struts,
+            centre=centre,
+            shear=shear,
+            compression=compression,
+            rotation=rotation,
+            softening=softening,
+            normalise=normalise)
+    return _create_uniform_spider
+
+
+@pytest.fixture
+def create_aberrated_aperture(create_circular_aperture: callable) -> callable:
+    nterms = 6
+    def _create_aberrated_aperture(
+            aperture: object = create_circular_aperture(),
+            noll_inds: list = np.arange(1, nterms+1, dtype=int),
+            coefficients: Array = np.ones(nterms, dtype=float),
+            ) -> OpticalLayer:
+        return dLux.apertures.AberratedAperture(
+            noll_inds=noll_inds,
+            coefficients=coefficients,
+            aperture=aperture)
+    
+    return _create_aberrated_aperture
+
+
+@pytest.fixture
+def create_static_aperture(create_circular_aperture: callable) -> callable:
+
+    def _create_static_aperture(
+            aperture: object = create_circular_aperture(),
+            npixels: int = 16,
+            diameter: float = 1.,
+            coordinates: Array = None,
+            ) -> OpticalLayer:
+        return dLux.apertures.StaticAperture(
+            aperture=aperture, npixels=npixels, diameter=diameter, 
+            coordinates=coordinates)
+    
+    return _create_static_aperture
+
+
+@pytest.fixture
+def create_static_aberrated_aperture(create_aberrated_aperture: callable) -> callable:
+
+    def _create_static_aberrated_aperture(
+            aperture: object = create_aberrated_aperture(),
+            npixels: int = 16,
+            diameter: float = 1.,
+            coordinates: Array = None,
+            ) -> OpticalLayer:
+        return dLux.apertures.StaticAberratedAperture(
+            aperture=aperture, npixels=npixels, diameter=diameter, 
+            coordinates=coordinates)
+    
+    return _create_static_aberrated_aperture
+
+
+@pytest.fixture
+def create_compound_aperture(create_circular_aperture: callable) -> callable:
+
+    def _create_compound_aperture(
+            apertures: list = [create_circular_aperture()],
+            normalise: bool = False,
+            ) -> OpticalLayer:
+        return dLux.apertures.CompoundAperture(
+            apertures=apertures, normalise=normalise)
+    
+    return _create_compound_aperture
+
+
+@pytest.fixture
+def create_multi_aperture(create_circular_aperture: callable) -> callable:
+
+    def _create_multi_aperture(
+            apertures: list = [create_circular_aperture()],
+            normalise: bool = False,
+            ) -> OpticalLayer:
+        return dLux.apertures.MultiAperture(
+            apertures=apertures, normalise=normalise)
+    
+    return _create_multi_aperture
+
+
+@pytest.fixture
+def create_aperture_factory(create_circular_aperture: callable) -> callable:
+
+    def _create_aperture_factory(
+        npixels          : int   = 16, 
+        aperture_ratio   : float = 1.0,
+        secondary_ratio  : float = 0.,
+        nsides           : int   = 0,
+        secondary_nsides : int   = 0,
+        rotation         : float = 0., 
+        nstruts          : int   = 0,
+        strut_ratio      : float = 0.,
+        strut_rotation   : float = 0.,
+        normalise        : bool  = True) -> OpticalLayer:
+        return dLux.apertures.ApertureFactory(
+            npixels=npixels,
+            aperture_ratio=aperture_ratio,
+            secondary_ratio=secondary_ratio,
+            nsides=nsides,
+            secondary_nsides=secondary_nsides,
+            rotation=rotation,
+            nstruts=nstruts,
+            strut_ratio=strut_ratio,
+            strut_rotation=strut_rotation,
+            normalise=normalise)
+    
+    return _create_aperture_factory
+
+
+### Detectors ###
 @pytest.fixture
 def create_pixel_response() -> callable:
     """
@@ -1071,57 +1296,7 @@ def create_rotate_detector() -> callable:
     return _create_rotate_detector
 
 
-@pytest.fixture
-def create_uniform_spider() -> callable:
-    """
-    Returns:
-    --------
-    _create_uniform_spider: callable
-        A function that has all keyword arguments and can be
-        used to create a `UniformSpider` layer for testing.
-    """
-    def _create_uniform_spider(
-            number_of_struts: int = 4,
-            width_of_struts: float = .05,
-            centre      : Array = [0., 0.], 
-            shear      : Array = [0., 0.],
-            compression : Array = [1., 1.],
-            rotation    : Array = 0., 
-            softening   : bool = False) -> OpticalLayer:
-        return dLux.apertures.UniformSpider(
-            number_of_struts, 
-            width_of_struts,
-            centre=centre,
-            shear=shear,
-            compression=compression,
-            rotation=rotation,
-            softening=softening)
-    return _create_uniform_spider
-
-
-@pytest.fixture
-def create_aberrated_aperture(create_circular_aperture: callable) -> callable:
-    """
-    Returns:
-    --------
-    _create_aberrated_aperture: callable
-        A function that has all keyword arguments and can be
-        used to create a `AberratedAperture` layer for testing.
-    """
-    shape: int = 6
-
-    def _create_aberrated_aperture(
-            noll_inds: list = np.arange(1, shape+1, dtype=int),
-            coefficients: Array = np.ones(shape, dtype=float),
-            aperture: object = create_circular_aperture()) -> OpticalLayer:
-        return dLux.apertures.AberratedAperture(
-            noll_inds=noll_inds,
-            coefficients=coefficients,
-            aperture=aperture)
-    
-    return _create_aberrated_aperture
-    
-
+### Observations ###
 @pytest.fixture
 def create_dither() -> callable:
     """

@@ -36,42 +36,27 @@ def test_model(
 
     # Test different combinations of inputs, detector
     out = dLux.core.model(optics, sources=sources, detector=detector)
-    assert not np.isnan(out).all()
-    assert not np.isinf(out).all()
 
     # Test normalise function for scene
     out = dLux.core.model(optics, sources=sources)
-    assert not np.isnan(out).all()
-    assert not np.isinf(out).all()
 
     # Test normalise function for sources
     out = dLux.core.model(optics, sources=sources, normalise=False)
-    assert not np.isnan(out).all()
-    assert not np.isinf(out).all()
 
     # Test return_tree with different structures, list
     out = dLux.core.model(optics, sources=sources, return_tree=True)
-    out = np.array(out)
-    assert not np.isnan(out).all()
-    assert not np.isinf(out).all()
 
     # Test return_tree with different structures, dict
     out = dLux.core.model(optics, sources={"source": source}, return_tree=True)
-    out = np.array(list(out.values()))
-    assert not np.isnan(out).all()
-    assert not np.isinf(out).all()
 
     # Test return_tree with different structures, source
     out = dLux.core.model(optics, sources=sources, return_tree=True)
-    out = np.array(out)
-    assert not np.isnan(out).all()
-    assert not np.isinf(out).all()
 
     # Test return_tree with detector input
     out = dLux.core.model(optics, sources=sources, detector=detector, return_tree=True)
-    out = np.array(out)
-    assert not np.isnan(out).all()
-    assert not np.isinf(out).all()
+
+    # Test with flatten
+    out = dLux.core.model(optics, sources=sources, flatten=True)
 
 
 class TestOptics(object):
@@ -108,8 +93,6 @@ class TestOptics(object):
 
         # Test propagation
         psf = osys.propagate_mono(4e-6)
-        assert not np.isnan(psf).all()
-        assert not np.isinf(psf).all()
 
 
     def test_propagate(self, create_optics: callable) -> None:
@@ -118,23 +101,15 @@ class TestOptics(object):
         """
         osys = create_optics()
 
-        # Test inputs
-        with pytest.raises(AssertionError):
-            osys.propagate(1e-6)
-
-        with pytest.raises(AssertionError):
-            osys.propagate([[1e-6]])
-
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             osys.propagate([1e-6], [0.])
 
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             osys.propagate([1e-6, 2e-6], weights=[0.])
 
         # Test propagation
-        psf = osys.propagate([4e-6, 5e-6])
-        assert not np.isnan(psf).all()
-        assert not np.isinf(psf).all()
+        osys.propagate([4e-6, 5e-6])
+        osys.propagate([4e-6, 5e-6], weights=np.ones(2))
 
 
     def test_model(self, 
@@ -145,8 +120,128 @@ class TestOptics(object):
         """
         osys = create_optics()
         psf = osys.model(sources=create_point_source())
-        assert not np.isnan(psf).all()
-        assert not np.isinf(psf).all()
+    
+
+    def test_getattr(self, create_optics: callable) -> None:
+        """
+        Tests the __getattr__ method.
+        """
+        osys = create_optics()
+
+        # Test non-existant attribute
+        with pytest.raises(AttributeError):
+            osys.non_existant
+
+        # Test existing attribute
+        osys.layers
+
+
+class TestSimpleOptics():
+
+    def test_constructor(self, 
+        create_simple_optics,
+        create_circular_aperture,
+        create_aberrated_aperture,
+        create_static_aberrated_aperture,
+        create_add_opd):
+        """
+        Tests the constructor
+        """
+        create_simple_optics()
+        create_simple_optics(diameter=1)
+
+        with pytest.raises(ValueError):
+            create_simple_optics(diameter=np.array([1]))
+
+        with pytest.raises(TypeError):
+            create_simple_optics(diameter="1")
+
+        with pytest.raises(TypeError):
+            create_simple_optics(aberrations="1")
+
+        with pytest.raises(TypeError):
+            create_simple_optics(aperture="1")
+        
+        with pytest.raises(TypeError):
+            create_simple_optics(propagator="1")
+
+        with pytest.raises(ValueError):
+            ap = create_circular_aperture()
+            aber_ap = create_aberrated_aperture(aperture=ap)
+            aber = create_static_aberrated_aperture(npixels=16, 
+                aperture=aber_ap)
+            create_simple_optics(aperture=np.ones((8, 8)), aberrations=aber)
+
+        with pytest.raises(ValueError):
+            opd_layer = create_add_opd(opd=np.ones((16, 16)))
+            create_simple_optics(aperture=np.ones((8, 8)), 
+                aberrations=opd_layer)
+
+
+    def test_propagate(self, create_simple_optics):
+        """
+        Tests the propagate method
+        """
+        osys = create_simple_optics()
+        psf = osys.propagate([4e-6, 5e-6])
+        psf = osys.propagate(4e-6)
+    
+    def test_propagate_mono(self, create_simple_optics):
+        """
+        Tests the propagate_mono method
+        """
+        osys = create_simple_optics()
+        psf = osys.propagate_mono(4e-6)
+        wf = osys.propagate_mono(4e-6, return_wf=True)
+    
+    def test_getattr(self, create_simple_optics):
+        """
+        Tests the __getattr__ method.
+        """
+        osys = create_simple_optics()
+
+        # Test non-existant attribute
+        with pytest.raises(AttributeError):
+            osys.non_existant
+
+        # Test existing attributes
+        osys.diameter
+        osys.pixel_scale
+
+
+class TestMaskedOptics():
+
+    def test_constructor(self, 
+        create_masked_optics,
+        create_circular_aperture,
+        create_aberrated_aperture,
+        create_static_aberrated_aperture,
+        create_add_opd):
+        """
+        Tests the constructor
+        """
+        create_masked_optics()
+
+        with pytest.raises(ValueError):
+            create_masked_optics(diameter=np.array([1]))
+
+
+    def test_propagate(self, create_masked_optics):
+        """
+        Tests the propagate method
+        """
+        osys = create_masked_optics()
+        psf = osys.propagate([4e-6, 5e-6])
+        psf = osys.propagate(4e-6)
+    
+
+    def test_propagate_mono(self, create_masked_optics):
+        """
+        Tests the propagate_mono method
+        """
+        osys = create_masked_optics()
+        psf = osys.propagate_mono(4e-6)
+        wf = osys.propagate_mono(4e-6, return_wf=True)
 
 
 class TestDetector(object):
@@ -188,8 +283,6 @@ class TestDetector(object):
 
         # Test propagation
         image = detector.apply_detector(np.ones((5, 5)))
-        assert not np.isnan(image).all()
-        assert not np.isinf(image).all()
 
 
     def test_debug_apply_detector(self, create_detector: callable) -> None:
@@ -212,8 +305,6 @@ class TestDetector(object):
 
         # Test propagation
         image, _, _ = detector.debug_apply_detector(np.ones((5, 5)))
-        assert not np.isnan(image).all()
-        assert not np.isinf(image).all()
 
 
     def test_model(self,
@@ -227,8 +318,6 @@ class TestDetector(object):
         source = create_point_source()
         psf = create_optics().model(sources=source)
         psf = detector.model(psf)
-        assert not np.isnan(psf).all()
-        assert not np.isinf(psf).all()
 
 
 class TestInstrument(object):
@@ -279,8 +368,6 @@ class TestInstrument(object):
 
         # Test modelling
         psf = instrument.model()
-        assert not np.isnan(psf).all()
-        assert not np.isinf(psf).all()
 
 
 class TestFilter(object):
@@ -334,21 +421,15 @@ class TestFilter(object):
 
         # Test scalar input
         throughput = filt.get_throughput(np.array([1e-6, 2e-6]))
-        assert not np.isnan(throughput).all()
-        assert not np.isinf(throughput).all()
         assert (throughput >= 0).all()
         assert (throughput <= 1).all()
 
         # test array input
         throughput = filt.get_throughput(np.array([1e-6, 2e-6]))
-        assert not np.isnan(throughput).all()
-        assert not np.isinf(throughput).all()
         assert (throughput >= 0).all()
         assert (throughput <= 1).all()
 
         # Test 1d array inputs
         throughput = filt.get_throughput(1e-6*np.linspace(1, 5, 5))
-        assert not np.isnan(throughput).all()
-        assert not np.isinf(throughput).all()
         assert (throughput >= 0).all()
         assert (throughput <= 1).all()

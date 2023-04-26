@@ -883,6 +883,12 @@ class Wavefront(Base):
         wavefront : Wavefront
             The new wavefront with the normalised electric field amplitudes.
         """
+        amplitude = self.amplitude
+
+        # Note this throws concretisiation errors
+        # if (amplitude == 0.).all():
+        #     raise ValueError("ampltide is all zeros, can't normalise.")
+
         return self.multiply('amplitude', (1 / np.linalg.norm(self.amplitude)))
 
 

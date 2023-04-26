@@ -41,7 +41,8 @@ class DetectorLayer(Base, ABC):
 
 
     @abstractmethod
-    def __call__(self : DetectorLayer, image : Array) -> Array: # pragma: no cover
+    def __call__(self : DetectorLayer, 
+                 image : Array) -> Array: # pragma: no cover
         """
         Abstract method for Detector Layers
         """
@@ -51,7 +52,7 @@ class DetectorLayer(Base, ABC):
     def summary(self            : DetectorLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -161,7 +162,7 @@ class ApplyPixelResponse(DetectorLayer):
     def summary(self            : DetectorLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -261,7 +262,7 @@ class ApplyJitter(DetectorLayer):
     def summary(self            : DetectorLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -339,7 +340,7 @@ class ApplySaturation(DetectorLayer):
     def summary(self            : DetectorLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -416,7 +417,7 @@ class AddConstant(DetectorLayer):
     def summary(self            : DetectorLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -522,7 +523,7 @@ class IntegerDownsample(DetectorLayer):
     def summary(self            : DetectorLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -617,7 +618,7 @@ class Rotate(DetectorLayer):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 

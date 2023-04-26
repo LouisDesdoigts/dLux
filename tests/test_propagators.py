@@ -30,7 +30,43 @@ class TestCartesianMFT():
         # Construct
         wf = dLux.Wavefront(npix, npix*p_pscale, wl)
         prop = create_cartesian_mft(npix, f_pscale, fl)
-        inv_prop = create_cartesian_mft(npix, p_pscale, fl)
+        inv_prop = create_cartesian_mft(npix, p_pscale, fl, inverse=True)
+
+        # Prop
+        focal = prop(wf)
+        pupil = inv_prop(focal)
+
+        # Test
+        assert not np.isnan(focal.psf).any()
+        assert not np.isnan(pupil.psf).any()
+
+
+class TestShiftedCartesianMFT():
+    """
+    Test the CartesianMFT class.
+    """
+
+
+    def test_constructor(self, create_shifted_cartesian_mft : callable):
+        """
+        Tests the constructor.
+        """
+        # Test constructor
+        create_shifted_cartesian_mft()
+
+
+    def test_propagate(self, create_shifted_cartesian_mft : callable):
+        """
+        Tests the propagate method.
+        """
+        wl, npix, f_pscale, fl = 1e-6, 32, 1e-6, 5.
+        p_pscale = 1/npix
+
+        # Construct
+        wf = dLux.Wavefront(npix, npix*p_pscale, wl)
+        prop = create_shifted_cartesian_mft(npix, f_pscale, fl)
+        inv_prop = create_shifted_cartesian_mft(npix, p_pscale, fl, 
+            inverse=True)
 
         # Prop
         focal = prop(wf)
@@ -45,9 +81,10 @@ class TestCartesianMFT():
         shift = f_pscale * np.ones(2)
 
         # Construct
-        prop_shift = create_cartesian_mft(npix, f_pscale, fl, shift=shift)
-        prop_shift_pix = create_cartesian_mft(npix, f_pscale, fl, 
-                                            shift=shift_pix, pixel=True)
+        prop_shift = create_shifted_cartesian_mft(npix, f_pscale, fl, 
+            shift=shift)
+        prop_shift_pix = create_shifted_cartesian_mft(npix, f_pscale, fl, 
+            shift=shift_pix, pixel=True)
 
         # Prop
         focal_shift = prop_shift(wf)
@@ -83,7 +120,42 @@ class TestAngularMFT():
         # Construct
         wf = dLux.Wavefront(npix, npix*p_pscale, wl)
         prop = create_angular_mft(npix, f_pscale)
-        inv_prop = create_angular_mft(npix, p_pscale)
+        inv_prop = create_angular_mft(npix, p_pscale, inverse=True)
+
+        # Prop
+        focal = prop(wf)
+        pupil = inv_prop(focal)
+
+        # Test
+        assert not np.isnan(focal.psf).any()
+        assert not np.isnan(pupil.psf).any()
+
+
+class TestShiftedAngularMFT():
+    """
+    Test the ShiftedAngularMFT class.
+    """
+
+
+    def test_constructor(self, create_shifted_angular_mft : callable):
+        """
+        Tests the constructor.
+        """
+        # Test constructor
+        create_shifted_angular_mft()
+
+
+    def test_propagate(self, create_shifted_angular_mft : callable):
+        """
+        Tests the propagate method.
+        """
+        wl, npix, f_pscale = 1e-6, 32, 2e-7
+        p_pscale = 1/npix
+
+        # Construct
+        wf = dLux.Wavefront(npix, npix*p_pscale, wl)
+        prop = create_shifted_angular_mft(npix, f_pscale)
+        inv_prop = create_shifted_angular_mft(npix, p_pscale, inverse=True)
 
         # Prop
         focal = prop(wf)
@@ -98,8 +170,9 @@ class TestAngularMFT():
         shift = f_pscale * np.ones(2)
 
         # Construct
-        prop_shift = create_angular_mft(npix, f_pscale, shift)
-        prop_shift_pix = create_angular_mft(npix, f_pscale, shift_pix, True)
+        prop_shift = create_shifted_angular_mft(npix, f_pscale, shift)
+        prop_shift_pix = create_shifted_angular_mft(npix, f_pscale, shift_pix,
+            True)
 
         # Prop
         focal_shift = prop_shift(wf)
@@ -133,7 +206,7 @@ class TestCartesianFFT():
         p_pscale = 1/npix
         wf = dLux.Wavefront(npix, npix*p_pscale, wl)
         prop = create_cartesian_fft(fl)
-        inv_prop = create_cartesian_fft(fl)
+        inv_prop = create_cartesian_fft(fl, inverse=True)
 
         # Prop
         focal = prop(wf.pad_to(npix * 5))
@@ -166,7 +239,7 @@ class TestAngularFFT():
         p_pscale = 1/npix
         wf = dLux.Wavefront(npix, npix*p_pscale, wl)
         prop = create_angular_fft()
-        inv_prop = create_angular_fft()
+        inv_prop = create_angular_fft(inverse=True)
 
         # Prop
         focal = prop(wf.pad_to(npix * 5))

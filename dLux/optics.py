@@ -106,7 +106,7 @@ class OpticalLayer(Base, ABC):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -135,7 +135,7 @@ class OpticalLayer(Base, ABC):
                 dpi             : int = 120,
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> None:
+                sigfigs         : int = 4) -> None: # pragma: no cover
         """
         Displays a plot of the wavefront amplitude and opd or phase.
 
@@ -262,7 +262,7 @@ class CreateWavefront(OpticalLayer):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -342,7 +342,7 @@ class TiltWavefront(OpticalLayer):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -413,7 +413,7 @@ class NormaliseWavefront(OpticalLayer):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -527,7 +527,7 @@ class ApplyBasisOPD(AberrationLayer):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -608,7 +608,7 @@ class AddPhase(OpticalLayer):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -688,7 +688,7 @@ class AddOPD(OpticalLayer):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -780,7 +780,7 @@ class TransmissiveOptic(TransmissiveLayer):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -984,7 +984,7 @@ class ApplyBasisCLIMB(OpticalLayer):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -1099,7 +1099,7 @@ class Rotate(OpticalLayer):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 

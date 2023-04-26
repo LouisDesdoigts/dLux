@@ -29,7 +29,6 @@ FarFieldFresnel   = lambda : dLux.propagators.FarFieldFresnel
 Source            = lambda : dLux.sources.Source
 Observation       = lambda : dLux.observations.AbstractObservation
 
-
 ###############
 ### Methods ###
 ###############
@@ -192,7 +191,7 @@ class BaseOptics(Base):
     def propagate_mono(self       : BaseOptics,
                        wavelength : Array,
                        offset     : Array = np.zeros(2),
-                       return_wf  : bool = False) -> Array:
+                       return_wf  : bool = False) -> Array: # pragma: no cover
         """
         Propagates a monochromatic point source through the optical layers.
 
@@ -219,94 +218,12 @@ class BaseOptics(Base):
         pass
 
 
-    def _format_inputs(self       : BaseOptics,
-                       wavelength : Array,
-                       offset     : Array = np.zeros(2),
-                       return_wf  : bool = False) -> Array:
+    def _format_input(self        : BaseOptics,
+                      wavelengths : Array,
+                      weights     : Array = None,
+                      offset      : Array = None) -> Array:
         """
-        Checks that all inputs are of the correct type and shape, returning
-        Array verions of all float/list inputs.
-
-        Parameters
-        ----------
-        wavelength : Array, meters
-            The wavelength of the wavefront to propagate through the optical
-            layers.
-        offset : Array, radians, = np.zeros(2)
-            The (x, y) offset from the optical axis of the source. Default
-            value is (0, 0), on axis.
-        return_wf : bool, = False
-            If True, the wavefront object after propagation is returned.
-
-        Returns
-        -------
-        wavelength : Array, meters
-            The wavelength of the wavefront to propagate through the optical
-            layers.
-        offset : Array, radians
-            The (x, y) offset from the optical axis of the source. Default
-            value is (0, 0), on axis.
-        return_wf : bool
-            If True, the wavefront object after propagation is returned.
-        """
-        # Check offset
-        if not isinstance(offset, Array):
-            offset = np.asarray(offset, dtype=float)
-            if offset.shape != (2,):
-                raise ValueError("offset must be a 2-element array, got "
-                    f"shape {offset.shape}.")
-        
-        # Check wavelength
-        if not isinstance(wavelength, Array):
-            wavelength = np.asarray(wavelength, dtype=float)
-            if wavelength.shape != ():
-                raise ValueError("wavelength must be a scalar, got "
-                    f"shape {wavelength.shape}.")
-        
-        # Check return_wf
-        if not isinstance(return_wf, bool):
-            raise ValueError("return_wf must be a bool, got "
-                f"type {type(return_wf)}.")
-        
-        return wavelength, offset, return_wf
-
-
-    def _construct_wavefront(self       : BaseOptics,
-                             wavelength : Array,
-                             offset     : Array = np.zeros(2)) -> Array:
-        """
-        Constructs the appropriate tilted wavefront object for the optical
-        system.
-
-        Parameters
-        ----------
-        wavelength : Array, meters
-            The wavelength of the wavefront to propagate through the optics.
-        offset : Array, radians, = np.zeros(2)
-            The (x, y) offset from the optical axis of the source. Default
-            value is (0, 0), on axis.
-        
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront object to propagate through the optics.
-        """
-        # Get correct wavefront type
-        if isinstance(self.propagator, FarFieldFresnel()):
-            wf_constructor = dLux.FresnelWavefront
-        else:
-            wf_constructor = dLux.Wavefront
-        
-        # Construct and tilt
-        wf = wf_constructor(self.aperture.shape[-1], self.diameter, wavelength)
-        return wf.tilt_wavefront(offset)
-
-
-    def _format_weights(self        : BaseOptics,
-                        wavelengths : Array,
-                        weights     : Array = None) -> Array:
-        """
-        Formats the weights of the polychromatic wavefronts.
+        Formats the weights and wavelengths of the polychromatic wavefronts.
 
         Parameters
         ----------
@@ -323,24 +240,37 @@ class BaseOptics(Base):
         weights : Array
             The weights of each wavelength if weights is not None.
         """
+        # Check wavelengths
+        if isinstance(wavelengths, float) or \
+            (isinstance(wavelengths, Array) and wavelengths.shape == ()):
+            wavelengths = np.array([wavelengths])
+        elif isinstance(wavelengths, list):
+            wavelengths = np.array(wavelengths)
+
         # Check weights
-        if weights is None:
-            return
-        else:
+        if weights is not None:
             weights = np.array(weights, dtype=float) \
                 if not isinstance(weights, np.ndarray) else weights
             if len(weights) != len(wavelengths):
                 raise ValueError("wavelengths and weights must have the "
                     f"same length, got {len(wavelengths)} and {len(weights)} "
                     "respectively.")
-        return weights
+        
+        # Check offset
+        offset = np.array(offset) if not isinstance(offset, Array) \
+            else offset
+        if offset.shape != (2,):
+            raise ValueError("offset must be a 2-element array, got "
+                f"shape {offset.shape}.")
+
+        # Return
+        return wavelengths, weights, offset
 
 
     def propagate(self        : BaseOptics, 
                   wavelengths : Array,
                   offset      : Array = np.zeros(2),
-                  weights     : Array = None,
-                  return_wfs  : bool = False) -> Array:
+                  weights     : Array = None) -> Array:
         """
         Propagates a Polychromatic point source through the optics.
 
@@ -354,31 +284,24 @@ class BaseOptics(Base):
         weights : Array, = None
             The weights of each wavelength. If None, all wavelengths are
             weighted equally.
-        return_wfs : bool, = False
-            If True, the wavefront objects after propagation are returned.
 
         Returns
         -------
         psf : Array
-            The monochromatic point spread function after being propagated
+            The chromatic point spread function after being propagated
             though the optical layers.
-        wavefronts : list[Wavefront]
-            The wavefront object after propagation. Only returned if
-            return_wf is True.
         """
-        weights = self._format_weights(wavelengths, weights)
+        wavelengths, weights, offset = self._format_input(wavelengths, weights, 
+            offset)
 
         # Construct Propagate
         propagator = vmap(self.propagate_mono, in_axes=(0, None))
 
         # Calc and Return
-        if return_wfs:
-            return propagator(wavelengths, offset, return_wf=True)
-        else:
-            psfs = propagator(wavelengths, offset)
-            if weights is not None:
-                psfs *= weights[:, None, None]
-            return psfs.sum(0)
+        psfs = propagator(wavelengths, offset)
+        if weights is not None:
+            psfs *= weights[:, None, None]
+        return psfs.sum(0)
     
     
     def model(self              : BaseOptics,
@@ -536,21 +459,26 @@ class SimpleOptics(BaseOptics):
         elif isinstance(diameter, int):
             diameter = float(diameter)
         elif not isinstance(diameter, float):
-            raise ValueError("diameter must be a scalar, got type"
+            raise TypeError("diameter must be a scalar, got type"
                 f"{type(diameter)}.")
         self.diameter = diameter
 
         # Aperture Checking
         if not isinstance(aperture, (Array, TransmissiveOptic())):
-            raise ValueError("aperture must be an Array or "
+            raise TypeError("aperture must be an Array or "
                 f"TransmissveOptic, got {type(aperture)}.")
-        self.aperture = aperture.transmission
+        
+        if isinstance(aperture, Array):
+            self.aperture = aperture
+        else:
+            self.aperture = aperture.transmission
 
         # Aberrations Checking
         if aberrations is not None:
-            if not isinstance(aberrations, AberrationLayer()):
-                raise ValueError("aberrations must be an AberrationLayer, got "
-                    f"{type(aberrations)}.")
+            if not isinstance(aberrations, (AberrationLayer(), AddOPD(), 
+                AddPhase())):
+                raise TypeError("aberrations must be an AberrationLayer, "
+                    f"AddPhase, or AddOPD got {type(aberrations)}.")
             
             # Check for consistent array sizes of basis
             if hasattr(aberrations, 'basis') and \
@@ -571,9 +499,40 @@ class SimpleOptics(BaseOptics):
     
         # Propagator Checking
         if not isinstance(propagator, Propagator()):
-            raise ValueError("propagator must be a Propagator, got "
+            raise TypeError("propagator must be a Propagator, got "
                 f"{type(propagator)}.")
         self.propagator = propagator
+
+
+    def _construct_wavefront(self       : BaseOptics,
+                             wavelength : Array,
+                             offset     : Array = np.zeros(2)) -> Array:
+        """
+        Constructs the appropriate tilted wavefront object for the optical
+        system.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optics.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront object to propagate through the optics.
+        """
+        # Get correct wavefront type
+        if isinstance(self.propagator, FarFieldFresnel()):
+            wf_constructor = dLux.FresnelWavefront
+        else:
+            wf_constructor = dLux.Wavefront
+        
+        # Construct and tilt
+        wf = wf_constructor(self.aperture.shape[-1], self.diameter, wavelength)
+        return wf.tilt_wavefront(offset)
 
 
     def propagate_mono(self       : BaseOptics,
@@ -603,10 +562,6 @@ class SimpleOptics(BaseOptics):
             The wavefront object after propagation. Only returned if
             return_wf is True.
         """
-        # Check valid inputs
-        wavelength, offset, return_wf = self._format_inputs(wavelength, offset, 
-            return_wf)
-
         # Construct and tilt the Wavefront
         wf = self._construct_wavefront(wavelength, offset)
 
@@ -740,10 +695,6 @@ class MaskedOptics(SimpleOptics):
             The wavefront object after propagation. Only returned if
             return_wf is True.
         """
-        # Check valid inputs
-        wavelength, offset, return_wf = self._format_inputs(wavelength, offset, 
-            return_wf)
-
         # Construct and tilt the Wavefront
         wf = self._construct_wavefront(wavelength, offset)
 
@@ -906,82 +857,7 @@ class Optics(BaseOptics):
             return WF_list
 
 
-    # def propagate(self        : Optics,
-    #               wavelengths : Array,
-    #               offset      : Array = np.zeros(2),
-    #               weights     : Array = None,
-    #               return_wfs  : bool = False) -> Array:
-    #     """
-    #     Propagates a broadband point source through the optical layers.
-
-    #     Parameters
-    #     ----------
-    #     wavelengths : Array, meters
-    #         The wavelengths of the wavefront to propagate through the optical
-    #         layers.
-    #     offset : Array, radians = np.zeros(2)
-    #         The (x, y) offset from the optical axis of the source. Default
-    #         value is (0, 0), on axis.
-    #     weights : Array = None
-    #         The relative to apply to the monochromatic psfs.
-    #     return_wfs : bool = False
-    #         Whether to return the wavefront objects after propagation.
-
-    #     Returns
-    #     -------
-    #     psf : Array
-    #         The broadband point spread function after being propagated
-    #         though the optical layers.
-    #     wavefronts : List[Wavefront]
-    #         A list of all the wavefront objects after propagation. Only
-    #         returned if return_wfs is True.
-    #     """
-    #     # Format weights input
-    #     wavelengths = np.asarray(wavelengths, dtype=float) \
-    #               if not isinstance(wavelengths, np.ndarray) else wavelengths
-    #     assert wavelengths.ndim == 1, "wavelengths must be 1 dimensional.."
-
-    #     # Format weights input
-    #     if weights is None:
-    #         weights = np.ones(len(wavelengths))/len(wavelengths)
-    #     elif not isinstance(weights, np.ndarray):
-    #         weights = np.asarray(weights, dtype=float)
-    #     assert weights.ndim == 1, "weights must be 1 dimensional."
-
-    #     # Ensure matching dimensionality
-    #     assert wavelengths.shape == weights.shape, \
-    #     ("wavelengths and weights must have the same shape.")
-
-    #     # Offset checking
-    #     offset = np.asarray(offset, dtype=float) \
-    #              if not isinstance(offset, np.ndarray) else offset
-    #     assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
-
-    #     # Construct Propagate
-    #     propagator = vmap(self.propagate_mono, in_axes=(0, None))
-
-    #     # TODO: Test if speed can be improved by initialising a single wavefront
-    #     # here and vmapping a 'propagate_wavefront' function, rather than
-    #     # vmapping the 'propagate_mono' function which initialises the WF.
-    #     # This poses a potential issue with the tilting of the wavefront, which
-    #     # presently done in the CreateWavefront layer. Possibly a small lambda
-    #     # function can be used to do this. Should primarily check if this has 
-    #     # any speed and memory benefits.
-
-    #     # For now this should work fine, but it is something to keep in mind.
-
-    #     # Calc and Return
-    #     if not return_wfs:
-    #         psfs = propagator(wavelengths, offset)
-    #         psfs *= weights[:, None, None]
-    #         return psfs.sum(0)
-    #     else:
-    #         psfs, wfs = propagator(wavelengths, offset, return_wf=True)
-    #         psfs *= weights[:, None, None]
-    #         return psfs.sum(0), wfs
-    
-
-    def get_planes(self : Optics) -> list:
+    def get_planes(self : Optics) -> list: # pragma: no cover
         """
         Breaks the optical layers into planes, where each plane is a list of
         layers.
@@ -1004,7 +880,7 @@ class Optics(BaseOptics):
         return planes
 
 
-    def summarise(self : Optics) -> None:
+    def summarise(self : Optics) -> None: # pragma: no cover
         """
         Prints a summary of all the planes in the optical system.
         """
@@ -1020,7 +896,7 @@ class Optics(BaseOptics):
 
     def plot(self       : Optics, 
              wavelength : Array, 
-             offset     : Array = np.zeros(2)) -> None:
+             offset     : Array = np.zeros(2)) -> None: # pragma: no cover
         """
         Prints the summary of all the planes and then plots a wavefront as it
         propagates through the optics.
@@ -1246,7 +1122,7 @@ class Instrument(Base):
             tree_map(normalise_fn, self.sources, is_leaf=leaf_fn))
     
 
-    def summarise(self : Instrument) -> None:
+    def summarise(self : Instrument) -> None:  # pragma: no cover
         """
         Prints a summary of all instrument
         """
@@ -1264,7 +1140,7 @@ class Instrument(Base):
 
     def plot(self       : Optics, 
              wavelength : Array, 
-             offset     : Array = np.zeros(2)) -> None:
+             offset     : Array = np.zeros(2)) -> None:  # pragma: no cover
         """
         Prints the summary of all the planes and then plots a wavefront as it
         propagates through the optics.
@@ -1431,7 +1307,7 @@ class Detector(Base):
         return image, intermediate_images, intermediate_layers
     
 
-    def summarise(self : Detector) -> None:
+    def summarise(self : Detector) -> None: # pragma: no cover
         """
         Prints a summary of all the layers in the detector.
         """
@@ -1443,7 +1319,7 @@ class Detector(Base):
         print('\n')
 
 
-    def plot(self : Optics, image : Array) -> None:
+    def plot(self : Optics, image : Array) -> None: # pragma: no cover
         """
         Prints the summary of all the layers and then plots a image as it
         propagates through the detector layer.

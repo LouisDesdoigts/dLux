@@ -262,7 +262,7 @@ class AngularPropagator(Propagator, ABC):
         super().__init__(inverse=inverse, **kwargs)
 
 
-class FarFieldFresnel(Propagator, ABC):
+class FarFieldFresnel(ShiftedPropagator, ABC):
     """
     A propagator class to store the focal_shift parameter required for
     Far-Field fresnel propagations. These classes implement algorithms that use
@@ -389,7 +389,7 @@ class ShiftedCartesianMFT(CartesianPropagator, ShiftedPropagator):
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -507,7 +507,7 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -625,7 +625,7 @@ class ShiftedAngularMFT(AngularPropagator, ShiftedPropagator):
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -735,7 +735,7 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -833,7 +833,7 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -920,7 +920,7 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -1042,7 +1042,7 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
     def summary(self            : Propagator, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 

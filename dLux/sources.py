@@ -19,6 +19,17 @@ __all__ = ["PointSource", "MultiPointSource", "ArrayDistribution",
 ########################
 ### Abstract Classes ###
 ########################
+class BaseSource(Base):
+    # TODO: Add this to allow custom sources
+
+    @abstractmethod
+    def normalise(self):
+        pass
+
+    @abstractmethod
+    def model(self, optics, detector=None):
+        pass
+
 class Source(Base, ABC):
     """
     Base class for source objects. The idea of these source classes is to allow
@@ -189,7 +200,7 @@ class Source(Base, ABC):
     def summary(self            : Source, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -217,7 +228,7 @@ class Source(Base, ABC):
                 dpi             : int = 120,
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> None:
+                sigfigs         : int = 4) -> None: # pragma: no cover
         """
         Displays a plot of the wavefront amplitude and opd or phase.
 
@@ -538,7 +549,7 @@ class PointSource(Source):
     def summary(self            : Source, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -690,7 +701,7 @@ class MultiPointSource(Source):
     def summary(self            : Source, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -822,7 +833,7 @@ class ArrayDistribution(ResolvedSource):
     def summary(self            : Source, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -977,7 +988,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
     def summary(self            : Source, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -1135,7 +1146,7 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
     def summary(self            : Source, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -1291,7 +1302,7 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
     def summary(self            : Source, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 

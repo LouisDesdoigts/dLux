@@ -104,7 +104,6 @@ class ApertureLayer(TransmissiveLayer(), ABC):
         return self._transmission(coordinates)
 
 
-
     def __call__(self : ApertureLayer, wavefront : Wavefront) -> Wavefront:
         """
         Apply the aperture to an incoming wavefront.
@@ -569,7 +568,7 @@ class CircularAperture(DynamicAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -744,7 +743,7 @@ class AnnularAperture(DynamicAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -927,7 +926,7 @@ class RectangularAperture(DynamicAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -1106,7 +1105,7 @@ class SquareAperture(DynamicAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -1260,7 +1259,7 @@ class PolygonalAperture(DynamicAperture, ABC):
     
     def _grad_from_two_points(self : ApertureLayer, 
                               xs   : float, 
-                              ys   : float) -> float:
+                              ys   : float) -> float: # pragma: no cover
         """
         Calculate the gradient of the chord that connects two points. 
         Note: This is distinct from `_grads_from_many_points` in that
@@ -1548,7 +1547,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -1759,7 +1758,7 @@ class RegularPolygonalAperture(PolygonalAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -1884,7 +1883,7 @@ class HexagonalAperture(RegularPolygonalAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -2020,7 +2019,7 @@ class Spider(DynamicAperture, ABC):
         return strut
 
 
-    def _extent(self : ApertureLayer) -> float:
+    def _extent(self : ApertureLayer) -> float: # pragma: no cover
         """
         Returns the largest distance to the outer edge of the aperture from the
         centre.
@@ -2180,7 +2179,7 @@ class UniformSpider(Spider):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -2396,14 +2395,16 @@ class AberratedAperture(AbstractAberratedAperture):
         name: str = 'AberratedAperture'
             The name of the layer, which is used to index the layers dictionary.
         """
-        if aperture.occulting:
-            raise ValueError("AberratedApertures can not be occulting.")
-        
+        # Ensure aperture is dynamic
         if not isinstance(aperture, DynamicAperture):
-            raise ValueError("AberratedApertures can not contain Static, "
+            raise TypeError("AberratedApertures can not contain Static, "
                 "Compound or Multi Apertures. AberratedApertures can be "
                 "placed in Compound or Multi Apertures, which can then be "
                 "promoted to Static.")
+
+        # Ensure transmissice
+        if aperture.occulting:
+            raise ValueError("AberratedApertures can not be occulting.")
 
         # Set Aperture
         self.aperture = aperture
@@ -2611,13 +2612,15 @@ class AberratedAperture(AbstractAberratedAperture):
             The orthonormalised zernike polynomials evaluated on the aperture.
         """
         pixel_area = aperture.sum()
-        shape = zernikes.shapediameter
+        shape = zernikes.shape
         basis = np.zeros(shape).at[0].set(aperture)
  
-        for j in np.arange(1, self.nterms):
+        nterms = len(zernikes)
+        # for j in np.arange(1, nterms):
+        for j in range(nterms):
             intermediate = zernikes[j] * aperture
-            coefficient = np.zeros((self.nterms, 1, 1), dtype=float)
-            mask = (np.arange(1, self.nterms) > j + 1).reshape((-1, 1, 1))
+            coefficient = np.zeros((nterms, 1, 1), dtype=float)
+            mask = (np.arange(1, nterms) > j + 1).reshape((-1, 1, 1))
  
             coefficient = -1 / pixel_area * \
                 (zernikes[j] * basis[1:] * aperture * mask)\
@@ -2637,7 +2640,7 @@ class AberratedAperture(AbstractAberratedAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -2730,9 +2733,9 @@ class CompositeAperture(AbstractDynamicAperture):
         for aperture in apertures:
             if not isinstance(aperture, (ApertureLayer, 
                 AbstractAberratedAperture)):
-                raise ValueError("All the apertures should be ApertureLayers.")
+                raise TypeError("All the apertures should be ApertureLayers.")
             if isinstance(aperture, AbstractStaticAperture):
-                raise ValueError("StaticApertures cannot be put into " + \
+                raise TypeError("StaticApertures cannot be put into " + \
                     "Compound or Multi Apertures. Please promote the " + \
                     "Compound or Multi Aperture to a StaticAperture.")
 
@@ -3084,12 +3087,12 @@ class CompoundAperture(CompositeAperture):
         naberrated = 0
         for aperture in apertures:
             if isinstance(aperture, CompositeAperture):
-                raise ValueError("CompositeApertures cannot be nested. To " +\
+                raise TypeError("CompositeApertures cannot be nested. To " +\
                     "combine multiple CompositeApertures, use MultiAperture.")
             if isinstance(aperture, AberratedAperture):
                 naberrated += 1
         if naberrated > 1:
-            raise ValueError("CompoundAperture can only have one " + \
+            raise TypeError("CompoundAperture can only have one " + \
                              "AberratedAperture.")
             
         super().__init__(apertures,
@@ -3123,7 +3126,7 @@ class CompoundAperture(CompositeAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -3268,7 +3271,7 @@ class MultiAperture(CompositeAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -3456,13 +3459,13 @@ class StaticAperture(AbstractStaticAperture):
             The name of the layer, which is used to index the layers dictionary.
         """
         if isinstance(aperture, AbstractStaticAperture):
-            raise ValueError("This Aperture is already static, please "
+            raise TypeError("This Aperture is already static, please "
                 "provide a dynamic aperture.")
         
         if isinstance(aperture, (CompoundAperture, MultiAperture)) and \
             len(aperture._aberrated_apertures()) > 0 or \
                 isinstance(aperture, AberratedAperture):
-            raise ValueError("This Aperture contains aberrated apertures, "
+            raise TypeError("This Aperture contains aberrated apertures, "
                 "please use the StaticAberratedAperture class.")
         
         super().__init__(aperture = aperture, 
@@ -3476,7 +3479,7 @@ class StaticAperture(AbstractStaticAperture):
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 
@@ -3548,10 +3551,10 @@ class StaticAberratedAperture(AbstractStaticAperture,
         """
         # Ensure correct aperture types
         if not isinstance(aperture, 
-            (AberratedAperture, CompoundAperture, MultiAperture)) and \
+            (AberratedAperture, CompoundAperture, MultiAperture)) or \
                 (isinstance(aperture, (CompoundAperture, MultiAperture)) and \
                     len(aperture._aberrated_apertures()) == 0):
-            raise ValueError("The provided aperture must have aberrations.")
+            raise TypeError("The provided aperture must have aberrations.")
         
         # Input check: Coordinates provided
         if coordinates is not None and \
@@ -3671,7 +3674,7 @@ class StaticAberratedAperture(AbstractStaticAperture,
     def summary(self            : OpticalLayer, 
                 angular_units   : str = 'radians', 
                 cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+                sigfigs         : int = 4) -> str: # pragma: no cover
         """
         Returns a summary of the class.
 

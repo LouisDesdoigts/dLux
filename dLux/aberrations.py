@@ -460,7 +460,7 @@ class AberrationFactory():
             ap = dLux.apertures.RegularPolygonalAperture
             dyn_aperture = ap(nsides, aperutre_ratio/2, softening=0, 
                           rotation=rotation)
-            coordinates = dyn_aperture._normalised_coordinates(coords, nsides)
+            coordinates = dyn_aperture._normalised_coordinates(coords)
 
         # Construct Aberrations
         basis = ZernikeBasis(zernikes).calculate_basis(coordinates)
