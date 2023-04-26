@@ -14,6 +14,7 @@ from . import observations
 from . import sources
 from . import spectrums
 from . import exceptions
+from . import models
 
 # Import core functions from modules
 from .core         import *
