@@ -23,14 +23,15 @@ class BaseSource(Base):
     # TODO: Add this to allow custom sources
 
     @abstractmethod
-    def normalise(self):
+    def normalise(self): # pragma: no cover
         pass
 
     @abstractmethod
-    def model(self, optics, detector=None):
+    def model(self, optics, detector=None): # pragma: no cover
         pass
 
-class Source(Base, ABC):
+
+class Source(BaseSource):
     """
     Base class for source objects. The idea of these source classes is to allow
     an arbitrary parametrisation of the underlying astrophyical objects. Each

@@ -26,7 +26,7 @@ AddOPD            = lambda : dLux.optics.AddOPD
 AddPhase          = lambda : dLux.optics.AddPhase
 Propagator        = lambda : dLux.propagators.Propagator
 FarFieldFresnel   = lambda : dLux.propagators.FarFieldFresnel
-Source            = lambda : dLux.sources.Source
+Source            = lambda : dLux.sources.BaseSource
 Observation       = lambda : dLux.observations.AbstractObservation
 
 ###############
@@ -944,43 +944,21 @@ class Optics(BaseOptics):
         return wf
 
 
-    # def model(self              : Optics,
-    #           sources           : Union[Source, dict, list],
-    #           normalise_sources : bool = True,
-    #           flatten           : bool = False,
-    #           return_tree       : bool = False) -> Union(Array, dict):
-    #     """
-    #     A base level modelling function for modelling the optical system.
-    #     Models the source or sources through the optics.
-
-    #     Parameters
-    #     ----------
-    #     sources : Union[Source, dict, list]
-    #         The source or sources to observe.
-    #     normalise_sources : bool = True
-    #         Whether to normalise the sources before modelling.
-    #     flatten : bool = False
-    #         Whether the output image should be flattened.
-    #     return_tree : bool = False
-    #         Whether to return a Pytree like object with matching tree structure
-    #         as the input sources (ie dict).
-
-    #     Returns
-    #     -------
-    #     image : Array, dict
-    #         The image of the scene modelled through the optics. Returns either
-    #         as a single array (if return_tree is false), or a dict of the output
-    #         for each source.
-    #     """
-    #     # None input is for the detector
-    #     return model(self, sources, None, normalise_sources, flatten,
-    #         return_tree)
-
-
 #####################
 ### Other Classes ###
 #####################
-class Instrument(Base):
+class BaseInstrument(Base):
+    
+    @abstractmethod
+    def normalise(self): # pragma: no cover
+        pass
+
+    @abstractmethod
+    def model(self, optics, detector=None): # pragma: no cover
+        pass
+
+
+class Instrument(BaseInstrument):
     """
     A high level class desgined to model the behaviour of a telescope. It
     stores a series different ∂Lux objects, and primarily passes the relevant
