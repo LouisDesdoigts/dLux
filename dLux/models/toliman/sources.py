@@ -85,9 +85,9 @@ class AlphaCen(Source()):
     @property
     def raw_fluxes(self):
         """
-        
+        This casts log flux to be the total (not mean) flux.
         """
-        flux = 10**self.log_flux
+        flux = (10 ** self.log_flux) / 2
         flux_A = 2 * self.contrast * flux / (1 + self.contrast)
         flux_B = 2 * flux / (1 + self.contrast)
         return np.array([flux_A, flux_B])
