@@ -5,7 +5,6 @@ import dLux.utils as dlu
 from jax import Array, vmap
 import matplotlib.pyplot as plt
 import dLux
-import pysynphot as S
 
 
 Source = lambda : dLux.sources.BaseSource
@@ -144,6 +143,9 @@ def get_mixed_alpha_cen_spectra(
     """
     
     """
+    # Import Here to prevent issues with google colab install, for example
+    import pysynphot as S
+
     alpha_cen_a_spectrum: float = S.Icat("phoenix",
         5790, # Surface temp (K)
         0.2,  # Metalicity (Unit?)
