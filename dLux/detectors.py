@@ -47,65 +47,6 @@ class DetectorLayer(Base, ABC):
         Abstract method for Detector Layers
         """
         return
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return f"{self.name} layer has no summary method yet."
-    
-
-    def display(self            : DetectorLayer, 
-                image           : Array,
-                figsize         : tuple = (5, 4),
-                dpi             : int = 120,
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> None:
-        """
-        Displays a plot of the image propagating through the layer.
-
-        Parameters
-        ----------
-        image : Array
-            The dummy image to propagate though the detector.
-        figsize : tuple = (10, 4)
-            The size of the figure to display.
-        cmap : str = 'inferno'
-            The colour map to use.
-        dpi : int = 120
-            The resolution of the figure.
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-        """
-        single_image_plot(image, figsize=figsize, title="PSF", 
-                          cbar_label="Counts", cmap='inferno', dpi=dpi)
 
 
 class ApplyPixelResponse(DetectorLayer):
@@ -157,32 +98,6 @@ class ApplyPixelResponse(DetectorLayer):
             The image with the pixel_response applied.
         """
         return image * self.pixel_response
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return f"{self.name}: Applies the pixel response to the image."
 
 
 class ApplyJitter(DetectorLayer):
@@ -257,33 +172,6 @@ class ApplyJitter(DetectorLayer):
         """
         kernel = self.generate_kernel()
         return convolve(image, kernel, mode='same')
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Applies a jitter of {self.jitter:.{sigfigs}} "
-                "pixels.")
 
 
 class ApplySaturation(DetectorLayer):
@@ -335,33 +223,6 @@ class ApplySaturation(DetectorLayer):
             The image with the saturation applied.
         """
         return np.minimum(image, self.saturation)
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Applies a saturation of "
-                f"{self.saturation:.{sigfigs}} counts.")
 
 
 class AddConstant(DetectorLayer):
@@ -412,33 +273,6 @@ class AddConstant(DetectorLayer):
             The image with the value added.
         """
         return image + self.value
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Adds a constant value of "
-                f"{self.value:.{sigfigs}} counts.")
 
 
 class IntegerDownsample(DetectorLayer):
@@ -518,33 +352,6 @@ class IntegerDownsample(DetectorLayer):
             The downsampled image.
         """
         return self.downsample(image, self.kernel_size)
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Downsamples the image by {self.kernel_size} "
-                f"pixels.")
 
 
 class Rotate(DetectorLayer):
@@ -613,37 +420,3 @@ class Rotate(DetectorLayer):
             return fourier_rotate(image, self.angle, self.padding)
         else:
             return rotate(image, self.angle)
-        
-
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        angle = convert_angular(self.angle, 'radians', angular_units)
-        
-        if self.fourier:
-            method = f"a Fourier method with padding of {self.padding}"
-        else:
-            method = "an Interpolation method of order 1"
-
-        return (f"{self.name}: Applies a {angle:.{sigfigs}} {angular_units} "
-                f"rotation to the image using {method}.")

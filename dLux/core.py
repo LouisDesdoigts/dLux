@@ -878,70 +878,6 @@ class Optics(BaseOptics):
         return planes
 
 
-    def summarise(self : Optics) -> None: # pragma: no cover
-        """
-        Prints a summary of all the planes in the optical system.
-        """
-        planes = self.get_planes()
-        # TODO: Add plane type (Plane 0: Pupil)
-        print("Text summary:")
-        for i in range(len(planes)):
-            print(f'Plane {i}')
-            for layer in planes[i]:
-                print(f"  {layer.summary(angular_units='arcseconds')}")
-        print('\n')
-
-
-    def plot(self       : Optics, 
-             wavelength : Array, 
-             offset     : Array = np.zeros(2)) -> None: # pragma: no cover
-        """
-        Prints the summary of all the planes and then plots a wavefront as it
-        propagates through the optics.
-
-        Parameters
-        ----------
-        wavelength : Array, meters
-            The wavelength of the wavefront to propagate through the optical
-            layers.
-        offset : Array, radians = np.zeros(2)
-            The (x, y) offset from the optical axis of the source.
-        
-        Returns
-        -------
-        wf : Wavefront
-            The final wavefront after being propagated through the optical
-            layers.
-        """
-        planes = self.get_planes()
-        self.summarise()
-
-        for i in range(len(planes)):
-            print(f'Plane {i}')
-            for layer in planes[i]:
-                print(f"  {layer.summary()}")
-                if isinstance(layer, dLux.CreateWavefront):
-                    wf, parameters = layer(None, 
-                                  {"wavelength": wavelength, 'offset': offset},returns_parameters=True)
-                else:
-                    # Inspect apply function to see if it takes/returns the parameters dict
-                    input_parameters = signature(layer).parameters
-
-                    # Method does not take in the parameters, update in place
-                    if 'parameters' not in input_parameters:
-                        wf = layer(wf)
-
-                    # Method takes and return updated parameters
-                    elif input_parameters['returns_parameters'].default == True:
-                        wf, parameters = layer(wf, parameters)
-
-                    # Method takes but does not return parameters
-                    else:
-                        wf = layer(wf, parameters)
-                layer.display(wf)
-        return wf
-
-
 #####################
 ### Other Classes ###
 #####################
@@ -1094,41 +1030,6 @@ class Instrument(BaseInstrument):
         normalise_fn = lambda source: source.normalise()
         return tree_at(lambda instrument: instrument.sources, self,
             tree_map(normalise_fn, self.sources, is_leaf=leaf_fn))
-    
-
-    def summarise(self : Instrument) -> None:  # pragma: no cover
-        """
-        Prints a summary of all instrument
-        """
-        print("Sources summary:")
-        summary_fn = lambda source: source.summarise()
-        tree_map(summary_fn, self.sources)
-
-        print("Optics summary:")
-        self.optics.summarise()
-        
-        if self.detector is not None:
-            print("Detector summary:")
-            self.detector.summarise()
-
-
-    def plot(self       : Optics, 
-             wavelength : Array, 
-             offset     : Array = np.zeros(2)) -> None:  # pragma: no cover
-        """
-        Prints the summary of all the planes and then plots a wavefront as it
-        propagates through the optics.
-
-        Parameters
-        ----------
-        wavelength : Array, meters
-            The wavelength of the wavefront to propagate through the optical
-            layers.
-        offset : Array, radians = np.zeros(2)
-            The (x, y) offset from the optical axis of the source.
-        """
-        wf = self.optics.plot(wavelength, offset)
-        self.detector.plot(wf.psf)
 
 
     def model(self              : Instrument,
@@ -1280,37 +1181,6 @@ class Detector(Base):
             intermediate_layers.append(deepcopy(layer))
         return image, intermediate_images, intermediate_layers
     
-
-    def summarise(self : Detector) -> None: # pragma: no cover
-        """
-        Prints a summary of all the layers in the detector.
-        """
-        print("Text summary:")
-        keys = self.layers.keys()
-        for key in keys:
-            layer = self.layers[key]
-            print(f"  {layer.summary()}")
-        print('\n')
-
-
-    def plot(self : Optics, image : Array) -> None: # pragma: no cover
-        """
-        Prints the summary of all the layers and then plots a image as it
-        propagates through the detector layer.
-
-        Parameters
-        ----------
-        iamge : Array
-            The image to propagate through the detector.
-        """
-        self.summarise()
-        keys = self.layers.keys()
-        for key in keys:
-            layer = self.layers[key]
-            print(f"{layer.summary()}")
-            image = layer(image)
-            layer.display(image)
-
 
     def model(self : Detector, image: Array) -> Array:
         """
