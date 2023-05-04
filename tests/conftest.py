@@ -11,6 +11,7 @@ Source = dLux.sources.Source
 Aperture = dLux.apertures.ApertureLayer
 AbstractObservation = dLux.observations.AbstractObservation
 Zernike = dLux.aberrations.Zernike
+Observation = dLux.observations.AbstractObservation
 
 
 ### Aberrations ###
@@ -817,7 +818,7 @@ def create_optics() -> callable:
                 dLux.optics.CreateWavefront(16, 1),
                 dLux.apertures.ApertureFactory(16),
                 dLux.optics.NormaliseWavefront(),
-                dLux.propagators.CartesianMFT(16, 1e-6, 1)
+                dLux.propagators.CartesianMFT(16, 1e-6, 1),
             ]) -> OpticalLayer:
         return dLux.core.Optics(layers)
     return _create_optics
@@ -906,7 +907,7 @@ def create_instrument(
         create_optics: callable, 
         create_point_source: callable, 
         create_detector: callable,
-        create_filter: callable) -> callable:
+        create_dither: callable) -> callable:
     """
     Returns:
     --------
@@ -918,13 +919,15 @@ def create_instrument(
             optics          : OpticalLayer  = create_optics(),
             sources         : OpticalLayer  = create_point_source(),
             detector        : OpticalLayer  = create_detector(),
+            observation     : Observation   = create_dither(),
             ) -> OpticalLayer:
 
         # if input_both:
         return dLux.core.Instrument(
             optics=optics,
             detector=detector,
-            sources=sources)
+            sources=sources,
+            observation=observation,)
     return _create_instrument
 
 

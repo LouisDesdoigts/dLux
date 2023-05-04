@@ -50,6 +50,27 @@ class AbstractObservation(Base):
         pass
 
 
+    def __getattr__(self : AbstractObservation, attr : str) -> Any:
+        """
+        Gets the attribute from the instrument if it exists. Otherwise, raises
+        an AttributeError.
+
+        Parameters
+        ----------
+        attr : str
+            The name of the attribute to get from the instrument.
+
+        Returns
+        -------
+        attr : Any
+            The attribute from the instrument.
+        """
+        if self.name == attr:
+            return self
+        else:
+            raise AttributeError(f"{self.name} does not have attribute {attr}")
+
+
 class Dither(AbstractObservation):
     """
     Observation class designed to apply a series of dithers to the insturment

@@ -645,7 +645,7 @@ class MaskedOptics(SimpleOptics):
 
         # Tranmissive Optics
         elif isinstance(mask, TransmissiveOptic()):
-            if self.aperture.shape != mask.tranmission.shape:
+            if self.aperture.shape != mask.transmission.shape:
                 raise ValueError("aperture and mask transmission must have "
                     f"the same shape, got {self.aperture.shape} and "
                     f"{mask.transmission.shape} respectively.")
@@ -831,10 +831,8 @@ class Optics(BaseOptics):
         assert wavelength.shape == (), "wavelength must be a scalar."
         assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
 
-        # Runtime check for CreateWavefront layer (Maybe move to constructor?)
+        # Assumes first layer is CreateWavefront
         layers = list(self.layers.values())
-        if not isinstance(layers[0], CreateWavefront()):
-            raise ValueError("First layer must be a CreateWavefront layer")
         WF = layers[0](wavelength, offset)
 
         # Construct parameters
@@ -1070,14 +1068,12 @@ class Instrument(BaseInstrument):
         """
         if hasattr(self.optics, key):
             return getattr(self.optics, key)
-        # if key in self.optics.layers.keys():
-            # return self.optics.layers[key]
         elif key in self.sources.keys():
             return self.sources[key]
         elif self.detector is not None and key in self.detector.layers.keys():
             return self.detector.layers[key]
         elif self.observation is not None and hasattr(self.observation, key):
-            return getattr(self.observation, key)
+                return getattr(self.observation, key)
         else:
             raise AttributeError("'{}' object has no attribute '{}'"\
                                  .format(type(self), key))
@@ -1333,7 +1329,7 @@ class Detector(Base):
         return self.apply_detector(image)
 
 
-class Filter(Base):
+class Filter(Base): # pragma: no cover
     """
     NOTE: This class is under development.
 
