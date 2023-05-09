@@ -237,13 +237,17 @@ class Wavefront(Base):
         if other is None:
             return self
 
-        # Array based inputs
+        # Some Optical Layer
+        if isinstance(other, OpticalLayer()):
+            return other(self)
+
+        # Array based inputs - Defaults to OPD
         if isinstance(other, Array):
             return self.add('phase', other * self.wavenumber)
         
         # Other
         else:
-            raise TypeError("Can only add an array or AberrationLayer to "
+            raise TypeError("Can only add an array or OpticalLayer to "
             f"Wavefront. Got: {type(other)}.")
     
 
@@ -290,24 +294,13 @@ class Wavefront(Base):
         if other is None:
             return self
         
+        # Some Optical Layer
+        if isinstance(other, OpticalLayer()):
+            return other(self)
+        
         # Array based inputs
         if isinstance(other, Array):
             return self.multiply('amplitude', other)
-        
-        elif isinstance(other, OpticalLayer()):
-            return other(self)
-
-        # # Aperture Layer inputs
-        # elif isinstance(other, Aperture()):
-        #     return other(self)
-        
-        # # Aberration Layer inputs
-        # elif isinstance(other, AberrationLayer()):
-        #     return other(self)
-        
-        # # Propagators
-        # elif isinstance(other, Propagator()):
-        #     return other(self)
         
         # TODO: Maybe add this? Doesnt seem like it is useful.
         # # Wavefronts
@@ -318,8 +311,8 @@ class Wavefront(Base):
         
         # Other
         else:
-            raise TypeError("Can only multiply an array or ApertureLayer to "
-            f"Wavefront. Got: {type(other)}.")
+            raise TypeError("Can only multiply Wavefront by array or "
+                f"OpticalLayer. Got: {type(other)}.")
 
 
     def __imul__(self : Wavefront, other : Any) -> Wavefront:
