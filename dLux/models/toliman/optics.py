@@ -68,14 +68,14 @@ class SimpleToliman(Optics()):
 
         # Generate Mask
         if mask is None:
-            phase_mask = np.load("prelim_mask.npy")
+            phase_mask = np.load("pupil.npy")
 
             # Scale mask
             mask = dlu.scale_array(phase_mask, wf_npixels, order=1)
 
             # Enforce full binary
-            small = np.where(mask <= np.pi/2)
-            big = np.where(mask > np.pi/2)
+            small = np.where(mask <= 0.5)
+            big = np.where(mask > 0.5)
             mask = mask.at[small].set(0.).at[big].set(np.pi)
 
             opd_mask = dlu.phase_to_opd(phase_mask, 595e-9)

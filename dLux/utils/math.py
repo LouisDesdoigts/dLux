@@ -1,7 +1,7 @@
 from jax import lax
 
 
-__all__ = ["factorial"]
+__all__ = ["factorial", "triangular_number"]
 
  
  # TODO: Use lax.cond to make n == 0 a safe case
@@ -21,3 +21,20 @@ def factorial(n : float) -> float:
         The factorial of the value.
     """
     return lax.exp(lax.lgamma(n + 1.))
+
+
+def triangular_number(n : int) -> int:
+    """
+    Calculate the nth triangular number.
+    
+    Parameters
+    ----------
+    n : int
+        The nth triangular number to calculate.
+    
+    Returns
+    -------
+    n : int
+        The nth triangular number.
+    """
+    return n * (n + 1) / 2

@@ -917,8 +917,10 @@ class Wavefront(Base):
             The new `Wavefront` with the phase and amplitude arrays reversed
             along the x axis.
         """
-        amplitude = np.flip(self.amplitude, axis=-1)
-        phase = np.flip(self.phase, axis=-1)
+        # amplitude = np.flip(self.amplitude, axis=-1)
+        # phase = np.flip(self.phase, axis=-1)
+        amplitude = np.fliplr(self.amplitude)
+        phase = np.fliplr(self.phase)
         return self.set(['amplitude', 'phase'], [amplitude, phase])
 
 
@@ -932,8 +934,10 @@ class Wavefront(Base):
             The new wavefront with the phase and amplitude arrays reversed
             along the y axis.
         """
-        amplitude = np.flip(self.amplitude, axis=-2)
-        phase = np.flip(self.phase, axis=-2)
+        # amplitude = np.flip(self.amplitude, axis=-2)
+        # phase = np.flip(self.phase, axis=-2)
+        amplitude = np.flipup(self.amplitude)
+        phase = np.flipup(self.phase)
         return self.set(['amplitude', 'phase'], [amplitude, phase])
 
 

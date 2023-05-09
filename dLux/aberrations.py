@@ -4,7 +4,7 @@ import jax.numpy as np
 from jax import lax, Array
 import jax.tree_util as jtu
 import dLux
-from dLux.utils.math import factorial
+from dLux.utils.math import factorial, triangular_number
 from dLux.utils.coordinates import cartesian_to_polar, get_pixel_positions
 
 
@@ -399,7 +399,8 @@ class AberrationFactory():
     """
     def __new__(cls              : AberrationFactory, 
                 npixels          : int, 
-                zernikes         : Array, 
+                zernikes         : Array,
+                radial_orders    : int   = 0,
                 coefficients     : Array = None, 
                 aperutre_ratio   : float = 1.0,
                 nsides           : int   = 0,
@@ -461,6 +462,29 @@ class AberrationFactory():
             dyn_aperture = ap(nsides, aperutre_ratio/2, softening=0, 
                           rotation=rotation)
             coordinates = dyn_aperture._normalised_coordinates(coords)
+
+
+        if radial_orders is not None:
+            if zerinkes is not None:
+                raise ValueError('Only one of radial_orders or zernikes can be '
+                    'supplied, not both.')
+        
+            radial_orders = np.array(radial_orders)
+
+            if (radial_orders < 1).any():
+                raise ValueError('Radial orders must be >= 1')
+
+            diffs = np.diff(radial_orders)
+            if (diffs <= 0).any():
+                raise ValueError('Radial orders must be in increasing order')
+
+            zernikes = []
+            for order in radial_orders:
+                start = triangular_number(order-1)
+                stop = triangular_number(order)
+                zernikes.append(np.arange(start, stop))
+
+            zernikes = np.concatenate(zernikes)        
 
         # Construct Aberrations
         basis = ZernikeBasis(zernikes).calculate_basis(coordinates)

@@ -1,1135 +1,1001 @@
 from __future__ import annotations
 import jax.numpy as np
 from jax import vmap, Array
-from jax.tree_util import tree_map
-from jax.lax import stop_gradient
+from jax.tree_util import tree_map, tree_flatten
+from equinox import tree_at
 from zodiax import Base
-from abc import ABC, abstractmethod
+from collections import OrderedDict
+from copy import deepcopy
 from inspect import signature
-from dLux.utils.helpers import two_image_plot
-from dLux.utils.units import convert_angular, convert_cartesian
+from typing import Union
+from warnings import warn
+from abc import abstractmethod
 import dLux
 
 
-__all__ = ["CreateWavefront", "TiltWavefront", "NormaliseWavefront", 
-           "ApplyBasisOPD", "AddPhase", "AddOPD", "TransmissiveOptic", 
-           "ApplyBasisCLIMB", "Rotate"]
+__all__ = ["model", "Instrument", "SimpleOptics", "MaskedOptics", "Optics", 
+    "Detector"]
 
 
-class OpticalLayer(Base, ABC):
+# Alias classes for simplified type-checking
+CreateWavefront   = lambda : dLux.optics.CreateWavefront
+TransmissiveOptic = lambda : dLux.optics.TransmissiveOptic
+AberrationLayer   = lambda : dLux.optics.AberrationLayer
+OpticalLayer      = lambda : dLux.optics.OpticalLayer
+AddOPD            = lambda : dLux.optics.AddOPD
+AddPhase          = lambda : dLux.optics.AddPhase
+Propagator        = lambda : dLux.propagators.Propagator
+FarFieldFresnel   = lambda : dLux.propagators.FarFieldFresnel
+Source            = lambda : dLux.sources.BaseSource
+
+
+class BaseOptics(Base):
     """
-    A base Optical layer class to help with type checking throuhgout the rest
-    of the software. Instantiates the apply method which inspects the function
-    signature of the __call__ method in order to only pass and return the
-    parameters dictionary if it is needed and modified.
+    A base class for all Optics classes that implements a few usefull methods.
 
-    Attributes
-    ----------
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
+    All child classes must implement a `propagate_mono` method, with a
+    signature matching the abstract method of this class.
     """
-    name : str
 
 
-    def __init__(self : OpticalLayer,
-                 name : str = 'OpticalLayer') -> OpticalLayer:
+    def __getattr__(self : BaseOptics, key : str) -> Any:
         """
-        Constructor for the OpticalLayer class.
-
-        Parameters
-        ----------
-        name : str = 'OpticalLayer'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        self.name = str(name)
-
-
-    @abstractmethod
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront: # pragma: no cover
-        """
-        Appies the layer to the `Wavefront`.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the optical layer applied.
-        """
-        return
-
-
-    def apply(self : OpticalLayer, 
-              wavefront, 
-              parameters : dict) -> dict:
-        """
-        Unpacks the wavefront object from the parameters dictionary and applies
-        the layers __call__ method upon it. This allows for extra meta-data
-        to be passed between the layers to allow for more complex interactions
-        between optical components (such as pupil-remapping).
-
-        Parameters
-        ----------
-        parameters : dict
-            A dictionary that must contain a "Wavefront" key with a
-            corresponding dLux.wavefronts.Wavefront object.
-
-        Returns
-        -------
-        parameters : dict
-            A dictionary with the updated "Wavefront" key with the propagated
-            wavefront object.
-        """
-        # Inspect apply function to see if it takes/returns the parameters dict
-        input_parameters = signature(self.__call__).parameters
-
-        # Method does not take in the parameters, update in place
-        if 'parameters' not in input_parameters:
-            # parameters["Wavefront"] = self.__call__(parameters["Wavefront"])
-            wavefront = self.__call__(wavefront)
-
-        # Method takes and return updated parameters
-        elif input_parameters['returns_parameters'].default == True:
-            wavefront, parameters = self.__call__(wavefront, parameters)
-
-        # Method takes but does not return parameters
-        else:
-            wavefront = self.__call__(wavefront, parameters)
-
-        # Return updated parameters dictionary
-        return wavefront, parameters
-    
-
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return f"{self.name} layer has no summary method yet."
-
-
-    def display(self            : OpticalLayer, 
-                wavefront       : Wavefront,
-                figsize         : tuple = (10, 4),
-                dpi             : int = 120,
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> None: # pragma: no cover
-        """
-        Displays a plot of the wavefront amplitude and opd or phase.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The dummy wavefront to propagate though the optics.
-        figsize : tuple = (10, 4)
-            The size of the figure to display.
-        cmap : str = 'inferno'
-            The colour map to use.
-        dpi : int = 120
-            The resolution of the figure.
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-        """
-        amplitude = wavefront.amplitude
-        phase = convert_angular(wavefront.phase, "radians", angular_units)
-        two_image_plot(amplitude[0], phase[0], figsize=figsize, 
-            titles=("Amplitude", "Phase"), cbar_labels=("Intensity", 
-            f"Phase ({angular_units})"), cmaps=('inferno', 'twilight'), 
-            bounds=(None, 2*np.pi), dpi=dpi)
-
-
-class AberrationLayer(OpticalLayer):
-    # No coefficinets here becuase it might be a static OPD
-
-    def __init__(self, name, **kwargs):
-        super().__init__(name = name, **kwargs)
-
-    @abstractmethod
-    def get_opd(self):
-        pass
-
-
-class TransmissiveLayer(OpticalLayer):
-    """
-    Base class to hold tranmissive layers embuing them with a normalise 
-    parameter.
-    """
-    normalise : bool
-
-    def __init__(self, normalise=False, name='TransmissiveLayer', **kwargs):
-        super().__init__(name=name, **kwargs)
-        self.normalise = bool(normalise)
+        Accessor for attributes of the class to simplify zodiax paths
         
-
-class CreateWavefront(OpticalLayer):
-    """
-    Initialises the relevant Wavefront class with the specified attributes.
-    Also applies the tilt specified by the source object, defined in the
-    parameters dictionary. All wavefronts are cosntructed in the Pupil plane.
-
-    Attributes
-    ----------
-    npixels : int
-        The number of pixels used to represent the wavefront.
-    diameter: Array, meters
-        The diameter of the wavefront in the Pupil plane.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    npixels        : int
-    diameter       : Array
-
-
-    def __init__(self     : OpticalLayer,
-                 npixels  : int,
-                 diameter : Array,
-                 name     : str = 'CreateWavefront') -> OpticalLayer:
-        """
-        Constructor for the CreateWavefront class.
+        NOTE: Will not work properly if multiple attributes have the same 
+        parmeter name. Also works with @property methods
 
         Parameters
         ----------
-        npixels : int
-            The number of pixels used to represent the wavefront.
-        diameter: Array, meters
-            The diameter of the wavefront in the Pupil plane.
-        name : str = 'CreateWavefront'
-            The name of the layer, which is used to index the layers dictionary.
+        key : str
+            The key of the item to be searched for in the class.
+
+        Returns
+        -------
+        item : object
+            The item corresponding to the supplied key.
         """
-        super().__init__(name)
-        self.npixels  = int(npixels)
-        self.diameter = np.asarray(diameter, dtype=float)
+        for keys, value in self.__dict__.items():
+            if hasattr(value, 'name') and value.name == key:
+                return value
+            if hasattr(value, key):
+                return getattr(value, key)
+        else:
+            raise AttributeError(f"{self.__class__.__name__} has no attribute "
+            f"{key}.")
 
-        # Input checks
-        assert self.diameter.ndim == 0, ("diameter must be "
-        "a scalar array.")
 
-
-    def __call__(self       : OpticalLayer,
-                 wavelength : Arary,
-                 offset     : Array = np.zeros(2)) -> Wavefront:
+    @abstractmethod
+    def propagate_mono(self       : BaseOptics,
+                       wavelength : Array,
+                       offset     : Array = np.zeros(2),
+                       return_wf  : bool = False) -> Array: # pragma: no cover
         """
-        Constructs a wavefront obect based on the parameters of the class and
-        the parameters within the parameters dictionary.
+        Propagates a monochromatic point source through the optical layers.
 
         Parameters
         ----------
-        wavelength : Array
-            The wavelength of the wavefront.
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
         offset : Array, radians, = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
+        return_wf : bool, = False
+            If True, the wavefront object after propagation is returned.
 
         Returns
         -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
         wavefront : Wavefront
-            Returns the constructed wavefront with approprately set parameters,
-            optionally tilted by offset.
+            The wavefront object after propagation. Only returned if
+            return_wf is True.
         """
-        wavefront = dLux.wavefronts.Wavefront(self.npixels, self.diameter, 
-            wavelength)
-        return wavefront.tilt_wavefront(offset)
-    
+        pass
 
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
+
+    def _format_input(self        : BaseOptics,
+                      wavelengths : Array,
+                      weights     : Array = None,
+                      offset      : Array = None) -> Array:
         """
-        Returns a summary of the class.
+        Formats the weights and wavelengths of the polychromatic wavefronts.
 
         Parameters
         ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
+        wavelengths : Array, meters
+            The wavelengths of the wavefronts to propagate through the optics.
+        weights : Array, = None
+            The weights of each wavelength. If None, all wavelengths are
+            weighted equally.
 
         Returns
         -------
-        summary : str
-            A summary of the class.
+        wavelengths : Array
+            The wavelengths of the wavefronts to propagate through the optics.
+        weights : Array
+            The weights of each wavelength. If None, all wavelengths are
+            weighted equally.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source.
         """
-        return (f"{self.name}: Creates a {self.wavefront_type} wavefront of " 
-                f"size {self.npixels} pixels and diameter {self.diameter} m.")
-
-
-class TiltWavefront(OpticalLayer):
-    """
-    Tilts the wavefront by the input tilt_angles.
-
-    Attributes
-    ----------
-    tilt_angles : Array, radians
-        The (x, y) angles by which to tilt the wavefront.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    tilt_angles : Array
-
-
-    def __init__(self        : OpticalLayer,
-                 tilt_angles : Array,
-                 name        : str = 'TiltWavefront') -> OpticalLayer:
-        """
-        Constructor for the TiltWavefront class.
-
-        Parameters
-        ----------
-        tilt_angles : Array, radians
-            The (x, y) angles by which to tilt the wavefront.
-        name : str = TiltWavefront
-            The name of the layer, which is used to index the layers dictionary.
-            Default is 'TiltWavefront'.
-        """
-        super().__init__(name)
-        self.tilt_angles = np.asarray(tilt_angles, dtype=float)
-
-        # Input checks
-        assert self.tilt_angles.shape == (2,), \
-        ("tilt_angles must be an array of shape (2,), ie (x, y).")
-
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Applies the tilt_angle to the phase of the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the optical layer applied.
-        """
-        return wavefront.tilt_wavefront(self.tilt_angles)
-
-
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        angles = convert_angular(self.tilt_angles, 'radians', angular_units)
-        return (f"{self.name}: Tilts the wavefront by {angles:.{sigfigs}} "
-                f"{angular_units} in the (x, y) dimension.")
-
-
-class NormaliseWavefront(OpticalLayer):
-    """
-    Normalises the input wavefront using the in-built wavefront normalisation
-    method.
-
-    Attributes
-    ----------
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    
-
-    def __init__(self : OpticalLayer,
-                 name : str = 'NormaliseWavefront') -> OpticalLayer:
-        """
-        Constructor for the NormaliseWavefront class.
-
-        Parameters
-        ----------
-        name : string = 'NormaliseWavefront'
-            The name of the layer, which is used to index the layers
-            dictionary.
-        """
-        super().__init__(name)
-
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Normalises the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the wavefront normalisation method applied.
-        """
-        return wavefront.normalise()
-    
-
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return f"{self.name}: Normalises the wavefront to unity power."
-
-
-
-# class ApplyBasisOPD(OpticalLayer):
-class ApplyBasisOPD(AberrationLayer):
-    """
-    Adds an array of phase values to the input wavefront calculated from the
-    Optical Path Difference (OPD). The OPDs are calculated from the basis
-    arrays, and weighted by the coefficients, and converted to phases by the
-    wavefront methods.
-
-    Attributes
-    ----------
-    basis: Array, meters
-        Arrays holding the pre-calculated basis vectors.
-    coefficients: Array
-        The Array of coefficients to be applied to each basis vector.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    basis        : Array
-    coefficients : Array
-
-
-    def __init__(self         : OpticalLayer,
-                 basis        : Array,
-                 coefficients : Array = None,
-                 name         : str = 'ApplyBasisOPD') -> OpticalLayer:
-        """
-        Constructor for the ApplyBasisOPD class.
-
-        Parameters
-        ----------
-        basis : Array, meters
-            The Array of basis polynomials. This should be a 3 dimensional Array
-            with the first dimension being the number of basis vectors, and the
-            last two dimensions being equal to the wavefront shape at the time
-            of application to the wavefront.
-        coefficients : Array = None
-            The coefficients by which to weight the basis vectors. This must
-            have the same length as the first dimension of the basis Array. If
-            None is supplied an Array of zeros is constructed.
-        name : str = 'ApplyBasisOPD'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.basis        = np.asarray(basis, dtype=float)
-        self.coefficients = np.zeros(basis.shape[0]) if coefficients is None \
-                            else np.asarray(coefficients, dtype=float)
-
-        # Input checks
-        assert self.basis.ndim == 3, \
-        ("basis must be a 3 dimensional array, ie (nterms, npixels, npixels).")
-        assert self.coefficients.ndim == 1 and \
-        self.coefficients.shape[0] == self.basis.shape[0], \
-        ("coefficients must be a 1 dimensional array with length equal to the "
-        "First dimension of the basis array.")
-
-
-    def get_opd(self : OpticalLayer) -> Array:
-        """
-        A function to calculate the total OPD from the basis vector and the
-        coefficients.
-
-        Returns
-        -------
-        OPD : Array, meters
-            The total OPD calulated from the basis vectors and coefficients.
-        """
-        return np.dot(self.basis.T, self.coefficients)
-
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-
-        """
-        Calculate and apply the appropriate phase shift to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the appropriate phase applied.
-        """
-        return wavefront.add_opd(self.get_opd())
-    
-
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Applies an Optical Path Difference (OPD) to the "
-            f"wavefront calculated from the basis vectors and coefficients.")
-
-
-class AddPhase(OpticalLayer):
-    """
-    Adds an array of phase values to the wavefront.
-
-    Attributes
-    ----------
-    phase: Array, radians
-        The Array of phase values to be applied to the input wavefront.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    phase : Array
-
-
-    def __init__(self  : OpticalLayer,
-                 phase : Array,
-                 name  : str = 'AddPhase') -> OpticalLayer:
-        """
-        Constructor for the AddPhase class.
-
-        Parameters
-        ----------
-        phase : Array, radians
-            Array of phase values to be applied to the input wavefront. This
-            must a 0, 2 or 3 dimensional array with equal to that of the 
-            wavefront at time of aplication.
-        name : str = 'AddPhase'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.phase = np.asarray(phase, dtype=float)
-
-        # Input checks
-        assert self.phase.ndim in (0, 2, 3), ("phase must be either a scalar "
-        "array, or a 2 or 3 dimensional array.")
-
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Adds the phase to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the phase added.
-        """
-        return wavefront + self.phase / wavefront.wavenumber
-    
-
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return f"{self.name}: Add an array of phase values to the wavefront."
-
-
-class AddOPD(OpticalLayer):
-    """
-    Adds an Optical Path Difference (OPD) to the wavefront.
-
-    Attributes
-    ----------
-    opd : Array, meters
-        Array of OPD values to be applied to the input wavefront.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    opd : Array
-
-
-    def __init__(self : OpticalLayer,
-                 opd  : Array,
-                 name : str = 'AddOPD') -> OpticalLayer:
-        """
-        Constructor for the ApplyOPD class.
-
-        Parameters
-        ----------
-        opd : float, meters
-            The Array of OPDs to be applied to the input wavefront. This must
-            a 0, 2 or 3 dimensional array with equal to that of the wavefront
-            at time of aplication.
-        name : str = 'AddOPD'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.opd = np.asarray(opd, dtype=float)
-
-        # Input checks
-        assert self.opd.ndim in (0, 2, 3), ("opd must be either a scalar "
-        "array, or a 2 or 3 dimensional array.")
-
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Apply the OPD array to the input wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the OPD added.
-        """
-        return wavefront.add_opd(self.opd)
-    
-
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Add an array of Optical Path Differences (OPD) "
-                "to the wavefront.")
-
-
-
-
-
-class TransmissiveOptic(TransmissiveLayer):
-    """
-    Represents an arbitrary transmissive optic.
-
-    Note this class does not normalise the 'transmission' between 0 and 1, but
-    simply multiplies the wavefront amplitude by the transmision array.
-
-    Attributes
-    ----------
-    transmission : Array
-        An array representing the transmission of the optic.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    transmission: Array
-
-
-    def __init__(self         : OpticalLayer,
-                 transmission : Array,
-                 normalise    : bool = False,
-                 name         : str = 'TransmissiveOptic', 
-                 **kwargs) -> OpticalLayer:
-        """
-        Constructor for the TransmissiveOptic class.
-
-        Parameters
-        ----------
-        transmission : Array
-            The array representing the transmission of the aperture. This must
-            a 0, 2 or 3 dimensional array with equal to that of the wavefront
-            at time of aplication.
-        name : str = 'TransmissiveOptic'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(normalise=normalise, name=name, **kwargs)
-        self.transmission = np.asarray(transmission, dtype=float)
-
-        # Input checks
-        assert self.transmission.ndim in (0, 2, 3), ("transmission must be "
-        "either a scalar array, or a 2 or 3 dimensional array.")
-
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Applies the tranmission of the optical to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the tranmission applied.
-        """
-        wavefront *= self.transmission
-        if self.normalise:
-            return wavefront.normalise()
-        return wavefront
-    
-
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Applies an array of tranmission values to the "
-                "Wavefront.")
-
-
-class ApplyBasisCLIMB(OpticalLayer):
-    """
-    Adds an array of binary phase values to the input wavefront from a set of
-    continuous basis vectors. This uses the CLIMB algorithm in order to
-    generate the binary values in a continous manner as described in the
-    paper Wong et al. 2021. The basis vectors are taken as an Optical Path
-    Difference (OPD), and applied to the phase of the wavefront. The ideal
-    wavelength parameter described the wavelength that will have a perfect
-    anti-phase relationship given by the Optical Path Difference.
-
-    Note: Many of the methods in the class still need doccumentation.
-    Note: This currently only outputs 256 pixel arrays and uses a 3x oversample,
-    therefore requiring a 768 pixel basis array.
-
-    Attributes
-    ----------
-    basis: Array
-        Arrays holding the continous pre-calculated basis vectors.
-    coefficients: Array
-        The Array of coefficients to be applied to each basis vector.
-    ideal_wavelength : Array
-        The target wavelength at which a perfect anti-phase relationship is
-        applied via the OPD.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    basis            : Array
-    coefficients     : Array
-    ideal_wavelength : Array
-
-
-    def __init__(self             : OpticalLayer,
-                 basis            : Array,
-                 ideal_wavelength : Array,
-                 coefficients     : Array = None,
-                 name             : str   = 'ApplyBasisCLIMB') -> OpticalLayer:
-        """
-        Constructor for the ApplyBasisCLIMB class.
-
-        Parameters
-        ----------
-        basis : Array
-            Arrays holding the continous pre-calculated basis vectors. This must
-            be a 3d array of shape (nterms, npixels, npixels), with the final
-            two dimensions matching that of the wavefront at time of
-            application. This is currently required to be a nx768x768 shaped
-            array. 
-        ideal_wavelength : Array
-            The target wavelength at which a perfect anti-phase relationship is
-            applied via the OPD.
-        coefficients : Array = None
-            The Array of coefficients to be applied to each basis vector. This
-            must be a one dimensional array with leading dimension equal to the
-            leading dimension of the basis vectors. Default is None which
-            initialises an array of zeros.
-        name : str = 'ApplyBasisCLIMB'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.basis            = np.asarray(basis, dtype=float)
-        self.ideal_wavelength = np.asarray(ideal_wavelength, dtype=float)
-        self.coefficients     = np.array(coefficients).astype(float) \
-                    if coefficients is not None else np.zeros(len(self.basis))
-
-        # Inputs checks
-        assert self.basis.ndim == 3, \
-        ("basis must be a 3 dimensional array, ie (nterms, npixels, npixels).")
-        assert self.basis.shape[-1] == 768, \
-        ("Basis must have shape (n, 768, 768).")
-        assert self.coefficients.ndim == 1 and \
-        self.coefficients.shape[0] == self.basis.shape[0], \
-        ("coefficients must be a 1 dimensional array with length equal to the "
-        "First dimension of the basis array.")
-        assert self.ideal_wavelength.ndim == 0, ("ideal_wavelength must be a "
-                                                 "scalar array.")
-
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Generates and applies the binary OPD array to the wavefront in a
-        differentiable manner.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront with the binary OPD applied.
-        """
-        latent = self.get_opd(self.basis, self.coefficients)
-        binary_phase = np.pi*self.CLIMB(latent, ppsz=wavefront.npixels)
-        opd = self.phase_to_opd(binary_phase, self.ideal_wavelength)
-        return wavefront.add_opd(opd)
-
-
-    def opd_to_phase(self, opd, wavel):
-        return 2*np.pi*opd/wavel
-
-
-    def phase_to_opd(self, phase, wavel):
-        return phase*wavel/(2*np.pi)
-
-
-    def get_opd(self, basis, coefficients):
-        return np.dot(basis.T, coefficients)
-
-
-    def get_total_opd(self):
-        return self.get_opd(self.basis, self.coefficients)
-
-
-    def get_binary_phase(self):
-        latent = self.get_opd(self.basis, self.coefficients)
-        binary_phase = np.pi*self.CLIMB(latent)
-        return binary_phase
-
-
-    def lsq_params(self, img):
-        xx, yy = np.meshgrid(np.linspace(0,1,img.shape[0]),
-                             np.linspace(0,1,img.shape[1]))
-        A = np.vstack([xx.ravel(), yy.ravel(), np.ones_like(xx).ravel()]).T
-        matrix = np.linalg.inv(np.dot(A.T,A)).dot(A.T)
-        return matrix, xx, yy, A
-
-
-    def lsq(self, img):
-        matrix, _, _, _ = self.lsq_params(img)
-        return np.dot(matrix,img.ravel())
-
-
-    def area(self, img, epsilon = 1e-15):
-        a,b,c = self.lsq(img)
-        a = np.where(a==0,epsilon,a)
-        b = np.where(b==0,epsilon,b)
-        c = np.where(c==0,epsilon,c)
-        x1 = (-b-c)/(a) # don't divide by zero
-        x2 = -c/(a) # don't divide by zero
-        x1, x2 = np.min(np.array([x1,x2])), np.max(np.array([x1,x2]))
-        x1, x2 = np.max(np.array([x1,0])), np.min(np.array([x2,1]))
-
-        dummy = x1 + (-c/b)*x2-(0.5*a/b)*x2**2 - (-c/b)*x1+(0.5*a/b)*x1**2
-
-        # Set the regions where there is a defined gradient
-        dummy = np.where(dummy>=0.5,dummy,1-dummy)
-
-        # Colour in regions
-        dummy = np.where(np.mean(img)>=0,dummy,1-dummy)
-
-        # rescale between 0 and 1?
-        dummy = np.where(np.all(img>0),1,dummy)
-        dummy = np.where(np.all(img<=0),0,dummy)
-
-        # undecided region
-        dummy = np.where(np.any(img==0),np.mean(dummy>0),dummy)
-
-        # rescale between 0 and 1
-        dummy = np.clip(dummy, 0, 1)
-
-        return dummy
-
-    def CLIMB(self, wf, ppsz = 256):
-        psz = ppsz * 3
-        dummy = np.array(np.split(wf, ppsz))
-        dummy = np.array(np.split(np.array(dummy), ppsz, axis = 2))
-        subarray = dummy[:,:,0,0]
-
-        flat = dummy.reshape(-1, 3, 3)
-        vmap_mask = vmap(self.area, in_axes=(0))
-
-        soft_bin = vmap_mask(flat).reshape(ppsz, ppsz)
-
-        return soft_bin
-    
-
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Applies a binary OPD to the Wavefront using the "
-                "CLIMB algorithm.")
-
-
-class Rotate(OpticalLayer):
-    """
-    Applies a rotation to the wavefront using interpolation methods.
-
-    Attributes
-    ----------
-    angle : Array, radians
-        The angle by which to rotate the wavefront in the clockwise direction.
-    real_imaginary : bool
-        Should the rotation be performed on the amplitude and phase array
-        or the real and imaginary arrays.
-    fourier : bool
-        Should the rotation be done using fourier methods or interpolation.
-    order : int = 1
-        The order of the interpolation to use. Only applies if fourier is
-        False. Must be 0, 1, or 3.
-    padding : int
-        The amount of padding to use if the fourier method is used.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    angle          : Array
-    real_imaginary : bool
-    fourier        : bool
-    order          : int
-    padding        : int
-
-
-    def __init__(self           : OpticalLayer,
-                 angle          : Array,
-                 real_imaginary : bool = False,
-                 fourier        : bool = False,
-                 order          : int  = 1,
-                 padding        : int  = None,
-                 name           : str  = 'Rotate') -> OpticalLayer:
-        """
-        Constructor for the Rotate class.
-
-        Parameters
-        ----------
-        angle: float, radians
-            The angle by which to rotate the wavefront in the clockwise 
-            direction.
-        real_imaginary : bool = False
-            Should the rotation be performed on the amplitude and phase array
-            or the real and imaginary arrays.
-        fourier : bool = False
-            Should the fourier rotation method be used (True), or regular
-            interpolation method be used (False).
-        order : int = 1
-            The order of the interpolation to use. Only applies if fourier is
-            False. Must be 0, 1, or 3.
-        padding : int = None
-            The amount of fourier padding to use. Only applies if fourier is
-            True.
-        name : str = 'Rotate'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.angle          = np.asarray(angle, dtype=float)
-        self.real_imaginary = bool(real_imaginary)
-        if order not in (0, 1, 3):
-            raise ValueError("Order must be 0, 1, or 3.")
-        self.order = int(order)
-        self.fourier        = bool(fourier)
-        self.padding = padding if padding is None else int(padding)
-        assert self.angle.ndim == 0, ("angle must be scalar array.")
-
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Applies the rotation to a wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The rotated wavefront.
-        """
-        args = [self.angle, self.real_imaginary, self.fourier, self.order]
-        args += [self.padding] if self.padding is not None else []
-        return wavefront.rotate(*args)
-
-
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        angle = convert_angular(self.angle, 'radians', angular_units)
+        # Check wavelengths
+        if isinstance(wavelengths, float) or \
+            (isinstance(wavelengths, Array) and wavelengths.shape == ()):
+            wavelengths = np.array([wavelengths])
+        elif isinstance(wavelengths, list):
+            wavelengths = np.array(wavelengths)
+
+        # Check weights
+        if weights is not None:
+            weights = np.array(weights, dtype=float) \
+                if not isinstance(weights, np.ndarray) else weights
+            if len(weights) != len(wavelengths):
+                raise ValueError("wavelengths and weights must have the "
+                    f"same length, got {len(wavelengths)} and {len(weights)} "
+                    "respectively.")
         
-        if self.fourier:
-            method = f"a Fourier method with padding of {self.padding}"
-        else:
-            method = "an Interpolation method of order 1"
+        # Check offset
+        offset = np.array(offset) if not isinstance(offset, Array) \
+            else offset
+        if offset.shape != (2,):
+            raise ValueError("offset must be a 2-element array, got "
+                f"shape {offset.shape}.")
 
-        if self.real_imaginary:
-            wf_type = "real and imaginary arrays"
-        else:
-            wf_type = "amplitude and phase arrays"
+        # Return
+        return wavelengths, weights, offset
 
-        return (f"{self.name}: Applies a {angle:.{sigfigs}} {angular_units} "
-                f"rotation to the wavefront {wf_type} using {method}.")
+
+    def propagate(self        : BaseOptics, 
+                  wavelengths : Array,
+                  offset      : Array = np.zeros(2),
+                  weights     : Array = None) -> Array:
+        """
+        Propagates a Polychromatic point source through the optics.
+
+        Parameters
+        ----------
+        wavelengths : Array, meters
+            The wavelengths of the wavefronts to propagate through the optics.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        weights : Array, = None
+            The weights of each wavelength. If None, all wavelengths are
+            weighted equally.
+
+        Returns
+        -------
+        psf : Array
+            The chromatic point spread function after being propagated
+            though the optical layers.
+        """
+        wavelengths, weights, offset = self._format_input(wavelengths, weights, 
+            offset)
+
+        # Construct Propagate
+        propagator = vmap(self.propagate_mono, in_axes=(0, None))
+
+        # Calc and Return
+        psfs = propagator(wavelengths, offset)
+        if weights is not None:
+            psfs *= weights[:, None, None]
+        return psfs.sum(0)
+    
+    
+    def model(self              : BaseOptics,
+              sources           : Union[Source, dict, list],
+              normalise_sources : bool = True,
+              flatten           : bool = False,
+              return_tree       : bool = False) -> Union(Array, dict):
+        """
+        A base level modelling function for modelling the optical system.
+        Models the source or sources through the optics.
+
+        Parameters
+        ----------
+        sources : Union[Source, dict, list]
+            The source or sources to observe.
+        normalise_sources : bool = True
+            Whether to normalise the sources before modelling.
+        flatten : bool = False
+            Whether the output image should be flattened.
+        return_tree : bool = False
+            Whether to return a Pytree like object with matching tree structure
+            as the input sources (ie dict).
+
+        Returns
+        -------
+        image : Array, dict
+            The image of the scene modelled through the optics. Returns either
+            as a single array (if return_tree is false), or a dict of the output
+            for each source.
+        """
+        # None input is for the detector - prevents declaring each parameter 
+        # kwarg
+        return model(self, sources, None, normalise_sources, flatten,
+            return_tree)
+    
+
+    # Potential future implementation for an optics class with a source,
+    # Current issue is this will not be deserialisable becuase its definition
+    # Will never be able to founc in the namespcae becuase it is generated
+    # dynamically.
+    # def add_source(self : BaseOptics, source : Source) -> SourceOptics:
+
+    #     # Define new class
+    #     class SourceOptics(self.__class__):
+    #         source : Source
+
+    #         # def __init__(self):
+    #         #     super().__init__()
+        
+    #         def model(self):
+    #             return super().model(self.source)
+
+    #     source_class = SourceOptics.__new__(SourceOptics)
+
+    #     # Set existing attributes
+    #     for key, value in self.__dict__.items():
+    #         object.__setattr__(source_class, key, value)
+
+    #     # Set source attribute
+    #     object.__setattr__(source_class, 'source', source)
+
+    #     return source_class
+
+
+class AngularOptics(Optics()):
+    """
+    A model of the Toliman optical system.
+
+    Its default parameters are:
+
+    """
+    diameter        : Array
+    aperture        : Union[Array, TransmissiveOptic()]
+    mask            : Union[Array, AberrationLayer()]
+    aberrations     : Union[Array, AberrationLayer()]
+    psf_npixels     : int
+    psf_oversample  : float
+    psf_pixel_scale : float
+
+    def __init__(self, 
+
+        wf_npixels = 256,
+        psf_npixels = 256,
+        psf_oversample = 2,
+        psf_pixel_scale = 0.375, # arcsec
+
+        mask = None,
+        zernikes = None,
+        amplitude : float = 0.,
+        seed : int = 0,
+        
+        nstruts = 3,
+        strut_width = 0.002,
+        strut_rotation=-np.pi/2
+
+        ) -> SimpleToliman:
+        """
+        Constructs a simple model of the Toliman Optical Systems
+
+        In this class units are different:
+        - psf_pixel_scale is in unit of arcseconds
+        """
+
+        # Diameter
+        self.diameter = m1_diameter
+
+        # Generate Aperture
+        self.aperture = dLux.apertures.ApertureFactory(
+            npixels         = wf_npixels,
+            secondary_ratio = m2_diameter/m1_diameter,
+            nstruts         = nstruts,
+            strut_ratio     = strut_width/m1_diameter,
+            name            = "Aperture").transmission
+
+        # Generate Mask
+        if mask is None:
+            phase_mask = np.load("pupil.npy")
+
+            # Scale mask
+            mask = dlu.scale_array(phase_mask, wf_npixels, order=1)
+
+            # Enforce full binary
+            small = np.where(mask <= 0.5)
+            big = np.where(mask > 0.5)
+            mask = mask.at[small].set(0.).at[big].set(np.pi)
+
+            opd_mask = dlu.phase_to_opd(phase_mask, 595e-9)
+            self.mask = dLux.optics.AddOPD(opd_mask)
+        
+        # Allow for arbitrary mask layers
+        else:
+            self.mask = mask
+
+        # Generate Aberrations
+        if zernikes is None:
+            self.aberrations = None
+        else:
+            # Set coefficients
+            if amplitude == 0.:
+                coefficients = np.zeros(len(zernikes))
+            else:
+                coefficients = amplitude * jr.normal(jr.PRNGKey(seed), 
+                    (len(zernikes),))
+            
+            # Construct Aberrations
+            self.aberrations = dLux.aberrations.AberrationFactory(
+                npixels      = wf_npixels,
+                zernikes     = zernikes,
+                coefficients = coefficients,
+                name         = "Aberrations")
+
+        # Propagator Properties
+        # Test default float input
+        self.psf_npixels = int(psf_npixels)
+        self.psf_oversample = float(psf_oversample)
+        self.psf_pixel_scale = float(psf_pixel_scale)
+
+        super().__init__()
+
+
+    def _construct_wavefront(self       : Optics(),
+                             wavelength : Array,
+                             offset     : Array = np.zeros(2)) -> Array:
+        """
+        Constructs the appropriate tilted wavefront object for the optical
+        system.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optics.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront object to propagate through the optics.
+        """
+        wf_constructor = dLux.wavefronts.Wavefront
+        
+        # Construct and tilt
+        wf = wf_constructor(self.aperture.shape[-1], self.diameter, wavelength)
+        return wf.tilt_wavefront(offset)
+
+
+    def propagate_mono(self       : SimpleToliman,
+                       wavelength : Array,
+                       offset     : Array = np.zeros(2),
+                       return_wf  : bool = False) -> Array:
+        """
+        Propagates a monochromatic point source through the optical layers.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        return_wf : bool, = False
+            If True, the wavefront object after propagation is returned.
+
+        Returns
+        -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
+        wavefront : Wavefront
+            The wavefront object after propagation. Only returned if
+            return_wf is True.
+        """
+        # Construct and tilt
+        wf = dLux.wavefronts.Wavefront(self.aperture.shape[-1], self.diameter, 
+            wavelength)
+        wf = wf.tilt_wavefront(offset)
+
+        # Apply aperture and normalise
+        wf *= self.aperture
+        wf = wf.normalise()
+
+        # Apply mask
+        wf *= self.mask
+
+        # Apply aberrations
+        wf *= self.aberrations
+
+        # Propagate
+        pixel_scale = self.psf_pixel_scale / self.psf_oversample
+        pixel_scale_radians = dlu.arcseconds_to_radians(pixel_scale)
+        wf = wf.MFT(self.psf_npixels, pixel_scale_radians)
+
+        # Return PSF or Wavefront
+        if return_wf:
+            return wf
+        return wf.psf
+
+
+class SimpleOptics(BaseOptics):
+    """
+    A simple class designed to model an optical system with a single pupil and
+    focal plane. This class is designed to take advantage of the `Factory`
+    classes to make construction simple. Lets look at an example of a simple
+    unaberrated optical system:
+
+    ```python
+    # Set up the componenets
+    diameter = 1 # meters
+    wf_npixels = 256
+    det_npixles = 128
+    pixel_scale = 2e-7 # radians
+
+    # Construct Components
+    aperture = dl.ApertureFactory(wf_npixels)
+    propagator = dl.PropagatorFactory(det_npixles, pixel_scale)
+    optics = SimpleOptics(diameter, aperture, propagator)
+    ```
+
+    We can now model a polychromatic PSF like so:
+
+    ```python
+    wavelengths = np.linspace(1e-6, 2e-6, 20)
+    psf = optics.propagate(wavelengths)
+    ```
+
+    Its that simple!
+
+    What if we wanted to add aberrations? We can do that too! Lets add some
+    random zernike aberrations and model the psf:
+
+    ```python
+    zernikes = np.arange(4, 11)
+    coeffs = 1e-7 * jr.normal(jr.PRNGKey(0), zernikes.shape)
+    aberrations = dl.AberrationFactory(wf_npixels, zernikes, coeffs)
+
+    optics = SimpleOptics(diameter, aperture, propagator, aberrations)
+    psf = optics.propagate(wavelengths)
+    ```
+
+    Attributes
+    ----------
+    diameter : Array
+        The diameter of the wavefront to model through the system in meters.
+    aperture : Union[Array, TransmissiveOptic()]
+        The aperture of the system. Can be an Array or a TransmissiveOptic.
+    propagator : Propagator()
+        The propagator to use to propagate the wavefront through the system.
+    aberrations : Union[Array, AberrationLayer()]
+        The aberrations to apply to the wavefront. Can be an Array or an
+        AberrationLayer, or defaults to None.
+    """
+    diameter    : Array
+    aperture    : Union[Array, TransmissiveOptic()]
+    aberrations : Union[Array, AberrationLayer()]
+    propagator  : Propagator()
+
+
+    def __init__(self : SimpleOptics, 
+                 diameter : Array, 
+                 aperture : Union[Array, TransmissiveOptic()],
+                 propagator : Propagator(), 
+                 aberrations : Union[Array, AberrationLayer()] = None
+                 ) -> SimpleOptics:
+        """
+        Constructs a simple optical system with a static aperture and
+        aberrations.
+
+        Note this class automatically converts aperture input into an array.
+
+        Parameters
+        ----------
+        diameter : Array
+            The diameter of the wavefront to model through the system in meters.
+        aperture : Union[Array, TransmissiveOptic()]
+            The aperture of the system. Can be an Array or a TransmissiveOptic.
+        propagator : Propagator()
+            The propagator to use to propagate the wavefront through the system.
+        aberrations : Union[Array, AberrationLayer()] = None
+            The aberrations to apply to the wavefront. Can be an Array or an
+            AberrationLayer. If None, no aberrations are applied.
+        """
+        super().__init__()
+        
+        # Diameter Checking
+        if isinstance(diameter, Array):
+            if diameter.ndim != 0:
+                raise ValueError("diameter must be a scalar, got shape"
+                    f"{diameter.shape}.")
+        elif isinstance(diameter, int):
+            diameter = float(diameter)
+        elif not isinstance(diameter, float):
+            raise TypeError("diameter must be a scalar, got type"
+                f"{type(diameter)}.")
+        self.diameter = diameter
+
+        # Aperture Checking
+        if not isinstance(aperture, (Array, TransmissiveOptic())):
+            raise TypeError("aperture must be an Array or "
+                f"TransmissveOptic, got {type(aperture)}.")
+        
+        if isinstance(aperture, Array):
+            self.aperture = aperture
+        else:
+            self.aperture = aperture.transmission
+
+        # Aberrations Checking
+        if aberrations is not None:
+            if not isinstance(aberrations, (AberrationLayer(), AddOPD(), 
+                AddPhase())):
+                raise TypeError("aberrations must be an AberrationLayer, "
+                    f"AddPhase, or AddOPD got {type(aberrations)}.")
+            
+            # Check for consistent array sizes of basis
+            if hasattr(aberrations, 'basis') and \
+                isinstance(aberrations.basis, Array):
+                if self.aperture.shape != aberrations.basis.shape[-2:]:
+                    raise ValueError("aperture and aberration basis must have "
+                        f"the same shape, got {self.aperture.shape} and "
+                        f"{aberrations.basis.shape} respectively.")
+
+            # Check for consistent array sizes of opd
+            elif hasattr(aberrations, 'opd') and \
+                isinstance(aberrations.opd, Array):
+                if self.aperture.shape != aberrations.opd.shape:
+                    raise ValueError("aperture and aberration opd must have "
+                        f"the same shape, got {self.aperture.shape} and "
+                        f"{aberrations.opd.shape} respectively.")
+        self.aberrations = aberrations
+    
+        # Propagator Checking
+        if not isinstance(propagator, Propagator()):
+            raise TypeError("propagator must be a Propagator, got "
+                f"{type(propagator)}.")
+        self.propagator = propagator
+
+
+    def _construct_wavefront(self       : BaseOptics,
+                             wavelength : Array,
+                             offset     : Array = np.zeros(2)) -> Array:
+        """
+        Constructs the appropriate tilted wavefront object for the optical
+        system.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optics.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront object to propagate through the optics.
+        """
+        # Get correct wavefront type
+        if isinstance(self.propagator, FarFieldFresnel()):
+            wf_constructor = dLux.FresnelWavefront
+        else:
+            wf_constructor = dLux.Wavefront
+        
+        # Construct and tilt
+        wf = wf_constructor(self.aperture.shape[-1], self.diameter, wavelength)
+        return wf.tilt_wavefront(offset)
+
+
+    def propagate_mono(self       : BaseOptics,
+                       wavelength : Array,
+                       offset     : Array = np.zeros(2),
+                       return_wf  : bool = False) -> Array:
+        """
+        Propagates a monochromatic point source through the optical layers.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        return_wf : bool, = False
+            If True, the wavefront object after propagation is returned.
+
+        Returns
+        -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
+        wavefront : Wavefront
+            The wavefront object after propagation. Only returned if
+            return_wf is True.
+        """
+        # Construct and tilt the Wavefront
+        wf = self._construct_wavefront(wavelength, offset)
+
+        # Apply aperture and normalise
+        wf *= self.aperture
+        wf = wf.normalise()
+
+        # Apply aberrations
+        wf *= self.aberrations
+
+        # Propagate
+        wf *= self.propagator
+
+        # Return PSF or Wavefront
+        if return_wf:
+            return wf
+        return wf.psf
+
+
+class MaskedOptics(SimpleOptics):
+    """
+    A simple extension of the SimpleOptics class than can hold a mask. This
+    mask can be transmissive like an aperture mask, or it can be some form of
+    phase mask, either adding a phase or an OPD. If the input mask is an array
+    it will be treated as a transmissive mask that is multiplied by the
+    wavefront amplitude. 
+    
+    Attributes
+    ----------
+    diameter : Array
+        The diameter of the wavefront to model through the system in meters.
+    aperture : Union[Array, TransmissiveOptic()]
+        The aperture of the system. Can be an Array or a TransmissiveOptic.
+    propagator : Propagator()
+        The propagator to use to propagate the wavefront through the system.
+    aberrations : Union[Array, AberrationLayer()]
+        The aberrations to apply to the wavefront. Can be an Array or an
+        AberrationLayer, or defaults to None.
+    mask : Union[Array, TransmissiveOptic(), AddPhase(), AddOPD()]
+        The mask to apply to the wavefront. Can be an Array, a 
+        TransmissiveOptic, an AddPhase or an AddOPD.
+    """
+    mask : Union[Array, OpticalLayer()]
+    
+
+    def __init__(self, diameter, aperture, mask, propagator, aberrations=None):
+        """
+        Constructs a simple optical system with a static aperture, mask and
+        aberrations.
+
+        Note this class automatically converts aperture input into an array.
+
+        Parameters
+        ----------
+        diameter : Array
+            The diameter of the wavefront to model through the system in meters.
+        aperture : Union[Array, TransmissiveOptic()]
+            The aperture of the system. Can be an Array or a TransmissiveOptic.
+        mask : Union[Array, TransmissiveOptic(), AddPhase(), AddOPD()]
+            The mask to apply to the wavefront. Can be an Array, a
+            TransmissiveOptic, an AddPhase or an AddOPD.
+        propagator : Propagator()
+            The propagator to use to propagate the wavefront through the system.
+        aberrations : Union[Array, AberrationLayer()] = None
+            The aberrations to apply to the wavefront. Can be an Array or an
+            AberrationLayer. If None, no aberrations are applied.
+        """
+        super().__init__(diameter, aperture, propagator, aberrations)
+
+        mask_like = (Array, TransmissiveOptic(), AddPhase(), AddOPD())
+        if not isinstance(mask, (Array, OpticalLayer())):
+            raise ValueError("mask must be an Array or OpticalLayer, "
+                f"got {type(mask)}.")
+
+        # Check for consistent array sizes of mask
+        if isinstance(mask, Array):
+            if self.aperture.shape != mask.shape:
+                raise ValueError("aperture and mask must have "
+                    f"the same shape, got {self.aperture.shape} and "
+                    f"{mask.shape} respectively.")
+
+        # Tranmissive Optics
+        elif isinstance(mask, TransmissiveOptic()):
+            if self.aperture.shape != mask.tranmission.shape:
+                raise ValueError("aperture and mask transmission must have "
+                    f"the same shape, got {self.aperture.shape} and "
+                    f"{mask.transmission.shape} respectively.")
+        
+        # Add OPD
+        elif isinstance(mask, AddOPD()):
+            if self.aperture.shape != mask.opd.shape:
+                raise ValueError("aperture and mask opd must have "
+                    f"the same shape, got {self.aperture.shape} and "
+                    f"{mask.opd.shape} respectively.")
+        
+        # Add Phase
+        elif isinstance(mask, AddPhase()):
+            if self.aperture.shape != mask.phase.shape:
+                raise ValueError("aperture and mask phase must have "
+                    f"the same shape, got {self.aperture.shape} and "
+                    f"{mask.phase.shape} respectively.")
+
+        # Finally, set the mask
+        self.mask = mask
+
+
+    def propagate_mono(self       : BaseOptics,
+                       wavelength : Array,
+                       offset     : Array = np.zeros(2),
+                       return_wf  : bool = False) -> Array:
+        """
+        Propagates a monochromatic point source through the optical layers.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        return_wf : bool, = False
+            If True, the wavefront object after propagation is returned.
+
+        Returns
+        -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
+        wavefront : Wavefront
+            The wavefront object after propagation. Only returned if
+            return_wf is True.
+        """
+        # Construct and tilt the Wavefront
+        wf = self._construct_wavefront(wavelength, offset)
+
+        # Apply aperture and normalise
+        wf *= self.aperture
+        wf = wf.normalise()
+
+        # Apply Mask
+        wf *= self.mask
+
+        # Apply aberrations
+        wf *= self.aberrations
+
+        # Propagate
+        wf *= self.propagator
+
+        # Return PSF or Wavefront
+        if return_wf:
+            return wf
+        return wf.psf
+
+
+class Optics(BaseOptics):
+    """
+    A high level class desgined to model the behaviour of some optical systems
+    response to wavefronts.
+
+    Attributes
+    ----------
+    layers: dict
+        A collections.OrderedDict of 'layers' that define the transformations
+        and operations upon some input wavefront through an optical system.
+    """
+    layers : OrderedDict
+
+
+    def __init__(self : Optics, layers : list) -> Optics:
+        """
+        Constructor for the Optics class.
+
+        Parameters
+        ----------
+        layers : list
+            A list of ∂Lux 'layers' that define the transformations and
+            operations upon some input wavefront through an optical system.
+        """
+        # Ensure input is a list
+        if not isinstance(layers, list):
+            raise ValueError("Input layers must be a list, it is"
+                " automatically converted to a dictionary.")
+
+        # Check for CreateWavefront layer
+        if not isinstance(layers[0], CreateWavefront()):
+            raise ValueError("First layer must be a CreateWavefront object.")
+        
+        # Ensure all entries are dLux layers & propagator
+        has_propagator = False
+        for layer in layers:
+            if not isinstance(layer, OpticalLayer()):
+                raise ValueError("All entries within layers must be an "
+                    "OpticalLayer object.")
+            if isinstance(layer, Propagator()):
+                has_propagator = True
+        
+        if not has_propagator:
+            warn("No propagator found in layers, wavefront will remain in the "
+                "Pupil plane.")
+
+        self.layers = dLux.utils.list_to_dictionary(layers)
+
+
+    def __getattr__(self : Optics, key : str) -> object:
+        """
+        Magic method designed to allow accessing of the various items within
+        the layers dictionary of this class via the 'class.attribute' method.
+
+        Parameters
+        ----------
+        key : str
+            The key of the item to be searched for in the layers dictionary.
+
+        Returns
+        -------
+        item : object
+            The item corresponding to the supplied key in the layers dictionary.
+        """
+        if key in self.layers.keys():
+            return self.layers[key]
+        else:
+            raise AttributeError("'{}' object has no attribute '{}'"\
+                                 .format(type(self), key))
+
+
+    def propagate_mono(self       : Optics,
+                       wavelength : Array,
+                       offset     : Array = np.zeros(2),
+                       return_wf  : bool = False,
+                       return_all : bool = False) -> Array:
+        """
+        Propagates a monochromatic point source through the optical layers.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        return_wf : bool = False
+            Whether to return the wavefront object after propagation.
+        return_all : bool = False
+            Whether to return the all intermediate wavefront objects.
+
+        Returns
+        -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
+        wavefront : Wavefront
+            The wavefront object after propagation. Only returned if
+            return_wf is True.
+        wavefront_list : List[Wavefront]
+            A list of all the wavefront objects after propagation. Only
+            returned if return_all is True.
+        """
+        # Ensure jax arrays
+        wavelength = np.asarray(wavelength, dtype=float) \
+            if not isinstance(wavelength, np.ndarray) else wavelength
+        offset = np.asarray(offset, dtype=float) \
+            if not isinstance(offset, np.ndarray) else offset
+
+        # Ensure dimensionality
+        assert wavelength.shape == (), "wavelength must be a scalar."
+        assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
+
+        # Runtime check for CreateWavefront layer (Maybe move to constructor?)
+        layers = list(self.layers.values())
+        if not isinstance(layers[0], CreateWavefront()):
+            raise ValueError("First layer must be a CreateWavefront layer")
+        WF = layers[0](wavelength, offset)
+
+        # Construct parameters
+        parameters = {"optics" : self}
+
+        # Propagate though the rest of the layers
+        if not return_all:
+            for layer in layers[1:]:
+                WF, parameters = layer.apply(WF, parameters)
+            if return_wf:
+                return WF
+            else:
+                return WF.psf
+        
+        else:
+            WF_list = [WF]
+            for layer in layers[1:]:
+                WF, parameters = layer.apply(WF, parameters)
+                WF_list.append(WF)
+            return WF_list
+
+
+    def get_planes(self : Optics) -> list: # pragma: no cover
+        """
+        Breaks the optical layers into planes, where each plane is a list of
+        layers.
+
+        Returns
+        -------
+        planes : list
+            A list of lists, with the inner lists being optical layers, and the
+            outer list being planes.
+        """
+        planes = []
+        plane = []
+        keys = self.layers.keys()
+        for key in keys:
+            layer = self.layers[key]
+            plane.append(layer)
+            if isinstance(layer, dLux.propagators.Propagator):
+                planes.append(plane)
+                plane = []
+        return planes
+
+
+    def summarise(self : Optics) -> None: # pragma: no cover
+        """
+        Prints a summary of all the planes in the optical system.
+        """
+        planes = self.get_planes()
+        # TODO: Add plane type (Plane 0: Pupil)
+        print("Text summary:")
+        for i in range(len(planes)):
+            print(f'Plane {i}')
+            for layer in planes[i]:
+                print(f"  {layer.summary(angular_units='arcseconds')}")
+        print('\n')
+
+
+    def plot(self       : Optics, 
+             wavelength : Array, 
+             offset     : Array = np.zeros(2)) -> None: # pragma: no cover
+        """
+        Prints the summary of all the planes and then plots a wavefront as it
+        propagates through the optics.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians = np.zeros(2)
+            The (x, y) offset from the optical axis of the source.
+        
+        Returns
+        -------
+        wf : Wavefront
+            The final wavefront after being propagated through the optical
+            layers.
+        """
+        planes = self.get_planes()
+        self.summarise()
+
+        for i in range(len(planes)):
+            print(f'Plane {i}')
+            for layer in planes[i]:
+                print(f"  {layer.summary()}")
+                if isinstance(layer, dLux.CreateWavefront):
+                    wf, parameters = layer(None, 
+                                  {"wavelength": wavelength, 'offset': offset},returns_parameters=True)
+                else:
+                    # Inspect apply function to see if it takes/returns the parameters dict
+                    input_parameters = signature(layer).parameters
+
+                    # Method does not take in the parameters, update in place
+                    if 'parameters' not in input_parameters:
+                        wf = layer(wf)
+
+                    # Method takes and return updated parameters
+                    elif input_parameters['returns_parameters'].default == True:
+                        wf, parameters = layer(wf, parameters)
+
+                    # Method takes but does not return parameters
+                    else:
+                        wf = layer(wf, parameters)
+                layer.display(wf)
+        return wf
