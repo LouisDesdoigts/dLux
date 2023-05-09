@@ -44,6 +44,7 @@ class OpticalLayer(Base, ABC):
         self.name = str(name)
 
 
+    # Remove apply and rename to apply
     @abstractmethod
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront: # pragma: no cover
         """
@@ -62,6 +63,7 @@ class OpticalLayer(Base, ABC):
         return
 
 
+    # Remove and use apply name for __call__ 
     def apply(self : OpticalLayer, 
               wavefront, 
               parameters : dict) -> dict:
@@ -138,74 +140,74 @@ class ShapedLayer(OpticalLayer):
         """
         pass
 
-# class CreateWavefront(OpticalLayer):
-#     """
-#     Initialises the relevant Wavefront class with the specified attributes.
-#     Also applies the tilt specified by the source object, defined in the
-#     parameters dictionary. All wavefronts are cosntructed in the Pupil plane.
+class CreateWavefront(OpticalLayer):
+    """
+    Initialises the relevant Wavefront class with the specified attributes.
+    Also applies the tilt specified by the source object, defined in the
+    parameters dictionary. All wavefronts are cosntructed in the Pupil plane.
 
-#     Attributes
-#     ----------
-#     npixels : int
-#         The number of pixels used to represent the wavefront.
-#     diameter: Array, meters
-#         The diameter of the wavefront in the Pupil plane.
-#     name : str
-#         The name of the layer, which is used to index the layers dictionary.
-#     """
-#     npixels        : int
-#     diameter       : Array
-
-
-#     def __init__(self     : OpticalLayer,
-#                  npixels  : int,
-#                  diameter : Array,
-#                  name     : str = 'CreateWavefront') -> OpticalLayer:
-#         """
-#         Constructor for the CreateWavefront class.
-
-#         Parameters
-#         ----------
-#         npixels : int
-#             The number of pixels used to represent the wavefront.
-#         diameter: Array, meters
-#             The diameter of the wavefront in the Pupil plane.
-#         name : str = 'CreateWavefront'
-#             The name of the layer, which is used to index the layers dictionary.
-#         """
-#         super().__init__(name)
-#         self.npixels  = int(npixels)
-#         self.diameter = np.asarray(diameter, dtype=float)
-
-#         # Input checks
-#         assert self.diameter.ndim == 0, ("diameter must be "
-#         "a scalar array.")
+    Attributes
+    ----------
+    npixels : int
+        The number of pixels used to represent the wavefront.
+    diameter: Array, meters
+        The diameter of the wavefront in the Pupil plane.
+    name : str
+        The name of the layer, which is used to index the layers dictionary.
+    """
+    npixels        : int
+    diameter       : Array
 
 
-#     def __call__(self       : OpticalLayer,
-#                  wavelength : Arary,
-#                  offset     : Array = np.zeros(2)) -> Wavefront:
-#         """
-#         Constructs a wavefront obect based on the parameters of the class and
-#         the parameters within the parameters dictionary.
+    def __init__(self     : OpticalLayer,
+                 npixels  : int,
+                 diameter : Array,
+                 name     : str = 'CreateWavefront') -> OpticalLayer:
+        """
+        Constructor for the CreateWavefront class.
 
-#         Parameters
-#         ----------
-#         wavelength : Array
-#             The wavelength of the wavefront.
-#         offset : Array, radians, = np.zeros(2)
-#             The (x, y) offset from the optical axis of the source. Default
-#             value is (0, 0), on axis.
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels used to represent the wavefront.
+        diameter: Array, meters
+            The diameter of the wavefront in the Pupil plane.
+        name : str = 'CreateWavefront'
+            The name of the layer, which is used to index the layers dictionary.
+        """
+        super().__init__(name)
+        self.npixels  = int(npixels)
+        self.diameter = np.asarray(diameter, dtype=float)
 
-#         Returns
-#         -------
-#         wavefront : Wavefront
-#             Returns the constructed wavefront with approprately set parameters,
-#             optionally tilted by offset.
-#         """
-#         wavefront = dLux.wavefronts.Wavefront(self.npixels, self.diameter, 
-#             wavelength)
-#         return wavefront.tilt_wavefront(offset)
+        # Input checks
+        assert self.diameter.ndim == 0, ("diameter must be "
+        "a scalar array.")
+
+
+    def __call__(self       : OpticalLayer,
+                 wavelength : Arary,
+                 offset     : Array = np.zeros(2)) -> Wavefront:
+        """
+        Constructs a wavefront obect based on the parameters of the class and
+        the parameters within the parameters dictionary.
+
+        Parameters
+        ----------
+        wavelength : Array
+            The wavelength of the wavefront.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            Returns the constructed wavefront with approprately set parameters,
+            optionally tilted by offset.
+        """
+        wavefront = dLux.wavefronts.Wavefront(self.npixels, self.diameter, 
+            wavelength)
+        return wavefront.tilt_wavefront(offset)
 
 
 class TiltWavefront(OpticalLayer):

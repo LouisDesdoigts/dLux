@@ -4,12 +4,14 @@ from jax.tree_util import tree_map
 from typing import Union
 import dLux
 
-__all__ = ["cartesian_to_polar", "polar_to_cartesian",
-           "get_pixel_positions", "rotate", "translate", "shear", "compress"]
+__all__ = [
+    "cart_to_polar", "polar_to_cart", "pixel_coords", "pixel_coordinates",
+    "rotate", "translate", "shear", "compress"
+]
 
 
 ### Coordinates convertions ###
-def cartesian_to_polar(coordinates : Array) -> Array:
+def cart_to_polar(coordinates : Array) -> Array:
     """
     Converts the input (x, y) cartesian cordinates into (r, phi) polar
     coordinates.
@@ -29,7 +31,7 @@ def cartesian_to_polar(coordinates : Array) -> Array:
     return np.array([np.hypot(x, y), np.arctan2(y, x)])
 
 
-def polar_to_cartesian(coordinates : Array) -> Array:
+def polar_to_cart(coordinates : Array) -> Array:
     """
     Converts the input (r, phi) polar coordinates into (x, y) cartesian
     cordinates.
@@ -50,13 +52,17 @@ def polar_to_cartesian(coordinates : Array) -> Array:
 
 
 ### Positions Calculations ###
-def get_pixel_positions(npixels      : Union[int, tuple], 
-                        pixel_scales : Union[tuple, float, None] = None,
-                        offsets      : Union[tuple, float, None] = None,
-                        polar        : bool = False,
-                        indexing     : str = 'xy') -> Array:
+def pixel_coords(npixels, pixel_scale, ndims=2, polar=False):
+    pass
+    # TODO: Write this simpler interface
+
+def pixel_coordinates(npixels      : Union[int, tuple], 
+                 pixel_scales : Union[tuple, float, None] = None,
+                 offsets      : Union[tuple, float, None] = None,
+                 polar        : bool = False,
+                 indexing     : str = 'xy') -> Array:
     """
-    Calculates the positions of the pixel centers for the given input. All 
+    Calculates the coordinates of the pixel centers for the given input. All 
     coordinates are output in units of meters. 
     
     The indexing argument is the same
@@ -154,7 +160,7 @@ def get_pixel_positions(npixels      : Union[int, tuple],
     if polar:
         if len(npixels) != 2:
             raise ValueError("polar coordinates are only defined for 2D arrays.")
-        return cartesian_to_polar(positions)
+        return cart_to_polar(positions)
 
     # Squeeze for empty axis removal with 1d
     return np.squeeze(positions)

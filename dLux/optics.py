@@ -30,6 +30,13 @@ Source            = lambda : dLux.sources.BaseSource
 ShapedOptic       = lambda : dLux.optical_layer.ShapedOptic
 
 
+# Base
+# # LayeredOptics
+# # SimpleOptics
+# # # Angular
+# # # Cartesian
+# # # Flexible (propagator)
+
 class BaseOptics(Base):
     """
     A base class for all Optics classes that implements a few usefull methods.
@@ -218,43 +225,7 @@ class BaseOptics(Base):
         # kwarg
         return model(self, sources, None, normalise_sources, flatten,
             return_tree)
-    
 
-    # Potential future implementation for an optics class with a source,
-    # Current issue is this will not be deserialisable becuase its definition
-    # Will never be able to founc in the namespcae becuase it is generated
-    # dynamically.
-    # def add_source(self : BaseOptics, source : Source) -> SourceOptics:
-
-    #     # Define new class
-    #     class SourceOptics(self.__class__):
-    #         source : Source
-
-    #         # def __init__(self):
-    #         #     super().__init__()
-        
-    #         def model(self):
-    #             return super().model(self.source)
-
-    #     source_class = SourceOptics.__new__(SourceOptics)
-
-    #     # Set existing attributes
-    #     for key, value in self.__dict__.items():
-    #         object.__setattr__(source_class, key, value)
-
-    #     # Set source attribute
-    #     object.__setattr__(source_class, 'source', source)
-
-    #     return source_class
-
-
-
-# Base
-# # Optics
-# # SimpleOptics
-# # # Angular
-# # # Cartesian
-# # # Flexible (propagator)
 
 # class SimpleOptics(BaseOptics):
 class SimpleOptics(BaseOptics):
@@ -591,6 +562,37 @@ class FlexibleOptics(SimpleOptics):
         self.propagator = propagator
         super().__init__(diameter=diameter, aperture=aperture,
             aberrations=aberrations, mask=mask)
+
+
+    def _construct_wavefront(self       : BaseOptics,
+                             wavelength : Array,
+                             offset     : Array = np.zeros(2)) -> Array:
+        """
+        Constructs the appropriate tilted wavefront object for the optical
+        system.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optics.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront object to propagate through the optics.
+        """
+        # Get correct wavefront type
+        if isinstance(self.propagator, FarFieldFresnel()):
+            wf_constructor = dLux.FresnelWavefront
+        else:
+            wf_constructor = dLux.Wavefront
+        
+        # Construct and tilt
+        wf = wf_constructor(self.aperture.shape[-1], self.diameter, wavelength)
+        return wf.tilt_wavefront(offset)
         
     def propagate_mono(self       : SimpleToliman,
                        wavelength : Array,
