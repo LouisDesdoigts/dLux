@@ -58,6 +58,9 @@ def test_model(
     # Test with flatten
     out = dLux.core.model(optics, sources=sources, flatten=True)
 
+    # Test with flatten and return tree
+    out = dLux.core.model(optics, sources=sources, return_tree=True, flatten=True)
+
 
 class TestOptics(object):
     """
@@ -65,7 +68,9 @@ class TestOptics(object):
     """
 
 
-    def test_constructor(self, create_optics: callable) -> None:
+    def test_constructor(self, 
+        create_optics: callable, 
+        create_create_wavefront: callable) -> None:
         """
         Tests the constructor.
         """
@@ -73,9 +78,34 @@ class TestOptics(object):
         with pytest.raises(ValueError):
             create_optics(layers={})
 
-        # Test list input with non Optics Layer input
+        # Test fist layer not CreateWavefront input
         with pytest.raises(ValueError):
             create_optics(layers=[10.])
+        
+        # Test non layer input
+        with pytest.raises(ValueError):
+            create_optics(layers=[create_create_wavefront(), 10.])
+        
+        # Test no propagator warning
+        with pytest.warns():
+            create_optics(layers=[create_create_wavefront()])
+    
+
+    # def _test_getattr(self, create_optics: callable) -> None:
+    #     """
+    #     Tests the __getattr__ method.
+    #     """
+    #     osys = create_optics()
+
+    #     # Test non-existant attribute
+    #     with pytest.raises(AttributeError):
+    #         osys.non_existant
+
+    #     # Test existing attribute
+    #     osys.layers
+
+    #     # Test name referece
+    #     osys.CartesianMFT
 
 
     def test_propagate_mono(self, create_optics: callable) -> None:
@@ -93,6 +123,12 @@ class TestOptics(object):
 
         # Test propagation
         psf = osys.propagate_mono(4e-6)
+
+        # Test with return WF
+        osys.propagate_mono(4e-6, return_wf=True)
+
+        # Test with return_all
+        osys.propagate_mono(4e-6, return_all=True)
 
 
     def test_propagate(self, create_optics: callable) -> None:
@@ -134,6 +170,9 @@ class TestOptics(object):
 
         # Test existing attribute
         osys.layers
+
+        # Test name referece
+        osys.CartesianMFT
 
 
 class TestSimpleOptics():
@@ -193,6 +232,16 @@ class TestSimpleOptics():
         osys = create_simple_optics()
         psf = osys.propagate_mono(4e-6)
         wf = osys.propagate_mono(4e-6, return_wf=True)
+
+    def test_fresnel_wavefront(self, create_simple_optics, 
+        create_cartesian_fresnel):
+        """
+        Tests the propagate_mono method
+        """
+        propagator = create_cartesian_fresnel()
+        osys = create_simple_optics(propagator=propagator)
+        psf = osys.propagate_mono(4e-6)
+        wf = osys.propagate_mono(4e-6, return_wf=True)
     
     def test_getattr(self, create_simple_optics):
         """
@@ -206,24 +255,48 @@ class TestSimpleOptics():
 
         # Test existing attributes
         osys.diameter
+
+        # Test existing attributes
         osys.pixel_scale
+        
+        # Test name referece
+        osys.Propagator
 
 
 class TestMaskedOptics():
 
     def test_constructor(self, 
         create_masked_optics,
-        create_circular_aperture,
-        create_aberrated_aperture,
-        create_static_aberrated_aperture,
-        create_add_opd):
+        create_transmissive_optic,
+        create_add_opd,
+        create_add_phase):
         """
         Tests the constructor
         """
         create_masked_optics()
 
+        # Test not array or optical layer input
         with pytest.raises(ValueError):
-            create_masked_optics(diameter=np.array([1]))
+            create_masked_optics(mask='mask')
+
+        # Test wrong array size
+        with pytest.raises(ValueError):
+            create_masked_optics(mask=np.ones((2, 2)))
+        
+        # Test wrong shape transmissive optics input
+        with pytest.raises(ValueError):
+            mask = create_transmissive_optic(np.ones((8, 8)))
+            create_masked_optics(mask=mask)
+        
+        # Test wrong shape AddOPD input
+        with pytest.raises(ValueError):
+            mask = create_add_opd(np.ones((8, 8)))
+            create_masked_optics(mask=mask)
+        
+        # Test wrong shape AddPhase input
+        with pytest.raises(ValueError):
+            mask = create_add_phase(np.ones((8, 8)))
+            create_masked_optics(mask=mask)
 
 
     def test_propagate(self, create_masked_optics):
@@ -261,6 +334,14 @@ class TestDetector(object):
         # Test list input with non Optics Layer input
         with pytest.raises(AssertionError):
             create_detector(layers=[10.])
+    
+
+    def test_getattr(self, create_detector):
+        """
+        
+        """
+        detector = create_detector()
+        detector.AddConstant
 
 
     def test_apply_detector(self, create_detector: callable) -> None:
@@ -341,6 +422,10 @@ class TestInstrument(object):
         # Test non source input
         with pytest.raises(ValueError):
             create_instrument(sources=[1.])
+        
+        # Test non-observation input
+        with pytest.raises(ValueError):
+            create_instrument(observation=1.)
 
 
     def test_normalise(self, create_instrument: callable) -> None:
@@ -354,6 +439,37 @@ class TestInstrument(object):
             assert np.allclose(source.get_weights().sum(), 1.)
             if hasattr(source, 'get_distribution'):
                 assert np.allclose(source.get_distribution(), 1.)
+    
+
+    def test_observe(self, create_instrument):
+        """
+        
+        """
+        instrument = create_instrument()
+        psf = instrument.observe()
+    
+
+    def test_getattr(self, create_instrument):
+        """
+        
+        """
+        instrument = create_instrument()
+
+        # Test non existent attribute
+        with pytest.raises(AttributeError):
+            instrument.not_a_attribute
+        
+        # Test optics attribute
+        instrument.CreateWavefront
+
+        # Test source attribute
+        instrument.PointSource
+
+        # Test detector attribute
+        instrument.AddConstant
+
+        # Test observation attribute
+        instrument.Dither
 
 
     def test_model(self, 

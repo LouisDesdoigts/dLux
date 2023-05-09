@@ -386,55 +386,6 @@ class ShiftedCartesianMFT(CartesianPropagator, ShiftedPropagator):
                 self.shift, self.focal_length, self.pixel)
 
 
-    def summary(self            : Propagator, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        pixel_scale = convert_cartesian(self.pixel_scale, 'meters', 
-                                        cartesian_units)
-        focal_length = convert_cartesian(self.focal_length, 'meters', 
-                                        cartesian_units)
-        shift = convert_cartesian(self.shift, 'meters', cartesian_units) \
-            if not self.pixel else self.shift
-
-        prop_string = (f"Propagates the Wavefront {focal_length} "
-                       f"{cartesian_units} to a {plane_out} plane "
-                       f"with {self.npixels}x{self.npixels} pixels of "
-                       f"size {pixel_scale:.{sigfigs}} {cartesian_units} ")
-        
-        if (self.shift == np.zeros(2)).all():
-            return prop_string +  "using a 2-sided MFT."
-        else:
-            if self.pixel:
-                shift_string = (f"shifted by {shift} pixels in the (x, y) "
-                                "dimension ")
-            else:
-                shift_string = (f"shifted by {shift} {cartesian_units} in the "
-                                "(x, y) dimension ")
-            return prop_string + shift_string + "using a 2-sided MFT."
-
-
-
-
 class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
     """
     A Propagator class designed to propagate a wavefront to a plane that is
@@ -502,43 +453,7 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         else:
             return wavefront.MFT(self.npixels, self.pixel_scale,
                 focal_length=self.focal_length)
-
-
-    def summary(self            : Propagator, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        pixel_scale = convert_cartesian(self.pixel_scale, 'meters', 
-                                        cartesian_units)
-        focal_length = convert_cartesian(self.focal_length, 'meters', 
-                                        cartesian_units)
-
-        prop_string = (f"Propagates the Wavefront {focal_length} "
-                       f"{cartesian_units} to a {plane_out} plane "
-                       f"with {self.npixels}x{self.npixels} pixels of "
-                       f"size {pixel_scale:.{sigfigs}} {cartesian_units} ")
-        
-        return prop_string +  "using a 2-sided MFT."
-        
+      
 
 class ShiftedAngularMFT(AngularPropagator, ShiftedPropagator):
     """
@@ -622,52 +537,6 @@ class ShiftedAngularMFT(AngularPropagator, ShiftedPropagator):
                 self.shift, pixel=self.pixel)
 
 
-    def summary(self            : Propagator, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        plane_out = 'pupil' if self.inverse else 'focal'
-            
-        pixel_scale = convert_angular(self.pixel_scale, 'radians', 
-                                        angular_units)
-        shift = convert_angular(self.shift, 'radians', angular_units) \
-            if not self.pixel else self.shift
-
-        prop_string = (f"Propagates the Wavefront to a {plane_out} plane "
-                       f"with {self.npixels}x{self.npixels} pixels of "
-                       f"size {pixel_scale:.{sigfigs}} {angular_units} ")
-        
-        if (self.shift == np.zeros(2)).all():
-            return prop_string +  "using a 2-sided MFT."
-        else:
-            if self.pixel:
-                shift_string = (f"shifted by {shift} pixels in the (x, y) "
-                                "dimension ")
-            else:
-                shift_string = (f"shifted by {shift} {angular_units} in the "
-                                "(x, y) dimension ")
-            return prop_string + shift_string + "using a 2-sided MFT."
-
-
 class AngularMFT(AngularPropagator, VariableSamplingPropagator):
     """
     A Propagator class designed to propagate wavefronts, with pixel scale units
@@ -732,43 +601,6 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
             return wavefront.MFT(self.npixels, self.pixel_scale)
 
 
-    def summary(self            : Propagator, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        plane_out = 'pupil' if self.inverse else 'focal'
-            
-        pixel_scale = convert_angular(self.pixel_scale, 'radians', 
-                                        angular_units)
-        shift = convert_angular(self.shift, 'radians', angular_units) \
-            if not self.pixel else self.shift
-
-        prop_string = (f"Propagates the Wavefront to a {plane_out} plane "
-                       f"with {self.npixels}x{self.npixels} pixels of "
-                       f"size {pixel_scale:.{sigfigs}} {angular_units} ")
-        
-        return prop_string +  "using a 2-sided MFT."
-
-
 class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
     """
     A Propagator class designed to propagate a wavefront to a plane using a
@@ -828,37 +660,6 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
             return wavefront.IFFT(self.pad, self.focal_length)
         else:
             return wavefront.FFT(self.pad, self.focal_length)
-    
-
-    def summary(self            : Propagator, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        plane_out = 'pupil' if self.inverse else 'focal'
-        focal_length = convert_cartesian(self.focal_length, 'meters', 
-                                        cartesian_units)
-
-        return (f"Propagates the Wavefront {focal_length} {cartesian_units} to "
-                f"a {plane_out} plane using a FFT.")
 
 
 class AngularFFT(AngularPropagator, FixedSamplingPropagator):
@@ -915,34 +716,6 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
             return wavefront.IFFT(self.pad)
         else:
             return wavefront.FFT(self.pad)
-
-
-    def summary(self            : Propagator, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        plane_out = 'pupil' if self.inverse else 'focal'
-
-        return f"Propagates the Wavefront to a {plane_out} plane using a FFT."
 
 
 class CartesianFresnel(FarFieldFresnel, CartesianMFT):
@@ -1037,61 +810,6 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         """
         return wavefront.shifted_fresnel_prop(self.npixels, self.pixel_scale,
             self.shift, self.focal_length, self.focal_shift, self.pixel)
-
-
-    def summary(self            : Propagator, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str: # pragma: no cover
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        plane_out = 'pupil' if self.inverse else 'focal'
-
-        pixel_scale = convert_cartesian(self.pixel_scale, 'meters', 
-                                        cartesian_units)
-        prop_distance = convert_cartesian(self.focal_length, 'meters', 
-                                        cartesian_units)
-        defocus = convert_cartesian(self.focal_shift, 'meters', 
-                                        cartesian_units)
-        shift = convert_cartesian(self.shift, 'meters', cartesian_units) \
-            if not self.pixel else self.shift
-
-
-        prop_string = (f"Propagates the Wavefront {prop_distance} "
-                       f"{cartesian_units} to a {plane_out} plane "
-                       f"with {self.npixels}x{self.npixels} pixels of "
-                       f"size {pixel_scale:.{sigfigs}} {cartesian_units} ")
-        
-        defocus_string = (f"with a defocus of {defocus} {cartesian_units} "
-                           "using a 2-sided MFT.")
-        
-        if (self.shift == np.zeros(2)).all():
-            return prop_string +  defocus_string
-        else:
-            if self.pixel:
-                shift_string = (f"shifted by {shift} pixels in the (x, y) "
-                                "dimension ")
-            else:
-                shift_string = (f"shifted by {shift} {cartesian_units} in the "
-                                "(x, y) dimension ")
-            return prop_string + shift_string + defocus_string
 
 
 # TODO: Implement eventually
