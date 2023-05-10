@@ -11,19 +11,20 @@ from typing import Union
 from warnings import warn
 from abc import abstractmethod
 import dLux
+import dLux.utils as dlu
 
 
-__all__ = ["model", "Instrument", "SimpleOptics", "MaskedOptics", "Optics", 
-    "Detector"]
+__all__ = ["AngularOptics", "CartesianOptics", "FlexibleOptics", 
+    "LayeredOptics"]
 
 
 # Alias classes for simplified type-checking
-CreateWavefront   = lambda : dLux.optics.CreateWavefront
-TransmissiveOptic = lambda : dLux.optics.TransmissiveOptic
-AberrationLayer   = lambda : dLux.optics.AberrationLayer
-OpticalLayer      = lambda : dLux.optics.OpticalLayer
-AddOPD            = lambda : dLux.optics.AddOPD
-AddPhase          = lambda : dLux.optics.AddPhase
+CreateWavefront   = lambda : dLux.optical_layers.CreateWavefront
+TransmissiveOptic = lambda : dLux.optical_layers.TransmissiveOptic
+AberrationLayer   = lambda : dLux.optical_layers.AberrationLayer
+OpticalLayer      = lambda : dLux.optical_layers.OpticalLayer
+AddOPD            = lambda : dLux.optical_layers.AddOPD
+AddPhase          = lambda : dLux.optical_layers.AddPhase
 Propagator        = lambda : dLux.propagators.Propagator
 FarFieldFresnel   = lambda : dLux.propagators.FarFieldFresnel
 Source            = lambda : dLux.sources.BaseSource
@@ -63,21 +64,20 @@ class BaseOptics(Base):
         item : object
             The item corresponding to the supplied key.
         """
-        for keys, value in self.__dict__.items():
-            if hasattr(value, 'name') and value.name == key:
-                return value
-            if hasattr(value, key):
-                return getattr(value, key)
+        for attribute in self.__dict__.values():
+            if hasattr(attribute, key):
+                return getattr(attribute, key)
         else:
             raise AttributeError(f"{self.__class__.__name__} has no attribute "
             f"{key}.")
 
 
     @abstractmethod
-    def propagate_mono(self       : BaseOptics,
-                       wavelength : Array,
-                       offset     : Array = np.zeros(2),
-                       return_wf  : bool = False) -> Array: # pragma: no cover
+    def propagate_mono(
+        self       : BaseOptics,
+        wavelength : Array,
+        offset     : Array = np.zeros(2),
+        return_wf  : bool = False) -> Array: # pragma: no cover
         """
         Propagates a monochromatic point source through the optical layers.
 
@@ -106,8 +106,8 @@ class BaseOptics(Base):
 
     def _format_input(self        : BaseOptics,
                       wavelengths : Array,
-                      weights     : Array = None,
-                      offset      : Array = None) -> Array:
+                      offset      : Array = None,
+                      weights     : Array = None) -> Array:
         """
         Formats the weights and wavelengths of the polychromatic wavefronts.
 
@@ -115,9 +115,11 @@ class BaseOptics(Base):
         ----------
         wavelengths : Array, meters
             The wavelengths of the wavefronts to propagate through the optics.
-        weights : Array, = None
+        weights : Array
             The weights of each wavelength. If None, all wavelengths are
             weighted equally.
+        offset : Array, radians
+            The (x, y) offset from the optical axis of the source.
 
         Returns
         -------
@@ -191,84 +193,52 @@ class BaseOptics(Base):
         if weights is not None:
             psfs *= weights[:, None, None]
         return psfs.sum(0)
-    
-    
-    def model(self              : BaseOptics,
-              sources           : Union[Source, dict, list],
-              normalise_sources : bool = True,
-              flatten           : bool = False,
-              return_tree       : bool = False) -> Union(Array, dict):
+
+
+    def model(self        : BaseOptics,
+              sources     : Union[dict, list, Source],
+              return_tree : bool = False) -> Array:
         """
-        A base level modelling function for modelling the optical system.
-        Models the source or sources through the optics.
+        A base level modelling function designed to robustly handle the different
+        combinations of inputs. Models the sources through the instrument optics
+        and detector. Users must provide optics and source.
 
         Parameters
         ----------
-        sources : Union[Source, dict, list]
-            The source or sources to observe.
-        normalise_sources : bool = True
-            Whether to normalise the sources before modelling.
-        flatten : bool = False
-            Whether the output image should be flattened.
+        sources : Union[dict, list, Source]
+            The sources to model.
         return_tree : bool = False
-            Whether to return a Pytree like object with matching tree structure
-            as the input sources (ie dict).
+            Whether to return a Pytree like object with matching tree structure as
+            the input scene/sources/source. Default is False.
 
         Returns
         -------
-        image : Array, dict
-            The image of the scene modelled through the optics. Returns either
-            as a single array (if return_tree is false), or a dict of the output
-            for each source.
+        image : Array, Pytree
+            The image of the scene modelled through the optics with detector and
+            filter effects applied if they are supplied. Returns either as a single
+            array (if return_tree is false), or a pytree like object with matching
+            tree strucutre as the input scene/sources/source.
         """
-        # None input is for the detector - prevents declaring each parameter 
-        # kwarg
-        return model(self, sources, None, normalise_sources, flatten,
-            return_tree)
+        # Check valid inputs
+        if isinstance(sources, Source()):
+            sources = [sources]
+        elif isinstance(sources, (dict, list, tuple)):
+            source_vals = sources.values() if isinstance(sources, dict) else sources
+            for source in source_vals:
+                if not isinstance(source, Source()):
+                    raise ValueError("sources must be a Source object, dict, list, "
+                        f"or tuple object of sources. Got type: {type(sources)})")
+
+        # Call the source.model() method to generate the psfs
+        model_fn = lambda source: source.model(optics)
+        _is_source = lambda leaf: isinstance(leaf, Source())
+        psfs = tree_map(model_fn, sources, is_leaf=_is_source)
+        return psfs if return_tree else tree_flatten(psfs)[0].sum(0)
 
 
-# class SimpleOptics(BaseOptics):
 class SimpleOptics(BaseOptics):
     """
-    A simple class designed to model an optical system with a single pupil and
-    focal plane. This class is designed to take advantage of the `Factory`
-    classes to make construction simple. Lets look at an example of a simple
-    unaberrated optical system:
-
-    ```python
-    # Set up the componenets
-    diameter = 1 # meters
-    wf_npixels = 256
-    det_npixles = 128
-    pixel_scale = 2e-7 # radians
-
-    # Construct Components
-    aperture = dl.ApertureFactory(wf_npixels)
-    propagator = dl.PropagatorFactory(det_npixles, pixel_scale)
-    optics = SimpleOptics(diameter, aperture, propagator)
-    ```
-
-    We can now model a polychromatic PSF like so:
-
-    ```python
-    wavelengths = np.linspace(1e-6, 2e-6, 20)
-    psf = optics.propagate(wavelengths)
-    ```
-
-    Its that simple!
-
-    What if we wanted to add aberrations? We can do that too! Lets add some
-    random zernike aberrations and model the psf:
-
-    ```python
-    zernikes = np.arange(4, 11)
-    coeffs = 1e-7 * jr.normal(jr.PRNGKey(0), zernikes.shape)
-    aberrations = dl.AberrationFactory(wf_npixels, zernikes, coeffs)
-
-    optics = SimpleOptics(diameter, aperture, propagator, aberrations)
-    psf = optics.propagate(wavelengths)
-    ```
-
+    
     Attributes
     ----------
     diameter : Array
@@ -439,7 +409,31 @@ class NonPropagatorOptics(SimpleOptics):
         super().__init__(diameter=diameter, aperture=aperture, 
             aberrations=aberrations, mask=mask)
 
-class AngularOptics(SimpleOptics):
+    def _construct_wavefront(self       : BaseOptics,
+                             wavelength : Array,
+                             offset     : Array = np.zeros(2)) -> Array:
+        """
+        Constructs the appropriate tilted wavefront object for the optical
+        system.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optics.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront object to propagate through the optics.
+        """
+        # Construct and tilt
+        wf = dLux.Wavefront(self.aperture.shape[-1], self.diameter, wavelength)
+        return wf.tilt_wavefront(offset)
+
+class AngularOptics(NonPropagatorOptics):
     """
 
     """
@@ -488,11 +482,12 @@ class AngularOptics(SimpleOptics):
             The wavefront object after propagation. Only returned if
             return_wf is True.
         """
-        wf = self._initialise_wavefront(wavelength, offset)
+        # wf = self._construct_wavefront(wavelength, offset)
+        wf = self._apply_aperture(wavelength, offset)
 
         # Propagate
         pixel_scale = self.psf_pixel_scale / self.psf_oversample
-        pixel_scale_radians = dlu.arcseconds_to_radians(pixel_scale)
+        pixel_scale_radians = dlu.arcsec_to_rad(pixel_scale)
         wf = wf.MFT(self.psf_npixels, pixel_scale_radians)
 
         # Return PSF or Wavefront
@@ -539,7 +534,8 @@ class CartesianOptics(SimpleOptics):
             The wavefront object after propagation. Only returned if
             return_wf is True.
         """
-        wf = self._initialise_wavefront(wavelength, offset)
+        # wf = self._construct_wavefront(wavelength, offset)
+        wf = self._apply_aperture(wavelength, offset)
 
         # Propagate
         pixel_scale = self.psf_pixel_scale / self.psf_oversample
@@ -564,36 +560,6 @@ class FlexibleOptics(SimpleOptics):
             aberrations=aberrations, mask=mask)
 
 
-    def _construct_wavefront(self       : BaseOptics,
-                             wavelength : Array,
-                             offset     : Array = np.zeros(2)) -> Array:
-        """
-        Constructs the appropriate tilted wavefront object for the optical
-        system.
-
-        Parameters
-        ----------
-        wavelength : Array, meters
-            The wavelength of the wavefront to propagate through the optics.
-        offset : Array, radians, = np.zeros(2)
-            The (x, y) offset from the optical axis of the source. Default
-            value is (0, 0), on axis.
-        
-        Returns
-        -------
-        wavefront : Wavefront
-            The wavefront object to propagate through the optics.
-        """
-        # Get correct wavefront type
-        if isinstance(self.propagator, FarFieldFresnel()):
-            wf_constructor = dLux.FresnelWavefront
-        else:
-            wf_constructor = dLux.Wavefront
-        
-        # Construct and tilt
-        wf = wf_constructor(self.aperture.shape[-1], self.diameter, wavelength)
-        return wf.tilt_wavefront(offset)
-        
     def propagate_mono(self       : SimpleToliman,
                        wavelength : Array,
                        offset     : Array = np.zeros(2),
@@ -621,7 +587,7 @@ class FlexibleOptics(SimpleOptics):
             The wavefront object after propagation. Only returned if
             return_wf is True.
         """
-        wf = self._initialise_wavefront(wavelength, offset)
+        wf = self._apply_aperture(wavelength, offset)
         wf = self.propagator(wf)
 
         # Return PSF or Wavefront
@@ -696,9 +662,8 @@ class LayeredOptics(BaseOptics):
         """
         if key in self.layers.keys():
             return self.layers[key]
-        else:
-            raise AttributeError("'{}' object has no attribute '{}'"\
-                                 .format(type(self), key))
+        raise AttributeError(f"{self.__class__.__name__} has no attribute "
+        f"{key}.")
 
 
     def propagate_mono(self       : Optics,

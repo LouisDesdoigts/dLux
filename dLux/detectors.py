@@ -5,9 +5,13 @@ from zodiax import Base
 from collections import OrderedDict
 from copy import deepcopy
 # from typing import Union
-# from abc import abstractmethod
+from abc import abstractmethod
 import dLux
 
+
+__all__ = ["Detector", "BaseDetector"]
+
+DetectorLayer = lambda : dLux.detector_layers.DetectorLayer
 
 class BaseDetector(Base):
     
@@ -49,7 +53,7 @@ class Detector(Base):
 
         # Ensure all entries are dLux layers
         for layer in layers:
-            assert isinstance(layer, dLux.detectors.DetectorLayer), \
+            assert isinstance(layer, dLux.detectors.DetectorLayer()), \
             ("All entries within layers must be a "
              "dLux.detectors.DetectorLayer object.")
 
@@ -79,28 +83,7 @@ class Detector(Base):
                                  .format(type(self), key))
 
 
-    def apply_detector(self : Instrument, image : Array) -> Array:
-        """
-        Applied the stored detector layers to the input image.
-
-        Parameters
-        ----------
-        image : Array
-            The input 'image' to the detector to be transformed.
-
-        Returns
-        -------
-        image : Array
-            The ouput 'image' after being transformed by the detector layers.
-        """
-        # Input type checking
-        assert isinstance(image, np.ndarray), "Input must be a jax array."
-        assert image.ndim == 2, "Input image must a 2d array."
-
-        # Apply detector layers
-        for key, layer in self.layers.items():
-            image = layer(image)
-        return image
+    # def apply_detector(self : Instrument, image : Array) -> Array:
 
 
     # def debug_apply_detector(self  : Instrument, 
@@ -136,51 +119,25 @@ class Detector(Base):
     #         intermediate_images.append(image.copy())
     #         intermediate_layers.append(deepcopy(layer))
     #     return image, intermediate_images, intermediate_layers
-    
 
-    def summarise(self : Detector) -> None: # pragma: no cover
+    def model(self : Detector, psf: Array) -> Array:
         """
-        Prints a summary of all the layers in the detector.
-        """
-        print("Text summary:")
-        keys = self.layers.keys()
-        for key in keys:
-            layer = self.layers[key]
-            print(f"  {layer.summary()}")
-        print('\n')
-
-
-    def plot(self : Optics, image : Array) -> None: # pragma: no cover
-        """
-        Prints the summary of all the layers and then plots a image as it
-        propagates through the detector layer.
+        Applied the stored detector layers to the input image.
 
         Parameters
         ----------
-        iamge : Array
-            The image to propagate through the detector.
-        """
-        self.summarise()
-        keys = self.layers.keys()
-        for key in keys:
-            layer = self.layers[key]
-            print(f"{layer.summary()}")
-            image = layer(image)
-            layer.display(image)
-
-
-    def model(self : Detector, image: Array) -> Array:
-        """
-        A function to apply the detector layers to the input image.
-
-        Parameters
-        ----------
-        image: Array
-            The image to be transformed by the detector layers.
+        psf : Array
+            The input psf to be transformed.
 
         Returns
         -------
         image : Array
-            The image after being transformed by the detector layers.
+            The ouput 'image' after being transformed by the detector layers.
         """
-        return self.apply_detector(image)
+        if not isinstance(image, Array) or image.ndim != 2:
+            raise ValueError("image must be a 2d array.")
+
+        # Apply detector layers
+        for key, layer in self.layers.items():
+            image = layer(image)
+        return image

@@ -6,8 +6,6 @@ from jax.scipy.signal import convolve
 from jax.scipy.stats import norm
 from zodiax import Base
 from dLux.utils.interpolation import rotate, fourier_rotate
-from dLux.utils.units import convert_angular
-from dLux.utils.helpers import single_image_plot
 
 
 __all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",

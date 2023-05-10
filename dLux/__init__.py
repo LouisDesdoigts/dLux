@@ -19,7 +19,7 @@ from . import detector_layers
 from . import instruments
 from . import observations
 from . import sources
-from . import spectrums
+from . import spectra
 
 # Sub Modules
 from . import models
@@ -45,7 +45,7 @@ from .detector_layers import *
 from .instruments  import *
 from .observations import *
 from .sources      import *
-from .spectrums    import *
+from .spectra    import *
 
 # Sub Modules
 from .models     import *
@@ -69,15 +69,7 @@ modules = [
     instruments,
     observations,
     sources,
-    spectrums,
+    spectra,
 ]
 
 __all__ = [module.__all__ for module in modules]
-
-
-# Check for 64-bit
-from jax import config
-if not config.x64_enabled:
-    print("dLux: Jax is running in 32-bit, to enable 64-bit visit: "
-          "https://jax.readthedocs.io/en/latest/notebooks/"
-          "Common_Gotchas_in_JAX.html#double-64bit-precision")

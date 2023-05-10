@@ -4,17 +4,16 @@ from abc import ABC, abstractmethod
 from jax import numpy as np, lax, vmap, Array
 from jax.tree_util import tree_map, tree_flatten
 from equinox import filter
-from dLux.utils import get_pixel_positions, coordinates as c, opd_to_phase, \
+from dLux.utils import pixel_coords, coordinates as c, opd_to_phase, \
     list_to_dictionary
-from dLux.utils.units import convert_angular, convert_cartesian
 
 
 Wavefront = dLux.wavefronts.Wavefront
-OpticalLayer = dLux.optics.OpticalLayer
+OpticalLayer = dLux.optical_layers.OpticalLayer
 ZernikeBasis = lambda : dLux.aberrations.ZernikeBasis
-TransmissiveLayer = lambda : dLux.optics.TransmissiveLayer
-AberrationLayer = lambda : dLux.optics.AberrationLayer
-TransmissiveOptic = lambda : dLux.optics.TransmissiveOptic
+TransmissiveLayer = lambda : dLux.optical_layers.TransmissiveLayer
+AberrationLayer = lambda : dLux.optical_layers.AberrationLayer
+TransmissiveOptic = lambda : dLux.optical_layers.TransmissiveOptic
 
 
 __all__ = ["CircularAperture", "SquareAperture", "HexagonalAperture", 
@@ -98,10 +97,7 @@ class ApertureLayer(TransmissiveLayer(), ABC):
         transmission : Array 
             The array representing the transmission of the aperture.
         """
-        npixels_in = (npixels, npixels)
-        pixel_scales = (diameter / npixels, diameter / npixels)
-        coordinates = get_pixel_positions(npixels_in, pixel_scales)
-        return self._transmission(coordinates)
+        return self._transmission(pixel_coords(npixels, diameter / npixels))
 
 
     def __call__(self : ApertureLayer, wavefront : Wavefront) -> Wavefront:
@@ -2139,10 +2135,8 @@ class AberratedAperture(AbstractAberratedAperture):
         transmission : Array 
             The array representing the transmission of the aperture.
         """
-        npixels_in = (npixels, npixels)
-        pixel_scales = (diameter / npixels, diameter / npixels)
-        coordinates = get_pixel_positions(npixels_in, pixel_scales)
-        return self.aperture._transmission(coordinates)
+        return self.aperture._transmission(pixel_coords(npixels, 
+            diameter / npixels))
 
 
     def _basis(self : ApertureLayer, coordinates : Array) -> Array:
@@ -2196,10 +2190,7 @@ class AberratedAperture(AbstractAberratedAperture):
         basis : Array 
             The array of the basis vectors of the aperture aberrations.
         """
-        npixels_in = (npixels, npixels)
-        pixel_scales = (diameter / npixels, diameter / npixels)
-        coordinates = get_pixel_positions(npixels_in, pixel_scales)
-        return self._basis(coordinates)
+        return self._basis(pixel_coords(npixels, diameter / npixels))
  
 
     def _opd(self : ApertureLayer, coordinates : Array) -> Array:
@@ -2239,10 +2230,7 @@ class AberratedAperture(AbstractAberratedAperture):
         basis : Array 
             The array of the total opd of the aperture aberrations.
         """
-        npixels_in = (npixels, npixels)
-        pixel_scales = (diameter / npixels, diameter / npixels)
-        coordinates = get_pixel_positions(npixels_in, pixel_scales)
-        return self._opd(coordinates)
+        return self._opd(pixel_coords(npixels, diameter / npixels))
 
 
     def _orthonormalise(self     : ApertureLayer, 
@@ -2432,10 +2420,7 @@ class CompositeAperture(AbstractDynamicAperture):
         transmission : Array 
             The array representing the transmission of the aperture.
         """
-        npixels_in = (npixels, npixels)
-        pixel_scales = (diameter / npixels, diameter / npixels)
-        coordinates = get_pixel_positions(npixels_in, pixel_scales)
-        return self._transmission(coordinates)
+        return self._transmission(pixel_coords(npixels, diameter / npixels))
 
 
     def _basis(self : ApertureLayer, coordinates : Array) -> Array:
@@ -2480,10 +2465,7 @@ class CompositeAperture(AbstractDynamicAperture):
         basis : Array 
             The array of the basis vectors of the aperture aberrations.
         """
-        npixels_in = (npixels, npixels)
-        pixel_scales = (diameter / npixels, diameter / npixels)
-        coordinates = get_pixel_positions(npixels_in, pixel_scales)
-        return self._basis(coordinates)
+        return self._basis(pixel_coords(npixels, diameter / npixels))
 
 
     def _coefficients(self : ApertureLayer) -> Array:
@@ -2573,10 +2555,7 @@ class CompositeAperture(AbstractDynamicAperture):
         basis : Array 
             The array of the total opd of the aperture aberrations.
         """
-        npixels_in = (npixels, npixels)
-        pixel_scales = (diameter / npixels, diameter / npixels)
-        coordinates = get_pixel_positions(npixels_in, pixel_scales)
-        return self._opd(coordinates)
+        return self._opd(pixel_coords(npixels, diameter / npixels))
 
 
     def _aberrated_apertures(self : ApertureLayer) -> list:
@@ -2917,9 +2896,7 @@ class AbstractStaticAperture(TransmissiveOptic(), ApertureLayer):
         
         # Generate coordinates if not provided
         if coordinates is None:
-            npixels_in = (npixels, npixels)
-            pixel_scales = (diameter / npixels, diameter / npixels)
-            coordinates = get_pixel_positions(npixels_in, pixel_scales)
+            coordinates = pixel_coords(npixels, diameter / npixels)
 
         if isinstance(aperture, AberratedAperture):
             normalise = aperture.aperture.normalise
@@ -3105,9 +3082,7 @@ class StaticAberratedAperture(AbstractStaticAperture,
         
         # Generate coordinates if not provided
         if coordinates is None:
-            npixels_in = (npixels, npixels)
-        pixel_scales = (diameter / npixels, diameter / npixels)
-        coordinates = get_pixel_positions(npixels_in, pixel_scales)
+            coordinates = pixel_coords(npixels, diameter / npixels)
 
         super().__init__(aperture=aperture, coordinates=coordinates, 
             coefficients=aperture.coefficients, name=name)

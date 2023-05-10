@@ -4,8 +4,7 @@ from jax.scipy.signal import convolve
 from jax import vmap, Array
 from equinox import tree_at
 from zodiax import Base
-from abc import ABC, abstractmethod
-from dLux.utils.units import convert_angular, convert_cartesian
+from abc import abstractmethod
 import dLux
 
 
@@ -63,20 +62,17 @@ class Source(BaseSource):
         The flux of the object.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
-    name : str
-        The name for this object.
     """
     position : Array
     flux     : Array
     spectrum : Spectrum
-    name     : str
 
 
-    def __init__(self     : Source,
-                 position : Array    = None,
-                 flux     : Array    = None,
-                 spectrum : Spectrum = None,
-                 name     : str      = 'Source') -> Source:
+    def __init__(self        : Source,
+                 position    : Array    = np.zeros(2),
+                 flux        : Array    = np.array(1.),
+                 spectrum    : Spectrum = None,
+                 wavelengths : Array    = None) -> Source:
         """
         Constructor for the Source class.
 
@@ -88,33 +84,35 @@ class Source(BaseSource):
             The flux of the object.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-        name : str = 'Source'
-            The name for this object.
+        wavelengths : Array, meters = None
+            The array of wavelengths at which the spectrum is defined. Defaults
+            to a PointSource with a flat spectrum.
         """
+        # Position and Flux
         self.position = np.asarray(position, dtype=float)
         self.flux     = np.asarray(flux,     dtype=float)
+
+        if position.shape != (2,):
+            raise ValueError("position must be a 1d array of shape (2,).")
+        
+        if flux.shape != ():
+            raise ValueError("flux must be a scalar, ie shape == ().")
+        
+        if not isinstance(spectrum, dLux.spectra.Spectrum):
+            raise ValueError("spectrum must be a dLux Spectrum object.")
+
+        # Spectrum
+        if spectrum is None and wavelengths is None:
+            raise ValueError("Either spectrum or wavelengths must be "
+                "specified.")
+        
+        if wavelengths is not None:
+            if spectrum is not None:
+                raise ValueError("Either spectrum or wavelengths can be "
+                    "specified, not both.")
+            spectrum = dLux.spectra.ArraySpectrum(wavelengths)
+        
         self.spectrum = spectrum
-        self.name     = name
-
-        # Input position checking
-        if position is not None:
-            assert self.position.ndim == 1, \
-            ("position must be a 1d array.")
-            assert self.position.shape == (2,), \
-            ("positions must be shape (2,), ie (x, y).")
-
-        # Input flux checking
-        if flux is not None:
-            assert self.flux.shape == (), \
-            ("flux must be a scalar, (shape == ()).")
-
-        # Input spectrum checking
-        assert isinstance(self.spectrum, dLux.spectrums.Spectrum), \
-        ("Spectrum must be dLux Spectrum object.")
-
-        # Input name checking
-        assert isinstance(self.name, str), "Name must be a string."
-    
 
     def __getattr__(self : Source, key : str) -> Any:
         """
@@ -136,54 +134,6 @@ class Source(BaseSource):
             raise AttributeError(f"{self.name} has no attribute {key}.")
 
 
-    def get_flux(self : Source) -> Array:
-        """
-        Getter method for the flux.
-
-        Returns
-        -------
-        flux : Array, photons
-            The flux of the object.
-        """
-        return self.flux
-
-
-    def get_position(self : Source) -> Array:
-        """
-        Getter method for the position.
-
-        Returns
-        -------
-        position : Array, radians
-            The (x, y) on-sky position of this object.
-        """
-        return self.position
-
-
-    def get_wavelengths(self : Source) -> Array:
-        """
-        Getter method for the source internal wavelengths.
-
-        Returns
-        -------
-        wavelengths : Array, meters
-            The array of wavelengths at which the spectrum is defined.
-        """
-        return self.spectrum.get_wavelengths()
-
-
-    def get_weights(self : Source) -> Array:
-        """
-        Getter method for the source internal weights.
-
-        Returns
-        -------
-        weights : Array
-            The relative weights of each wavelength.
-        """
-        return self.spectrum.get_weights()
-
-
     def normalise(self : Source) -> Source:
         """
         Method for returning a new normalised source object.
@@ -193,15 +143,10 @@ class Source(BaseSource):
         source : Source
             The normalised source object.
         """
-        normalised_spectrum = self.spectrum.normalise()
-        return tree_at(
-            lambda source : source.spectrum, self, normalised_spectrum)
+        return self.set('spectrum', spectrum.normalise())
 
 
-    def model(self      : Source,
-              optics    : Optics,
-              detector  : Detector = None,
-              filter_in : Filter   = None) -> Array:
+    def model(self : Source, optics : Optics) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -211,110 +156,74 @@ class Source(BaseSource):
             The optics through which to model the source objects.
         detector : Detector = None
             The detector object that is observing the psf.
-        filter_in : Filter = None
-            The filter through which the source is being observed.
 
         Returns
         -------
         psf : Array
             The psf of the source source modelled through the optics.
         """
-        # Normalise and get parameters
-        self        = self.normalise()
-        wavelengths = self.get_wavelengths()
-        weights     = self.get_weights()
-        position    = self.get_position()
-        flux        = self.get_flux()
-
-        # Get filter throughput
-        if filter_in is not None:
-            raise NotImplementedError("Filter modelling is under development.")
-
-        # Vmap propagator & model
+        self = self.normalise()
+        weights = self.weights * self.flux
         propagator = vmap(optics.propagate_mono, in_axes=(0, None))
-        psfs = weights[:, None, None] * propagator(wavelengths, position)
-        psf = flux * psfs.sum(0)
-
-        # Apply detector if supplied
-        return psf if detector is None else detector.apply_detector(psf)
+        return propagator(self.wavelengths, self.position, weights)
 
 
-class ResolvedSource(Source, ABC):
-    """
-    Base class for resolved source objects. This simply extends the base Source
-    class by implementing an abstract get_distribution() method and a concrete
-    model() method.
+# class ResolvedSource(Source):
+#     """
+#     Base class for resolved source objects. This simply extends the base Source
+#     class by implementing an abstract get_distribution() method and a concrete
+#     model() method.
 
-    Attributes
-    ----------
-    position : Array, radians
-        The (x, y) on-sky position of this object.
-    flux : Array, photons
-        The flux of the object.
-    spectrum : Spectrum
-        The spectrum of this object, represented by a Spectrum object.
-    name : str
-        The name for this object.
-    """
+#     Attributes
+#     ----------
+#     position : Array, radians
+#         The (x, y) on-sky position of this object.
+#     flux : Array, photons
+#         The flux of the object.
+#     spectrum : Spectrum
+#         The spectrum of this object, represented by a Spectrum object.
+#     """
 
 
-    @abstractmethod
-    def get_distribution(self): # pragma: no cover
-        """
-        Abstract method for returning the distribution of the resolved source.
+#     @abstractmethod
+#     def get_distribution(self): # pragma: no cover
+#         """
+#         Abstract method for returning the distribution of the resolved source.
 
-        Returns
-        -------
-        distribution : Array
-            The distribution of the resolved source
-        """
-        pass
-
-
-    def model(self      : Source,
-              optics    : Optics,
-              detector  : Detector = None,
-              filter_in : Filter   = None) -> Array:
-        """
-        Method to model the psf of the source through the optics. Implements a
-        basic convolution with the psf and source distribution.
-
-        Parameters
-        ----------
-        optics : Optics
-            The optics through which to model the source objects.
-        detector : Detector = None
-            The detector object that is observing the psf.
-        filter_in : Filter = None
-            The filter through which the source is being observed.
-
-        Returns
-        -------
-        psf : Array
-            The psf of the source modelled through the optics
-        """
-        # Normalise and get parameters
-        self         = self.normalise()
-        wavelengths  = self.get_wavelengths()
-        weights      = self.get_weights()
-        position     = self.get_position()
-        flux         = self.get_flux()
-        distribution = self.get_distribution()
-
-        # Get filter throughput
-        if filter_in is not None:
-            raise NotImplementedError("Filter modelling is under development.")
-
-        # Vmap propagator & model
-        propagator = vmap(optics.propagate_mono, in_axes=(0, None))
-        psfs = weights[:, None, None] * propagator(wavelengths, position)
-        psf = convolve(flux * psfs.sum(0), distribution, mode='same')
-
-        # Apply detector if supplied
-        return psf if detector is None else detector.apply_detector(psf)
+#         Returns
+#         -------
+#         distribution : Array
+#             The distribution of the resolved source
+#         """
+#         pass
 
 
-class RelativeFluxSource(Source, ABC):
+#     def model(self : Source, optics : Optics) -> Array:
+#         """
+#         Method to model the psf of the source through the optics. Implements a
+#         basic convolution with the psf and source distribution.
+
+#         Parameters
+#         ----------
+#         optics : Optics
+#             The optics through which to model the source objects.
+
+#         Returns
+#         -------
+#         psf : Array
+#             The psf of the source modelled through the optics
+#         """
+#         # Normalise
+#         self = self.normalise()
+#         weights = self.weights * self.flux[:, None]
+
+#         # Calculate
+#         propagator = vmap(optics.propagate_mono, in_axes=(0, None))
+#         psf = propagator(self.wavelengths, self.position, weights)
+#         return convolve(psf, self.distribution, mode='same')
+
+
+class RelativeFluxSource(Source):
     """
     Abstract class that extend the methods of Source to allow for binary-object
     sources to be parameterised by their relative flux. Classes that inherit
@@ -330,13 +239,11 @@ class RelativeFluxSource(Source, ABC):
         The contrast ratio between the two sources.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
-    name : str
-        The name for this object.
     """
     contrast : Array
 
 
-    def __init__(self      : Source,
+    def __init__(self     : Source,
                  contrast : Array,
                  **kwargs) -> Source:
         """
@@ -350,12 +257,12 @@ class RelativeFluxSource(Source, ABC):
         super().__init__(**kwargs)
         self.contrast = np.asarray(contrast, dtype=float)
 
-        # Input contrast checking
-        assert self.contrast.shape == (), \
-        ("Flux ratio must be a scalar, (shape == ()).")
+        if self.contrast.shape != ():
+            raise ValueError("contrast must have shape ().")
 
 
-    def get_flux(self : Source) -> Array:
+    @property
+    def fluxes(self : Source) -> Array:
         """
         Getter method for the fluxes. This paramterieses the source such that
         flux refers to the mean_flux and contrast is defined as the ratio of
@@ -371,7 +278,7 @@ class RelativeFluxSource(Source, ABC):
         return np.array([flux_A, flux_B])
 
 
-class RelativePositionSource(Source, ABC):
+class RelativePositionSource(Source):
     """
     Abstract class that extend the methods of Source to allow for binary-object
     sources to be parameterised by their relative position. Classes that
@@ -390,8 +297,6 @@ class RelativePositionSource(Source, ABC):
         x axis.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
-    name : str
-        The name for this object.
     """
     separation     : Array
     position_angle : Array
@@ -416,14 +321,15 @@ class RelativePositionSource(Source, ABC):
         self.separation     = np.asarray(separation,     dtype=float)
         self.position_angle = np.asarray(position_angle, dtype=float)
 
-        assert self.separation.shape == (), "Separation must be a scalar, \
-        (shape == ())."
+        if self.separation.shape != ():
+            raise ValueError("separation must have shape ().")
 
-        assert self.position_angle.shape == (), "Field angle must be a scalar, \
-        (shape == ())."
+        if self.position_angle.shape != ():
+            raise ValueError("position_angle must have shape ().")
 
 
-    def get_position(self : Source) -> Array:
+    @property
+    def positions(self : Source) -> Array:
         """
         Getter method for the position.
 
@@ -453,42 +359,29 @@ class PointSource(Source):
         The flux of the object.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
-    name : str
-        The name for this object.
     """
 
 
-    def __init__(self        : Source,
-                 position    : Array    = np.array([0., 0.]),
-                 flux        : Array    = np.array(1.),
-                 spectrum    : Spectrum = None,
-                 wavelengths : Array    = None,
-                 name        : str      = 'PointSource') -> Source:
-        """
-        Constructor for the PointSource class.
+    # def __init__(self        : Source,
+    #              position    : Array    = np.zeros(2),
+    #              flux        : Array    = np.array(1.),
+    #              spectrum    : Spectrum = None,
+    #              wavelengths : Array    = None) -> Source:
+    #     """
+    #     Constructor for the PointSource class.
 
-        Parameters
-        ----------
-        position : Array, radians = np.array([0., 0.])
-            The (x, y) on-sky position of this object.
-        flux : Array, photons = np.array(1.)
-            The flux of the object.
-        spectrum : Spectrum = None
-            The spectrum of this object, represented by a Spectrum object.
-        wavelengths : Array, meters = None
-            The array of wavelengths at which the spectrum is defined.
-        name : str = 'PointSource'
-            The name for this object.
-        """
-        # Check spectrum & wavelengths
-        assert spectrum is not None or wavelengths is not None, \
-        ("Either spectrum or wavelengths must be specified.")
-        if spectrum is not None:
-            assert wavelengths is None, \
-            ("wavelengths can not be specified if spectrum is specified.")
-        else:
-            spectrum = dLux.spectrums.ArraySpectrum(wavelengths)
-        super().__init__(position, flux, spectrum, name=name)
+    #     Parameters
+    #     ----------
+    #     position : Array, radians = np.array([0., 0.])
+    #         The (x, y) on-sky position of this object.
+    #     flux : Array, photons = np.array(1.)
+    #         The flux of the object.
+    #     spectrum : Spectrum = None
+    #         The spectrum of this object, represented by a Spectrum object.
+    #     wavelengths : Array, meters = None
+    #         The array of wavelengths at which the spectrum is defined.
+    #     """
+    #     super().__init__(position, flux, spectrum, wavelengths)
 
 
 class MultiPointSource(Source):
@@ -504,8 +397,6 @@ class MultiPointSource(Source):
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
         Every source in this class will have an identical spectrum.
-    name : str
-        The name for this object.
     """
 
 
@@ -513,8 +404,7 @@ class MultiPointSource(Source):
                  position    : Array,
                  flux        : Array    = None,
                  spectrum    : Spectrum = None,
-                 wavelengths : Array    = None,
-                 name        : str      = 'MultiPointSource') -> Source:
+                 wavelengths : Array    = None) -> Source:
         """
         Constructor for the MultiPointSource class.
 
@@ -529,46 +419,28 @@ class MultiPointSource(Source):
             Every source in this class will have an identical spectrum.
         wavelengths : Array, meters = None
             The array of wavelengths at which the spectrum is defined.
-        name : str = 'MultiPointSource'
-            The name for this object.
         """
-        # Check spectrum & wavelengths
-        assert spectrum is not None or wavelengths is not None, \
-        ("Either spectrum or wavelengths must be specified.")
-        if spectrum is not None:
-            assert wavelengths is None, \
-            ("wavelengths can not be specified if spectrum is specified.")
-        else:
-            spectrum = dLux.spectrums.ArraySpectrum(wavelengths)
-
-        # Only call super, not __init__ since we are overwriting all the attrs
-        super().__init__(spectrum=spectrum, name=name)
-
         self.position = np.asarray(position, dtype=float)
 
-        # Input position checking
-        assert self.position.ndim == 2, \
-        ("position must be a 2d array.")
-        assert self.position.shape[-1] == 2, \
-        ("positions must be shape (nstars, 2), ie [(x0, y0), (x1, y1), ...].")
+        if self.position.ndim != 2:
+            raise ValueError("position must be a 2d array.")
+        
+        if flux is None:
+            self.flux = np.ones(len(self.position))
+        else:
+            flux = np.asarray(flux, dtype=float)
 
-        # Get flux
-        self.flux = np.ones(len(self.positions)) if flux is None else \
-                    np.asarray(flux, dtype=float)
+            if self.flux.ndim != 1:
+                raise ValueError("flux must be a 1d array.")
 
-        # Input flux checking
-        assert self.flux.ndim == 1, \
-        ("flux must be a 1d array.")
+            if len(self.flux) != len(self.position):
+                raise ValueError("Length of flux must be equal to length of "
+                    "position.")
+        
+        super().__init__(spectrum=spectrum, wavelengths=wavelengths)
+        
 
-        # Ensure same dimensionality
-        assert self.flux.shape[0] == self.position.shape[0], ("position and "
-        "flux must have the same length leading dimension, ie nstars")
-
-
-    def model(self      : Source,
-              optics    : Optics,
-              detector  : Detector = None,
-              filter_in : Filter   = None) -> Array:
+    def model(self : Source, optics : Optics) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -576,38 +448,16 @@ class MultiPointSource(Source):
         ----------
         optics : Optics
             The optics through which to model the source objects.
-        detector : Detector = None
-            The detector object that is observing the psf.
-        filter_in : Filter = None
-            The filter through which the source is being observed.
 
         Returns
         -------
         psf : Array
             The psf of the source source modelled through the optics.
         """
-        # Normalise and get parameters
-        self        = self.normalise()
-        wavelengths = self.get_wavelengths()
-        weights     = self.get_weights()
-        positions   = self.get_position()
-        fluxes      = self.get_flux()
-
-        # Get filter throughput
-        if filter_in is not None:
-            raise NotImplementedError("Filter modelling is under development.")
-
-        # Vmap propagator
-        source_propagator = vmap(optics.propagate_mono, in_axes=(0, None))
-        propagator = vmap(source_propagator, in_axes=(None, 0))
-
-        # Model Psf
-        psfs = propagator(wavelengths, positions)
-        psfs *= weights[None, :, None, None] * fluxes[:, None, None, None]
-        psf = psfs.sum((0, 1))
-
-        # Apply detector if supplied
-        return psf if detector is None else detector.apply_detector(psf)
+        self = self.normalise()
+        weights = self.weights * self.flux[:, None]
+        propagator = vmap(optics.propagate, in_axes=(0, 0, 0))
+        return propagator(self.wavelengths, self.position, weights)
 
 
 class ArrayDistribution(ResolvedSource):
@@ -621,23 +471,20 @@ class ArrayDistribution(ResolvedSource):
         The (x, y) on-sky position of this object.
     flux : Array, photons
         The flux of the object.
-    distribution : Array
-        The array of intensities respresenting the resolved source.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
-    name : str
-        The name for this object.
+    distribution : Array
+        The array of intensities respresenting the resolved source.
     """
     distribution : Array
 
 
     def __init__(self         : Source,
-                 position     : Array    = np.array([0., 0.]),
+                 position     : Array    = np.ones(2),
                  flux         : Array    = np.array(1.),
                  distribution : Array    = np.ones((3, 3)),
                  spectrum     : Spectrum = None,
                  wavelengths  : Array    = None,
-                 name         : str      = 'ArrayDistribution',
                  **kwargs) -> Source:
         """
         Constructor for the ArrayDistribution class.
@@ -654,40 +501,14 @@ class ArrayDistribution(ResolvedSource):
             The spectrum of this object, represented by a Spectrum object.
         wavelengths : Array, meters = None
             The array of wavelengths at which the spectrum is defined.
-        name : str = 'ArrayDistribution'
-            The name for this object.
         """
-        # Check spectrum & wavelengths
-        assert spectrum is not None or wavelengths is not None, \
-        ("Either spectrum or wavelengths must be specified.")
-        if spectrum is not None:
-            assert wavelengths is None, \
-            ("wavelengths can not be specified if spectrum is specified.")
-        else:
-            spectrum = dLux.spectrums.ArraySpectrum(wavelengths)
-
-        super().__init__(position, flux, spectrum, name=name, **kwargs)
         distribution = np.asarray(distribution, dtype=float)
-        distribution = np.maximum(distribution, 0.)
         self.distribution = distribution/distribution.sum()
 
-        # Input checking
-        assert self.distribution.ndim == 2, \
-        ("distribution must be a 2d array.")
-        assert len(self.distribution) > 0, \
-        ("Length of distribution must be greater than 1.")
-
-
-    def get_distribution(self : Source) -> Array:
-        """
-        Getter method for the source distribution.
-
-        Returns
-        -------
-        distribution : Array, intensity
-            The distribution of the source intensity.
-        """
-        return self.distribution
+        if self.distribution.ndim != 2:
+            raise ValueError("distribution must be a 2d array.")
+        
+        super().__init__(position, flux, spectrum, wavelengths, **kwargs)
 
 
     def normalise(self : Source) -> Source:
@@ -700,12 +521,10 @@ class ArrayDistribution(ResolvedSource):
         source : Source
             The source object with the normalised spectrum and distribution.
         """
-        normalised_spectrum = self.spectrum.normalise()
+        spectrum = self.spectrum.normalise()
         distribution_floor = np.maximum(self.distribution, 0.)
-        normalised_distribution = distribution_floor/distribution_floor.sum()
-        return tree_at(
-            lambda source : (source.spectrum, source.distribution), self, \
-                            (normalised_spectrum, normalised_distribution))
+        distribution = distribution_floor/distribution_floor.sum()
+        return self.set(['spectrum', 'distribution'], [spectrum, distribution])
 
 
 class BinarySource(RelativePositionSource, RelativeFluxSource):
@@ -727,8 +546,6 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         The contrast ratio between the two sources.
     spectrum : Spectrum
         The spectrum of this object, represented by a CombinedSpectrum object.
-    name : str
-        The name for this object.
     """
 
 
@@ -739,8 +556,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
                  position_angle : Array    = np.pi/2,
                  contrast       : Array    = np.array(1.),
                  spectrum       : Spectrum = None,
-                 wavelengths    : Array    = None,
-                 name           : str      = 'BinarySource') -> Source:
+                 wavelengths    : Array    = None) -> Source:
         """
         Parameters
         ----------
@@ -759,36 +575,21 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
             The spectrum of this object, represented by a CombinedSpectrum.
         wavelengths : Array, meters = None
             The array of wavelengths at which the spectrum is defined.
-        name : str = 'BinarySource'
-            The name for this object.
         """
-        # Check spectrum & wavelengths
-        assert spectrum is not None or wavelengths is not None, \
-        ("Either spectrum or wavelengths must be specified.")
-        if spectrum is not None:
-            assert wavelengths is None, \
-            ("wavelengths can not be specified if spectrum is specified.")
-            assert isinstance(spectrum, dLux.CombinedSpectrum), \
-            ("The input spectrum must be a CombinedSpectrum object.")
-        else:
-            spectrum = dLux.spectrums.CombinedSpectrum(wavelengths)
-
-        # Check separation
-        assert separation is not None, ("separation must be provided.")
+        wavelengths = np.asarray(wavelengths, dtype=float)
+        if wavelengths.ndim == 1:
+            wavelengths = np.array([wavelengths, wavelengths])
+        spectrum = dLux.spectra.ArraySpectrum(wavelengths)
 
         super().__init__(position=position,
                          flux=flux,
                          spectrum=spectrum,
                          separation=separation,
                          position_angle=position_angle,
-                         contrast=contrast,
-                         name=name)
+                         contrast=contrast)
 
 
-    def model(self      : Source,
-              optics    : Optics,
-              detector  : Detector = None,
-              filter_in : Filter   = None) -> Array:
+    def model(self : Source, optics : Optics) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -796,40 +597,25 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         ----------
         optics : Optics
             The optics through which to model the source objects.
-        detector : Detector = None
-            The detector object that is observing the psf.
-        filter_in : Filter = None
-            The filter through which the source is being observed.
 
         Returns
         -------
         psf : Array
             The psf of the source source modelled through the optics.
         """
-        # Normalise and get parameters
-        self        = self.normalise()
-        wavelengths = self.get_wavelengths()[0]
-        weights     = self.get_weights()
-        positions   = self.get_position()
-        fluxes      = self.get_flux()
-
-        # Get filter throughput
-        if filter_in is not None:
-            raise NotImplementedError("Filter modelling is under development.")
-
-        # Vmap propagator
-        source_propagator = vmap(optics.propagate_mono, in_axes=(0, None))
-        propagator = vmap(source_propagator, in_axes=(None, 0))
-
-        # Model Psf
-        psfs = propagator(wavelengths, positions)
-        psfs *= weights[:, :, None, None] * fluxes[:, None, None, None]
-        psf = psfs.sum((0, 1))
-
-        # Apply detector if supplied
-        return psf if detector is None else detector.apply_detector(psf)
+        self = self.normalise()
+        weights = self.weights * self.fluxes[:, None]
+        propagator = vmap(optics.propagate, in_axes=(0, 0, 0))
+        return propagator(self.wavelengths, self.positions, weights)
 
 
+# TODO: Finish off these last two
+# apertures
+# aberrations
+# propagators
+# detector layers
+# images
+# observations
 class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
     """
     A class for modelling a point source and a resolved source that is defined
@@ -853,8 +639,6 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
         source.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
-    name : str
-        The name for this object.
     """
 
 
@@ -864,8 +648,7 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
                  distribution : Array    = np.ones((3, 3)),
                  contrast     : Array    = np.array(1.),
                  spectrum     : Spectrum = None,
-                 wavelengths  : Array    = None,
-                 name         : str      = 'PointExtendedSource') -> Source:
+                 wavelengths  : Array    = None) -> Source:
         """
         Parameters
         ----------
@@ -882,8 +665,6 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
             The spectrum of this object, represented by a Spectrum object.
         wavelengths : Array, meters = None
             The array of wavelengths at which the spectrum is defined.
-        name : str = 'PointExtendedSource'
-            The name for this object.
         """
         # Check spectrum & wavelengths
         assert spectrum is not None or wavelengths is not None, \
@@ -892,17 +673,14 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
             assert wavelengths is None, \
             ("wavelengths can not be specified if spectrum is specified.")
         else:
-            spectrum = dLux.spectrums.Spectrum(wavelengths)
+            spectrum = dLux.spectra.Spectrum(wavelengths)
 
         super().__init__(position=position, flux=flux, spectrum=spectrum, \
                          distribution=distribution, contrast=contrast, \
                          name=name)
 
 
-    def model(self      : Source,
-              optics    : Optics,
-              detector  : Detector = None,
-              filter_in : Filter   = None) -> Array:
+    def model(self : Source, optics : Optics) -> Array:
         """
         Method to model the psf of the source through the optics. Implements a
         basic convolution with the psf and source distribution, while also
@@ -912,11 +690,6 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
         ----------
         optics : Optics
             The optics through which to model the soource objects.
-        detector : Detector = None
-            The detector object that is observing the psf.
-        filter_in : Filter = None
-            The filter through which the source is being observed. Default is 
-            None which is uniform throughput.
 
         Returns
         -------
@@ -973,8 +746,6 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
         source.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
-    name : str
-        The name for this object.
     """
 
 
@@ -984,8 +755,7 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
                  distribution : Array    = np.ones((3, 3)),
                  contrast     : Array    = np.array(1.),
                  spectrum     : Spectrum = None,
-                 wavelengths  : Array    = None,
-                 name         : str      = 'PointAndExtendedSource') -> Source:
+                 wavelengths  : Array    = None) -> Source:
         """
         Parameters
         ----------
@@ -1002,8 +772,6 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
             The spectrum of this object, represented by a CombinedSpectrum.
         wavelengths : Array, meters = None
             The array of wavelengths at which the spectrum is defined.
-        name : str = 'PointAndExtendedSource'
-            The name for this object.
         """
         # Check spectrum & wavelengths
         assert spectrum is not None or wavelengths is not None, \
@@ -1014,17 +782,14 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
             assert isinstance(spectrum, dLux.CombinedSpectrum), \
             ("The input spectrum must be a CombinedSpectrum object.")
         else:
-            spectrum = dLux.spectrums.CombinedSpectrum(wavelengths)
+            spectrum = dLux.spectra.CombinedSpectrum(wavelengths)
 
         super().__init__(position=position, flux=flux, spectrum=spectrum, \
                          distribution=distribution, contrast=contrast, \
                          name=name)
 
 
-    def model(self      : Source,
-              optics    : Optics,
-              detector  : Detector = None,
-              filter_in : Filter   = None) -> Array:
+    def model(self : Source, optics : Optics) -> Array:
         """
         Method to model the psf of the source through the optics. Implements a
         basic convolution with the psf and source distribution, while also
@@ -1035,11 +800,6 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
         ----------
         optics : Optics
             The optics through which to model the source objects.
-        detector : Detector = None
-            The detector object that is observing the psf.
-        filter_in : Filter = None
-            The filter through which the source is being observed. Default is
-            None which is uniform throughput.
 
         Returns
         -------

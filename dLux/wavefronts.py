@@ -2,7 +2,7 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import vmap, Array
 from zodiax import Base
-from dLux.utils.coordinates import get_pixel_positions
+from dLux.utils.coordinates import pixel_coordinates, pixel_coords
 from dLux.utils.interpolation import interpolate_field, rotate_field
 import dLux
 
@@ -10,12 +10,10 @@ import dLux
 __all__ = ["Wavefront", "FresnelWavefront"]
 
 
-Aberration = lambda : dLux.optics.AberrationLayer
+Aberration = lambda : dLux.optical_layers.AberrationLayer
 Aperture = lambda : dLux.apertures.ApertureLayer
-TransmissiveLayer = lambda : dLux.optics.TransmissiveLayer
-AberrationLayer = lambda : dLux.optics.AberrationLayer
 Propagator = lambda : dLux.propagators.Propagator
-OpticalLayer = lambda : dLux.optics.OpticalLayer
+OpticalLayer = lambda : dLux.optical_layers.OpticalLayer
 
 
 class Wavefront(Base):
@@ -179,8 +177,7 @@ class Wavefront(Base):
             The coordinates of the centers of each pixel representing the
             wavefront.
         """
-        return get_pixel_positions((self.npixels, self.npixels), 
-                                   (self.pixel_scale, self.pixel_scale))
+        return dlu.pixel_coords(self.npixels, self.pixel_scale)
 
 
     @property
@@ -220,12 +217,12 @@ class Wavefront(Base):
         Magic method used to to give a simple API for interaction with different
         layer types and arrays. If the input 'other' in an array it is treated
         as an array of OPD values and is added to the wavefront. If it is an
-        AberrationLayer, the wavefront is passed to the layer and the output
+        Aberration, the wavefront is passed to the layer and the output
         wavefront is returned.
         
         Parameters
         ----------
-        other : Array or AberrationLayer
+        other : Array or Aberration
             The input to add to the wavefront.
         
         Returns
@@ -243,7 +240,7 @@ class Wavefront(Base):
 
         # Array based inputs - Defaults to OPD
         if isinstance(other, Array):
-            return self.add('phase', other * self.wavenumber)
+            return self.add_opd(other)
         
         # Other
         else:
@@ -256,12 +253,12 @@ class Wavefront(Base):
         Magic method used to to give a simple API for interaction with different
         layer types and arrays. If the input 'other' in an array it is treated
         as an array of OPD values and is added to the wavefront. If it is an
-        AberrationLayer, the wavefront is passed to the layer and the output
+        Aberration, the wavefront is passed to the layer and the output
         wavefront is returned.
         
         Parameters
         ----------
-        other : Array or AberrationLayer
+        other : Array or Aberration
             The input to add to the wavefront.
         
         Returns
@@ -277,12 +274,12 @@ class Wavefront(Base):
         Magic method used to to give a simple API for interaction with different
         layer types and arrays. If the input 'other' in an array it is treated
         as an array of tranmission values and is multipled by the wavefront
-        amplitude. If it is an Aperture, AberrationLayer, or Propagator, the
+        amplitude. If it is an Aperture, Aberration, or Propagator, the
         wavefront is passed to the layer and the output wavefront is returned.
         
         Parameters
         ----------
-        other : Array or AberrationLayer or Aperture or Propagator
+        other : Array or Aberration or Aperture or Propagator
             The input to add to the wavefront.
         
         Returns
@@ -290,25 +287,27 @@ class Wavefront(Base):
         wavefront : Wavefront
             The output wavefront.
         """
-        # None Type
+        # None Type, return None
         if other is None:
             return self
         
-        # Some Optical Layer
+        # Some Optical Layer, apply it
         if isinstance(other, OpticalLayer()):
             return other(self)
         
         # Array based inputs
         if isinstance(other, Array):
-            return self.multiply('amplitude', other)
-        
-        # TODO: Maybe add this? Doesnt seem like it is useful.
-        # # Wavefronts
-        # elif isinstance(other, Wavefront):
-        #     transmission = other.amplitude * self.amplitude
-        #     phase = other.phase + self.phase
-        #     return self.set(['amplitude', 'phase'], [transmission, phase])
-        
+
+            # Complex array - Multiply the phasors
+            if other.dtype == complex:
+                phasor = self.phasor * other
+                self.set(["amplitude", "phase"], 
+                    [np.abs(phasor), np.angle(phasor)])
+            
+            # Scalar array - Multiply ampltiude
+            else:
+                return self.multiply('amplitude', other)
+
         # Other
         else:
             raise TypeError("Can only multiply Wavefront by array or "
@@ -320,12 +319,12 @@ class Wavefront(Base):
         Magic method used to to give a simple API for interaction with different
         layer types and arrays. If the input 'other' in an array it is treated
         as an array of tranmission values and is multipled by the wavefront
-        amplitude. If it is an Aperture, AberrationLayer, or Propagator, the
+        amplitude. If it is an Aperture, Aberration, or Propagator, the
         wavefront is passed to the layer and the output wavefront is returned.
         
         Parameters
         ----------
-        other : Array or AberrationLayer or Aperture or Propagator
+        other : Array or Aberration or Aperture or Propagator
             The input to add to the wavefront.
         
         Returns
@@ -334,7 +333,280 @@ class Wavefront(Base):
             The output wavefront.
         """
         return self.__mul__(other)
+
+
+    #######################
+    ### Adder Functions ###
+    #######################
+    def add_opd(self: Wavefront, path_difference : Array) -> Wavefront:
+        """
+        Applies the wavelength-dependent phase based on the supplied optical
+        path difference.
+
+        Parameters
+        ----------
+        path_difference : Array, meters
+            The physical optical path difference of either the entire wavefront
+            or each pixel individually.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new wavefront with the phases updated according to the supplied
+            path_difference
+        """
+        phase_difference = self.wavenumber * path_difference
+        return self.add('phase', phase_difference)
+
+
+    def add_phase(self: Wavefront, phase : Array) -> Wavefront:
+        """
+        Applies input array to the phase of the wavefront.
+
+        Parameters
+        ----------
+        phase : Array, radians
+            The phase to be added to the wavefront.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new wavefront with updated phases.
+        """
+        return self.add('phase', phase)
+
+
+    #######################
+    ### Other Functions ###
+    #######################
+    def tilt(self : Wavefront, angles : Array) -> Wavefront:
+        """
+        Tilts the wavefront by the angles in the (x, y) by modifying the 
+        phase arrays.
+
+        Parameters
+        ----------
+        angles : Array, radians
+            The (x, y) angles by which to tilt the wavefront.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The tilted wavefront.
+        """
+        if not isinstance(angles, Array) or angles.shape != (2,):
+            raise ValueError("angles must be an array of shape (2,).")
+        opd = - (tilt_angles[:, None, None] * self.coordinates).sum()
+        return self.add_opd(opd)
+
+
+    def normalise(self : Wavefront) -> Wavefront:
+        """
+        Normalises the total power of the wavefront to 1.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new wavefront with the normalised electric field amplitudes.
+        """
+        return self.divide('amplitude', np.linalg.norm(self.amplitude))
+
+
+    def _to_field(self, complex=False):
+        if complex:
+            return np.array([self.real, self.imaginary])
+        return np.array([self.amplitude, self.phase])
     
+    
+    def _to_ampltide_phase(self, field):
+        amplitude = np.hypot(field[0], field[1])
+        phase = np.arctan2(field[1], field[0])
+        return np.array([amplitude, phase])
+
+
+    def flip(self : Wavefront, axis : tuple) -> Wavefront:
+        """
+        Flips the amplitude and phase of the wavefront along the specified axes.
+
+        Returns
+        -------
+        wavefront : Wavefront
+
+        """
+        field = self._to_field()
+        flipper = vmap(np.flip, (0, None))
+        amplitude, phase = flipper(field, axis)
+        return self.set(['amplitude', 'phase'], [amplitude, phase])
+    
+
+    def scale_to(self            : Wavefront,
+                    npixels     : int,
+                    pixel_scale : Array,
+                    complex  : bool = False) -> Wavefront:
+        """
+        Performs a paraxial interpolation on the wavefront, determined by the
+        the pixel_scale_out and npixels_out parameters. By default the
+        interpolation is done on the amplitude and phase arrays, however by
+        passing `real_imgainary=True` the interpolation is done on the real and
+        imaginary components. This option allows for consistent interpolation
+        behaviour when the phase array has a large amount of wrapping.
+        Automatically conserves energy though the interpolation.
+
+        Parameters
+        ----------
+        npixels_out : int
+            The number of pixels representing the wavefront after the
+            interpolation.
+        pixel_scale: Array
+            The pixel scale of the array after the interpolation.
+        complex : bool = False
+            Whether to rotate the real and imaginary representation of the
+            wavefront as opposed to the the amplitude and phase representation.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new wavefront interpolated to the size and shape determined by
+            npixels_out and pixel_scale_out, with the updated pixel_scale.
+        """
+        # Get field in either (ampltide, phase) or (real, imaginary)
+        field = self._to_field(complex=complex)
+
+        # Scale the field
+        scaler = vmap(dlu.scale, (0, None, None))
+        field = scaler(field, npixels_out, pixel_scale / self.pixel_scale)
+
+        # Cast back to (amplitude, phase) if needed
+        if complex:
+            field = self._to_ampltide_phase(field)
+
+        # Return new wavefront
+        return self.set(['amplitude', 'phase'], [field[0], field[1]])
+
+
+    def rotate(self           : Wavefront,
+               angle          : Array,
+               real_imaginary : bool = False,
+               fourier        : bool = False,
+               order          : int  = 1,
+               padding        : int  = 2) -> Wavefront:
+        """
+        Performs a paraxial rotation on the wavefront, determined by the
+        the angle parameter. By default the rotation is performed using a
+        simple linear interpolation, but an information perserving rotation
+        using fourier methods can be done by setting `fourier = True`. By
+        default rotation is done on the amplitude and phase arrays, however by
+        passing `real_imgainary=True` the rotation is done on the real and
+        imaginary components.
+
+        Parameters
+        ----------
+        angle : Array, radians
+            The angle by which to rotate the wavefront in a clockwise direction.
+        order : int = 1
+            The interpolation order to use.
+        complex : bool = False
+            Whether to rotate the real and imaginary representation of the
+            wavefront as opposed to the the amplitude and phase representation.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new wavefront rotated by angle in the clockwise direction.
+        """
+        # Get field in either (ampltide, phase) or (real, imaginary)
+        field = self._to_field(complex=complex)
+
+        # Rotate the field
+        rotator = vmap(dlu.rotate, (0, None, None))
+        field = rotator(field, angle, order)
+
+        # Cast back to (amplitude, phase) if needed
+        if complex:
+            field = self._to_ampltide_phase(field)
+
+        # Return new wavefront
+        return self.set(['amplitude', 'phase'], [field[0], field[1]])
+
+
+
+    ############################
+    ### Padding and Cropping ###
+    ############################
+    def pad_to(self : Wavefront, npixels_out : int) -> Wavefront:
+        """
+        Paraxially zero-pads the `Wavefront` to the size determined by
+        npixels_out. Note this only supports padding arrays of even dimension
+        to even dimension, and odd dimension to to odd dimension, ie 2 -> 4 or
+        3 -> 5.
+
+        Parameters
+        ----------
+        npixels_out : int
+            The size of the array to pad to the wavefront to.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new `Wavefront` zero-padded to the size npixels_out.
+        """
+        npixels_in  = self.npixels
+        assert npixels_in  % 2 == npixels_out % 2, \
+        ("Only supports even -> even or odd -> odd padding")
+        assert npixels_out > npixels_in, ("npixels_out must be larger than the"
+        " current array size: {}".format(npixels_in))
+
+        new_centre = npixels_out // 2
+        centre = npixels_in  // 2
+        remainder = npixels_in  % 2
+        padded = np.zeros([npixels_out, npixels_out])
+
+        amplitude = padded.at[
+                new_centre - centre : centre + new_centre + remainder,
+                new_centre - centre : centre + new_centre + remainder
+            ].set(self.amplitude)
+        phase = padded.at[
+                new_centre - centre : centre + new_centre + remainder,
+                new_centre - centre : centre + new_centre + remainder
+            ].set(self.phase)
+        return self.set(['amplitude', 'phase'], [amplitude, phase])
+
+
+    def crop_to(self : Wavefront, npixels_out : int) -> Wavefront:
+        """
+        Paraxially crops the `Wavefront` to the size determined by npixels_out.
+        Note this only supports padding arrays of even dimension to even
+        dimension, and odd dimension to to odd dimension, ie 4 -> 2 or 5 -> 3.
+
+        Parameters
+        ----------
+        npixels_out : int
+            The size of the array to crop to the wavefront to.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The new `Wavefront` cropped to the size npixels_out.
+        """
+        npixels_in  = self.npixels
+
+        assert npixels_in%2 == npixels_out%2, \
+        ("Only supports even -> even or odd -> odd cropping")
+        assert npixels_out < npixels_in, ("npixels_out must be smaller than the"
+        " current array size: {}".format(npixels_in))
+
+        new_centre = npixels_in  // 2
+        centre = npixels_out // 2
+
+        amplitude = self.amplitude[
+            new_centre - centre : new_centre + centre,
+            new_centre - centre : new_centre + centre]
+        phase = self.phase[
+            new_centre - centre : new_centre + centre,
+            new_centre - centre : new_centre + centre]
+
+        return self.set(['amplitude', 'phase'], [amplitude, phase])
+
 
     #############################
     ### Propagation Functions ###
@@ -602,8 +874,8 @@ class Wavefront(Base):
         """
         scale_in = 1.0 / self.npixels
         scale_out = self._nfringes(npixels, pixel_scale, focal_length) / npixels
-        in_vec = get_pixel_positions(self.npixels, scale_in, shift * scale_in)
-        out_vec = get_pixel_positions(npixels, scale_out, shift * scale_out)
+        in_vec = pixel_coordinates(self.npixels, scale_in, shift * scale_in)
+        out_vec = pixel_coordinates(npixels, scale_out, shift * scale_out)
 
         if not inverse:
             return np.exp(2j * np.pi * np.outer(in_vec, out_vec))
@@ -805,303 +1077,6 @@ class Wavefront(Base):
             [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
 
 
-    #######################
-    ### Other Functions ###
-    #######################
-    def tilt_wavefront(self : Wavefront, tilt_angles : Array) -> Wavefront:
-        """
-        Tilts the wavefront by the tilt_angles.
-
-        Parameters
-        ----------
-        tilt_angles : Array, radians
-            The (x, y) angles by which to tilt the wavefront.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` with the (x, y) tilts applied.
-        """
-        assert isinstance(tilt_angles, Array) and tilt_angles.shape == (2,), \
-        ("tilt_angles must be an array with shape (2,) ie. (x, y).")
-
-        opds = tilt_angles[:, None, None] * self.coordinates
-        return self.add('phase', - self.wavenumber * opds.sum(0))
-
-
-    def add_opd(self: Wavefront, path_difference : Array) -> Wavefront:
-        """
-        Applies the wavelength-dependent phase based on the supplied optical
-        path difference.
-
-        Parameters
-        ----------
-        path_difference : Array, meters
-            The physical optical path difference of either the entire wavefront
-            or each pixel individually.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new wavefront with the phases updated according to the supplied
-            path_difference
-        """
-        phase_difference = self.wavenumber * path_difference
-        return self.add('phase', phase_difference)
-
-
-    def add_phase(self: Wavefront, phase : Array) -> Wavefront:
-        """
-        Applies input array to the phase of the wavefront.
-
-        Parameters
-        ----------
-        phase : Array, radians
-            The phase to be added to the wavefront.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new wavefront with updated phases.
-        """
-        return self.add('phase', phase)
-
-
-    def normalise(self : Wavefront) -> Wavefront:
-        """
-        Normalises the total power of the wavefront to 1.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new wavefront with the normalised electric field amplitudes.
-        """
-        amplitude = self.amplitude
-
-        # Note this throws concretisiation errors
-        # if (amplitude == 0.).all():
-        #     raise ValueError("ampltide is all zeros, can't normalise.")
-
-        return self.multiply('amplitude', (1 / np.linalg.norm(self.amplitude)))
-
-
-    def invert_x_and_y(self : Wavefront) -> Wavefront:
-        """
-        Reflects the wavefront about both axes.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` with the phase and amplitude arrays reversed
-            along both axes.
-        """
-        amplitude = np.flip(self.amplitude, axis=(-1, -2))
-        phase = np.flip(self.phase, axis=(-1, -2))
-        return self.set(['amplitude', 'phase'], [amplitude, phase])
-
-
-    def invert_x(self : Wavefront) -> Wavefront:
-        """
-        Reflects the wavefront about the x axis.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` with the phase and amplitude arrays reversed
-            along the x axis.
-        """
-        # amplitude = np.flip(self.amplitude, axis=-1)
-        # phase = np.flip(self.phase, axis=-1)
-        amplitude = np.fliplr(self.amplitude)
-        phase = np.fliplr(self.phase)
-        return self.set(['amplitude', 'phase'], [amplitude, phase])
-
-
-    def invert_y(self : Wavefront) -> Wavefront:
-        """
-        Reflects the wavefront about the y axis.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new wavefront with the phase and amplitude arrays reversed
-            along the y axis.
-        """
-        # amplitude = np.flip(self.amplitude, axis=-2)
-        # phase = np.flip(self.phase, axis=-2)
-        amplitude = np.flipup(self.amplitude)
-        phase = np.flipup(self.phase)
-        return self.set(['amplitude', 'phase'], [amplitude, phase])
-
-
-    def interpolate(self            : Wavefront,
-                    npixels_out     : int,
-                    pixel_scale_out : Array,
-                    real_imaginary  : bool = False) -> Wavefront:
-        """
-        Performs a paraxial interpolation on the wavefront, determined by the
-        the pixel_scale_out and npixels_out parameters. By default the
-        interpolation is done on the amplitude and phase arrays, however by
-        passing `real_imgainary=True` the interpolation is done on the real and
-        imaginary components. This option allows for consistent interpolation
-        behaviour when the phase array has a large amount of wrapping.
-        Automatically conserves energy though the interpolation.
-
-        Parameters
-        ----------
-        npixels_out : int
-            The number of pixels representing the wavefront after the
-            interpolation.
-        pixel_scale_out : Array
-            The pixel scale of the array after the interpolation.
-        real_imaginary : bool = False
-            Whether to interpolate the real and imaginary representation of the
-            wavefront as opposed to the the amplitude and phase representation.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new wavefront interpolated to the size and shape determined by
-            npixels_out and pixel_scale_out, with the updated pixel_scale.
-        """
-        sampling_ratio = pixel_scale_out / self.pixel_scale
-        if real_imaginary:
-            field = np.array([self.real, self.imaginary])
-        else:
-            field = np.array([self.amplitude, self.phase])
-
-        amplitude, phase = interpolate_field(field, npixels_out, 
-            sampling_ratio, real_imaginary=real_imaginary)
-
-        return self.set(['amplitude', 'phase', 'pixel_scale'], 
-            [amplitude, phase, pixel_scale_out])
-
-
-    def rotate(self           : Wavefront,
-               angle          : Array,
-               real_imaginary : bool = False,
-               fourier        : bool = False,
-               order          : int  = 1,
-               padding        : int  = 2) -> Wavefront:
-        """
-        Performs a paraxial rotation on the wavefront, determined by the
-        the angle parameter. By default the rotation is performed using a
-        simple linear interpolation, but an information perserving rotation
-        using fourier methods can be done by setting `fourier = True`. By
-        default rotation is done on the amplitude and phase arrays, however by
-        passing `real_imgainary=True` the rotation is done on the real and
-        imaginary components.
-
-        Parameters
-        ----------
-        angle : Array, radians
-            The angle by which to rotate the wavefront in a clockwise direction.
-        real_imaginary : bool = False
-            Whether to rotate the real and imaginary representation of the
-            wavefront as opposed to the the amplitude and phase representation.
-        fourier : bool = False
-            Should the fourier rotation method be used (True), or regular
-            interpolation method be used (False).
-        order : int = 2
-            The interpolation order to use. Must be 0, 1, or 3.
-        padding : int = 2
-            The amount of fourier padding to use. Only applies if fourier is
-            True.
-
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new wavefront rotated by angle in the clockwise direction.
-        """
-        # Get Field
-        if real_imaginary:
-            field = np.array([self.real, self.imaginary])
-        else:
-            field = np.array([self.amplitude, self.phase])
-
-        # Rotate
-        amplitude, phase = rotate_field(field, angle, fourier=fourier,
-            real_imaginary=real_imaginary, order=order)
-        return self.set(['amplitude', 'phase'], [amplitude, phase])
-
-
-    def pad_to(self : Wavefront, npixels_out : int) -> Wavefront:
-        """
-        Paraxially zero-pads the `Wavefront` to the size determined by
-        npixels_out. Note this only supports padding arrays of even dimension
-        to even dimension, and odd dimension to to odd dimension, ie 2 -> 4 or
-        3 -> 5.
-
-        Parameters
-        ----------
-        npixels_out : int
-            The size of the array to pad to the wavefront to.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` zero-padded to the size npixels_out.
-        """
-        npixels_in  = self.npixels
-        assert npixels_in  % 2 == npixels_out % 2, \
-        ("Only supports even -> even or odd -> odd padding")
-        assert npixels_out > npixels_in, ("npixels_out must be larger than the"
-        " current array size: {}".format(npixels_in))
-
-        new_centre = npixels_out // 2
-        centre = npixels_in  // 2
-        remainder = npixels_in  % 2
-        padded = np.zeros([npixels_out, npixels_out])
-
-        amplitude = padded.at[
-                new_centre - centre : centre + new_centre + remainder,
-                new_centre - centre : centre + new_centre + remainder
-            ].set(self.amplitude)
-        phase = padded.at[
-                new_centre - centre : centre + new_centre + remainder,
-                new_centre - centre : centre + new_centre + remainder
-            ].set(self.phase)
-        return self.set(['amplitude', 'phase'], [amplitude, phase])
-
-
-    def crop_to(self : Wavefront, npixels_out : int) -> Wavefront:
-        """
-        Paraxially crops the `Wavefront` to the size determined by npixels_out.
-        Note this only supports padding arrays of even dimension to even
-        dimension, and odd dimension to to odd dimension, ie 4 -> 2 or 5 -> 3.
-
-        Parameters
-        ----------
-        npixels_out : int
-            The size of the array to crop to the wavefront to.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` cropped to the size npixels_out.
-        """
-        npixels_in  = self.npixels
-
-        assert npixels_in%2 == npixels_out%2, \
-        ("Only supports even -> even or odd -> odd cropping")
-        assert npixels_out < npixels_in, ("npixels_out must be smaller than the"
-        " current array size: {}".format(npixels_in))
-
-        new_centre = npixels_in  // 2
-        centre = npixels_out // 2
-
-        amplitude = self.amplitude[
-            new_centre - centre : new_centre + centre,
-            new_centre - centre : new_centre + centre]
-        phase = self.phase[
-            new_centre - centre : new_centre + centre,
-            new_centre - centre : new_centre + centre]
-
-        return self.set(['amplitude', 'phase'], [amplitude, phase])
-
-
-
 class FresnelWavefront(Wavefront):
     """
     A class to represent a wavefront that can be propagated to a Far Field
@@ -1259,8 +1234,8 @@ class FresnelWavefront(Wavefront):
         scale_in = 1.0 / self.npixels
         scale_out = self._nfringes(npixels, pixel_scale, focal_shift, 
             focal_length) / npixels
-        in_vec = get_pixel_positions(self.npixels, scale_in, shift * scale_in)
-        out_vec = get_pixel_positions(npixels, scale_out, shift * scale_out)
+        in_vec = pixel_coordinates(self.npixels, scale_in, shift * scale_in)
+        out_vec = pixel_coordinates(npixels, scale_out, shift * scale_out)
 
         if self.plane == 'Pupil':
             return np.exp(2j * np.pi * np.outer(in_vec, out_vec))
@@ -1349,8 +1324,7 @@ class FresnelWavefront(Wavefront):
         # Coordinates
         prop_dist = focal_length + focal_shift
         input_positions = self.coordinates
-        output_positions = get_pixel_positions(
-            (npixels, npixels), (pixel_scale, pixel_scale))
+        output_positions = pixel_coords(npixels, pixel_scale)
 
         # Calculate phase values
         first_factor = self.quadratic_phase(*input_positions, -focal_length)

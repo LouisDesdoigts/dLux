@@ -52,27 +52,61 @@ def polar_to_cart(coordinates : Array) -> Array:
 
 
 ### Positions Calculations ###
-def pixel_coords(npixels, pixel_scale, ndims=2, polar=False):
-    pass
-    # TODO: Write this simpler interface
+def pixel_coords(
+    npixels : int, 
+    pixel_scale : float, 
+    ndims : int = 2, 
+    polar = False
+    ) -> Array:
+    """
+    Calculates the coordinates of the pixel centers for the given input,
+    assuming an equal size and pixel scale in all dimensions. All 
+    coordinates are output in units of meters. This function is essentially a
+    reduced version of the full `pixel_coordinates` function that gives
+    flexibility to have different dimension sizes and scales.
 
-def pixel_coordinates(npixels      : Union[int, tuple], 
-                 pixel_scales : Union[tuple, float, None] = None,
-                 offsets      : Union[tuple, float, None] = None,
-                 polar        : bool = False,
-                 indexing     : str = 'xy') -> Array:
+    Parameters
+    ----------
+    npixels : int
+        The number of pixels in all dimensions.
+    pixel_scale : float
+        The pixel scale in all dimensions.
+    ndims : int = 2
+        The number of outut dimensions.
+    polar : bool = False
+        If True, the output is in polar coordinates. If False, the output is in
+        cartesian coordinates. ndims must be 2 if polar is True.
+    
+    Returns
+    -------
+    coordaintes : Array
+        The array of pixel center coordinates.
+    """
+    npixels = (npixels,) * ndims
+    pixel_scale = (pixel_scale,) * ndims
+    
+    return pixel_coordinates(npixels, pixel_scale, polar=polar)
+
+
+def pixel_coordinates(
+    npixels      : Union[int, tuple], 
+    pixel_scales : Union[tuple, float, None] = None,
+    offsets      : Union[tuple, float, None] = None,
+    polar        : bool = False,
+    indexing     : str = 'xy'
+    ) -> Array:
     """
     Calculates the coordinates of the pixel centers for the given input. All 
     coordinates are output in units of meters. 
     
-    The indexing argument is the same
-    as in numpy.meshgrid., ie:  Giving the string ‘ij’ returns a meshgrid with 
-    matrix indexing, while ‘xy’ returns a meshgrid with Cartesian indexing. In 
-    the 2-D case with inputs of length M and N, the outputs are of shape (N, M) 
-    for ‘xy’ indexing and (M, N) for ‘ij’ indexing. In the 3-D case with inputs 
-    of length M, N and P, outputs are of shape (N, M, P) for ‘xy’ indexing and 
-    (M, N, P) for ‘ij’ indexing. If the output is in polar coordainates, 
-    indexing is set to 'xy' and the input must be 2d
+    The indexing argument is the same as in numpy.meshgrid., ie: Giving the
+    string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a
+    meshgrid with Cartesian indexing. In the 2-D case with inputs of length M
+    and N, the outputs are of shape (N, M) for ‘xy’ indexing and (M, N) for
+    ‘ij’ indexing. In the 3-D case with inputs of length M, N and P, outputs
+    are of shape (N, M, P) for ‘xy’ indexing and (M, N, P) for ‘ij’ indexing.
+    If the output is in polar coordainates, indexing is set to 'xy' and the
+    input must be 2d.
     
     Parameters
     ----------

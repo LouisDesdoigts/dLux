@@ -5,7 +5,7 @@ from jax import lax, Array
 import jax.tree_util as jtu
 import dLux
 from dLux.utils.math import factorial, triangular_number
-from dLux.utils.coordinates import cartesian_to_polar, get_pixel_positions
+from dLux.utils.coordinates import cart_to_polar, pixel_coords
 
 
 __all__ = ['Zernike', 'ZernikeBasis', 'AberrationFactory']
@@ -216,7 +216,7 @@ class Zernike(Base):
         zernike : Array
             The Zernike polynomial.
         """
-        polar_coordinates = cartesian_to_polar(coordinates)
+        polar_coordinates = cart_to_polar(coordinates)
         rho = polar_coordinates[0]
         theta = polar_coordinates[1]
         aperture = rho <= 1.
@@ -247,7 +247,7 @@ class Zernike(Base):
         """
         if nsides < 3:
             raise ValueError(f'nsides must be >= 3, not {nsides}.')
-        theta = cartesian_to_polar(coordinates)[1]
+        theta = cart_to_polar(coordinates)[1]
         alpha = np.pi / nsides
         phi = theta + alpha  
         wedge = np.floor((phi + alpha) / (2. * alpha))
@@ -399,7 +399,7 @@ class AberrationFactory():
     """
     def __new__(cls              : AberrationFactory, 
                 npixels          : int, 
-                radial_order     : Array,
+                radial_orders    : Array,
                 coefficients     : Array = None, 
                 aperutre_ratio   : float = 1.0,
                 nsides           : int   = 0,
@@ -455,7 +455,7 @@ class AberrationFactory():
             raise ValueError("nsides must be either 0 or >=3")
 
         # Construct coordinates
-        coords = get_pixel_positions((npixels, npixels), (1/npixels, 1/npixels))
+        coords = pixel_coords(npixels, 1/npixels)
 
         # Circular Primary
         if nsides == 0:
@@ -472,7 +472,7 @@ class AberrationFactory():
 
 
         # Noll_indexes overwrite radial_orders
-        if noll_indexes is not None:
+        if radial_orders is not None:
             radial_orders = np.array(radial_orders)
 
             if (radial_orders < 0).any():
@@ -480,14 +480,14 @@ class AberrationFactory():
 
             noll_indexes = []
             for order in radial_orders:
-                start = triangular_number(order-1)
-                stop = triangular_number(order)
-                noll_indexes.append(np.arange(start, stop))
-            noll_indexes = np.concatenate(noll_indexes)        
+                start = triangular_number(order)
+                stop = triangular_number(order + 1)
+                noll_indexes.append(np.arange(start, stop) + 1)
+            noll_indexes = np.concatenate(noll_indexes)   
 
         # Construct Aberrations
         basis = ZernikeBasis(noll_indexes).calculate_basis(coordinates)
-        return dLux.optics.ApplyBasisOPD(basis, coefficients, name=name)
+        return dLux.optical_layers.ApplyBasisOPD(basis, coefficients, name=name)
 
 
     def __init__(self           : AberrationFactory, 

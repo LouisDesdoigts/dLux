@@ -3,9 +3,7 @@ import jax.numpy as np
 from jax import Array
 from equinox import tree_at
 from abc import ABC, abstractmethod
-from dLux.utils.coordinates import get_pixel_positions
-from dLux.utils.helpers import two_image_plot
-from dLux.utils.units import convert_angular, convert_cartesian
+# from dLux.utils.coordinates import get_pixel_positions
 import dLux
 
 
@@ -18,7 +16,8 @@ __all__ = ["CartesianMFT", "AngularMFT", "ShiftedCartesianMFT",
 ########################
 ### Abstract Classes ###
 ########################
-class Propagator(dLux.optics.OpticalLayer, ABC):
+# class Propagator(dLux.optics.OpticalLayer, ABC):
+class Propagator(dLux.optical_layers.OpticalLayer):
     """
     An abstract class to store the various properties of the propagation of
     some wavefront.
@@ -48,7 +47,7 @@ class Propagator(dLux.optics.OpticalLayer, ABC):
         super().__init__(**kwargs)
 
 
-class VariableSamplingPropagator(Propagator, ABC):
+class VariableSamplingPropagator(Propagator):
     """
     A propagator that implements the Soummer et. al. 2007 MFT algorithm
     allowing variable sampling in the outuput plane rather than the fixed
@@ -96,7 +95,7 @@ class VariableSamplingPropagator(Propagator, ABC):
 
 
 
-class ShiftedPropagator(VariableSamplingPropagator, ABC):
+class ShiftedPropagator(VariableSamplingPropagator):
     """
     A propagator that implements the Soummer et. al. 2007 MFT algorithm
     allowing variable sampling in the outuput plane rather than the fixed
@@ -162,7 +161,7 @@ class ShiftedPropagator(VariableSamplingPropagator, ABC):
                          **kwargs)
 
 
-class FixedSamplingPropagator(Propagator, ABC):
+class FixedSamplingPropagator(Propagator):
     """
     A propagator that implements the Fast Fourier Transform algorithm. This
     algorith has a fixed sampling in the output plane, at one fringe per pixel.
@@ -197,7 +196,7 @@ class FixedSamplingPropagator(Propagator, ABC):
         self.pad = int(pad)
 
 
-class CartesianPropagator(Propagator, ABC):
+class CartesianPropagator(Propagator):
     """
     A propagator class to store the focal_length parameter for cartesian
     propagations defined by a physical propagation distance defined as
@@ -234,7 +233,7 @@ class CartesianPropagator(Propagator, ABC):
         assert self.focal_length.ndim == 0, ("focal_length must a scalar.")
 
 
-class AngularPropagator(Propagator, ABC):
+class AngularPropagator(Propagator):
     """
     A simple propagator class designed to be inhereited by propagators that
     operate on wavefronts defined in angular units in focal planes.
@@ -262,7 +261,7 @@ class AngularPropagator(Propagator, ABC):
         super().__init__(inverse=inverse, **kwargs)
 
 
-class FarFieldFresnel(ShiftedPropagator, ABC):
+class FarFieldFresnel(ShiftedPropagator):
     """
     A propagator class to store the focal_shift parameter required for
     Far-Field fresnel propagations. These classes implement algorithms that use

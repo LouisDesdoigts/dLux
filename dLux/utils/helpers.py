@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 from jax import Array
 
 
-__all__ = ["list_to_dictionary", "single_image_plot", "two_image_plot",
-           "spectrum_plot"]
+__all__ = ["list_to_dictionary"]
 
 
 def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
@@ -16,8 +15,7 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
     Parameters
     ----------
     list_in : list
-        The list of dLux OpticalLayers or DetectorLayers to be converted into
-        a dictionary.
+        The list of dLux Layersto be converted into a dictionary.
     ordered : bool = True
         Whether to return an ordered or regular dictionary.
 
