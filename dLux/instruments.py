@@ -88,13 +88,13 @@ class Instrument(Base):
         
         # Sources
         # TODO: Update for names tuples
-        if isinstance(sources, Source()):
+        if isinstance(sources, (Source(), tuple)):
             sources = [sources]
-        elif isinstance(sources, list):
-            for source in sources:
-                if not isinstance(source, Source()):
-                    raise ValueError(
-                        "sources must be a list of Source objects.")
+        for source in sources:
+            if isinstance(source, tuple):
+                source = source[0]
+            if not isinstance(source, Source()):
+                raise ValueError("sources must be a list of Source objects.")
         self.sources = dLux.utils.list_to_dictionary(sources, ordered=False)
 
         # Detector

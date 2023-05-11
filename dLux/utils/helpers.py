@@ -26,12 +26,11 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
     """
     # Construct names list and identify repeats
     names, repeats = [], []
-    for i in range(len(list_in)):
-        item = list_in[i]
+    for item in list_in:
 
+        # Check for specified names
         if isinstance(item, tuple):
-            item = item[0]
-            name = item[1]
+            item, name = item
         else:
             name = item.__class__.__name__
 
