@@ -2791,8 +2791,8 @@ class AbstractStaticAperture(TransmissiveOptic(), ApertureLayer):
         else:
             normalise = aperture.normalise
         transmission = aperture._transmission(coordinates)
-        super().__init__(name = name, normalise = normalise, 
-            transmission=transmission, **kwargs)
+        super().__init__(normalise = normalise, transmission=transmission, 
+            **kwargs)
 
 
     @property

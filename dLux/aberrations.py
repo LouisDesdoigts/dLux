@@ -119,7 +119,7 @@ class Zernike(Base):
         if int(j) < 1:
             raise ValueError('The Zernike index must be greater than 0.')
         self.j = int(j)
-        self.n, self.m = self._noll_indexes(self.j)
+        self.n, self.m = self._noll_indices(self.j)
         self.name = zernike_names[int(self.j)] if self.j >= 1 and self.j <= 36 \
                     else f'Zernike {int(self.j)}'
 
@@ -133,7 +133,7 @@ class Zernike(Base):
         self._c = sign * _fact_1 / _fact_2 / _fact_3 / _fact_4 
 
 
-    def _noll_indexes(self : Zernike, j : int) -> tuple[int]:
+    def _noll_indices(self : Zernike, j : int) -> tuple[int]:
         """
         Calculate the radial and azimuthal orders of the Zernike polynomial.
 
@@ -303,10 +303,10 @@ class ZernikeBasis(Base):
 
     Attributes
     ----------
-    noll_indexes : list[Zernike]
+    noll_indices : list[Zernike]
         The list of Zernike polynomial classes to calculate.
     """
-    noll_indexes : list[Zernike]
+    noll_indices : list[Zernike]
 
 
     def __init__(self : ZernikeBasis, js : list[int]):
@@ -318,7 +318,7 @@ class ZernikeBasis(Base):
         js : list[int]
             The list of Zernike (noll) indices to calculate.
         """
-        self.noll_indexes = [Zernike(j) for j in js]
+        self.noll_indices = [Zernike(j) for j in js]
     
 
     def calculate_basis(self        : ZernikeBasis, 
@@ -342,7 +342,7 @@ class ZernikeBasis(Base):
         """
         leaf_fn = lambda leaf: isinstance(leaf, Zernike)
         calculate_fn = lambda z: z.calculate(coordinates, nsides)
-        return np.array(jtu.tree_map(calculate_fn, self.noll_indexes, 
+        return np.array(jtu.tree_map(calculate_fn, self.noll_indices, 
                                      is_leaf=leaf_fn))
 
 
@@ -366,11 +366,11 @@ class AberrationFactory():
     import jax.random as jr
     
     # Construct Zernikes
-    noll_indexes = np.arange(4, 11)
-    coefficients = jr.normal(jr.PRNGKey(0), (noll_indexes.shape[0],))
+    noll_indices = np.arange(4, 11)
+    coefficients = jr.normal(jr.PRNGKey(0), (noll_indices.shape[0],))
 
     # Construct aberrations
-    aberrations = AberrationFactory(512, noll_indexes, coefficients)
+    aberrations = AberrationFactory(512, noll_indices, coefficients)
     ```
     
     The resulting aperture class has two parameters, `.basis` and 
@@ -380,7 +380,7 @@ class AberrationFactory():
 
     ```python
     # Construct aberrations
-    hexagonal_aberrations = AberrationFactory(512, nsides=6, noll_indexes, 
+    hexagonal_aberrations = AberrationFactory(512, nsides=6, noll_indices, 
         coefficients)
     ```
 
@@ -399,12 +399,12 @@ class AberrationFactory():
     """
     def __new__(cls              : AberrationFactory, 
                 npixels          : int, 
-                radial_orders    : Array,
+                radial_orders    : Array = None,
                 coefficients     : Array = None, 
                 aperutre_ratio   : float = 1.0,
                 nsides           : int   = 0,
                 rotation         : float = 0.,
-                noll_indexes     : Array = None):
+                noll_indices     : Array = None):
         """
         Constructs a basic single static aberration class.
 
@@ -414,13 +414,13 @@ class AberrationFactory():
         ----------
         npixels : int
             Number of pixels used to represent the aperture.
-        radial_orders : Array
+        radial_orders : Array = None
             The radial orders of the zernike polynomials to be used for the
             aberrations. Input of [0, 1] would give [Piston, Tilt X, Tilt Y],
             [1, 2] would be [Tilt X, Tilt Y, Defocus, Astig X, Astig Y], etc.
             The order must be increasing but does not have to be consecutive.
             If you want to specify specific zernikes across radial orders the
-            noll_indexes argument should be used instead.
+            noll_indices argument should be used instead.
         coefficients : Array = None
             The zernike cofficients to be applied to the aberrations. Defaults 
             to an array of zeros.
@@ -434,7 +434,7 @@ class AberrationFactory():
             aperture. All other other values of three and above are supported.
         rotation : float, radians = 0
             The global rotation of the aperture in radians.
-        noll_indexes : Array = None
+        noll_indices : Array = None
             The zernike noll indices to be used for the aberrations. [1, 2, 3]
             would give [Piston, Tilt X, Tilt Y], [2, 3, 4] would be [Tilt X,
             Tilt Y, Defocus. 
@@ -472,26 +472,26 @@ class AberrationFactory():
             if (radial_orders < 0).any():
                 raise ValueError('Radial orders must be >= 0')
 
-            noll_indexes = []
+            noll_indices = []
             for order in radial_orders:
                 start = triangular_number(order)
                 stop = triangular_number(order + 1)
-                noll_indexes.append(np.arange(start, stop) + 1)
-            noll_indexes = np.concatenate(noll_indexes)   
+                noll_indices.append(np.arange(start, stop) + 1)
+            noll_indices = np.concatenate(noll_indices)   
 
         # Construct Aberrations
-        basis = ZernikeBasis(noll_indexes).calculate_basis(coordinates)
+        basis = ZernikeBasis(noll_indices).calculate_basis(coordinates)
         return dLux.optical_layers.ApplyBasisOPD(basis, coefficients)
 
 
     def __init__(self           : AberrationFactory, 
-                 npixels        : int, 
-                 radial_orders  : int,
-                 noll_indexes   : Array, 
-                 coefficients   : Array = None, 
-                 aperutre_ratio : float = 1.0,
-                 nsides         : int   = 0,
-                 rotation       : float = 0.):
+                 npixels          : int, 
+                 radial_orders    : Array = None,
+                 coefficients     : Array = None, 
+                 aperutre_ratio   : float = 1.0,
+                 nsides           : int   = 0,
+                 rotation         : float = 0.,
+                 noll_indices     : Array = None):
         """
         Constructs a basic single static aberration class.
 
@@ -501,13 +501,13 @@ class AberrationFactory():
         ----------
         npixels : int
             Number of pixels used to represent the aperture.
-        radial_orders : Array
+        radial_orders : Array = None
             The radial orders of the zernike polynomials to be used for the
             aberrations. Input of [0, 1] would give [Piston, Tilt X, Tilt Y],
             [1, 2] would be [Tilt X, Tilt Y, Defocus, Astig X, Astig Y], etc.
             The order must be increasing but does not have to be consecutive.
             If you want to specify specific zernikes across radial orders the
-            noll_indexes argument should be used instead.
+            noll_indices argument should be used instead.
         coefficients : Array = None
             The zernike cofficients to be applied to the aberrations. Defaults 
             to an array of zeros.
@@ -521,7 +521,7 @@ class AberrationFactory():
             aperture. All other other values of three and above are supported.
         rotation : float, radians = 0
             The global rotation of the aperture in radians.
-        noll_indexes : Array = None
+        noll_indices : Array = None
             The zernike noll indices to be used for the aberrations. [1, 2, 3]
             would give [Piston, Tilt X, Tilt Y], [2, 3, 4] would be [Tilt X,
             Tilt Y, Defocus. 

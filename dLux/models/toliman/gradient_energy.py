@@ -1,6 +1,7 @@
 import jax.numpy as np
-import dLux
 from jax import Array
+import dLux
+import dLux.utils as dlu
 
 __all__ = ["get_GE", "get_RGE", "get_RWGE", "get_radial_mask"]
 
@@ -40,8 +41,7 @@ def get_RGE(array : Array, epsilon : float = 1e-8) -> Array:
     array : Array
         The array of radial gradient energies.
     """
-    npix = array.shape[0]
-    positions = dLux.utils.coordinates.get_pixel_positions((npix, npix))
+    positions = dlu.pixel_coords(array.shape[0])
     grads_vec = np.gradient(array)
 
     xnorm = positions[1]*grads_vec[0]
@@ -67,9 +67,8 @@ def get_RWGE(array : Array, epsilon : float = 1e-8) -> Array:
         The array of radial radially weighted energies.
     """
     npix = array.shape[0]
-    positions = dLux.utils.coordinates.get_pixel_positions((npix, npix))
-    radii = dLux.utils.coordinates.get_pixel_positions((npix, npix), 
-                                                        polar=True)[0]
+    positions = dlu.pixel_coords(npix)
+    radii = dlu.pixel_coords(npix, polar=True)[0]
     radii_norm = positions/(radii + epsilon)
     grads_vec = np.gradient(array)
 
@@ -99,6 +98,5 @@ def get_radial_mask(npixels : int,
     mask: Array
         A mask with the the values below rmin and above rmax masked out.
     """
-    radii = dLux.utils.coordinates.get_pixel_positions((npixels, npixels), 
-                                                        polar=True)[0]
+    radii = dlu.pixel_coords(npixels, polar=True)[0]
     return np.asarray((radii < rmax) & (radii > rmin), dtype=float)

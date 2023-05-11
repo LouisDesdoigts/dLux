@@ -125,11 +125,11 @@ class BaseOptics(Base):
         -------
         wavelengths : Array
             The wavelengths of the wavefronts to propagate through the optics.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source.
         weights : Array
             The weights of each wavelength. If None, all wavelengths are
             weighted equally.
-        offset : Array, radians, = np.zeros(2)
-            The (x, y) offset from the optical axis of the source.
         """
         # Check wavelengths
         if isinstance(wavelengths, float) or \
@@ -182,8 +182,8 @@ class BaseOptics(Base):
             The chromatic point spread function after being propagated
             though the optical layers.
         """
-        wavelengths, weights, offset = self._format_input(wavelengths, weights, 
-            offset)
+        wavelengths, weights, offset = self._format_input(wavelengths, offset, 
+            weights)
 
         # Construct Propagate
         propagator = vmap(self.propagate_mono, in_axes=(0, None))
@@ -230,10 +230,10 @@ class BaseOptics(Base):
                         f"or tuple object of sources. Got type: {type(sources)})")
 
         # Call the source.model() method to generate the psfs
-        model_fn = lambda source: source.model(optics)
+        model_fn = lambda source: source.model(self)
         _is_source = lambda leaf: isinstance(leaf, Source())
         psfs = tree_map(model_fn, sources, is_leaf=_is_source)
-        return psfs if return_tree else tree_flatten(psfs)[0].sum(0)
+        return psfs if return_tree else np.array(tree_flatten(psfs)[0]).sum(0)
 
 
 class SimpleOptics(BaseOptics):
@@ -367,7 +367,7 @@ class SimpleOptics(BaseOptics):
         
         # Construct and tilt
         wf = wf_constructor(self.aperture.shape[-1], self.diameter, wavelength)
-        return wf.tilt_wavefront(offset)
+        return wf.tilt(offset)
 
 
     def _apply_aperture(self, wavelength, offset):
@@ -431,7 +431,7 @@ class NonPropagatorOptics(SimpleOptics):
         """
         # Construct and tilt
         wf = dLux.Wavefront(self.aperture.shape[-1], self.diameter, wavelength)
-        return wf.tilt_wavefront(offset)
+        return wf.tilt(offset)
 
 class AngularOptics(NonPropagatorOptics):
     """
@@ -672,6 +672,9 @@ class LayeredOptics(BaseOptics):
         """
         if key in self.layers.keys():
             return self.layers[key]
+        for attribute in self.layers.values():
+            if hasattr(attribute, key):
+                return getattr(attribute, key)
         raise AttributeError(f"{self.__class__.__name__} has no attribute "
         f"{key}.")
 
@@ -700,8 +703,8 @@ class LayeredOptics(BaseOptics):
         wavefront : Wavefront
             The wavefront object to propagate through the optics.
         """
-        wf = dLux.Wavefront(self.wf_npixles, self.diameter, wavelength)
-        return wf.tilt_wavefront(offset)
+        wf = dLux.Wavefront(self.wf_npixels, self.diameter, wavelength)
+        return wf.tilt(offset)
 
 
     def propagate_mono(

@@ -3,7 +3,8 @@ import jax.numpy as np
 from jax import vmap, Array
 from zodiax import Base
 # from dLux.utils.coordinates import get_pixel_positions
-from dLux.utils.interpolation import interpolate_field, rotate_field
+# from dLux.utils.interpolation import interpolate_field, rotate_field
+import dLux.utils as dlu
 import dLux
 
 

@@ -86,7 +86,7 @@ class VariableSamplingPropagator(Propagator):
         super().__init__(inverse=inverse, **kwargs)
         self.pixel_scale = np.asarray(pixel_scale, dtype=float)
         self.npixels     = int(npixels)
-        if self.pixel_scale.nidm != 0:
+        if self.pixel_scale.ndim != 0:
             raise TypeError('pixel_scale must be a scalar.')
 
 

@@ -17,9 +17,9 @@ __all__ = ["BaseInstrument", "Instrument"]
 
 
 # Alias classes for simplified type-checking
-BaseOptics  = lambda : dLux.optics.BaseOptics
+Optics      = lambda : dLux.optics.BaseOptics
 Detector    = lambda : dLux.detectors.BaseDetector
-Source      = lambda : dLux.source.BaseSource
+Source      = lambda : dLux.sources.BaseSource
 Observation = lambda : dLux.observations.BaseObservation
 
 
@@ -31,7 +31,7 @@ class BaseInstrument(Base):
         pass
 
 
-class BaseInstrument(Base):
+class Instrument(Base):
     """
     A high level class desgined to model the behaviour of a telescope. It
     stores a series different ∂Lux objects, and primarily passes the relevant
@@ -61,8 +61,8 @@ class BaseInstrument(Base):
     
     def __init__(self        : Instrument,
                  optics      : Optics(),
-                 sources     : Union[list, Source],
-                 detector    : Detector()    = None,
+                 sources     : Union[list, Source()],
+                 detector    : Detector()  = None,
                  observation : Observation = None,
                  ) -> Instrument:
         """
@@ -87,6 +87,7 @@ class BaseInstrument(Base):
         self.optics = optics
         
         # Sources
+        # TODO: Update for names tuples
         if isinstance(sources, Source()):
             sources = [sources]
         elif isinstance(sources, list):
@@ -141,14 +142,19 @@ class BaseInstrument(Base):
         item : object
             The item corresponding to the supplied key in the sub-dictionaries.
         """
-        for attribute in self.__dict__.value():
+        for attribute in self.__dict__.values():
             if hasattr(attribute, key):
                 return getattr(attribute, key)
+        if key in self.sources.keys():
+            return self.sources[key]
+        for source in self.sources.values():
+            if hasattr(source, key):
+                return getattr(source, key)
         raise AttributeError(f"{self.__class__.__name__} has no attribute "
         f"{key}.")
 
 
-    def normalise(self : Source) -> Source:
+    def normalise(self : Source()) -> Source():
         """
         Method for returning a new normalised source object.
 
@@ -178,5 +184,5 @@ class BaseInstrument(Base):
             each source.
         """
         psf = self.optics.model(self.sources)
-        image = self.detector.model(image) if detector is not None else psf
-        return images if return_tree else tree_flatten(images)[0].sum(0)
+        image = self.detector.model(psf) if self.detector is not None else psf
+        return np.array(tree_flatten(image)[0]).sum(0)

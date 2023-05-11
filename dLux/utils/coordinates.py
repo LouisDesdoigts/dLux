@@ -54,7 +54,7 @@ def polar_to_cart(coordinates : Array) -> Array:
 ### Positions Calculations ###
 def pixel_coords(
     npixels : int, 
-    pixel_scale : float, 
+    pixel_scale : float = 1, 
     ndims : int = 2, 
     polar = False
     ) -> Array:
@@ -69,7 +69,7 @@ def pixel_coords(
     ----------
     npixels : int
         The number of pixels in all dimensions.
-    pixel_scale : float
+    pixel_scale : float = 1
         The pixel scale in all dimensions.
     ndims : int = 2
         The number of outut dimensions.
@@ -84,7 +84,6 @@ def pixel_coords(
     """
     npixels = (npixels,) * ndims
     pixel_scale = (pixel_scale,) * ndims
-    
     return pixel_coordinates(npixels, pixel_scale, polar=polar)
 
 

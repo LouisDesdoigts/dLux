@@ -9,9 +9,8 @@ from inspect import signature
 import dLux
 
 
-__all__ = ["TiltWavefront", "NormaliseWavefront", 
-           "ApplyBasisOPD", "AddPhase", "AddOPD", "TransmissiveOptic", 
-           "Rotate"]
+__all__ = ["Tilt", "NormaliseWavefront", "AddPhase", "AddOPD", 
+    "TransmissiveOptic", "Rotate", "ApplyBasisOPD"]
 
 
 class OpticalLayer(Base):

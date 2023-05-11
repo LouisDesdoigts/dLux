@@ -31,8 +31,8 @@ class BaseObservation(Base):
 
 
     @abstractmethod
-    def observe(self       : BaseObservation, 
-                instrument : Instrument()) -> Any: # pragma: no cover
+    def model(self       : BaseObservation, 
+              instrument : Instrument()) -> Any: # pragma: no cover
         """
         Abstract method for the observation function.
         """
@@ -99,10 +99,9 @@ class Dither(BaseObservation):
             dithered_sources)
 
 
-    def observe(self       : Dither,
-                instrument : Instrument,
-                *args, 
-                **kwargs) -> Array:
+    def model(self       : Dither,
+              instrument : Instrument,
+              *args, **kwargs) -> Array:
         """
         Applies a series of dithers to the instrument sources and calls the
         .model() method after applying each dither.

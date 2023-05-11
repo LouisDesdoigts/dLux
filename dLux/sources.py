@@ -92,27 +92,27 @@ class Source(BaseSource):
         self.position = np.asarray(position, dtype=float)
         self.flux     = np.asarray(flux,     dtype=float)
 
-        if position.shape != (2,):
+        if self.position.shape != (2,):
             raise ValueError("position must be a 1d array of shape (2,).")
         
-        if flux.shape != ():
+        if self.flux.shape != ():
             raise ValueError("flux must be a scalar, ie shape == ().")
         
-        if not isinstance(spectrum, dLux.spectra.Spectrum):
-            raise ValueError("spectrum must be a dLux Spectrum object.")
-
         # Spectrum
-        if spectrum is None and wavelengths is None:
-            raise ValueError("Either spectrum or wavelengths must be "
-                "specified.")
-        
-        if wavelengths is not None:
-            if spectrum is not None:
+        if spectrum is not None:
+            if wavelengths is not None:
                 raise ValueError("Either spectrum or wavelengths can be "
                     "specified, not both.")
+            if not isinstance(spectrum, dLux.spectra.Spectrum):
+                raise ValueError("spectrum must be a dLux Spectrum object.")
+        else:
+            if wavelengths is None:
+                raise ValueError("Either spectrum or wavelengths must be "
+                    "specified.")
             spectrum = dLux.spectra.ArraySpectrum(wavelengths)
         
         self.spectrum = spectrum
+
 
     def __getattr__(self : Source, key : str) -> Any:
         """
@@ -131,7 +131,8 @@ class Source(BaseSource):
         if hasattr(self.spectrum, key):
             return getattr(self.spectrum, key)
         else:
-            raise AttributeError(f"{self.name} has no attribute {key}.")
+            raise AttributeError(f"{self.__class__.__name__} has no "
+                f"attribute {key}.")
 
 
     def normalise(self : Source) -> Source:
@@ -143,7 +144,8 @@ class Source(BaseSource):
         source : Source
             The normalised source object.
         """
-        return self.set('spectrum', spectrum.normalise())
+        norm_spectrum = self.spectrum.normalise()
+        return self.set('spectrum', norm_spectrum)
 
 
     def model(self : Source, optics : Optics) -> Array:
@@ -164,63 +166,7 @@ class Source(BaseSource):
         """
         self = self.normalise()
         weights = self.weights * self.flux
-        propagator = vmap(optics.propagate_mono, in_axes=(0, None))
-        return propagator(self.wavelengths, self.position, weights)
-
-
-# class ResolvedSource(Source):
-#     """
-#     Base class for resolved source objects. This simply extends the base Source
-#     class by implementing an abstract get_distribution() method and a concrete
-#     model() method.
-
-#     Attributes
-#     ----------
-#     position : Array, radians
-#         The (x, y) on-sky position of this object.
-#     flux : Array, photons
-#         The flux of the object.
-#     spectrum : Spectrum
-#         The spectrum of this object, represented by a Spectrum object.
-#     """
-
-
-#     @abstractmethod
-#     def get_distribution(self): # pragma: no cover
-#         """
-#         Abstract method for returning the distribution of the resolved source.
-
-#         Returns
-#         -------
-#         distribution : Array
-#             The distribution of the resolved source
-#         """
-#         pass
-
-
-#     def model(self : Source, optics : Optics) -> Array:
-#         """
-#         Method to model the psf of the source through the optics. Implements a
-#         basic convolution with the psf and source distribution.
-
-#         Parameters
-#         ----------
-#         optics : Optics
-#             The optics through which to model the source objects.
-
-#         Returns
-#         -------
-#         psf : Array
-#             The psf of the source modelled through the optics
-#         """
-#         # Normalise
-#         self = self.normalise()
-#         weights = self.weights * self.flux[:, None]
-
-#         # Calculate
-#         propagator = vmap(optics.propagate_mono, in_axes=(0, None))
-#         psf = propagator(self.wavelengths, self.position, weights)
-#         return convolve(psf, self.distribution, mode='same')
+        return optics.propagate(self.wavelengths, self.position, weights)
 
 
 class RelativeFluxSource(Source):
@@ -420,15 +366,16 @@ class MultiPointSource(Source):
         wavelengths : Array, meters = None
             The array of wavelengths at which the spectrum is defined.
         """
-        self.position = np.asarray(position, dtype=float)
+        super().__init__(spectrum=spectrum, wavelengths=wavelengths)
 
+        self.position = np.asarray(position, dtype=float)
         if self.position.ndim != 2:
             raise ValueError("position must be a 2d array.")
         
         if flux is None:
             self.flux = np.ones(len(self.position))
         else:
-            flux = np.asarray(flux, dtype=float)
+            self.flux = np.asarray(flux, dtype=float)
 
             if self.flux.ndim != 1:
                 raise ValueError("flux must be a 1d array.")
@@ -437,7 +384,6 @@ class MultiPointSource(Source):
                 raise ValueError("Length of flux must be equal to length of "
                     "position.")
         
-        super().__init__(spectrum=spectrum, wavelengths=wavelengths)
         
 
     def model(self : Source, optics : Optics) -> Array:
@@ -455,12 +401,12 @@ class MultiPointSource(Source):
             The psf of the source source modelled through the optics.
         """
         self = self.normalise()
-        weights = self.weights * self.flux[:, None]
-        propagator = vmap(optics.propagate, in_axes=(0, 0, 0))
-        return propagator(self.wavelengths, self.position, weights)
+        weights = self.weights[None, :] * self.flux[:, None]
+        propagator = vmap(optics.propagate, in_axes=(None, 0, 0))
+        return propagator(self.wavelengths, self.position, weights).sum(0)
 
 
-class ArrayDistribution(ResolvedSource):
+class ArrayDistribution(Source):
     """
     A class for modelling resolved sources that parameterise their resolved
     component using an array of intensities.
@@ -606,7 +552,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         self = self.normalise()
         weights = self.weights * self.fluxes[:, None]
         propagator = vmap(optics.propagate, in_axes=(0, 0, 0))
-        return propagator(self.wavelengths, self.positions, weights)
+        return propagator(self.wavelengths, self.positions, weights).sum(0)
 
 
 class PointExtendedSource(RelativeFluxSource, ArrayDistribution):

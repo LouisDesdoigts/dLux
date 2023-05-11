@@ -29,7 +29,7 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
     for i in range(len(list_in)):
         item = list_in[i]
 
-        if isinstance(itme, tuple):
+        if isinstance(item, tuple):
             item = item[0]
             name = item[1]
         else:
@@ -62,5 +62,9 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
             raise ValueError(f"Names can not contain spaces, got {names[i]}")
         
         # Add to dict
-        dict_out[names[i]] = list_in[i].set('name', names[i])
+        if isinstance(list_in[i], tuple):
+            item = list_in[i][0]
+        else:
+            item = list_in[i]
+        dict_out[names[i]] = item
     return dict_out

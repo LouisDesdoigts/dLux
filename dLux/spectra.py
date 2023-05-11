@@ -6,7 +6,7 @@ from zodiax import Base
 from jax import vmap, Array
 
 
-__all__ = ["ArraySpectrum", "PolynomialSpectrum", "CombinedSpectrum"]
+__all__ = ["ArraySpectrum", "PolynomialSpectrum"]
 
 
 class Spectrum(Base, ABC):
@@ -43,13 +43,13 @@ class Spectrum(Base, ABC):
         return
 
 
-    @abstractmethod
-    def weights(self : Spectrum) -> Array: # pragma: no cover
-        """
-        Abstract getter method for the weights. Must be overwritten by child
-        classes. Should be made into a property
-        """
-        return
+    # @abstractmethod
+    # def weights(self : Spectrum) -> Array: # pragma: no cover
+    #     """
+    #     Abstract getter method for the weights. Must be overwritten by child
+    #     classes. Should be made into a property
+    #     """
+    #     return
 
 
 class ArraySpectrum(Spectrum):
@@ -85,25 +85,16 @@ class ArraySpectrum(Spectrum):
         if weights is None:
             in_shape = self.wavelengths.shape
             weights = np.ones(in_shape)/in_shape[-1]
+        
         weights = np.asarray(weights, dtype=float)
-        self.weights = weights / weights.sum(-1)
+        if weights.ndim == 2:
+            self.weights = weights / weights.sum(-1)[:, None]
+        else:
+            self.weights = weights / weights.sum()
 
         if self.wavelengths.shape != self.weights.shape:
             raise ValueError("wavelengths and weights must have the same "
                 "shape.")
-
-
-    @property
-    def weights(self : Spectrum) -> Array:
-        """
-        Getter method for the weights.
-
-        Returns
-        -------
-        weights : Array
-            The relative weights of each wavelength.
-        """
-        return self.weights
 
 
     def normalise(self : Spectrum) -> Spectrum:
@@ -116,7 +107,11 @@ class ArraySpectrum(Spectrum):
         spectrum : Specturm
             The spectrum object with the normalised spectrum.
         """
-        return self.divide('weights', self.weights.sum(-1))
+        if self.weights.ndim == 0:
+            weight_sum = self.weights.sum(-1)[:, None]
+        else:
+            weight_sum = self.weights.sum()
+        return self.divide('weights', weight_sum)
 
 
 class PolynomialSpectrum(Spectrum):

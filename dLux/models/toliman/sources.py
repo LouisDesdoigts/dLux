@@ -72,13 +72,13 @@ class AlphaCen(Source()):
         """
         # Calculate
         r = self.separation/2
-        phi = dlu.degrees_to_radians(self.position_angle)
+        phi = dlu.deg_to_rad(self.position_angle)
         sep_vec = np.array([r*np.sin(phi), r*np.cos(phi)])
 
         # Add to Position vectors
         pos_vec = np.array([self.x_position, self.y_position])
         output_vec = np.array([pos_vec + sep_vec, pos_vec - sep_vec])
-        return dlu.arcseconds_to_radians(output_vec)
+        return dlu.arcsec_to_rad(output_vec)
 
 
     @property

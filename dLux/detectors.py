@@ -15,14 +15,10 @@ DetectorLayer = lambda : dLux.detector_layers.DetectorLayer
 class BaseDetector(Base):
     
     @abstractmethod
-    def normalise(self): # pragma: no cover
+    def model(self, image): # pragma: no cover
         pass
 
-    @abstractmethod
-    def model(self, optics, detector=None): # pragma: no cover
-        pass
-
-class Detector(Base):
+class Detector(BaseDetector):
     """
     A high level class desgined to model the behaviour of some detectors
     response to some psf.
@@ -90,13 +86,13 @@ class Detector(Base):
                                  .format(type(self), key))
 
 
-    def model(self : Detector, psf: Array) -> Array:
+    def model(self : Detector, image: Array) -> Array:
         """
         Applied the stored detector layers to the input image.
 
         Parameters
         ----------
-        psf : Array
+        image : Array
             The input psf to be transformed.
 
         Returns
@@ -104,7 +100,7 @@ class Detector(Base):
         image : Array
             The ouput 'image' after being transformed by the detector layers.
         """
-        if not isinstance(image, Array) or image.ndim != 2:
+        if image.ndim != 2:
             raise ValueError("image must be a 2d array.")
 
         # Apply detector layers

@@ -2,8 +2,7 @@ from __future__ import annotations
 import jax.numpy as np
 from jax import vmap, Array
 from zodiax import Base
-from dLux.utils.coordinates import pixel_coordinates, pixel_coords
-from dLux.utils.interpolation import interpolate_field, rotate_field
+import dLux.utils as dlu
 import dLux
 
 
@@ -396,7 +395,7 @@ class Wavefront(Base):
         """
         if not isinstance(angles, Array) or angles.shape != (2,):
             raise ValueError("angles must be an array of shape (2,).")
-        opd = - (tilt_angles[:, None, None] * self.coordinates).sum()
+        opd = - (angles[:, None, None] * self.coordinates).sum(0)
         return self.add_opd(opd)
 
 
@@ -440,9 +439,9 @@ class Wavefront(Base):
     
 
     def scale_to(self            : Wavefront,
-                    npixels     : int,
-                    pixel_scale : Array,
-                    complex  : bool = False) -> Wavefront:
+                 npixels     : int,
+                 pixel_scale : Array,
+                 complex  : bool = False) -> Wavefront:
         """
         Performs a paraxial interpolation on the wavefront, determined by the
         the pixel_scale_out and npixels_out parameters. By default the
@@ -874,8 +873,8 @@ class Wavefront(Base):
         """
         scale_in = 1.0 / self.npixels
         scale_out = self._nfringes(npixels, pixel_scale, focal_length) / npixels
-        in_vec = pixel_coordinates(self.npixels, scale_in, shift * scale_in)
-        out_vec = pixel_coordinates(npixels, scale_out, shift * scale_out)
+        in_vec = dlu.pixel_coordinates(self.npixels, scale_in, shift * scale_in)
+        out_vec = dlu.pixel_coordinates(npixels, scale_out, shift * scale_out)
 
         if not inverse:
             return np.exp(2j * np.pi * np.outer(in_vec, out_vec))
