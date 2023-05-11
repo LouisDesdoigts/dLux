@@ -607,42 +607,52 @@ class LayeredOptics(BaseOptics):
         A collections.OrderedDict of 'layers' that define the transformations
         and operations upon some input wavefront through an optical system.
     """
-    layers : OrderedDict
+    wf_npixels : int
+    diameter   : Array
+    layers     : OrderedDict
 
 
-    def __init__(self : Optics, layers : list) -> Optics:
+    def __init__(self       : Optics, 
+                 wf_npixels : int, 
+                 diameter   : float, 
+                 layers     : list) -> Optics:
         """
         Constructor for the Optics class.
 
         Parameters
         ----------
+        wf_npixels : int
+            The number of pixels to use when propagating the wavefront through
+            the optical system.
+        diameter : float
+            The diameter of the wavefront to model through the system in meters.
         layers : list
             A list of ∂Lux 'layers' that define the transformations and
             operations upon some input wavefront through an optical system.
+            The entried can either be dLux OtpicalLayers, or tuples of the
+            form (OpticalLayer, key), with the key being used as the dictionary
+            key for the layer.
         """
-        # Ensure input is a list
+        super().__init__()
         if not isinstance(layers, list):
             raise ValueError("Input layers must be a list, it is"
                 " automatically converted to a dictionary.")
-
-        # Check for CreateWavefront layer
-        if not isinstance(layers[0], CreateWavefront()):
-            raise ValueError("First layer must be a CreateWavefront object.")
         
-        # Ensure all entries are dLux layers & propagator
-        has_propagator = False
+        # Ensure all entries are dLux layers
         for layer in layers:
+            if isinstance(layer, tuple):
+                layer = layer[0]
             if not isinstance(layer, OpticalLayer()):
                 raise ValueError("All entries within layers must be an "
                     "OpticalLayer object.")
-            if isinstance(layer, Propagator()):
-                has_propagator = True
-        
-        if not has_propagator:
-            warn("No propagator found in layers, wavefront will remain in the "
-                "Pupil plane.")
 
         self.layers = dLux.utils.list_to_dictionary(layers)
+        self.diameter = np.asarray(diameter, dtype=float)
+        self.wf_npixels = int(wf_npixels)
+
+        if self.diameter.ndim != 0:
+            raise ValueError("diameter must be a scalar, got shape"
+                f"{diameter.shape}.")
 
 
     def __getattr__(self : Optics, key : str) -> object:
@@ -666,11 +676,39 @@ class LayeredOptics(BaseOptics):
         f"{key}.")
 
 
-    def propagate_mono(self       : Optics,
-                       wavelength : Array,
-                       offset     : Array = np.zeros(2),
-                       return_wf  : bool = False,
-                       return_all : bool = False) -> Array:
+    def _construct_wavefront(self       : BaseOptics,
+                             wavelength : Array,
+                             offset     : Array = np.zeros(2)) -> Array:
+        """
+        Constructs the appropriate tilted wavefront object for the optical
+        system.
+
+        TODO: Possibly seach for propagator type and construct the correct
+        wavefront type. Possibly search and check for propagator consistency.
+        Also do a shape check for layers.
+
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optics.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        
+        Returns
+        -------
+        wavefront : Wavefront
+            The wavefront object to propagate through the optics.
+        """
+        wf = dLux.Wavefront(self.wf_npixles, self.diameter, wavelength)
+        return wf.tilt_wavefront(offset)
+
+
+    def propagate_mono(
+        self       : BaseOptics,
+        wavelength : Array,
+        offset     : Array = np.zeros(2),
+        return_wf  : bool = False) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
 
@@ -682,10 +720,8 @@ class LayeredOptics(BaseOptics):
         offset : Array, radians, = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
-        return_wf : bool = False
-            Whether to return the wavefront object after propagation.
-        return_all : bool = False
-            Whether to return the all intermediate wavefront objects.
+        return_wf : bool, = False
+            If True, the wavefront object after propagation is returned.
 
         Returns
         -------
@@ -695,38 +731,11 @@ class LayeredOptics(BaseOptics):
         wavefront : Wavefront
             The wavefront object after propagation. Only returned if
             return_wf is True.
-        wavefront_list : List[Wavefront]
-            A list of all the wavefront objects after propagation. Only
-            returned if return_all is True.
         """
-        # Ensure jax arrays
-        wavelength = np.asarray(wavelength, dtype=float) \
-            if not isinstance(wavelength, np.ndarray) else wavelength
-        offset = np.asarray(offset, dtype=float) \
-            if not isinstance(offset, np.ndarray) else offset
-
-        # Ensure dimensionality
-        assert wavelength.shape == (), "wavelength must be a scalar."
-        assert offset.shape == (2,), "offset must be shape (2,), ie (x, y)."
-
-        layers = list(self.layers.values())
-        WF = layers[0](wavelength, offset)
-
-        # Construct parameters
-        parameters = {"optics" : self}
-
-        # Propagate though the rest of the layers
-        if not return_all:
-            for layer in layers[1:]:
-                WF, parameters = layer.apply(WF, parameters)
-            if return_wf:
-                return WF
-            else:
-                return WF.psf
+        wavefront = self._construct_wavefront(wavelength, offset)
+        for layer in list(self.layers.values()):
+            wavefront = layer(wavefront)
         
-        else:
-            WF_list = [WF]
-            for layer in layers[1:]:
-                WF, parameters = layer.apply(WF, parameters)
-                WF_list.append(WF)
-            return WF_list
+        if return_wf:
+            return wavefront
+        return wavefront.psf

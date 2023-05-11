@@ -27,14 +27,13 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
     # Construct names list and identify repeats
     names, repeats = [], []
     for i in range(len(list_in)):
+        item = list_in[i]
 
-        # Check for name attribute
-        if hasattr(list_in[i], 'name') and list_in[i].name is not None:
-            name = list_in[i].name
-
-        # Else take name from object
+        if isinstance(itme, tuple):
+            item = item[0]
+            name = item[1]
         else:
-            name = str(list_in[i]).split('(')[0]
+            name = item.__class__.__name__
 
         # Check for Repeats
         if name in names:
@@ -47,8 +46,8 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
     # Iterate over repeat names
     for i in range(len(repeats)):
 
-        idx = 0
         # Iterate over names list and append index value to name
+        idx = 0
         for j in range(len(names)):
             if repeats[i] == names[j]:
                 names[j] = names[j] + '_{}'.format(idx)
@@ -57,10 +56,11 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
     # Turn list into Dictionary
     dict_out = OrderedDict() if ordered else {}
     for i in range(len(names)):
-
-        # Assert no spaces in the name in order to ensure the __getattrr__
-        # method will work
-        assert ' ' not in names[i], \
-        ("names can not contain spaces, {} was supplied.".format(names[i]))
+        
+        # Check for spaces in names
+        if ' ' in names[i]:
+            raise ValueError(f"Names can not contain spaces, got {names[i]}")
+        
+        # Add to dict
         dict_out[names[i]] = list_in[i].set('name', names[i])
     return dict_out

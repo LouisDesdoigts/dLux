@@ -4,7 +4,6 @@ from jax import Array
 from zodiax import Base
 from collections import OrderedDict
 from copy import deepcopy
-# from typing import Union
 from abc import abstractmethod
 import dLux
 
@@ -46,16 +45,24 @@ class Detector(Base):
         layers : list
             An list of dLux detector layer classes that define the instrumental
             effects for some detector.
+
+            A list of ∂Lux 'layers' that define the transformations and
+            operations upon some input wavefront through an optical system.
+            The entried can either be dLux DetectorLayers, or tuples of the
+            form (DetectorLayer, key), with the key being used as the dictionary
+            key for the layer.
         """
         # Ensure input is a list
-        assert isinstance(layers, list), ("Input layers must be a list, it is" \
-        " automatically converted to a dictionary.")
-
+        if not isinstance(layers, list):
+            raise ValueError("Input layers must be a list, it is"
+                " automatically converted to a dictionary.")
         # Ensure all entries are dLux layers
         for layer in layers:
-            assert isinstance(layer, dLux.detectors.DetectorLayer()), \
-            ("All entries within layers must be a "
-             "dLux.detectors.DetectorLayer object.")
+            if isinstance(layer, tuple):
+                layer = layer[0]
+            if not isinstance(layer, DetectorLayer()):
+                raise ValueError("All entries within layers must be an "
+                    "DetectorLayer object.")
 
         # Construct layers
         self.layers = dLux.utils.list_to_dictionary(layers)
@@ -82,43 +89,6 @@ class Detector(Base):
             raise AttributeError("'{}' object has no attribute '{}'"\
                                  .format(type(self), key))
 
-
-    # def apply_detector(self : Instrument, image : Array) -> Array:
-
-
-    # def debug_apply_detector(self  : Instrument, 
-    #                          image : Array) -> Array:
-    #     """
-    #     Applied the stored detector layers to the input image, storing and
-    #     returning the intermediate states of the image and layers.
-
-    #     Parameters
-    #     ----------
-    #     image : Array
-    #         The input 'image' to the detector to be transformed.
-
-    #     Returns
-    #     -------
-    #     image : Array
-    #         The ouput 'image' after being transformed by the detector layers.
-    #     intermediate_images : list
-    #         The intermediate states of the image.
-    #     intermediate_layers : list
-    #         The intermediate states of each layer after being applied to the
-    #         image.
-    #     """
-    #     # Input type checking
-    #     assert isinstance(image, np.ndarray), "Input must be a jax array."
-    #     assert image.ndim == 2, "Input image must a 2d array."
-
-    #     # Apply detector layers
-    #     intermediate_images = []
-    #     intermediate_layers = []
-    #     for key, layer in self.layers.items():
-    #         image = layer(image)
-    #         intermediate_images.append(image.copy())
-    #         intermediate_layers.append(deepcopy(layer))
-    #     return image, intermediate_images, intermediate_layers
 
     def model(self : Detector, psf: Array) -> Array:
         """
