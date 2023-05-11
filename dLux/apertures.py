@@ -23,7 +23,7 @@ __all__ = ["CircularAperture", "SquareAperture", "HexagonalAperture",
            "MultiAperture", "UniformSpider", "ApertureFactory"]
 
 
-class ApertureLayer(TransmissiveLayer(), ABC):
+class ApertureLayer(TransmissiveLayer()):
     """
     The abstract base class that all aperture layers inherit from. This 
     instatiates the Transmissive class, intialising the name and normalisation
@@ -34,14 +34,11 @@ class ApertureLayer(TransmissiveLayer(), ABC):
     ----------
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
 
     
     def __init__(self      : OpticalLayer, 
                  normalise : bool = False,
-                 name      : str  = "ApertureLayer",
                  **kwargs) -> ApertureLayer:
         """
         Constructor for the ApertureLayer class, instatiating the OpticalLayer 
@@ -52,10 +49,8 @@ class ApertureLayer(TransmissiveLayer(), ABC):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name : str = 'ApertureLayer'
-            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(normalise, name, **kwargs)
+        super().__init__(normalise, **kwargs)
 
 
     @abstractmethod
@@ -140,8 +135,6 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         The clockwise rotation of the aperture.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     centre      : Array
     shear       : Array
@@ -154,9 +147,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
                  shear       : Array = np.array([0., 0.]),
                  compression : Array = np.array([1., 1.]),
                  rotation    : Array = np.array(0.),
-                 normalise   : bool  = False,
-                 name        : str   = 'AbstractDynamicAperture'
-                 ) -> ApertureLayer:
+                 normalise   : bool  = False) -> ApertureLayer:
         """
         Constructor for the AbstractDynamicAperture class.
 
@@ -173,10 +164,8 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'AbstractDynamicAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(normalise=normalise, name=name)
+        super().__init__(normalise=normalise)
 
         self.centre = np.asarray(centre).astype(float)
         self.shear = np.asarray(shear).astype(float)
@@ -254,8 +243,6 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         The clockwise rotation of the aperture.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     occulting : bool 
     softening : Array
@@ -268,8 +255,7 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
                  rotation    : Array = np.array(0.),
                  occulting   : bool  = False, 
                  softening   : Array = np.array(1.),
-                 normalise   : bool = False,
-                 name        : str   = 'DynamicAperture') -> ApertureLayer:
+                 normalise   : bool = False) -> ApertureLayer:
         """
         Constructor for the DynamicAperture class.
 
@@ -292,15 +278,12 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'DynamicAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(centre      = centre,
                          shear       = shear,
                          compression = compression,
                          rotation    = rotation,
-                         normalise   = normalise,
-                         name        = name)
+                         normalise   = normalise)
         self.occulting = bool(occulting)
         self.softening = np.asarray(softening).astype(float) 
         dLux.exceptions.validate_eq_attr_dims((), self.softening.shape, 
@@ -458,8 +441,6 @@ class CircularAperture(DynamicAperture):
         aperture. Hard edges can be achieved by setting the softening to 0.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     radius : Array
 
@@ -471,9 +452,7 @@ class CircularAperture(DynamicAperture):
                  compression : Array = np.array([1., 1.]),
                  occulting   : bool = False, 
                  softening   : Array = np.array(1.),
-                 normalise   : bool  = False,
-                 name        : str   = "CircularAperture",
-                 ) -> Array:
+                 normalise   : bool  = False) -> Array:
         """
         Constructor for the CircularAperture class.
 
@@ -496,16 +475,13 @@ class CircularAperture(DynamicAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'CircularAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(centre      = centre, 
                          shear       = shear, 
                          compression = compression, 
                          occulting   = occulting, 
                          softening   = softening,
-                         normalise   = normalise,
-                         name        = name) 
+                         normalise   = normalise) 
 
         self.radius = np.asarray(radius).astype(float)
         dLux.exceptions.validate_eq_attr_dims((), self.radius.shape, "radius")
@@ -585,8 +561,6 @@ class AnnularAperture(DynamicAperture):
         aperture. Hard edges can be achieved by setting the softening to 0.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     rmin : Array
     rmax : Array
@@ -600,8 +574,7 @@ class AnnularAperture(DynamicAperture):
                  compression : Array = np.array([1., 1.]),
                  occulting   : bool  = False, 
                  softening   : Array = np.array(1.),
-                 normalise   : bool  = False,
-                 name        : str   = "AnnularAperture") -> ApertureLayer:
+                 normalise   : bool  = False) -> ApertureLayer:
         """
         Constructor for the AnnularAperture class.
 
@@ -626,16 +599,13 @@ class AnnularAperture(DynamicAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'AnnularAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(centre = centre, 
                          shear = shear, 
                          compression = compression, 
                          occulting = occulting, 
                          softening = softening,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
 
         self.rmax = np.asarray(rmax).astype(float)
         self.rmin = np.asarray(rmin).astype(float)
@@ -721,8 +691,6 @@ class RectangularAperture(DynamicAperture):
         aperture. Hard edges can be achieved by setting the softening to 0.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     height : Array
     width  : Array
@@ -737,8 +705,7 @@ class RectangularAperture(DynamicAperture):
                  rotation    : Array = np.array(0.),
                  occulting   : bool  = False, 
                  softening   : Array = np.array(1.),
-                 normalise   : bool  = False,
-                 name        : str   = "RectangularAperture") -> ApertureLayer: 
+                 normalise   : bool  = False) -> ApertureLayer: 
         """
         Constructor for the RectangularAperture class.
 
@@ -765,8 +732,6 @@ class RectangularAperture(DynamicAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'RectangularAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(centre = centre, 
                          shear = shear,
@@ -774,8 +739,7 @@ class RectangularAperture(DynamicAperture):
                          rotation = rotation, 
                          occulting = occulting, 
                          softening = softening,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
 
         self.height = np.asarray(height).astype(float)
         self.width = np.asarray(width).astype(float)
@@ -860,8 +824,6 @@ class SquareAperture(DynamicAperture):
     normalise : bool = False
         Whether to normalise the wavefront after passing through the
         aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     width : Array
 
@@ -874,8 +836,7 @@ class SquareAperture(DynamicAperture):
                  rotation    : Array = np.array(0.),
                  occulting   : bool  = False, 
                  softening   : Array = np.array(1.),
-                 normalise   : bool  = False,
-                 name        : str   = "SquareAperture") -> ApertureLayer: 
+                 normalise   : bool  = False) -> ApertureLayer: 
         """
         Constructor for the SquareAperture class.
 
@@ -900,8 +861,6 @@ class SquareAperture(DynamicAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'SquareAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(centre = centre, 
                          shear = shear,
@@ -909,8 +868,7 @@ class SquareAperture(DynamicAperture):
                          rotation = rotation, 
                          occulting = occulting, 
                          softening = softening,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
 
         self.width = np.asarray(width).astype(float)
 
@@ -996,8 +954,6 @@ class PolygonalAperture(DynamicAperture, ABC):
         aperture. Hard edges can be achieved by setting the softening to 0.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     
 
@@ -1008,8 +964,7 @@ class PolygonalAperture(DynamicAperture, ABC):
                  rotation    : Array = np.array(0.),
                  occulting   : bool  = False, 
                  softening   : Array = np.array(1.),
-                 normalise   : bool  = False,
-                 name        : str   = 'PolygonalAperture') -> ApertureLayer:
+                 normalise   : bool  = False) -> ApertureLayer:
         """
         Constructor for the PolygonalAperture class.
 
@@ -1032,8 +987,6 @@ class PolygonalAperture(DynamicAperture, ABC):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'PolygonalAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(centre = centre, 
                          shear = shear, 
@@ -1041,8 +994,7 @@ class PolygonalAperture(DynamicAperture, ABC):
                          rotation = rotation,
                          occulting = occulting,
                          softening = softening,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
     
     
     def _perp_dists_from_lines(self : ApertureLayer, 
@@ -1182,8 +1134,6 @@ class IrregularPolygonalAperture(PolygonalAperture):
         aperture. Hard edges can be achieved by setting the softening to 0.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     vertices : Array
     
@@ -1196,9 +1146,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
                  rotation    : Array = np.array(0.),
                  occulting   : bool  = False, 
                  softening   : Array = np.array(1.),
-                 normalise   : bool  = False,
-                 name        : str   = "IrregularPolygonalAperture"
-                 ) -> ApertureLayer:
+                 normalise   : bool  = False) -> ApertureLayer:
         """
         Constructor for the IrregularPolygonalAperture class.
 
@@ -1223,8 +1171,6 @@ class IrregularPolygonalAperture(PolygonalAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'IrregularPolygonalAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(centre = centre, 
                          shear = shear, 
@@ -1232,8 +1178,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
                          rotation = rotation,
                          occulting = occulting,
                          softening = softening,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
         
         self.vertices = np.array(vertices).astype(float)
         dLux.exceptions.validate_bc_attr_dims(
@@ -1393,8 +1338,6 @@ class RegularPolygonalAperture(PolygonalAperture):
         aperture. Hard edges can be achieved by setting the softening to 0.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     nsides : int
     rmax   : Array
@@ -1409,9 +1352,7 @@ class RegularPolygonalAperture(PolygonalAperture):
                  rotation    : Array = np.array(0.),
                  occulting   : bool  = False, 
                  softening   : Array = np.array(1.),
-                 normalise   : bool  = False,
-                 name        : str   = "RegularPolygonalAperture"
-                 ) -> ApertureLayer:
+                 normalise   : bool  = False) -> ApertureLayer:
         """
         Constructor for the RegularPolygonalAperture class.
 
@@ -1438,8 +1379,6 @@ class RegularPolygonalAperture(PolygonalAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'RegularPolygonalAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(centre = centre, 
                          shear = shear, 
@@ -1447,8 +1386,7 @@ class RegularPolygonalAperture(PolygonalAperture):
                          rotation = rotation,
                          occulting = occulting,
                          softening = softening,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
 
         self.nsides = int(nsides)
         self.rmax = np.array(rmax).astype(float)
@@ -1560,8 +1498,6 @@ class HexagonalAperture(RegularPolygonalAperture):
         aperture. Hard edges can be achieved by setting the softening to 0.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     rmax : Array
 
@@ -1574,8 +1510,7 @@ class HexagonalAperture(RegularPolygonalAperture):
                  rotation    : Array = np.array(0.),
                  occulting   : bool  = False, 
                  softening   : Array = np.array(1.),
-                 normalise   : bool  = False,
-                 name        : str   = "HexagonalAperture") -> ApertureLayer:
+                 normalise   : bool  = False) -> ApertureLayer:
         """
         Constructor for the HexagonalAperture class.
 
@@ -1600,8 +1535,6 @@ class HexagonalAperture(RegularPolygonalAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'HexagonalAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(nsides = 6,
                          rmax = rmax,
@@ -1611,8 +1544,7 @@ class HexagonalAperture(RegularPolygonalAperture):
                          rotation = rotation,
                          occulting = occulting,
                          softening = softening,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
 
 
 ###############
@@ -1637,8 +1569,6 @@ class Spider(DynamicAperture, ABC):
         aperture. Hard edges can be achieved by setting the softening to 0.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     
     
@@ -1648,8 +1578,7 @@ class Spider(DynamicAperture, ABC):
                  compression : Array = np.array([1., 1.]),
                  rotation    : Array = np.array(0.), 
                  softening   : Array = np.array(1.),
-                 normalise   : bool  = False,
-                 name        : str   = 'Spider') -> ApertureLayer:
+                 normalise   : bool  = False) -> ApertureLayer:
         """
         Constructor for the Spider class.
 
@@ -1669,8 +1598,6 @@ class Spider(DynamicAperture, ABC):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'Spider'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(centre = centre, 
                          shear = shear, 
@@ -1678,8 +1605,7 @@ class Spider(DynamicAperture, ABC):
                          rotation = rotation,
                          occulting = False,
                          softening = softening,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
  
  
     def _strut(self        : ApertureLayer, 
@@ -1750,8 +1676,6 @@ class UniformSpider(Spider):
         aperture. Hard edges can be achieved by setting the softening to 0.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     nstruts     : int
     strut_width : Array
@@ -1765,8 +1689,7 @@ class UniformSpider(Spider):
                  compression  : Array = np.array([1., 1.]),
                  rotation     : Array = np.array(0.),
                  softening    : Array = np.array(1.),
-                 normalise    : bool  = False,
-                 name         : str   = "UniformSpider") -> ApertureLayer:
+                 normalise    : bool  = False) -> ApertureLayer:
         """
         Constructor for the UniformSpider class.
 
@@ -1791,16 +1714,13 @@ class UniformSpider(Spider):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'UniformSpider'
-            The name of the layer, which is used to index the layers dictionary.
         """ 
         super().__init__(centre = centre, 
                          shear = shear, 
                          compression = compression,
                          rotation = rotation,
                          softening = softening,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
 
         self.nstruts = int(nstruts)
         self.strut_width = np.asarray(strut_width).astype(float)
@@ -1883,14 +1803,12 @@ class AbstractAberratedAperture(AberrationLayer(), ApertureLayer):
     normalise : bool = False
         Whether to normalise the wavefront after passing through the
         aperture.
-    TODO: Name
     """
     coefficients : Array
 
 
     def __init__(self         : AberrationLayer, 
-                 coefficients : Array, 
-                 name         : str = "AbstractAberratedAperture",
+                 coefficients : Array,
                  **kwargs) -> ApertureLayer:
         
         """
@@ -1900,10 +1818,8 @@ class AbstractAberratedAperture(AberrationLayer(), ApertureLayer):
         ----------
         coefficients: Array
             The amplitude of each basis vector of the aberrations.
-        name: str = "AbstractAberratedAperture"
-            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name=name, **kwargs)
+        super().__init__(**kwargs)
 
         self.coefficients = np.asarray(coefficients).astype(float)
         # NOTE: Dimension checking is complex here becuase AberratedApertures
@@ -2011,8 +1927,6 @@ class AberratedAperture(AbstractAberratedAperture):
         The amplitude of each basis vector of the aberrations.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     aperture : ApertureLayer
     basis    : ZernikeBasis
@@ -2022,7 +1936,6 @@ class AberratedAperture(AbstractAberratedAperture):
                  aperture     : ApertureLayer, 
                  noll_inds    : Array,
                  coefficients : Array = None,
-                 name         : str   = "AberratedAperture",
                  **kwargs) -> ApertureLayer: 
         """
         Constructor for the AberratedAperture class.
@@ -2040,8 +1953,6 @@ class AberratedAperture(AbstractAberratedAperture):
         coefficients: Array = None
             The amplitude of each basis vector of the aberrations. If nothing 
             is provided, then the coefficients are set to zero.
-        name: str = 'AberratedAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         # Ensure aperture is dynamic
         if not isinstance(aperture, DynamicAperture):
@@ -2064,7 +1975,7 @@ class AberratedAperture(AbstractAberratedAperture):
         coefficients = np.zeros(len(noll_inds)) if coefficients is None \
             else np.asarray(coefficients).astype(float)
 
-        super().__init__(coefficients=coefficients, name=name, **kwargs)
+        super().__init__(coefficients=coefficients, **kwargs)
         
         # Dimensionality check
         dLux.exceptions.validate_bc_attr_dims(
@@ -2301,8 +2212,6 @@ class CompositeAperture(AbstractDynamicAperture):
         The clockwise rotation of the aperture.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     apertures : dict
 
@@ -2313,8 +2222,7 @@ class CompositeAperture(AbstractDynamicAperture):
                  shear       : Array = np.array([0., 0.]),
                  compression : Array = np.array([1., 1.]),
                  rotation    : Array = np.array(0.),
-                 normalise   : bool  = False,
-                 name        : str   = 'CompositeAperture') -> ApertureLayer:
+                 normalise   : bool  = False) -> ApertureLayer:
         """
         Constructor for the CompositeAperture class.
 
@@ -2333,15 +2241,12 @@ class CompositeAperture(AbstractDynamicAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'CompositeAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(centre = centre,
                          shear = shear, 
                          compression = compression,
                          rotation = rotation,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
         
         for aperture in apertures:
             if not isinstance(aperture, (ApertureLayer, 
@@ -2653,8 +2558,6 @@ class CompoundAperture(CompositeAperture):
         The clockwise rotation of the aperture.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
 
 
@@ -2664,8 +2567,7 @@ class CompoundAperture(CompositeAperture):
                  shear       : Array = np.array([0., 0.]),
                  compression : Array = np.array([1., 1.]),
                  rotation    : Array = np.array(0.),
-                 normalise   : bool  = False,
-                 name        : str   = "CompoundAperture") -> ApertureLayer:
+                 normalise   : bool  = False) -> ApertureLayer:
         """
         Constructor for the CompoundAperture class.
 
@@ -2684,8 +2586,6 @@ class CompoundAperture(CompositeAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'CompoundAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         # Check for more than one aberration
         naberrated = 0
@@ -2704,8 +2604,7 @@ class CompoundAperture(CompositeAperture):
                          shear = shear,
                          compression = compression,
                          rotation = rotation,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
         
 
     def _transmission(self : ApertureLayer, coordinates : Array) -> Array:
@@ -2752,8 +2651,6 @@ class MultiAperture(CompositeAperture):
         The clockwise rotation of the aperture.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
 
     
@@ -2763,8 +2660,7 @@ class MultiAperture(CompositeAperture):
                  shear       : Array = np.array([0., 0.]),
                  compression : Array = np.array([1., 1.]),
                  rotation    : Array = np.array(0.),
-                 normalise   : bool  = False,
-                 name        : str   = "MultiAperture") -> ApertureLayer:
+                 normalise   : bool  = False) -> ApertureLayer:
         """
         Constructor for the MultiAperture class.
 
@@ -2783,16 +2679,13 @@ class MultiAperture(CompositeAperture):
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'MultiAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         super().__init__(apertures,
                          centre = centre,
                          shear = shear,
                          compression = compression,
                          rotation = rotation,
-                         normalise = normalise,
-                         name = name)
+                         normalise = normalise)
 
 
     def _transmission(self : ApertureLayer, coordinates : Array) -> Array:
@@ -2856,8 +2749,6 @@ class AbstractStaticAperture(TransmissiveOptic(), ApertureLayer):
         The aperture represented as an array.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
 
 
@@ -2866,7 +2757,6 @@ class AbstractStaticAperture(TransmissiveOptic(), ApertureLayer):
                  npixels     : int   = None, 
                  diameter    : float = None,
                  coordinates : Array = None,
-                 name        : str   = "AbstractStaticAperture",
                  **kwargs) -> ApertureLayer:
         """
         Constructor for the AbstractStaticAperture class.
@@ -2881,8 +2771,6 @@ class AbstractStaticAperture(TransmissiveOptic(), ApertureLayer):
             The diameter of the aperture in meters. 
         coordinates : Array, meters = None
             The coordinate system to calculate the aperture on.
-        name: str = 'AbstractStaticAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         # Input check: Coordinates provided
         if coordinates is not None and \
@@ -2970,8 +2858,6 @@ class StaticAperture(AbstractStaticAperture):
         The aperture represented as an array.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
 
 
@@ -2980,7 +2866,6 @@ class StaticAperture(AbstractStaticAperture):
                  npixels     : int   = None, 
                  diameter    : float = None,
                  coordinates : Array = None,
-                 name        : str   = "StaticAperture",
                  **kwargs) -> ApertureLayer:
         """
         Constructor for the StaticAperture class.
@@ -2995,8 +2880,6 @@ class StaticAperture(AbstractStaticAperture):
             The diameter of the aperture in meters. 
         coordinates : Array, meters = None
             The coordinate system to calculate the aperture on.
-        name: str = 'StaticAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         if isinstance(aperture, AbstractStaticAperture):
             raise TypeError("This Aperture is already static, please "
@@ -3011,8 +2894,7 @@ class StaticAperture(AbstractStaticAperture):
         super().__init__(aperture = aperture, 
                          npixels = npixels, 
                          diameter = diameter, 
-                         coordinates = coordinates, 
-                         name = name,
+                         coordinates = coordinates,
                          **kwargs)
 
 
@@ -3031,8 +2913,6 @@ class StaticAberratedAperture(AbstractStaticAperture,
         The basis represented as an array.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
-    name: str
-        The name of the layer, which is used to index the layers dictionary.
     """
     basis : Array
 
@@ -3042,7 +2922,6 @@ class StaticAberratedAperture(AbstractStaticAperture,
                  npixels     : int   = None, 
                  diameter    : float = None,
                  coordinates : Array = None,
-                 name        : str   = "StaticAberratedAperture"
                  ) -> ApertureLayer:
         """
         Constructor for the StaticAberratedAperture class.
@@ -3060,8 +2939,6 @@ class StaticAberratedAperture(AbstractStaticAperture,
         normalise : bool = False
             Whether to normalise the wavefront after passing through the
             aperture.
-        name: str = 'StaticAberratedAperture'
-            The name of the layer, which is used to index the layers dictionary.
         """
         # Ensure correct aperture types
         if not isinstance(aperture, 
@@ -3085,7 +2962,7 @@ class StaticAberratedAperture(AbstractStaticAperture,
             coordinates = pixel_coords(npixels, diameter / npixels)
 
         super().__init__(aperture=aperture, coordinates=coordinates, 
-            coefficients=aperture.coefficients, name=name)
+            coefficients=aperture.coefficients)
         self.basis = aperture._basis(coordinates)
 
 
@@ -3249,8 +3126,7 @@ class ApertureFactory():
                 nstruts          : int   = 0,
                 strut_ratio      : float = 0.,
                 strut_rotation   : float = 0.,
-                normalise        : bool  = True,
-                name             : str   = 'Aperture'):
+                normalise        : bool  = True):
         """
         Constructs a basic single static aperture.
 
@@ -3282,8 +3158,6 @@ class ApertureFactory():
             The ratio of the width of the strut to the aperture diameter.
         strut_rotation : float = 0
             The rotation of the struts in radians.
-        name : str = 'Aperture'
-            The name of the aperture used to index the layers dictionary.
         
         Returns
         -------
@@ -3342,7 +3216,7 @@ class ApertureFactory():
 
         # Construct CompoundAperture
         full_aperture = CompoundAperture(apertures, normalise=normalise)
-        static = StaticAperture(full_aperture, npixels, 1, name=name)
+        static = StaticAperture(full_aperture, npixels, 1)
 
         return static
 
@@ -3357,8 +3231,7 @@ class ApertureFactory():
                  nstruts          : int   = 0,
                  strut_ratio      : float = 0.,
                  strut_rotation   : float = 0.,
-                 normalise        : bool  = True,
-                 name             : str   = 'Aperture'):
+                 normalise        : bool  = True):
         """
         Constructs a basic single static aperture.
 
@@ -3390,8 +3263,6 @@ class ApertureFactory():
             The ratio of the width of the strut to the aperture diameter.
         strut_rotation : float = 0
             The rotation of the struts in radians.
-        name : str = 'Aperture'
-            The name of the aperture used to index the layers dictionary.
         
         Returns
         -------

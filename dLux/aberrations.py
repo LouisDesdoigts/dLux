@@ -404,8 +404,7 @@ class AberrationFactory():
                 aperutre_ratio   : float = 1.0,
                 nsides           : int   = 0,
                 rotation         : float = 0.,
-                noll_indexes     : Array = None,
-                name             : str   = 'Aberrations'):
+                noll_indexes     : Array = None):
         """
         Constructs a basic single static aberration class.
 
@@ -439,11 +438,6 @@ class AberrationFactory():
             The zernike noll indices to be used for the aberrations. [1, 2, 3]
             would give [Piston, Tilt X, Tilt Y], [2, 3, 4] would be [Tilt X,
             Tilt Y, Defocus. 
-        name : str = 'Aberrations'
-            The name of the aperture used to index the layers dictionary. If 
-            not supplied, the aperture will be named based on the number of
-            sides. However this is only supported up to 8 sides, and a name
-            must be supplied for apertures with more than 8 sides.
         
         Returns
         -------
@@ -487,7 +481,7 @@ class AberrationFactory():
 
         # Construct Aberrations
         basis = ZernikeBasis(noll_indexes).calculate_basis(coordinates)
-        return dLux.optical_layers.ApplyBasisOPD(basis, coefficients, name=name)
+        return dLux.optical_layers.ApplyBasisOPD(basis, coefficients)
 
 
     def __init__(self           : AberrationFactory, 
@@ -497,8 +491,7 @@ class AberrationFactory():
                  coefficients   : Array = None, 
                  aperutre_ratio : float = 1.0,
                  nsides         : int   = 0,
-                 rotation       : float = 0., 
-                 name           : str   = 'Aberrations'):
+                 rotation       : float = 0.):
         """
         Constructs a basic single static aberration class.
 
@@ -532,11 +525,6 @@ class AberrationFactory():
             The zernike noll indices to be used for the aberrations. [1, 2, 3]
             would give [Piston, Tilt X, Tilt Y], [2, 3, 4] would be [Tilt X,
             Tilt Y, Defocus. 
-        name : str = 'Aberrations'
-            The name of the aperture used to index the layers dictionary. If 
-            not supplied, the aperture will be named based on the number of
-            sides. However this is only supported up to 8 sides, and a name
-            must be supplied for apertures with more than 8 sides.
         
         Returns
         -------

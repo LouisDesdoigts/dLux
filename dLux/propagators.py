@@ -12,12 +12,12 @@ __all__ = ["CartesianMFT", "AngularMFT", "ShiftedCartesianMFT",
     "PropagatorFactory"]
 
 
+OpticalLayer = lambda : dLux.optical_layers.OpticalLayer
 
 ########################
 ### Abstract Classes ###
 ########################
-# class Propagator(dLux.optics.OpticalLayer, ABC):
-class Propagator(dLux.optical_layers.OpticalLayer):
+class Propagator(OpticalLayer()):
     """
     An abstract class to store the various properties of the propagation of
     some wavefront.
@@ -26,8 +26,6 @@ class Propagator(dLux.optical_layers.OpticalLayer):
     ----------
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
     inverse : bool
 
@@ -62,8 +60,6 @@ class VariableSamplingPropagator(Propagator):
         pixel for Cartesian or Angular Wavefront respectively.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
     npixels     : int
     pixel_scale : Array
@@ -90,9 +86,8 @@ class VariableSamplingPropagator(Propagator):
         super().__init__(inverse=inverse, **kwargs)
         self.pixel_scale = np.asarray(pixel_scale, dtype=float)
         self.npixels     = int(npixels)
-        assert self.pixel_scale.ndim == 0, \
-        ("pixel_scale must be a scalar.")
-
+        if self.pixel_scale.nidm != 0:
+            raise TypeError('pixel_scale must be a scalar.')
 
 
 class ShiftedPropagator(VariableSamplingPropagator):
@@ -117,8 +112,6 @@ class ShiftedPropagator(VariableSamplingPropagator):
         interprets the shift value in pixel units.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
     shift       : Array
     pixel       : bool
@@ -152,8 +145,8 @@ class ShiftedPropagator(VariableSamplingPropagator):
         """
         self.shift = np.asarray(shift, dtype=float)
         self.pixel = bool(pixel)
-        assert self.shift.shape == (2,), \
-        ("shift must be an array of shape (2,) ie (x, y).")
+        if self.shift.shape != (2,):
+            raise TypeError('shift must be an array of shape (2,).')
 
         super().__init__(pixel_scale=pixel_scale, 
                          npixels=npixels, 
@@ -179,8 +172,6 @@ class FixedSamplingPropagator(Propagator):
         the FFT.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
     pad : int
 
@@ -208,8 +199,6 @@ class CartesianPropagator(Propagator):
         The focal_length of the lens/mirror this propagator represents.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
     focal_length : Array
 
@@ -230,7 +219,8 @@ class CartesianPropagator(Propagator):
         """
         super().__init__(inverse=inverse, **kwargs)
         self.focal_length = np.asarray(focal_length, dtype=float)
-        assert self.focal_length.ndim == 0, ("focal_length must a scalar.")
+        if self.focal_length.ndim != 0:
+            raise TypeError('focal_length must be a scalar.')
 
 
 class AngularPropagator(Propagator):
@@ -242,8 +232,6 @@ class AngularPropagator(Propagator):
     ----------
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
 
 
@@ -274,8 +262,6 @@ class FarFieldFresnel(ShiftedPropagator):
         The shift in the propagation distance of the wavefront.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
     focal_shift : Array
 
@@ -292,9 +278,9 @@ class FarFieldFresnel(ShiftedPropagator):
             The shift in the propagation distance of the wavefront.
         """
         super().__init__(**kwargs)
-        self.focal_shift  = np.asarray(focal_shift,  dtype=float)
-        assert self.focal_shift.ndim == 0, \
-        ("focal_shift must be scalar array.")
+        self.focal_shift  = np.asarray(focal_shift, dtype=float)
+        if self.focal_shift.ndim != 0:
+            raise TypeError('focal_shift must be a scalar.')
 
 
 ########################
@@ -322,8 +308,6 @@ class ShiftedCartesianMFT(CartesianPropagator, ShiftedPropagator):
         interprets the shift value in pixel units.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
 
 
@@ -333,8 +317,7 @@ class ShiftedCartesianMFT(CartesianPropagator, ShiftedPropagator):
                  focal_length : Array,
                  shift        : Array = np.array([0., 0.]),
                  pixel        : bool  = False,
-                 inverse      : bool  = False,
-                 name         : str   = 'ShiftedCartesianMFT') -> Propagator:
+                 inverse      : bool  = False) -> Propagator:
         """
         Parameters
         ----------
@@ -351,11 +334,8 @@ class ShiftedCartesianMFT(CartesianPropagator, ShiftedPropagator):
             physical units of the output plane (ie pixels or meters, radians).
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
-        name : str = 'ShiftedCartesianMFT'
-            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name         = name,
-                         pixel        = pixel,
+        super().__init__(pixel        = pixel,
                          shift        = shift,
                          focal_length = focal_length,
                          pixel_scale  = pixel_scale,
@@ -400,8 +380,6 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
         The focal_length of the lens/mirror this propagator represents.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
 
 
@@ -409,8 +387,7 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
                  npixels      : int,
                  pixel_scale  : Array,
                  focal_length : Array,
-                 inverse      : bool  = False,
-                 name         : str   = 'CartesianMFT') -> Propagator:
+                 inverse      : bool  = False) -> Propagator:
         """
         Parameters
         ----------
@@ -422,11 +399,8 @@ class CartesianMFT(CartesianPropagator, VariableSamplingPropagator):
             The focal_length of the lens/mirror this propagator represents.
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
-        name : str = 'CartesianMFT'
-            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name         = name,
-                         focal_length = focal_length,
+        super().__init__(focal_length = focal_length,
                          pixel_scale  = pixel_scale,
                          npixels      = npixels,
                          inverse      = inverse)
@@ -476,8 +450,6 @@ class ShiftedAngularMFT(AngularPropagator, ShiftedPropagator):
         interprets the shift value in pixel units.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
 
 
@@ -486,8 +458,7 @@ class ShiftedAngularMFT(AngularPropagator, ShiftedPropagator):
                  pixel_scale : Array,
                  shift       : Array = np.zeros(2),
                  pixel       : bool  = False,
-                 inverse     : bool  = False,
-                 name        : str   = 'ShiftedAngularMFT') -> Propagator:
+                 inverse     : bool  = False) -> Propagator:
         """
         Parameters
         ----------
@@ -503,11 +474,8 @@ class ShiftedAngularMFT(AngularPropagator, ShiftedPropagator):
             physical units of the output plane (ie pixels or meters, radians).
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
-        name : str = 'ShiftedAngularMFT'
-            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name        = name,
-                         shift       = shift,
+        super().__init__(shift       = shift,
                          pixel       = pixel,
                          pixel_scale = pixel_scale,
                          npixels     = npixels,
@@ -551,16 +519,13 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
         pupil plane and radians per pixel in focal planes.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
 
 
     def __init__(self        : Propagator,
                  npixels     : int,
                  pixel_scale : Array,
-                 inverse     : bool  = False,
-                 name        : str   = 'AngularMFT') -> Propagator:
+                 inverse     : bool  = False) -> Propagator:
         """
         Parameters
         ----------
@@ -571,11 +536,8 @@ class AngularMFT(AngularPropagator, VariableSamplingPropagator):
             pupil planes and radians per pixel in focal planes.
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
-        name : str = 'AngularMFT'
-            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name        = name,
-                         pixel_scale = pixel_scale,
+        super().__init__(pixel_scale = pixel_scale,
                          npixels     = npixels,
                          inverse     = inverse)
 
@@ -613,16 +575,13 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
         The amount of padding to apply to the wavefront before propagating.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
 
 
     def __init__(self         : Propagator,
                  focal_length : Array,
                  pad          : int = 2,
-                 inverse      : bool = False,
-                 name         : str  = 'CartesianFFT') -> Propagator:
+                 inverse      : bool = False) -> Propagator:
         """
         Parameters
         ----------
@@ -632,11 +591,8 @@ class CartesianFFT(CartesianPropagator, FixedSamplingPropagator):
             The amount of padding to apply to the wavefront before propagating.
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
-        name : str = 'CartesianFFT'
-            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name         = name,
-                         pad          = pad,
+        super().__init__(pad          = pad,
                          focal_length = focal_length,
                          inverse      = inverse)
     
@@ -673,15 +629,12 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
         The amount of padding to apply to the wavefront before propagating.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
 
 
     def __init__(self : Propagator,
                  pad  : int = 2,
-                 inverse : bool = False,
-                 name : str = 'AngularFFT') -> Propagator:
+                 inverse : bool = False) -> Propagator:
         """
         Constructor for the AngularFFT propagator.
 
@@ -691,10 +644,8 @@ class AngularFFT(AngularPropagator, FixedSamplingPropagator):
             The amount of padding to apply to the wavefront before propagating.
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
-        name : str = 'AngularFFT'
-            The name of the layer, which is used to index the layers dictionary.
         """
-        super().__init__(name = name, pad = pad, inverse = inverse)
+        super().__init__(pad=pad, inverse=inverse)
 
 
     def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
@@ -743,8 +694,6 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
         interprets the shift value in pixel units.
     inverse : bool
         Should the propagation be performed in the inverse direction.
-    name : str
-        The name for this propagator.
     """
 
 
@@ -755,8 +704,7 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
                  focal_shift  : Array,
                  shift        : Array = np.zeros(2),
                  pixel        : bool  = False,
-                 inverse      : bool  = False,
-                 name         : str   = 'CartesianFresnel') -> Propagator:
+                 inverse      : bool  = False) -> Propagator:
         """
         Constructor for the CartesianFresnel propagator
 
@@ -777,14 +725,11 @@ class CartesianFresnel(FarFieldFresnel, CartesianMFT):
             physical units of the output plane (ie pixels or meters, radians).
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
-        name : str = 'CartesianFresnel'
-            The name of the layer, which is used to index the layers dictionary.
         """
         if inverse:
             raise NotImplementedError('Inverse propagation not implemented '
                 'for CartesianFresnel.')
-        super().__init__(name         = name,
-                         shift        = shift,
+        super().__init__(shift        = shift,
                          pixel        = pixel,
                          focal_length = focal_length,
                          pixel_scale  = pixel_scale,
@@ -840,8 +785,7 @@ class PropagatorFactory():
                 shift            : Array = np.zeros(2),
                 pixel            : bool = False,
                 focal_length     : float = None,
-                focal_shift      : Array = 0.,
-                name             : str  = 'Propagator'):
+                focal_shift      : Array = 0.):
         """
         Constructs a new Propagator object.
 
@@ -865,8 +809,6 @@ class PropagatorFactory():
             The focal_length of the lens/mirror this propagator represents.
         focal_shift : Array = 0, meters
             The shift in the propagation distance of the wavefront.
-        name : str = 'Propagator'
-            The name of the layer, which is used to index the layers dictionary.
         """
         # Type checking
         if not isinstance(npixels, int):
@@ -883,21 +825,24 @@ class PropagatorFactory():
                     'focal_shift is non-zero.')
             
             return CartesianFresnel(npixels, pixel_scale, focal_length, 
-                focal_shift, shift, pixel, inverse, name)
+                focal_shift, shift, pixel, inverse)
         
         # Angular Propagators
         if focal_length is None:
             if (shift == np.zeros(2)).all():
-                return AngularMFT(npixels, pixel_scale, inverse, name)
+                return AngularMFT(npixels, pixel_scale, inverse)
             else:
                 return ShiftedAngularMFT(npixels, pixel_scale, shift, pixel,
-                    inverse, name)
+                    inverse)
 
         # Cartesian Propagators
         else:
             if (shift == np.zeros(2)).all():
                 return CartesianMFT(npixels, pixel_scale, focal_length, 
-                    inverse, name)
+                    inverse)
             else:
                 return ShiftedCartesianMFT(npixels, pixel_scale, focal_length,
-                    shift, pixel, inverse, name)
+                    shift, pixel, inverse)
+
+
+# TODO: Asserts

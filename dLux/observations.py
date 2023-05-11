@@ -9,69 +9,37 @@ from typing import Any
 import dLux
 
 
-__all__ = ["AbstractObservation", "Dither"]
+__all__ = ["BaseObservation", "Dither"]
 
 
-class AbstractObservation(Base):
+Instrument = lambda : dLux.core.BaseInstrument
+
+
+class BaseObservation(Base):
     """
     Abstract base class for observations. All observations should inherit from
     this class and must implement an `.observe()` method that only takes in a
     single instance of `dLux.Instrument`.
-
-    Attributes
-    ----------
-    name : str
-        The name of the observation that can be used to access the observation
-        from the `Instrument` class.
     """
-    name : str
 
 
-    def __init__(self : AbstractObservation, 
-                 name : str = 'AbstractObservation'):
+    def __init__(self : BaseObservation):
         """
-        Constructor for the AbstractObservation class.
-
-        Parameters
-        ----------
-        name : str = 'AbstractObservation'
-            The name of the observation that can be used to access the
-            observation from the `Instrument` class.
+        Constructor for the BaseObservation class.
         """
-        self.name = str(name)
+        super().__init__()
 
 
     @abstractmethod
-    def observe(self       : AbstractObservation, 
-                instrument : dLux.core.Instrument) -> Any:
+    def observe(self       : BaseObservation, 
+                instrument : Instrument()) -> Any: # pragma: no cover
         """
         Abstract method for the observation function.
         """
         pass
 
 
-    def __getattr__(self : AbstractObservation, attr : str) -> Any:
-        """
-        Gets the attribute from the instrument if it exists. Otherwise, raises
-        an AttributeError.
-
-        Parameters
-        ----------
-        attr : str
-            The name of the attribute to get from the instrument.
-
-        Returns
-        -------
-        attr : Any
-            The attribute from the instrument.
-        """
-        if self.name == attr:
-            return self
-        else:
-            raise AttributeError(f"{self.name} does not have attribute {attr}")
-
-
-class Dither(AbstractObservation):
+class Dither(BaseObservation):
     """
     Observation class designed to apply a series of dithers to the insturment
     and return the corresponding psfs.
@@ -82,14 +50,11 @@ class Dither(AbstractObservation):
         The array of dithers to apply to the source positions. The shape of the
         array should be (ndithers, 2) where ndithers is the number of dithers
         and the second dimension is the (x, y) dither in radians.
-    name : str
-        The name of the observation that can be used to access the observation
-        from the `Instrument` class.
     """
     dithers : Array
 
 
-    def __init__(self : Dither, dithers : Array, name : str = 'Dither'):
+    def __init__(self : Dither, dithers : Array):
         """
         Constructor for the Dither class.
 
@@ -99,11 +64,8 @@ class Dither(AbstractObservation):
             The array of dithers to apply to the source positions. The shape of
             the array should be (ndithers, 2) where ndithers is the number of
             dithers and the second dimension is the (x, y) dither in radians.
-        name : str = 'Dither'
-            The name of the observation that can be used to access the
-            observation from the `Instrument` class.
         """
-        super().__init__(name)
+        super().__init__()
         self.dithers = np.asarray(dithers, float)
         dLux.exceptions.validate_bc_attr_dims(self.dithers.shape, (1, 2), 
             'dithers')
@@ -125,8 +87,6 @@ class Dither(AbstractObservation):
         instrument : Instrument
             The instrument with the sources dithered.
         """
-        assert dither.shape == (2,), ("dither must have shape (2,) ie (x, y)")
-
         # Define the dither function
         dither_fn = lambda source: source.add('position', dither)
 

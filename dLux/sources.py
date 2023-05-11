@@ -609,13 +609,6 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         return propagator(self.wavelengths, self.positions, weights)
 
 
-# TODO: Finish off these last two
-# apertures
-# aberrations
-# propagators
-# detector layers
-# images
-# observations
 class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
     """
     A class for modelling a point source and a resolved source that is defined
@@ -643,7 +636,7 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
 
 
     def __init__(self         : Source,
-                 position     : Array    = np.array([0., 0.]),
+                 position     : Array    = np.zeros(2),
                  flux         : Array    = np.array(1.),
                  distribution : Array    = np.ones((3, 3)),
                  contrast     : Array    = np.array(1.),
@@ -666,18 +659,11 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
         wavelengths : Array, meters = None
             The array of wavelengths at which the spectrum is defined.
         """
-        # Check spectrum & wavelengths
-        assert spectrum is not None or wavelengths is not None, \
-        ("Either spectrum or wavelengths must be specified.")
-        if spectrum is not None:
-            assert wavelengths is None, \
-            ("wavelengths can not be specified if spectrum is specified.")
-        else:
-            spectrum = dLux.spectra.Spectrum(wavelengths)
+        wavelengths = np.asarray(wavelengths, dtype=float)
+        spectrum = dLux.spectra.ArraySpectrum(wavelengths)
 
-        super().__init__(position=position, flux=flux, spectrum=spectrum, \
-                         distribution=distribution, contrast=contrast, \
-                         name=name)
+        super().__init__(position=position, flux=flux, spectrum=spectrum,
+            distribution=distribution, contrast=contrast)
 
 
     def model(self : Source, optics : Optics) -> Array:
@@ -697,30 +683,10 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
             The psf of the source modelled through the optics.
         """
         # Normalise and get parameters
-        self         = self.normalise()
-        wavelengths  = self.get_wavelengths()
-        weights      = self.get_weights()
-        position     = self.get_position()
-        fluxes       = self.get_flux()
-        distribution = self.get_distribution()
-
-        # Get filter throughput
-        if filter_in is not None:
-            raise NotImplementedError("Filter modelling is under development.")
-
-        # Vmap propagator
-        propagator = vmap(optics.propagate_mono, in_axes=(0, None))
-
-        # Model psfs
-        psfs = propagator(wavelengths, position)
-        single_psf = (weights[:, None, None] * psfs).sum(0)
-        point_psf = fluxes[0] * single_psf
-        extended_psf = fluxes[1] * single_psf
-        convolved = convolve(extended_psf, distribution, mode='same')
-        psf = convolved + point_psf
-
-        # Apply detector if supplied
-        return psf if detector is None else detector.apply_detector(psf)
+        self = self.normalise()
+        psf = optics.propagate(self.wavelengths, self.position, self.weights)
+        convolved = convolve(psf, self.distribution, mode='same')
+        return self.fluxes[0] * psf + self.fluxes[1] * convolved
 
 
 class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
@@ -750,7 +716,7 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
 
 
     def __init__(self         : Source,
-                 position     : Array    = np.array([0., 0.]),
+                 position     : Array    = np.zeros(2),
                  flux         : Array    = np.array(1.),
                  distribution : Array    = np.ones((3, 3)),
                  contrast     : Array    = np.array(1.),
@@ -773,20 +739,13 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
         wavelengths : Array, meters = None
             The array of wavelengths at which the spectrum is defined.
         """
-        # Check spectrum & wavelengths
-        assert spectrum is not None or wavelengths is not None, \
-        ("Either spectrum or wavelengths must be specified.")
-        if spectrum is not None:
-            assert wavelengths is None, \
-            ("wavelengths can not be specified if spectrum is specified.")
-            assert isinstance(spectrum, dLux.CombinedSpectrum), \
-            ("The input spectrum must be a CombinedSpectrum object.")
-        else:
-            spectrum = dLux.spectra.CombinedSpectrum(wavelengths)
+        wavelengths = np.asarray(wavelengths, dtype=float)
+        if wavelengths.ndim == 1:
+            wavelengths = np.array([wavelengths, wavelengths])
+        spectrum = dLux.spectra.ArraySpectrum(wavelengths)
 
-        super().__init__(position=position, flux=flux, spectrum=spectrum, \
-                         distribution=distribution, contrast=contrast, \
-                         name=name)
+        super().__init__(position=position, flux=flux, spectrum=spectrum,
+            distribution=distribution, contrast=contrast)
 
 
     def model(self : Source, optics : Optics) -> Array:
@@ -807,26 +766,15 @@ class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
             The psf of the source modelled through the optics.
         """
         # Normalise and get parameters
-        self         = self.normalise()
-        wavelengths  = self.get_wavelengths()[0]
-        weights      = self.get_weights()
-        position     = self.get_position()
-        fluxes       = self.get_flux()
-        distribution = self.get_distribution()
+        self = self.normalise()
+        weights = self.weights * self.fluxes[:, None]
 
-        # Get filter throughput
-        if filter_in is not None:
-            raise NotImplementedError("Filter modelling is under development.")
+        # Propagate
+        propagator = vmap(optics.propagate_mono, (0, None))
+        psfs = propagator(self.wavelengths[0], self.position)
 
-        # Vmap propagator
-        propagator = vmap(optics.propagate_mono, in_axes=(0, None))
-
-        # Model psfs
-        psfs = propagator(wavelengths, position)
-        point_psf    = fluxes[0] * (weights[0, :, None, None] * psfs).sum(0)
-        extended_psf = fluxes[1] * (weights[1, :, None, None] * psfs).sum(0)
-        convolved = convolve(extended_psf, distribution, mode='same')
-        psf = convolved + point_psf
-
-        # Apply detector if supplied
-        return psf if detector is None else detector.apply_detector(psf)
+        # Calc weight and convolve
+        point_psf = (psfs * weights[0, :, None, None]).sum(0)
+        extended_psf = (psfs * weights[1, :, None, None]).sum(0)
+        convolved = convolve(extended_psf, self.distribution, mode='same')
+        return point_psf  + convolved
