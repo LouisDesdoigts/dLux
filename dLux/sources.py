@@ -8,11 +8,8 @@ from abc import abstractmethod
 import dLux
 
 
-__all__ = ["PointSource", "MultiPointSource", "ArrayDistribution",
-           "BinarySource", "PointExtendedSource", "PointAndExtendedSource"]
-
-
-# TODO: Remove all Filter objects from the source objects.
+__all__ = ["PointSource", "PointSources", "BinarySource", "ResolvedSource", 
+    "PointResolvedSource"]
 
 
 ########################
@@ -330,7 +327,7 @@ class PointSource(Source):
     #     super().__init__(position, flux, spectrum, wavelengths)
 
 
-class MultiPointSource(Source):
+class PointSources(Source):
     """
     Concrete Class for multiple unresolved point source objects.
 
@@ -352,7 +349,7 @@ class MultiPointSource(Source):
                  spectrum    : Spectrum = None,
                  wavelengths : Array    = None) -> Source:
         """
-        Constructor for the MultiPointSource class.
+        Constructor for the PointSources class.
 
         Parameters
         ----------
@@ -406,7 +403,7 @@ class MultiPointSource(Source):
         return propagator(self.wavelengths, self.position, weights).sum(0)
 
 
-class ArrayDistribution(Source):
+class ResolvedSource(Source):
     """
     A class for modelling resolved sources that parameterise their resolved
     component using an array of intensities.
@@ -433,7 +430,7 @@ class ArrayDistribution(Source):
                  wavelengths  : Array    = None,
                  **kwargs) -> Source:
         """
-        Constructor for the ArrayDistribution class.
+        Constructor for the ResolvedSource class.
 
         Parameters
         ----------
@@ -555,7 +552,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         return propagator(self.wavelengths, self.positions, weights).sum(0)
 
 
-class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
+class PointResolvedSource(RelativeFluxSource, ResolvedSource):
     """
     A class for modelling a point source and a resolved source that is defined
     relative to the point source. An example would be an unresolved star with
@@ -563,7 +560,7 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
     spectra but have their fluxes defined by flux (the mean flux) and the flux
     ratio (contrast) between the point source and resolved distribution. The
     resolved component is defined by an array (ie this class inherits from
-    ArrayDistribution).
+    ResolvedSource).
 
     Attributes
     ----------
@@ -633,94 +630,3 @@ class PointExtendedSource(RelativeFluxSource, ArrayDistribution):
         psf = optics.propagate(self.wavelengths, self.position, self.weights)
         convolved = convolve(psf, self.distribution, mode='same')
         return self.fluxes[0] * psf + self.fluxes[1] * convolved
-
-
-class PointAndExtendedSource(RelativeFluxSource, ArrayDistribution):
-    """
-    A class for modelling a point source and a resolved source that is defined
-    relative to the point source, but with its own spectra. An example would be
-    an unresolved quasar within a resolved galaxy. These two objects have
-    independent spectra but have their fluxes defined by flux (the mean flux)
-    and the flux ratio (contrast) between the point source and resolved
-    distribution. The resolved component is defined by an array (ie this class
-    inherits from ArrayDistribution).
-
-    Attributes
-    ----------
-    position : Array, radians
-        The (x, y) on-sky position of this object.
-    flux : Array, photons
-        The mean flux of the point and resolves source.
-    distribution : Array
-        The array of intensities respresenting the resolved source.
-    contrast : Array
-        The contrast ratio between the point source and the resolved
-        source.
-    spectrum : Spectrum
-        The spectrum of this object, represented by a Spectrum object.
-    """
-
-
-    def __init__(self         : Source,
-                 position     : Array    = np.zeros(2),
-                 flux         : Array    = np.array(1.),
-                 distribution : Array    = np.ones((3, 3)),
-                 contrast     : Array    = np.array(1.),
-                 spectrum     : Spectrum = None,
-                 wavelengths  : Array    = None) -> Source:
-        """
-        Parameters
-        ----------
-        position : Array, radians = np.array([0., 0.])
-            The (x, y) on-sky position of this object.
-        flux : Array, photons = np.array(1.)
-            The flux of the object.
-        distribution : Array = np.ones((3, 3))
-            The array of intensities respresenting the resolved source.
-        contrast : Array = np.array(1.)
-            The contrast ratio between the point source and the resolved
-            source.
-        spectrum : CombinedSpectrum = None
-            The spectrum of this object, represented by a CombinedSpectrum.
-        wavelengths : Array, meters = None
-            The array of wavelengths at which the spectrum is defined.
-        """
-        wavelengths = np.asarray(wavelengths, dtype=float)
-        if wavelengths.ndim == 1:
-            wavelengths = np.array([wavelengths, wavelengths])
-        spectrum = dLux.spectra.ArraySpectrum(wavelengths)
-
-        super().__init__(position=position, flux=flux, spectrum=spectrum,
-            distribution=distribution, contrast=contrast)
-
-
-    def model(self : Source, optics : Optics) -> Array:
-        """
-        Method to model the psf of the source through the optics. Implements a
-        basic convolution with the psf and source distribution, while also
-        modelling the single point source psf. Applied a different spectrum to
-        the point source and resolved source.
-
-        Parameters
-        ----------
-        optics : Optics
-            The optics through which to model the source objects.
-
-        Returns
-        -------
-        psf : Array
-            The psf of the source modelled through the optics.
-        """
-        # Normalise and get parameters
-        self = self.normalise()
-        weights = self.weights * self.fluxes[:, None]
-
-        # Propagate
-        propagator = vmap(optics.propagate_mono, (0, None))
-        psfs = propagator(self.wavelengths[0], self.position)
-
-        # Calc weight and convolve
-        point_psf = (psfs * weights[0, :, None, None]).sum(0)
-        extended_psf = (psfs * weights[1, :, None, None]).sum(0)
-        convolved = convolve(extended_psf, self.distribution, mode='same')
-        return point_psf  + convolved

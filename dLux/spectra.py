@@ -6,10 +6,10 @@ from zodiax import Base
 from jax import vmap, Array
 
 
-__all__ = ["ArraySpectrum", "PolynomialSpectrum"]
+__all__ = ["Spectrum", "PolynomialSpectrum"]
 
 
-class Spectrum(Base, ABC):
+class BaseSpectrum(Base):
     """
     Abstract base class for arbitrary spectral parametrisations.
 
@@ -32,6 +32,7 @@ class Spectrum(Base, ABC):
             The array of wavelengths at which the spectrum is defined.
         """
         self.wavelengths = np.asarray(wavelengths, dtype=float)
+        super().__init()
 
 
     @abstractmethod
@@ -40,19 +41,17 @@ class Spectrum(Base, ABC):
         Abstract method to normalise the spectrum. Must be overwitten by child
         classes.
         """
-        return
 
 
-    # @abstractmethod
-    # def weights(self : Spectrum) -> Array: # pragma: no cover
-    #     """
-    #     Abstract getter method for the weights. Must be overwritten by child
-    #     classes. Should be made into a property
-    #     """
-    #     return
+    @abstractmethod
+    def weights(self : Spectrum) -> Array: # pragma: no cover
+        """
+        Abstract getter method for the weights. Must be overwritten by child
+        classes. Should be made into a property
+        """
 
 
-class ArraySpectrum(Spectrum):
+class Spectrum(BaseSpectrum):
     """
     A Spectrum class that interally parametersises the spectrum via arrays (ie
     wavelengths and weights)
@@ -71,7 +70,7 @@ class ArraySpectrum(Spectrum):
                  wavelengths : Array,
                  weights     : Array = None) -> Spectrum:
         """
-        Constructor for the ArraySpectrum class.
+        Constructor for the Spectrum class.
 
         Parameters
         ----------
@@ -114,7 +113,7 @@ class ArraySpectrum(Spectrum):
         return self.divide('weights', weight_sum)
 
 
-class PolynomialSpectrum(Spectrum):
+class PolynomialSpectrum(BaseSpectrum):
     """
     Implements a generic polynomial spectrum. This is likely not needed and
     will probably just be turned into LinearSpectrum in the future.

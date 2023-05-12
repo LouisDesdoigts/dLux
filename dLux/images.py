@@ -52,6 +52,3 @@ class Image(Base):
 
     def distort(self): # Match poppy
         pass
-
-    def add_noise(self): # ?
-        pass

@@ -16,11 +16,18 @@ AberrationLayer = lambda : dLux.optical_layers.AberrationLayer
 TransmissiveOptic = lambda : dLux.optical_layers.TransmissiveOptic
 
 
-__all__ = ["CircularAperture", "SquareAperture", "HexagonalAperture", 
-           "RegularPolygonalAperture", "IrregularPolygonalAperture", 
-           "StaticAperture", "AberratedAperture", "StaticAberratedAperture", 
-           "AnnularAperture", "RectangularAperture", "CompoundAperture", 
-           "MultiAperture", "UniformSpider", "ApertureFactory"]
+__all__ = [
+    "CircularAperture",
+    "AnnularAperture",
+    "RegPolyAperture",
+    "IrregPolyAperture",
+    "AberratedAperture",
+    
+    "UniformSpider",
+    "CompoundAperture",
+    "MultiAperture", 
+     
+    "ApertureFactory"]
 
 
 class ApertureLayer(TransmissiveLayer()):
@@ -36,21 +43,28 @@ class ApertureLayer(TransmissiveLayer()):
         Whether to normalise the wavefront after passing through the aperture.
     """
 
-    
-    def __init__(self      : OpticalLayer, 
-                 normalise : bool = False,
-                 **kwargs) -> ApertureLayer:
+
+
+    @abstractmethod
+    def make_staic(self     : ApertureLayer,
+                npixels  : int, 
+                diameter : float) -> ApertureLayer:
         """
-        Constructor for the ApertureLayer class, instatiating the OpticalLayer 
-        class.
+        Returns the static version of the input aperture calcualted on the
+        coordinates defined by npixels and diameter.
 
         Parameters
         ----------
-        normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+        npixels : int
+            The number of pixels accross one edge of the aperture.  
+        diameter : float, meters
+            The diameter of the aperture in meters. 
+
+        Returns
+        -------
+        aperture: ApertureLayer
+            The TranmissiveOptic version of this aperture.
         """
-        super().__init__(normalise, **kwargs)
 
 
     @abstractmethod
@@ -70,12 +84,12 @@ class ApertureLayer(TransmissiveLayer()):
         transmission : Array 
             The array representing the transmission of the aperture.
         """
-        pass
 
 
-    def get_transmission(self     : ApertureLayer, 
-                         npixels  : int, 
-                         diameter : float) -> Array:
+    @abstractmethod
+    def transmission(self     : ApertureLayer, 
+                     npixels  : int, 
+                     diameter : float) -> Array:
         """
         Compute the array representing the aperture on a set of coordinates 
         with the specified number of pixels and diameter.
@@ -92,32 +106,11 @@ class ApertureLayer(TransmissiveLayer()):
         transmission : Array 
             The array representing the transmission of the aperture.
         """
-        return self._transmission(pixel_coords(npixels, diameter / npixels))
 
 
-    def __call__(self : ApertureLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Apply the aperture to an incoming wavefront.
-
-        Parameters
-        ----------
-        wavefront: Wavefront
-            The wavefront before encountering the aperture.
-
-        Returns
-        -------
-        wavefront: Wavefront
-            The wavefront after encountering the aperture.
-        """
-        wavefront *= self._transmission(wavefront.coordinates)
-        if self.normalise:
-            return wavefront.normalise()
-        return wavefront
-
-
-class AbstractDynamicAperture(ApertureLayer, ABC):
+class BaseDynamicAperture(ApertureLayer):
     """
-    Abstract base class instatiating a series of methods designed to generate
+    Base base class instatiating a series of methods designed to generate
     apertures differentiably at run-time. This class primarily implements the 
     coordinate transformations that can be applied to each aperture in order to 
     have fully control over the aperture shape, and apply global transformations
@@ -149,7 +142,7 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
                  rotation    : Array = np.array(0.),
                  normalise   : bool  = False) -> ApertureLayer:
         """
-        Constructor for the AbstractDynamicAperture class.
+        Constructor for the BaseDynamicAperture class.
 
         Parameters
         ----------
@@ -167,17 +160,19 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         """
         super().__init__(normalise=normalise)
 
-        self.centre = np.asarray(centre).astype(float)
-        self.shear = np.asarray(shear).astype(float)
-        self.compression = np.asarray(compression).astype(float)
-        self.rotation = np.asarray(rotation).astype(float)
+        self.centre      = np.asarray(centre, dtype=float)
+        self.shear       = np.asarray(shear, dtype=float)
+        self.compression = np.asarray(compression, dtype=float)
+        self.rotation    = np.asarray(rotation, dtype=float)
 
-        dLux.exceptions.validate_eq_attr_dims(self.centre.shape, (2,), "centre")
-        dLux.exceptions.validate_eq_attr_dims(self.shear.shape, (2,), "shear")
-        dLux.exceptions.validate_eq_attr_dims(
-            self.compression.shape, (2,), "compression")
-        dLux.exceptions.validate_eq_attr_dims(
-            self.rotation.shape, (), "rotation")
+        if self.centre.shape != (2,):
+            raise ValueError("center must be have shape (2,).")
+        if self.shear.shape != (2,):
+            raise ValueError("shear must be have shape (2,).")
+        if self.compression.shape != (2,):
+            raise ValueError("compression must have shape (2,).")
+        if self.rotation.shape != ():
+            raise ValueError("rotation must have shaoe ().")
 
 
     def _coordinates(self : ApertureLayer, coordinates : Array) -> Array:
@@ -219,7 +214,40 @@ class AbstractDynamicAperture(ApertureLayer, ABC):
         return coordinates
 
 
-class DynamicAperture(AbstractDynamicAperture, ABC):
+    def make_staic(self     : ApertureLayer,
+                npixels  : int, 
+                diameter : float) -> ApertureLayer:
+        """
+        Returns the static version of the input aperture calcualted on the
+        coordinates defined by npixels and diameter.
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels accross one edge of the aperture.  
+        diameter : float, meters
+            The diameter of the aperture in meters. 
+
+        Returns
+        -------
+        aperture: ApertureLayer
+            The TranmissiveOptic version of this aperture.
+        """
+        coordinates = self._coordinates(pixel_coords(npixels, diameter/npixels))
+        transmission = self._transmission(coordinates)
+        return Optic()(transmission, self.normalise)
+
+
+    def __call__(self : ApertureLayer, wavefront : Wavefront) -> Wavefront:
+        self.__doc__ = inspect.getdoc(super().__call__)
+        coordaintes = self._coordinates(wavefront.coordinates)
+        wavefront *= self._transmission(coordinates)
+        if self.normalise:
+            return wavefront.normalise()
+        return wavefront
+
+
+class DynamicAperture(BaseDynamicAperture):
     """
     An abstract base class that implements the methods required to provide soft
     edges to the apertures and generate either transmissive or occulting 
@@ -359,22 +387,9 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
         steepness = 3. / self.softening * distances.shape[-1]
         return (np.tanh(steepness * distances) + 1.) / 2.
 
-
-    def _transmission(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Compute the array representing the aperture on the provided coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the aperture on.
-
-        Returns
-        -------
-        transmission : Array 
-            The array representing the transmission of the aperture.
-        """
-        coordinates = self._coordinates(coordinates) 
+    def _transmission(self : ApertureLayer, coordainates : Array) -> Array:
+        self.__doc__ = inspect.getdoc(super().transmission)
+        coordinates = self._coordinates(coordainates)
 
         aperture = lax.cond(
             (self.softening != 0.).any(),
@@ -382,15 +397,15 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             lambda coords: self._hard_edged(coords).astype(float),
             coordinates)
 
-        # TODO: Workout how to recast this using raw logic and see 
-        #       if it is faster or not. Need to lok at the `jaxpr` 
-        #       for python if statements like this and to try 
-        #       work-out if extra stuff is getting done.
         if self.occulting:
             aperture = (1. - aperture)
-
         return aperture
 
+    def transmission(self : ApertureLayer, 
+                     npixels : int, 
+                     diameter : float) -> Array:
+        self.__doc__ = inspect.getdoc(super().transmission)
+        return self._transmission(pixel_coords(npixels, diameter/npixels))
 
     def _normalised_coordinates(self        : ApertureLayer, 
                                 coordinates : Array) -> Array:
@@ -412,8 +427,6 @@ class DynamicAperture(AbstractDynamicAperture, ABC):
             normalised the maximum distance of an edge from the center.
         """
         return self._coordinates(coordinates) / self._extent()
-
-
 
 
 #################################
@@ -488,52 +501,20 @@ class CircularAperture(DynamicAperture):
 
 
     def _soft_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the soft edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The softed edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._soft_edged)
         scale = coordinates[0, 1] - coordinates[0, 0]
         coordinates = np.hypot(coordinates[0], coordinates[1])
         return self._soften(- coordinates + self.radius)
 
 
     def _hard_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the hard edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The hard edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._hard_edged)
         coordinates = np.hypot(coordinates[0], coordinates[1])
         return (coordinates < self.radius).astype(float)
 
 
     def _extent(self : ApertureLayer) -> Array:
-        """
-        Returns the largest distance to the outer edge of the aperture from the
-        centre.
-
-        Returns
-        -------
-        extent : float
-            The maximum distance from the centre to edge of aperture.
-        """
+        self.__doc__ = inspect.getdoc(super()._extent)
         return self.radius
 
 
@@ -615,53 +596,21 @@ class AnnularAperture(DynamicAperture):
 
 
     def _soft_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the soft edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The softed edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._soft_edged)
         coordinates = np.hypot(coordinates[0], coordinates[1])
         return self._soften(coordinates - self.rmin) * \
             self._soften(- coordinates + self.rmax)
 
 
     def _hard_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the hard edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The hard edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._hard_edged)
         coordinates = np.hypot(coordinates[0], coordinates[1])
         return ((coordinates > self.rmin) * \
             (coordinates < self.rmax)).astype(float)
 
 
     def _extent(self : ApertureLayer) -> Array:
-        """
-        Returns the largest distance to the outer edge of the aperture from the
-        centre.
-
-        Returns
-        -------
-        extent : float
-            The maximum distance from the centre to edge of aperture.
-        """
+        self.__doc__ = inspect.getdoc(super()._extent)
         return self.rmax
     
 
@@ -749,186 +698,27 @@ class RectangularAperture(DynamicAperture):
 
 
     def _soft_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the soft edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The softed edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._soft_edged)
         y_mask = self._soften(- np.abs(coordinates[1]) + self.height / 2.)
         x_mask = self._soften(- np.abs(coordinates[0]) + self.width / 2.)
         return x_mask * y_mask
 
     
     def _hard_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the hard edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The hard edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super().__call__)
         y_mask = np.abs(coordinates[1]) < self.height / 2.
         x_mask = np.abs(coordinates[0]) < self.width / 2.
         return (x_mask * y_mask).astype(float)
 
 
     def _extent(self : ApertureLayer) -> Array:
-        """
-        Returns the largest distance to the outer edge of the aperture from the
-        centre.
-
-        Returns
-        -------
-        extent : float
-            The maximum distance from the centre to edge of aperture.
-        """
+        self.__doc__ = inspect.getdoc(super()._extent)
         return np.hypot(self.height / 2., self.width / 2.)
 
 
-class SquareAperture(DynamicAperture):
+class PolygonalAperture(DynamicAperture):
     """
-    A square aperture parameterised by its width.
-
-    Attributes
-    ----------
-    width: Array, meters
-        The side length of the aperture. 
-    centre: Array, meters
-        The (x, y) coordinates of the centre of the aperture.
-    shear: Array
-        The (x, y) linear shear of the aperutre.
-    compression: Array 
-        The (x, y) compression of the aperture. 
-    rotation: Array, radians
-        The clockwise rotation of the aperture.
-    occulting: bool
-        Is the aperture occulting or tranmissive. False results in a tranmissive
-        aperture, and True results in an occulting aperture.
-    softening: Array, pixels
-        The approximate pixel width of the soft boundary applied to the 
-        aperture. Hard edges can be achieved by setting the softening to 0.
-    normalise : bool = False
-        Whether to normalise the wavefront after passing through the
-        aperture.
-    """
-    width : Array
-
- 
-    def __init__(self        : ApertureLayer, 
-                 width       : Array, 
-                 centre      : Array = np.array([0., 0.]),
-                 shear       : Array = np.array([0., 0.]),
-                 compression : Array = np.array([1., 1.]),
-                 rotation    : Array = np.array(0.),
-                 occulting   : bool  = False, 
-                 softening   : Array = np.array(1.),
-                 normalise   : bool  = False) -> ApertureLayer: 
-        """
-        Constructor for the SquareAperture class.
-
-        Parameters
-        ----------
-        width: Array, meters
-            The side length of the aperture. 
-        centre: Array, meters = np.array([0., 0.])
-            The (x, y) coordinates of the centre of the aperture.
-        shear: Array = np.array([0., 0.])
-            The (x, y) linear shear of the aperutre.
-        compression: Array  = np.array([1., 1.]) 
-            The (x, y) compression of the aperture. 
-        rotation: Array, radians = np.array(0.)
-            The clockwise rotation of the aperture.
-        occulting: bool = False
-            Is the aperture occulting or tranmissive. False results in a 
-            tranmissive aperture, and True results in an occulting aperture.
-        softening: Array, pixels = np.array(1.)
-            The approximate pixel width of the soft boundary applied to the 
-            aperture. Hard edges can be achieved by setting the softening to 0.
-        normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
-        """
-        super().__init__(centre = centre, 
-                         shear = shear,
-                         compression = compression,
-                         rotation = rotation, 
-                         occulting = occulting, 
-                         softening = softening,
-                         normalise = normalise)
-
-        self.width = np.asarray(width).astype(float)
-
-        dLux.exceptions.validate_eq_attr_dims((), self.width.shape, "width")
-
-
-    def _soft_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the soft edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The softed edged aperture shape.
-        """
-        x_mask = self._soften(- np.abs(coordinates[0]) + self.width / 2.)
-        y_mask = self._soften(- np.abs(coordinates[1]) + self.width / 2.)
-        return x_mask * y_mask
-
-
-    def _hard_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the hard edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The hard edged aperture shape.
-        """
-        x_mask = np.abs(coordinates[0]) < self.width / 2.
-        y_mask = np.abs(coordinates[1]) < self.width / 2.
-        return (x_mask * y_mask).astype(float)
-
-
-    def _extent(self : ApertureLayer) -> Array:
-        """
-        Returns the largest distance to the outer edge of the aperture from the
-        centre.
-
-        Returns
-        -------
-        extent : float
-            The maximum distance from the centre to edge of aperture.
-        """
-        return np.sqrt(2) * self.width / 2.
-
-
-class PolygonalAperture(DynamicAperture, ABC):
-    """
-    Abstract base class for all polygonal apertures, from which both regular 
+    Base base class for all polygonal apertures, from which both regular 
     and irregular polygonal apertures inherit from, implementing some shared 
     methods.
     
@@ -1029,29 +819,6 @@ class PolygonalAperture(DynamicAperture, ABC):
         inf_case = (xs - x1)
         gen_case = (m * inf_case - (ys - y1)) / np.sqrt(1 + m ** 2)
         return np.where(np.isinf(m), inf_case, gen_case)
-    
-    
-    def _grad_from_two_points(self : ApertureLayer, 
-                              xs   : float, 
-                              ys   : float) -> float: # pragma: no cover
-        """
-        Calculate the gradient of the chord that connects two points. 
-        Note: This is distinct from `_grads_from_many_points` in that
-        it does not wrap arround.
-        
-        Parameters
-        ----------
-        xs: float, meters
-            The x coordinates of the two points.
-        ys: float, meters
-            The y coordinates of the two points.
-            
-        Returns
-        -------
-        m: float
-            The gradient of the chord that connects the two points.
-        """
-        return (ys[1] - ys[0]) / (xs[1] - xs[0])
     
     
     def _offset(self      : ApertureLayer, 
@@ -1221,34 +988,14 @@ class IrregularPolygonalAperture(PolygonalAperture):
     
     
     def _extent(self : ApertureLayer) -> float:
-        """
-        Returns the largest distance to the outer edge of the aperture from the
-        centre.
-
-        Returns
-        -------
-        extent : float
-            The maximum distance from the centre to edge of aperture.
-        """
+        self.__doc__ = inspect.getdoc(super()._extent)
         verts = self.vertices
         dist_to_verts = np.hypot(verts[:, 1], verts[:, 0])
         return np.max(dist_to_verts)
     
     
     def _soft_edged(self : ApertureLayer, coordinates : float) -> float:
-        """
-        Calcualtes the soft edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The softed edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._soft_edged)
         # NOTE: see class docs.
         bc_x1 = self.vertices[:, 0][:, None, None]
         bc_y1 = self.vertices[:, 1][:, None, None]
@@ -1274,19 +1021,7 @@ class IrregularPolygonalAperture(PolygonalAperture):
 
 
     def _hard_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the hard edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The hard edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._hard_edged)
         # NOTE: see class docs.
         bc_x1 = self.vertices[:, 0][:, None, None]
         bc_y1 = self.vertices[:, 1][:, None, None]
@@ -1395,32 +1130,12 @@ class RegularPolygonalAperture(PolygonalAperture):
 
         
     def _extent(self : ApertureLayer) -> float:
-        """
-        Returns the largest distance to the outer edge of the aperture from the
-        centre.
-
-        Returns
-        -------
-        extent : float
-            The maximum distance from the centre to edge of aperture.
-        """
+        self.__doc__ = inspect.getdoc(super()._extent)
         return self.rmax
         
     
     def _soft_edged(self : ApertureLayer, coordinates : float) -> float:
-        """
-        Calcualtes the soft edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The softed edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._soft_edged)
         x = coordinates[0]
         y = coordinates[1]
 
@@ -1441,19 +1156,7 @@ class RegularPolygonalAperture(PolygonalAperture):
 
 
     def _hard_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the hard edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The hard edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._hard_edged)
         x = coordinates[0]
         y = coordinates[1]
 
@@ -1473,84 +1176,194 @@ class RegularPolygonalAperture(PolygonalAperture):
         return dist.prod(axis=0)
 
 
-class HexagonalAperture(RegularPolygonalAperture):
+###################
+### Aberrations ###
+###################
+class AberratedAperture(ApertureLayer, BasisLayer):
     """
-    A hexagonal aperture parameterised by the maximum radius to the vertices 
-    from its center.
-    
+    A class for generating apertures with aberrations. This class generates the
+    basis vectors of the aberrations at run time, allowing for the aperture and
+    aberrations to be recovered simultaneously.
+ 
     Attributes
     ----------
-    rmax : Array, meters
-        The maximum radius to the vertices from its center.
-    centre: Array, meters
-        The (x, y) coordinates of the centre of the aperture.
-    shear: Array
-        The (x, y) linear shear of the aperutre.
-    compression: Array 
-        The (x, y) compression of the aperture. 
-    rotation: Array, radians
-        The clockwise rotation of the aperture.
-    occulting: bool
-        Is the aperture occulting or tranmissive. False results in a tranmissive
-        aperture, and True results in an occulting aperture.
-    softening: Array, pixels
-        The approximate pixel width of the soft boundary applied to the 
-        aperture. Hard edges can be achieved by setting the softening to 0.
+    aperture: ApertureLayer
+        The aperture on which the aberration basis is defined.
+    basis: list[Zernike]
+        A list of basis functions that represent the basis. The exact 
+        polynomials that are represented will depend on the aperture shape. 
+    coefficients: Array
+        The amplitude of each basis vector of the aberrations.
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
     """
-    rmax : Array
+    aperture : ApertureLayer
 
     
-    def __init__(self        : ApertureLayer, 
-                 rmax        : Array,
-                 centre      : Array = np.array([0., 0.]), 
-                 shear       : Array = np.array([0., 0.]),
-                 compression : Array = np.array([1., 1.]),
-                 rotation    : Array = np.array(0.),
-                 occulting   : bool  = False, 
-                 softening   : Array = np.array(1.),
-                 normalise   : bool  = False) -> ApertureLayer:
+    def __init__(self         : ApertureLayer, 
+                 aperture     : ApertureLayer, 
+                 noll_inds    : Array,
+                 coefficients : Array = None,
+                 **kwargs) -> ApertureLayer: 
         """
-        Constructor for the HexagonalAperture class.
+        Constructor for the AberratedAperture class.
 
         Parameters
         ----------
-        rmax : Array, meters
-            The maximum radius to the vertices from its center.
-        centre: Array, meters = np.array([0., 0.])
-            The (x, y) coordinates of the centre of the aperture.
-        shear: Array = np.array([0., 0.])
-            The (x, y) linear shear of the aperutre.
-        compression: Array  = np.array([1., 1.]) 
-            The (x, y) compression of the aperture. 
-        rotation: Array, radians = np.array(0.)
-            The clockwise rotation of the aperture.
-        occulting: bool = False
-            Is the aperture occulting or tranmissive. False results in a 
-            tranmissive aperture, and True results in an occulting aperture.
-        softening: Array, pixels = np.array(1.)
-            The approximate pixel width of the soft boundary applied to the 
-            aperture. Hard edges can be achieved by setting the softening to 0.
-        normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+        aperture: ApertureLayer
+            The aperture on which the aberration basis is defined.
+        noll_inds: List[int]
+            The noll indices are a scheme for indexing the Zernike
+            polynomials. Normally these polynomials have two 
+            indices but the noll indices prevent an order to 
+            these pairs. All basis can be indexed using the noll
+            indices based on `n` and `m`. 
+        coefficients: Array = None
+            The amplitude of each basis vector of the aberrations. If nothing 
+            is provided, then the coefficients are set to zero.
         """
-        super().__init__(nsides = 6,
-                         rmax = rmax,
-                         centre = centre, 
-                         shear = shear, 
-                         compression = compression,
-                         rotation = rotation,
-                         occulting = occulting,
-                         softening = softening,
-                         normalise = normalise)
+        # Ensure aperture is dynamic
+        if not isinstance(aperture, DynamicAperture):
+            raise TypeError("AberratedApertures can not contain Static, "
+                "Compound or Multi Apertures. AberratedApertures can be "
+                "placed in Compound or Multi Apertures, which can then be "
+                "promoted to Static.")
+
+        # Ensure transmissice
+        if aperture.occulting:
+            raise ValueError("AberratedApertures can not be occulting.")
+
+        # Set Aperture
+        self.aperture = aperture
+        self.basis = dLux.aberrations.ZernikeBasis(noll_inds)
+        super().__init__(coefficients=coefficients, **kwargs)
+
+    def __getattr__(self: ApertureLayer, key : str):
+        if hasattr(self.aperture, key):
+            return getattr(self.aperture, key)
+        raise AttributeError(f"'{self.__class__.__name__}' object has no "
+            f"attribute '{key}'")
+
+    def __call__(self : ApertureLayer, wavefront : Wavefront) -> Wavefront:
+        self.__doc__ = inspect.getdoc(super().__call__)
+
+        # Calculate aperture and opd
+        coordinates = wavefront.coordinates
+        transmission = self.aperture._transmission(coordinates)
+        phase = wavefront.phase + self._opd(coordinates) * wavefront.wavenumber
+        amplitude = transmission * wavefront.amplitude
+        wavefront = wavefront.set(['amplitude', 'phase'], [amplitude, phase])
+        if self.aperture.normalise:
+            wavefront = wavefront.normalise()
+        return wavefront
+
+    def _basis(self : ApertureLayer, coordinates : Array) -> Array:
+        self.__doc__ = inspect.getdoc(super()._basis)
+
+        coordinates = self._normalised_coordinates(coordinates)
+
+        if isinstance(self.aperture, RegularPolygonalAperture):
+            ikes = self.basis.calculate_basis(coordinates, self.aperture.nsides)
+        else:
+            ikes = self.basis.calculate_basis(coordinates)
+
+        is_reg_pol = isinstance(self.aperture, RegularPolygonalAperture)
+        is_circ = isinstance(self.aperture, CircularAperture)
+
+        if is_circ or is_reg_pol:
+            return ikes
+        aperture = self.aperture._transmission(coordinates)
+        return self._orthonormalise(aperture, ikes) 
+
+    def basis(self     : ApertureLayer, 
+              npixels  : int, 
+              diameter : float) -> Array:
+        self.__doc__ = inspect.getdoc(super().basis)
+        return self._basis(pixel_coords(npixels, diameter/npixels))
+
+    def _opd(self : ApertureLayer, coordinates : Array) -> Array:
+        self.__doc__ = inspect.getdoc(super()._opd)
+        return self.calculate(self._basis(coordinates), self.coefficeints)
+    
+    def opd(self     : ApertureLayer, 
+            npixels  : int, 
+            diameter : float) -> Array:
+        self.__doc__ = inspect.getdoc(super().opd)
+        return self.calculate(self.basis(npixels, diameter), self.coefficeints)
+
+
+    def _orthonormalise(self     : ApertureLayer, 
+                        aperture : Array, 
+                        zernikes : Array) -> Array:
+        """
+        Orthonomalises the zernike polynomials on the aperture.
+        
+        Parameters
+        ----------
+        aperture : Array
+            An array representing the aperture.
+        zernikes : Array
+            The zernike polynomials to orthonormalise on the aperture.
+ 
+        Returns
+        -------
+        basis : Array
+            The orthonormalised zernike polynomials evaluated on the aperture.
+        """
+        pixel_area = aperture.sum()
+        shape = zernikes.shape
+        basis = np.zeros(shape).at[0].set(aperture)
+ 
+        nterms = len(zernikes)
+        for j in range(nterms):
+            intermediate = zernikes[j] * aperture
+            coefficient = np.zeros((nterms, 1, 1), dtype=float)
+            mask = (np.arange(1, nterms) > j + 1).reshape((-1, 1, 1))
+ 
+            coefficient = -1 / pixel_area * \
+                (zernikes[j] * basis[1:] * aperture * mask)\
+                .sum(axis = (1, 2))\
+                .reshape(-1, 1, 1) 
+
+            intermediate += (coefficient * basis[1:] * mask).sum(axis = 0)
+            basis = basis\
+                .at[j]\
+                .set(intermediate / \
+                    np.sqrt((intermediate ** 2).sum() / pixel_area))
+        return basis
+
+
+    def make_staic(self     : ApertureLayer,
+                   npixels  : int, 
+                   diameter : float) -> ApertureLayer:
+        """
+        Returns the static version of the input aperture calcualted on the
+        coordinates defined by npixels and diameter.
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels accross one edge of the aperture.  
+        diameter : float, meters
+            The diameter of the aperture in meters. 
+
+        Returns
+        -------
+        aperture: ApertureLayer
+            The BasisOptic version of this aperture.
+        """
+        coordinates = self._coordinates(pixel_coords(npixels, diameter/npixels))
+        transmission = self._transmission(coordinates)
+        basis = self._basis(coordinates)
+        return BasisOptic()(basis=basis, transmission=transmission, 
+            coefficients=self.coefficients, normalise=self.normalise)
 
 
 ###############
 ### Spiders ###
 ###############
-class Spider(DynamicAperture, ABC):
+# These should only really exist in compoud apertures
+class Spider(DynamicAperture):
     """
     An abstract class for generating aperture spiders struts.
 
@@ -1634,23 +1447,6 @@ class Spider(DynamicAperture, ABC):
         strut = np.where((theta > np.pi / 2.) & (theta < 3. * np.pi / 2.), 1.,
             dist)
         return strut
-
-
-    def _extent(self : ApertureLayer) -> float: # pragma: no cover
-        """
-        Returns the largest distance to the outer edge of the aperture from the
-        centre.
-
-        Returns
-        -------
-        extent : float
-            The maximum distance from the centre to edge of aperture.
-        """
-        raise NotImplementedError("The `Spider` class and its derivatives "
-            "are not designed to be used with the `AberatedAperture` class. "
-            "If this is part of a `CompoundAperture` place the "
-            "`AberratedAperture`s into the `CompoundAperture` not the "
-            "other way arround.")
 
 
 class UniformSpider(Spider):
@@ -1745,453 +1541,28 @@ class UniformSpider(Spider):
             The array of all the individual struts.
         """
         coordinates = self._coordinates(coordinates)
-        angles = np.linspace(0, 2. * np.pi, self.nstruts, endpoint=False)
+        angles = np.linspace(0, 2*np.pi, self.nstruts, endpoint=False)
         angles += self.rotation
         return vmap(self._strut, in_axes=(0, None))(angles, coordinates) 
 
  
     def _soft_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the soft edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The softed edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._soft_edged)
         struts = self._stacked_struts(coordinates) - self.strut_width / 2.
         softened = self._soften(struts)
         return softened.prod(axis=0)
 
 
     def _hard_edged(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Calcualtes the hard edged aperture shape on the input coordinates.
-
-        Parameters
-        ----------
-        coordinates: Array, meters
-            The coordinates to calculate the aperture shape on.
-
-        Returns
-        -------
-        aperture: Array
-            The hard edged aperture shape.
-        """
+        self.__doc__ = inspect.getdoc(super()._hard_edged)
         struts = self._stacked_struts(coordinates) > self.strut_width / 2. 
         return struts.prod(axis=0)
-
-
-###################
-### Aberrations ###
-###################
-class AbstractAberratedAperture(AberrationLayer(), ApertureLayer):
-    """
-    An abstract class for generating apertures with aberrations. This 
-    instantiates the coefficients parameter, defining the amplitude of each 
-    basis vector of the aberrations.
-    
-    Attributes
-    ----------
-    coefficients: Array
-        The amplitude of each basis vector of the aberrations.
-    normalise : bool = False
-        Whether to normalise the wavefront after passing through the
-        aperture.
-    """
-    coefficients : Array
-
-
-    def __init__(self         : AberrationLayer, 
-                 coefficients : Array,
-                 **kwargs) -> ApertureLayer:
-        
-        """
-        Constructor for the AbstractAberratedAperture class.
-
-        Parameters
-        ----------
-        coefficients: Array
-            The amplitude of each basis vector of the aberrations.
-        """
-        super().__init__(**kwargs)
-
-        self.coefficients = np.asarray(coefficients).astype(float)
-        # NOTE: Dimension checking is complex here becuase AberratedApertures
-        # and CompoundApertures must always have 1d coefficeints, but 
-        # MultiApertures can have 2d coefficients.
-
-
-    @abstractmethod
-    def _basis(self        : ApertureLayer, 
-               coordinates : Array) -> Array: # pragma: no cover
-        """
-        Compute the basis vectors of the aperture aberrations on the provided 
-        coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the basis vectors on.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the basis vectors of the aperture aberrations.
-        """
-
-
-    @abstractmethod
-    def get_basis(self     : ApertureLayer, 
-                  npixels  : int, 
-                  diameter : float) -> Array: # pragma: no cover
-        """
-        Compute the basis vectors of the aperture aberrations on the provided 
-        coordinates with the specified number of pixels and diameter.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
-
-        Returns
-        -------
-        basis : Array 
-            The array of the basis vectors of the aperture aberrations.
-        """
- 
-
-    @abstractmethod
-    def _opd(self        : ApertureLayer, 
-             coordinates : Array) -> Array: # pragma: no cover
-        """
-        Compute the total optical path difference of the aperture aberrations 
-        on the provided coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the opd on.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the total opd of the aperture aberrations.
-        """
-
-
-    @abstractmethod
-    def get_opd(self     : ApertureLayer, 
-                npixels  : int, 
-                diameter : float) -> Array: # pragma: no cover
-        """
-        Compute the total optical path difference of the aperture aberrations 
-        on the provided coordinates with the specified number of pixels and 
-        diameter.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
-
-        Returns
-        -------
-        basis : Array 
-            The array of the total opd of the aperture aberrations.
-        """
-
-
-class AberratedAperture(AbstractAberratedAperture):
-    """
-    A class for generating apertures with aberrations. This class generates the
-    basis vectors of the aberrations at run time, allowing for the aperture and
-    aberrations to be recovered simultaneously.
- 
-    Attributes
-    ----------
-    aperture: ApertureLayer
-        The aperture on which the aberration basis is defined.
-    basis: list[Zernike]
-        A list of basis functions that represent the basis. The exact 
-        polynomials that are represented will depend on the aperture shape. 
-    coefficients: Array
-        The amplitude of each basis vector of the aberrations.
-    normalise : bool = False
-        Whether to normalise the wavefront after passing through the aperture.
-    """
-    aperture : ApertureLayer
-    basis    : ZernikeBasis
-
-    
-    def __init__(self         : ApertureLayer, 
-                 aperture     : ApertureLayer, 
-                 noll_inds    : Array,
-                 coefficients : Array = None,
-                 **kwargs) -> ApertureLayer: 
-        """
-        Constructor for the AberratedAperture class.
-
-        Parameters
-        ----------
-        aperture: ApertureLayer
-            The aperture on which the aberration basis is defined.
-        noll_inds: List[int]
-            The noll indices are a scheme for indexing the Zernike
-            polynomials. Normally these polynomials have two 
-            indices but the noll indices prevent an order to 
-            these pairs. All basis can be indexed using the noll
-            indices based on `n` and `m`. 
-        coefficients: Array = None
-            The amplitude of each basis vector of the aberrations. If nothing 
-            is provided, then the coefficients are set to zero.
-        """
-        # Ensure aperture is dynamic
-        if not isinstance(aperture, DynamicAperture):
-            raise TypeError("AberratedApertures can not contain Static, "
-                "Compound or Multi Apertures. AberratedApertures can be "
-                "placed in Compound or Multi Apertures, which can then be "
-                "promoted to Static.")
-
-        # Ensure transmissice
-        if aperture.occulting:
-            raise ValueError("AberratedApertures can not be occulting.")
-
-        # Set Aperture
-        self.aperture = aperture
-
-        # Set Basis
-        self.basis = dLux.aberrations.ZernikeBasis(noll_inds)
-
-        # Initialise the coefficinets
-        coefficients = np.zeros(len(noll_inds)) if coefficients is None \
-            else np.asarray(coefficients).astype(float)
-
-        super().__init__(coefficients=coefficients, **kwargs)
-        
-        # Dimensionality check
-        dLux.exceptions.validate_bc_attr_dims(
-            noll_inds.shape, self.coefficients.shape, "coefficients")
- 
-
-    def __call__(self : ApertureLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Apply the aperture and the abberations to the wavefront.  
- 
-        Parameters
-        ----------
-        wavefront: Wavefront
-            The wavefront that is passing through the aperture.
-
-        Returns
-        -------
-        wavefront: Wavefront
-            The wavefront after passing through the aperture.
-        """
-        # Calculate aperture and opd
-        coordinates = wavefront.coordinates
-        transmission = self.aperture._transmission(coordinates)
-        phase = wavefront.phase + self._opd(coordinates) * wavefront.wavenumber
-        amplitude = transmission * wavefront.amplitude
-        wavefront = wavefront.set(['amplitude', 'phase'], [amplitude, phase])
-
-        # This must be done after the amplitude is updated because we dont
-        # know what aperture have been applied upstream
-        if self.aperture.normalise:
-            wavefront = wavefront.normalise()
-        return wavefront
- 
-
-    def _transmission(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Compute the array representing the aperture on the provided coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the aperture on.
-
-        Returns
-        -------
-        transmission : Array 
-            The array representing the transmission of the aperture.
-        """
-        return self.aperture._transmission(coordinates)
-        
-
-    def get_transmission(self     : ApertureLayer, 
-                         npixels  : int, 
-                         diameter : float) -> Array:
-        """
-        Compute the array representing the aperture on a set of coordinates 
-        with the specified number of pixels and diameter.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the array to calcualte the transmission on.
-
-        Returns
-        -------
-        transmission : Array 
-            The array representing the transmission of the aperture.
-        """
-        return self.aperture._transmission(pixel_coords(npixels, 
-            diameter / npixels))
-
-
-    def _basis(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Compute the basis vectors of the aperture aberrations on the provided 
-        coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the basis vectors on.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the basis vectors of the aperture aberrations.
-        """
-        coordinates = self.aperture._normalised_coordinates(coordinates)
-
-        if isinstance(self.aperture, RegularPolygonalAperture):
-            ikes = self.basis.calculate_basis(coordinates, self.aperture.nsides)
-        else:
-            ikes = self.basis.calculate_basis(coordinates)
-
-        is_reg_pol = isinstance(self.aperture, RegularPolygonalAperture)
-        is_circ = isinstance(self.aperture, CircularAperture)
-
-        if is_circ or is_reg_pol:
-            return ikes
-
-        aperture = self.aperture._transmission(coordinates)
-        return self._orthonormalise(aperture, ikes) 
-
-
-    def get_basis(self     : ApertureLayer, 
-                  npixels  : int, 
-                  diameter : float) -> Array:
-        """
-        Compute the basis vectors of the aperture aberrations on the provided 
-        coordinates with the specified number of pixels and diameter.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
-
-        Returns
-        -------
-        basis : Array 
-            The array of the basis vectors of the aperture aberrations.
-        """
-        return self._basis(pixel_coords(npixels, diameter / npixels))
- 
-
-    def _opd(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Compute the total optical path difference of the aperture aberrations 
-        on the provided coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the opd on.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the total opd of the aperture aberrations.
-        """
-        basis = self._basis(coordinates)
-        return (basis * self.coefficients[:, None, None]).sum(axis=0)
-
-
-    def get_opd(self : ApertureLayer, npixels : int, diameter : float) -> Array:
-        """
-        Compute the total optical path difference of the aperture aberrations 
-        on the provided coordinates with the specified number of pixels and 
-        diameter.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
-
-        Returns
-        -------
-        basis : Array 
-            The array of the total opd of the aperture aberrations.
-        """
-        return self._opd(pixel_coords(npixels, diameter / npixels))
-
-
-    def _orthonormalise(self     : ApertureLayer, 
-                        aperture : Array, 
-                        zernikes : Array) -> Array:
-        """
-        Orthonomalises the zernike polynomials on the aperture.
-        
-        Parameters
-        ----------
-        aperture : Array
-            An array representing the aperture.
-        zernikes : Array
-            The zernike polynomials to orthonormalise on the aperture.
- 
-        Returns
-        -------
-        basis : Array
-            The orthonormalised zernike polynomials evaluated on the aperture.
-        """
-        pixel_area = aperture.sum()
-        shape = zernikes.shape
-        basis = np.zeros(shape).at[0].set(aperture)
- 
-        nterms = len(zernikes)
-        # for j in np.arange(1, nterms):
-        for j in range(nterms):
-            intermediate = zernikes[j] * aperture
-            coefficient = np.zeros((nterms, 1, 1), dtype=float)
-            mask = (np.arange(1, nterms) > j + 1).reshape((-1, 1, 1))
- 
-            coefficient = -1 / pixel_area * \
-                (zernikes[j] * basis[1:] * aperture * mask)\
-                .sum(axis = (1, 2))\
-                .reshape(-1, 1, 1) 
-
-            intermediate += (coefficient * basis[1:] * mask).sum(axis = 0)
-            
-            basis = basis\
-                .at[j]\
-                .set(intermediate / \
-                    np.sqrt((intermediate ** 2).sum() / pixel_area))
-        
-        return basis
 
 
 ###########################
 ### Composite Apertures ###
 ###########################
-class CompositeAperture(AbstractDynamicAperture):
+class CompositeAperture(BaseDynamicAperture):
     """
     An abstract class used to combine multiple apertures so that more complex
     apertures can have global transformations applied to them. Two examples 
@@ -2242,22 +1613,17 @@ class CompositeAperture(AbstractDynamicAperture):
             Whether to normalise the wavefront after passing through the
             aperture.
         """
-        super().__init__(centre = centre,
-                         shear = shear, 
-                         compression = compression,
-                         rotation = rotation,
-                         normalise = normalise)
-        
         for aperture in apertures:
-            if not isinstance(aperture, (ApertureLayer, 
-                AbstractAberratedAperture)):
+            if not isinstance(aperture, (ApertureLayer, BaseAberratedAperture)):
                 raise TypeError("All the apertures should be ApertureLayers.")
-            if isinstance(aperture, AbstractStaticAperture):
+            if isinstance(aperture, StaticAperture):
                 raise TypeError("StaticApertures cannot be put into " + \
                     "Compound or Multi Apertures. Please promote the " + \
                     "Compound or Multi Aperture to a StaticAperture.")
-
         self.apertures = list_to_dictionary(apertures, ordered=False)
+
+        super().__init__(centre=centre, shear=shear, compression=compression, 
+            rotation=rotation, normalise=normalise)
 
 
     def _stacked_apertures(self : ApertureLayer, coordinates : Array) -> Array:
@@ -2275,244 +1641,104 @@ class CompositeAperture(AbstractDynamicAperture):
         apertures: Array
             The array of all the individual apertures.
         """
-        # Get coordinates and define leaf function
         coordinates = self._coordinates(coordinates)
-        _leaf = lambda ap: isinstance(ap, ApertureLayer)
-
-        # Get Apertures
-        get_aperture = lambda ap: ap._transmission(coordinates)
-        aps = tree_map(get_aperture, self.apertures, is_leaf=_leaf)
-
-        # Construct Aperture
-        return np.array(list(aps.values()))
-
-
-    @abstractmethod
-    def _transmission(self        : ApertureLayer, 
-                  coordinates : Array) -> Array: # pragma: no cover
-        """
-        Compute the array representing the aperture on the provided coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the aperture on.
-
-        Returns
-        -------
-        aperture : Array 
-            The array representing the transmission of the combined 
-            sub-apertures. 
-        """
-    
-
-    def get_transmission(self     : ApertureLayer, 
-                         npixels  : int, 
-                         diameter : float) -> Array:
-        """
-        Compute the array representing the aperture on a set of coordinates 
-        with the specified number of pixels and diameter.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
-
-        Returns
-        -------
-        transmission : Array 
-            The array representing the transmission of the aperture.
-        """
-        return self._transmission(pixel_coords(npixels, diameter / npixels))
-
-
-    def _basis(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Compute the basis vectors of the aperture aberrations on the provided 
-        coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the basis vectors on.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the basis vectors of the aperture aberrations.
-        """
-        coordinates = self._coordinates(coordinates)
-        aberrated = self._aberrated_apertures()
-        _leaf = lambda ap: isinstance(ap, ApertureLayer)
-        get_basis = lambda ap: ap._basis(coordinates)
-        basis = tree_map(get_basis, aberrated, is_leaf=_leaf)
-        return np.squeeze(np.array(tree_flatten(basis)[0]))
-
-    
-    def get_basis(self     : ApertureLayer, 
-                  npixels  : int, 
-                  diameter : float) -> Array:
-        """
-        Compute the basis vectors of the aperture aberrations on the provided 
-        coordinates with the specified number of pixels and diameter.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
-
-        Returns
-        -------
-        basis : Array 
-            The array of the basis vectors of the aperture aberrations.
-        """
-        return self._basis(pixel_coords(npixels, diameter / npixels))
-
-
-    def _coefficients(self : ApertureLayer) -> Array:
-        """
-        Returns the coefficients of the stored aberrated apertures.
-
-        Returns 
-        -------
-        coefficients : Array
-           The coefficients of the aberrated sub-aperture/apertures
-        """
-        aberrated = self._aberrated_apertures()
-        _leaf = lambda ap: isinstance(ap, ApertureLayer)
-        get_coeffs = lambda ap: ap.coefficients
-        coeffs = tree_map(get_coeffs, aberrated, is_leaf=_leaf)
-        return np.squeeze(np.array(tree_flatten(coeffs)[0]))
-
-    
-    @property
-    def coefficients(self : ApertureLayer) -> Array:
-        """
-        Returns the coefficinets of the stored aberrated apertures.
-
-        Returns
-        -------
-        coefficients : Array
-           The coefficients of the aberrated sub-aperture/apertures
-        """
-        return self._coefficients()
-
-
-    def _opd(self : ApertureLayer, coordinates : Array) -> Array:        
-        """
-        Compute the total optical path difference of the aperture aberrations 
-        on the provided coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the opd on.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the total opd of the aperture aberrations.
-        """
-        # Get the aberrated aperture in a list
-        aberrated = self._aberrated_apertures()
-
-        # Check for an aberrated aperture
-        if not any(aberrated):
-            return np.array(0)
-        
-        # Define leaf and get coordinates
-        _leaf = lambda ap: isinstance(ap, ApertureLayer)
-        coordinates = self._coordinates(coordinates)
-
-        # Get basis
-        get_basis = lambda ap: ap._basis(coordinates)
-        basis = tree_map(get_basis, aberrated, is_leaf=_leaf)
-        basis = np.array(tree_flatten(basis)[0])
-
-        # Get coeffs
-        get_coeffs = lambda ap: ap.coefficients
-        coeffs = tree_map(get_coeffs, aberrated, is_leaf=_leaf)
-        coeffs = np.array(tree_flatten(coeffs)[0])
-
-        # Calculate opd
-        return (basis * coeffs[:, :, None, None]).sum((0, 1))
-        
-
-    def get_opd(self : ApertureLayer, npixels : int, diameter : float) -> Array:
-        """
-        Compute the total optical path difference of the aperture aberrations 
-        on the provided coordinates with the specified number of pixels and 
-        diameter.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the aperture in meters. 
-
-        Returns
-        -------
-        basis : Array 
-            The array of the total opd of the aperture aberrations.
-        """
-        return self._opd(pixel_coords(npixels, diameter / npixels))
+        get_transmission = lambda ap: ap._transmission(coordinates)
+        transmissions = [get_transmission(ap) for ap in self.apertures.values()]
+        return np.array(transmissions)
 
 
     def _aberrated_apertures(self : ApertureLayer) -> list:
         """
         Returns the individual apertures with aberrations.
+        Note: This method returns CompoundApertures if it contains apertures
+        with aberrations in them.
 
         Returns
         -------
-        apertures: list[AberratedApertures]
+        apertures: list[Union[AberratedAperture, CompoundAperture]]
             The list of apertures with aberrations.
         """
         # Define leaf fn
-        is_aberrated = lambda leaf: isinstance(leaf, AberratedAperture)
+        def is_aberrated(leaf):
+            if isinstance(leaf, AberratedAperture):
+                return True
+            elif isinstance(leaf, CompoundAperture):
+                if len(leaf._aberrated_apertures()) > 0:
+                    return True
+            return False
 
         # Get aberrated apertures
-        filter_map = tree_map(is_aberrated, self.apertures, is_leaf=is_aberrated)
+        filter_map = tree_map(is_aberrated, self.apertures, 
+            is_leaf=is_aberrated)
         aberrated = filter(self.apertures, filter_map)
         return tree_flatten(aberrated, is_leaf=is_aberrated)[0]
 
+    @property
+    def coefficients(self):
+        coefficeints = [ap.coefficients for ap in self._aberrated_apertures()]
+        return np.array(coefficients)
+
+    def _basis(self : ApertureLayer, coordinates : Array) -> Array:
+        aberrated_apertures = self._aberrated_apertures()
+        basis = [ap._basis(coordiantes) for ap in aberrated_apertures]
+        return np.array(coefficients)
+    
+    def _opd(self : ApertureLayer, coordinates : Array) -> Array:
+        self.__doc__ = inspect.getdoc(super()._opd)
+        return self.calculate(self._basis(coordinates), self.coefficeints)
 
     def __call__(self : ApertureLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Apply the aperture to an incoming wavefront.
+        self.__doc__ = inspect.getdoc(super().__call__)
 
-        Parameters
-        ----------
-        wavefront: Wavefront
-            The incoming wavefront.
-
-        Returns
-        -------
-        wavefront: Wavefront
-            The outgoing wavefront.
-        """
         coordinates = wavefront.coordinates
-        aper = self._transmission(coordinates)
-        opd = self._opd(coordinates)
+        amplitude = wavefront.amplitude * self._transmission(coordinates)
 
-        # Calcualte and update amplitude and phase
-        phase = wavefront.phase + opd * wavefront.wavenumber
-        amplitude = wavefront.amplitude * aper
-        wavefront = wavefront.set(['amplitude', 'phase'], [amplitude, phase])
+        if len(self._aberrated_apertures()) == 0:
+            wavefront = wavefront.set('ampltiude', amplitude)
+        else:
+            opd = self._opd(coordinates)
+            phase = wavefront.phase + opd * wavefront.wavenumber
+            wavefront = wavefront.set(['amplitude', 'phase'], 
+                [amplitude, phase])
+        
         if self.normalise:
             wavefront = wavefront.normalise()
         return wavefront
 
 
+    def make_staic(self     : ApertureLayer,
+                   npixels  : int, 
+                   diameter : float) -> ApertureLayer:
+        """
+        Returns the static version of the input aperture calcualted on the
+        coordinates defined by npixels and diameter.
+
+        Parameters
+        ----------
+        npixels : int
+            The number of pixels accross one edge of the aperture.  
+        diameter : float, meters
+            The diameter of the aperture in meters. 
+
+        Returns
+        -------
+        aperture: ApertureLayer
+            The BasisOptic version of this aperture.
+        """
+        coordinates = self._coordinates(pixel_coords(npixels, diameter/npixels))
+        transmission = self._transmission(coordinates)
+
+        if len(self._aberrated_apertures()) == 0:
+            return Optic()(transmission=transmission, normalise=self.normalise)
+        else:
+            basis = self._basis(coordinates)
+        return BasisOptic()(basis=basis, transmission=transmission, 
+            coefficients=self.coefficients, normalise=self.normalise)
+
+
     def __getattr__(self : ApertureLayer, key : str) -> Any:
         """
         Get the attribute of the aberrated apertures.
-
-        TODO: Needs testing
 
         Parameters
         ----------
@@ -2599,31 +1825,12 @@ class CompoundAperture(CompositeAperture):
             raise TypeError("CompoundAperture can only have one " + \
                              "AberratedAperture.")
             
-        super().__init__(apertures,
-                         centre = centre,
-                         shear = shear,
-                         compression = compression,
-                         rotation = rotation,
-                         normalise = normalise)
-        
+        super().__init__(apertures=apertures, centre=centre, shear=shear, 
+            compression=compression, rotation=rotation, normalise=normalise)
 
     def _transmission(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Compute the array representing the aperture on the provided coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the aperture on.
-
-        Returns
-        -------
-        aperture : Array 
-            The array representing the transmission of the combined 
-            sub-apertures. 
-        """
-        aps = self._stacked_apertures(coordinates)
-        return aps.prod(axis=0)
+        self.__doc__ = inspect.getdoc(super()._transmission)
+        return self._stacked_apertures(coordinates).prod(axis=0)
 
 
 class MultiAperture(CompositeAperture):
@@ -2653,411 +1860,8 @@ class MultiAperture(CompositeAperture):
         Whether to normalise the wavefront after passing through the aperture.
     """
 
-    
-    def __init__(self        : ApertureLayer,
-                 apertures   : list,
-                 centre      : Array = np.array([0., 0.]), 
-                 shear       : Array = np.array([0., 0.]),
-                 compression : Array = np.array([1., 1.]),
-                 rotation    : Array = np.array(0.),
-                 normalise   : bool  = False) -> ApertureLayer:
-        """
-        Constructor for the MultiAperture class.
-
-        Parameters
-        ----------
-        apertures: list[Aperture]
-            The sub-apertures that make up the full aperture.
-        centre: Array, meters = np.array([0., 0.])
-            The (x, y) coordinates of the centre of the aperture.
-        shear: Array = np.array([0., 0.])
-            The (x, y) linear shear of the aperutre.
-        compression: Array  = np.array([1., 1.]) 
-            The (x, y) compression of the aperture. 
-        rotation: Array, radians = np.array(0.)
-            The clockwise rotation of the aperture.
-        normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
-        """
-        super().__init__(apertures,
-                         centre = centre,
-                         shear = shear,
-                         compression = compression,
-                         rotation = rotation,
-                         normalise = normalise)
-
-
     def _transmission(self : ApertureLayer, coordinates : Array) -> Array:
-        """
-        Compute the array representing the aperture on the provided coordinates.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the aperture on.
-
-        Returns
-        -------
-        aperture : Array 
-            The array representing the transmission of the combined 
-            sub-apertures. 
-        """
-        aps = self._stacked_apertures(coordinates)
-        return aps.sum(axis=0)
-
-
-    def _aberrated_apertures(self : ApertureLayer) -> list:
-        """
-        Returns the individual apertures with aberrations.
-        Note: This method returns CompoundApertures if it contains apertures
-        with aberrations in them.
-
-        Returns
-        -------
-        apertures: list[Union[AberratedAperture, CompoundAperture]]
-            The list of apertures with aberrations.
-        """
-        # Define leaf fn
-        def is_aberrated(leaf):
-            if isinstance(leaf, AberratedAperture):
-                return True
-            elif isinstance(leaf, CompoundAperture):
-                if len(leaf._aberrated_apertures()) > 0:
-                    return True
-            return False
-
-        # Get aberrated apertures
-        filter_map = tree_map(is_aberrated, self.apertures, 
-            is_leaf=is_aberrated)
-        aberrated = filter(self.apertures, filter_map)
-        return tree_flatten(aberrated, is_leaf=is_aberrated)[0]
-
-
-########################
-### Static Apertures ###
-########################
-class AbstractStaticAperture(TransmissiveOptic(), ApertureLayer):
-    """
-    An abstract class used to represent static apertures. Static apertures 
-    pre-calcualte the aperture array on the specified init time cooridantes and
-    can not have its parameters optimised. 
-
-    Attributes
-    ----------
-    aperture: Array
-        The aperture represented as an array.
-    normalise : bool = False
-        Whether to normalise the wavefront after passing through the aperture.
-    """
-
-
-    def __init__(self        : ApertureLayer, 
-                 aperture    : ApertureLayer, 
-                 npixels     : int   = None, 
-                 diameter    : float = None,
-                 coordinates : Array = None,
-                 **kwargs) -> ApertureLayer:
-        """
-        Constructor for the AbstractStaticAperture class.
-
-        Parameters
-        ----------
-        aperture: ApertureLayer
-            The aperture to be pre-calculated and represented as an array.
-        npixels : int = None
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters = None
-            The diameter of the aperture in meters. 
-        coordinates : Array, meters = None
-            The coordinate system to calculate the aperture on.
-        """
-        # Input check: Coordinates provided
-        if coordinates is not None and \
-            (npixels is not None or diameter is not None):
-            raise ValueError("If coordinates is specified npixels and " + \
-                "diameter can not be provided.")
-        # Input check: Coordinates not provided
-        elif coordinates is None and \
-            (npixels is None or diameter is None):
-            raise ValueError("both npixels and diameter must be provided.")
-        
-        # Generate coordinates if not provided
-        if coordinates is None:
-            coordinates = pixel_coords(npixels, diameter / npixels)
-
-        if isinstance(aperture, AberratedAperture):
-            normalise = aperture.aperture.normalise
-        else:
-            normalise = aperture.normalise
-        transmission = aperture._transmission(coordinates)
-        super().__init__(normalise = normalise, transmission=transmission, 
-            **kwargs)
-
-
-    @property
-    def shape(self : ApertureLayer) -> tuple:
-        """
-        The shape of the aperture array.
-
-        Returns
-        -------
-        shape : tuple
-            The shape of the aperture transmission array.
-        """
-        return self.transmission.shape
-    
-
-    def _transmission(self : ApertureLayer, **kwargs) -> Array:
-        """
-        Compute the array representing the aperture.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the aperture on.
-
-        Returns
-        -------
-        aperture : Array 
-            The array representing the transmission of the combined 
-            sub-apertures. 
-        """
-        return self.transmission
-
-
-    def get_transmission(self : ApertureLayer, **kwargs) -> Array:
-        """
-        Compute the array representing the aperture on a set of coordinates 
-        with the specified number of pixels and diameter.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters
-            The diameter of the array to calcualte the transmission on.
-
-        Returns
-        -------
-        transmission : Array 
-            The array representing the transmission of the aperture.
-        """
-        return self._transmission()
-
-
-class StaticAperture(AbstractStaticAperture):
-    """
-    A class for static pre-calculated apertures, without aberrations. Static
-    apertures with aberrations can be instantiated using the 
-    StaticAberratedAberrated class.
-
-    Attributes
-    ----------
-    aperture: Array
-        The aperture represented as an array.
-    normalise : bool = False
-        Whether to normalise the wavefront after passing through the aperture.
-    """
-
-
-    def __init__(self        : ApertureLayer, 
-                 aperture    : ApertureLayer, 
-                 npixels     : int   = None, 
-                 diameter    : float = None,
-                 coordinates : Array = None,
-                 **kwargs) -> ApertureLayer:
-        """
-        Constructor for the StaticAperture class.
-
-        Parameters
-        ----------
-        aperture: ApertureLayer
-            An instance of DynamicAperture. 
-        npixels : int = None
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters = None
-            The diameter of the aperture in meters. 
-        coordinates : Array, meters = None
-            The coordinate system to calculate the aperture on.
-        """
-        if isinstance(aperture, AbstractStaticAperture):
-            raise TypeError("This Aperture is already static, please "
-                "provide a dynamic aperture.")
-        
-        if isinstance(aperture, (CompoundAperture, MultiAperture)) and \
-            len(aperture._aberrated_apertures()) > 0 or \
-                isinstance(aperture, AberratedAperture):
-            raise TypeError("This Aperture contains aberrated apertures, "
-                "please use the StaticAberratedAperture class.")
-        
-        super().__init__(aperture = aperture, 
-                         npixels = npixels, 
-                         diameter = diameter, 
-                         coordinates = coordinates,
-                         **kwargs)
-
-
-class StaticAberratedAperture(AbstractStaticAperture, 
-                              AbstractAberratedAperture):
-    """
-    A class for static pre-calculated apertures with aberrations. This 
-    pre-calcaultes both the aperture and the basis at init time and can not 
-    have the aperture properties optimised.
-
-    Attributes
-    ----------
-    aperture: Array
-        The aperture represented as an array.
-    basis: Array 
-        The basis represented as an array.
-    normalise : bool = False
-        Whether to normalise the wavefront after passing through the aperture.
-    """
-    basis : Array
-
-
-    def __init__(self        : ApertureLayer, 
-                 aperture    : ApertureLayer, 
-                 npixels     : int   = None, 
-                 diameter    : float = None,
-                 coordinates : Array = None,
-                 ) -> ApertureLayer:
-        """
-        Constructor for the StaticAberratedAperture class.
-
-        Parameters
-        ----------
-        aperture: AberratedAperture
-            An instance of AberratedAperture. 
-        npixels : int = None
-            The number of pixels accross one edge of the aperture.  
-        diameter : float, meters = None
-            The diameter of the aperture in meters. 
-        coordinates : Array, meters = None
-            The coordinate system to calculate the aperture on.
-        normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
-        """
-        # Ensure correct aperture types
-        if not isinstance(aperture, 
-            (AberratedAperture, CompoundAperture, MultiAperture)) or \
-                (isinstance(aperture, (CompoundAperture, MultiAperture)) and \
-                    len(aperture._aberrated_apertures()) == 0):
-            raise TypeError("The provided aperture must have aberrations.")
-        
-        # Input check: Coordinates provided
-        if coordinates is not None and \
-            (npixels is not None or diameter is not None):
-            raise ValueError("If coordinates is specified npixels and " + \
-                "diameter can not be provided.")
-        # Input check: Coordinates not provided
-        elif coordinates is None and \
-            (npixels is None or diameter is None):
-            raise ValueError("both npixels and diameter must be provided.")
-        
-        # Generate coordinates if not provided
-        if coordinates is None:
-            coordinates = pixel_coords(npixels, diameter / npixels)
-
-        super().__init__(aperture=aperture, coordinates=coordinates, 
-            coefficients=aperture.coefficients)
-        self.basis = aperture._basis(coordinates)
-
-
-    def __call__(self : ApertureLayer, wavefront : Wavefront) -> Wavefront:
-        """
-        Apply the aperture to the wavefront.
-
-        Parameters
-        ----------
-        wavefront: Wavefront
-            The wavefront that is passing through the aperture.
-
-        Returns
-        -------
-        wavefront: Wavefront
-            The wavefront after passing through the aperture
-        """
-
-        # Calculate and update amplitude and phase
-        phase = wavefront.phase + self._opd() * wavefront.wavenumber
-        amplitude = wavefront.amplitude * self.transmission
-        wavefront = wavefront.set(['amplitude', 'phase'], [amplitude, phase])
-        if self.normalise:
-            return wavefront.normalise()
-        return wavefront
-
-
-    def _basis(self : ApertureLayer, **kwargs) -> Array:
-        """
-        Compute the basis vectors of the aperture aberrations.
-
-        Parameters
-        ----------
-        coordinates : Array, meters
-            The coordinate system to calculate the basis vectors on.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the basis vectors of the aperture aberrations.
-        """
-        return self.basis
-
-
-    def get_basis(self : ApertureLayer, **kwargs) -> Array:
-        """
-        Compute the basis vectors of the aperture aberrations.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the basis vectors of the aperture aberrations.
-        """
-        return self._basis()
-
-
-    def _opd(self : ApertureLayer, **kwargs) -> Array:
-        """
-        Compute the total optical path difference of the aperture aberrations.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the total opd of the aperture aberrations.
-        """
-        if self.coefficients.ndim == 1:
-            return (self.basis * self.coefficients[:, None, None]).sum(0)
-        else:
-            return (self.basis * \
-                self.coefficients[:, :, None, None]).sum((0, 1))
-
-
-    def get_opd(self : ApertureLayer, **kwargs) -> Array:
-        """
-        Compute the total optical path difference of the aperture aberrations.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the total opd of the aperture aberrations.
-        """
-        return self._opd()
-    
-
-    @property
-    def opd(self : ApertureLayer) -> Array:
-        """
-        Return the total optical path difference of the aperture aberrations.
-
-        Returns
-        -------
-        basis : Array 
-            The array of the total opd of the aperture aberrations.
-        """
-        return self._opd()
+        return self._stacked_apertures(coordinates).sum(axis=0)
 
 
 ###############
