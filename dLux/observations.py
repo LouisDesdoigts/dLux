@@ -18,17 +18,9 @@ Instrument = lambda : dLux.core.BaseInstrument
 class BaseObservation(Base):
     """
     Abstract base class for observations. All observations should inherit from
-    this class and must implement an `.observe()` method that only takes in a
+    this class and must implement an `.model()` method that only takes in a
     single instance of `dLux.Instrument`.
     """
-
-
-    def __init__(self : BaseObservation):
-        """
-        Constructor for the BaseObservation class.
-        """
-        super().__init__()
-
 
     @abstractmethod
     def model(self       : BaseObservation, 
@@ -36,7 +28,6 @@ class BaseObservation(Base):
         """
         Abstract method for the observation function.
         """
-        pass
 
 
 class Dither(BaseObservation):
@@ -67,8 +58,8 @@ class Dither(BaseObservation):
         """
         super().__init__()
         self.dithers = np.asarray(dithers, float)
-        dLux.exceptions.validate_bc_attr_dims(self.dithers.shape, (1, 2), 
-            'dithers')
+        if self.dither.ndim != 2 or self.dither.shape[1] != 2:
+            raise ValueError("dithers must be an array of shape (ndithers, 2)")
 
 
     def dither_position(self       : Dither, 

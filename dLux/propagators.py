@@ -1,7 +1,7 @@
 from __future__ import annotations
 import jax.numpy as np
 from jax import Array
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import dLux
 
 
@@ -78,8 +78,19 @@ class FFT(Propagator):
     
 
     def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
-        self.__doc__ = inspect.getdoc(super().__call__)
+        """
+        Applies the layer to the wavefront.
 
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
         if self.inverse:
             return wavefront.IFFT(self.pad, self.focal_length)
         else:
@@ -140,8 +151,19 @@ class MFT(Propagator):
 
 
     def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
-        self.__doc__ = inspect.getdoc(super().__call__)
+        """
+        Applies the layer to the wavefront.
 
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
         if self.inverse:
             return wavefront.IMFT(self.npixels, self.pixel_scale,
                 focal_length=self.focal_length)
@@ -220,8 +242,19 @@ class ShiftedMFT(MFT):
         
 
     def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
-        self.__doc__ = inspect.getdoc(super().__call__)
+        """
+        Applies the layer to the wavefront.
 
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
         if self.inverse:
             return wavefront.shifted_IMFT(self.npixels, self.pixel_scale,
                 self.shift, self.focal_length, self.pixel)
@@ -303,88 +336,18 @@ class FarFieldFresnel(Propagator):
 
 
     def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
-        self.__doc__ = inspect.getdoc(super().__call__)
+        """
+        Applies the layer to the wavefront.
 
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
         return wavefront.shifted_fresnel_prop(self.npixels, self.pixel_scale,
             self.shift, self.focal_length, self.focal_shift, self.pixel)
-
-
-# ###############
-# ### Factory ###
-# ###############
-# class PropagatorFactory():
-#     """
-#     This class is not actually ever instatiated, but is rather a class used to 
-#     give a simple constructor interface that is used to construct the most
-#     commonly used propagators. The constructor is used to determine which
-#     propagator to construct, and then the constructor for that propagator is
-#     called with the remaining arguments.
-#     """
-#     def __new__(cls              : ApertureFactory, 
-#                 npixels          : int,
-#                 pixel_scale      : Array,
-#                 inverse          : bool = False,
-#                 shift            : Array = np.zeros(2),
-#                 pixel            : bool = False,
-#                 focal_length     : float = None,
-#                 focal_shift      : Array = 0.):
-#         """
-#         Constructs a new Propagator object.
-
-#         Parameters
-#         ----------
-#         npixels : int
-#             The number of pixels in the output plane.
-#         pixel_scale : Array, meters/pixel
-#             The pixel scale in the output plane, measured in radians per pixel
-#             if focal_length is None, else meters per pixel.
-#         inverse : bool = False
-#             Should the propagation be performed in the inverse direction.
-#         shift : Array = np.zeros(2)
-#             The (x, y) shift to apply to the wavefront in the output plane.
-#         pixel : bool = False
-#             Should the shift value be considered in units of pixel, or in the
-#             physical units of the output plane. If True the shift is taken in
-#             pixels, otherwise it is taken in the native units of the output 
-#             plane.
-#         focal_length : Array = None, meters
-#             The focal_length of the lens/mirror this propagator represents.
-#         focal_shift : Array = 0, meters
-#             The shift in the propagation distance of the wavefront.
-#         """
-#         # Type checking
-#         if not isinstance(npixels, int):
-#             raise TypeError('npixels must be an integer.')
-#         if not isinstance(inverse, bool):
-#             raise TypeError('inverse must be a boolean.')
-#         if not isinstance(pixel, bool):
-#             raise TypeError('pixel must be a boolean.')
-        
-#         # Fresnel Propagators
-#         if focal_shift != 0.:
-#             if focal_length is None:
-#                 raise ValueError('A focal length must be supplied if '
-#                     'focal_shift is non-zero.')
-            
-#             return CartesianFresnel(npixels, pixel_scale, focal_length, 
-#                 focal_shift, shift, pixel, inverse)
-        
-#         # Angular Propagators
-#         if focal_length is None:
-#             if (shift == np.zeros(2)).all():
-#                 return AngularMFT(npixels, pixel_scale, inverse)
-#             else:
-#                 return ShiftedAngularMFT(npixels, pixel_scale, shift, pixel,
-#                     inverse)
-
-#         # Cartesian Propagators
-#         else:
-#             if (shift == np.zeros(2)).all():
-#                 return CartesianMFT(npixels, pixel_scale, focal_length, 
-#                     inverse)
-#             else:
-#                 return ShiftedCartesianMFT(npixels, pixel_scale, focal_length,
-#                     shift, pixel, inverse)
-
-
-# # TODO: Asserts

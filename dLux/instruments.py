@@ -10,6 +10,7 @@ from inspect import signature
 from typing import Union
 from warnings import warn
 from abc import abstractmethod
+import dLux.utils as dlu
 import dLux
 
 
@@ -21,6 +22,7 @@ Optics      = lambda : dLux.optics.BaseOptics
 Detector    = lambda : dLux.detectors.BaseDetector
 Source      = lambda : dLux.sources.BaseSource
 Observation = lambda : dLux.observations.BaseObservation
+Image       = lambda : dLux.images.Image
 
 
 
@@ -90,21 +92,22 @@ class Instrument(Base):
         # TODO: Update for names tuples
         if isinstance(sources, (Source(), tuple)):
             sources = [sources]
-        for source in sources:
-            if isinstance(source, tuple):
-                source = source[0]
-            if not isinstance(source, Source()):
-                raise ValueError("sources must be a list of Source objects.")
-        self.sources = dLux.utils.list_to_dictionary(sources, ordered=False)
+        # for source in sources:
+        #     if isinstance(source, tuple):
+        #         source = source[0]
+        #     if not isinstance(source, Source()):
+        #         raise ValueError("sources must be a list of Source objects.")
+        self.sources = dlu.list_to_dictionary(sources, False, Source())
 
         # Detector
-        if not isinstance(detector, (Detector(), type(None))):
+        if not isinstance(detector, Detector()) and detector is not None:
             raise ValueError("detector must be an Detector object. "
                 f"Got type {type(detector)}")
         self.detector = detector
 
         # Observation
-        if not isinstance(observation, (Observation(), type(None))):
+        if (not isinstance(observation, Observation()) and 
+            observation is not None):
             raise ValueError("observation must be an Observation object.")
         self.observation = observation
 
@@ -183,6 +186,7 @@ class Instrument(Base):
             single array (if return_tree is false), or a dict of the output for
             each source.
         """
-        psf = self.optics.model(self.sources)
-        image = self.detector.model(psf) if self.detector is not None else psf
+        psf = self.optics.model(list(self.sources.values()))
+        image = Image()(psf, self.optics.true_pixel_scale)
+        image = self.detector.model(image) if self.detector is not None else psf
         return np.array(tree_flatten(image)[0]).sum(0)

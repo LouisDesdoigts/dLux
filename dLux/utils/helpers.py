@@ -7,7 +7,10 @@ from jax import Array
 __all__ = ["list_to_dictionary"]
 
 
-def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
+def list_to_dictionary(
+    list_in : list, 
+    ordered : bool,
+    allowed_types : tuple) -> dict:
     """
     Converts some input list of dLux layers and converts them into an
     OrderedDict with the correct structure, ensuring that all keys are unique.
@@ -16,8 +19,10 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
     ----------
     list_in : list
         The list of dLux Layersto be converted into a dictionary.
-    ordered : bool = True
+    ordered : bool
         Whether to return an ordered or regular dictionary.
+    allowed_types : tuple
+        The allowed types of layers to be included in the dictionary.
 
     Returns
     -------
@@ -33,6 +38,11 @@ def list_to_dictionary(list_in : list, ordered : bool = True) -> dict:
             item, name = item
         else:
             name = item.__class__.__name__
+
+        # Check input types
+        if not isinstance(item, allowed_types):
+            raise TypeError(f"Item {name} is not an allowed type, got "
+                f"{type(item)}")
 
         # Check for Repeats
         if name in names:

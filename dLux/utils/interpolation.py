@@ -6,8 +6,8 @@ import dLux.utils.coordinates as c
 
 
 # TODO: Resolve scale and scale_array
-__all__ = ["scale_array", "generate_coordinates", "scale", "rotate", 
-    "fourier_rotate"]
+__all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
+    "rotate", "fourier_rotate"]
 
 
 def scale_array(array    : Array,
@@ -33,6 +33,37 @@ def scale_array(array    : Array,
     xs = np.linspace(0, array.shape[0], size_out)
     xs, ys = np.meshgrid(xs, xs)
     return map_coordinates(array, np.array([ys, xs]), order=order)
+
+
+def downsample(arr, n, method='mean'):
+    """
+    Downsample an array by averaging or summing over blocks of size n.
+    
+    Parameters
+    ----------
+    arr : Array
+        The array to be downsampled.
+    n : int
+        The factor by which to downsample the array.
+    method : str
+        The method by which to downsample the array. Options are 'mean' or
+        'sum'.
+    
+    Returns
+    -------
+    arr : Array
+        The downsampled array.
+    """
+    shape = arr.shape
+    if any(dim % n != 0 for dim in shape):
+        raise ValueError('n must be a factor of all dimensions')
+    new_shape = tuple(dim // n for dim in shape) + (n,) * arr.ndim
+    if method == 'mean':
+        return arr.reshape(new_shape).mean(axis=-1)
+    elif method == 'sum':
+        return arr.reshape(new_shape).sum(axis=-1)
+    else:
+        raise ValueError('Invalid method. Choose "mean" or "sum".')
 
 
 def generate_coordinates(npixels_in     : int,
@@ -126,11 +157,17 @@ def rotate(array : Array, angle : Array, order : int = 1) -> Array:
     array : Array
         The rotated array.
     """
+    def _rotate(coordinates: Array, rotation: Array) -> Array:
+        x, y = coordinates[0], coordinates[1]
+        new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
+        new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
+        return np.array([new_x, new_y])
+    
     # Get coordinates
     npixels = array.shape[0]
     centre = (npixels - 1) / 2
     coordinates = c.get_pixel_positions((npixels, npixels), indexing='ij')
-    coordinates_rotated = c.rotate(coordinates, angle) + centre
+    coordinates_rotated = _rotate(coordinates, angle) + centre
 
     # Interpolate
     return map_coordinates(array, coordinates_rotated, order=order)

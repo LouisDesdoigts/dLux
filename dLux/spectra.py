@@ -6,7 +6,7 @@ from zodiax import Base
 from jax import vmap, Array
 
 
-__all__ = ["Spectrum", "PolynomialSpectrum"]
+__all__ = ["Spectrum", "PolySpectrum"]
 
 
 class BaseSpectrum(Base):
@@ -32,7 +32,7 @@ class BaseSpectrum(Base):
             The array of wavelengths at which the spectrum is defined.
         """
         self.wavelengths = np.asarray(wavelengths, dtype=float)
-        super().__init()
+        super().__init__()
 
 
     @abstractmethod
@@ -40,14 +40,6 @@ class BaseSpectrum(Base):
         """
         Abstract method to normalise the spectrum. Must be overwitten by child
         classes.
-        """
-
-
-    @abstractmethod
-    def weights(self : Spectrum) -> Array: # pragma: no cover
-        """
-        Abstract getter method for the weights. Must be overwritten by child
-        classes. Should be made into a property
         """
 
 
@@ -113,7 +105,7 @@ class Spectrum(BaseSpectrum):
         return self.divide('weights', weight_sum)
 
 
-class PolynomialSpectrum(BaseSpectrum):
+class PolySpectrum(BaseSpectrum):
     """
     Implements a generic polynomial spectrum. This is likely not needed and
     will probably just be turned into LinearSpectrum in the future.
@@ -135,7 +127,7 @@ class PolynomialSpectrum(BaseSpectrum):
                  wavelengths  : Array,
                  coefficients : Array) -> Spectrum:
         """
-        Constructor for the PolynomialSpectrum class.
+        Constructor for the PolySpectrum class.
 
         Parameters
         ----------

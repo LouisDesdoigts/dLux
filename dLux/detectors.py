@@ -5,10 +5,11 @@ from zodiax import Base
 from collections import OrderedDict
 from copy import deepcopy
 from abc import abstractmethod
+import dLux.utils as dlu
 import dLux
 
 
-__all__ = ["Detector", "BaseDetector"]
+__all__ = ["BaseDetector", "LayeredDetector"]
 
 DetectorLayer = lambda : dLux.detector_layers.DetectorLayer
 
@@ -18,7 +19,7 @@ class BaseDetector(Base):
     def model(self, image): # pragma: no cover
         pass
 
-class Detector(BaseDetector):
+class LayeredDetector(BaseDetector):
     """
     A high level class desgined to model the behaviour of some detectors
     response to some psf.
@@ -48,20 +49,8 @@ class Detector(BaseDetector):
             form (DetectorLayer, key), with the key being used as the dictionary
             key for the layer.
         """
-        # Ensure input is a list
-        if not isinstance(layers, list):
-            raise ValueError("Input layers must be a list, it is"
-                " automatically converted to a dictionary.")
-        # Ensure all entries are dLux layers
-        for layer in layers:
-            if isinstance(layer, tuple):
-                layer = layer[0]
-            if not isinstance(layer, DetectorLayer()):
-                raise ValueError("All entries within layers must be an "
-                    "DetectorLayer object.")
-
-        # Construct layers
-        self.layers = dLux.utils.list_to_dictionary(layers)
+        self.layers = dlu.list_to_dictionary(layers, True, DetectorLayer())
+        super().__init__()
 
 
     def __getattr__(self : Detector, key : str) -> object:
@@ -100,10 +89,6 @@ class Detector(BaseDetector):
         image : Array
             The ouput 'image' after being transformed by the detector layers.
         """
-        if image.ndim != 2:
-            raise ValueError("image must be a 2d array.")
-
-        # Apply detector layers
         for key, layer in self.layers.items():
             image = layer(image)
-        return image
+        return image.image

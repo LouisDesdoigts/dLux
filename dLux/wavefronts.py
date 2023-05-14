@@ -372,7 +372,12 @@ class Wavefront(Base):
         wavefront : Wavefront
             The new wavefront with updated phases.
         """
-        return self.add('phase', phase)
+        # Add this extra non check to allow PhaseOptics to have a None phase
+        # and still be able to be 'added' to it, making this the phase 
+        # equivilent of `wf += opd` -> `wf = wf.add_phase(phase)`
+        if phase is not None:
+            return self.add('phase', phase)
+        return self
 
 
     #######################

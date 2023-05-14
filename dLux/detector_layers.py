@@ -9,7 +9,10 @@ from dLux.utils.interpolation import rotate, fourier_rotate
 
 
 __all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
-           "AddConstant", "IntegerDownsample", "Rotate"]
+    "AddConstant", "IntegerDownsample", "Rotate"]
+
+
+Image = lambda : dLux.images.Image
 
 
 class DetectorLayer(Base):
@@ -28,12 +31,20 @@ class DetectorLayer(Base):
 
     @abstractmethod
     def __call__(self : DetectorLayer, 
-                 image : Array) -> Array: # pragma: no cover
+                 image : Image()) -> Image: # pragma: no cover
         """
-        Abstract method for Detector Layers
-        """
-        return
+        Applies the layer to the Image.
 
+        Parameters
+        ----------
+        image : Image
+            The image to operate on.
+
+        Returns
+        -------
+        image : Image
+            The transformed image.
+        """
 
 class ApplyPixelResponse(DetectorLayer):
     """
@@ -64,19 +75,19 @@ class ApplyPixelResponse(DetectorLayer):
             raise ValueError("pixel_response must be a 2 dimensional array.")
 
 
-    def __call__(self : DetectorLayer, image) -> Array:
+    def __call__(self : DetectorLayer, image : Image()) -> Image:
         """
-        Applies the pixel response to the input image, via a multiplication.
+        Applies the layer to the Image.
 
         Parameters
         ----------
-        image : Array
-            The image to apply the pixel_response to.
+        image : Image
+            The image to operate on.
 
         Returns
         -------
-        image : Array
-            The image with the pixel_response applied.
+        image : Image
+            The transformed image.
         """
         return image * self.pixel_response
 
@@ -117,7 +128,7 @@ class ApplyJitter(DetectorLayer):
             raise ValueError("sigma must be a scalar array.")
 
 
-    def generate_kernel(self : DetectorLayer) -> Array:
+    def generate_kernel(self : DetectorLayer, pixel_scale : Array) -> Array:
         """
         Generates the normalised guassian kernel.
 
@@ -127,28 +138,29 @@ class ApplyJitter(DetectorLayer):
             The gaussian kernel.
         """
         # Generate distribution
-        x = np.linspace(-10, 10, self.kernel_size)
-        kernel = norm.pdf(x,          scale=self.sigma) * \
-                 norm.pdf(x[:, None], scale=self.sigma)
+        sigma = self.sigma * pixel_scale
+        x = np.linspace(-10, 10, self.kernel_size)  * pixel_scale
+        kernel = norm.pdf(x, scale=sigma) * norm.pdf(x[:, None], scale=sigma)
         return kernel/np.sum(kernel)
 
 
-    def __call__(self : DetectorLayer, image : Array) -> Array:
+    def __call__(self : DetectorLayer, image : Image()) -> Image():
         """
-        Convolves the input image with the generate gaussian kernel.
+        Applies the layer to the Image.
 
         Parameters
         ----------
-        image : Array
-            The image to convolve with the gussian kernel.
+        image : Image
+            The image to operate on.
 
         Returns
         -------
-        image : Array
-            The image with the gaussian kernel convolution applied.
+        image : Image
+            The transformed image.
         """
-        kernel = self.generate_kernel()
-        return convolve(image, kernel, mode='same')
+        # TODO: Add pixel scale from image
+        kernel = self.generate_kernel(image.pixel_scale)
+        return image.convolve(kernel)
 
 
 class ApplySaturation(DetectorLayer):
@@ -179,22 +191,21 @@ class ApplySaturation(DetectorLayer):
             raise ValueError("saturation must be a scalar array.")
 
 
-    def __call__(self : DetectorLayer, image : Array) -> Array:
+    def __call__(self : DetectorLayer, image : Image()) -> Image():
         """
-        Applies the satuation effect by reducing all values in the image above
-        saturation, to the saturation value.
+        Applies the layer to the Image.
 
         Parameters
         ----------
-        image : Array
-            The image to apply the saturation to.
+        image : Image
+            The image to operate on.
 
         Returns
         -------
-        image : Array
-            The image with the saturation applied.
+        image : Image
+            The transformed image.
         """
-        return np.minimum(image, self.saturation)
+        return image.minmum('image', self.saturation)
 
 
 class AddConstant(DetectorLayer):
@@ -225,19 +236,19 @@ class AddConstant(DetectorLayer):
             raise ValueError("value must be a scalar array.")
 
 
-    def __call__(self : DetectorLayer, image : Array) -> Array:
+    def __call__(self : DetectorLayer, image : Image()) -> Image():
         """
-        Adds the value to the input image.
+        Applies the layer to the Image.
 
         Parameters
         ----------
-        image : Array
-            The image to add the value to.
+        image : Image
+            The image to operate on.
 
         Returns
         -------
-        image : Array
-            The image with the value added.
+        image : Image
+            The transformed image.
         """
         return image + self.value
 
@@ -269,50 +280,21 @@ class IntegerDownsample(DetectorLayer):
         self.kernel_size = int(kernel_size)
 
 
-    def downsample(self        : DetectorLayer,
-                   array       : Array,
-                   kernel_size : int) -> Array:
-        """
-        Downsamples the input array by kernel_size.
-
-        Parameters
-        ----------
-        array : Array
-            The input array to downsample.
-
-        Returns
-        -------
-        kernel_size : int
-            The size of the downsample kernel.
-        """
-        size_in = array.shape[0]
-        size_out = size_in//kernel_size
-
-        # Downsample first dimension
-        array = array.reshape((size_in*size_out, kernel_size)).sum(1)
-        array = array.reshape(size_in, size_out).T
-
-        # Downsample second dimension
-        array = array.reshape((size_out*size_out, kernel_size)).sum(1)
-        array = array.reshape(size_out, size_out).T
-        return array
-
-
     def __call__(self, image):
         """
-        Downsamples the input image by the internally stored kernel_size.
+        Applies the layer to the Image.
 
         Parameters
         ----------
-        image : Array
-            The image to downsample.
+        image : Image
+            The image to operate on.
 
         Returns
         -------
-        image : Array
-            The downsampled image.
+        image : Image
+            The transformed image.
         """
-        return self.downsample(image, self.kernel_size)
+        return image.downsample(self.kernel_size)
 
 
 class Rotate(DetectorLayer):
@@ -326,7 +308,8 @@ class Rotate(DetectorLayer):
     order : int
         The order of the interpolation.
     """
-    angle   : Array
+    angle : Array
+    order : int
 
 
     def __init__(self  : DetectorLayer, 
@@ -347,18 +330,18 @@ class Rotate(DetectorLayer):
             raise ValueError("angle must be a scalar array.")
 
 
-    def __call__(self : DetectorLayer, image : Array) -> Array:
+    def __call__(self : DetectorLayer, image : Image()) -> Image():
         """
-        Applies the rotation to an image.
+        Applies the layer to the Image.
 
         Parameters
         ----------
-        image : Array
-            The image to rotate.
+        image : Image
+            The image to operate on.
 
         Returns
         -------
-        image : Array
-            The rotated image.
+        image : Image
+            The transformed image.
         """
-        return rotate(image, self.angle, self.order)
+        return image.rotate(self.angle, self.order)

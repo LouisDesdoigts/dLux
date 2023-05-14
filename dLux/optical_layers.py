@@ -51,8 +51,7 @@ class OpticalLayer(Base):
     def __call__(self : OpticalLayer, 
         wavefront : Wavefront) -> Wavefront: # pragma: no cover
         """
-        Applies the appropriate transformations to the wavefront to 'apply' this
-        optical layer.
+        Applies the layer to the wavefront.
 
         Parameters
         ----------
@@ -92,8 +91,7 @@ class AberratedLayer(OpticalLayer):
     Base class for aberration layers. Primarily used for input type checking.
     """
 
-class ShapedLayer(OpticalLayer):    
-
+class ShapedLayer(OpticalLayer):
     @abstractmethod
     def applied_shape(self):
         """
@@ -101,7 +99,7 @@ class ShapedLayer(OpticalLayer):
         matching shape of the waevefront to be applied to.
         """
 
-class BasisLayer(OpticalLayer, ShapedLayer):
+class BasisLayer(ShapedLayer):
     """
     Attributes
     ----------
@@ -115,7 +113,7 @@ class BasisLayer(OpticalLayer, ShapedLayer):
 
 
     def __init__(self         : OpticalLayer,
-                 basis        : Array,
+                 basis        : Array = None,
                  coefficients : Array = None,
                  **kwargs) -> OpticalLayer:
         super().__init__(**kwargs)
@@ -134,7 +132,7 @@ class BasisLayer(OpticalLayer, ShapedLayer):
         return self.basis.shape[-2:]
 
     def calculate(self, basis, coefficients):
-        ndim = coefficeints.ndim
+        ndim = coefficients.ndim
         axes = (tuple(range(ndim)), tuple(range(ndim)))
         return np.tensordot(basis, coefficients, axes=axes)
 
@@ -145,7 +143,9 @@ class BaseTransmissiveOptic(TransmissiveLayer, ShapedLayer):
     def __init__(self         : OpticalLayer,
                  transmission : Array,
                  **kwargs) -> OpticalLayer:
-        self.transmission = np.asarray(transmission, dtype=float)
+        if transmission is not None:
+            transmission = np.asarray(transmission, dtype=float)
+        self.transmission = transmission
         super().__init__(**kwargs)
 
     @property
@@ -156,7 +156,9 @@ class BaseOPDOptic(AberratedLayer, ShapedLayer):
     opd : Array
 
     def __init__(self : OpticalLayer, opd : Array, **kwargs) -> OpticalLayer:
-        self.opd = np.asarray(opd, dtype=float)
+        if opd is not None:
+            opd = np.asarray(opd, dtype=float)
+        self.opd = opd
         super().__init__(**kwargs)
 
     @property
@@ -167,7 +169,9 @@ class BasePhaseOptic(AberratedLayer, ShapedLayer):
     phase : Array
 
     def __init__(self : OpticalLayer, phase : Array, **kwargs) -> OpticalLayer:
-        self.phase = np.asarray(phase, dtype=float)
+        if phase is not None:
+            phase = np.asarray(phase, dtype=float)
+        self.phase = phase
         super().__init__(**kwargs)
 
 class BaseBasisOptic(BaseTransmissiveOptic):
@@ -211,35 +215,32 @@ class BaseBasisOptic(BaseTransmissiveOptic):
         return self.basis.shape[-2:]
 
     def calculate(self, basis, coefficients):
-        ndim = coefficeints.ndim
+        ndim = coefficients.ndim
         axes = (tuple(range(ndim)), tuple(range(ndim)))
         return np.tensordot(basis, coefficients, axes=axes)
 
 
-
-
-
-# Public Classes
+######################
+### Public Classes ###
+######################
 class Optic(BaseTransmissiveOptic, BaseOPDOptic):
 
     def __init__(self         : OpticalLayer,
-                 transmission : Array,
-                 opd          : Array,
+                 transmission : Array = None,
+                 opd          : Array = None,
                  normalise    : bool = False) -> OpticalLayer:
-        super().__init__(transmission=transmission, normalise=normalise)
-
-        # Manually set opd attribute to allow setting None
-        # Maybe need to a kwarg check and pop when initalising in BaseOPDOptic
-        if opd is not None:
-            opd = np.asarray(opd, dtype=float)
+        """
+        
+        """
+        super().__init__(transmission=transmission, opd=opd, 
+            normalise=normalise)
+        
+        if self.opd is not None and self.transmission is not None:
             if opd.shape != self.transmission.shape:
                 raise ValueError("opd and transmission must have the same "
                     "shape.")
-        self.opd = opd
     
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        self.__doc__ = inspect.getdoc(super().__call__)
-
         wavefront *= self.transmission
         wavefront += self.opd
         if self.normalise:
@@ -247,7 +248,7 @@ class Optic(BaseTransmissiveOptic, BaseOPDOptic):
         return wavefront
 
 
-class BasisOptic(BaseTransmissiveOptic, BaseOPDOptic):
+class BasisOptic(BaseBasisOptic):
     """
     Adds an array of phase values to the input wavefront calculated from the
     Optical Path Difference (OPD). The OPDs are calculated from the basis
@@ -267,36 +268,41 @@ class BasisOptic(BaseTransmissiveOptic, BaseOPDOptic):
     @property
     def opd(self):
         return self.calculate(self.basis, self.coefficients)
-
-
-class PhaseOptic(BaseTransmissiveOptic, BasePhaseOptic):
-
-    def __init__(self         : OpticalLayer,
-                 transmission : Array,
-                 phase        : Array,
-                 normalise    : bool = False) -> OpticalLayer:
-        super().__init__(transmission=transmission, normalise=normalise)
-
-        # Manually set phase attribute to allow setting None
-        # Maybe need to a kwarg check and pop when initalising in BasePhaseOptic
-        if phase is not None:
-            phase = np.asarray(phase, dtype=float)
-            if phase.shape != self.transmission.shape:
-                raise ValueError("phase and transmission must have the same "
-                    "shape.")
-        self.phase = phase
     
-    # NOTE: Will not work if phase is None
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        self.__doc__ = inspect.getdoc(super().__call__)
+    def __call__(self, wavefront):
         wavefront *= self.transmission
-        wavefront = wavefront.add_phase(self.phase)
+        wavefront += self.opd
         if self.normalise:
             wavefront = wavefront.normalise()
         return wavefront
 
 
-class PhaseBasisOptic(BaseTransmissiveOptic, BaseOPDOptic):
+class PhaseOptic(BaseTransmissiveOptic, BasePhaseOptic):
+
+    def __init__(self         : OpticalLayer,
+                 transmission : Array = None,
+                 phase        : Array = None,
+                 normalise    : bool = False) -> OpticalLayer:
+        """
+        
+        """
+        super().__init__(transmission=transmission, phase=phase,
+            normalise=normalise)
+
+        if self.phase is not None and self.transmission is not None:
+            if phase.shape != self.transmission.shape:
+                raise ValueError("phase and transmission must have the same "
+                    "shape.")
+    
+    def __call__(self):
+        wavefront *= self.transmission
+        wavefront += self.opd
+        if self.normalise:
+            wavefront = wavefront.normalise()
+        return wavefront
+
+
+class PhaseBasisOptic(BaseBasisOptic):
     """
     Adds an array of phase values to the input wavefront calculated from the
     Optical Path Difference (OPD). The OPDs are calculated from the basis
@@ -317,7 +323,12 @@ class PhaseBasisOptic(BaseTransmissiveOptic, BaseOPDOptic):
     def phase(self):
         return self.calculate(self.basis, self.coefficients)
 
-
+    def __call__(self):
+        wavefront *= self.transmission
+        wavefront = wavefront.add_phase(self.phase)
+        if self.normalise:
+            wavefront = wavefront.normalise()
+        return wavefront
 
 
 

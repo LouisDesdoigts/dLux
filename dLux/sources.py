@@ -8,13 +8,17 @@ from abc import abstractmethod
 import dLux
 
 
-__all__ = ["PointSource", "PointSources", "BinarySource", "ResolvedSource", 
+__all__ = [
+    "PointSource", 
+    "PointSources", 
+    "BinarySource", 
+    "ResolvedSource", 
     "PointResolvedSource"]
 
 
-########################
-### Abstract Classes ###
-########################
+#######################
+### Private Classes ###
+#######################
 class BaseSource(Base):
     # TODO: Add this to allow custom sources
 
@@ -106,7 +110,7 @@ class Source(BaseSource):
             if wavelengths is None:
                 raise ValueError("Either spectrum or wavelengths must be "
                     "specified.")
-            spectrum = dLux.spectra.ArraySpectrum(wavelengths)
+            spectrum = dLux.spectra.Spectrum(wavelengths)
         
         self.spectrum = spectrum
 
@@ -305,28 +309,6 @@ class PointSource(Source):
     """
 
 
-    # def __init__(self        : Source,
-    #              position    : Array    = np.zeros(2),
-    #              flux        : Array    = np.array(1.),
-    #              spectrum    : Spectrum = None,
-    #              wavelengths : Array    = None) -> Source:
-    #     """
-    #     Constructor for the PointSource class.
-
-    #     Parameters
-    #     ----------
-    #     position : Array, radians = np.array([0., 0.])
-    #         The (x, y) on-sky position of this object.
-    #     flux : Array, photons = np.array(1.)
-    #         The flux of the object.
-    #     spectrum : Spectrum = None
-    #         The spectrum of this object, represented by a Spectrum object.
-    #     wavelengths : Array, meters = None
-    #         The array of wavelengths at which the spectrum is defined.
-    #     """
-    #     super().__init__(position, flux, spectrum, wavelengths)
-
-
 class PointSources(Source):
     """
     Concrete Class for multiple unresolved point source objects.
@@ -522,7 +504,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         wavelengths = np.asarray(wavelengths, dtype=float)
         if wavelengths.ndim == 1:
             wavelengths = np.array([wavelengths, wavelengths])
-        spectrum = dLux.spectra.ArraySpectrum(wavelengths)
+        spectrum = dLux.spectra.Spectrum(wavelengths)
 
         super().__init__(position=position,
                          flux=flux,
@@ -603,7 +585,7 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
             The array of wavelengths at which the spectrum is defined.
         """
         wavelengths = np.asarray(wavelengths, dtype=float)
-        spectrum = dLux.spectra.ArraySpectrum(wavelengths)
+        spectrum = dLux.spectra.Spectrum(wavelengths)
 
         super().__init__(position=position, flux=flux, spectrum=spectrum,
             distribution=distribution, contrast=contrast)

@@ -4,15 +4,15 @@ from jax import vmap, Array
 from jax.tree_util import tree_map, tree_flatten
 from equinox import tree_at
 from zodiax import Base
-from collections import OrderedDict
+# from collections import OrderedDict
 from copy import deepcopy
-from inspect import signature
+# from inspect import signature
 from typing import Union
 from warnings import warn
 from abc import abstractmethod
 import inspect
-import dLux
 import dLux.utils as dlu
+import dLux
 
 
 __all__ = ["AngularOptics", "CartesianOptics", "FlexibleOptics", 
@@ -20,16 +20,9 @@ __all__ = ["AngularOptics", "CartesianOptics", "FlexibleOptics",
 
 
 # Alias classes for simplified type-checking
-CreateWavefront   = lambda : dLux.optical_layers.CreateWavefront
-TransmissiveOptic = lambda : dLux.optical_layers.TransmissiveOptic
-AberrationLayer   = lambda : dLux.optical_layers.AberrationLayer
-OpticalLayer      = lambda : dLux.optical_layers.OpticalLayer
-AddOPD            = lambda : dLux.optical_layers.AddOPD
-AddPhase          = lambda : dLux.optical_layers.AddPhase
-Propagator        = lambda : dLux.propagators.Propagator
-FarFieldFresnel   = lambda : dLux.propagators.FarFieldFresnel
-Source            = lambda : dLux.sources.BaseSource
-ShapedOptic       = lambda : dLux.optical_layer.ShapedOptic
+OpticalLayer  = lambda : dLux.optical_layers.OpticalLayer
+Propagator    = lambda : dLux.propagators.Propagator
+Source        = lambda : dLux.sources.BaseSource
 
 
 # Base
@@ -50,10 +43,7 @@ class BaseOptics(Base):
 
     def __getattr__(self : BaseOptics, key : str) -> Any:
         """
-        Accessor for attributes of the class to simplify zodiax paths
-        
-        NOTE: Will not work properly if multiple attributes have the same 
-        parmeter name. Also works with @property methods
+        Accessor for attributes of the class to simplify zodiax paths.
 
         Parameters
         ----------
@@ -102,7 +92,6 @@ class BaseOptics(Base):
             The wavefront object after propagation. Only returned if
             return_wf is True.
         """
-        pass
 
 
     def _format_input(self        : BaseOptics,
@@ -196,48 +185,32 @@ class BaseOptics(Base):
         return psfs.sum(0)
 
 
-    def model(self        : BaseOptics,
-              sources     : Union[dict, list, Source],
-              return_tree : bool = False) -> Array:
+    def model(self    : BaseOptics,
+              sources : Union[list, Source]) -> Array:
         """
-        A base level modelling function designed to robustly handle the different
-        combinations of inputs. Models the sources through the instrument optics
-        and detector. Users must provide optics and source.
-
+        Models the sources through the optics.
         Parameters
         ----------
-        sources : Union[dict, list, Source]
+        sources : Union[list, Source]
             The sources to model.
-        return_tree : bool = False
-            Whether to return a Pytree like object with matching tree structure as
-            the input scene/sources/source. Default is False.
 
         Returns
         -------
-        image : Array, Pytree
-            The image of the scene modelled through the optics with detector and
-            filter effects applied if they are supplied. Returns either as a single
-            array (if return_tree is false), or a pytree like object with matching
-            tree strucutre as the input scene/sources/source.
+        image : Array
+            The sum of the individual source modelled through the optics.
         """
-        # Check valid inputs
         if isinstance(sources, Source()):
             sources = [sources]
-        elif isinstance(sources, (dict, list, tuple)):
-            if isinstance(sources, dict):
-                source_vals = sources.values()
-            else:
-                sources
-            for source in source_vals:
+        elif isinstance(sources, list):
+            for source in sources:
                 if not isinstance(source, Source()):
-                    raise ValueError("sources must be a Source object, dict, list, "
-                        f"or tuple object of sources. Got type: {type(sources)})")
-
-        # Call the source.model() method to generate the psfs
-        model_fn = lambda source: source.model(self)
-        _is_source = lambda leaf: isinstance(leaf, Source())
-        psfs = tree_map(model_fn, sources, is_leaf=_is_source)
-        return psfs if return_tree else np.array(tree_flatten(psfs)[0]).sum(0)
+                    raise ValueError("All input sources must be a Source "
+                        f"object. Got type: {type(sources)})")
+        else:
+            raise TypeError("sources must be a list or Source object, "
+                f"got {type(sources)}.")
+        
+        return np.array([source.model(self) for source in sources]).sum(0)
 
 class SimpleOptics(BaseOptics):
     """
@@ -258,12 +231,9 @@ class SimpleOptics(BaseOptics):
     def __init__(
         self        : BaseOptics, 
         wf_npixels  : int,
-        diameter    : Array):
+        diameter    : Array,
+        **kwargs):
         """
-        Constructs a simple optical system with a static aperture and
-        aberrations.
-
-        Note this class automatically converts aperture input into an array.
 
         Parameters
         ----------
@@ -272,9 +242,7 @@ class SimpleOptics(BaseOptics):
         diameter : Array, meters
             The diameter of the initial wavefront to propagte.
         """
-        super().__init__()
-        # Wavefront Checking
-        if not isisntance(wf_npixels, int):
+        if not isinstance(wf_npixels, int):
             raise TypeError("wf_npixels must be an int, got "
                 f"{type(wf_npixels)}.")
         self.wf_npixels = wf_npixels
@@ -290,6 +258,8 @@ class SimpleOptics(BaseOptics):
             raise TypeError("diameter must be a scalar, got type"
                 f"{type(diameter)}.")
         self.diameter = diameter
+
+        super().__init__(**kwargs)
 
 
     def _construct_wavefront(self       : BaseOptics,
@@ -316,7 +286,7 @@ class SimpleOptics(BaseOptics):
         return wf.tilt(offset)
 
 
-class NonPropagatorOptics(SimpleOptics):
+class NonPropagatorOptics(BaseOptics):
     """
     
     """
@@ -340,152 +310,122 @@ class NonPropagatorOptics(SimpleOptics):
         super().__init__(**kwargs)
 
 
-class AperturedOptics(SimpleOptics):
+    @property
+    def true_pixel_scale(self):
+        """
+        Returns the true pixel scale of the PSF.
+        """
+        return dlu.arcsec_to_rad(self.psf_pixel_scale / self.psf_oversample)
+
+
+class AperturedOptics(BaseOptics):
     """
+    Constructs a simple optical system  with an aperture and an optional
+    'mask'.
     
     Attributes
     ----------
-    wf_npixels : int
-        The size of the initial wavefront to propagte.
-    diameter : Array
-        The diameter of the wavefront to model through the system in meters.
-    aperture : Union[Array, TransmissiveOptic()]
-        The aperture of the system. Can be an Array or a TransmissiveOptic.
-    propagator : Propagator()
-        The propagator to use to propagate the wavefront through the system.
-    aberrations : Union[Array, AberrationLayer()]
-        The aberrations to apply to the wavefront. Can be an Array or an
-        AberrationLayer, or defaults to None.
-    mask : Union[Array, OpticalLayer()]
-        The mask to apply to the wavefront. Can be an Array or an
-        OpticalLayer, or defaults to None. If an Array it is applied as a
-        tranmissive optic.
+    aperture : Union[Array, OpticalLayer]
+        The aperture of the system. Can be an Array or a OpticalLayer.
+    mask : Union[Array, OpticalLayer]
+        The mask to apply to the wavefront. Can be an Array or an OpticalLayer.
     """
-    aperture    : Union[Array, TransmissiveOptic()]
-    aberrations : Union[Array, AberrationLayer()]
-    mask        : Union[Array, OpticalLayer()]
+    aperture : Union[Array, OpticalLayer()]
+    mask     : Union[Array, OpticalLayer()]
 
 
     def __init__(
-        self        : BaseOptics, 
-        # wf_npixels  : int,
-        # diameter    : Array, 
-        aperture    : Union[Array, TransmissiveOptic()],
-        aberrations : Union[Array, AberrationLayer()] = None,
-        mask        : Union[Array, OpticalLayer()] = None,
+        self     : BaseOptics, 
+        aperture : Union[Array, OpticalLayer()],
+        mask     : Union[Array, OpticalLayer()] = None,
         **kwargs):
         """
-        Constructs a simple optical system with a static aperture and
-        aberrations.
+        Constructs a simple optical system with an aperutre and a mask.
 
         Note this class automatically converts aperture input into an array.
 
         Parameters
         ----------
-        wf_npixels : int
-            The number of pixels representing the wavefront.
-        diameter : Array
-            The diameter of the wavefront to model through the system in meters.
-        aperture : Union[Array, TransmissiveOptic()]
-            The aperture of the system. Can be an Array or a TransmissiveOptic.
-        propagator : Propagator()
-            The propagator to use to propagate the wavefront through the system.
-        aberrations : Union[Array, AberrationLayer()] = None
-            The aberrations to apply to the wavefront. Can be an Array or an
-            AberrationLayer. If None, no aberrations are applied.
+        aperture : Union[Array, OpticalLayer]
+            The aperture of the system. Can be an Array or a OpticalLayer.
+        mask : Union[Array, OpticalLayer], = None
+            The mask to apply to the wavefront. Can be an Array or an
+            OpticalLayer. Default is None.
         """
-        # super().__init__(wf_npixels=wf_npixels, diameter=diameter)
-        super().__init__(**kwargs)
-
-        ### Aperture ###
-        # Type Check
-        if not isinstance(aperture, (Array, TransmissiveOptic())):
+        if not isinstance(aperture, (Array, OpticalLayer())):
             raise TypeError("aperture must be an Array or "
-                f"TransmissveOptic, got {type(aperture)}.")
-        
-        # Automatically Convert transmissive optics to arrays for simplicity
-        if hasattr(aperture, 'transmission'):
-            aperture = aperture.transmission
+                f"OpticalLayer, got {type(aperture)}.")
         self.aperture = aperture
-        ap_shape = self.aperture.shape
 
-        ### Aberrations ###
-        if aberrations is not None:
-
-            # Type Check
-            if not isinstance(aberrations, (AberrationLayer(), AddOPD(), 
-                AddPhase())):
-                raise TypeError("aberrations must be an AberrationLayer, "
-                    f"AddPhase, or AddOPD got {type(aberrations)}.")
-
-            # Shape Check
-            if (hasattr(aberrations, 'shape') and 
-                (ap_shape != aberrations.shape)):
-                raise ValueError("Inconsistent array sizes found: aperture has "
-                    f"shape {ap_shape} and aberrations has shape {mask.shape}")
-        self.aberrations = aberrations
-
-        ### Mask ###
-        if mask is not None:
-            
-            # Type check
-            if not isinstance(mask, (Array, OpticalLayer())):
-                raise ValueError("mask must be an Array or OpticalLayer, "
-                    f"got {type(mask)}.")
-
-            # Shape Check
-            if hasattr(mask, 'shape') and (ap_shape != mask.shape):
-                raise ValueError("Inconsistent array sizes found: aperture has "
-                    f"shape {ap_shape} and mask has shape {mask.shape}")
+        if not isinstance(mask, (Array, OpticalLayer())):
+            raise TypeError("mask must be an Array or "
+                f"OpticalLayer, got {type(aperture)}.")
         self.mask = mask
+
+        super().__init__(**kwargs)
 
 
     def _apply_aperture(self, wavelength, offset):
-        # Construct and tilt the Wavefront
-        wf = self._construct_wavefront(wavelength, offset)
+        """
 
-        # Apply aperture and normalise
+        """
+        wf = self._construct_wavefront(wavelength, offset)
         wf *= self.aperture
         wf = wf.normalise()
-
-        # Apply Mask and Aberrations
         wf *= self.mask
-        wf *= self.aberrations
-
         return wf
 
 
 ### Begin concrete classes
-class AngularOptics(NonPropagatorOptics, AperturedOptics):
+class AngularOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
     """
 
     """
 
 
     def __init__(self, 
-        wf_npxiels,
+        wf_npixels,
         diameter,
         aperture,
         psf_npixels,
-        psf_pixel_scale, # arcseconds
+        psf_pixel_scale,
         psf_oversample = 1,
-        aberrations = None,
         mask = None):
         """
 
         """
-        super().__init__(wf_npxiels=wf_npxiels, diameter=diameter, 
-        aperture=aperture, psf_npixels=psf_npixels, 
-        psf_pixel_scale=psf_pixel_scale, psf_oversample=psf_oversample, 
-        aberrations=aberrations, mask=mask)
+        super().__init__(wf_npixels=wf_npixels, diameter=diameter, 
+            aperture=aperture, psf_npixels=psf_npixels, mask=mask,
+            psf_pixel_scale=psf_pixel_scale, psf_oversample=psf_oversample)
 
 
     def propagate_mono(self       : SimpleToliman,
                        wavelength : Array,
                        offset     : Array = np.zeros(2),
                        return_wf  : bool = False) -> Array:
-        self.__doc__ = inspect.getdoc(super().propagate_mono)
+        """
+        Propagates a monochromatic point source through the optical layers.
 
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        return_wf : bool, = False
+            If True, the wavefront object after propagation is returned.
+
+        Returns
+        -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
+        wavefront : Wavefront
+            The wavefront object after propagation. Only returned if
+            return_wf is True.
+        """
         wf = self._apply_aperture(wavelength, offset)
 
         # Propagate
@@ -499,7 +439,7 @@ class AngularOptics(NonPropagatorOptics, AperturedOptics):
         return wf.psf
 
 
-class CartesianOptics(NonPropagatorOptics, AperturedOptics):
+class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
     """
     
     """
@@ -507,14 +447,14 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics):
 
 
     def __init__(
-        self, 
+        self,
+        wf_npixels,
         diameter,
         aperture,
         focal_length,
         psf_npixels,
         psf_pixel_scale,
         psf_oversample = 1,
-        aberrations = None,
         mask = None):
         """
 
@@ -524,17 +464,39 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics):
             raise ValueError("focal_length must be a scalar, got shape"
                 f"{self.focal_length.shape}.")
 
-        super().__init__(diameter=diameter, aperture=aperture, 
-            psf_npixels=psf_npixels, psf_pixel_scale=psf_pixel_scale, 
-            psf_oversample=psf_oversample, aberrations=aberrations, mask=mask)
+        super().__init__(wf_npixels=wf_npixels, diameter=diameter,
+            aperture=aperture, psf_npixels=psf_npixels,
+            psf_pixel_scale=psf_pixel_scale, psf_oversample=psf_oversample,
+            mask=mask)
 
 
     def propagate_mono(self       : SimpleToliman,
                        wavelength : Array,
                        offset     : Array = np.zeros(2),
                        return_wf  : bool = False) -> Array:
-        self.__doc__ = inspect.getdoc(super().propagate_mono)
+        """
+        Propagates a monochromatic point source through the optical layers.
 
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        return_wf : bool, = False
+            If True, the wavefront object after propagation is returned.
+
+        Returns
+        -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
+        wavefront : Wavefront
+            The wavefront object after propagation. Only returned if
+            return_wf is True.
+        """
         wf = self._apply_aperture(wavelength, offset)
 
         # Propagate
@@ -548,15 +510,15 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics):
         return wf.psf
 
 
-class FlexibleOptics(AperturedOptics):
+class FlexibleOptics(AperturedOptics, SimpleOptics):
     propagator : None
 
     def __init__(
         self, 
+        wf_npixels,
         diameter, 
         aperture, 
         propagator, 
-        aberrations = None, 
         mask = None):
         """
 
@@ -565,16 +527,44 @@ class FlexibleOptics(AperturedOptics):
             raise TypeError("propagator must be a Propagator object, "
                 f"got {type(propagator)}.")
         self.propagator = propagator
-        super().__init__(diameter=diameter, aperture=aperture,
-            aberrations=aberrations, mask=mask)
+        super().__init__(wf_npixels=wf_npixels, diameter=diameter,
+            aperture=aperture, mask=mask)
 
+
+    @property
+    def true_pixel_scale(self):
+        """
+        Returns the true pixel scale of the PSF.
+        """
+        return self.propagator.pixel_scale
 
     def propagate_mono(self       : SimpleToliman,
                        wavelength : Array,
                        offset     : Array = np.zeros(2),
                        return_wf  : bool = False) -> Array:
-        self.__doc__ = inspect.getdoc(super().propagate_mono)
+        """
+        Propagates a monochromatic point source through the optical layers.
 
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        return_wf : bool, = False
+            If True, the wavefront object after propagation is returned.
+
+        Returns
+        -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
+        wavefront : Wavefront
+            The wavefront object after propagation. Only returned if
+            return_wf is True.
+        """
         wf = self._apply_aperture(wavelength, offset)
         wf = self.propagator(wf)
 
@@ -603,8 +593,8 @@ class LayeredOptics(SimpleOptics):
 
 
     def __init__(self       : Optics, 
-                 diameter   : float, 
                  wf_npixels : int, 
+                 diameter   : float, 
                  layers     : list) -> Optics:
         """
         Constructor for the Optics class.
@@ -624,19 +614,7 @@ class LayeredOptics(SimpleOptics):
             key for the layer.
         """
         super().__init__(wf_npixels=wf_npixels, diameter=diameter)
-        if not isinstance(layers, list):
-            raise ValueError("Input layers must be a list, it is"
-                " automatically converted to a dictionary.")
-        
-        # Ensure all entries are dLux layers
-        for layer in layers:
-            if isinstance(layer, tuple):
-                layer = layer[0]
-            if not isinstance(layer, OpticalLayer()):
-                raise ValueError("All entries within layers must be an "
-                    "OpticalLayer object.")
-
-        self.layers = dLux.utils.list_to_dictionary(layers)
+        self.layers = dlu.list_to_dictionary(layers, True, OpticalLayer())
 
 
     def __getattr__(self : Optics, key : str) -> object:
@@ -662,13 +640,47 @@ class LayeredOptics(SimpleOptics):
         raise AttributeError(f"{self.__class__.__name__} has no attribute "
         f"{key}.")
 
+
+    @property
+    def true_pixel_scale(self):
+        """
+        Returns the true pixel scale of the PSF.
+        """
+        # Note: This is a bit inefficient, but should work
+        for layer in self.layers.values():
+            if isinstance(layer, Propagator()):
+                propagator = layer
+        return propagator.pixel_scale
+
+
     def propagate_mono(
         self       : BaseOptics,
         wavelength : Array,
         offset     : Array = np.zeros(2),
         return_wf  : bool = False) -> Array:
-        self.__doc__ = inspect.getdoc(super().propagate_mono)
+        """
+        Propagates a monochromatic point source through the optical layers.
 
+        Parameters
+        ----------
+        wavelength : Array, meters
+            The wavelength of the wavefront to propagate through the optical
+            layers.
+        offset : Array, radians, = np.zeros(2)
+            The (x, y) offset from the optical axis of the source. Default
+            value is (0, 0), on axis.
+        return_wf : bool, = False
+            If True, the wavefront object after propagation is returned.
+
+        Returns
+        -------
+        psf : Array
+            The monochromatic point spread function after being propagated
+            though the optical layers.
+        wavefront : Wavefront
+            The wavefront object after propagation. Only returned if
+            return_wf is True.
+        """
         wavefront = self._construct_wavefront(wavelength, offset)
         for layer in list(self.layers.values()):
             wavefront *= layer
