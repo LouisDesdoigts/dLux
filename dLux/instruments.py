@@ -1,15 +1,10 @@
 from __future__ import annotations
+from abc import abstractmethod
 import jax.numpy as np
 from jax import vmap, Array
 from jax.tree_util import tree_map, tree_flatten
-from equinox import tree_at
 from zodiax import Base
-from collections import OrderedDict
-from copy import deepcopy
-from inspect import signature
 from typing import Union
-from warnings import warn
-from abc import abstractmethod
 import dLux.utils as dlu
 import dLux
 

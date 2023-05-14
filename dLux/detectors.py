@@ -1,17 +1,18 @@
 from __future__ import annotations
+from abc import abstractmethod
+from collections import OrderedDict
 import jax.numpy as np
 from jax import Array
 from zodiax import Base
-from collections import OrderedDict
-from copy import deepcopy
-from abc import abstractmethod
 import dLux.utils as dlu
 import dLux
 
 
 __all__ = ["BaseDetector", "LayeredDetector"]
 
+
 DetectorLayer = lambda : dLux.detector_layers.DetectorLayer
+
 
 class BaseDetector(Base):
     

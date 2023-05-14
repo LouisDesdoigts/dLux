@@ -24,7 +24,6 @@ from . import spectra
 # Sub Modules
 from . import models
 from . import utils
-from . import exceptions
 
 
 # Import core functions from modules
@@ -50,9 +49,6 @@ from .spectra    import *
 # Sub Modules
 # from .models     import *
 # from .utils      import *
-
-# Other
-from .exceptions import *
 
 
 # Add to __all__

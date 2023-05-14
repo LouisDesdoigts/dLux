@@ -1,8 +1,9 @@
 from __future__ import annotations
 import jax.numpy as np
-import pytest
-import dLux
 from jax import config, Array
+import pytest
+import dLux.utils as dlu
+
 config.update("jax_debug_nans", True)
 
 
@@ -12,7 +13,7 @@ class TestZernike(object):
     """
 
 
-    def test_constructor(self, create_zernike : callable):
+    def test_constructor(self, create_zernike):
         """
         Tests the constructor.
         """
@@ -24,12 +25,12 @@ class TestZernike(object):
         zernike = create_zernike()
 
 
-    def test_calculate(self, create_zernike : callable):
+    def test_calculate(self, create_zernike):
         """
         Tests the calculate method.
         """
         zernike = create_zernike()
-        coords = dLux.utils.get_pixel_positions((16, 16), (1/16, 1/16))
+        coords = dlu.pixel_coords(16, 1/16)
 
         # Test calcualte
         z = zernike.calculate(coords)
@@ -45,43 +46,13 @@ class TestZernikeBasis(object):
     """
 
 
-    def test_constructor(self, create_zernike_basis : callable):
-        """
-        Tests the constructor.
-        """
-        # Test constructor
+    def test_constructor(self, create_zernike_basis):
         zernike_basis = create_zernike_basis()
 
 
-    def test_calculate_basis(self, create_zernike_basis : callable):
-        """
-        Tests the calculate_basis method.
-        """
+    def test_calculate_basis(self, create_zernike_basis):
         zernike_basis = create_zernike_basis()
-        coords = dLux.utils.get_pixel_positions((16, 16), (1/16, 1/16))
+        coords = dlu.pixel_coords(16, 1/16)
 
         # Test calcualte
         z = zernike_basis.calculate_basis(coords)
-
-
-class TestAberrationFactory(object):
-    """
-    Tests the AberrationFactory class.
-    """
-
-
-    def test_constructor(self, create_aberration_factory : callable):
-        """
-        Tests the constructor.
-        """
-        # Test inputs
-        with pytest.raises(ValueError):
-            create_aberration_factory(nsides=2)
-
-        # Test circular constructor
-        aberration_factory = create_aberration_factory()
-        assert isinstance(aberration_factory, dLux.optics.ApplyBasisOPD)
-
-        # Test polygonal constructor
-        aberration_factory = create_aberration_factory(nsides=3)
-        assert isinstance(aberration_factory, dLux.optics.ApplyBasisOPD)

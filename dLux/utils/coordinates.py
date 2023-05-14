@@ -2,7 +2,6 @@ import jax.numpy as np
 from jax import Array
 from jax.tree_util import tree_map
 from typing import Union
-import dLux
 
 __all__ = ["cart_to_polar", "polar_to_cart", "pixel_coords",
     "pixel_coordinates"]

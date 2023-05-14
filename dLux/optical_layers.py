@@ -1,17 +1,14 @@
 from __future__ import annotations
+from abc import abstractmethod
 import jax.numpy as np
 from jax import vmap, Array
 from jax.tree_util import tree_map
-from jax.lax import stop_gradient
 from zodiax import Base
-from abc import abstractmethod
-from inspect import signature
 import dLux
 
 
 __all__ = [
 
-    # 'Layers'
     # OpticalLayer
     # TransmissiveLayer
     # AberratedLayer

@@ -1,11 +1,10 @@
 from __future__ import annotations
+from abc import abstractmethod
 from zodiax import Base
 from jax.tree_util import tree_map
 import jax.numpy as np
 from jax import vmap, Array
-from abc import abstractmethod
 from equinox import tree_at
-from typing import Any
 import dLux
 
 
@@ -24,7 +23,7 @@ class BaseObservation(Base):
 
     @abstractmethod
     def model(self       : BaseObservation, 
-              instrument : Instrument()) -> Any: # pragma: no cover
+              instrument : Instrument()): # pragma: no cover
         """
         Abstract method for the observation function.
         """

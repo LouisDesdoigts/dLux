@@ -133,28 +133,27 @@ optics.py classes:
 
 '''
 aperture = apertures.ApertureFactory(16)
-aberrations = aberrations.AberrationFactory(16, [2, 3])
-propagator = propagators.PropagatorFactory(16, 1)
+propagator = propagators.MFT(16, 1)
 mask = np.ones((16, 16))
 
 @pytest.fixture
 def create_angular_optics():
     """Constructs the AngularOptics class for testing."""
     def _create_angular_optics(
+        wf_npixels      : int   = 16,
         diameter        : float = 1.,
         aperture        : Array = aperture,
         psf_npixels     : int   = 16,
         psf_pixel_scale : float = 1.,
         psf_oversample  : int   = 1,
-        aberrations     : Array = aberrations,
         mask            : Array = mask):
         return optics.AngularOptics(
+            wf_npixels=wf_npixels,
             diameter=diameter,
             aperture=aperture,
             psf_npixels=psf_npixels,
             psf_pixel_scale=psf_pixel_scale,
             psf_oversample=psf_oversample,
-            aberrations=aberrations,
             mask=mask)
     return _create_angular_optics
 
@@ -162,39 +161,39 @@ def create_angular_optics():
 def create_cartesian_optics():
     """Constructs the CartesianOptics class for testing."""
     def _create_cartesian_optics(
+        wf_npixels      : int   = 16,
         diameter        : float = 1.,
         aperture        : Array = aperture,
         focal_length    : float = 10.,
         psf_npixels     : int = 16,
         psf_pixel_scale : float = 1.,
         psf_oversample  : int = 1,
-        aberrations     : Array = aberration,
         mask            : Array = mask):
         return optics.CartesianOptics(
+            wf_npixels=wf_npixels,
             diameter=diameter,
             aperture=aperture,
             focal_length=focal_length,
             psf_npixels=psf_npixels,
             psf_pixel_scale=psf_pixel_scale,
             psf_oversample=psf_oversample,
-            aberrations=aberrations,
             mask=mask)
-    return _createcartesianr_optics
+    return _create_cartesian_optics
 
 @pytest.fixture
 def create_flexible_optics():
     """Constructs the FlexibleOptics class for testing."""
     def _create_flexible_optics(
-        diameter    = 1.,
-        aperture    = aperture,
-        propagator  = propagator,
-        aberrations = aberration,
-        mask        = mask):
+        wf_npixels  : int   = 16,
+        diameter    : float = 1.,
+        aperture    : Array = aperture,
+        propagator  : Array = propagator,
+        mask        : Array = mask):
         return optics.FlexibleOptics(
+            wf_npixels=wf_npixels,
             diameter=diameter,
             aperture=aperture,
             propagator=propagator,
-            aberrations=aberrations,
             mask=mask)
     return _create_flexible_optics
 
@@ -202,12 +201,12 @@ def create_flexible_optics():
 def create_layered_optics():
     """Constructs the LayeredOptics class for testing."""
     def _create_layered_optics(
-        diameter   : float = 1,
         wf_npixels : int   = 16,
+        diameter   : float = 1,
         layers     : list  = [aperture, propagator]):
         return optics.LayeredOptics(
+            wf_npixels=wf_npixels,
             diameter=diameter,
-            wf_npixels=wf_npixels, 
             layers=layers)
     return _create_layered_optics
 
@@ -666,10 +665,10 @@ sources.py classes:
 @pytest.fixture
 def create_point_source(create_spectrum):
     def _create_point_source(
-        position    : Array    = np.zeros(2),
-        flux        : Array    = np.array(1.),
-        spectrum    : Spectrum = create_spectrum(),
-        wavelengths : Array    = None):
+        position    : Array = np.zeros(2),
+        flux        : Array = np.array(1.),
+        wavelengths : Array = None,
+        spectrum    : spectra.Spectrum = create_spectrum()):
         return sources.PointSource(position=position, flux=flux,
             spectrum=spectrum, wavelengths=wavelengths)
     return _create_point_source
@@ -677,10 +676,10 @@ def create_point_source(create_spectrum):
 @pytest.fixture
 def create_point_sources(create_spectrum):
     def _create_point_sources(
-        position    : Array    = np.zeros(2),
-        flux        : Array    = np.ones(3),
-        spectrum    : Spectrum = create_spectrum(),
-        wavelengths : Array    = None):
+        position    : Array = np.zeros(2),
+        flux        : Array = np.ones(3),
+        wavelengths : Array = None,
+        spectrum    : spectra.Spectrum = create_spectrum()):
         return sources.PointSources(position=position, flux=flux,
             spectrum=spectrum, wavelengths=wavelengths)
     return _create_point_sources
@@ -688,11 +687,11 @@ def create_point_sources(create_spectrum):
 @pytest.fixture
 def create_resolved_source(create_spectrum):
     def _create_resolved_source(
-        position     : Array    = np.zeros(2),
-        flux         : Array    = np.array(1.),
-        spectrum     : Spectrum = create_spectrum(),
-        wavelengths  : Array    = None,
-        distribution : Array    = np.ones((5, 5))):
+        position     : Array = np.zeros(2),
+        flux         : Array = np.array(1.),
+        wavelengths  : Array = None,
+        distribution : Array = np.ones((5, 5)),
+        spectrum     : spectra.Spectrum = create_spectrum()):
         return sources.ResolvedSource(position=position, flux=flux, 
             distribution=distribution, spectrum=spectrum, 
             wavelengths=wavelengths)
@@ -701,13 +700,13 @@ def create_resolved_source(create_spectrum):
 @pytest.fixture
 def create_binary_source(create_spectrum):
     def _create_binary_source(
-        position       : Array    = np.array([0., 0.]),
-        flux           : Array    = np.array(1.),
-        spectrum       : Spectrum = create_spectrum(),
-        wavelengths    : Array    = None,
-        separation     : Array    = np.array(1.),
-        position_angle : Array    = np.array(0.),
-        contrast       : Array    = np.array(2.)):
+        position       : Array = np.array([0., 0.]),
+        flux           : Array = np.array(1.),
+        wavelengths    : Array = None,
+        separation     : Array = np.array(1.),
+        position_angle : Array = np.array(0.),
+        contrast       : Array = np.array(2.),
+        spectrum       : spectra.Spectrum = create_spectrum()):
         return sources.BinarySource(position=position, flux=flux,
             separation=separation, position_angle=position_angle,
             contrast=contrast, spectrum=spectrum, wavelengths=wavelengths)
@@ -716,12 +715,12 @@ def create_binary_source(create_spectrum):
 @pytest.fixture
 def create_point_resolved_source(create_spectrum):
     def _create_point_resolved_source(
-        position     : Array    = np.array([0., 0.]),
-        flux         : Array    = np.array(1.),
-        spectrum     : Spectrum = create_spectrum(),
-        wavelengths  : Array    = None,
-        contrast     : Array    = np.array(2.),
-        distribution : Array    = np.ones((5, 5))):
+        position     : Array = np.array([0., 0.]),
+        flux         : Array = np.array(1.),
+        wavelengths  : Array = None,
+        contrast     : Array = np.array(2.),
+        distribution : Array = np.ones((5, 5)),
+        spectrum     : spectra.Spectrum = create_spectrum()):
         return sources.PointResolvedSource(position=position, flux=flux,
             distribution=distribution, contrast=contrast, spectrum=spectrum,
             wavelengths=wavelengths)
@@ -806,4 +805,3 @@ def create_dither():
 #         return optical_layers.ApplyBasisCLIMB(
 #             basis, ideal_wavelength, coefficients)
 #     return _create_basis_climb
-

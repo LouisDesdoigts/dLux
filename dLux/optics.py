@@ -1,16 +1,11 @@
 from __future__ import annotations
+from abc import abstractmethod
 import jax.numpy as np
 from jax import vmap, Array
 from jax.tree_util import tree_map, tree_flatten
 from equinox import tree_at
 from zodiax import Base
-# from collections import OrderedDict
-from copy import deepcopy
-# from inspect import signature
 from typing import Union
-from warnings import warn
-from abc import abstractmethod
-import inspect
 import dLux.utils as dlu
 import dLux
 
@@ -25,13 +20,9 @@ Propagator    = lambda : dLux.propagators.Propagator
 Source        = lambda : dLux.sources.BaseSource
 
 
-# Base
-# # LayeredOptics
-# # SimpleOptics
-# # # Angular
-# # # Cartesian
-# # # Flexible (propagator)
-
+#######################
+### Private Classes ###
+#######################
 class BaseOptics(Base):
     """
     A base class for all Optics classes that implements a few usefull methods.
@@ -94,60 +85,6 @@ class BaseOptics(Base):
         """
 
 
-    def _format_input(self        : BaseOptics,
-                      wavelengths : Array,
-                      offset      : Array = None,
-                      weights     : Array = None) -> Array:
-        """
-        Formats the weights and wavelengths of the polychromatic wavefronts.
-
-        Parameters
-        ----------
-        wavelengths : Array, meters
-            The wavelengths of the wavefronts to propagate through the optics.
-        weights : Array
-            The weights of each wavelength. If None, all wavelengths are
-            weighted equally.
-        offset : Array, radians
-            The (x, y) offset from the optical axis of the source.
-
-        Returns
-        -------
-        wavelengths : Array
-            The wavelengths of the wavefronts to propagate through the optics.
-        offset : Array, radians, = np.zeros(2)
-            The (x, y) offset from the optical axis of the source.
-        weights : Array
-            The weights of each wavelength. If None, all wavelengths are
-            weighted equally.
-        """
-        # Check wavelengths
-        if isinstance(wavelengths, float) or \
-            (isinstance(wavelengths, Array) and wavelengths.shape == ()):
-            wavelengths = np.array([wavelengths])
-        elif isinstance(wavelengths, list):
-            wavelengths = np.array(wavelengths)
-
-        # Check weights
-        if weights is not None:
-            weights = np.array(weights, dtype=float) \
-                if not isinstance(weights, np.ndarray) else weights
-            if len(weights) != len(wavelengths):
-                raise ValueError("wavelengths and weights must have the "
-                    f"same length, got {len(wavelengths)} and {len(weights)} "
-                    "respectively.")
-        
-        # Check offset
-        offset = np.array(offset) if not isinstance(offset, Array) \
-            else offset
-        if offset.shape != (2,):
-            raise ValueError("offset must be a 2-element array, got "
-                f"shape {offset.shape}.")
-
-        # Return
-        return wavelengths, weights, offset
-
-
     def propagate(self        : BaseOptics, 
                   wavelengths : Array,
                   offset      : Array = np.zeros(2),
@@ -172,13 +109,27 @@ class BaseOptics(Base):
             The chromatic point spread function after being propagated
             though the optical layers.
         """
-        wavelengths, weights, offset = self._format_input(wavelengths, offset, 
-            weights)
+        wavelengths = np.atleast_1d(wavelengths)
+        if weights is None:
+            weights = np.ones_like(wavelengths)/len(wavelengths)
+        else:
+            weights = np.atleast_1d(weights)
 
-        # Construct Propagate
+        # Check wavelengths and weights
+        if weights.shape != wavelengths.shape:
+            raise ValueError("wavelengths and weights must have the "
+                f"same shape, got {wavelengths.shape} and {weights.shape} "
+                "respectively.")
+        
+        # Check offset
+        offset = np.array(offset) if not isinstance(offset, Array) \
+            else offset
+        if offset.shape != (2,):
+            raise ValueError("offset must be a 2-element array, got "
+                f"shape {offset.shape}.")
+
+        # Caluculate
         propagator = vmap(self.propagate_mono, in_axes=(0, None))
-
-        # Calc and Return
         psfs = propagator(wavelengths, offset)
         if weights is not None:
             psfs *= weights[:, None, None]
@@ -199,16 +150,13 @@ class BaseOptics(Base):
         image : Array
             The sum of the individual source modelled through the optics.
         """
-        if isinstance(sources, Source()):
+        if not isinstance(sources, list):
             sources = [sources]
-        elif isinstance(sources, list):
-            for source in sources:
-                if not isinstance(source, Source()):
-                    raise ValueError("All input sources must be a Source "
-                        f"object. Got type: {type(sources)})")
-        else:
-            raise TypeError("sources must be a list or Source object, "
-                f"got {type(sources)}.")
+        
+        for source in sources:
+            if not isinstance(source, Source()):
+                raise TypeError("All input sources must be a Source "
+                    f"object. Got type: {type(sources)})")
         
         return np.array([source.model(self) for source in sources]).sum(0)
 
@@ -231,7 +179,7 @@ class SimpleOptics(BaseOptics):
     def __init__(
         self        : BaseOptics, 
         wf_npixels  : int,
-        diameter    : Array,
+        diameter    : float,
         **kwargs):
         """
 
@@ -242,29 +190,16 @@ class SimpleOptics(BaseOptics):
         diameter : Array, meters
             The diameter of the initial wavefront to propagte.
         """
-        if not isinstance(wf_npixels, int):
-            raise TypeError("wf_npixels must be an int, got "
-                f"{type(wf_npixels)}.")
-        self.wf_npixels = wf_npixels
-
-        # Diameter Checking
-        if isinstance(diameter, Array):
-            if diameter.ndim != 0:
-                raise ValueError("diameter must be a scalar, got shape"
-                    f"{diameter.shape}.")
-        elif isinstance(diameter, int):
-            diameter = float(diameter)
-        elif not isinstance(diameter, float):
-            raise TypeError("diameter must be a scalar, got type"
-                f"{type(diameter)}.")
-        self.diameter = diameter
+        self.wf_npixels = int(wf_npixels)
+        self.diameter = float(diameter)
 
         super().__init__(**kwargs)
 
 
-    def _construct_wavefront(self       : BaseOptics,
-                             wavelength : Array,
-                             offset     : Array = np.zeros(2)) -> Array:
+    def _construct_wavefront(
+        self       : BaseOptics,
+        wavelength : Array,
+        offset     : Array = np.zeros(2)) -> Array:
         """
         Constructs the appropriate tilted wavefront object for the optical
         system.
@@ -375,8 +310,9 @@ class AperturedOptics(BaseOptics):
         wf *= self.mask
         return wf
 
-
-### Begin concrete classes
+######################
+### Public Classes ###
+######################
 class AngularOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
     """
 
@@ -459,10 +395,7 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
         """
 
         """
-        self.focal_length = np.asarray(focal_length, dtype=float)
-        if self.focal_length.ndim != 0:
-            raise ValueError("focal_length must be a scalar, got shape"
-                f"{self.focal_length.shape}.")
+        self.focal_length = float(focal_length)
 
         super().__init__(wf_npixels=wf_npixels, diameter=diameter,
             aperture=aperture, psf_npixels=psf_npixels,
@@ -589,7 +522,7 @@ class LayeredOptics(SimpleOptics):
         A collections.OrderedDict of 'layers' that define the transformations
         and operations upon some input wavefront through an optical system.
     """
-    layers     : OrderedDict
+    layers : OrderedDict
 
 
     def __init__(self       : Optics, 
@@ -634,11 +567,7 @@ class LayeredOptics(SimpleOptics):
         """
         if key in self.layers.keys():
             return self.layers[key]
-        for attribute in self.layers.values():
-            if hasattr(attribute, key):
-                return getattr(attribute, key)
-        raise AttributeError(f"{self.__class__.__name__} has no attribute "
-        f"{key}.")
+        super().__getattr__(key)
 
 
     @property

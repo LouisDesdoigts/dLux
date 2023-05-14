@@ -71,10 +71,10 @@ class Wavefront(Base):
         self.phase       = np.zeros((npixels, npixels), dtype=float)
         
         # Input checks
-        assert self.wavelength.shape == (), \
-        ("wavelength must be a scalar Array.")
-        assert self.pixel_scale.shape == (), \
-        ("pixel_scale must be a scalar Array.")
+        if self.wavelength.shape != ():
+            raise ValueError("wavelength must have shape ().")
+        if self.pixel_scale.shape != ():
+            raise ValueError("pixel_scale must have shape ().")
 
         # Always initialised in Pupil plane with Cartesian Coords
         self.plane = 'Pupil'
@@ -443,13 +443,13 @@ class Wavefront(Base):
         return self.set(['amplitude', 'phase'], [amplitude, phase])
     
 
-    def scale_to(self            : Wavefront,
+    def scale_to(self        : Wavefront,
                  npixels     : int,
                  pixel_scale : Array,
-                 complex  : bool = False) -> Wavefront:
+                 complex     : bool = False) -> Wavefront:
         """
         Performs a paraxial interpolation on the wavefront, determined by the
-        the pixel_scale_out and npixels_out parameters. By default the
+        the pixel_scale_out and npixels parameters. By default the
         interpolation is done on the amplitude and phase arrays, however by
         passing `real_imgainary=True` the interpolation is done on the real and
         imaginary components. This option allows for consistent interpolation
@@ -458,7 +458,7 @@ class Wavefront(Base):
 
         Parameters
         ----------
-        npixels_out : int
+        npixels : int
             The number of pixels representing the wavefront after the
             interpolation.
         pixel_scale: Array
@@ -471,14 +471,14 @@ class Wavefront(Base):
         -------
         wavefront : Wavefront
             The new wavefront interpolated to the size and shape determined by
-            npixels_out and pixel_scale_out, with the updated pixel_scale.
+            npixels and pixel_scale_out, with the updated pixel_scale.
         """
         # Get field in either (ampltide, phase) or (real, imaginary)
         field = self._to_field(complex=complex)
 
         # Scale the field
         scaler = vmap(dlu.scale, (0, None, None))
-        field = scaler(field, npixels_out, pixel_scale / self.pixel_scale)
+        field = scaler(field, npixels, pixel_scale / self.pixel_scale)
 
         # Cast back to (amplitude, phase) if needed
         if complex:
@@ -537,33 +537,34 @@ class Wavefront(Base):
     ############################
     ### Padding and Cropping ###
     ############################
-    def pad_to(self : Wavefront, npixels_out : int) -> Wavefront:
+    def pad_to(self : Wavefront, npixels : int) -> Wavefront:
         """
         Paraxially zero-pads the `Wavefront` to the size determined by
-        npixels_out. Note this only supports padding arrays of even dimension
+        npixels. Note this only supports padding arrays of even dimension
         to even dimension, and odd dimension to to odd dimension, ie 2 -> 4 or
         3 -> 5.
 
         Parameters
         ----------
-        npixels_out : int
+        npixels : int
             The size of the array to pad to the wavefront to.
 
         Returns
         -------
         wavefront : Wavefront
-            The new `Wavefront` zero-padded to the size npixels_out.
+            The new `Wavefront` zero-padded to the size npixels.
         """
         npixels_in  = self.npixels
-        assert npixels_in  % 2 == npixels_out % 2, \
-        ("Only supports even -> even or odd -> odd padding")
-        assert npixels_out > npixels_in, ("npixels_out must be larger than the"
-        " current array size: {}".format(npixels_in))
+        if npixels_in  % 2 != npixels % 2:
+            raise ValueError("Only supports even -> even or odd -> odd input.")
+        if npixels < npixels_in:
+            raise ValueError("npixels must be larger than the current array "
+                "size: {}".format(npixels_in))
 
-        new_centre = npixels_out // 2
+        new_centre = npixels // 2
         centre = npixels_in  // 2
         remainder = npixels_in  % 2
-        padded = np.zeros([npixels_out, npixels_out])
+        padded = np.zeros([npixels, npixels])
 
         amplitude = padded.at[
                 new_centre - centre : centre + new_centre + remainder,
@@ -576,31 +577,32 @@ class Wavefront(Base):
         return self.set(['amplitude', 'phase'], [amplitude, phase])
 
 
-    def crop_to(self : Wavefront, npixels_out : int) -> Wavefront:
+    def crop_to(self : Wavefront, npixels : int) -> Wavefront:
         """
-        Paraxially crops the `Wavefront` to the size determined by npixels_out.
+        Paraxially crops the `Wavefront` to the size determined by npixels.
         Note this only supports padding arrays of even dimension to even
         dimension, and odd dimension to to odd dimension, ie 4 -> 2 or 5 -> 3.
 
         Parameters
         ----------
-        npixels_out : int
+        npixels : int
             The size of the array to crop to the wavefront to.
 
         Returns
         -------
         wavefront : Wavefront
-            The new `Wavefront` cropped to the size npixels_out.
+            The new `Wavefront` cropped to the size npixels.
         """
         npixels_in  = self.npixels
 
-        assert npixels_in%2 == npixels_out%2, \
-        ("Only supports even -> even or odd -> odd cropping")
-        assert npixels_out < npixels_in, ("npixels_out must be smaller than the"
-        " current array size: {}".format(npixels_in))
+        if npixels_in  % 2 != npixels % 2:
+            raise ValueError("Only supports even -> even or odd -> odd input.")
+        if npixels > npixels_in:
+            raise ValueError("npixels must be smaller than the current array "
+                "size: {}".format(npixels_in))
 
         new_centre = npixels_in  // 2
-        centre = npixels_out // 2
+        centre = npixels // 2
 
         amplitude = self.amplitude[
             new_centre - centre : new_centre + centre,

@@ -3,12 +3,10 @@ from zodiax import Base
 import jax.numpy as np
 from jax import lax, Array
 import jax.tree_util as jtu
-import dLux
-from dLux.utils.math import factorial, triangular_number
-from dLux.utils.coordinates import cart_to_polar, pixel_coords
+import dLux.utils as dlu
 
 
-__all__ = ['Zernike', 'ZernikeBasis'] #, 'AberrationFactory']
+__all__ = ['Zernike', 'ZernikeBasis']
 
 
 zernike_names = {
@@ -126,10 +124,10 @@ class Zernike(Base):
         # Calcualte values
         self._k = np.arange(((self.n - self.m) // 2) + 1, dtype=float)
         sign = lax.pow(-1., self._k)
-        _fact_1 = factorial(np.abs(self.n - self._k))
-        _fact_2 = factorial(self._k)
-        _fact_3 = factorial(((self.n + self.m) // 2) - self._k)
-        _fact_4 = factorial(((self.n - self.m) // 2) - self._k)
+        _fact_1 = dlu.factorial(np.abs(self.n - self._k))
+        _fact_2 = dlu.factorial(self._k)
+        _fact_3 = dlu.factorial(((self.n + self.m) // 2) - self._k)
+        _fact_4 = dlu.factorial(((self.n - self.m) // 2) - self._k)
         self._c = sign * _fact_1 / _fact_2 / _fact_3 / _fact_4 
 
 
@@ -216,7 +214,7 @@ class Zernike(Base):
         zernike : Array
             The Zernike polynomial.
         """
-        polar_coordinates = cart_to_polar(coordinates)
+        polar_coordinates = dlu.cart_to_polar(coordinates)
         rho = polar_coordinates[0]
         theta = polar_coordinates[1]
         aperture = rho <= 1.
@@ -247,7 +245,7 @@ class Zernike(Base):
         """
         if nsides < 3:
             raise ValueError(f'nsides must be >= 3, not {nsides}.')
-        theta = cart_to_polar(coordinates)[1]
+        theta = dlu.cart_to_polar(coordinates)[1]
         alpha = np.pi / nsides
         phi = theta + alpha  
         wedge = np.floor((phi + alpha) / (2. * alpha))

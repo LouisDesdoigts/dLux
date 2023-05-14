@@ -1,11 +1,9 @@
 from __future__ import annotations
+from abc import abstractmethod
 import jax.numpy as np
-from abc import ABC, abstractmethod
 from jax import Array
-from jax.scipy.signal import convolve
 from jax.scipy.stats import norm
 from zodiax import Base
-from dLux.utils.interpolation import rotate, fourier_rotate
 
 
 __all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",

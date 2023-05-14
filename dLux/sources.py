@@ -70,24 +70,30 @@ class Source(BaseSource):
 
 
     def __init__(self        : Source,
+                 wavelengths : Array,
                  position    : Array    = np.zeros(2),
                  flux        : Array    = np.array(1.),
+                 weights     : Array    = None,
                  spectrum    : Spectrum = None,
-                 wavelengths : Array    = None) -> Source:
+                 ) -> Source:
         """
         Constructor for the Source class.
 
         Parameters
         ----------
+        wavelengths : Array, meters
+            The array of wavelengths at which the spectrum is defined. Defaults
+            to a PointSource with a flat spectrum.
         position : Array, radians = None
             The (x, y) on-sky position of this object.
         flux : Array, photons = None
             The flux of the object.
+        weights : Array = None
+            The spectral weights of the object.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-        wavelengths : Array, meters = None
-            The array of wavelengths at which the spectrum is defined. Defaults
-            to a PointSource with a flat spectrum.
+            if provided it will overwrite the inputs wavelengths and weights.
+
         """
         # Position and Flux
         self.position = np.asarray(position, dtype=float)
@@ -101,18 +107,11 @@ class Source(BaseSource):
         
         # Spectrum
         if spectrum is not None:
-            if wavelengths is not None:
-                raise ValueError("Either spectrum or wavelengths can be "
-                    "specified, not both.")
             if not isinstance(spectrum, dLux.spectra.Spectrum):
                 raise ValueError("spectrum must be a dLux Spectrum object.")
+            self.spectrum = spectrum
         else:
-            if wavelengths is None:
-                raise ValueError("Either spectrum or wavelengths must be "
-                    "specified.")
-            spectrum = dLux.spectra.Spectrum(wavelengths)
-        
-        self.spectrum = spectrum
+            self.spectrum = dLux.spectra.Spectrum(wavelengths, weights)
 
 
     def __getattr__(self : Source, key : str) -> Any:

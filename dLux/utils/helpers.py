@@ -1,7 +1,5 @@
 import jax.numpy as np
 from collections import OrderedDict
-import matplotlib.pyplot as plt
-from jax import Array
 
 
 __all__ = ["list_to_dictionary"]

@@ -1,8 +1,7 @@
 import jax.numpy as np
-from jax import vmap, Array
+from jax import Array
 from jax.scipy.ndimage import map_coordinates
-from functools import partial
-import dLux.utils.coordinates as c
+import dLux.utils as dlu
 
 
 # TODO: Resolve scale and scale_array
@@ -166,7 +165,7 @@ def rotate(array : Array, angle : Array, order : int = 1) -> Array:
     # Get coordinates
     npixels = array.shape[0]
     centre = (npixels - 1) / 2
-    coordinates = c.get_pixel_positions((npixels, npixels), indexing='ij')
+    coordinates = dlu.pixel_coordinates((npixels, npixels), indexing='ij')
     coordinates_rotated = _rotate(coordinates, angle) + centre
 
     # Interpolate

@@ -3,7 +3,6 @@ from jax import numpy as np, lax, vmap, Array
 from jax.tree_util import tree_map, tree_flatten
 from abc import abstractmethod
 from equinox import filter
-import inspect
 import dLux.utils as dlu
 import dLux
 
@@ -11,6 +10,9 @@ import dLux
 Wavefront = lambda : dLux.wavefronts.Wavefront
 Optic = lambda : dLux.optical_layers.Optic
 BasisOptic = lambda : dLux.optical_layers.BasisOptic
+TransmissiveLayer = lambda : dLux.optical_layers.TransmissiveLayer
+BasisLayer = lambda : dLux.optical_layers.BasisLayer
+ZernikeBasis = lambda : dLux.aberrations.ZernikeBasis
 
 
 __all__ = [ "CircularAperture", "RectangularAperture", "RegPolyAperture",
@@ -18,7 +20,7 @@ __all__ = [ "CircularAperture", "RectangularAperture", "RegPolyAperture",
     "CompoundAperture", "MultiAperture",  "ApertureFactory"]
 
 
-class ApertureLayer(dLux.optical_layers.TransmissiveLayer):
+class ApertureLayer(TransmissiveLayer()):
     """
     The abstract base class that all aperture layers inherit from. This 
     instatiates the TransmissiveLayer class, intialising the normalisation
@@ -251,7 +253,7 @@ class BaseDynamicAperture(ApertureLayer):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        coordaintes = self._coordinates(wavefront.coordinates)
+        coordinates = self._coordinates(wavefront.coordinates)
         wavefront *= self._transmission(coordinates)
         if self.normalise:
             return wavefront.normalise()
@@ -1238,7 +1240,7 @@ class RegPolyAperture(PolyAperture):
 ###################
 ### Aberrations ###
 ###################
-class AberratedAperture(ApertureLayer, dLux.optical_layers.BasisLayer):
+class AberratedAperture(ApertureLayer, BasisLayer()):
     """
     A class for generating apertures with aberrations. This class generates the
     basis vectors of the aberrations at run time, allowing for the aperture and
@@ -1293,7 +1295,7 @@ class AberratedAperture(ApertureLayer, dLux.optical_layers.BasisLayer):
 
         # Set Aperture
         self.aperture = aperture
-        self.basis = dLux.aberrations.ZernikeBasis(noll_inds)
+        self.basis = ZernikeBasis()(noll_inds)
 
         if coefficients is None:
             coefficients = np.zeros(len(noll_inds))
