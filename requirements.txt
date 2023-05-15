@@ -10,3 +10,4 @@ jupyter
 jupyterlab
 tqdm
 chainconsumer
+# nummpyro

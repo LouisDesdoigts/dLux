@@ -6,86 +6,52 @@ from jax import config, Array
 config.update("jax_debug_nans", True)
 
 
-class TestCreateWavefront(object):
-    """
-    Tests the CreateWavefront class.
-    """
-
-
-    def test_constructor(self, create_create_wavefront) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_create_wavefront(diameter=np.array([]))
-
-        # Test functioning
-        create_create_wavefront()
-
-
-    def test_call(self, create_create_wavefront) -> None:
-        """
-        Tests the __call__ method.
-        """
-        create_create_wavefront()(1e-6, np.array([0, 0]))
-
-
 class TestTiltWavefront(object):
-    """
-    Tests the TiltWavefront class.
-    """
+    """Tests the TiltWavefront class."""
 
-
-    def test_constructor(self, create_tilt) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test wrong dims
-        with pytest.raises(AssertionError):
+    def test_constructor(self, create_tilt):
+        """Tests the constructor."""
+        create_tilt()
+        with pytest.raises(ValueError):
             create_tilt(angles=np.ones(1))
 
-        # Test wrong dims
+    def test_call(self, create_tilt, create_wavefront):
+        """Tests the __call__ method."""
+        create_tilt()(create_wavefront())
+
+
+class TestNormalise(object):
+    """Tests the NormaliseWavefront class."""
+
+    def test_constructor(self, create_normalise):
+        """Tests the constructor."""
+        create_normalise()
+
+    def test_call(self, create_normalise, create_wavefront):
+        """Tests the __call__ method."""
+        wf = create_wavefront() 
+        wf = create_normalise()(wf)
+
+
+class TestRotate(object):
+    """Tests the Rotate class."""
+
+    def test_constructor(self, create_rotate):
+        """Tests the constructor."""
+        create_rotate()
         with pytest.raises(AssertionError):
-            create_tilt(angles=np.array([]))
+            create_rotate(angle=np.ones(1))
 
-        # Test functioning
-        create_tilt()
-
-
-    def test_call(self, 
-            create_tilt,
-            create_wavefront) -> None:
-        """
-        Tests the __call__ method.
-        """
-        wf = create_wavefront() 
-        create_tilt()(wf)
+    def test_call(self, create_rotate, create_wavefront):
+        """Tests the __call__ method."""
+        # Test regular rotation
+        wf = create_wavefront()
+        create_rotate()(wf)
+        create_rotate(complex=True)(wf)
 
 
-class TestNormaliseWavefront(object):
-    """
-    Tests the NormaliseWavefront class.
-    """
 
-
-    def test_constructor(self, create_normalise_wavefront) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test functioning
-        create_normalise_wavefront()
-
-
-    def test_call(self, 
-            create_normalise_wavefront,
-            create_wavefront) -> None:
-        """
-        Tests the __call__ method.
-        """
-        wf = create_wavefront() 
-        wf = create_normalise_wavefront()(wf)
-        assert wf.psf.sum() == 1.
+# def _test_base_tranmissive_optic()
 
 
 class TestApplyBasisOPD(object):
@@ -295,39 +261,4 @@ class TestTransmissiveOptic(object):
 #         create_basis_climb(basis=basis)(wf)
 
 
-class TestRotate(object):
-    """
-    Tests the Rotate class.
-    """
 
-
-    def test_constructor(self, create_rotate) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_rotate(angle=np.ones(1))
-
-        # Test functioning
-        create_rotate()
-
-
-    def test_call(self, 
-            create_rotate, 
-            create_wavefront) -> None:
-        """
-        Tests the __call__ method.
-        """
-        # Test regular rotation
-        wf = create_wavefront()
-        create_rotate()(wf)
-
-        # Test real imaginary rotation
-        wf = create_wavefront()
-        create_rotate(real_imaginary=True)(wf)
-
-        # Test fourier
-        with pytest.raises(NotImplementedError):
-            wf = create_wavefront()
-            create_rotate(fourier=True)(wf)

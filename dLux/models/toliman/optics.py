@@ -13,11 +13,11 @@ MixedAlphaCen = lambda : dLux.models.MixedAlphaCen
 __all__ = ["TolimanOptics", "ApplyBasisCLIMB", "TolimanSpikes", "Toliman"]
 
 OpticalLayer = lambda : dLux.optical_layers.OpticalLayer
-ShapedLayer = lambda : dLux.optical_layers.ShapedLayer
+BaseBasisOptic = lambda : dLux.optical_layers.BaseBasisOptic
 AngularOptics = lambda : dLux.optics.AngularOptics
 
 
-class ApplyBasisCLIMB(ShapedLayer()):
+class ApplyBasisCLIMB(BaseBasisOptic()):
     """
     Adds an array of binary phase values to the input wavefront from a set of
     continuous basis vectors. This uses the CLIMB algorithm in order to
@@ -41,8 +41,8 @@ class ApplyBasisCLIMB(ShapedLayer()):
         The target wavelength at which a perfect anti-phase relationship is
         applied via the OPD.
     """
-    basis            : Array
-    coefficients     : Array
+    # basis            : Array
+    # coefficients     : Array
     ideal_wavelength : Array
 
 
@@ -70,23 +70,23 @@ class ApplyBasisCLIMB(ShapedLayer()):
             leading dimension of the basis vectors. Default is None which
             initialises an array of zeros.
         """
-        super().__init__()
-        self.basis            = np.asarray(basis, dtype=float)
+        super().__init__(basis=basis, coefficients=coefficients)
+        # self.basis            = np.asarray(basis, dtype=float)
         self.ideal_wavelength = np.asarray(ideal_wavelength, dtype=float)
-        self.coefficients     = np.array(coefficients).astype(float) \
-                    if coefficients is not None else np.zeros(len(self.basis))
+        # self.coefficients     = np.array(coefficients).astype(float) \
+        #             if coefficients is not None else np.zeros(len(self.basis))
 
-        # Inputs checks
-        assert self.basis.ndim == 3, \
-        ("basis must be a 3 dimensional array, ie (nterms, npixels, npixels).")
-        assert self.basis.shape[-1] == 768, \
-        ("Basis must have shape (n, 768, 768).")
-        assert self.coefficients.ndim == 1 and \
-        self.coefficients.shape[0] == self.basis.shape[0], \
-        ("coefficients must be a 1 dimensional array with length equal to the "
-        "First dimension of the basis array.")
-        assert self.ideal_wavelength.ndim == 0, ("ideal_wavelength must be a "
-                                                 "scalar array.")
+        # # Inputs checks
+        # assert self.basis.ndim == 3, \
+        # ("basis must be a 3 dimensional array, ie (nterms, npixels, npixels).")
+        # assert self.basis.shape[-1] == 768, \
+        # ("Basis must have shape (n, 768, 768).")
+        # assert self.coefficients.ndim == 1 and \
+        # self.coefficients.shape[0] == self.basis.shape[0], \
+        # ("coefficients must be a 1 dimensional array with length equal to the "
+        # "First dimension of the basis array.")
+        # assert self.ideal_wavelength.ndim == 0, ("ideal_wavelength must be a "
+        #                                          "scalar array.")
 
 
     def __call__(self : OpticalLayer(), wavefront : Wavefront) -> Wavefront:
@@ -111,7 +111,7 @@ class ApplyBasisCLIMB(ShapedLayer()):
 
 
     @property
-    def shape(self):
+    def applied_shape(self):
         return tuple(np.array(self.basis.shape[-2:])//3)
 
 
@@ -234,15 +234,29 @@ class TolimanOptics(AngularOptics()):
         diameter = m1_diameter
 
         # Generate Aperture
+        if zernikes is not None:
+            # Set coefficients
+            if amplitude == 0.:
+                coefficients = np.zeros(len(zernikes))
+            else:
+                coefficients = amplitude * jr.normal(jr.PRNGKey(seed), 
+                    (len(zernikes),))
+        else:
+            coefficients = None
+
+        # Generate Aperture
         aperture = dLux.apertures.ApertureFactory(
             npixels         = wf_npixels,
+            noll_indices    = zernikes,
+            coefficients    = coefficients,
             secondary_ratio = m2_diameter/m1_diameter,
             nstruts         = nstruts,
-            strut_ratio     = strut_width/m1_diameter).transmission
+            strut_ratio     = strut_width/m1_diameter)
 
         # Generate Mask
         if mask is None:
-            phase_mask = np.load("diffractive_pupil.npy")
+            path = "/Users/louis/PhD/Software/dLux/dLux/models/toliman/diffractive_pupil.npy"
+            phase_mask = np.load(path)
 
             # Scale mask
             mask = dlu.scale_array(phase_mask, wf_npixels, order=1)
@@ -253,24 +267,7 @@ class TolimanOptics(AngularOptics()):
             mask = mask.at[small].set(0.).at[big].set(np.pi)
 
             opd_mask = dlu.phase_to_opd(phase_mask, 595e-9)
-            mask = dLux.optics.AddOPD(opd_mask)
-
-        # Generate Aberrations
-        if zernikes is None:
-            aberrations = None
-        else:
-            # Set coefficients
-            if amplitude == 0.:
-                coefficients = np.zeros(len(zernikes))
-            else:
-                coefficients = amplitude * jr.normal(jr.PRNGKey(seed), 
-                    (len(zernikes),))
-            
-            # Construct Aberrations
-            aberrations = dLux.aberrations.AberrationFactory(
-                npixels      = wf_npixels,
-                noll_indices = zernikes,
-                coefficients = coefficients)
+            mask = dLux.optical_layers.AddOPD(opd_mask)
 
         # Propagator Properties
         # Test default float input
@@ -278,8 +275,8 @@ class TolimanOptics(AngularOptics()):
         psf_oversample = float(psf_oversample)
         psf_pixel_scale = float(psf_pixel_scale)
 
-        super().__init__(diameter=diameter, aperture=aperture, mask=mask, 
-            aberrations=aberrations, psf_npixels=psf_npixels, 
+        super().__init__(wf_npixels=wf_npixels, diameter=diameter,
+            aperture=aperture, mask=mask, psf_npixels=psf_npixels, 
             psf_oversample=psf_oversample, psf_pixel_scale=psf_pixel_scale)
 
 
@@ -503,8 +500,8 @@ class Toliman(dLux.instruments.BaseInstrument):
         for attribute in self.__dict__.values():
             if hasattr(attribute, key):
                 return getattr(attribute, key)
-        if key in self.sources.keys():
-            return self.sources[key]
+        # if key in self.sources.keys():
+        #     return self.sources[key]
         raise AttributeError(f"{self.__class__.__name__} has no attribute "
         f"{key}.")
     

@@ -83,6 +83,7 @@ class TransmissiveLayer(OpticalLayer):
         self.normalise = bool(normalise)
         super().__init__(**kwargs)
 
+
 class AberratedLayer(OpticalLayer):
     """
     Base class for aberration layers. Primarily used for input type checking.
@@ -365,7 +366,19 @@ class Tilt(OpticalLayer):
 
 
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        self.__doc__ = inspect.getdoc(super().__call__)
+        """
+        Applies the layer to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
         return wavefront.tilt_wavefront(self.tilt_angles)
 
 
@@ -420,6 +433,17 @@ class Rotate(OpticalLayer):
 
 
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
-        self.__doc__ = inspect.getdoc(super().__call__)
+        """
+        Applies the layer to the wavefront.
 
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
         return wavefront.rotate(self.angle, self.order, self.rotate)

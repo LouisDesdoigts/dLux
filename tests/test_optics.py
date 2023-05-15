@@ -5,6 +5,7 @@ import dLux
 from jax import config, Array
 config.update("jax_debug_nans", True)
 
+
 def _test_apertured_optics_constructor(constructor):
     """Tests the constructor of the AperturedOptics class"""
     constructor()
@@ -24,7 +25,6 @@ def _test_propagate(optics):
     # Test weights
     optics.propagate(1e-6, weights=1e-6)
     optics.propagate(1e-6, weights=np.array(1e-6))
-
     with pytest.raises(ValueError):
         optics.propagate(1e-6, weights=np.array([1e-6, 2e-6]))
 
@@ -33,11 +33,13 @@ def _test_propagate(optics):
     with pytest.raises(ValueError):
         optics.propagate(1e-6, weights=np.array([1e-6, 2e-6]))
 
+
 def _test_propagate_mono(optics):
     """Tests the propagate method and its sub function"""
     # Test wavelengths
     optics.propagate_mono(1e-6)
     optics.propagate_mono(1e-6, return_wf=True)
+
 
 def _test_model(optics, source):
     """Tests the source input type checking of the BaseOptics.model method"""
@@ -46,7 +48,9 @@ def _test_model(optics, source):
     with pytest.raises(TypeError):
         optics.model(sources=1)
 
+
 class TestAngularOptics():
+    """Tests the AngularOptics class."""
 
     def test_constructor(self, create_angular_optics):
         """Tests the constructor"""
@@ -64,7 +68,9 @@ class TestAngularOptics():
         """Tests the propagate_mono method"""
         _test_propagate_mono(create_angular_optics())
 
+
 class TestCartesianOptics():
+    """Tests the CartesianOptics class."""
 
     def test_constructor(self, create_cartesian_optics):
         """Tests the constructor"""
@@ -84,7 +90,9 @@ class TestCartesianOptics():
         """Tests the propagate_mono method"""
         _test_propagate_mono(create_cartesian_optics())
 
+
 class TestFlexibleOptics():
+    """Tests the FlexibleOptics class."""
 
     def test_constructor(self, create_flexible_optics, create_mft):
         """Tests the constructor"""
@@ -103,6 +111,7 @@ class TestFlexibleOptics():
     def test_propagate_mono(self, create_flexible_optics):
         """Tests the propagate_mono method"""
         _test_propagate_mono(create_flexible_optics())
+
 
 class TestLayeredOptics():
     """Tests the LayeredOptics class."""
