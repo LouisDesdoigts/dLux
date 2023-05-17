@@ -6,8 +6,109 @@ from jax import config, Array
 config.update("jax_debug_nans", True)
 
 
-class TestTiltWavefront(object):
-    """Tests the TiltWavefront class."""
+def _test_transmissive_layer(constructor):
+    """Tests the constructor of a transmissive layer."""
+    constructor()
+
+def _test_call_transmissive_layer(constructor, create_wavefront):
+    """Tests the __call__ method of a transmissive layer."""
+    wf = create_wavefront()
+    constructor(normalise=True)(wf)
+    constructor(normalise=False)(wf)
+
+def _test_applied_shape(constructor):
+    """Tests the applied_shape method of a shaped layer."""
+    constructor().applied_shape
+
+def _test_basis_layer_constructor(constructor):
+    """Tests the constructor of a basis layer."""
+    constructor()
+    constructor(basis=None)
+    constructor(coefficients=None)
+    with pytest.raises(ValueError):
+        constructor(basis=np.ones((2, 1, 1)), coefficients=np.ones(1))
+    with pytest.raises(ValueError):
+        constructor(basis=[(2, 1, 1)], coefficients=np.ones(1))
+
+def _test_base_transmissive_optic_constructor(constructor):
+    """Tests the constructor of a base transmissive optic."""
+    constructor()
+    constructor(transmission=None)
+
+def _test_base_opd_optic_constructor(constructor):
+    """Tests the constructor of a base opd optic."""
+    constructor()
+    constructor(opd=None)
+
+def _test_base_phase_optic_constructor(constructor):
+    """Tests the constructor of a base phase optic."""
+    constructor()
+    constructor(phase=None)
+
+def _test_base_basis_optic_constructor(constructor):
+    """Tests the constructor of a base basis optic."""
+    constructor()
+    constructor(basis=None)
+    constructor(coefficients=None)
+    with pytest.raises(ValueError):
+        constructor(basis=np.ones((2, 1, 1)), coefficients=np.ones(1))
+
+
+class TestOptic():
+    """Tests the Optic class."""
+
+    def test_constructor(self, create_optic):
+        """Tests the constructor."""
+        _test_base_transmissive_optic_constructor(create_optic)
+        _test_base_opd_optic_constructor(create_optic)
+    
+    def test_call(self, create_optic, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call_transmissive_layer(create_optic, create_wavefront)
+
+
+class TestPhaseOptic():
+    """Tests the Optic class."""
+
+    def test_constructor(self, create_phase_optic):
+        """Tests the constructor."""
+        _test_base_transmissive_optic_constructor(create_phase_optic)
+        _test_base_phase_optic_constructor(create_phase_optic)
+    
+    def test_call(self, create_phase_optic, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call_transmissive_layer(create_phase_optic, create_wavefront)
+
+
+class TestBasisOptic():
+    """Tests the BasisOptics class."""
+
+    def test_constructor(self, create_basis_optic):
+        """Tests the constructor."""
+        _test_base_transmissive_optic_constructor(create_basis_optic)
+        _test_base_basis_optic_constructor(create_basis_optic)
+    
+    def test_call(self, create_basis_optic, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call_transmissive_layer(create_basis_optic, create_wavefront)
+
+
+class TestPhaseBasisOptic():
+    """Tests the PhaseBasisOptics class."""
+
+    def test_constructor(self, create_phase_basis_optic):
+        """Tests the constructor."""
+        _test_base_transmissive_optic_constructor(create_phase_basis_optic)
+        _test_base_basis_optic_constructor(create_phase_basis_optic)
+    
+    def test_call(self, create_phase_basis_optic, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call_transmissive_layer(create_phase_basis_optic, 
+            create_wavefront)
+
+
+class TestTilt():
+    """Tests the Tilt class."""
 
     def test_constructor(self, create_tilt):
         """Tests the constructor."""
@@ -20,245 +121,25 @@ class TestTiltWavefront(object):
         create_tilt()(create_wavefront())
 
 
-class TestNormalise(object):
-    """Tests the NormaliseWavefront class."""
-
-    def test_constructor(self, create_normalise):
-        """Tests the constructor."""
-        create_normalise()
+class TestNormalise():
+    """Tests the Normalise class."""
 
     def test_call(self, create_normalise, create_wavefront):
         """Tests the __call__ method."""
-        wf = create_wavefront() 
-        wf = create_normalise()(wf)
+        wf = create_normalise()(create_wavefront())
 
 
-class TestRotate(object):
+class TestRotate():
     """Tests the Rotate class."""
 
     def test_constructor(self, create_rotate):
         """Tests the constructor."""
         create_rotate()
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             create_rotate(angle=np.ones(1))
 
     def test_call(self, create_rotate, create_wavefront):
         """Tests the __call__ method."""
-        # Test regular rotation
         wf = create_wavefront()
         create_rotate()(wf)
         create_rotate(complex=True)(wf)
-
-
-
-# def _test_base_tranmissive_optic()
-
-
-class TestApplyBasisOPD(object):
-    """
-    Tests the ApplyBasisOPD class.
-    """
-
-
-    def test_constructor(self, create_apply_basis_opd) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_apply_basis_opd(basis=np.ones((16, 16)))
-
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_apply_basis_opd(basis=np.ones((1, 1, 16, 16)))
-
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_apply_basis_opd(coefficients=np.array([]))
-
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_apply_basis_opd(coefficients=np.zeros((1, 1)))
-
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_apply_basis_opd(basis=np.ones((2, 15, 15)),
-                                   coefficients=np.zeros((3)))
-
-        # Test functioning
-        create_apply_basis_opd()
-
-
-    def test_call(self, 
-            create_apply_basis_opd, 
-            create_wavefront) -> None:
-        """
-        Tests the __call__ method.
-        """
-        wf = create_wavefront() 
-        create_apply_basis_opd()(wf)
-
-
-class TestAddPhase(object):
-    """
-    Tests the AddPhase class.
-    """
-
-
-    def test_constructor(self, create_add_phase) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_add_phase(phase=np.ones(1))
-
-        # Test functioning
-        create_add_phase()
-
-
-    def test_call(self, 
-            create_add_phase, 
-            create_wavefront) -> None:
-        """
-        Tests the __call__ method.
-        """
-        wf = create_wavefront() 
-        npix = wf.npixels
-
-        # Test 0d
-        create_add_phase(phase=np.array(1.))(wf)
-
-        # Test 2d
-        create_add_phase(phase=np.ones((npix, npix)))(wf)
-
-        # Test 3d
-        create_add_phase(phase=np.ones((1, npix, npix)))(wf)
-
-
-class TestAddOPD(object):
-    """
-    Tests the AddOPD class.
-    """
-
-
-    def test_constructor(self, create_add_opd) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_add_opd(opd=np.ones(1))
-
-        # Test functioning
-        create_add_opd()
-
-
-    def test_call(self, 
-            create_add_opd, 
-            create_wavefront) -> None:
-        """
-        Tests the __call__ method.
-        """
-        wf = create_wavefront() 
-        npix = wf.npixels
-
-        # Test 0d
-        create_add_opd(opd=np.array(1.))(wf)
-
-        # Test 2d
-        create_add_opd(opd=np.ones((npix, npix)))(wf)
-
-        # Test 3d
-        create_add_opd(opd=np.ones((1, npix, npix)))(wf)
-
-
-class TestTransmissiveOptic(object):
-    """
-    Tests the TransmissiveOptic class.
-    """
-
-
-    def test_constructor(self, create_transmissive_optic) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test wrong dims
-        with pytest.raises(AssertionError):
-            create_transmissive_optic(trans=np.ones(1))
-
-        # Test functioning
-        create_transmissive_optic()
-
-
-    def test_call(self, 
-            create_transmissive_optic, 
-            create_wavefront) -> None:
-        """
-        Tests the __call__ method.
-        """
-        wf = create_wavefront() 
-        npix = wf.npixels
-
-        # Test 0d
-        create_transmissive_optic(trans=np.array(1.))(wf)
-
-        # Test 2d
-        create_transmissive_optic(trans=np.ones((npix, npix)))(wf)
-
-        # Test 3d
-        create_transmissive_optic(trans=np.ones((1, npix, npix)))(wf)
-
-
-# class TestApplyBasisCLIMB(object):
-#     """
-#     Tests the ApplyBasisCLIMB class.
-#     """
-
-
-#     def test_constructor(self, create_basis_climb) -> None:
-#         """
-#         Tests the constructor.
-#         """
-#         # Test wrong dims
-#         with pytest.raises(AssertionError):
-#             create_basis_climb(basis=np.ones((16, 16)))
-
-#         # Test wrong dims
-#         with pytest.raises(AssertionError):
-#             create_basis_climb(basis=np.ones((1, 1, 16, 16)))
-
-#         # Test wrong dims
-#         with pytest.raises(AssertionError):
-#             create_basis_climb(ideal_wavelength=np.ones(1))
-
-#         # Test wrong dims
-#         with pytest.raises(AssertionError):
-#             create_basis_climb(coefficients=np.array([]))
-
-#         # Test wrong dims
-#         with pytest.raises(AssertionError):
-#             create_basis_climb(coefficients=np.zeros((1, 1)))
-
-#         # Test wrong dims
-#         with pytest.raises(AssertionError):
-#             create_basis_climb(basis=np.ones((2, 15, 15)),
-#                                    coefficients=np.zeros((3)))
-
-#         # Test functioning
-#         create_basis_climb()
-
-
-#     def test_call(self, 
-#             create_basis_climb, 
-#             create_wavefront) -> None:
-#         """
-#         Tests the __call__ method.
-#         """
-#         npix = 256
-#         wf = create_wavefront(npixels = npix) 
-#         basis = np.ones((3, 3*npix, 3*npix))
-#         create_basis_climb(basis=basis)(wf)
-
-
-

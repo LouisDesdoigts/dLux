@@ -35,8 +35,8 @@ class ApertureLayer(TransmissiveLayer()):
 
     @abstractmethod
     def make_static(self     : ApertureLayer,
-                npixels  : int, 
-                diameter : float) -> ApertureLayer:
+                    npixels  : int, 
+                    diameter : float) -> ApertureLayer:
         """
         Returns the static version of the input aperture calcualted on the
         coordinates defined by npixels and diameter.
@@ -215,8 +215,8 @@ class BaseDynamicAperture(ApertureLayer):
 
 
     def make_static(self     : ApertureLayer,
-                npixels  : int, 
-                diameter : float) -> ApertureLayer:
+                    npixels  : int, 
+                    diameter : float) -> ApertureLayer:
         """
         Returns the static version of the input aperture calcualted on the
         coordinates defined by npixels and diameter.
@@ -233,10 +233,10 @@ class BaseDynamicAperture(ApertureLayer):
         aperture: ApertureLayer
             The TranmissiveOptic version of this aperture.
         """
-        coordinates = self._coordinates(dlu.dlu.pixel_coords(npixels,
+        coordinates = self._coordinates(dlu.pixel_coords(npixels,
             diameter/npixels))
         transmission = self._transmission(coordinates)
-        return Optic()(transmission, self.normalise)
+        return Optic()(transmission, None, self.normalise)
 
 
     def __call__(self : ApertureLayer, wavefront : Wavefront) -> Wavefront:
@@ -1280,7 +1280,7 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
             The amplitude of each basis vector of the aberrations. If nothing 
             is provided, then the coefficients are set to zero.
         """
-        super().__init__(normalise = aperture.normalise)
+        super().__init__(normalise=aperture.normalise)
 
         # Ensure aperture is dynamic
         if not isinstance(aperture, DynamicAperture):
@@ -1419,8 +1419,8 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
 
 
     def make_static(self     : ApertureLayer,
-                   npixels  : int, 
-                   diameter : float) -> ApertureLayer:
+                    npixels  : int, 
+                    diameter : float) -> ApertureLayer:
         """
         Returns the static version of the input aperture calcualted on the
         coordinates defined by npixels and diameter.
@@ -1437,9 +1437,9 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
         aperture: ApertureLayer
             The BasisOptic version of this aperture.
         """
-        coordinates = self._coordinates(dlu.pixel_coords(npixels, 
+        coordinates = self.aperture._coordinates(dlu.pixel_coords(npixels, 
             diameter/npixels))
-        transmission = self._transmission(coordinates)
+        transmission = self.aperture._transmission(coordinates)
 
         basis = self._basis(coordinates)
         return BasisOptic()(basis=basis, transmission=transmission, 
@@ -1811,7 +1811,15 @@ class CompositeAperture(BaseDynamicAperture):
         aberrated_apertures = self._aberrated_apertures()
         basis = [ap._basis(coordinates) for ap in aberrated_apertures]
         return np.squeeze(np.array(basis))
-    
+
+
+    # This is acutall a duplicate from BasisLayer - class structure could be
+    # optimised
+    def calculate(self, basis, coefficients):
+        ndim = coefficients.ndim
+        axes = (tuple(range(ndim)), tuple(range(ndim)))
+        return np.tensordot(basis, coefficients, axes=axes)
+
     def _opd(self : ApertureLayer, coordinates : Array) -> Array:
         """
         Compute the array representing the opd of the optical aberrations on the
@@ -1847,7 +1855,7 @@ class CompositeAperture(BaseDynamicAperture):
         amplitude = wavefront.amplitude * self._transmission(coordinates)
 
         if len(self._aberrated_apertures()) == 0:
-            wavefront = wavefront.set('ampltiude', amplitude)
+            wavefront = wavefront.set('amplitude', amplitude)
         else:
             opd = self._opd(coordinates)
             phase = wavefront.phase + opd * wavefront.wavenumber
@@ -1860,8 +1868,8 @@ class CompositeAperture(BaseDynamicAperture):
 
 
     def make_static(self     : ApertureLayer,
-                   npixels  : int, 
-                   diameter : float) -> ApertureLayer:
+                    npixels  : int, 
+                    diameter : float) -> ApertureLayer:
         """
         Returns the static version of the input aperture calcualted on the
         coordinates defined by npixels and diameter.

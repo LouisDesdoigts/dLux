@@ -1240,8 +1240,8 @@ class FresnelWavefront(Wavefront):
         scale_in = 1.0 / self.npixels
         scale_out = self._nfringes(npixels, pixel_scale, focal_shift, 
             focal_length) / npixels
-        in_vec = pixel_coordinates(self.npixels, scale_in, shift * scale_in)
-        out_vec = pixel_coordinates(npixels, scale_out, shift * scale_out)
+        in_vec = dlu.pixel_coordinates(self.npixels, scale_in, shift * scale_in)
+        out_vec = dlu.pixel_coordinates(npixels, scale_out, shift * scale_out)
 
         if self.plane == 'Pupil':
             return np.exp(2j * np.pi * np.outer(in_vec, out_vec))
@@ -1330,7 +1330,7 @@ class FresnelWavefront(Wavefront):
         # Coordinates
         prop_dist = focal_length + focal_shift
         input_positions = self.coordinates
-        output_positions = pixel_coords(npixels, pixel_scale)
+        output_positions = dlu.pixel_coords(npixels, pixel_scale)
 
         # Calculate phase values
         first_factor = self.quadratic_phase(*input_positions, -focal_length)

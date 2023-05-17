@@ -266,9 +266,11 @@ def create_far_field_fresnel():
         focal_length : Array = np.array(1.),
         focal_shift  : Array = np.array(1e-3),
         shift        : Array = np.zeros(2),
-        pixel        : bool  = False):
-        return propagators.FarFieldFresnel(npixels, pixel_scale,
-                 focal_length, focal_shift, shift, pixel)
+        pixel        : bool  = False,
+        inverse      : bool  = False):
+        return propagators.FarFieldFresnel(npixels=npixels, 
+            pixel_scale=pixel_scale, focal_length=focal_length,
+            inverse=inverse, focal_shift=focal_shift,pixel=pixel)
     return _create_far_field_fresnel
 
 
@@ -292,7 +294,7 @@ optical_layers.py classes:
 def create_tilt():
     """Constructs the Tilt class for testing."""
     def _create_tilt(angles : Array = np.ones(2)):
-        return optical_layers.Tilt(tilt_angles)
+        return optical_layers.Tilt(angles=angles)
     return _create_tilt
 
 @pytest.fixture
@@ -300,7 +302,7 @@ def create_normalise():
     """Constructs the Normalise class for testing."""
     def _create_normalise():
         return optical_layers.Normalise()
-    return _create_normalise_wavefront
+    return _create_normalise
 
 @pytest.fixture
 def create_rotate():
@@ -311,7 +313,6 @@ def create_rotate():
         complex : bool  = False):
         return optical_layers.Rotate(angle=angle, order=order, complex=complex)
     return _create_rotate
-
 
 @pytest.fixture
 def create_optic():
@@ -336,15 +337,14 @@ def create_basis_optic():
             coefficients=coefficients, normalise=normalise)
     return _create_basis_optic 
 
-
 @pytest.fixture
 def create_phase_optic():
     """Constructs the PhaseOptic class for testing."""
     def _create_phase_optic(
         transmission : Array = np.ones((16, 16)),
-        opd          : Array = np.zeros((16, 16)),
+        phase        : Array = np.zeros((16, 16)),
         normalise    : bool = True):
-        return optical_layers.PhaseOptic(transmission=transmission, opd=opd, 
+        return optical_layers.PhaseOptic(transmission=transmission, phase=phase, 
             normalise=normalise)
     return _create_phase_optic 
 
@@ -403,7 +403,7 @@ def create_circular_aperture():
 @pytest.fixture
 def create_rectangular_aperture():
     def _create_rectangular_aperture(
-        length      : Array = 0.5, 
+        height      : Array = 0.5, 
         width       : Array = 1., 
         centre      : Array = [0., 0.],
         shear       : Array = [0., 0.],
@@ -413,7 +413,7 @@ def create_rectangular_aperture():
         softening   : Array = 0.,
         normalise   : bool = False):
         return apertures.RectangularAperture(
-            length=length,
+            height=height,
             width=width,
             centre=centre,
             shear=shear,
@@ -428,6 +428,7 @@ def create_rectangular_aperture():
 def create_reg_poly_aperture():
     def _create_reg_poly_aperture( 
         nsides      : int = 4,
+        rmax        : float = 0.5,
         centre      : Array = [0., 0.],
         shear       : Array = [0., 0.],
         compression : Array = [1., 1.],
@@ -436,7 +437,8 @@ def create_reg_poly_aperture():
         softening   : Array = 0.,
         normalise   : bool = False):
         return apertures.RegPolyAperture(
-            vertices=vertices,
+            nsides=nsides,
+            rmax=rmax,
             centre=centre,
             shear=shear,
             compression=compression,
@@ -475,7 +477,7 @@ def create_aberrated_aperture(create_circular_aperture):
     def _create_aberrated_aperture(
         aperture: object = create_circular_aperture(),
         noll_inds: list = np.arange(1, nterms+1, dtype=int),
-        coefficients: Array = np.ones(nterms, dtype=float)):
+        coefficients: Array = np.zeros(nterms, dtype=float)):
         return apertures.AberratedAperture(
             aperture=aperture,
             noll_inds=noll_inds,
@@ -486,17 +488,17 @@ def create_aberrated_aperture(create_circular_aperture):
 @pytest.fixture
 def create_uniform_spider():
     def _create_uniform_spider(
-        number_of_struts : int = 4,
-        width_of_struts  : float = .05,
-        centre           : Array = [0., 0.], 
-        shear            : Array = [0., 0.],
-        compression      : Array = [1., 1.],
-        rotation         : Array = 0., 
-        softening        : bool = False,
-        normalise        : bool = False):
+        nstruts     : int = 4,
+        strut_width : float = .05,
+        centre      : Array = [0., 0.], 
+        shear       : Array = [0., 0.],
+        compression : Array = [1., 1.],
+        rotation    : Array = 0., 
+        softening   : bool = False,
+        normalise   : bool = False):
         return apertures.UniformSpider(
-            number_of_struts=number_of_struts, 
-            width_of_struts=width_of_struts,
+            nstruts=nstruts, 
+            strut_width=strut_width,
             centre=centre,
             shear=shear,
             compression=compression,
@@ -508,27 +510,27 @@ def create_uniform_spider():
 @pytest.fixture
 def create_compound_aperture(create_circular_aperture):
     def _create_compound_aperture(
-        apertures   : list = [create_circular_aperture()],
+        apers       : list = [create_circular_aperture()],
         centre      : Array = np.array([0., 0.]), 
         shear       : Array = np.array([0., 0.]),
         compression : Array = np.array([1., 1.]),
         rotation    : Array = np.array(0.),
         normalise: bool = False):
         return apertures.CompoundAperture(
-            apertures=apertures, normalise=normalise)
+            apertures=apers, normalise=normalise)
     return _create_compound_aperture
 
 @pytest.fixture
 def create_multi_aperture(create_circular_aperture):
     def _create_multi_aperture(
-        apertures: list = [create_circular_aperture()],
+        apers       : list = [create_circular_aperture()],
         centre      : Array = np.array([0., 0.]), 
         shear       : Array = np.array([0., 0.]),
         compression : Array = np.array([1., 1.]),
         rotation    : Array = np.array(0.),
         normalise: bool = False):
         return apertures.MultiAperture(
-            apertures=apertures, normalise=normalise)
+            apertures=apers, normalise=normalise)
     return _create_multi_aperture
 
 @pytest.fixture
@@ -659,68 +661,75 @@ sources.py classes:
     Source
     PointSources
     BinarySource
+    ResolvedSource
     PointResolvedSource
 
 '''
 @pytest.fixture
-def create_point_source(create_spectrum):
+def create_point_source():
     def _create_point_source(
+        wavelengths : Array = np.array([1e-6]),
         position    : Array = np.zeros(2),
         flux        : Array = np.array(1.),
-        wavelengths : Array = None,
-        spectrum    : spectra.Spectrum = create_spectrum()):
-        return sources.PointSource(position=position, flux=flux,
-            spectrum=spectrum, wavelengths=wavelengths)
+        weights     : Array = None,
+        spectrum    : spectra.Spectrum = None):
+        return sources.PointSource(wavelengths=wavelengths, position=position,
+            flux=flux, spectrum=spectrum, weights=weights)
     return _create_point_source
 
 @pytest.fixture
-def create_point_sources(create_spectrum):
+def create_point_sources():
     def _create_point_sources(
-        position    : Array = np.zeros(2),
+        wavelengths : Array = np.array([1e-6]),
+        position    : Array = np.zeros((3, 2)),
         flux        : Array = np.ones(3),
-        wavelengths : Array = None,
-        spectrum    : spectra.Spectrum = create_spectrum()):
-        return sources.PointSources(position=position, flux=flux,
-            spectrum=spectrum, wavelengths=wavelengths)
+        weights     : Array = None,
+        spectrum    : spectra.Spectrum = None):
+        return sources.PointSources(wavelengths=wavelengths, position=position,
+            flux=flux, spectrum=spectrum, weights=weights)
     return _create_point_sources
 
 @pytest.fixture
-def create_resolved_source(create_spectrum):
+def create_resolved_source():
     def _create_resolved_source(
-        position     : Array = np.zeros(2),
-        flux         : Array = np.array(1.),
-        wavelengths  : Array = None,
-        distribution : Array = np.ones((5, 5)),
-        spectrum     : spectra.Spectrum = create_spectrum()):
-        return sources.ResolvedSource(position=position, flux=flux, 
-            distribution=distribution, spectrum=spectrum, 
-            wavelengths=wavelengths)
+            wavelengths  : Array = np.array([1e-6]),
+            position     : Array = np.zeros(2),
+            flux         : Array = np.array(1.),
+            distribution : Array = np.ones((5, 5)),
+            weights      : Array = None,
+            spectrum     : spectra.Spectrum = None):
+        return sources.ResolvedSource(wavelengths=wavelengths, 
+            position=position, flux=flux, distribution=distribution, 
+            spectrum=spectrum, weights=weights)
     return _create_resolved_source
 
 @pytest.fixture
-def create_binary_source(create_spectrum):
+def create_binary_source():
     def _create_binary_source(
+        wavelengths    : Array = np.array([1e-6]),
         position       : Array = np.array([0., 0.]),
         flux           : Array = np.array(1.),
-        wavelengths    : Array = None,
         separation     : Array = np.array(1.),
         position_angle : Array = np.array(0.),
         contrast       : Array = np.array(2.),
-        spectrum       : spectra.Spectrum = create_spectrum()):
+        spectrum       : spectra.Spectrum = None,
+        weights        : Array = None):
         return sources.BinarySource(position=position, flux=flux,
             separation=separation, position_angle=position_angle,
-            contrast=contrast, spectrum=spectrum, wavelengths=wavelengths)
+            contrast=contrast, spectrum=spectrum, wavelengths=wavelengths,
+            weights=weights)
     return _create_binary_source
 
 @pytest.fixture
-def create_point_resolved_source(create_spectrum):
+def create_point_resolved_source():
     def _create_point_resolved_source(
+        wavelengths  : Array = np.array([1e-6]),
         position     : Array = np.array([0., 0.]),
         flux         : Array = np.array(1.),
-        wavelengths  : Array = None,
-        contrast     : Array = np.array(2.),
         distribution : Array = np.ones((5, 5)),
-        spectrum     : spectra.Spectrum = create_spectrum()):
+        contrast     : Array = np.array(2.),
+        spectrum     : spectra.Spectrum = None,
+        weights      : Array = None):
         return sources.PointResolvedSource(position=position, flux=flux,
             distribution=distribution, contrast=contrast, spectrum=spectrum,
             wavelengths=wavelengths)

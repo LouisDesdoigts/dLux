@@ -263,7 +263,7 @@ class ShiftedMFT(MFT):
                 self.shift, self.focal_length, self.pixel)
 
 
-class FarFieldFresnel(Propagator):
+class FarFieldFresnel(ShiftedMFT):
     """
     A propagator class to for Far-Field fresnel propagations. This classes
     implements algorithms that use quadratic phase factors to better represent
@@ -331,8 +331,7 @@ class FarFieldFresnel(Propagator):
             raise TypeError('focal_shift must be a scalar.')
         
         super().__init__(shift=shift, pixel=pixel, focal_length=focal_length, 
-            pixel_scale=pixel_scale, npixels=npixels, focal_shift=focal_shift,
-            inverse=inverse)
+            pixel_scale=pixel_scale, npixels=npixels, inverse=inverse)
 
 
     def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:

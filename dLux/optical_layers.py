@@ -24,6 +24,7 @@ __all__ = [
     "BasisOptic",
     "PhaseBasisOptic",
     "Tilt",
+    "Normalise",
     "Rotate"]
 
 
@@ -62,7 +63,6 @@ class OpticalLayer(Base):
         """
 
 
-# For inheritance in Apertre Layers
 class TransmissiveLayer(OpticalLayer):
     """
     Base class to hold tranmissive layers embuing them with a normalise 
@@ -89,7 +89,10 @@ class AberratedLayer(OpticalLayer):
     Base class for aberration layers. Primarily used for input type checking.
     """
 
+
 class ShapedLayer(OpticalLayer):
+
+
     @abstractmethod
     def applied_shape(self):
         """
@@ -97,16 +100,19 @@ class ShapedLayer(OpticalLayer):
         matching shape of the waevefront to be applied to.
         """
 
-class BasisLayer(ShapedLayer):
+class BasisLayer(OpticalLayer):
     """
+    This class primarily exists to allow for the use of the class based basis
+    used for dynamic aberrated apertures.
+
     Attributes
     ----------
-    basis: Array, meters
-        Arrays holding the pre-calculated basis vectors.
+    basis: Union[Array, list]
+        The basis to use. Can be an array of a list of aberrations classes.
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
     """
-    basis        : Array
+    basis        : Union[Array, list]
     coefficients : Array
 
 
@@ -115,19 +121,27 @@ class BasisLayer(ShapedLayer):
                  coefficients : Array = None,
                  **kwargs) -> OpticalLayer:
         super().__init__(**kwargs)
-        self.basis = np.asarray(basis, dtype=float)
+        if basis is not None:
+            basis = np.asarray(basis, dtype=float)
+        self.basis = basis
 
-        if coefficients is None:
-            coefficients = np.zeros(self.basis.shape[:-2])
-        self.coefficients = np.asarray(coefficients, dtype=float)
+        if self.basis is None:
+            self.coefficients = None
+        else:
+            if hasattr(self.basis, 'shape'):
+                coefficients = np.zeros(self.basis.shape[:-2])
+            else:
+                coefficients = np.zeros(len(self.basis))
+            self.coefficients = np.asarray(coefficients, dtype=float)
 
-        if self.basis.shape[:-2] != self.coefficients.shape:
-            raise ValueError("The number of basis vectors must be equal to the"
-                "number of coefficients.")
-    
-    @property
-    def applied_shape(self):
-        return self.basis.shape[-2:]
+        if isinstance(self.basis, Array):
+            if self.basis.shape[:-2] != self.coefficients.shape:
+                raise ValueError("The number of basis vectors must be equal to "
+                    "the number of coefficients.")
+        elif isinstance(self.basis, list):
+            if len(self.basis) != len(self.coefficients):
+                raise ValueError("The number of basis vectors must be equal to "
+                    "the number of coefficients.")
 
     def calculate(self, basis, coefficients):
         ndim = coefficients.ndim
@@ -172,7 +186,7 @@ class BasePhaseOptic(AberratedLayer, ShapedLayer):
         self.phase = phase
         super().__init__(**kwargs)
 
-class BaseBasisOptic(BaseTransmissiveOptic):
+class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
     """
     Adds an array of phase values to the input wavefront calculated from the
     Optical Path Difference (OPD). The OPDs are calculated from the basis
@@ -187,35 +201,22 @@ class BaseBasisOptic(BaseTransmissiveOptic):
         Arrays holding the pre-calculated basis vectors.
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
+    normalise: bool
+        Whether to normalise the wavefront after passing through the
+        optic.
     """
-    basis        : Array
-    coefficients : Array
-
 
     def __init__(self         : OpticalLayer,
                  basis        : Array,
                  transmission : Array = None,
                  coefficients : Array = None,
                  normalise    : bool = False) -> OpticalLayer:
-        super().__init__(transmission=transmission, normalise=normalise)
-        self.basis = np.asarray(basis, dtype=float)
-
-        if coefficients is None:
-            coefficients = np.zeros(self.basis.shape[0])
-        self.coefficients = np.asarray(coefficients, dtype=float)
-
-        if self.basis.shape[0] != self.coefficients.shape[0]:
-            raise ValueError("The number of basis vectors must be equal to the"
-                "number of coefficients.")
+        super().__init__(transmission=transmission, basis=basis, 
+        coefficients=coefficients, normalise=normalise)
     
     @property
     def applied_shape(self):
         return self.basis.shape[-2:]
-
-    def calculate(self, basis, coefficients):
-        ndim = coefficients.ndim
-        axes = (tuple(range(ndim)), tuple(range(ndim)))
-        return np.tensordot(basis, coefficients, axes=axes)
 
 
 ######################
@@ -292,9 +293,9 @@ class PhaseOptic(BaseTransmissiveOptic, BasePhaseOptic):
                 raise ValueError("phase and transmission must have the same "
                     "shape.")
     
-    def __call__(self):
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
         wavefront *= self.transmission
-        wavefront += self.opd
+        wavefront = wavefront.add_phase(self.phase)
         if self.normalise:
             wavefront = wavefront.normalise()
         return wavefront
@@ -321,20 +322,12 @@ class PhaseBasisOptic(BaseBasisOptic):
     def phase(self):
         return self.calculate(self.basis, self.coefficients)
 
-    def __call__(self):
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
         wavefront *= self.transmission
         wavefront = wavefront.add_phase(self.phase)
         if self.normalise:
             wavefront = wavefront.normalise()
         return wavefront
-
-
-
-
-
-
-
-
 
 
 class Tilt(OpticalLayer):
@@ -361,7 +354,7 @@ class Tilt(OpticalLayer):
         super().__init__()
         self.angles = np.asarray(angles, dtype=float)
 
-        if self.angle.shape != (2,):
+        if self.angles.shape != (2,):
             raise ValueError("angles must have have (2,)")
 
 
@@ -379,7 +372,27 @@ class Tilt(OpticalLayer):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        return wavefront.tilt_wavefront(self.tilt_angles)
+        return wavefront.tilt(self.angles)
+
+
+class Normalise(OpticalLayer):
+    """Normalises the wavefront."""
+    
+    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+        """
+        Applies the layer to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
+        return wavefront.normalise()
 
 
 class Rotate(OpticalLayer):
@@ -429,7 +442,7 @@ class Rotate(OpticalLayer):
             raise ValueError("Order must be 0, 1")
         if self.angle.ndim != 0:
             raise ValueError(f"angle must be a zero-dimensional, has "
-                f"{self.angle.ndims} dimensions.")
+                f"{self.angle.ndim} dimensions.")
 
 
     def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
@@ -446,4 +459,4 @@ class Rotate(OpticalLayer):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        return wavefront.rotate(self.angle, self.order, self.rotate)
+        return wavefront.rotate(self.angle, self.order, self.complex)

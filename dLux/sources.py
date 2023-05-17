@@ -325,10 +325,11 @@ class PointSources(Source):
 
 
     def __init__(self        : Source,
-                 position    : Array,
-                 flux        : Array    = None,
-                 spectrum    : Spectrum = None,
-                 wavelengths : Array    = None) -> Source:
+                 wavelengths : Array,
+                 position    : Array    = np.zeros(2),
+                 flux        : Array    = np.array(1.),
+                 weights     : Array    = None,
+                 spectrum    : Spectrum = None) -> Source:
         """
         Constructor for the PointSources class.
 
@@ -344,8 +345,10 @@ class PointSources(Source):
         wavelengths : Array, meters = None
             The array of wavelengths at which the spectrum is defined.
         """
-        super().__init__(spectrum=spectrum, wavelengths=wavelengths)
+        super().__init__(spectrum=spectrum, wavelengths=wavelengths,
+            weights=weights)
 
+        # More complex parameter checks here because of extra dims
         self.position = np.asarray(position, dtype=float)
         if self.position.ndim != 2:
             raise ValueError("position must be a 2d array.")
@@ -361,8 +364,7 @@ class PointSources(Source):
             if len(self.flux) != len(self.position):
                 raise ValueError("Length of flux must be equal to length of "
                     "position.")
-        
-        
+
 
     def model(self : Source, optics : Optics) -> Array:
         """
@@ -404,12 +406,12 @@ class ResolvedSource(Source):
 
 
     def __init__(self         : Source,
-                 position     : Array    = np.ones(2),
+                 wavelengths  : Array,
+                 position     : Array    = np.zeros(2),
                  flux         : Array    = np.array(1.),
                  distribution : Array    = np.ones((3, 3)),
-                 spectrum     : Spectrum = None,
-                 wavelengths  : Array    = None,
-                 **kwargs) -> Source:
+                 weights      : Array    = None,
+                 spectrum     : Spectrum = None) -> Source:
         """
         Constructor for the ResolvedSource class.
 
@@ -432,7 +434,8 @@ class ResolvedSource(Source):
         if self.distribution.ndim != 2:
             raise ValueError("distribution must be a 2d array.")
         
-        super().__init__(position, flux, spectrum, wavelengths, **kwargs)
+        super().__init__(position=position, flux=flux, spectrum=spectrum,
+            wavelengths=wavelengths, weights=weights)
 
 
     def normalise(self : Source) -> Source:
@@ -474,13 +477,14 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
 
 
     def __init__(self           : Source,
+                 wavelengths    : Array    = None,
                  position       : Array    = np.array([0., 0.]),
                  flux           : Array    = np.array(1.),
                  separation     : Array    = None,
                  position_angle : Array    = np.pi/2,
                  contrast       : Array    = np.array(1.),
                  spectrum       : Spectrum = None,
-                 wavelengths    : Array    = None) -> Source:
+                 weights        : Array    = None) -> Source:
         """
         Parameters
         ----------
@@ -503,14 +507,10 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         wavelengths = np.asarray(wavelengths, dtype=float)
         if wavelengths.ndim == 1:
             wavelengths = np.array([wavelengths, wavelengths])
-        spectrum = dLux.spectra.Spectrum(wavelengths)
 
-        super().__init__(position=position,
-                         flux=flux,
-                         spectrum=spectrum,
-                         separation=separation,
-                         position_angle=position_angle,
-                         contrast=contrast)
+        super().__init__(wavelengths=wavelengths, position=position, flux=flux,
+            separation=separation, position_angle=position_angle,
+            contrast=contrast, spectrum=spectrum, weights=weights)
 
 
     def model(self : Source, optics : Optics) -> Array:
@@ -560,12 +560,13 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
 
 
     def __init__(self         : Source,
+                 wavelengths  : Array    = None,
                  position     : Array    = np.zeros(2),
                  flux         : Array    = np.array(1.),
                  distribution : Array    = np.ones((3, 3)),
                  contrast     : Array    = np.array(1.),
                  spectrum     : Spectrum = None,
-                 wavelengths  : Array    = None) -> Source:
+                 weights      : Array    = None) -> Source:
         """
         Parameters
         ----------
@@ -583,11 +584,9 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
         wavelengths : Array, meters = None
             The array of wavelengths at which the spectrum is defined.
         """
-        wavelengths = np.asarray(wavelengths, dtype=float)
-        spectrum = dLux.spectra.Spectrum(wavelengths)
-
-        super().__init__(position=position, flux=flux, spectrum=spectrum,
-            distribution=distribution, contrast=contrast)
+        super().__init__(wavelengths=wavelengths, position=position, flux=flux,
+            distribution=distribution, spectrum=spectrum, weights=weights,
+            contrast=contrast)
 
 
     def model(self : Source, optics : Optics) -> Array:
