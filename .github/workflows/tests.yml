@@ -52,7 +52,7 @@ jobs:
       - name: image tests
         run: pytest --quiet tests/test_images.py
 
-      - name: detecto layer tests
+      - name: detector layer tests
         run: pytest --quiet tests/test_detector_layers.py
 
       - name: detector tests
