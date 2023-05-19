@@ -44,6 +44,7 @@ class DetectorLayer(Base):
             The transformed image.
         """
 
+
 class ApplyPixelResponse(DetectorLayer):
     """
     Applies a pixel response array to the the input image, via a multiplication.
@@ -156,7 +157,6 @@ class ApplyJitter(DetectorLayer):
         image : Image
             The transformed image.
         """
-        # TODO: Add pixel scale from image
         kernel = self.generate_kernel(image.pixel_scale)
         return image.convolve(kernel)
 
@@ -203,7 +203,7 @@ class ApplySaturation(DetectorLayer):
         image : Image
             The transformed image.
         """
-        return image.minmum('image', self.saturation)
+        return image.min('image', self.saturation)
 
 
 class AddConstant(DetectorLayer):

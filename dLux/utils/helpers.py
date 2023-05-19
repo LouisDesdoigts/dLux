@@ -8,7 +8,7 @@ __all__ = ["list_to_dictionary"]
 def list_to_dictionary(
     list_in : list, 
     ordered : bool,
-    allowed_types : tuple) -> dict:
+    allowed_types : tuple = ()) -> dict:
     """
     Converts some input list of dLux layers and converts them into an
     OrderedDict with the correct structure, ensuring that all keys are unique.
@@ -38,7 +38,7 @@ def list_to_dictionary(
             name = item.__class__.__name__
 
         # Check input types
-        if not isinstance(item, allowed_types):
+        if allowed_types != () and not isinstance(item, allowed_types):
             raise TypeError(f"Item {name} is not an allowed type, got "
                 f"{type(item)}")
 

@@ -174,7 +174,7 @@ def rotate(array : Array, angle : Array, order : int = 1) -> Array:
 
 def fourier_rotate(array   : Array,
                    angle   : Array,
-                   padding : int = 2) -> Array:
+                   padding : int = 2) -> Array: # pragma: no cover
     """
     Rotates an array by the angle, using a fourier rotation.
 

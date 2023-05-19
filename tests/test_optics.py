@@ -1,4 +1,3 @@
-from __future__ import annotations
 import jax.numpy as np
 import pytest
 import dLux
@@ -31,7 +30,7 @@ def _test_propagate(optics):
     # Test offset
     optics.propagate(wavelengths=1e-6, offset=[0, 0])
     with pytest.raises(ValueError):
-        optics.propagate(1e-6, weights=np.array([1e-6, 2e-6]))
+        optics.propagate(1e-6, offset=np.array([0, 0, 0]))
 
 
 def _test_propagate_mono(optics):
@@ -47,6 +46,18 @@ def _test_model(optics, source):
     optics.model(sources=[source])
     with pytest.raises(TypeError):
         optics.model(sources=1)
+
+
+def _test_getattr(optics):
+    """Tests the __getattr__ method"""
+    optics.transmission
+    with pytest.raises(AttributeError):
+        optics.not_an_attribute
+
+
+def _test_true_pixel_scale(optics):
+    """Tests the true_pixel_scale property"""
+    optics.true_pixel_scale
 
 
 class TestAngularOptics():
@@ -67,6 +78,14 @@ class TestAngularOptics():
     def test_propagate_mono(self, create_angular_optics):
         """Tests the propagate_mono method"""
         _test_propagate_mono(create_angular_optics())
+
+    def test_getattr(self, create_angular_optics):
+        """Tests the __getattr__ method"""
+        _test_getattr(create_angular_optics())
+    
+    def test_true_pixel_scale(self, create_angular_optics):
+        """Tests the true_pixel_scale property"""
+        _test_true_pixel_scale(create_angular_optics())
 
 
 class TestCartesianOptics():
@@ -90,6 +109,14 @@ class TestCartesianOptics():
         """Tests the propagate_mono method"""
         _test_propagate_mono(create_cartesian_optics())
 
+    def test_getattr(self, create_cartesian_optics):
+        """Tests the __getattr__ method"""
+        _test_getattr(create_cartesian_optics())
+    
+    def test_true_pixel_scale(self, create_cartesian_optics):
+        """Tests the true_pixel_scale property"""
+        _test_true_pixel_scale(create_cartesian_optics())
+
 
 class TestFlexibleOptics():
     """Tests the FlexibleOptics class."""
@@ -112,6 +139,14 @@ class TestFlexibleOptics():
         """Tests the propagate_mono method"""
         _test_propagate_mono(create_flexible_optics())
 
+    def test_getattr(self, create_flexible_optics):
+        """Tests the __getattr__ method"""
+        _test_getattr(create_flexible_optics())
+    
+    def test_true_pixel_scale(self, create_flexible_optics):
+        """Tests the true_pixel_scale property"""
+        _test_true_pixel_scale(create_flexible_optics())
+
 
 class TestLayeredOptics():
     """Tests the LayeredOptics class."""
@@ -131,3 +166,13 @@ class TestLayeredOptics():
     def test_propagate_mono(self, create_layered_optics):
         """Tests the propagate_mono method"""
         _test_propagate_mono(create_layered_optics())
+
+    def test_getattr(self, create_layered_optics):
+        """Tests the __getattr__ method"""
+        create_layered_optics().Optic
+        with pytest.raises(AttributeError):
+            create_layered_optics().not_an_attribute
+    
+    def test_true_pixel_scale(self, create_layered_optics):
+        """Tests the true_pixel_scale property"""
+        _test_true_pixel_scale(create_layered_optics())

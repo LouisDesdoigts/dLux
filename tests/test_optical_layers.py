@@ -1,4 +1,3 @@
-from __future__ import annotations
 import jax.numpy as np
 import pytest
 import dLux
@@ -48,8 +47,6 @@ def _test_base_phase_optic_constructor(constructor):
 def _test_base_basis_optic_constructor(constructor):
     """Tests the constructor of a base basis optic."""
     constructor()
-    constructor(basis=None)
-    constructor(coefficients=None)
     with pytest.raises(ValueError):
         constructor(basis=np.ones((2, 1, 1)), coefficients=np.ones(1))
 
@@ -61,10 +58,16 @@ class TestOptic():
         """Tests the constructor."""
         _test_base_transmissive_optic_constructor(create_optic)
         _test_base_opd_optic_constructor(create_optic)
+        with pytest.raises(ValueError):
+            create_optic(transmission=np.ones(1), opd=np.ones(2))
     
     def test_call(self, create_optic, create_wavefront):
         """Tests the __call__ method."""
         _test_call_transmissive_layer(create_optic, create_wavefront)
+    
+    def test_applied_shape(self, create_optic):
+        """Tests the applied_shape method."""
+        _test_applied_shape(create_optic)
 
 
 class TestPhaseOptic():
@@ -74,10 +77,16 @@ class TestPhaseOptic():
         """Tests the constructor."""
         _test_base_transmissive_optic_constructor(create_phase_optic)
         _test_base_phase_optic_constructor(create_phase_optic)
+        with pytest.raises(ValueError):
+            create_phase_optic(transmission=np.ones(1), phase=np.ones(2))
     
     def test_call(self, create_phase_optic, create_wavefront):
         """Tests the __call__ method."""
         _test_call_transmissive_layer(create_phase_optic, create_wavefront)
+
+    def test_applied_shape(self, create_phase_optic):
+        """Tests the applied_shape method."""
+        _test_applied_shape(create_phase_optic)
 
 
 class TestBasisOptic():
@@ -92,6 +101,10 @@ class TestBasisOptic():
         """Tests the __call__ method."""
         _test_call_transmissive_layer(create_basis_optic, create_wavefront)
 
+    def test_applied_shape(self, create_basis_optic):
+        """Tests the applied_shape method."""
+        _test_applied_shape(create_basis_optic)
+
 
 class TestPhaseBasisOptic():
     """Tests the PhaseBasisOptics class."""
@@ -105,6 +118,10 @@ class TestPhaseBasisOptic():
         """Tests the __call__ method."""
         _test_call_transmissive_layer(create_phase_basis_optic, 
             create_wavefront)
+
+    def test_applied_shape(self, create_phase_basis_optic):
+        """Tests the applied_shape method."""
+        _test_applied_shape(create_phase_basis_optic)
 
 
 class TestTilt():
@@ -137,6 +154,8 @@ class TestRotate():
         create_rotate()
         with pytest.raises(ValueError):
             create_rotate(angle=np.ones(1))
+        with pytest.raises(ValueError):
+            create_rotate(order=2)
 
     def test_call(self, create_rotate, create_wavefront):
         """Tests the __call__ method."""

@@ -1,4 +1,3 @@
-from __future__ import annotations
 import jax.numpy as np
 import pytest
 import dLux
@@ -6,9 +5,10 @@ from jax import config, Array
 config.update("jax_debug_nans", True)
 
 
-def _test_source_constructor(constructor):
+def _test_source_constructor(constructor, spectrum_constructor):
     """Tests the consturctor for source classes"""
-    constructor(spectrum=None)
+    constructor()
+    constructor(spectrum=spectrum_constructor())
     with pytest.raises(ValueError):
         constructor(position=[1, 2, 3])
     with pytest.raises(ValueError):
@@ -45,10 +45,10 @@ def _test_rel_flux_constructor(constructor):
 class TestPointSource():
     """Tests the Source class."""
 
-    def test_constructor(self, create_point_source):
+    def test_constructor(self, create_point_source, create_spectrum):
         """Test the constructor class."""
         create_point_source()
-        _test_source_constructor(create_point_source)
+        _test_source_constructor(create_point_source, create_spectrum)
         
     def test_normalise(self, create_point_source):
         """Test the normalise method."""
@@ -62,10 +62,13 @@ class TestPointSource():
 class TestPointSources():
     """Tests the Sources class."""
 
-    def test_constructor(self, create_point_sources):
+    def test_constructor(self, create_point_sources, create_spectrum):
         """Test the constructor class."""
         create_point_sources()
-        _test_source_constructor(create_point_sources)
+        _test_source_constructor(create_point_sources, create_spectrum)
+        create_point_sources(flux=None)
+        with pytest.raises(ValueError):
+            create_point_sources(flux=np.ones((2, 2)))
         
     def test_normalise(self, create_point_sources):
         """Test the normalise method."""
@@ -79,10 +82,10 @@ class TestPointSources():
 class TestResolvedSource():
     """Tests the ResolvedSource class."""
 
-    def test_constructor(self, create_resolved_source):
+    def test_constructor(self, create_resolved_source, create_spectrum):
         """Test the constructor class."""
         create_resolved_source()
-        _test_source_constructor(create_resolved_source)
+        _test_source_constructor(create_resolved_source, create_spectrum)
         _test_resolved_source_constructor(create_resolved_source)
         
     def test_normalise(self, create_resolved_source):
@@ -96,10 +99,10 @@ class TestResolvedSource():
 class TestBinarySource():
     """Tests the BinarySource class."""
 
-    def test_constructor(self, create_binary_source):
+    def test_constructor(self, create_binary_source, create_spectrum):
         """Test the constructor class."""
         create_binary_source()
-        _test_source_constructor(create_binary_source)
+        _test_source_constructor(create_binary_source, create_spectrum)
         _test_rel_pos_constructor(create_binary_source)
         _test_rel_flux_constructor(create_binary_source)
         
@@ -115,10 +118,10 @@ class TestBinarySource():
 class TestPointResolvedSource():
     """Tests the PointResolvedSource class."""
 
-    def test_constructor(self, create_point_resolved_source):
+    def test_constructor(self, create_point_resolved_source, create_spectrum):
         """Test the constructor class."""
         create_point_resolved_source()
-        _test_source_constructor(create_point_resolved_source)
+        _test_source_constructor(create_point_resolved_source, create_spectrum)
         _test_rel_flux_constructor(create_point_resolved_source)
         _test_resolved_source_constructor(create_point_resolved_source)
     

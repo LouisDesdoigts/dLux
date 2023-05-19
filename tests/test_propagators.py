@@ -1,4 +1,3 @@
-from __future__ import annotations
 import jax.numpy as np
 import pytest
 import dLux
@@ -51,15 +50,15 @@ class TestMFT():
 class TestShiftedMFT():
     """Test the ShiftedCartesianMFT class."""
 
-    def test_constructor(self, create_mft):
+    def test_constructor(self, create_shifted_mft):
         """Tests the constructor."""
-        _test_propagator_constructor(create_mft)
+        _test_propagator_constructor(create_shifted_mft)
         with pytest.raises(TypeError):
-            create_mft(shift = np.array([1]))
+            create_shifted_mft(shift = np.array([1]))
 
-    def test_call(self, create_mft, create_wavefront):
+    def test_call(self, create_shifted_mft, create_wavefront):
         """Tests the __call__ method."""
-        _test_call(create_mft, create_wavefront)
+        _test_call(create_shifted_mft, create_wavefront)
 
 
 class TestFarFieldFresnel():

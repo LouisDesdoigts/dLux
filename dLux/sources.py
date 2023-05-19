@@ -505,8 +505,8 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
             The array of wavelengths at which the spectrum is defined.
         """
         wavelengths = np.asarray(wavelengths, dtype=float)
-        if wavelengths.ndim == 1:
-            wavelengths = np.array([wavelengths, wavelengths])
+        if weights is None:
+            weights = np.ones((2, len(wavelengths)))
 
         super().__init__(wavelengths=wavelengths, position=position, flux=flux,
             separation=separation, position_angle=position_angle,
@@ -529,7 +529,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         """
         self = self.normalise()
         weights = self.weights * self.fluxes[:, None]
-        propagator = vmap(optics.propagate, in_axes=(0, 0, 0))
+        propagator = vmap(optics.propagate, in_axes=(None, 0, 0))
         return propagator(self.wavelengths, self.positions, weights).sum(0)
 
 

@@ -1,4 +1,3 @@
-from __future__ import annotations
 import jax.numpy as np
 from jax import config, Array
 import pytest

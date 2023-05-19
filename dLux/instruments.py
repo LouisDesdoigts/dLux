@@ -80,30 +80,24 @@ class Instrument(Base):
         """
         # Optics
         if not isinstance(optics, Optics()):
-            raise ValueError("optics must be an Optics object.")
+            raise TypeError("optics must be an Optics object.")
         self.optics = optics
         
         # Sources
-        # TODO: Update for names tuples
         if isinstance(sources, (Source(), tuple)):
             sources = [sources]
-        # for source in sources:
-        #     if isinstance(source, tuple):
-        #         source = source[0]
-        #     if not isinstance(source, Source()):
-        #         raise ValueError("sources must be a list of Source objects.")
         self.sources = dlu.list_to_dictionary(sources, False, Source())
 
         # Detector
         if not isinstance(detector, Detector()) and detector is not None:
-            raise ValueError("detector must be an Detector object. "
+            raise TypeError("detector must be an Detector object. "
                 f"Got type {type(detector)}")
         self.detector = detector
 
         # Observation
         if (not isinstance(observation, Observation()) and 
             observation is not None):
-            raise ValueError("observation must be an Observation object.")
+            raise TypeError("observation must be an Observation object.")
         self.observation = observation
 
 
@@ -152,18 +146,18 @@ class Instrument(Base):
         f"{key}.")
 
 
-    def normalise(self : Source()) -> Source():
+    def normalise(self : Instrument) -> Instrument:
         """
-        Method for returning a new normalised source object.
+        Method for returning a new instrument with normalised source objects.
 
         Returns
         -------
-        source : Source
-            The normalised source object.
+        instrument : Instrument
+            The normalised instrument object.
         """
         is_source = lambda leaf: isinstance(leaf, Source())
         norm_fn = lambda source: source.normalise()
-        sources = tree_map(norm_fn, self.sources)
+        sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
         return self.set('sources', sources)
 
 

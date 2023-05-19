@@ -83,9 +83,14 @@ class Spectrum(BaseSpectrum):
         else:
             self.weights = weights / weights.sum()
 
-        if self.wavelengths.shape != self.weights.shape:
-            raise ValueError("wavelengths and weights must have the same "
-                "shape.")
+        if self.weights.ndim == 1:
+            if self.wavelengths.shape != self.weights.shape:
+                raise ValueError("wavelengths and weights must have the same "
+                    "shape.")
+        else:
+            if self.wavelengths.shape != self.weights.shape[-1:]:
+                raise ValueError("wavelengths and weights must have the same "
+                    "shape.")
 
 
     def normalise(self : Spectrum) -> Spectrum:
@@ -98,7 +103,7 @@ class Spectrum(BaseSpectrum):
         spectrum : Specturm
             The spectrum object with the normalised spectrum.
         """
-        if self.weights.ndim == 0:
+        if self.weights.ndim == 2:
             weight_sum = self.weights.sum(-1)[:, None]
         else:
             weight_sum = self.weights.sum()
@@ -139,7 +144,7 @@ class PolySpectrum(BaseSpectrum):
         super().__init__(wavelengths)
         self.coefficients = np.asarray(coefficients, dtype=float)
 
-        if self.coefficeints.ndim != 1:
+        if self.coefficients.ndim != 1:
             raise ValueError("Coefficients must be a 1d array.")
 
 
@@ -159,7 +164,7 @@ class PolySpectrum(BaseSpectrum):
         weights : Array
             The normalised relative weights of each wavelength.
         """
-        weights = vmap(self._eval_weights)(self.wavelengths)
+        weights = vmap(self._eval_weight)(self.wavelengths)
         return weights/weights.sum()
 
 

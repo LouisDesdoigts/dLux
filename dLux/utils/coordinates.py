@@ -86,8 +86,8 @@ def pixel_coords(
 
 def pixel_coordinates(
     npixels      : Union[int, tuple], 
-    pixel_scales : Union[tuple, float, None] = None,
-    offsets      : Union[tuple, float, None] = None,
+    pixel_scales : Union[tuple, float] = 1.,
+    offsets      : Union[tuple, float] = 0.,
     polar        : bool = False,
     indexing     : str = 'xy'
     ) -> Array:
@@ -108,11 +108,11 @@ def pixel_coordinates(
     ----------
     npixels : Union[int, tuple]
         The number of pixels in each dimension.
-    pixel_scales : Union[tuple, float, None] = None
+    pixel_scales : Union[tuple, float] = 1.
         The pixel scales in each dimension. If a tuple, the length
         of the tuple must match the number of dimensions. If a float, the same
         scale is applied to all dimensions. If None, the scale is set to 1.
-    offsets : Union[tuple, float, None] = None
+    offsets : Union[tuple, float] = 0.
         The offset of the pixel centers in each dimension. If a tuple, the 
         length of the tuple must match the number of dimensions. If a float, 
         the same offset is applied to all dimensions. If None, the offset is 
@@ -134,54 +134,23 @@ def pixel_coordinates(
     
     if polar and indexing == 'ij':
         indexing = 'xy'
-
-    # Turn inputs into tuples
-    if isinstance(npixels, int):
+    
+    if not isinstance(npixels, tuple):
         npixels = (npixels,)
 
-        if offsets is None:
-            offsets = (0.,)
-        elif not isinstance(offsets, (float, Array)):
-            raise ValueError("offset must be a float or Array if npixels "
-                             "is an int.")
-        else:
-            offsets = (offsets,)
-
-        if pixel_scales is None:
-            pixel_scales = (1.,)
-        elif not isinstance(pixel_scales, (float, Array)):
-            raise ValueError("pixel_scales must be a float or Array if npixels "
-                             "is an int.")
-        else:
-            pixel_scales = (pixel_scales,)
-        
-    # Check input 
-    else:
-        if offsets is None:
-            offsets = tuple([0.]*len(npixels))
-        elif not isinstance(offsets, tuple):
-            raise ValueError("offset must be an be a float or Array if npixels "
-                             "is an int.")
-        else:
-            if len(offsets) != len(npixels):
-                raise ValueError("offset must have the same length as npixels.")
-            
-        if pixel_scales is None:
-            pixel_scales = tuple([1.]*len(npixels))
-        elif isinstance(pixel_scales, float):
-            pixel_scales = tuple([pixel_scales]*len(npixels))
-        elif not isinstance(pixel_scales, tuple):
-            raise ValueError("pixel_scales must be a tuple if npixels is a tuple.")
-        else:
-            if len(pixel_scales) != len(npixels):
-                raise ValueError("pixel_scales must have the same length as npixels.")
+    # Assume equal pixel scales if not given
+    if not isinstance(pixel_scales, tuple):
+        pixel_scales = (pixel_scales,) * len(npixels)
     
+    # Assume no offset if not given
+    if not isinstance(offsets, tuple):
+        offsets = (offsets,) * len(npixels)
+
     def pixel_fn(n, offset, scale):
         pix = np.arange(n) - (n - 1) / 2.
         pix *= scale
         pix -= offset
         return pix
-    
     pixels = tree_map(pixel_fn, npixels, offsets, pixel_scales)
 
     # ouput (x, y) for 2d, else in order

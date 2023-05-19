@@ -292,9 +292,10 @@ class AperturedOptics(BaseOptics):
                 f"OpticalLayer, got {type(aperture)}.")
         self.aperture = aperture
 
-        if not isinstance(mask, (Array, OpticalLayer())):
-            raise TypeError("mask must be an Array or "
-                f"OpticalLayer, got {type(aperture)}.")
+        if mask is not None:
+            if not isinstance(mask, (Array, OpticalLayer())):
+                raise TypeError("mask must be an Array or "
+                    f"OpticalLayer, got {type(aperture)}.")
         self.mask = mask
 
         super().__init__(**kwargs)

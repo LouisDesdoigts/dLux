@@ -47,5 +47,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
 
-    packages = ["dLux", "dLux/utils", "dLux/models", "dLux/models/toliman"]
+    packages = ["dLux", "dLux/utils"]#, "dLux/models", "dLux/models/toliman"]
 )

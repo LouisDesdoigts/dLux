@@ -121,25 +121,13 @@ class BasisLayer(OpticalLayer):
                  coefficients : Array = None,
                  **kwargs) -> OpticalLayer:
         super().__init__(**kwargs)
-        if basis is not None:
-            basis = np.asarray(basis, dtype=float)
-        self.basis = basis
 
-        if self.basis is None:
-            self.coefficients = None
+        self.basis = np.asarray(basis, dtype=float)
+        if coefficients is None:
+            self.coefficients = np.zeros(self.basis.shape[:-2])
         else:
-            if hasattr(self.basis, 'shape'):
-                coefficients = np.zeros(self.basis.shape[:-2])
-            else:
-                coefficients = np.zeros(len(self.basis))
             self.coefficients = np.asarray(coefficients, dtype=float)
-
-        if isinstance(self.basis, Array):
             if self.basis.shape[:-2] != self.coefficients.shape:
-                raise ValueError("The number of basis vectors must be equal to "
-                    "the number of coefficients.")
-        elif isinstance(self.basis, list):
-            if len(self.basis) != len(self.coefficients):
                 raise ValueError("The number of basis vectors must be equal to "
                     "the number of coefficients.")
 
@@ -172,10 +160,6 @@ class BaseOPDOptic(AberratedLayer, ShapedLayer):
             opd = np.asarray(opd, dtype=float)
         self.opd = opd
         super().__init__(**kwargs)
-
-    @property
-    def applied_shape(self):
-        return self.transmission.shape
 
 class BasePhaseOptic(AberratedLayer, ShapedLayer):
     phase : Array

@@ -17,7 +17,7 @@ from dLux import (
     observations,
     sources,
     spectra,
-    models,
+    # models,
     utils,
     )
 
@@ -25,12 +25,12 @@ from dLux import (
 There are Four main parts of dLux:
 
 Classes that operate on/interact with wavefronts
-    wavefronts.py     : 2 Classes
-    aberrations.py    : 2 Classes
-    optics.py         : 4 Classes
-    propagators.py    : 4 Classes
-    optical_layers.py : 8 Classes
-    apertures.py      : 9 Classes
+    wavefronts.py     : 2 Classes [Done]
+    aberrations.py    : 2 Classes [Done]
+    optics.py         : 4 Classes [Done]
+    propagators.py    : 4 Classes [Done]
+    optical_layers.py : 8 Classes [Done]
+    apertures.py      : 9 Classes [Done]
 
 Classes that operate on/interact with images
     images.py          : 1 Classes
@@ -38,7 +38,7 @@ Classes that operate on/interact with images
     detector_layers.py : 6 Classes
 
 Source objects the operate on optics classes
-    sources.py      : 5 Classes
+    sources.py      : 5 Classes [Done]
     spectra.py      : 2 Classes
 
 Other main class types
@@ -255,7 +255,7 @@ def create_shifted_mft():
         pixel        : bool = False,
         inverse      : bool = False):
         return propagators.ShiftedMFT(npixels=npixels, pixel_scale=pixel_scale,
-            focal_length=focal_length, inverse=inverse)
+            shift=shift, focal_length=focal_length, inverse=inverse)
     return _create_shifted_mft
 
 @pytest.fixture
@@ -389,7 +389,7 @@ def create_circular_aperture():
         compression : Array = [1., 1.],
         occulting   : bool = False, 
         softening   : Array = 0.,
-        normalise   : bool = False):
+        normalise   : bool = True):
         return apertures.CircularAperture(
             radius=radius,
             centre=centre,
@@ -411,7 +411,7 @@ def create_rectangular_aperture():
         rotation    : Array = 0.,
         occulting   : bool = False, 
         softening   : Array = 0.,
-        normalise   : bool = False):
+        normalise   : bool = True):
         return apertures.RectangularAperture(
             height=height,
             width=width,
@@ -435,7 +435,7 @@ def create_reg_poly_aperture():
         rotation    : Array = 0.,
         occulting   : bool = False, 
         softening   : Array = 0.,
-        normalise   : bool = False):
+        normalise   : bool = True):
         return apertures.RegPolyAperture(
             nsides=nsides,
             rmax=rmax,
@@ -459,7 +459,7 @@ def create_irreg_poly_aperture():
         rotation    : Array = 0.,
         occulting   : bool = False, 
         softening   : Array = 0.,
-        normalise   : bool = False):
+        normalise   : bool = True):
         return apertures.IrregPolyAperture(
             vertices=vertices,
             centre=centre,
@@ -495,7 +495,7 @@ def create_uniform_spider():
         compression : Array = [1., 1.],
         rotation    : Array = 0., 
         softening   : bool = False,
-        normalise   : bool = False):
+        normalise   : bool = True):
         return apertures.UniformSpider(
             nstruts=nstruts, 
             strut_width=strut_width,
@@ -507,6 +507,8 @@ def create_uniform_spider():
             normalise=normalise)
     return _create_uniform_spider
 
+# Note the apertures input is mapped to 'apers' since apertures is already
+# taken in the namespcae for the aperture module
 @pytest.fixture
 def create_compound_aperture(create_circular_aperture):
     def _create_compound_aperture(
@@ -515,9 +517,8 @@ def create_compound_aperture(create_circular_aperture):
         shear       : Array = np.array([0., 0.]),
         compression : Array = np.array([1., 1.]),
         rotation    : Array = np.array(0.),
-        normalise: bool = False):
-        return apertures.CompoundAperture(
-            apertures=apers, normalise=normalise)
+        normalise: bool = True):
+        return apertures.CompoundAperture(apertures=apers, normalise=normalise)
     return _create_compound_aperture
 
 @pytest.fixture
@@ -528,9 +529,8 @@ def create_multi_aperture(create_circular_aperture):
         shear       : Array = np.array([0., 0.]),
         compression : Array = np.array([1., 1.]),
         rotation    : Array = np.array(0.),
-        normalise: bool = False):
-        return apertures.MultiAperture(
-            apertures=apers, normalise=normalise)
+        normalise: bool = True):
+        return apertures.MultiAperture(apertures=apers, normalise=normalise)
     return _create_multi_aperture
 
 @pytest.fixture
@@ -617,37 +617,37 @@ image_layers.py classes:
 @pytest.fixture
 def create_pixel_response():
     def _create_pixel_response(pixel_response: Array = np.ones((16, 16))):
-        return detectors.ApplyPixelResponse(pixel_response=pixel_response)
+        return detector_layers.ApplyPixelResponse(pixel_response=pixel_response)
     return _create_pixel_response
 
 @pytest.fixture
 def create_jitter():
     def _create_jitter(sigma: float = 1., kernel_size: int = 10):
-        return detectors.ApplyJitter(sigma=sigma, kernel_size=kernel_size)
+        return detector_layers.ApplyJitter(sigma=sigma, kernel_size=kernel_size)
     return _create_jitter
 
 @pytest.fixture
 def create_saturation():
     def _create_saturation(saturation: float = 1.):
-        return detectors.ApplySaturation(saturation=saturation)
+        return detector_layers.ApplySaturation(saturation=saturation)
     return _create_saturation
 
 @pytest.fixture
 def create_constant():
     def _create_constant(value: Array = np.array(1.)):
-        return detectors.AddConstant(value=value)
+        return detector_layers.AddConstant(value=value)
     return _create_constant
 
 @pytest.fixture
 def create_integer_downsample():
-    def _create_integer_downsample(kernel_size: int = 3):
-        return detectors.IntegerDownsample(kernel_size=kernel_size)
+    def _create_integer_downsample(kernel_size: int = 2):
+        return detector_layers.IntegerDownsample(kernel_size=kernel_size)
     return _create_integer_downsample    
 
 @pytest.fixture
 def create_rotate_detector():
     def _create_rotate_detector(angle: Array = np.array(np.pi), order: int = 1):
-        return detectors.Rotate(angle, fourier, padding)
+        return detector_layers.Rotate(angle=angle, order=order)
     return _create_rotate_detector
 
 
@@ -775,14 +775,14 @@ instruments.py classes:
 
 '''
 @pytest.fixture
-def create_instrument(create_optics, create_point_source, create_detector, 
-    create_dither):
+def create_instrument(create_angular_optics, create_point_source, 
+    create_layered_detector, create_dither):
     def _create_instrument(
-            optics      : OpticalLayer = create_optics(),
-            sources     : Source       = create_point_source(),
-            detector    : OpticalLayer = create_detector(),
-            observation : Observation  = create_dither()):
-        return instruments.Instrument( optics=optics, detector=detector,
+            optics      = create_angular_optics(),
+            sources     = create_point_source(),
+            detector    = create_layered_detector(),
+            observation = create_dither()):
+        return instruments.Instrument(optics=optics, detector=detector,
             sources=sources, observation=observation)
     return _create_instrument
 

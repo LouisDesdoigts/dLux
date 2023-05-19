@@ -1280,8 +1280,6 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
             The amplitude of each basis vector of the aberrations. If nothing 
             is provided, then the coefficients are set to zero.
         """
-        super().__init__(normalise=aperture.normalise)
-
         # Ensure aperture is dynamic
         if not isinstance(aperture, DynamicAperture):
             raise TypeError("AberratedApertures can not contain Static, "
@@ -1292,6 +1290,8 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
         # Ensure transmissice
         if aperture.occulting:
             raise ValueError("AberratedApertures can not be occulting.")
+        
+        super().__init__(normalise=aperture.normalise)
 
         # Set Aperture
         self.aperture = aperture
@@ -2038,9 +2038,23 @@ class MultiAperture(CompositeAperture):
 ###############
 ### Factory ###
 ###############
-class ApertureFactory():
+def ApertureFactory(
+    npixels          : int, 
+    radial_orders    : Array = None,
+    coefficients     : Array = None, 
+    noll_indices     : Array = None,
+    aperture_ratio   : float = 1.0,
+    secondary_ratio  : float = 0.,
+    nsides           : int   = 0,
+    secondary_nsides : int   = 0,
+    rotation         : float = 0., 
+    nstruts          : int   = 0,
+    strut_ratio      : float = 0.,
+    strut_rotation   : float = 0.,
+    normalise        : bool  = True,
+    static           : bool = True):
     """
-    This class is not actually ever instatiated, but is rather a class used to 
+    This method is used to 
     give a simple constructor interface that is used to construct the most
     commonly used apertures. It is able to construct hard-edged circular or 
     regular poygonalal apertures. Secondary mirrors obscurations with the same
@@ -2090,218 +2104,131 @@ class ApertureFactory():
     plt.colorbar()
     plt.show()
     ```
+
+    Parameters
+    ----------
+    npixels : int
+        Number of pixels used to represent the aperture.
+    radial_orders : Array = None
+        The radial orders of the zernike polynomials to be used for the
+        aberrations. Input of [0, 1] would give [Piston, Tilt X, Tilt Y],
+        [1, 2] would be [Tilt X, Tilt Y, Defocus, Astig X, Astig Y], etc.
+        The order must be increasing but does not have to be consecutive.
+        If you want to specify specific zernikes across radial orders the
+        noll_indices argument should be used instead.
+    coefficients : Array = None
+        The zernike cofficients to be applied to the aberrations. Defaults 
+        to an array of zeros.
+    noll_indices : Array = None
+        The zernike noll indices to be used for the aberrations. [1, 2, 3]
+        would give [Piston, Tilt X, Tilt Y], [2, 3, 4] would be [Tilt X,
+        Tilt Y, Defocus.
+    aperture_ratio : float = 1.
+        The ratio of the aperture size to the array size. A value of 1. 
+        results in an aperture that fully spans the array, a value of 0.5 
+        results in an aperure that is half the size of the array, which is 
+        equivilent to a padding factor of 2.
+    secondary_ratio : float = 0.
+        The ratio of the secondary mirror obsuration diameter to the 
+        aperture diameter. A value of 0. results in no secondary mirror 
+        obsuration.
+    nsides : int = 0
+        Number of sides of the aperture. A zero input results in a circular
+        aperture. All other other values of three and above are supported.
+    secondary_nsides : int = 0
+        The number of sides of the secondary mirror obsuration. A zero input
+        results in a circular aperture. All other other values of three and 
+        above are supported.
+    rotation : float, radians = 0
+        The global rotation of the aperture in radians.
+    nstruts : int = 0
+        The number of uniformly spaced struts holding the secondary mirror. 
+    strut_ratio : float = 0.
+        The ratio of the width of the strut to the aperture diameter.
+    strut_rotation : float = 0
+        The rotation of the struts in radians.
+    normalise : bool = True
+        Whether to normalise the wavefront after passing through the
+        aperture.
+    static : bool = True
+        Whether to return a static aperture or a dynamic aperture.
+    
+    Returns
+    -------
+    aperture : StaticAperture
+        Returns an appropriately constructed StaticAperture.
     """
-    def __new__(cls              : ApertureFactory, 
-                npixels          : int, 
-                radial_orders    : Array = None,
-                coefficients     : Array = None, 
-                noll_indices     : Array = None,
-                aperture_ratio   : float = 1.0,
-                secondary_ratio  : float = 0.,
-                nsides           : int   = 0,
-                secondary_nsides : int   = 0,
-                rotation         : float = 0., 
-                nstruts          : int   = 0,
-                strut_ratio      : float = 0.,
-                strut_rotation   : float = 0.,
-                normalise        : bool  = True,
-                static           : bool = True):
-        """
-        Constructs a basic single static aperture.
+    # Check vaid inputs
+    if nsides < 3 and nsides != 0:
+        raise ValueError("nsides must be either 0 or >=3")
+    
+    if secondary_nsides < 3 and secondary_nsides != 0:
+        raise ValueError("secondary_nsides must be either 0 or >=3")
+    
+    if aperture_ratio <= 0:
+        raise ValueError("aperture_ratio must be > 0")
+    
+    if secondary_ratio < 0:
+        raise ValueError("secondary_ratio must be >= 0")
+    
+    if strut_ratio < 0:
+        raise ValueError("strut_ratio must be >= 0")
 
-        # TODO: Add seed, amplitude for basis/coefficient generation
+    # Construct components
+    apertures = []
 
-        Parameters
-        ----------
-        npixels : int
-            Number of pixels used to represent the aperture.
-        radial_orders : Array = None
-            The radial orders of the zernike polynomials to be used for the
-            aberrations. Input of [0, 1] would give [Piston, Tilt X, Tilt Y],
-            [1, 2] would be [Tilt X, Tilt Y, Defocus, Astig X, Astig Y], etc.
-            The order must be increasing but does not have to be consecutive.
-            If you want to specify specific zernikes across radial orders the
-            noll_indices argument should be used instead.
-        coefficients : Array = None
-            The zernike cofficients to be applied to the aberrations. Defaults 
-            to an array of zeros.
-        noll_indices : Array = None
-            The zernike noll indices to be used for the aberrations. [1, 2, 3]
-            would give [Piston, Tilt X, Tilt Y], [2, 3, 4] would be [Tilt X,
-            Tilt Y, Defocus.
-        aperture_ratio : float = 1.
-            The ratio of the aperture size to the array size. A value of 1. 
-            results in an aperture that fully spans the array, a value of 0.5 
-            results in an aperure that is half the size of the array, which is 
-            equivilent to a padding factor of 2.
-        secondary_ratio : float = 0.
-            The ratio of the secondary mirror obsuration diameter to the 
-            aperture diameter. A value of 0. results in no secondary mirror 
-            obsuration.
-        nsides : int = 0
-            Number of sides of the aperture. A zero input results in a circular
-            aperture. All other other values of three and above are supported.
-        secondary_nsides : int = 0
-            The number of sides of the secondary mirror obsuration. A zero input
-            results in a circular aperture. All other other values of three and 
-            above are supported.
-        rotation : float, radians = 0
-            The global rotation of the aperture in radians.
-        nstruts : int = 0
-            The number of uniformly spaced struts holding the secondary mirror. 
-        strut_ratio : float = 0.
-            The ratio of the width of the strut to the aperture diameter.
-        strut_rotation : float = 0
-            The rotation of the struts in radians.
-        normalise : bool = True
-            Whether to normalise the wavefront after passing through the
-            aperture.
-        static : bool = True
-            Whether to return a static aperture or a dynamic aperture.
-        
-        Returns
-        -------
-        aperture : StaticAperture
-            Returns an appropriately constructed StaticAperture.
-        """
-        # Check vaid inputs
-        if nsides < 3 and nsides != 0:
-            raise ValueError("nsides must be either 0 or >=3")
-        
-        if secondary_nsides < 3 and secondary_nsides != 0:
-            raise ValueError("secondary_nsides must be either 0 or >=3")
-        
-        if aperture_ratio <= 0:
-            raise ValueError("aperture_ratio must be > 0")
-        
-        if secondary_ratio < 0:
-            raise ValueError("secondary_ratio must be >= 0")
-        
-        if strut_ratio < 0:
-            raise ValueError("strut_ratio must be >= 0")
+    # Primary
+    if nsides == 0:
+        ap = CircularAperture(aperture_ratio/2, softening=0)
+    else: 
+        ap = RegPolyAperture(nsides, aperture_ratio/2, softening=0,
+            rotation=rotation)
 
-        # Construct components
-        apertures = []
+    # Aberrations
+    if radial_orders is not None:
+        radial_orders = np.array(radial_orders)
 
-        # Primary
-        if nsides == 0:
-            ap = CircularAperture(aperture_ratio/2, softening=0)
+        if (radial_orders < 0).any():
+            raise ValueError('Radial orders must be >= 0')
+
+        noll_indices = []
+        for order in radial_orders:
+            start = dlu.triangular_number(order)
+            stop = dlu.triangular_number(order + 1)
+            noll_indices.append(np.arange(start, stop) + 1)
+        noll_indices = np.concatenate(noll_indices)
+
+    if noll_indices is None:
+        apertures.append(ap)
+    else:
+        ab_ap = AberratedAperture(ap, noll_indices, coefficients=coefficients)
+        apertures.append(ab_ap)
+
+    # Secondary
+    if secondary_ratio != 0:
+        secondary_rel = aperture_ratio * secondary_ratio
+
+        # Circular
+        if secondary_nsides == 0: 
+            apertures.append(CircularAperture(
+                secondary_rel/2, softening=0, occulting=True))
+        # Polygonal
         else: 
-            ap = RegPolyAperture(nsides, aperture_ratio/2, softening=0,
-                rotation=rotation)
+            apertures.append(RegPolyAperture(secondary_nsides, 
+                secondary_rel/2, softening=0, rotation=rotation, 
+                    occulting=True))
 
-        # Aberrations
-        if radial_orders is not None:
-            radial_orders = np.array(radial_orders)
+    # Spiders
+    if nstruts > 0:
+        if strut_ratio == 0:
+            raise ValueError("strut_ratio must be > 0 if nstruts > 0")
+        strut_rel = aperture_ratio * strut_ratio
+        full_rotation = strut_rotation + rotation
+        apertures.append(UniformSpider(
+            nstruts, strut_rel, rotation=full_rotation, softening=0))
 
-            if (radial_orders < 0).any():
-                raise ValueError('Radial orders must be >= 0')
-
-            noll_indices = []
-            for order in radial_orders:
-                start = dlu.triangular_number(order)
-                stop = dlu.triangular_number(order + 1)
-                noll_indices.append(np.arange(start, stop) + 1)
-            noll_indices = np.concatenate(noll_indices)
-
-        if noll_indices is None:
-            apertures.append(ap)
-        else:
-            ab_ap = AberratedAperture(ap, noll_indices, coefficients=coefficients)
-            apertures.append(ab_ap)
-
-        # Secondary
-        if secondary_ratio != 0:
-            secondary_rel = aperture_ratio * secondary_ratio
-
-            # Circular
-            if secondary_nsides == 0: 
-                apertures.append(CircularAperture(
-                    secondary_rel/2, softening=0, occulting=True))
-            # Polygonal
-            else: 
-                apertures.append(RegPolyAperture(secondary_nsides, 
-                    secondary_rel/2, softening=0, rotation=rotation, 
-                        occulting=True))
-
-        # Spiders
-        if nstruts > 0:
-            if strut_ratio == 0:
-                raise ValueError("strut_ratio must be > 0 if nstruts > 0")
-            strut_rel = aperture_ratio * strut_ratio
-            full_rotation = strut_rotation + rotation
-            apertures.append(UniformSpider(
-                nstruts, strut_rel, rotation=full_rotation, softening=0))
-
-        # Construct CompoundAperture
-        full_aperture = CompoundAperture(apertures, normalise=normalise)
-        if static:
-            return full_aperture.make_static(npixels, 1)
-        return full_aperture
-
-
-    def __init__(self             : ApertureFactory, 
-                 npixels          : int, 
-                 radial_orders    : Array = None,
-                 coefficients     : Array = None,
-                 noll_indices     : Array = None,
-                 aperture_ratio   : float = 1.,
-                 secondary_ratio  : float = 0.,
-                 nsides           : int   = 0,
-                 secondary_nsides : int   = 0,
-                 rotation         : float = 0., 
-                 nstruts          : int   = 0,
-                 strut_ratio      : float = 0.,
-                 strut_rotation   : float = 0.,
-                 normalise        : bool  = True):
-        """
-        Constructs a basic single static aperture.
-
-        Parameters
-        ----------
-        npixels : int
-            Number of pixels used to represent the aperture.
-        radial_orders : Array = None
-            The radial orders of the zernike polynomials to be used for the
-            aberrations. Input of [0, 1] would give [Piston, Tilt X, Tilt Y],
-            [1, 2] would be [Tilt X, Tilt Y, Defocus, Astig X, Astig Y], etc.
-            The order must be increasing but does not have to be consecutive.
-            If you want to specify specific zernikes across radial orders the
-            noll_indices argument should be used instead.
-        coefficients : Array = None
-            The zernike cofficients to be applied to the aberrations. Defaults 
-            to an array of zeros.
-        noll_indices : Array = None
-            The zernike noll indices to be used for the aberrations. [1, 2, 3]
-            would give [Piston, Tilt X, Tilt Y], [2, 3, 4] would be [Tilt X,
-            Tilt Y, Defocus. 
-        aperture_ratio : float = 1.
-            The ratio of the aperture size to the array size. A value of 1. 
-            results in an aperture that fully spans the array, a value of 0.5 
-            retuls in an aperure that is half the size of the array, which is 
-            equivilent to a padding factor of 2.
-        secondary_ratio : float = 0.
-            The ratio of the secondary mirror obsuration diameter to the 
-            aperture diameter. A value of 0. results in no secondary mirror 
-            obsuration.
-        nsides : int = 0
-            Number of sides of the aperture. A zero input results in a circular
-            aperture. All other other values of three and above are supported.
-        secondary_nsides : int = 0
-            The number of sides of the secondary mirror obsuration. A zero input
-            results in a circular aperture. All other other values of three and 
-            above are supported.
-        rotation : float, radians = 0
-            The global rotation of the aperture in radians.
-        nstruts : int = 0
-            The number of uniformly spaced struts holding the secondary mirror. 
-        strut_ratio : float = 0.
-            The ratio of the width of the strut to the aperture diameter.
-        strut_rotation : float = 0
-            The rotation of the struts in radians.
-        
-        Returns
-        -------
-        aperture : StaticAperture
-            Returns an appropriately constructed StaticAperture.
-        """
+    # Construct CompoundAperture
+    full_aperture = CompoundAperture(apertures, normalise=normalise)
+    if static:
+        return full_aperture.make_static(npixels, 1)
+    return full_aperture

@@ -73,8 +73,8 @@ class Wavefront(Base):
         # Input checks
         if self.wavelength.shape != ():
             raise ValueError("wavelength must have shape ().")
-        if self.pixel_scale.shape != ():
-            raise ValueError("pixel_scale must have shape ().")
+        if self.diameter.shape != ():
+            raise ValueError("diameter must have shape ().")
 
         # Always initialised in Pupil plane with Cartesian Coords
         self.plane = 'Pupil'
@@ -298,7 +298,7 @@ class Wavefront(Base):
         if isinstance(other, Array):
 
             # Complex array - Multiply the phasors
-            if other.dtype == complex:
+            if other.dtype.kind == 'c':
                 phasor = self.phasor * other
                 self.set(["amplitude", "phase"], 
                     [np.abs(phasor), np.angle(phasor)])
@@ -656,13 +656,13 @@ class Wavefront(Base):
         # Check planes
         if inverse:
             if self.plane != 'Focal':
-                raise ValueError("Can only do an IMFT from a Focal plane, "
+                raise ValueError("Can only do an IFFT from a Focal plane, "
                     f"current plane is {self.plane}.")
             plane = 'Pupil'
             units = 'Cartesian'
         else:
             if self.plane != 'Pupil':
-                raise ValueError("Can only do an MFT from a Pupil plane, "
+                raise ValueError("Can only do an FFT from a Pupil plane, "
                     f"current plane is {self.plane}.")
             plane = 'Focal'
         
@@ -1245,11 +1245,11 @@ class FresnelWavefront(Wavefront):
 
         if self.plane == 'Pupil':
             return np.exp(2j * np.pi * np.outer(in_vec, out_vec))
-        elif self.plane == 'Focal':
-            return np.exp(-2j * np.pi * np.outer(in_vec, out_vec))
         else:
-            raise ValueError("plane must be either 'Pupil' or 'Focal'. "
-                f"Got {self.plane}")
+            raise ValueError(f"plane must be 'Pupil' Got {self.plane}")
+    
+        # elif self.plane == 'Focal':
+        #     return np.exp(-2j * np.pi * np.outer(in_vec, out_vec))
     
 
     def _MFT(self         : Wavefront,

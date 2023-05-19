@@ -57,7 +57,7 @@ class Dither(BaseObservation):
         """
         super().__init__()
         self.dithers = np.asarray(dithers, float)
-        if self.dither.ndim != 2 or self.dither.shape[1] != 2:
+        if self.dithers.ndim != 2 or self.dithers.shape[1] != 2:
             raise ValueError("dithers must be an array of shape (ndithers, 2)")
 
 

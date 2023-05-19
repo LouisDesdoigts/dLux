@@ -64,7 +64,7 @@ class Image(Base):
         """
         
         """
-        return self.__mull__(other)
+        return self.__mul__(other)
     
     def __add__(self, other):
         """
@@ -82,7 +82,7 @@ class Image(Base):
         """
         
         """
-        return self.subtract('image', other)
+        return self.add('image', -other)
     
     def __isub__(self, other):
         """
@@ -90,14 +90,14 @@ class Image(Base):
         """
         return self.__sub__(other)
     
-    def __div__(self, other):
+    def __truediv__(self, other):
         """
         
         """
         return self.divide('image', other)
     
-    def __idiv__(self, other):
+    def __itruediv__(self, other):
         """
         
         """
-        return self.__div__(other)
+        return self.__truediv__(other)
