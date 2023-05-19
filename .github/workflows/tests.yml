@@ -60,8 +60,8 @@ jobs:
 
 
 
-      - name: spectrum tests
-        run: pytest --quiet tests/test_spectrums.py
+      - name: spectra tests
+        run: pytest --quiet tests/test_spectra.py
 
       - name: source tests
         run: pytest --quiet tests/test_sources.py
