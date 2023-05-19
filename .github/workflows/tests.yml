@@ -27,7 +27,7 @@ jobs:
 
       # ===== Tests =====
       - name: install tests
-        run: pytest --quiet tests/test_install.py
+        run: pytest --quiet tests/test_installation.py
 
 
       - name: wavefront tests
