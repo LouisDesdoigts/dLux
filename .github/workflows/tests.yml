@@ -26,29 +26,15 @@ jobs:
           pip install --quiet .
 
       # ===== Tests =====
-      - name: core tests
-        run: pytest --quiet tests/test_core.py
+      - name: install tests
+        run: pytest --quiet tests/test_install.py
 
-      - name: spectrum tests
-        run: pytest --quiet tests/test_spectrums.py
-
-      - name: source tests
-        run: pytest --quiet tests/test_sources.py
 
       - name: wavefront tests
         run: pytest --quiet tests/test_wavefronts.py
-
-      - name: propagator tests
-        run: pytest --quiet tests/test_propagators.py
-
-      - name: optics tests
-        run: pytest --quiet tests/test_optics.py
-
-      - name: detector tests
-        run: pytest --quiet tests/test_detectors.py
-
-      - name: spectra tests
-        run: pytest --quiet tests/test_spectrums.py
+    
+      - name: optical layer tests
+        run: pytest --quiet tests/test_optical_layers.py
 
       - name: aperture tests
         run: pytest --quiet tests/test_apertures.py
@@ -56,5 +42,35 @@ jobs:
       - name: aperture tests
         run: pytest --quiet tests/test_aberrations.py
 
+      - name: propagator tests
+        run: pytest --quiet tests/test_propagators.py
+
+      - name: optics tests
+        run: pytest --quiet tests/test_optics.py
+
+
+      - name: image tests
+        run: pytest --quiet tests/test_images.py
+
+      - name: detecto layer tests
+        run: pytest --quiet tests/test_detector_layers.py
+
+      - name: detector tests
+        run: pytest --quiet tests/test_detectors.py
+
+
+
+      - name: spectrum tests
+        run: pytest --quiet tests/test_spectrums.py
+
+      - name: source tests
+        run: pytest --quiet tests/test_sources.py
+
+      - name: instrument tests
+        run: pytest --quiet tests/test_instruments.py
+
       - name: observations tests
         run: pytest --quiet tests/test_observations.py
+
+      - name: utils tests
+        run: pytest --quiet tests/test_utils.py
