@@ -134,7 +134,7 @@ nav:
 
     - Tutorials:
         - Usage:                    docs/usage.md
-        - Creating a Layer:         docs/creating_a_layer.md
+        # - Creating a Layer:         docs/creating_a_layer.md
         - Phase Retrieval:          docs/notebooks/phase_retrieval_demo.ipynb
         - Phase Mask Design:        docs/notebooks/designing_a_mask.ipynb
         - Pixel Level Calibration:  docs/notebooks/flatfield_calibration.ipynb

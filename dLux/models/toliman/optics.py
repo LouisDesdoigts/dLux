@@ -31,9 +31,12 @@ class TolimanOptics(AngularOptics()):
         psf_pixel_scale = 0.375, # arcsec
 
         mask = None,
-        zernikes = None,
-        amplitude : float = 0.,
-        seed : int = 0,
+
+        radial_orders    : Array = None,
+        noll_indices     : Array = None,
+        coefficients = None,
+        # amplitude : float = 0.,
+        # seed : int = 0,
 
         m1_diameter = 0.125,
         m2_diameter = 0.032,
@@ -53,21 +56,22 @@ class TolimanOptics(AngularOptics()):
         # Diameter
         diameter = m1_diameter
 
-        # Generate Aperture
-        if zernikes is not None:
-            # Set coefficients
-            if amplitude == 0.:
-                coefficients = np.zeros(len(zernikes))
-            else:
-                coefficients = amplitude * jr.normal(jr.PRNGKey(seed), 
-                    (len(zernikes),))
-        else:
-            coefficients = None
+        # # Generate Aperture
+        # if zernikes is not None:
+        # Set coefficients
+        # if amplitude != 0.:
+        #     # coefficients = /np.zeros(len(zernikes))
+        # # else:
+        #     coefficients = amplitude * jr.normal(jr.PRNGKey(seed), 
+        #         (len(zernikes),))
+        # else:
+        #     coefficients = None
 
         # Generate Aperture
         aperture = dLux.apertures.ApertureFactory(
             npixels         = wf_npixels,
-            noll_indices    = zernikes,
+            radial_orders   = radial_orders,
+            noll_indices    = noll_indices,
             coefficients    = coefficients,
             secondary_ratio = m2_diameter/m1_diameter,
             nstruts         = nstruts,
