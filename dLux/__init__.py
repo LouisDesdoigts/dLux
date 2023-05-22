@@ -22,7 +22,6 @@ from . import sources
 from . import spectra
 
 # Sub Modules
-# from . import models
 from . import utils
 
 
@@ -41,13 +40,12 @@ from .detectors       import *
 from .detector_layers import *
 
 # All other classes
-from .instruments  import *
-from .observations import *
 from .sources      import *
 from .spectra    import *
+from .instruments  import *
+from .observations import *
 
 # Sub Modules
-from .models     import *
 # from .utils      import *
 
 
@@ -64,10 +62,11 @@ modules = [
     detectors,
     detector_layers,
 
-    instruments,
-    observations,
     sources,
     spectra,
+
+    instruments,
+    observations,
 ]
 
 __all__ = [module.__all__ for module in modules]
