@@ -161,6 +161,10 @@ class BaseOPDOptic(AberratedLayer, ShapedLayer):
         self.opd = opd
         super().__init__(**kwargs)
 
+    @property
+    def applied_shape(self):
+        return self.transmission.shape
+
 class BasePhaseOptic(AberratedLayer, ShapedLayer):
     phase : Array
 

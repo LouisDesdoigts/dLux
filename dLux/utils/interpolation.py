@@ -34,35 +34,40 @@ def scale_array(array    : Array,
     return map_coordinates(array, np.array([ys, xs]), order=order)
 
 
-def downsample(arr, n, method='mean'):
+def downsample(array : Array, n : int, method='mean') -> Array:
     """
-    Downsample an array by averaging or summing over blocks of size n.
-    
+    Downsamples the input array by n.
+
     Parameters
     ----------
-    arr : Array
-        The array to be downsampled.
+    array : Array
+        The input array to downsample.
     n : int
         The factor by which to downsample the array.
-    method : str
-        The method by which to downsample the array. Options are 'mean' or
-        'sum'.
-    
+
     Returns
     -------
-    arr : Array
+    array : Array
         The downsampled array.
     """
-    shape = arr.shape
-    if any(dim % n != 0 for dim in shape):
-        raise ValueError('n must be a factor of all dimensions')
-    new_shape = tuple(dim // n for dim in shape) + (n,) * arr.ndim
-    if method == 'mean':
-        return arr.reshape(new_shape).mean(axis=-1)
-    elif method == 'sum':
-        return arr.reshape(new_shape).sum(axis=-1)
+    if method == 'sum':
+        method = np.sum
+    elif method == 'mean':
+        method = np.mean
     else:
         raise ValueError('Invalid method. Choose "mean" or "sum".')
+
+    size_in = array.shape[0]
+    size_out = size_in//n
+
+    # Downsample first dimension
+    array = method(array.reshape((size_in*size_out, n)), 1)
+    array = array.reshape(size_in, size_out).T
+
+    # Downsample second dimension
+    array = method(array.reshape((size_out*size_out, n)), 1)
+    array = array.reshape(size_out, size_out).T
+    return array
 
 
 def generate_coordinates(npixels_in     : int,

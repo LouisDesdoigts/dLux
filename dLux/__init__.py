@@ -47,7 +47,7 @@ from .sources      import *
 from .spectra    import *
 
 # Sub Modules
-# from .models     import *
+from .models     import *
 # from .utils      import *
 
 
