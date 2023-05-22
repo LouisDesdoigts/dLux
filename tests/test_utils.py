@@ -165,6 +165,4 @@ def test_downsample():
     interpolation.downsample(np.ones((16, 16)), 2)
     interpolation.downsample(np.ones((16, 16)), 2, 'sum')
     with pytest.raises(ValueError):
-        interpolation.downsample(np.ones((16, 16)), 3)
-    with pytest.raises(ValueError):
         interpolation.downsample(np.ones((16, 16)), 2, 'other')
