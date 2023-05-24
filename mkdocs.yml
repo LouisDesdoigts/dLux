@@ -112,7 +112,7 @@ nav:
         - Parameter Inference:      docs/notebooks/HMC.ipynb
 
     - dLux API: 
-        # - Overview:     docs/API/api.md
+        - Overview:        docs/API/overview.md
         - Wavefronts:      docs/API/wavefronts.md
         - Optics:          docs/API/optics.md
         - Optical Layers:  docs/API/optical_layers.md
@@ -130,17 +130,15 @@ nav:
         - Instruments:    docs/API/instruments.md
         - Observations:   docs/API/observations.md
 
-    # - Utils API:
-    #     - Overview:      docs/API/utils.md
-    #     - Optics:        docs/API/optics_util.md
-    #     - Models:        docs/API/models.md
-    #     - Units:         docs/API/units.md
-    #     - Math:          docs/API/math.md
-    #     - Coordinates:   docs/API/coordinates.md
-    #     - Interpolation: docs/API/interpolation.md
-    #     - Bayes:         docs/API/bayes.md
-    #     - Helpers:       docs/API/helpers.md
+    - Utils API:
+        - Overview:      docs/API/utils.md
+        - Optics:        docs/API/optics_util.md
+        - Units:         docs/API/units.md
+        - Math:          docs/API/math.md
+        - Coordinates:   docs/API/coordinates.md
+        - Interpolation: docs/API/interpolation.md
+        - Helpers:       docs/API/helpers.md
 
-    # - FAQ & Troubleshooting: docs/faq.md
-    # - Change Log: CHANGELOG.md
-    # - Contributing: CONTRIBUTING.md
+    - FAQ & Troubleshooting: docs/faq.md
+    - Change Log: CHANGELOG.md
+    - Contributing: CONTRIBUTING.md

@@ -7,7 +7,6 @@
 ## Overview
 
 ---
----
 
 - Overview
 - Class Overview
@@ -18,7 +17,6 @@ Layered gives full control over the wavefront at each step, but non-layered obje
 - A Simple Opitcal System (Angular)
 - A Simple Opitcal System (Layered)
 
----
 ---
 
 ∂Lux is an open-source differentiable optical modelling framework harnessing the structural isomorphism between optical systems and neural networks, giving forwards models of optical system as a _parametric neural network_. In ∂Lux we represent optical systems as a series of layers, each of which applies some transformation to either a wavefront or PSF. The layers are connected in a feed-forward manner, with the output of each layer as the input to the next. This construction allows for very complex optical systems to be parameterised by these layers and for each monochromatic wavefront calculation to be performed in parallel and optimised by Jax.
