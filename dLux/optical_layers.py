@@ -1,3 +1,41 @@
+"""
+Optical Layers: optical_layers.py
+=================================
+This module contains the classes that define the behaviour of OpticalLayers
+in dLux.
+
+These classes provide a simple set of classes used to perform basic
+transformations of wavefronts.
+
+There are 7 public classes:
+    - Optic
+    - PhaseOptic
+    - BasisOptic
+    - PhaseBasisOptic
+    - Tilt
+    - Normalise
+    - Rotate
+
+The 'Optic' (`Optic`, `PhaseOptic`, `BasisOptic`, `PhaseBasisOptic`) classes
+are quite general and are used to perform basic modifications to both the
+wavefront amplitude and phase. They all have a `transmission` and `normalise`
+attribute that modify the amplitude of the wavefront, and optionally normalise
+the wavefront after applying the Optic. 
+
+The `Optic` class holds a static OPD array that is added to the wavefront. The
+`PhaseOptic` class holds a static phase array that is added to the wavefront.
+
+The `BasisOptic` class holds a set of basis vectors and coefficients that are
+used to calculate the OPD array that is added to the wavefront. The
+`PhaseBasisOptic` class holds a set of basis vectors and coefficients that are
+used to calculate the phase array that is added to the wavefront.
+
+The `Tilt` class tilts the wavefront by the input angles.
+
+The `Normalise` class normalises the wavefront.
+
+The `Rotate` class rotates the wavefront by the input angle.
+"""
 from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
@@ -160,10 +198,6 @@ class BaseOPDOptic(AberratedLayer, ShapedLayer):
             opd = np.asarray(opd, dtype=float)
         self.opd = opd
         super().__init__(**kwargs)
-
-    @property
-    def applied_shape(self):
-        return self.transmission.shape
 
 class BasePhaseOptic(AberratedLayer, ShapedLayer):
     phase : Array

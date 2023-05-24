@@ -1,5 +1,26 @@
 """
+Aberrations: aberrations.py
+===========================
+This module contains the classes that define the behaviour of Aberration Layers
+in dLux.
 
+There are two public classes:
+    - Zernike
+    - ZernikeBasis
+
+These classes are designed to generate Zernike polynomials dynamically.
+Typically users should not need to interact with these classes directly, but
+rather through the `Aperture` classes.
+
+The Zernike class hold a single Zernike polynomial. It has one main method,
+`.calculate(coordinates, nsides)` that takes in a set of coordinates and
+calculates the Zernike polynomial on those coordinates.
+
+The ZernikeBasis class holds a set of Zernike polynomials. It has one main
+method, `.calculate_basis(coordinates, nsides)` that takes in a set of
+coordinates and calculates the Zernike polynomial basis on those coordinates.
+
+API
 """
 from __future__ import annotations
 from zodiax import Base

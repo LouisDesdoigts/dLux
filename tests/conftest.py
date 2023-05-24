@@ -17,7 +17,6 @@ from dLux import (
     observations,
     sources,
     spectra,
-    # models,
     utils,
     )
 
@@ -25,12 +24,12 @@ from dLux import (
 There are Four main parts of dLux:
 
 Classes that operate on/interact with wavefronts
-    wavefronts.py     : 2 Classes [Done]
-    aberrations.py    : 2 Classes [Done]
-    optics.py         : 4 Classes [Done]
-    propagators.py    : 4 Classes [Done]
-    optical_layers.py : 8 Classes [Done]
-    apertures.py      : 9 Classes [Done]
+    wavefronts.py     : 2 Classes
+    aberrations.py    : 2 Classes
+    optics.py         : 4 Classes
+    propagators.py    : 4 Classes
+    optical_layers.py : 8 Classes
+    apertures.py      : 9 Classes
 
 Classes that operate on/interact with images
     images.py          : 1 Classes
@@ -38,7 +37,7 @@ Classes that operate on/interact with images
     detector_layers.py : 6 Classes
 
 Source objects the operate on optics classes
-    sources.py      : 5 Classes [Done]
+    sources.py      : 5 Classes
     spectra.py      : 2 Classes
 
 Other main class types
@@ -46,14 +45,7 @@ Other main class types
     observations.py : 1 Classes
 
 Sub Modules
-    models.py
     utils.py
-
-
-Presently no explicit tests exist for utils as the methods are implicity tested
-though the other modules. 
-
-Models is also new, and may be tested in the future.
 """
 
 

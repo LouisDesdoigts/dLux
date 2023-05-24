@@ -112,7 +112,7 @@ class TestWavefront():
         assert np.allclose(new_wf.amplitude, flipped_amplitude, atol=1e-5)
         assert np.allclose(new_wf.phase, flipped_phase)
 
-        new_wf = wf.rotate(np.pi, real_imaginary=True, order=1)
+        new_wf = wf.rotate(np.pi, complex=True, order=1)
 
         assert np.allclose(new_wf.amplitude, flipped_amplitude, atol=1e-5)
         # Add small remainer to fix 0-pi instability

@@ -1,3 +1,90 @@
+"""
+Instruments: instruments.py
+===========================
+This module contains the classes that define the behaviour of instruments in
+dLux. Instruments classes hold the various different types of dLux classes and
+handles the coherent modelling of these different classes.
+
+There is one public class:
+    - Instrument
+
+The Instrument class has three main methods:
+
+1. `.observe()`
+> Calls the `observe` method of the stored observation class.
+
+2. `.model()`
+> Models the sources through the instrument optics and detector.
+
+3. `.normalise()`
+> Returns a new instrument with normalised source objects. Note this method
+> is automatically called during the `.model()` method to ensure quantities
+> are conserved during optimisation loops.
+
+---
+
+# Examples:
+
+Lets see how we can construct a minimal instrument object with all of its
+attributes populated.
+
+```python
+import jax.numpy as np
+import dLux as dl
+
+# Define the optical parameters
+wf_npixels = 256
+diameter = 1 # meters
+psf_npixels = 128
+psf_pixel_scale = 0.1 # arcseconds
+psf_oversample = 4
+
+# Use ApertureFactory class to make a simple circular aperture
+aperture = dl.ApertureFactory(wf_npixels)
+
+# Construct the optics class
+optics = dl.AngularOptics(wf_npixels, diameter, aperture, 
+    psf_npixels, psf_pixel_scale, psf_oversample)
+
+# Construct Source
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+source = dl.PointSource(wavelengths)
+
+# Construct Detector
+detector = dl.LayeredDetector([dl.ApplyJitter(20)])
+
+# Construct Observation
+observation = dl.Dither(np.array([[0, 0], [1e-6, 1e-6]]))
+
+# Construct the instrument and observe
+instrument = dl.Instrument(optics, source, detector, observation)
+psfs = instrument.observe()
+```
+
+Plotting code box:
+```python
+plt.figure(figsize=(10, 4))
+plt.subplot(1, 2, 1)
+plt.title("$\sqrt{PSF_1}$")
+plt.imshow(psfs[0]**0.5)
+plt.colorbar()
+
+plt.subplot(1, 2, 2)
+plt.title("$\sqrt{PSF_2}$")
+plt.imshow(psfs[1]**0.5)
+plt.colorbar()
+plt.savefig('assets/instrument.png')
+```
+
+TIP: We can also use the `.model()` method to model the instrument without
+applying the observation class!
+
+Add API
+
+---
+
+Full API
+"""
 from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
@@ -9,7 +96,7 @@ import dLux.utils as dlu
 import dLux
 
 
-__all__ = ["BaseInstrument", "Instrument"]
+__all__ = ["Instrument"]
 
 
 # Alias classes for simplified type-checking
@@ -22,6 +109,11 @@ Image       = lambda : dLux.images.Image
 
 
 class BaseInstrument(Base):
+    """
+    The Base Instrument class that all instrument classes inherit from. Can be
+    used to create your own instrument classes that will integrate seamlessly
+    with the rest of dLux.
+    """
 
     @abstractmethod
     def model(self): # pragma: no cover

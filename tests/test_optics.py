@@ -121,11 +121,16 @@ class TestCartesianOptics():
 class TestFlexibleOptics():
     """Tests the FlexibleOptics class."""
 
-    def test_constructor(self, create_flexible_optics, create_mft):
+    def test_constructor(self, create_flexible_optics, create_mft, 
+        create_far_field_fresnel):
         """Tests the constructor"""
         _test_apertured_optics_constructor(create_flexible_optics)
         with pytest.raises(TypeError):
             create_flexible_optics(propagator=1.)
+
+        # Test Fresnel propagation
+        optics = create_flexible_optics(propagator=create_far_field_fresnel())
+        optics.propagate(1e-6)
 
     def test_propagate(self, create_flexible_optics):
         """Tests the propagate method"""
