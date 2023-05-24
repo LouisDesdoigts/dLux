@@ -1,4 +1,4 @@
-# Units Utility Functions
+<!-- # Units Utility Functions
 
 This module contains functions for converting scales of cartesian and angular coordinates, and for converting between the different angular units.
 
@@ -126,4 +126,4 @@ Converts arcseconds to degrees.
 Converts arcseconds to arcminutes.
 
 ??? info "Arcseconds to Arcminutes API"
-    ::: dLux.utils.units.arcseconds_to_arcminutes
+    ::: dLux.utils.units.arcseconds_to_arcminutes -->

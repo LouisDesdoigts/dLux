@@ -1,4 +1,4 @@
-# Coordinates Utility Functions
+<!-- # Coordinates Utility Functions
 
 This module contains a series of functions that are used to calculate coordinates arrays, apply transformations to coordinate those arrays, and convert between cartesian and polar coordiantes.
 
@@ -49,4 +49,4 @@ Compresses a coordinate array by a given amount.
 Shears a coordinate array by a given amount.
 
 ??? info "Shear API"
-    ::: dLux.utils.coordinates.shear
+    ::: dLux.utils.coordinates.shear -->

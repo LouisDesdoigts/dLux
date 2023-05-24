@@ -1,4 +1,4 @@
-# Utilities Module
+<!-- # Utilities Module
 
 The utilities module contains a number of useful functions that are used throughout the package. It is split into 8 sub-modules: `optics`, `models`, `units`, `math`, `coordinates`, `interpolation`, `bayes`, `helpers`.
 
@@ -48,4 +48,4 @@ This module contains a few likelihood functions. plus functions to calcualte thi
 
 ## Helpers Module
 
-This module contains any other remaining functions that don't fit into the above scripts!
+This module contains any other remaining functions that don't fit into the above scripts! -->

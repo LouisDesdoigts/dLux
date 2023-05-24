@@ -1,4 +1,4 @@
-
+<!-- 
 # Core classes
 
 The `core.py` class contains the core classes that users will interact with. These classes are designed to be modular and allow for the creation of complex instruments. The `core.py` script contains the following classes:
@@ -80,7 +80,7 @@ It also has both `propagate` and `propagate_mono` methods, which propagate a bro
     :::dLux.core.Optics.propagate
 
 ??? info "propagate_mono API"
-    :::dLux.core.Optics.propagate_mono
+    :::dLux.core.Optics.propagate_mono -->
 
 <!-- It also has the methods `plot` and `summarise`. `summarise` prints a brief summary of the objects it contains and `plot` will propagate a single wavelength through the instrument and show it at intemediate states, although `plot` and `summarise` and both considered to experimental and are subject to change in the future. -->
 <!-- 
@@ -92,7 +92,7 @@ It also has both `propagate` and `propagate_mono` methods, which propagate a bro
 
 <!-- ??? info "Optics API"
     :::dLux.core.Optics -->
-
+<!-- 
 ---
 
 ## Instrument
@@ -154,7 +154,7 @@ It also has the methods `normalise`, `plot` and `summarise`. `normalise` will no
 <!-- ??? info "Instrument API"
     :::dLux.core.Instrument -->
 
----
+<!-- ---
 
 ## Detector
 
@@ -200,7 +200,7 @@ The `Detector` class is a high level class that is designed to control the trans
 The `Detector` has a simple API with two primary methods: `model` and `apply_detector`. The `model` method takes in an Optics object and source or list of sources, propagates them through the layers of the optics class and then applies the detector layers. The `apply_detector` method simply applies the detector layers to a given input array.
 
 ??? info "model API"
-    :::dLux.core.Detector.model
-
+    :::dLux.core.Detector.model -->
+<!-- 
 ??? info "apply_detector API"
-    :::dLux.core.Detector.apply_detector
+    :::dLux.core.Detector.apply_detector -->

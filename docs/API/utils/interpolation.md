@@ -1,4 +1,4 @@
-# Interpolation Utility Functions
+<!-- # Interpolation Utility Functions
 
 This module contains some basic interpolation functions that can be used on arrays and wavefronts.
 
@@ -42,4 +42,4 @@ Rotates an array via Fourier methods by some angle in radians.
 Just a helper function used to generate the coordaintes required by the low-level interpolation functions.
 
 ??? info "Generate Coordiantes API"
-    ::: dLux.utils.interpolation.generate_coordinates
+    ::: dLux.utils.interpolation.generate_coordinates -->

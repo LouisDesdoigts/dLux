@@ -1,4 +1,4 @@
-# Optics Utility Functions
+<!-- # Optics Utility Functions
 
 This module contains a number of common equations used in optics, such as converting between OPDs and phases, and a few functions used to calcualte sampling rates in focal planes.
 
@@ -54,4 +54,4 @@ Calcualtes the pixel scale in either radians or meters per pixel in a focal plan
 Calcualtes the pixel scale in either radians or meters per pixel in a focal plane based on the wavelength and aperture in meters, in order to sample the diffraction fringes by some smapling rate, based on the slightly larger diffraction fringes given by an airy disk PSF. A sampling rate of 2 will give a Nyquist sampled system. If a focal length is provided the output will be in meters per pixel, otherwise it will be in radians per pixel.
 
 ??? info "Get Airy Pixel Scale API"
-    ::: dLux.utils.optics.get_airy_pixel_scale
+    ::: dLux.utils.optics.get_airy_pixel_scale -->

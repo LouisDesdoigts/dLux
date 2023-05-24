@@ -6,6 +6,21 @@
 
 ## Overview
 
+---
+---
+
+- Overview
+- Class Overview
+
+Two different types of optical classes: Layered, non-Layered
+
+Layered gives full control over the wavefront at each step, but non-layered objects can be simpler to work with.
+- A Simple Opitcal System (Angular)
+- A Simple Opitcal System (Layered)
+
+---
+---
+
 ∂Lux is an open-source differentiable optical modelling framework harnessing the structural isomorphism between optical systems and neural networks, giving forwards models of optical system as a _parametric neural network_. In ∂Lux we represent optical systems as a series of layers, each of which applies some transformation to either a wavefront or PSF. The layers are connected in a feed-forward manner, with the output of each layer as the input to the next. This construction allows for very complex optical systems to be parameterised by these layers and for each monochromatic wavefront calculation to be performed in parallel and optimised by Jax.
 
 dLux is designed to be verbose about what is happening under the hood. We think that in order for users to be confident in their results that it is important to be clear about what goes in to that model. Becuase of this dLux tries to avoid 'pre-built' classes and optical systes, allowing users to be flexible in the way they model their systems. This helps users become more familiar with the underlying physics and computational methods and allows them to build more complex configurations.
@@ -46,9 +61,9 @@ import jax.numpy as np
 import dLux as dl
 
 # Define the parameters of the optical system
+aperture_npixels  = 256  # Number of pixels representing the wavefront
 aperture_diameter = 1.0  # meters
 pixel_scale       = 2e-7 # Radians per pixel of the detector
-aperture_npixels  = 256  # Number of pixels representing the wavefront
 detector_npixels  = 64   # Number of pixels in the detector
 
 # Define our Optical configuration as a list of layers

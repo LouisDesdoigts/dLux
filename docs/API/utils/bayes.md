@@ -1,4 +1,4 @@
-# Bayesian Utility Functions
+<!-- # Bayesian Utility Functions
 
 This module contains a few likelihood functions. plus functions to calcualte things like covariance matrices and its entropy. This module is likely to be moved in the base package of dLux, [Zodiax](https://github.com/LouisDesdoigts/zodiax).
 
@@ -44,4 +44,4 @@ Calcluates the covaraince matrix of some likelihood function.
 Calculates the entropy of a covariance matrix.
 
 ??? info "Calculate Entropy API"
-    ::: dLux.utils.bayes.calculate_entropy
+    ::: dLux.utils.bayes.calculate_entropy -->

@@ -1,4 +1,4 @@
-# Overview
+<!-- # Overview
 
 ∂Lux has two modules, `dLux` and `dLux.utils`. The `dLux` repo contains the core functionality of ∂Lux, while `dLux.utils` contains various functions that are used throughout the package.
 
@@ -90,4 +90,4 @@ The source classes are designed to provide parameterisations of light sources. C
 
 ---
 
-All of these classes can be explored in more detail in the API documentation.
+All of these classes can be explored in more detail in the API documentation. -->
