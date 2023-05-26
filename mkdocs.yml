@@ -131,13 +131,13 @@ nav:
         - Observations:   docs/API/observations.md
 
     - Utils API:
-        - Overview:      docs/API/utils.md
-        - Optics:        docs/API/optics_util.md
-        - Units:         docs/API/units.md
-        - Math:          docs/API/math.md
-        - Coordinates:   docs/API/coordinates.md
-        - Interpolation: docs/API/interpolation.md
-        - Helpers:       docs/API/helpers.md
+        # - Overview:      docs/API/utils/utils.md
+        - Optics:        docs/API/utils/optics.md
+        - Units:         docs/API/utils/units.md
+        - Math:          docs/API/utils/math.md
+        - Coordinates:   docs/API/utils/coordinates.md
+        - Interpolation: docs/API/utils/interpolation.md
+        - Helpers:       docs/API/utils/helpers.md
 
     - FAQ & Troubleshooting: docs/faq.md
     - Change Log: CHANGELOG.md

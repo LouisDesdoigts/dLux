@@ -9,7 +9,7 @@ Scales an array to some number of output pixels.
 ??? info "Scale Array API"
     ::: dLux.utils.interpolation.scale_array
 
-# Downsample
+## Downsample
 
 Downsamples an array taking either the mean or sum.
 
