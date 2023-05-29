@@ -1874,7 +1874,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b9b14550" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=5444c650" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1912,7 +1912,7 @@ import re</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=3fae0438" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=2705e627" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1944,7 +1944,7 @@ import re</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=9a7978a1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=1d6a0006" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1982,7 +1982,7 @@ def read(*parts):
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=6f3b2d15" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=ef862d74" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2024,7 +2024,7 @@ def read(*parts):
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c5fa15c6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d30a8288" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2049,14 +2049,18 @@ def read(*parts):
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;requirements.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">install_requires</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
 <span class="c1"># 2. What dependencies required to run the unit tests? (i.e. `pytest --remote-data`)</span>
-<span class="c1"># tests_require = [&#39;pytest&#39;, &#39;pytest-cov&#39;, &#39;pytest-remotedata&#39;]</span>
+<span class="n">tests_require</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pytest&#39;</span><span class="p">]</span>
+<span class="n">docs_require</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;optax&#39;</span><span class="p">,</span> <span class="s1">&#39;matplotlib&#39;</span><span class="p">,</span> <span class="s1">&#39;jupyter&#39;</span><span class="p">,</span> <span class="s1">&#39;jupyterlab&#39;</span><span class="p">,</span> <span class="s1">&#39;tqdm&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;chainconsumer&#39;</span><span class="p">,</span> <span class="s1">&#39;nummpyro&#39;</span><span class="p">]</span>
 </pre></div>
 <div id="cell-5" class="clipboard-copy-txt"># DEPENDENCIES
 # 1. What are the required dependencies?
 with open('requirements.txt') as f:
     install_requires = f.read().splitlines()
 # 2. What dependencies required to run the unit tests? (i.e. `pytest --remote-data`)
-# tests_require = ['pytest', 'pytest-cov', 'pytest-remotedata']</div>
+tests_require = ['pytest']
+docs_require = ['optax', 'matplotlib', 'jupyter', 'jupyterlab', 'tqdm', 
+    'chainconsumer', 'nummpyro']</div>
         
         </div>
     </div>
@@ -2066,7 +2070,7 @@ with open('requirements.txt') as f:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=f3d7d673" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=fe43d9d3" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2102,6 +2106,8 @@ with open('requirements.txt') as f:
     <span class="p">},</span>
 
     <span class="n">install_requires</span><span class="o">=</span><span class="n">install_requires</span><span class="p">,</span>
+    <span class="n">tests_require</span><span class="o">=</span><span class="n">tests_require</span><span class="p">,</span>
+    <span class="n">extras_require</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;docs&#39;</span><span class="p">:</span> <span class="n">docs_require</span><span class="p">},</span>
 
     <span class="n">classifiers</span><span class="o">=</span><span class="p">[</span>
         <span class="s2">&quot;Programming Language :: Python :: 3&quot;</span><span class="p">,</span>
@@ -2127,6 +2133,8 @@ with open('requirements.txt') as f:
     },
 
     install_requires=install_requires,
+    tests_require=tests_require,
+    extras_require={'docs': docs_require},
 
     classifiers=[
         "Programming Language :: Python :: 3",
