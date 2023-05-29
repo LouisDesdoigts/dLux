@@ -1,204 +1,350 @@
-import dLux 
-import jax
+
 import jax.numpy as np
-import typing
+from jax import Array, config
+import pytest
+import dLux
+from inspect import signature
+import dLux.utils as dlu
 
-jax.config.update("jax_debug_nans", True)
-
-Aperture = typing.TypeVar("Aperture")
-Array = typing.TypeVar("Array")
-Spider = typing.TypeVar("Spider")
+config.update("jax_debug_nans", True)
 
 
-class TestAperturesCommonInterfaces():
-    """
-    For each type of aperture that has common properties, test it
-    """
-    def _assert_valid_hard_aperture(aperture, msg=''):
-        assert ((aperture == 1.) | (aperture == 0.)).all(), msg
-        
-    def _assert_valid_soft_aperture(aperture, msg=''):
-        assert (aperture <= 1. + np.finfo(np.float32).resolution).all(), msg
-        assert (aperture >= 0. - np.finfo(np.float32).resolution).all(), msg
-        # there should also exist something in bounds (assuming edges are within coordinates)
-        assert np.logical_and(aperture > 0., aperture < 1.).any(), msg
-        
-    # input is all the fixtures that need testing
-    def test_all_apertures(self, create_square_aperture : callable,
-                           create_rectangular_aperture : callable,
-                           create_circular_aperture : callable,
-                           create_hexagonal_aperture : callable,
-                           create_annular_aperture : callable):
-        
-        constructors = [create_square_aperture,
-                        create_rectangular_aperture,
-                        create_circular_aperture,
-                        create_hexagonal_aperture,
-                        create_annular_aperture]
-        
-        # TODO might need to add error message for when this fails but it checks things very easily
-        for ctor in constructors:
-            self._test_single_aperture_class(ctor)
+def _test_transmission(constructor):
+    """Tests the tranmission function of some input aperture"""
+    constructor().transmission(16, 1)
+    if 'occulting' in signature(constructor).parameters.keys():
+        constructor(occulting=True).transmission(16, 1)
+
+def _test_extent(constructor):
+    """Tests the extent function of some input aperture"""
+    constructor()._extent()
+
+def _test_base_dynamic_aperture_constructor(constructor):
+    """Tests the constructor of some input aperture"""
+    constructor()
+    with pytest.raises(ValueError):
+        constructor(centre=[0])
+    with pytest.raises(ValueError):
+        constructor(shear=[0])
+    with pytest.raises(ValueError):
+        constructor(compression=[0])
     
-    def _test_single_aperture_class(self, aperture_fixture):
-        coordinates = dLux.utils.get_pixel_positions((16, 16), (2./16, 2./16))
-        
-        x_offset = 1.
-        y_offset = 1.
-        centres = [np.array([0., 0.]),
-                   np.array([x_offset, 0.]),
-                   np.array([0., y_offset]),
-                   np.array([x_offset, y_offset])]
-        
-        rotations = [0, np.pi/3., -np.pi/3.5, np.pi/2.]
-        not_rotatable_apertures = (dLux.apertures.CircularAperture,
-                                   dLux.apertures.AnnularAperture)
-        
-        base_kwargs = {"centre" : None,
-                       "softening" : None,
-                       "occulting" : None
-                       }
+    # Have to add this here since CircularAperture is a special case
+    if 'rotation' in signature(constructor).parameters.keys():
+        with pytest.raises(ValueError):
+            constructor(rotation=[0])
 
-        for centre in centres:
-            for rotation in rotations:
-                for softening in [0., 1.]:
-                    for occulting in [True, False]:
-                        actual_kwargs = base_kwargs
-                        actual_kwargs["centre"] = centre
-                        actual_kwargs["softening"] = softening
-                        actual_kwargs["occulting"] = occulting
-                        
-                        if not isinstance(aperture_fixture(), not_rotatable_apertures):
-                            actual_kwargs["rotation"] = rotation
-                            
-                        
-                        aperture = aperture_fixture(**actual_kwargs)._aperture(coordinates)
-                        
-                        msg = f'{actual_kwargs}, on ctor {aperture_fixture}'
-                        
-                        if softening:
-                            TestAperturesCommonInterfaces._assert_valid_soft_aperture(aperture, msg)
-                        else:
-                            TestAperturesCommonInterfaces._assert_valid_hard_aperture(aperture, msg)
+def _test_call(constructor, wf_constructor):
+    """Tests the __call__ function of some input aperture"""
+    constructor()(wf_constructor())
+
+def _test_dyanmic_aperture_constructor(constructor):
+    """Tests the constructor of some input aperture"""
+    constructor()
+    with pytest.raises(ValueError):
+        constructor(softening=[0, 0])
+
+def _test_make_static(constructor):
+    """Tests the make_static function of some input aperture"""
+    constructor().make_static(16, 1)
+
+def _test_basis(constructor, aperture_constructor=None):
+    """Tests the basis function of some input aperture"""
+    # constructor()._basis(dlu.pixel_coords(16, 1/16))
+    if aperture_constructor is not None:
+        aperture = aperture_constructor()
+        constructor(aperture=aperture)._basis(dlu.pixel_coords(16, 1/16))
+
+def _test_opd(constructor):
+    """Tests the opd function of some input aperture"""
+    constructor()._opd(dlu.pixel_coords(16, 1/16))
 
 
-class TestUniformSpider(object):
-    """
-    Contains the unit tests for the `UniformSpider` class.
-    """
+class TestCircularAperture():
+    """Tests the CircularAperture class."""
 
+    def test_constructor(self, create_circular_aperture):
+        """Tests the constructor."""
+        _test_base_dynamic_aperture_constructor(create_circular_aperture)
+        _test_dyanmic_aperture_constructor(create_circular_aperture)
+        with pytest.raises(ValueError):
+            create_circular_aperture(radius=[0])
 
-    def test_constructor(self, create_uniform_spider: callable) -> None:
-        """
-        Tests that the state is correctly initialised. 
-        """
-        # Test functioning
-        spider = create_uniform_spider()
-
+    def test_call(self, create_circular_aperture, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call(create_circular_aperture, create_wavefront)
     
-    def test_range_hard(self, create_uniform_spider: callable) -> None:
-        """
-        Checks that the apertures fall into the correct range.
-        """
-        npix = 16
-        width = 2.
-        pixel_scale = width / npix
-        coordinates = dLux.utils.get_pixel_positions((npix,npix), 
-                                                    (pixel_scale, pixel_scale))
-
-        # Case Translated 
-        spider = create_uniform_spider(centre=[1., 1.], softening=0.)
-        aperture = spider._aperture(coordinates)
-        assert ((aperture == 1.) | (aperture == 0.)).all()
-
-        # Case Rotated 
-        spider = create_uniform_spider(rotation=np.pi/4., softening=0.)
-        aperture = spider._aperture(coordinates)
-        assert ((aperture == 1.) | (aperture == 0.)).all()
-
-        # Case Strained 
-        spider = create_uniform_spider(shear=[.05, .05], softening=0.)
-        aperture = spider._aperture(coordinates)
-        assert ((aperture == 1.) | (aperture == 0.)).all()
-
-        # Case Compression
-        spider = create_uniform_spider(compression=[1.05, .95], softening=0.)
-        aperture = spider._aperture(coordinates)
-        assert ((aperture == 1.) | (aperture == 0.)).all()
+    def test_transmission(self, create_circular_aperture):
+        """Tests the transmission method."""
+        _test_transmission(create_circular_aperture)
+    
+    def test_make_static(self, create_circular_aperture):
+        """Tests the make_static method."""
+        _test_make_static(create_circular_aperture)
+    
+    def test_extent(self, create_circular_aperture):
+        """Tests the extent method."""
+        _test_extent(create_circular_aperture)
 
 
-    def test_range_soft(self, create_uniform_spider: callable) -> None:
-        """
-        Checks that the aperture falls into the correct range.
-        """
-        npix = 16
-        width = 2.
-        pixel_scale = width / npix
-        coordinates = dLux.utils.get_pixel_positions((npix,npix), 
-                                                    (pixel_scale, pixel_scale))
+class TestRectangularAperture():
+    """Tests the RectangularAperture class."""
 
-        # Case Translated 
-        spider = create_uniform_spider(centre=[1., 1.], softening=0.)
-        aperture = spider._aperture(coordinates)
-        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
-        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
+    def test_constructor(self, create_rectangular_aperture):
+        """Tests the constructor."""
+        _test_base_dynamic_aperture_constructor(create_rectangular_aperture)
+        _test_dyanmic_aperture_constructor(create_rectangular_aperture)
+        with pytest.raises(ValueError):
+            create_rectangular_aperture(height=[0])
+        with pytest.raises(ValueError):
+            create_rectangular_aperture(width=[0])
 
-        # Case Rotated 
-        spider = create_uniform_spider(rotation=np.pi/4., softening=0.)
-        aperture = spider._aperture(coordinates)
-        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
-        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
-
-        # Case Strained 
-        spider = create_uniform_spider(shear=[.05, .05], softening=0.)
-        aperture = spider._aperture(coordinates)
-        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
-        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
-
-        # Case Compression
-        spider = create_uniform_spider(compression=[1.05, .95], softening=0.)
-        aperture = spider._aperture(coordinates)
-        assert (aperture <= 1. + np.finfo(np.float32).resolution).all()
-        assert (aperture >= 0. - np.finfo(np.float32).resolution).all()
+    def test_call(self, create_rectangular_aperture, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call(create_rectangular_aperture, create_wavefront)
+    
+    def test_transmission(self, create_rectangular_aperture):
+        """Tests the transmission method."""
+        _test_transmission(create_rectangular_aperture)
+    
+    def test_make_static(self, create_rectangular_aperture):
+        """Tests the make_static method."""
+        _test_make_static(create_rectangular_aperture)
+    
+    def test_extent(self, create_rectangular_aperture):
+        """Tests the extent method."""
+        _test_extent(create_rectangular_aperture)
 
 
-class TestAberratedAperture(object):
-    """
-    Checks that the aberrated aperture is functional. It does not
-    test whether the aberrated aperture is correct.
-    """
+class TestRegPolyAperture():
+    """Tests the RegPolyAperture class."""
+
+    def test_constructor(self, create_reg_poly_aperture):
+        """Tests the constructor."""
+        _test_base_dynamic_aperture_constructor(create_reg_poly_aperture)
+        _test_dyanmic_aperture_constructor(create_reg_poly_aperture)
+        with pytest.raises(ValueError):
+            create_reg_poly_aperture(rmax=[0])
+    
+    def test_call(self, create_reg_poly_aperture, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call(create_reg_poly_aperture, create_wavefront)
+    
+    def test_transmission(self, create_reg_poly_aperture):
+        """Tests the transmission method."""
+        _test_transmission(create_reg_poly_aperture)
+    
+    def test_make_static(self, create_reg_poly_aperture):
+        """Tests the make_static method."""
+        _test_make_static(create_reg_poly_aperture)
+    
+    def test_extent(self, create_reg_poly_aperture):
+        """Tests the extent method."""
+        _test_extent(create_reg_poly_aperture)
 
 
-    def test_constructor(self, create_aberrated_aperture: callable) -> None:
-        """
-        Tests that it is possible to instantiate an AberratedAperture.
-        Does not test if the AberratedAperture is correct.
-        """
-        # TODO: Make sure that the class asserts that the coeffs and 
-        # the noll indexes have the same length.
+class TestIrregPolyAperture():
+    """Tests the IrregPolyAperture class."""
+
+    def test_constructor(self, create_irreg_poly_aperture):
+        """Tests the constructor."""
+        _test_base_dynamic_aperture_constructor(create_irreg_poly_aperture)
+        _test_dyanmic_aperture_constructor(create_irreg_poly_aperture)
+        with pytest.raises(ValueError):
+            create_irreg_poly_aperture(vertices=[0])
+    
+    def test_call(self, create_irreg_poly_aperture, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call(create_irreg_poly_aperture, create_wavefront)
+    
+    def test_transmission(self, create_irreg_poly_aperture):
+        """Tests the transmission method."""
+        _test_transmission(create_irreg_poly_aperture)
+
+    def test_make_static(self, create_irreg_poly_aperture):
+        """Tests the make_static method."""
+        _test_make_static(create_irreg_poly_aperture)
+    
+    def test_extent(self, create_irreg_poly_aperture):
+        """Tests the extent method."""
+        _test_extent(create_irreg_poly_aperture)
+
+
+class TestAberratedAperture():
+    """Tests the AberratedAperture class."""
+
+    def test_constructor(self, create_aberrated_aperture, 
+        create_circular_aperture):
+        """Tests the constructor."""
         create_aberrated_aperture()
+        create_aberrated_aperture(coefficients=None)
+        with pytest.raises(TypeError):
+            create_aberrated_aperture(aperture='Not an aperture')
+        with pytest.raises(ValueError):
+            ap = create_circular_aperture(occulting=True)
+            create_aberrated_aperture(aperture=ap)
+    
+    def test_call(self, create_aberrated_aperture, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call(create_aberrated_aperture, create_wavefront)
+    
+    def test_transmission(self, create_aberrated_aperture):
+        """Tests the transmission method."""
+        _test_transmission(create_aberrated_aperture)
+    
+    def test_make_static(self, create_aberrated_aperture):
+        """Tests the make_static method."""
+        _test_make_static(create_aberrated_aperture)
+    
+    def test_basis(self, create_aberrated_aperture, create_reg_poly_aperture, 
+        create_irreg_poly_aperture):
+        """Tests the basis method."""
+        _test_basis(create_aberrated_aperture)
+        _test_basis(create_aberrated_aperture, create_reg_poly_aperture)
+        _test_basis(create_aberrated_aperture, create_irreg_poly_aperture)
+    
+    def test_opd(self, create_aberrated_aperture):
+        """Tests the _opd method."""
+        _test_opd(create_aberrated_aperture)
+
+    
+class TestUniformSpider():
+    """Tests the UniformSpider class."""
+
+    def test_constructor(self, create_uniform_spider):
+        """Tests the constructor."""
+        create_uniform_spider()
+        with pytest.raises(ValueError):
+            create_uniform_spider(strut_width=[0])
+    
+    def test_call(self, create_uniform_spider, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call(create_uniform_spider, create_wavefront)
+    
+    def test_transmission(self, create_uniform_spider):
+        """Tests the transmission method."""
+        _test_transmission(create_uniform_spider)
+    
+    def test_make_static(self, create_uniform_spider):
+        """Tests the make_static method."""
+        _test_make_static(create_uniform_spider)
+    
+    def test_extent(self, create_uniform_spider):
+        """Tests the extent method."""
+        _test_extent(create_uniform_spider)
 
 
-    def test_on_aperture(self: object, 
-            create_aberrated_aperture: callable,
-            create_circular_aperture: callable) -> None:
-        """
-        Tests that the basis functions are evaluated atop the aperture.
-        Applies mutliple different permutations.
-        """
-        jax.config.update("jax_debug_nans", True)
-        
-        npix = 16
-        width = 2.
-        pixel_scale = width / npix
-        coordinates = dLux.utils.get_pixel_positions((npix,npix), 
-                                                    (pixel_scale, pixel_scale))
+class TestCompoundAperture():
+    """Tests the CompoundAperture class."""
 
-        ap = create_circular_aperture()
+    def test_constructor(self, create_compound_aperture, 
+        create_aberrated_aperture):
+        """Tests the constructor."""
+        create_compound_aperture()
+        aber_ap = create_aberrated_aperture()
+        with pytest.raises(TypeError):
+            create_compound_aperture(apers=[aber_ap, aber_ap])
+    
+    def test_call(self, create_compound_aperture, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call(create_compound_aperture, create_wavefront)
+    
+    def test_transmission(self, create_compound_aperture):
+        """Tests the transmission method."""
+        _test_transmission(create_compound_aperture)
+    
+    def test_make_static(self, create_compound_aperture):
+        """Tests the make_static method."""
+        _test_make_static(create_compound_aperture)
 
-        aber_ap = create_aberrated_aperture(aperture=ap)._basis(coordinates)
-        ap = ap._aperture(coordinates)
+    def test_basis(self, create_compound_aperture):
+        """Tests the basis method."""
+        _test_basis(create_compound_aperture)
+    
+    def test_opd(self, create_compound_aperture):
+        """Tests the _opd method."""
+        _test_opd(create_compound_aperture)
 
-        abers = np.where(ap == 0., aber_ap, 0.)
-        assert (abers == 0.).all()
 
+class TestMultiAperture():
+    """Tests the MultiAperture class."""
+
+    def test_constructor(self, create_multi_aperture):
+        """Tests the constructor."""
+        create_multi_aperture()
+    
+    def test_call(self, create_multi_aperture, create_wavefront, 
+        create_aberrated_aperture, create_compound_aperture):
+        """Tests the __call__ method."""
+        _test_call(create_multi_aperture, create_wavefront)
+        aber_ap = create_aberrated_aperture()
+        comp_ap = create_compound_aperture(apers=[aber_ap])
+        create_multi_aperture(apers=[comp_ap])(create_wavefront())
+    
+    def test_transmission(self, create_multi_aperture):
+        """Tests the transmission method."""
+        _test_transmission(create_multi_aperture)
+    
+    def test_make_static(self, create_multi_aperture, create_aberrated_aperture,
+        create_compound_aperture):
+        """Tests the make_static method."""
+        _test_make_static(create_multi_aperture)
+        aber_ap = create_aberrated_aperture()
+        comp_ap = create_compound_aperture(apers=[aber_ap])
+        create_multi_aperture(apers=[comp_ap]).make_static(16, 1)
+
+    def test_basis(self, create_multi_aperture):
+        """Tests the basis method."""
+        _test_basis(create_multi_aperture)
+    
+    def test_opd(self, create_multi_aperture):
+        """Tests the _opd method."""
+        _test_opd(create_multi_aperture)
+    
+    def test_aberrated_apertures(self, create_multi_aperture, 
+        create_aberrated_aperture, create_compound_aperture):
+        """Tests the _aberrated_aperture method."""
+        create_multi_aperture()._aberrated_apertures()
+        aber_ap = create_aberrated_aperture()
+        comp_ap = create_compound_aperture(apers=[aber_ap])
+        create_multi_aperture(apers=[comp_ap])._aberrated_apertures()
+    
+    def test_getattr(self, create_multi_aperture):
+        """Tests the __getattr__ method."""
+        create_multi_aperture().CircularAperture
+        with pytest.raises(AttributeError):
+            create_multi_aperture().not_an_aperture
+
+def test_aperture_factory():
+    """Tests the ApertureFactory method"""
+    npix = 16
+
+    dLux.ApertureFactory(npix)
+    dLux.ApertureFactory(npix, nsides=3)
+    dLux.ApertureFactory(npix, radial_orders=[2, 3])
+    dLux.ApertureFactory(npix, noll_indices=[1, 2, 3])
+    dLux.ApertureFactory(npix, secondary_ratio=0.1)
+    dLux.ApertureFactory(npix, secondary_ratio=0.1, secondary_nsides=3)
+    dLux.ApertureFactory(npix, nstruts=3, strut_ratio=0.01)
+    dLux.ApertureFactory(npix, static=False)
+
+    with pytest.raises(ValueError):
+        dLux.ApertureFactory(npix, nstruts=3, secondary_ratio=0)
+
+    with pytest.raises(ValueError):
+        dLux.ApertureFactory(npix, radial_orders=[-1, 0])
+
+    with pytest.raises(ValueError):
+        dLux.ApertureFactory(npix, nsides=1)
+
+    with pytest.raises(ValueError):
+        dLux.ApertureFactory(npix, secondary_nsides=1)
+    
+    with pytest.raises(ValueError):
+        dLux.ApertureFactory(npix, aperture_ratio=-1)
+
+    with pytest.raises(ValueError):
+        dLux.ApertureFactory(npix, secondary_ratio=-1)
+
+    with pytest.raises(ValueError):
+        dLux.ApertureFactory(npix, strut_ratio=-1)
