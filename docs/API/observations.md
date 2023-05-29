@@ -1,4 +1,59 @@
-# Observations
+# Observations: observations.py
+
+This module contains the classes that define the behaviour of observations in dLux. Observations classes are designed to be constructed by users in order to model arbitrary observation patterns. As an example we have implemented a `Dither` class that applies a series of dithers to the source positions.
+
+??? info "Observations API"
+    ::: dLux.observations
+
+All `Observation` classes shoudl implement a `.model(instrument)` method that performs the actual calculation of the observation.
+
+Lets have a look how to construct a simple dither observation class.
+
+```python
+import jax.numpy as np
+import dLux as dl
+
+# Define the optical parameters
+wf_npixels = 256
+diameter = 1 # meters
+psf_npixels = 128
+psf_pixel_scale = 0.1 # arcseconds
+psf_oversample = 4
+
+# Use ApertureFactory class to make a simple circular aperture
+aperture = dl.ApertureFactory(wf_npixels)
+
+# Construct the optics class
+optics = dl.AngularOptics(wf_npixels, diameter, aperture, 
+    psf_npixels, psf_pixel_scale, psf_oversample)
+
+# Construct Source
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+source = dl.PointSource(wavelengths)
+
+# Construct Observation
+dithers = 1e-6 * np.array([[1, 1], [1, -1], [-1, 1], [-1, -1]])
+observation = dl.Dither(dithers)
+
+# Construct the instrument and observe
+instrument = dl.Instrument(optics, source, observation=observation)
+psfs = instrument.observe()
+```
+
+??? abstract "Plotting Code"
+    ```python
+    plt.figure(figsize=(20, 4))
+    for i in range(4):
+        plt.subplot(1, 4, i+1)
+        plt.title("$\sqrt{PSF}$")
+        plt.imshow(psfs[i]**0.5)
+        plt.colorbar()
+    plt.savefig('assets/observation.png')
+    ```
+
+![observation](../assets/observation.png)
+
+<!-- # Observations
 
 The observations class is designed to give users complete control over how the instrument is modelled. It is designed to be used in conjunction with the `Instrument` class and stored as one of its class attributes. There is one main class `AbstractObservation` that is designed to be subclassed. Users can create custom observations by inheriting from `AbstractObservation` and implementing the `observe` method. Lets take a look at an example observation class. Lets say we wanted to model the response of some instrument over two different band-passes. We could do this by creating a custom observation class:
 
@@ -111,4 +166,4 @@ The base class that all user-created observations should inherit from.
 A simple dither observation class that models the instrument over a grid of relative pointings.
 
 ??? info "Dither API"
-    ::: dLux.observations.Dither
+    ::: dLux.observations.Dither -->

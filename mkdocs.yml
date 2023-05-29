@@ -99,42 +99,12 @@ theme:
         icon: material/weather-sunny
         name: Switch to light mode
 
-
-# theme:
-#   palette:
-#     scheme: slate
-#   logo: assets/logo.jpg
-#   favicon: material/telescope
-#   name: material
-#   icon:
-#     logo: material/telescope
-
-# # ===== Plugins =====
-# plugins:
-#   - search
-#   - mkdocs-jupyter
-#   - mkdocstrings:
-#       default_handler: python
-#       handlers:
-#         python:
-#           selection:
-#             docstring_style: "numpy"
-#           setup_commands:
-#             - import sys
-#             - sys.path.append("dLux")
-#           rendering:
-#             show_source: false
-#             show_if_no_docstring: yes
-#       custom_templates: templates
-
-
 # ===== Navigation =====
 nav:
     - Home: README.md
 
     - Tutorials:
         - Usage:                    docs/usage.md
-        - Creating a Layer:         docs/creating_a_layer.md
         - Phase Retrieval:          docs/notebooks/phase_retrieval_demo.ipynb
         - Phase Mask Design:        docs/notebooks/designing_a_mask.ipynb
         - Pixel Level Calibration:  docs/notebooks/flatfield_calibration.ipynb
@@ -142,28 +112,32 @@ nav:
         - Parameter Inference:      docs/notebooks/HMC.ipynb
 
     - dLux API: 
-        - Overview:     docs/API/api.md
-        - Core:         docs/API/core.md
-        - Optics:       docs/API/optics.md
-        - Apertures:    docs/API/apertures.md
-        - Aberrations:  docs/API/aberrations.md
-        - Propagators:  docs/API/propagators.md
-        - Wavefronts:   docs/API/wavefronts.md
-        - Detectors:    docs/API/detectors.md
-        - Sources:      docs/API/sources.md
-        - Spectrums:    docs/API/spectrums.md
-        - Observations: docs/API/observations.md
+        - Overview:        docs/API/overview.md
+        - Wavefronts:      docs/API/wavefronts.md
+        - Optics:          docs/API/optics.md
+        - Optical Layers:  docs/API/optical_layers.md
+        - Propagators:     docs/API/propagators.md
+        - Apertures:       docs/API/apertures.md
+        - Aberrations:     docs/API/aberrations.md
+
+        - Spectra:         docs/API/spectra.md
+        - Sources:         docs/API/sources.md
+
+        - Images:          docs/API/images.md
+        - Detector Layers: docs/API/detector_layers.md
+        - Detectors:       docs/API/detectors.md
+
+        - Instruments:    docs/API/instruments.md
+        - Observations:   docs/API/observations.md
 
     - Utils API:
-        - Overview:      docs/API/utils.md
-        - Optics:        docs/API/optics_util.md
-        - Models:        docs/API/models.md
-        - Units:         docs/API/units.md
-        - Math:          docs/API/math.md
-        - Coordinates:   docs/API/coordinates.md
-        - Interpolation: docs/API/interpolation.md
-        - Bayes:         docs/API/bayes.md
-        - Helpers:       docs/API/helpers.md
+        # - Overview:      docs/API/utils/utils.md
+        - Optics:        docs/API/utils/optics.md
+        - Units:         docs/API/utils/units.md
+        - Math:          docs/API/utils/math.md
+        - Coordinates:   docs/API/utils/coordinates.md
+        - Interpolation: docs/API/utils/interpolation.md
+        - Helpers:       docs/API/utils/helpers.md
 
     - FAQ & Troubleshooting: docs/faq.md
     - Change Log: CHANGELOG.md

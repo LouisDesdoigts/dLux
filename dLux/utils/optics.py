@@ -1,11 +1,9 @@
 import jax.numpy as np
+from jax import Array
 
 
 __all__ = ["opd_to_phase", "phase_to_opd", "get_fringe_size", 
            "get_pixels_per_fringe", "get_pixel_scale", "get_airy_pixel_scale"]
-
-
-Array = np.ndarray
 
 
 def opd_to_phase(opd : Array, wavelength : Array) -> Array:

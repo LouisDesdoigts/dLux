@@ -1,62 +1,103 @@
-# Sources
+# Source: source.py
 
-The sources module contains different parametrisations of source objects. These are used to model the light sources that are being observed. Each source class must have at least a `position` `flux` and `spectrum` attribute. The position defaults to the center of the image, ie aligned with the optical axis. Flux defaults to one, giving a unit psf. The only parameter that must be specific is the the `spectrum`, however we can instead pass in an array of wavelengths and an appropriate spectrum object will be generated. Resolved sources can also be modelled and are applied via a convolution.
+This module contains the classes that define the behaviour of sources in dLux.
 
-All source positions are defined in radians and all fluxes are in units of photons.
+There are five public classes:
 
-!!! tip "Acessing Parameters"
-    The `Source` class has an in-built `__getattr__` class that allows for the spectrum parameters to be accessed from the `Source` object. That means if we wanted to access the `wavelengths` parameter  of a `PointSource` we could do so like this:
+- `PointSource`
+- `PointSources`
+- `BinarySource`
+- `ResolvedSource`
+- `PointResolvedSource`
 
+Source classes store `Spectrum` objects that define the spectral properties of the source. They also store the position of the source on the sky, and the flux of the source.
+
+All public clases have two main methods:
+
+1. `normalise()` Returns a new source object with the relevant attributes normalised.
+2. `model(optics)` Models the source through the optics.
+
+??? info "PointSource"
+    ::: dLux.sources.PointSource
+
+??? info "PointSources"
+    ::: dLux.sources.PointSources
+
+??? info "BinarySource"
+    ::: dLux.sources.BinarySource
+
+??? info "ResolvedSource"
+    ::: dLux.sources.ResolvedSource
+
+??? info "PointResolvedSource"
+    ::: dLux.sources.PointResolvedSource
+
+---
+
+# Examples
+
+Lets have a look at how to construct all of these different classes. First we construct some optics to model the sources through.
+
+```python
+import jax.numpy as np
+import dLux as dl
+
+# Define the optical parameters
+wf_npixels = 256
+diameter = 1 # meters
+psf_npixels = 128
+psf_pixel_scale = 0.1 # arcseconds
+psf_oversample = 4
+
+# Use ApertureFactory class to make a simple circular aperture
+aperture = dl.ApertureFactory(wf_npixels)
+
+# Construct the optics class
+optics = dl.AngularOptics(wf_npixels, diameter, aperture, 
+    psf_npixels, psf_pixel_scale, psf_oversample)
+```
+
+Now we define the different source classes.
+
+```python
+# Define wavelengths
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+
+# Construct PointSource
+sourcess = [dl.PointSource(wavelengths)]
+
+# Construct PointSources
+positions = 3e-6 * np.array([[1, 1], [1, -1], [-1, 1], [-1, -1]])
+sources.append(dl.PointSources(wavelengths, positions))
+
+# Construct BinarySource
+separation = 2e-6 # radians
+sources.append(dl.BinarySource(wavelengths, separation=separation))
+
+# Construct ResolvedSource
+distribution = np.ones([10, 10])
+sources.append(dl.ResolvedSource(wavelengths, distribution=distribution))
+
+# Construct PointResolvedSource
+distribution = np.ones([10, 10])
+sources.append(dl.PointResolvedSource(wavelengths, distribution=distribution, 
+    contrast=3))
+```
+
+??? abstract "Plotting Code"
     ```python
-    wavelengths = PointSource.wavelengths
+    import matplotlib.pyplot as plt
+    titles = ["PointSource", "PointSources", "BinarySource", "ResolvedSource",
+        "PointResolvedSource"]
+
+    plt.figure(figsize=(25, 4))
+    for i in range(5):
+        psf = sources[i].model(optics)
+        plt.subplot(1, 5, i+1)
+        plt.title(titles[i])
+        plt.imshow(psf**0.5)
+        plt.colorbar()
+    plt.savefig('assets/sources.png')
     ```
 
-    As opposed to the longer:
-
-    ```python
-    wavelengths = PointSource.spectrum.wavelengths
-    ```
-
-There are also a series of different parametrisation of source objects, lets have a look:
-
-## Point Source
-
-A simple point source objects.
-
-??? info "Point Source API"
-    :::dLux.sources.PointSource
-
-## Multi-Point Source
-
-Models a series of point sources at different positions and fluxes with a single spectrum.
-
-??? info "Multi-Point Source API"
-    :::dLux.sources.MultiPointSource
-
-## Binary Source
-
-Models a binary source with a differing spectra. Parametrised by separation, position angle, and flux ratio.
-
-??? info "Binary Source API"
-    :::dLux.sources.BinarySource
-
-## Array Distribution
-
-Models a single resolved source source object stored as an array of relative intensities.
-
-??? info "Array Distribution API"
-    :::dLux.sources.ArrayDistribution
-
-## Point Extended Source
-
-Models a single unresolved source and a single resolved source with a shared spectrum. An example would be a star and its dust-shell.
-
-??? info "Point Extended Source API"
-    :::dLux.sources.PointExtendedSource
-
-## Point and Extended Source
-
-Models a single unresolved source and a single resolved source with a unique spectrums. An example would be a quasar and its host galaxy.
-
-??? info "Point and Extended Source API"
-    :::dLux.sources.PointAndExtendedSource
+![sources](../assets/sources.png)

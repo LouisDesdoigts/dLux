@@ -1,650 +1,95 @@
 from __future__ import annotations
+from abc import abstractmethod
+from collections import OrderedDict
 import jax.numpy as np
-from abc import ABC, abstractmethod
-from jax.scipy.signal import convolve
-from jax.scipy.stats import norm
+from jax import Array
 from zodiax import Base
-from dLux.utils.interpolation import rotate, fourier_rotate
-from dLux.utils.units import convert_angular
-from dLux.utils.helpers import single_image_plot
+import dLux.utils as dlu
+import dLux
 
 
-__all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
-           "AddConstant", "IntegerDownsample", "Rotate"]
+__all__ = ["LayeredDetector"]
 
 
-Array = np.ndarray
+DetectorLayer = lambda : dLux.detector_layers.DetectorLayer
 
 
-class DetectorLayer(Base, ABC):
-    """
-    A base Detector layer class to help with type checking throuhgout the rest
-    of the software.
-
-    Attributes
-    ----------
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    name : str
-
-
-    def __init__(self : DetectorLayer,
-                 name : str = 'DetectorLayer') -> DetectorLayer:
-        """
-        Constructor for the DetectorLayer class.
-
-        Parameters
-        ----------
-        name : str = 'DetectorLayer'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        self.name = str(name)
-
-
+class BaseDetector(Base):
+    
     @abstractmethod
-    def __call__(self : DetectorLayer, image : Array) -> Array: # pragma: no cover
-        """
-        Abstract method for Detector Layers
-        """
-        return
-    
+    def model(self, image): # pragma: no cover
+        pass
 
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return f"{self.name} layer has no summary method yet."
-    
-
-    def display(self            : DetectorLayer, 
-                image           : Array,
-                figsize         : tuple = (5, 4),
-                dpi             : int = 120,
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> None:
-        """
-        Displays a plot of the image propagating through the layer.
-
-        Parameters
-        ----------
-        image : Array
-            The dummy image to propagate though the detector.
-        figsize : tuple = (10, 4)
-            The size of the figure to display.
-        cmap : str = 'inferno'
-            The colour map to use.
-        dpi : int = 120
-            The resolution of the figure.
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-        """
-        single_image_plot(image, figsize=figsize, title="PSF", 
-                          cbar_label="Counts", cmap='inferno', dpi=dpi)
-
-
-class ApplyPixelResponse(DetectorLayer):
+class LayeredDetector(BaseDetector):
     """
-    Applies a pixel response array to the the input image, via a multiplication.
+    A high level class desgined to model the behaviour of some detectors
+    response to some psf.
 
     Attributes
     ----------
-    pixel_response : Array
-        The pixel_response to apply to the input image.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
+    layers: dict
+        A collections.OrderedDict of 'layers' that define the transformations
+        and operations upon some input psf as it interacts with the detector.
     """
-    pixel_response : Array
+    layers : OrderedDict
 
 
-    def __init__(self           : DetectorLayer,
-                 pixel_response : Array,
-                 name           : str = 'ApplyPixelResponse') -> DetectorLayer:
+    def __init__(self : Detector, layers : list) -> Instrument:
         """
-        Constructor for the ApplyPixelResponse class.
+        Constructor for the Detector class.
 
         Parameters
         ----------
-        pixel_response : Array
-            The pixel_response to apply to the input image. Must be a 2
-            dimensional array equal to size of the image at time of application.
-        name : str = 'ApplyPixelResponse'
-            The name of the layer, which is used to index the layers dictionary.
+        layers : list
+            An list of dLux detector layer classes that define the instrumental
+            effects for some detector.
+
+            A list of ∂Lux 'layers' that define the transformations and
+            operations upon some input wavefront through an optical system.
+            The entried can either be dLux DetectorLayers, or tuples of the
+            form (DetectorLayer, key), with the key being used as the dictionary
+            key for the layer.
         """
-        super().__init__(name)
-        self.pixel_response = np.asarray(pixel_response, dtype=float)
-        assert self.pixel_response.ndim == 2, \
-        ("pixel_response must be a 2 dimensional array.")
+        self.layers = dlu.list_to_dictionary(layers, True, DetectorLayer())
+        super().__init__()
 
 
-    def __call__(self : DetectorLayer, image) -> Array:
+    def __getattr__(self : Detector, key : str) -> object:
         """
-        Applies the pixel response to the input image, via a multiplication.
+        Magic method designed to allow accessing of the various items within
+        the layers dictionary of this class via the 'class.attribute' method.
 
         Parameters
         ----------
-        image : Array
-            The image to apply the pixel_response to.
+        key : str
+            The key of the item to be searched for in the layers dictionary.
 
         Returns
         -------
-        image : Array
-            The image with the pixel_response applied.
+        item : object
+            The item corresponding to the supplied key in the layers dictionary.
         """
-        return image * self.pixel_response
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return f"{self.name}: Applies the pixel response to the image."
-
-
-class ApplyJitter(DetectorLayer):
-    """
-    Convolves the image with a gaussian kernel parameterised by the standard
-    deviation (sigma).
-
-    Attributes
-    ----------
-    sigma : Array, pixels
-        The standard deviation of the guassian kernel, in units of pixels.
-    kernel_size : int
-        The size of the convolution kernel to use.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    kernel_size : int
-    sigma       : Array
-
-
-    def __init__(self        : DetectorLayer,
-                 sigma       : Array,
-                 kernel_size : int = 10,
-                 name        : str = 'ApplyJitter') -> DetectorLayer:
-        """
-        Constructor for the ApplyJitter class.
-
-        Parameters
-        ----------
-        sigma : Array, pixels
-            The standard deviation of the guassian kernel, in units of pixels.
-        kernel_size : int = 10
-            The size of the convolution kernel to use.
-        name : str = 'ApplyJitter'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.kernel_size = int(kernel_size)
-        self.sigma       = np.asarray(sigma, dtype=float)
-        assert self.sigma.ndim == 0, ("sigma must be scalar array.")
-
-
-    def generate_kernel(self : DetectorLayer) -> Array:
-        """
-        Generates the normalised guassian kernel.
-
-        Returns
-        -------
-        kernel : Array
-            The gaussian kernel.
-        """
-        # Generate distribution
-        x = np.linspace(-10, 10, self.kernel_size)
-        kernel = norm.pdf(x,          scale=self.sigma) * \
-                 norm.pdf(x[:, None], scale=self.sigma)
-        return kernel/np.sum(kernel)
-
-
-    def __call__(self : DetectorLayer, image : Array) -> Array:
-        """
-        Convolves the input image with the generate gaussian kernel.
-
-        Parameters
-        ----------
-        image : Array
-            The image to convolve with the gussian kernel.
-
-        Returns
-        -------
-        image : Array
-            The image with the gaussian kernel convolution applied.
-        """
-        kernel = self.generate_kernel()
-        return convolve(image, kernel, mode='same')
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Applies a jitter of {self.jitter:.{sigfigs}} "
-                "pixels.")
-
-
-class ApplySaturation(DetectorLayer):
-    """
-    Applies a simple saturation model to the input image, by clipping any
-    values above saturation, to saturation.
-
-    Attributes
-    ----------
-    saturation : Array
-        The value at which the saturation is applied.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    saturation : Array
-
-
-    def __init__(self       : DetectorLayer,
-                 saturation : Array,
-                 name       : str = 'ApplySaturation') -> DetectorLayer:
-        """
-        Constructor for the ApplySaturation class.
-
-        Parameters
-        ----------
-        saturation : Array
-            The value at which the saturation is applied.
-        name : str = 'ApplySaturation'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.saturation = np.asarray(saturation, dtype=float)
-        assert self.saturation.ndim == 0, ("saturation must be a scalar array.")
-
-
-    def __call__(self : DetectorLayer, image : Array) -> Array:
-        """
-        Applies the satuation effect by reducing all values in the image above
-        saturation, to the saturation value.
-
-        Parameters
-        ----------
-        image : Array
-            The image to apply the saturation to.
-
-        Returns
-        -------
-        image : Array
-            The image with the saturation applied.
-        """
-        return np.minimum(image, self.saturation)
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Applies a saturation of "
-                f"{self.saturation:.{sigfigs}} counts.")
-
-
-class AddConstant(DetectorLayer):
-    """
-    Add a constant to the output image. This is typically used to model the
-    mean value of the detector noise.
-
-    Attributes
-    ----------
-    value : Array
-        The value to add to the image.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    value : Array
-
-
-    def __init__(self  : DetectorLayer,
-                 value : Array,
-                 name  : str = 'AddConstant') -> DetectorLayer:
-        """
-        Constructor for the AddConstant class.
-
-        Parameters
-        ----------
-        value : Array
-            The value to add to the image.
-        name : str = 'AddConstant'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.value = np.asarray(value, dtype=float)
-        assert self.value.ndim == 0, ("value must be a scalar array.")
-
-
-    def __call__(self : DetectorLayer, image : Array) -> Array:
-        """
-        Adds the value to the input image.
-
-        Parameters
-        ----------
-        image : Array
-            The image to add the value to.
-
-        Returns
-        -------
-        image : Array
-            The image with the value added.
-        """
-        return image + self.value
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Adds a constant value of "
-                f"{self.value:.{sigfigs}} counts.")
-
-
-class IntegerDownsample(DetectorLayer):
-    """
-    Downsamples an input image by an integer number of pixels via a sum.
-    The number of pixels in the input image must by integer divisible by the
-    kernel_size.
-
-    Attributes
-    ----------
-    kernel_size : int
-        The size of the downsampling kernel.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    kernel_size : int
-
-
-    def __init__(self        : DetectorLayer,
-                 kernel_size : int,
-                 name        : str = 'IntegerDownsample') -> DetectorLayer:
-        """
-        Constructor for the IntegerDownsample class.
-
-        Parameters
-        ----------
-        kernel_size : int
-            The size of the downsampling kernel.
-        name : str = 'IntegerDownsample'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.kernel_size = int(kernel_size)
-
-
-    def downsample(self        : DetectorLayer,
-                   array       : Array,
-                   kernel_size : int) -> Array:
-        """
-        Downsamples the input array by kernel_size.
-
-        Parameters
-        ----------
-        array : Array
-            The input array to downsample.
-
-        Returns
-        -------
-        kernel_size : int
-            The size of the downsample kernel.
-        """
-        size_in = array.shape[0]
-        size_out = size_in//kernel_size
-
-        # Downsample first dimension
-        array = array.reshape((size_in*size_out, kernel_size)).sum(1)
-        array = array.reshape(size_in, size_out).T
-
-        # Downsample second dimension
-        array = array.reshape((size_out*size_out, kernel_size)).sum(1)
-        array = array.reshape(size_out, size_out).T
-        return array
-
-
-    def __call__(self, image):
-        """
-        Downsamples the input image by the internally stored kernel_size.
-
-        Parameters
-        ----------
-        image : Array
-            The image to downsample.
-
-        Returns
-        -------
-        image : Array
-            The downsampled image.
-        """
-        return self.downsample(image, self.kernel_size)
-    
-
-    def summary(self            : DetectorLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
-        """
-        Returns a summary of the class.
-
-        Parameters
-        ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
-
-        Returns
-        -------
-        summary : str
-            A summary of the class.
-        """
-        return (f"{self.name}: Downsamples the image by {self.kernel_size} "
-                f"pixels.")
-
-
-class Rotate(DetectorLayer):
-    """
-    Applies a rotation to the image using interpolation methods.
-
-    Parameters
-    ----------
-    angle : Array, radians
-        The angle by which to rotate the image in the clockwise direction.
-    fourier : bool
-        Should the rotation be done using fourier methods or interpolation.
-    padding : int
-        The amount of padding to use if the fourier method is used.
-    name : str
-        The name of the layer, which is used to index the layers dictionary.
-    """
-    angle   : Array
-    fourier : bool
-    padding : int
-
-
-    def __init__(self    : DetectorLayer,
-                 angle   : Array,
-                 fourier : bool = False,
-                 padding : int  = None,
-                 name    : str  = 'Rotate') -> DetectorLayer:
-        """
-        Constructor for the Rotate class.
-
-        Parameters
-        ----------
-        angle: float, radians
-            The angle by which to rotate the image in the clockwise direction.
-        fourier : bool = False
-            Should the fourier rotation method be used (True), or regular
-            interpolation method be used (False).
-        padding : int = None
-            The amount of fourier padding to use. Only applies if fourier is
-            True.
-        name : str = 'Rotate'
-            The name of the layer, which is used to index the layers dictionary.
-        """
-        super().__init__(name)
-        self.angle   = np.asarray(angle, dtype=float)
-        self.fourier = bool(fourier)
-        self.padding = padding if padding is None else int(padding)
-        assert self.angle.ndim == 0, ("angle must be scalar array.")
-
-
-    def __call__(self : DetectorLayer, image : Array) -> Array:
-        """
-        Applies the rotation to an image.
-
-        Parameters
-        ----------
-        image : Array
-            The image to rotate.
-
-        Returns
-        -------
-        image : Array
-            The rotated image.
-        """
-        if self.fourier:
-            return fourier_rotate(image, self.angle, self.padding)
+        if key in self.layers.keys():
+            return self.layers[key]
         else:
-            return rotate(image, self.angle)
-        
+            raise AttributeError("'{}' object has no attribute '{}'"\
+                                 .format(type(self), key))
 
-    def summary(self            : OpticalLayer, 
-                angular_units   : str = 'radians', 
-                cartesian_units : str = 'meters', 
-                sigfigs         : int = 4) -> str:
+
+    def model(self : Detector, image: Array) -> Array:
         """
-        Returns a summary of the class.
+        Applied the stored detector layers to the input image.
 
         Parameters
         ----------
-        angular_units : str = 'radians'
-            The angular units to use in the summary. Options are 'radians', 
-            'degrees', 'arcseconds' and 'arcminutes'.
-        cartesian_units : str = 'meters'
-            The cartesian units to use in the summary. Options are 'meters',
-            'millimeters' and 'microns'.
-        sigfigs : int = 4
-            The number of significant figures to use in the summary.
+        image : Array
+            The input psf to be transformed.
 
         Returns
         -------
-        summary : str
-            A summary of the class.
+        image : Array
+            The ouput 'image' after being transformed by the detector layers.
         """
-        angle = convert_angular(self.angle, 'radians', angular_units)
-        
-        if self.fourier:
-            method = f"a Fourier method with padding of {self.padding}"
-        else:
-            method = "an Interpolation method of order 1"
-
-        return (f"{self.name}: Applies a {angle:.{sigfigs}} {angular_units} "
-                f"rotation to the image using {method}.")
+        for key, layer in self.layers.items():
+            image = layer(image)
+        return image.image

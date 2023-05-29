@@ -1,17 +1,12 @@
 from __future__ import annotations
 from zodiax import Base
 import jax.numpy as np
-from jax import lax
+from jax import lax, Array
 import jax.tree_util as jtu
-import dLux
-from dLux.utils.math import factorial
-from dLux.utils.coordinates import cartesian_to_polar, get_pixel_positions
+import dLux.utils as dlu
 
 
-__all__ = ['Zernike', 'ZernikeBasis', 'AberrationFactory']
-
-
-Array = np.ndarray
+__all__ = ['Zernike', 'ZernikeBasis']
 
 
 zernike_names = {
@@ -122,21 +117,21 @@ class Zernike(Base):
         if int(j) < 1:
             raise ValueError('The Zernike index must be greater than 0.')
         self.j = int(j)
-        self.n, self.m = self._noll_index(self.j)
+        self.n, self.m = self._noll_indices(self.j)
         self.name = zernike_names[int(self.j)] if self.j >= 1 and self.j <= 36 \
                     else f'Zernike {int(self.j)}'
 
         # Calcualte values
         self._k = np.arange(((self.n - self.m) // 2) + 1, dtype=float)
         sign = lax.pow(-1., self._k)
-        _fact_1 = factorial(np.abs(self.n - self._k))
-        _fact_2 = factorial(self._k)
-        _fact_3 = factorial(((self.n + self.m) // 2) - self._k)
-        _fact_4 = factorial(((self.n - self.m) // 2) - self._k)
+        _fact_1 = dlu.factorial(np.abs(self.n - self._k))
+        _fact_2 = dlu.factorial(self._k)
+        _fact_3 = dlu.factorial(((self.n + self.m) // 2) - self._k)
+        _fact_4 = dlu.factorial(((self.n - self.m) // 2) - self._k)
         self._c = sign * _fact_1 / _fact_2 / _fact_3 / _fact_4 
 
 
-    def _noll_index(self : Zernike, j : int) -> tuple[int]:
+    def _noll_indices(self : Zernike, j : int) -> tuple[int]:
         """
         Calculate the radial and azimuthal orders of the Zernike polynomial.
 
@@ -219,7 +214,7 @@ class Zernike(Base):
         zernike : Array
             The Zernike polynomial.
         """
-        polar_coordinates = cartesian_to_polar(coordinates)
+        polar_coordinates = dlu.cart_to_polar(coordinates)
         rho = polar_coordinates[0]
         theta = polar_coordinates[1]
         aperture = rho <= 1.
@@ -250,7 +245,7 @@ class Zernike(Base):
         """
         if nsides < 3:
             raise ValueError(f'nsides must be >= 3, not {nsides}.')
-        theta = cartesian_to_polar(coordinates)[1]
+        theta = dlu.cart_to_polar(coordinates)[1]
         alpha = np.pi / nsides
         phi = theta + alpha  
         wedge = np.floor((phi + alpha) / (2. * alpha))
@@ -306,10 +301,10 @@ class ZernikeBasis(Base):
 
     Attributes
     ----------
-    zernikes : list[Zernike]
+    noll_indices : list[Zernike]
         The list of Zernike polynomial classes to calculate.
     """
-    zernikes : list[Zernike]
+    noll_indices : list[Zernike]
 
 
     def __init__(self : ZernikeBasis, js : list[int]):
@@ -321,7 +316,7 @@ class ZernikeBasis(Base):
         js : list[int]
             The list of Zernike (noll) indices to calculate.
         """
-        self.zernikes = [Zernike(j) for j in js]
+        self.noll_indices = [Zernike(j) for j in js]
     
 
     def calculate_basis(self        : ZernikeBasis, 
@@ -345,193 +340,5 @@ class ZernikeBasis(Base):
         """
         leaf_fn = lambda leaf: isinstance(leaf, Zernike)
         calculate_fn = lambda z: z.calculate(coordinates, nsides)
-        return np.array(jtu.tree_map(calculate_fn, self.zernikes, 
+        return np.array(jtu.tree_map(calculate_fn, self.noll_indices, 
                                      is_leaf=leaf_fn))
-
-
-
-class AberrationFactory():
-    """
-    This class is not actually ever instatiated, but is rather a class used to 
-    give a simple constructor interface that is used to construct the most
-    commonly used aberrations. It is able to construct hard-edged circular or 
-    regular poygonal aberrations. 
-
-    Lets look at an example of how to construct a simple circular aberration 
-    class. Let calcualte this for a 512x512 array with the aperture spanning
-    the full array.
-
-    ```python
-    from dLux import AberrationFactory
-    import jax.numpy as np
-    import jax.random as jr
-    
-    # Construct Zernikes
-    zernikes = np.arange(4, 11)
-    coefficients = jr.normal(jr.PRNGKey(0), (zernikes.shape[0],))
-
-    # Construct aberrations
-    aberrations = AberrationFactory(512, zernikes=zernikes, 
-                                    coefficients=coefficients)
-    ```
-    
-    The resulting aperture class has two parameters, `.basis` and 
-    `.coefficients`. We can then examine the opd like so:
-
-    ```python
-    import matplotlib.pyplot as plt
-    plt.figure(figsize=(5, 4))
-    plt.imshow(aberrations.get_opd())
-    plt.colorbar()
-    plt.show()
-    ```
-
-    We can also easily change this to a hexagonal aperture:
-
-    ```python
-    # Construct aberrations
-    aberrations = AberrationFactory(512, nsides=6, zernikes=zernikes, 
-                                    coefficients=coefficients)
-    
-    # Examine
-    plt.figure(figsize=(5, 4))
-    plt.imshow(aberrations.get_opd())
-    plt.colorbar()
-    plt.show()
-    ```
-    """
-    def __new__(cls              : AberrationFactory, 
-                npixels          : int, 
-                nsides           : int   = 0,
-                rotation         : float = 0., 
-
-                # Sizing
-                aperutre_ratio   : float = 1.0,
-
-                # Aberrations
-                zernikes         : Array = None, 
-                coefficients     : Array = None, 
-
-                # name
-                name             : str = None):
-        """
-        Constructs a basic single static aberration class.
-
-        TODO: Add link to the zenike noll indicies
-
-        Parameters
-        ----------
-        npixels : int
-            Number of pixels used to represent the aperture.
-        nsides : int = 0
-            Number of sides of the aperture. A zero input results in a circular
-            aperture. All other other values of three and above are supported.
-        rotation : float, radians = 0
-            The global rotation of the aperture in radians.
-        aperutre_ratio : float = 1.
-            The ratio of the aperture size to the array size. A value of 1. 
-            results in an aperture that fully spans the array, a value of 0.5 
-            retuls in an aperure that is half the size of the array, which is 
-            equivilent to a padding factor of 2.
-        zernikes : Array = None
-            The zernike noll indices to be used for the aberrations. Please 
-            refer to (this)[Add this link] docstring to see which indicides 
-            correspond to which aberrations. Typical values are range(4, 11).
-        coefficients : Array = None
-            The zernike cofficients to be applied to the aberrations. Defaults 
-            to an array of zeros.
-        name : str = None
-            The name of the aperture used to index the layers dictionary. If 
-            not supplied, the aperture will be named based on the number of
-            sides. However this is only supported up to 8 sides, and a name
-            must be supplied for apertures with more than 8 sides.
-        
-        Returns
-        -------
-        aperture : ApplyBasisOPD
-            Returns an appropriately constructed ApplyBasisOPD.
-        """
-        # Check vaid inputs
-        if nsides < 3 and nsides != 0:
-            raise ValueError("nsides must be either 0 or >=3")
-        
-        # Auto-name
-        if name is None:
-            if nsides > 8:
-                raise ValueError("Warning: Auto-naming not supported for " + \
-                "nsides > 8. Please provide a name.")
-            sides = ["Circular", "Triangular", "Square", "Pentagonal", 
-                "Hexagonal", "Heptagonal", "Octagonal"]
-            name = sides[np.maximum(nsides-2, 0)] + "Aperture"
-
-
-        # Construct coordinates
-        coords = get_pixel_positions((npixels, npixels), (1/npixels, 1/npixels))
-
-        # Circular Primary
-        if nsides == 0:
-            ap = dLux.apertures.CircularAperture
-            dyn_aperture = ap(aperutre_ratio/2, softening=0)
-            coordinates = dyn_aperture._normalised_coordinates(coords)
-
-        # Polygonal Primary
-        else: 
-            ap = dLux.apertures.RegularPolygonalAperture
-            dyn_aperture = ap(nsides, aperutre_ratio/2, softening=0, 
-                          rotation=rotation)
-            coordinates = dyn_aperture._normalised_coordinates(coords, nsides)
-
-        # Construct Aberrations
-        basis = ZernikeBasis(zernikes).calculate_basis(coordinates)
-        return dLux.optics.ApplyBasisOPD(basis, coefficients, name=name)
-
-
-    def __init__(self              : AberrationFactory, 
-                npixels          : int, 
-                nsides           : int   = 0,
-                rotation         : float = 0., 
-
-                # Sizing
-                aperutre_ratio   : float = 1.0,
-
-                # Aberrations
-                zernikes         : Array = None, 
-                coefficients     : Array = None, 
-
-                # name
-                name             : str = None):
-        """
-        Constructs a basic single static aberration class.
-
-        Parameters
-        ----------
-        npixels : int
-            Number of pixels used to represent the aperture.
-        nsides : int = 0
-            Number of sides of the aperture. A zero input results in a circular
-            aperture. All other other values of three and above are supported.
-        rotation : float, radians = 0
-            The global rotation of the aperture in radians.
-        aperutre_ratio : float = 1.
-            The ratio of the aperture size to the array size. A value of 1. 
-            results in an aperture that fully spans the array, a value of 0.5 
-            retuls in an aperure that is half the size of the array, which is 
-            equivilent to a padding factor of 2.
-        zernikes : Array = None
-            The zernike noll indices to be used for the aberrations. Please 
-            refer to (this)[Add this link] docstring to see which indicides 
-            correspond to which aberrations. Typical values are range(4, 11).
-        coefficients : Array = None
-            The zernike cofficients to be applied to the aberrations. Defaults 
-            to an array of zeros.
-        name : str = None
-            The name of the aperture used to index the layers dictionary. If 
-            not supplied, the aperture will be named based on the number of
-            sides. However this is only supported up to 8 sides, and a name
-            must be supplied for apertures with more than 8 sides.
-        
-        Returns
-        -------
-        aperture : ApplyBasisOPD
-            Returns an appropriately constructed ApplyBasisOPD.
-        """
