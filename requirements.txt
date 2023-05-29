@@ -1,7 +1,7 @@
 # Core
 jax
 jaxlib
-zodiax==0.3.3
+zodiax==0.4.0
 
 # Extra
 optax
@@ -10,3 +10,4 @@ jupyter
 jupyterlab
 tqdm
 chainconsumer
+# nummpyro

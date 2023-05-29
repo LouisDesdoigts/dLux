@@ -1,58 +1,38 @@
-# An Overview of the Apertures
+# Aperture Layers: apertures.py
 
-## Introduction
+This module contains the classes that define the behaviour of ApertureLayers in dLux.
 
-`dLux` implements a number of aperture components for telescopes. Because `dLux` is powered by autodiff, the shape of the aperture can be learned. Theoretically, you could learn the value of every pixel in the aperture. Learning by pixel would be computationally expensive and the model could chase noise making the results meaningless. Instead the apertures that we have implemented are **parametrised**. In general the apertures can be, *translated*, *sheared, compressed androtated*, all in a differentiable manner by softening the hard bounary using a sigmoid.
+These classes provide a simple set of classes used to perform basic transformations of wavefronts.
 
-There are four different aperture types: Dynamic, Static, Aberrated and Composite. The dynamic apertures are the most flexible and can be used to learn the shape of the aperture. The static apertures pre-compute the aperture and use the fixed array representation. The aberrated apertures are used to learn the shape of the aperture and the basis functions for phase retrieval. The compound apertures are used to combine multiple apertures into a single aperture. There are also spider apertures that are used to model secondary mirror supports.
+There are 9 public classes:
 
-## Dynamic Apertures
+- `CircularAperture`
+- `RectangularAperture`
+- `RegPolyAperture`
+- `IrregPolyAperture`
+- `AberratedAperture`
+- `UniformSpider`
+- `CompoundAperture`
+- `MultiAperture`
 
-The dynamic apertures are form the basis for the rest of the apertures and contains 7 classes: `CircularAperture`, `AnnularAperture`, `HexagonalAperture`, `RectangularAperture`, `SquareAperture`, `RegularPolygonAperture`, `IrregularPolygonAperture`. Each of these classes has a seriers of common parameters: `translation`, `rotation`, `shear`, `compression`, `softening` and `occulting`. The `translation` and `rotation` parameters are used to move and rotate the aperture. The `shear` and `compression` parameters are used to change the shape of the aperture. The `softening` parameter is used to soften the hard boundary of the aperture, and `occulting` controls if the aperture is transmissive or occulting.
+Plus also one public method, `ApertureFactory`, that allows for the easy construction of various simple apertures.
 
-Each of these classes then has a different parameterisation of the aperture itself, for example the `CircularAperture` has a `radius` parameter, the `AnnularAperture` has `inner_radius` and `outer_radius` parameters.
+# API
 
 ??? info "Circular Aperture API"
     :::dLux.apertures.CircularAperture
 
-??? info "Annular Aperture API"
-    :::dLux.apertures.AnnularAperture
-
-??? info "Hexagonal Aperture API"
-    :::dLux.apertures.HexagonalAperture
-
 ??? info "Rectangular Aperture API"
     :::dLux.apertures.RectangularAperture
 
-??? info "Square Aperture API"
-    :::dLux.apertures.SquareAperture
-
 ??? info "Regular Polygonal Aperture API"
-    :::dLux.apertures.RegularPolygonalAperture
+    :::dLux.apertures.RegPolyAperture
 
 ??? info "Irregular Polygonal Aperture API"
-    :::dLux.apertures.IrregularPolygonalAperture
-
-## Static Apertures
-
-The inbuild flexibility of the `dLux.apertures` module is very powerful but unlikely to be needed in most cases. For this reason Dynamic apertures can be turned into static apertures where the array of tranmission values are calculated once, and then kept fixed to avoid re-calculation of the aperture every evaluation.
-
-??? info "Static Aperture API"
-    :::dLux.apertures.StaticAperture
-
-## Aberrated Apertures
-
-Both dynamic and static apertures can have aberations applied to them using the `AberratedAperture` class. This class takes an aperture as an argument and then applies a set of basis vectors to the aperture. The basis vectors are derived from the *Zernike* polynomials and calculated to be orthonormal on all regular-polygon apertures. The underlying aberrations are generated in the aberations module.
+    :::dLux.apertures.IrregPolyAperture
 
 ??? info "Aberrated Aperture API"
     :::dLux.apertures.AberratedAperture
-
-??? info "Static Aberrated Aperture API"
-    :::dLux.apertures.StaticAberratedAperture
-
-## Composite Apertures
-
-The Composite apertures are designed to take in a series of dynamic aperture and combine them to create arbirary aperture shapes. There are two types of composite aperture, Compound and Multi apertures. The CompoundAperture is used to combine apertures that are overlapping, and the MultiAperture is used to combine apertures that are not overlapping. For example if we wanted to create a HST-like aperture we would combine an annular aperture with a spiders class. If we wanted to create an aperture mask, we would combine a series of circular apertures in a MultiAperture class.
 
 ??? info "Compound Aperture API"
     :::dLux.apertures.CompoundAperture
@@ -60,16 +40,42 @@ The Composite apertures are designed to take in a series of dynamic aperture and
 ??? info "Multi Aperture API"
     :::dLux.apertures.MultiAperture
 
-## Spiders
+??? info "Aperture Factory API"
+    :::dLux.apertures.ApertureFactory
 
-The spiders class are just a specific parametrisation of rectangular apertures for simplicity.
+These classes are broken into three categories: Dyanmic Apertures, Aberrated Apertures, and Composite Apertures.
 
-??? info "Uniform Spider API"
-    :::dLux.apertures.UniformSpider
+## Dynamic Apertures
 
-# Usage and Examples
+The Dynamic apertures are apertures that are defined by physical units, such as radius, and are generated at run-time on the input coordinates. These apertures all have a set of input transformation parameters that can be used to modify the shape of the aperture. These parameters are:
 
-Now let's write some code. We can create a basic circular aperture at the centre of the coordinate system with a 1m radius like so:
+- `centre`: The (x, y) coordinates of the centre of the aperture.
+- `shear`: The (x, y) linear shear of the aperutre.
+- `compression`: The (x, y) compression of the aperture.
+- `rotation`: The clockwise rotation of the aperture.
+- `occulting`: Is the aperture occulting or tranmissive. False results in a
+    tranmissive aperture, and True results in an occulting aperture.
+- `softening`: The approximate pixel width of the soft boundary applied to the
+    aperture. Hard edges can be achieved by setting the softening to 0.
+
+## Aberrated Apertures
+
+The Aberrated apertures are apertures that are defined by a set of Zernike coefficients. These apertures and zernikes are generated at run-time on the input coordinates. These classes contain a dynamic aperture, plus a dynamic zernike basis and coefficients.
+
+## Composite Apertures
+
+The Composite apertures are apertures that are defined by a set of sub-apertures that are combined together. These apertures are generated at run-time on the input coordinates. These classes contain a list of dynamic apertures that are combined together. `CompoundApertures` are apertures that are combined together via a multiplication (ie, combining a primary mirror and secondary mirror with spiders), whereas `MultiApertures` are apertures that are combined together via an addition (ie, combining different holes of an aperture mask).
+
+Most users will not need to use these dynamic features, so all of these classes have a `.make_static(npixels, diameter)` method that returns a static version of the aperture that can be much faster to use. These static versions are implemented as `Optic` classes, and can be used in the same way as any other `Optic` class.
+
+The primary interface for these classes is the `.transmission(npixels, diameter)` method that returns the transmission of the aperture on a set of coordinates defined by the number of pixels and diameter.
+
+---
+
+# Examples
+
+Lets take a look at how to apply some simple transformations to a circualr
+apertures.
 
 ```python
 import dLux as dl
@@ -91,29 +97,58 @@ apertures = [
     plt.figure(figsize=(30, 4))
     for i in range(len(apertures)):
         plt.subplot(1, 6, i+1)
-        plt.imshow(apertures[i].get_aperture(256, 2))
+        plt.imshow(apertures[i].transmission(256, 2))
     plt.tight_layout()
-    plt.savefig("assets/apertures.png")
+    plt.savefig("assets/basic_apertures.png")
     ```
+![basic_apertures](../assets/basic_apertures.png)
 
-![apertures](../assets/apertures.png)
-
-## Aperture Factory
-
-Most users will not need to use the dynamic apertures, so the `ApertureFactory` class is designed to provide a simple interface to generate the most common apertures. It is able to construct hard-edged circular or regular poygonal apertures. Secondary mirrors obscurations with the same aperture shape can be constructed, along with uniformly spaced struts. Aberrations can also be applied to the aperture. The ratio of the primary aperture opening to the array size is determined by the aperture_ratio parameter, with secondary mirror obscurations and struts being scaled relative to the aperture diameter.
-
-??? info "Aperture Factory API"
-    :::dLux.apertures.ApertureFactory
-
-Lets look at an example of how to construct a simple circular aperture with a secondary mirror obscurtion held by 4 struts and some low-order aberrations. For this example lets take a 2m diameter aperutre, with a 20cm secondary mirror held by 3 struts with a width of 2cm. In this example the secondary mirror is 10% of the primary aperture diameter and the struts are 1% of the primary aperture diameter, giving us values of 0.1 and 0.01 for the secondary_ratio and strut_ratio parameters. Let calcualte this for a 512x512 array with the aperture spanning the full array.
+We can esaily add aberrations to these and also make them static:
 
 ```python
 import dLux as dl
-from jax import numpy as np, random as jr
+import jax.numpy as np
+import jax.random as jr
+
+# Construct a Hexagonal Aperture
+hex = dl.RegPolyAperture(6, 1.)
+
+# Turn it into an aberrated aperture
+zernikes = np.arange(1, 7)
+coefficients = jr.normal(jr.PRNGKey(0), (6,))
+aberrated_hex = dl.AberratedAperture(hex, zernikes, coefficients)
+
+# Promote it to static
+static_hex = aberrated_hex.make_static(256, 2)
+```
+
+??? abstract "Plotting code"
+    ```python
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(10, 4))
+    plt.subplot(1, 2, 1)
+    plt.title("Transmission")
+    plt.imshow(static_hex.transmission)
+    plt.colorbar()
+
+    plt.subplot(1, 2, 2)
+    plt.title("OPD")
+    plt.imshow(static_hex.transmission * static_hex.opd)
+    plt.colorbar()
+    plt.savefig('assets/aberrated_apertures.png')
+    ```
+![aberrated_apertures](../assets/aberrated_apertures.png)
+
+We can also use the ApertureFactory class to construct a simple aperture:
+
+```python
+import dLux as dl
+import jax.numpy as np
+import jax.random as jr
 
 # Construct Zernikes
-zernikes = np.arange(4, 11)
-coefficients = jr.normal(jr.PRNGKey(0), (zernikes.shape[0],))
+radial_orders = [2, 3]
+coefficients = jr.normal(jr.PRNGKey(0), (7,))
 
 # Construct aperture
 aperture = dl.ApertureFactory(
@@ -121,38 +156,24 @@ aperture = dl.ApertureFactory(
     secondary_ratio = 0.1, 
     nstruts         = 4, 
     strut_ratio     = 0.01, 
-    zernikes        = zernikes, 
-    coefficients    = coefficients,
-    name            = 'Aperture')
-
-print(aperture)
+    radial_orders   = radial_orders, 
+    coefficients    = coefficients)
 ```
-
-```python
-> StaticAberratedAperture(
->   name='Aperture',
->   aperture=f32[512,512],
->   coefficients=f32[7],
->   basis=f32[7,512,512]
-> )
-```
-
-As we can see the resulting aperture class has three parameters, `aperture`, `basis` and `coefficients`. Lets have a look at the resulting aperture and aberrations.
 
 ??? abstract "Plotting code"
     ```python
     import matplotlib.pyplot as plt
-
     plt.figure(figsize=(10, 4))
     plt.subplot(1, 2, 1)
-    plt.imshow(aperture.aperture)
+    plt.title("Transmission")
+    plt.imshow(aperture.transmission)
     plt.colorbar()
 
     plt.subplot(1, 2, 2)
-    plt.imshow(aperture.opd)
+    opd = aperture.opd.at[aperture.transmission == 0].set(np.nan)
+    plt.title("OPD")
+    plt.imshow(opd)
     plt.colorbar()
-    plt.tight_layout()
-    plt.savefig("assets/aperture_factory.png")
+    plt.savefig('assets/aperture_factory.png')
     ```
-
 ![aperture_factory](../assets/aperture_factory.png)

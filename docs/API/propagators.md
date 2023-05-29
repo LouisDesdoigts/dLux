@@ -1,26 +1,40 @@
-# Propagators
+# Propagators: propagators.py
 
-The propagators module contains all the optical layers that transform wavefront between pupil and focal planes. There are several different types of propagators that are combined. Angular and Cartesian propagators define their output units in either angular or cartesian coordinates. MFT and FFT based propagators have either a dynamic or fixed sampling in the output plane respectively. There is also a FarFieldFresnel propagator that is used to propagate near-to the focal plane.
+This module contains the classes that define the behaviour of PropagatorLayers in dLux.
 
-This gives a total of 5 classes: `AngularMFT`, `AngularFFT`, `CartesianMFT`, `CartesianFFT` and `CartesianFresnel`. `AngularMFT` is the most commonly used propagator as it can easily model chromatic effects without interpolation and most optical systems are designed in angular coordinates.
+These classes do not implement the propagation functionality themselves, but instead store the parameters of the propagation and call the inbuild methods of the Wavefront class, so its API is essentially a mirror of those methods.
 
-All of the propagators have an `inverse` parameter that used to designate the type of propagation. If `inverse=False` then the propagation will from the pupil plane to the focal plane, and vice versa if `inverse=True`.
+There are four public classes:
 
-The MFT propagators all have an `npixels_out` and `pixel_scale_out` parameters that define the size and sampling of the output plane. They also have a `shift` and `pixel_shift` parameter which can be used to shift the output plane by a given amount. By default the shift values is in angular units, but if `shift_units='pixels'` then the shift will be in pixels. FFT propagators by their nature have a fixed sampling and output size, nor can they be shifted so these parameters are not used.
+- `MFT`
+- `FFT`
+- `ShiftedMFT`
+- `FarFieldFresnel`
 
-Cartesian propagators also have a `focal_length` parameter that is required to calculate the correct sampling in the output plane.
+### `MFT(npixels, pixel_scale, focal_length=None, inverse=False)`
 
-??? info "Angular MFT API"
-    :::dLux.propagators.AngularMFT
+Performs a Matrix Fourier Transform (MFT) on the wavefront, propagating from Pupil to Focal planes. If the focal_length is None, the pixel_scale is assumed to be in angular units (radians), otherwise it is assumed to be in cartesian units (meters).
 
-??? info "Angular FFT API"
-    :::dLux.propagators.AngularFFT
+??? info "MFT API"
+    ::: dLux.propagators.MFT
 
-??? info "Cartesian MFT API"
-    :::dLux.propagators.CartesianMFT
+### `FFT(pad, focal_length=None, inverse=False)`
 
-??? info "Cartesian FFT API"
-    :::dLux.propagators.CartesianFFT
+Performs a Fast Fourier Transform (FFT) on the wavefront, propagating from Pupil to Focal planes. If the focal_length is None, the output units will angular, otherwise cartesian.
 
-??? info "Cartesian Fresnel API"
-    :::dLux.propagators.CartesianFresnel
+??? info "FFT API"
+    ::: dLux.propagators.FFT
+
+### `shiftedMFT(npixels, pixel_scale, shift, focal_length=None, pixel=True, inverse=False)`
+
+Performs a Matrix Fourier Transform (MFT) on the wavefront, propagating from Pupil to Focal planes. If the focal_length is None, the pixel_scale is assumed to be in angular units (radians), otherwise it is assumed to be in cartesian units (meters). The shift parameter is used to shift the center of the output plane by 'shift', which is treated in units of pixels by default, otherwise it is treated in the units of the pixel_scale.
+
+??? info "Shifted MFT API"
+    ::: dLux.propagators.ShiftedMFT
+
+### `FarFieldFresnel(npixels, pixel_scale, focal_length, focal_shift, shift, pixel=True)`
+
+Performs a Fresnel propagation on the wavefront, propagating from Pupil to Focal planes. The focal_shift parameter represents the distance from the focal plane at which the PSF is modelled. The shift parameter is used to shift the center of the output plane by 'shift', which is treated in units of pixels by default, otherwise it is treated in the units of the pixel_scale.
+
+??? info "Far Field Fresnel API"
+    ::: dLux.propagators.FarFieldFresnel
