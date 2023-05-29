@@ -1,57 +1,75 @@
-# Detectors
+# Detector: detector.py
 
-The `detectors.py` script contains the general `DetectorLayer` classes. The main class is `DetectorLayer` which is the base class for all other detector layers. Unless you are creating a new optical layer, you will not need to use this class directly. If you do, please refer to the "Creating a Layer" tutorial.
+This module contains the classes that define the behaviour of Detectors in dLux.
 
----
+There is one public class: `LayeredDetector`.
 
-## Apply Pixel Response
+This essentially operates in the same way as `LayeredOptics`, taking in a list of `DetectorLayers` and applying them sequentially. DetectorLayers operate on `Image` classes. It has one main method, `.model(image)` that applies the detector layers to the input image.
 
-This layer takes in an array of per-pixel response values and multiplies the psf by these values. Input arrays must be the same size as the psf.
-
-??? info "Apply Pixel Response API"
-    :::dLux.detectors.ApplyPixelResponse
+??? info "Detector API"
+    ::: dLux.detectors.LayeredDetector
 
 ---
 
-## Apply Jitter
+# Examples
 
-This layer takes in an jitter value in pixel units and applies a convolves the psf with a 2d gaussian of that size.
+Lets have a look at how we can construct a `LayeredDetector` class and apply it to some psf.
 
-??? info "Apply Jitter API"
-    :::dLux.detectors.ApplyJitter
+First we construct some optics and a source:
 
----
+```python
+import jax.numpy as np
+import dLux as dl
 
-## Apply Saturation
+# Define the optical parameters
+wf_npixels = 256
+diameter = 1 # meters
+psf_npixels = 128
+psf_pixel_scale = 0.1 # arcseconds
+psf_oversample = 4
 
-This layer takes in an saturation value and applies a simply threshold to the psf, it does not model any charge bleeding effects.
+# Use ApertureFactory class to make a simple circular aperture
+aperture = dl.ApertureFactory(wf_npixels)
 
-??? info "Apply Saturation API"
-    :::dLux.detectors.ApplySaturation
+# Construct the optics class
+optics = dl.AngularOptics(wf_npixels, diameter, aperture, 
+    psf_npixels, psf_pixel_scale, psf_oversample)
 
----
+# Construct Source
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+source = dl.PointSource(wavelengths)
+raw_psf = source.model(optics)
+```
 
-## Add Constant
+Now we construct our detector:
 
-This layer takes in an constant value and adds it to the psf, representing the mean of the background noise.
+```python
+# Construct Detector
+detector = dl.LayeredDetector([
+    dl.ApplyJitter(20),
+    dl.IntegerDownsample(4),
+    dl.AddConstant(1),
+])
 
-??? info "Add Constant API"
-    :::dLux.detectors.AddConstant
+# Combine into instrument and model
+instrument = dl.Instrument(optics, source, detector)
+psf = instrument.model()
+```
 
----
+??? abstract "Plotting Code"
+    ```python
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(10, 4))
+    plt.subplot(1, 2, 1)
+    plt.title("Raw PSF")
+    plt.imshow(raw_psf**0.5)
+    plt.colorbar()
 
-## Integer Downsample
+    plt.subplot(1, 2, 2)
+    plt.title("Detector Transformed PSF")
+    plt.imshow(psf**0.5)
+    plt.colorbar()
+    plt.savefig('assets/detectors.png')
+    ```
 
-This layer takes in an integer downsampling factor and downsamples the psf by that factor.
-
-??? info "Integer Downsample API"
-    :::dLux.detectors.IntegerDownsample
-
----
-
-## Rotate
-
-This layer takes in an angle in radians and rotates the psf by that angle using interpolation.
-
-??? info "Rotate API"
-    :::dLux.detectors.Rotate
+![detectors](../assets/detectors.png)

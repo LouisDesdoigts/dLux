@@ -1,24 +1,20 @@
 import dLux 
-import jax
 import jax.numpy as np
-import typing
-from dLux.exceptions import DimensionError
 import pytest
+from jax import config, Array
+config.update("jax_debug_nans", True)
 
-jax.config.update("jax_debug_nans", True)
-
-Dither = dLux.observations.Dither
-Array = typing.TypeVar("Array")
 
 
 class TestDither(object):
-    """
-    Contains the unit tests for the `UniformSpider` class.
-    """
+    """Tests the Dither class."""
 
-    def test_constructor(self, create_dither: callable) -> None:
-
-        with pytest.raises(DimensionError):
+    def test_constructor(self, create_dither):
+        """Tests the constructor."""
+        create_dither()
+        with pytest.raises(ValueError):
             dither = create_dither(np.array([1., 1., 1.]))
-        
-        dither = create_dither()
+    
+    def test_model(self, create_dither, create_instrument):
+        """Tests the model method."""
+        create_dither().model(create_instrument())

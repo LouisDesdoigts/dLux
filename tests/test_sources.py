@@ -1,390 +1,134 @@
-from __future__ import annotations
 import jax.numpy as np
 import pytest
 import dLux
-from jax import config
+from jax import config, Array
 config.update("jax_debug_nans", True)
 
 
-Array = np.ndarray
+def _test_source_constructor(constructor, spectrum_constructor):
+    """Tests the consturctor for source classes"""
+    constructor()
+    constructor(spectrum=spectrum_constructor())
+    with pytest.raises(ValueError):
+        constructor(position=[1, 2, 3])
+    with pytest.raises(ValueError):
+        constructor(flux=[1])
+    with pytest.raises(ValueError):
+        constructor(spectrum="spectrum")
 
+def _test_resolved_source_constructor(constructor):
+    """tests the constructor for resolved source classes"""
+    with pytest.raises(ValueError):
+        constructor(distribution=[1])
 
-class TestSource():
-    """
-    Tests the Source class.
-    """
+def _test_normalise(constructor):
+    """Tests the normalise method for source classes"""
+    source = constructor().normalise()
 
+def _test_model(constructor, optics_constructor):
+    """Tests the model method for source classes"""
+    constructor().model(optics_constructor())
 
-    def test_constructor(self, create_source : callable) -> None:
-        """
-        Test the constructor class.
-        """
-        # Position
-        # Test string inputs
-        with pytest.raises(ValueError):
-            create_source(position="")
+def _test_rel_pos_constructor(constructor):
+    """Tests the constructor for relative position classes"""
+    with pytest.raises(ValueError):
+        constructor(separation=[1])
+    with pytest.raises(ValueError):
+        constructor(position_angle=[1])
 
-        # Test zero dimension input
-        with pytest.raises(AssertionError):
-            create_source(position=5.)
-
-        # Test zero length input
-        with pytest.raises(AssertionError):
-            create_source(position=[])
-
-        # Flux
-        # Test string inputs
-        with pytest.raises(ValueError):
-            create_source(flux="")
-
-        # Test 1d dimension input
-        with pytest.raises(AssertionError):
-            create_source(flux=[1.])
-
-        # Test zero length input
-        with pytest.raises(AssertionError):
-            create_source(flux=[])
-
-        # Spectrum
-        # Test non-spectrum input
-        with pytest.raises(AssertionError):
-            create_source(spectrum=[])
-
-        # Name
-        # Test non-string input
-        with pytest.raises(AssertionError):
-            create_source(name=[])
-
-
-    # Getters
-    def test_get_position(self, create_source : callable) -> None:
-        """
-        Tests the get_position method.
-        """
-        source = create_source()
-        assert (source.get_position() == source.position).all()
-
-
-    def test_get_flux(self, create_source : callable) -> None:
-        """
-        Tests the get_flux method.
-        """
-        source = create_source()
-        assert (source.get_flux() == source.flux).all()
-
-
-    def test_get_wavelengths(self, create_source : callable) -> None:
-        """
-        Tests the get_wavelengths method.
-        """
-        source = create_source()
-        assert (source.get_wavelengths() == source.spectrum.wavelengths).all()
-
-
-    def test_get_weights(self, create_source : callable) -> None:
-        """
-        Tests the get_weights method.
-        """
-        source = create_source()
-        assert (source.get_weights() == source.spectrum.weights).all()
-
-class TestResolvedSource():
-    """
-    Tests the ResolvedSourve class.
-    """
-    pass
-
-
-class TestRelativeFluxSource():
-    """
-    Tests the RelativeFluxSource class.
-    """
-
-
-    def test_constructor(self, create_relative_flux_source : callable) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test string inputs
-        with pytest.raises(ValueError):
-            create_relative_flux_source(contrast="")
-
-        # Test one dimension input
-        with pytest.raises(AssertionError):
-            create_relative_flux_source(contrast=[5.])
-
-        # Test zero length input
-        with pytest.raises(AssertionError):
-            create_relative_flux_source(contrast=[])
-
-
-    def test_get_flux(self, create_relative_flux_source : callable) -> None:
-        """
-        Tests the get_flux method.
-        """
-        source = create_relative_flux_source()
-        flux_out = source.get_flux()
-        assert flux_out.shape == (2,)
-        assert np.allclose(flux_out[0]/flux_out[1], source.contrast)
-
-
-class TestRelativePositionSource():
-    """
-    Tests the RelativePositionSource class.
-    """
-
-
-    def test_constructor(self, create_relative_position_source : callable) -> None:
-        """
-        Tests the constructor.
-        """
-        # Separation
-        # Test string inputs
-        with pytest.raises(ValueError):
-            create_relative_position_source(separation="")
-
-        # Test one dimension input
-        with pytest.raises(AssertionError):
-            create_relative_position_source(separation=[5.])
-
-        # Test zero length input
-        with pytest.raises(AssertionError):
-            create_relative_position_source(separation=[])
-
-        # position_angle
-        # Test string inputs
-        with pytest.raises(ValueError):
-            create_relative_position_source(position_angle="")
-
-        # Test one dimension input
-        with pytest.raises(AssertionError):
-            create_relative_position_source(position_angle=[5.])
-
-        # Test zero length input
-        with pytest.raises(AssertionError):
-            create_relative_position_source(position_angle=[])
-
-
-    def test_get_position(self, create_relative_position_source : callable) -> None:
-        """
-        Tests the get_position method.
-        """
-        source = create_relative_position_source()
-        position_out = source.get_position()
-        sep_vec = position_out[0] - position_out[1]
-        separation = np.hypot(sep_vec[0], sep_vec[1])
-        position_angle = np.arctan2(sep_vec[0], sep_vec[1])
-        assert position_out.shape == (2,2)
-        assert np.allclose(source.separation, separation).all()
-        assert np.allclose(source.position_angle, position_angle).all()
+def _test_rel_flux_constructor(constructor):
+    """Tests the constructor for relative flux classes"""
+    with pytest.raises(ValueError):
+        constructor(contrast=[1])
 
 
 class TestPointSource():
-    """
-    Tests the PointSource class.
-    """
+    """Tests the Source class."""
+
+    def test_constructor(self, create_point_source, create_spectrum):
+        """Test the constructor class."""
+        create_point_source()
+        _test_source_constructor(create_point_source, create_spectrum)
+        
+    def test_normalise(self, create_point_source):
+        """Test the normalise method."""
+        _test_normalise(create_point_source)
+    
+    def test_model(self, create_point_source, create_angular_optics):
+        """Test the model method."""
+        _test_model(create_point_source, create_angular_optics)
 
 
-    def test_model(self, create_point_source : callable) -> None:
-        """
-        Tests the model method.
-        """
-        # TODO: this has no asserts?
-        source = create_point_source()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
-        # filter_in = dLux.Filter()
-        source.model(optics)
-        source.model(optics, detector)
-        # source.model(optics, detector, filter_in)
-        # source.model(optics, filter_in=filter_in)
+class TestPointSources():
+    """Tests the Sources class."""
 
-
-class TestMultiPointSource():
-    """
-    Tests the MultiPointSource class.
-    """
-
-
-    def test_constructor(self, create_multi_point_source : callable) -> None:
-        """
-        Test the constructor class.
-        """
-        # Position
-        # Test string inputs
+    def test_constructor(self, create_point_sources, create_spectrum):
+        """Test the constructor class."""
+        create_point_sources()
+        _test_source_constructor(create_point_sources, create_spectrum)
+        create_point_sources(flux=None)
         with pytest.raises(ValueError):
-            create_multi_point_source(position="")
-
-        # Test zero dimension input
-        with pytest.raises(AssertionError):
-            create_multi_point_source(position=5.)
-
-        # Test zero length input
-        with pytest.raises(AssertionError):
-            create_multi_point_source(position=[])
-
-        # Test 1 dim input
-        with pytest.raises(AssertionError):
-            create_multi_point_source(position=np.ones(2))
-
-        # Flux
-        # Test string inputs
-        with pytest.raises(ValueError):
-            create_multi_point_source(flux="")
-
-        # Test zero length input
-        with pytest.raises(AssertionError):
-            create_multi_point_source(flux=[])
-
-        # Test 2 dim input
-        with pytest.raises(AssertionError):
-            create_multi_point_source(flux=np.ones((2, 2)))
-
-        # Spectrum
-        # Test non-spectrum input
-        with pytest.raises(AssertionError):
-            create_multi_point_source(spectrum=[])
-
-        # Name
-        # Test non-string input
-        with pytest.raises(AssertionError):
-            create_multi_point_source(name=[])
+            create_point_sources(flux=np.ones((2, 2)))
+        
+    def test_normalise(self, create_point_sources):
+        """Test the normalise method."""
+        _test_normalise(create_point_sources)
+    
+    def test_model(self, create_point_sources, create_angular_optics):
+        """Test the model method."""
+        _test_model(create_point_sources, create_angular_optics)
 
 
-    def test_model(self, create_multi_point_source : callable) -> None:
-        """
-        Tests the model method.
-        """
-        source = create_multi_point_source()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
-        # filter_in = dLux.Filter()
-        source.model(optics)
-        source.model(optics, detector)
-        # source.model(optics, detector, filter_in)
-        # source.model(optics, filter_in=filter_in)
+class TestResolvedSource():
+    """Tests the ResolvedSource class."""
 
-
-class TestArrayDistribution():
-    """
-    Tests the ArrayDistribution class.
-    """
-
-
-    def test_constructor(self, create_array_distribution : callable) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test string inputs
-        with pytest.raises(ValueError):
-            create_array_distribution(distribution="")
-
-        # Test one dimension input
-        with pytest.raises(AssertionError):
-            create_array_distribution(distribution=[5.])
-
-        # Test zero length input
-        with pytest.raises(AssertionError):
-            create_array_distribution(distribution=[])
-
-
-    def test_get_distribution(self, create_array_distribution : callable) -> None:
-        """
-        Tests the get_distribution method.
-        """
-        source = create_array_distribution()
-        assert (source.get_distribution() == source.distribution).all()
-
-
-    def test_normalise(self, create_array_distribution : callable) -> None:
-        """
-        Tests the normalise method.
-        """
-        source = create_array_distribution()
-        new_distribution = np.ones((4, 4))
-        new_source = source.set('distribution', new_distribution).normalise()
-        assert np.allclose(new_source.distribution.sum(), 1.)
-
-
-    def test_model(self, create_array_distribution : callable) -> None:
-        """
-        Tests the model method.
-        """
-        source = create_array_distribution()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
-        # filter_in = dLux.Filter()
-        source.model(optics)
-        source.model(optics, detector)
-        # source.model(optics, detector, filter_in)
-        # source.model(optics, filter_in=filter_in)
-
+    def test_constructor(self, create_resolved_source, create_spectrum):
+        """Test the constructor class."""
+        create_resolved_source()
+        _test_source_constructor(create_resolved_source, create_spectrum)
+        _test_resolved_source_constructor(create_resolved_source)
+        
+    def test_normalise(self, create_resolved_source):
+        """Test the normalise method."""
+        _test_normalise(create_resolved_source)
+    
+    def test_model(self, create_resolved_source, create_angular_optics):
+        """Test the model method."""
+        _test_model(create_resolved_source, create_angular_optics)
 
 class TestBinarySource():
-    """
-    Tests the BinarySource class.
-    """
+    """Tests the BinarySource class."""
+
+    def test_constructor(self, create_binary_source, create_spectrum):
+        """Test the constructor class."""
+        create_binary_source()
+        _test_source_constructor(create_binary_source, create_spectrum)
+        _test_rel_pos_constructor(create_binary_source)
+        _test_rel_flux_constructor(create_binary_source)
+        
+    def test_normalise(self, create_binary_source):
+        """Test the normalise method."""
+        _test_normalise(create_binary_source)
+    
+    def test_model(self, create_binary_source, create_angular_optics):
+        """Test the model method."""
+        _test_model(create_binary_source, create_angular_optics)
 
 
-    def test_model(self, create_binary_source : callable) -> None:
-        """
-        Tests the model method.
-        """
-        # TODO add tests
-        source = create_binary_source()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
-        # filter_in = dLux.Filter()
-        source.model(optics)
-        source.model(optics, detector)
-        # source.model(optics, detector, filter_in)
-        # source.model(optics, filter_in=filter_in)
+class TestPointResolvedSource():
+    """Tests the PointResolvedSource class."""
 
-class TestPointExtendedSource():
-    """
-    Tests the PointExtendedSource class.
-    """
-
-    def test_model(self, create_point_extended_source : callable) -> None:
-        """
-        Tests the model method.
-        """
-        source = create_point_extended_source()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
-        # filter_in = dLux.Filter()
-        source.model(optics)
-        source.model(optics, detector)
-        # source.model(optics, detector, filter_in)
-        # source.model(optics, filter_in=filter_in)
-
-
-
-class TestPointAndExtendedSource():
-    """
-    Tests the PointAndExtendedSource class.
-    """
-
-
-    def test_constructor(self, create_point_and_extended_source : callable) -> None:
-        """
-        Tests the constructor.
-        """
-        # Test non Combined Spectrum input
-        with pytest.raises(AssertionError):
-            spec = dLux.spectrums.ArraySpectrum(np.linspace(500e-9, 600e-9, 10))
-            create_point_and_extended_source(spectrum=spec)
-
-
-    def test_model(self, create_point_and_extended_source : callable) -> None:
-        """
-        Tests the model method.
-        """
-        source = create_point_and_extended_source()
-        optics = dLux.core.Optics([dLux.CreateWavefront(16, 1)])
-        detector = dLux.core.Detector([dLux.AddConstant(0.)])
-        # filter_in = dLux.Filter()
-        source.model(optics)
-        source.model(optics, detector)
-        # source.model(optics, detector, filter_in)
-        # source.model(optics, filter_in=filter_in)
+    def test_constructor(self, create_point_resolved_source, create_spectrum):
+        """Test the constructor class."""
+        create_point_resolved_source()
+        _test_source_constructor(create_point_resolved_source, create_spectrum)
+        _test_rel_flux_constructor(create_point_resolved_source)
+        _test_resolved_source_constructor(create_point_resolved_source)
+    
+    def test_normalise(self, create_point_resolved_source):
+        """Test the normalise method."""
+        _test_normalise(create_point_resolved_source)
+    
+    def test_model(self, create_point_resolved_source, create_angular_optics):
+        """Test the model method."""
+        _test_model(create_point_resolved_source, create_angular_optics)

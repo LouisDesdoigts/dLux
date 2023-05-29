@@ -1,16 +1,12 @@
 import jax.numpy as np
-from jax import vmap
+from jax import Array
 from jax.scipy.ndimage import map_coordinates
-from functools import partial
-import dLux.utils.coordinates as c
+import dLux.utils as dlu
 
 
-
-__all__ = ["scale_array", "generate_coordinates", "interpolate_field",
-           "interpolate", "rotate_field", "rotate", "fourier_rotate"]
-
-
-Array =  np.ndarray
+# TODO: Resolve scale and scale_array
+__all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
+    "rotate", "fourier_rotate"]
 
 
 def scale_array(array    : Array,
@@ -33,10 +29,45 @@ def scale_array(array    : Array,
     array : Array
         The array scaled to size_out
     """
-    assert order in (0, 1), ("order must be 0 or 1.")
     xs = np.linspace(0, array.shape[0], size_out)
     xs, ys = np.meshgrid(xs, xs)
     return map_coordinates(array, np.array([ys, xs]), order=order)
+
+
+def downsample(array : Array, n : int, method='mean') -> Array:
+    """
+    Downsamples the input array by n.
+
+    Parameters
+    ----------
+    array : Array
+        The input array to downsample.
+    n : int
+        The factor by which to downsample the array.
+
+    Returns
+    -------
+    array : Array
+        The downsampled array.
+    """
+    if method == 'sum':
+        method = np.sum
+    elif method == 'mean':
+        method = np.mean
+    else:
+        raise ValueError('Invalid method. Choose "mean" or "sum".')
+
+    size_in = array.shape[0]
+    size_out = size_in//n
+
+    # Downsample first dimension
+    array = method(array.reshape((size_in*size_out, n)), 1)
+    array = array.reshape(size_in, size_out).T
+
+    # Downsample second dimension
+    array = method(array.reshape((size_out*size_out, n)), 1)
+    array = array.reshape(size_out, size_out).T
+    return array
 
 
 def generate_coordinates(npixels_in     : int,
@@ -77,34 +108,28 @@ def generate_coordinates(npixels_in     : int,
     return np.array([y_pixels, x_pixels])
 
 
-def interpolate_field(field           : Array,
-                      npixels_out     : int,
-                      sampling_ratio  : Array,
-                      real_imaginary  : bool = False,
-                      x_shift         : Array = np.array(0.),
-                      y_shift         : Array = np.array(0.)) -> Array:
+def scale(array   : Array,
+          npixels : int,
+          ratio   : float,
+          order   : int = 1) -> Array:
     """
     Paraxially interpolates a wavefront field (either in ampltude and phase, or
     real and imaginiary) based on the sampling ratio, and npixels_out.
 
+    # TODO: Check if a half-pixel offset is produced
+
     Parameters
     ----------
-    field : Array
+    array : Array
         The input field to interpolate, either in amplitude and phase, or real
         and imaginary.
-    npixels_out : int
+    npixels : int
         The number of pixel in the output array.
-    sampling_ratio : Array
-        The ratio of pixel sizes in the input and output array,
-        ie pixel_scale_out/pixel_scale_in.
-    real_imaginary : bool = False
-        Is the input field given in amplitude and phase, or real and imagninary.
-    x_shift : Array, pixles = np.array(0.)
-        How much to shift the x_coordinates in the output array, in the pixel
-        units of the output array.
-    y_shift : Array, pixles = np.array(0.)
-        How much to shift the y_coordinates in the output array, in the pixel
-        units of the output array.
+    ratio : float
+        The relative input to output scales, TODO: does 2 make it bigger or 
+        smaller? ie input scale/output scale. <- get this right.
+    order : int = 1
+        The interpolation order to use.
 
     Returns
     -------
@@ -112,120 +137,10 @@ def interpolate_field(field           : Array,
         The interpolated output amplitude and phase arrays.
     """
     # Get coords arrays
-    npixels_in = field.shape[-1]
-    coordinates = generate_coordinates(npixels_in, npixels_out, sampling_ratio,
-                                       x_shift, y_shift)
-
-    # Interpolate
-    interpolator = vmap(map_coordinates, in_axes=(0, None, None))
-    new_field = interpolator(field, coordinates, 1)
-
-    # Conserve energy
-    if real_imaginary:
-        amplitude = np.hypot(new_field[0], new_field[1])
-        phase = np.arctan2(new_field[1], new_field[0])
-    else:
-        amplitude, phase = new_field
-
-    return np.array([amplitude, phase])
-
-
-def interpolate(array          : Array,
-                npixels_out    : int,
-                sampling_ratio : Array,
-                x_shift        : Array = np.array(0.),
-                y_shift        : Array = np.array(0.)) -> Array:
-    """
-    Paraxially interpolates an array based on the sampling ratio, and
-    npixels_out.
-
-    Parameters
-    ----------
-    array : Array
-        The input array to interpolate.
-    npixels_out : int
-        The number of pixel in the output array.
-    sampling_ratio : Array
-        The ratio of pixel sizes in the input and output array,
-        ie pixel_scale_out/pixel_scale_in.
-    x_shift : Array, pixles = np.array(0.)
-        How much to shift the x_coordinates in the output array, in the pixel
-        units of the output array.
-    y_shift : Array, pixles = np.array(0.)
-        How much to shift the y_coordinates in the output array, in the pixel
-        units of the output array.
-
-    Returns
-    -------
-    field : Array
-        The interpolated arrays.
-    """
-    # Get coords arrays
     npixels_in = array.shape[-1]
-    coordinates = generate_coordinates(npixels_in, npixels_out, sampling_ratio,
-                                       x_shift, y_shift)
-
-    # Interpolate
-    new_array = map_coordinates(array, order=1)
-
-    # Conserve energy and return
-    return new_array * sampling_ratio
-
-
-def rotate_field(field          : Array,
-                 angle          : Array,
-                 real_imaginary : bool = False,
-                 fourier        : bool = False,
-                 order          : int  = 1,
-                 padding        : int  = 2) -> Array:
-    """
-    Paraxially rotates a wavefront field (either in ampltude and phase, or
-    real and imaginiary) in the {}wise direction by angle. Two methods are
-    available, interpolation and fourier rotation. Interpolation is much faster
-    with large arrays, and fourier rotation is information preserving.
-
-    Parameters
-    ----------
-    field : Array
-        The input field to rotate, either in amplitude and phase, or real
-        and imaginary.
-    angle : Array, radians
-        The angle by which to rotate the wavefront in a {}wise direction.
-    real_imaginary : bool = False
-        Whether to rotate the real and imaginary representation of the
-        wavefront as opposed to the the amplitude and phase representation.
-    fourier : bool = False
-        Should the fourier rotation method be used (True), or regular
-        interpolation method be used (False).
-    order : int = 2
-        The interpolation order to use. Must be 0, 1, or 3.
-    padding : int = 2
-        The amount of fourier padding to use. Only applies if fourier is True.
-
-    Returns
-    -------
-    field : Array
-        The rotated output amplitude and phase arrays.
-    """
-    # Generate rotator function
-    if fourier:
-        padded_rotate = partial(fourier_rotate, padding=padding)
-        rotator = vmap(padded_rotate, in_axes=(0, None))
-    else:
-        order_rotate = partial(rotate, order=order)
-        rotator = vmap(order_rotate, in_axes=(0, None))
-
-    # Rotate
-    rotated_field = rotator(field, angle)
-
-    # Get amplitude phase
-    if real_imaginary:
-        amplitude = np.hypot(rotated_field[0], rotated_field[1])
-        phase = np.arctan2(rotated_field[1], rotated_field[0])
-    else:
-        amplitude, phase = rotated_field
-
-    return np.array([amplitude, phase])
+    # TODO: Update with utils.pixel_coordiantes
+    coordinates = generate_coordinates(npixels_in, npixels, ratio)
+    return map_coordinates(array, coordinates, order=order)
 
 
 def rotate(array : Array, angle : Array, order : int = 1) -> Array:
@@ -238,19 +153,25 @@ def rotate(array : Array, angle : Array, order : int = 1) -> Array:
         The array to rotate.
     angle : Array, radians
         The angle to rotate the array by.
+    order : int = 1
+        The interpolation order to use.
 
     Returns
     -------
     array : Array
         The rotated array.
     """
-    if order not in (0, 1, 3):
-        raise ValueError("Order must be 0, 1, or 3.")
+    def _rotate(coordinates: Array, rotation: Array) -> Array:
+        x, y = coordinates[0], coordinates[1]
+        new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
+        new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
+        return np.array([new_x, new_y])
+    
     # Get coordinates
     npixels = array.shape[0]
     centre = (npixels - 1) / 2
-    coordinates = c.get_pixel_positions((npixels, npixels), indexing='ij')
-    coordinates_rotated = c.rotate(coordinates, angle) + centre
+    coordinates = dlu.pixel_coordinates((npixels, npixels), indexing='ij')
+    coordinates_rotated = _rotate(coordinates, angle) + centre
 
     # Interpolate
     return map_coordinates(array, coordinates_rotated, order=order)
@@ -258,7 +179,7 @@ def rotate(array : Array, angle : Array, order : int = 1) -> Array:
 
 def fourier_rotate(array   : Array,
                    angle   : Array,
-                   padding : int = 2) -> Array:
+                   padding : int = 2) -> Array: # pragma: no cover
     """
     Rotates an array by the angle, using a fourier rotation.
 
