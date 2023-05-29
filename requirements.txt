@@ -2,12 +2,3 @@
 jax
 jaxlib
 zodiax==0.4.0
-
-# Extra
-optax
-matplotlib
-jupyter
-jupyterlab
-tqdm
-chainconsumer
-# nummpyro
