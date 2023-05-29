@@ -1,5 +1,5 @@
 name = "dLux"
-__version__ = "0.12.0"
+__version__ = "0.13.0"
 
 # Import as modules
 # Wavefronts and Optics
