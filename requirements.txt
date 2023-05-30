@@ -1,4 +1,4 @@
 # Core
 jax
 jaxlib
-zodiax==0.4.0
+zodiax>=0.4.1

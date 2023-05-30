@@ -18,14 +18,14 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 # DEPENDENCIES
-# 1. What are the required dependencies?
 with open('requirements.txt') as f:
     install_requires = f.read().splitlines()
-# 2. What dependencies required to run the unit tests? (i.e. `pytest --remote-data`)
 tests_require = ['pytest']
-docs_require = ['optax', 'matplotlib', 'jupyter', 'jupyterlab', 'tqdm', 
-    'chainconsumer', 'nummpyro']
-
+docs_require = ['matplotlib', 'jupyter', 'jupyterlab', 'tqdm', 
+    'chainconsumer', 'numpyro', 'dLuxToliman', "scikit-learn", "mkdocs", 
+    "mkdocs-jupyter", "mkdocs-same-dir", "mkdocs-autorefs",
+    "mkdocs-simple-plugin", "mkdocstrings-python",
+    "jupyter_contrib_nbextensions"]
 
 setuptools.setup(
     python_requires='>=3.7,<4.0',
@@ -43,8 +43,10 @@ setuptools.setup(
     },
 
     install_requires=install_requires,
-    tests_require=tests_require,
-    extras_require={'docs': docs_require},
+    extras_require={
+        'docs': docs_require, 
+        'tests' : tests_require
+        },
 
     classifiers=[
         "Programming Language :: Python :: 3",
