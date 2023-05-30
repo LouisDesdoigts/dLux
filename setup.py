@@ -21,10 +21,11 @@ def find_version(*file_paths):
 with open('requirements.txt') as f:
     install_requires = f.read().splitlines()
 tests_require = ['pytest']
-docs_require = ['optax', 'matplotlib', 'jupyter', 'jupyterlab', 'tqdm', 
-    'chainconsumer', 'numpyro', 'dLuxToliman', "mkdocs", "mkdocs-jupyter", 
-    "mkdocs-same-dir", "mkdocs-autorefs", "mkdocs-simple-plugin", 
-    "mkdocstrings-python", "jupyter_contrib_nbextensions"]
+docs_require = ['matplotlib', 'jupyter', 'jupyterlab', 'tqdm', 
+    'chainconsumer', 'numpyro', 'dLuxToliman', "scikit-learn", "mkdocs", 
+    "mkdocs-jupyter", "mkdocs-same-dir", "mkdocs-autorefs",
+    "mkdocs-simple-plugin", "mkdocstrings-python",
+    "jupyter_contrib_nbextensions"]
 
 setuptools.setup(
     python_requires='>=3.7,<4.0',

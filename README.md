@@ -38,9 +38,14 @@ For an overview of these capabilities and different optimisation methods in [Zod
 
 Doccumentataion: [https://louisdesdoigts.github.io/dLux/](https://louisdesdoigts.github.io/dLux/)
 
+Requires: Python 3.8+, Jax 0.4.3+, Zodiax 0.4+
+
 Installation: ```pip install dLux```
 
-Requires: Python 3.8+, Jax 0.4.3+, Zodiax 0.4+
+Docs installation: ```pip install "dLux[docs]"```
+
+Test installation: ```pip install "dLux[tests]"```
+
 
 ## Collaboration & Development
 
