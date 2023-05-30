@@ -36,7 +36,7 @@ The ∂Lux framwork is built in [Zodiax](https://github.com/LouisDesdoigts/zodia
 
 For an overview of these capabilities and different optimisation methods in [Zodiax](https://github.com/LouisDesdoigts/zodiax), please go through this [Zodiax Tutorial](https://louisdesdoigts.github.io/zodiax/docs/usage/).
 
-Doccumentataion: [https://louisdesdoigts.github.io/dLux/](https://louisdesdoigts.github.io/dLux/)
+Documentation: [https://louisdesdoigts.github.io/dLux/](https://louisdesdoigts.github.io/dLux/)
 
 Requires: Python 3.8+, Jax 0.4.3+, Zodiax 0.4+
 
