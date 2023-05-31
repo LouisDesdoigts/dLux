@@ -2,13 +2,13 @@
 
 ---
 
-∂Lux is built in Zodiax, so users should start with the [Using Zodiax Tutorial](https://louisdesdoigts.github.io/zodiax/docs/usage/), which covers the the basics of the framework and how to use the optimisation tools used in ∂Lux.
+∂Lux is built in Zodiax, so users should start with the [Using Zodiax Tutorial](https://louisdesdoigts.github.io/zodiax/docs/usage/), which covers the basics of the framework and how to use the optimisation tools used in ∂Lux.
 
-## A Simple Optical system
+## A Simple Optical System
 
-Two different types of optical classes: Layered, non-Layered
+There are two different types of optical classes: _Layered_, and _non-Layered_.
 
-Layered gives full control over the wavefront at each step, but non-layered objects can be simpler to work with. We will first cosntruct one non-Layered Optics class and then one Layered Optics class.
+Layered gives full control over the wavefront at each step, but non-layered objects can be simpler to work with. We will first construct a non-Layered Optics class and then a Layered Optics class.
 
 ```python
 import jax.numpy as np
@@ -29,7 +29,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 ```
 
-Lets have a look at our object:
+Let's have a look at our object:
 
 ```python
 print(optics)
@@ -45,11 +45,11 @@ print(optics)
 > )
 ```
 
-Now we can simply propagate wavelengths throught the optics like so:
+Now, we can simply propagate `wavelengths` through the optics like so:
 
 ```python
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)
 ```
 
@@ -72,7 +72,7 @@ psf = optics.propagate(wavelengths)
 
 ![Simple Optics](assets/simple_optics.png)
 
-Now lets take a look at how we can create an identical optical system using the layered approach. This approach is more verbose, but gives us more control over the wavefront at each step.
+Now, let's take a look at how we can create an identical optical system using the layered approach. This approach is more verbose, but gives us more control over the wavefront at each step.
 
 ```python
 import jax.numpy as np
@@ -95,7 +95,7 @@ layers = [
 optics = dl.LayeredOptics(wf_npixels, diameter, layers)
 ```
 
-Lets have a look at our optics object again to see how it has changed:
+Let's again look at our optics object to see how it has changed:
 
 ```python
 print(optics)
@@ -143,7 +143,7 @@ psf = optics.propagate(wavelengths)
 
 ## Basic Phase Retrieval
 
-Now that we know how to create a simple optical system, lets see how we can take advangate of the differentiable nature of ∂Lux to perform phase retrieval. We will use the same optical system as before, but this time we will add a phase screen to the aperture.
+Now that we know how to create a simple optical system, let's see how we can take advantage of the differentiable nature of ∂Lux to perform phase retrieval. We will use the same optical system as before, but this time we will add a phase screen to the aperture.
 
 ```python
 import jax.numpy as np
@@ -194,7 +194,7 @@ data = jr.poisson(jr.PRNGKey(1), optics.model(source))
 
 ![Aberrated Optics](assets/aberrated_optics.png)
 
-Now we just need to reset our aberration coefficients to zero and define our loss function:
+Now, we just need to reset our aberration coefficients to zero and define our loss function:
 
 ```python
 import jax.scipy as jsp
@@ -216,7 +216,7 @@ def loss_fn(model, source, data):
 loss, grads = loss_fn(model, source, data)
 ```
 
-Now we optimise in a simple loop:
+Now, we optimise in a simple loop:
 
 ```python
 optim, opt_state = zdx.get_optimiser(model, parameter, optax.adam(2e-9))
@@ -289,7 +289,7 @@ for i in range(100):
 
 ## Complex Optical Systems
 
-So far we have looked at the dLux basics, but there is much more functionality available! Here we will show how to model the effects of a detector with a dithered observation pattern, using the same optics and source classes we defined above.
+So far we have looked at the ∂Lux basics, but there is much more functionality available! Here we will show how to model the effects of a detector with a dithered observation pattern, using the same optics and source classes we defined above.
 
 ```python
 # Construct Detector Object
@@ -319,4 +319,4 @@ psfs = instrument.observe()
 
 ![Full Instrument](assets/full_instrument.png)
 
-This has been a quick overview of how to use dLux! The next step from here would be to take a look at the rest of the tutorials, which show how to do more complex modelling and parameter recovery!
+This has been a quick overview of how to use ∂Lux! The next step from here would be to take a look at the rest of the tutorials, which show how to do more complex modelling and parameter recovery!
