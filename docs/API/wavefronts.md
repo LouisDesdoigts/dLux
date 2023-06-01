@@ -31,8 +31,8 @@ import jax.numpy as np
 import dLux as dl
 
 npixels = 16
-diameter = 1 # meters
-wavelength = 1e-6 # meters
+diameter = 1 # metres
+wavelength = 1e-6 # metres
 
 wf = dl.Wavefront(npixels, diameter, wavelength)
 
