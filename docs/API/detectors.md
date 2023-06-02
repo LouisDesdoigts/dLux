@@ -1,10 +1,10 @@
-# Detector: detector.py
+# Detector: `detector.py`
 
-This module contains the classes that define the behaviour of Detectors in dLux.
+This module contains the classes that define the behaviour of detectors in ∂Lux.
 
 There is one public class: `LayeredDetector`.
 
-This essentially operates in the same way as `LayeredOptics`, taking in a list of `DetectorLayers` and applying them sequentially. DetectorLayers operate on `Image` classes. It has one main method, `.model(image)` that applies the detector layers to the input image.
+This essentially operates in the same way as `LayeredOptics`; taking in a list of `DetectorLayer` objects and applying them sequentially (although they operate on `Image` classes). `LayeredOptics` has one main method: `.model(image)`, which applies the detector layers to the input image.
 
 ??? info "Detector API"
     ::: dLux.detectors.LayeredDetector
@@ -13,7 +13,7 @@ This essentially operates in the same way as `LayeredOptics`, taking in a list o
 
 # Examples
 
-Lets have a look at how we can construct a `LayeredDetector` class and apply it to some psf.
+Let's look at how we can construct a `LayeredDetector` class and apply it to a PSF.
 
 First we construct some optics and a source:
 
