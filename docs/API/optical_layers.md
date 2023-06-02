@@ -1,10 +1,10 @@
-# Optical Layers: optical_layers.py
+# Optical Layers: `optical_layers.py`
 
-This module contains the classes that define the behaviour of OpticalLayers in dLux.
+This module contains the classes that define the behaviour of OpticalLayers in ∂Lux.
 
-These classes provide a simple set of classes used to perform basic transformations of wavefronts.
+These classes provide a simple set of classes used to perform basic transformations on wavefronts.
 
-There are 7 public classes:
+There are seven public classes:
 
 - `Optic`
 - `PhaseOptic`
@@ -14,7 +14,7 @@ There are 7 public classes:
 - `Normalise`
 - `Rotate`
 
-The 'Optic' (`Optic`, `PhaseOptic`, `BasisOptic`, `PhaseBasisOptic`) classes are quite general and are used to perform basic modifications to both the wavefront amplitude and phase. They all have a `transmission` and `normalise` attribute that modify the amplitude of the wavefront, and optionally normalise the wavefront after applying the Optic.
+The _optic_ classes (`Optic`, `PhaseOptic`, `BasisOptic`, `PhaseBasisOptic`) are quite general and are used to perform basic modifications to the wavefront amplitude and phase. They all have `transmission` and `normalise` attributes that modify the amplitude of the wavefront. It is optional to normalise the wavefront after it passes through the optic.
 
 The `Optic` class holds a static OPD array that is added to the wavefront. The `PhaseOptic` class holds a static phase array that is added to the wavefront.
 
