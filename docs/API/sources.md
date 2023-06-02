@@ -1,6 +1,6 @@
-# Source: source.py
+# Source: `source.py`
 
-This module contains the classes that define the behaviour of sources in dLux.
+This module contains the classes that define the behaviour of sources in ∂Lux.
 
 There are five public classes:
 
@@ -12,7 +12,7 @@ There are five public classes:
 
 Source classes store `Spectrum` objects that define the spectral properties of the source. They also store the position of the source on the sky, and the flux of the source.
 
-All public clases have two main methods:
+All public classes have two main methods:
 
 1. `normalise()` Returns a new source object with the relevant attributes normalised.
 2. `model(optics)` Models the source through the optics.
@@ -36,7 +36,7 @@ All public clases have two main methods:
 
 # Examples
 
-Lets have a look at how to construct all of these different classes. First we construct some optics to model the sources through.
+Let's look at how to construct all these different classes. First, we construct some optics to model the sources through.
 
 ```python
 import jax.numpy as np
@@ -57,14 +57,14 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 ```
 
-Now we define the different source classes.
+Now, we define the different source classes.
 
 ```python
 # Define wavelengths
 wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
 
 # Construct PointSource
-sourcess = [dl.PointSource(wavelengths)]
+sources = [dl.PointSource(wavelengths)]
 
 # Construct PointSources
 positions = 3e-6 * np.array([[1, 1], [1, -1], [-1, 1], [-1, -1]])
