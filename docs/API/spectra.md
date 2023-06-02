@@ -1,13 +1,13 @@
-# Spectra: spectra.py
+# Spectra: `spectra.py`
 
-This module contains the classes that define the behaviour of spectra in dLux.
+This module contains the classes that define the behaviour of spectra in ∂Lux.
 
 There are two public classes:
 
 - `Spectrum`
 - `PolySpectrum`
 
-The Spectrum class is a generic class that allows for the definition of spectra by a simple wavelength and weights. The PolySpectrum class provides a generic polynomial spectrum.
+The `Spectrum` class is a generic class that allows for the definition of spectra by a simple wavelength and weights. The `PolySpectrum` class provides a generic polynomial spectrum.
 
 ??? info "Spectrum"
     ::: dLux.spectra.Spectrum
@@ -19,9 +19,12 @@ The Spectrum class is a generic class that allows for the definition of spectra 
 
 # Examples
 
-Here we show how to construct a simple Spectrum object and plot it.
+Here is how to construct and plot a simple `Spectrum` object.
 
 ```python
+import dLux as dl
+import jax.numpy as np
+
 # Array based spectrum
 wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
 weights = np.linspace(.5, 1, 5)
