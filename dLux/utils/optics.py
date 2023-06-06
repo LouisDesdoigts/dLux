@@ -1,12 +1,11 @@
 import jax.numpy as np
 from jax import Array
 
-
-__all__ = ["opd_to_phase", "phase_to_opd", "get_fringe_size", 
+__all__ = ["opd_to_phase", "phase_to_opd", "get_fringe_size",
            "get_pixels_per_fringe", "get_pixel_scale", "get_airy_pixel_scale"]
 
 
-def opd_to_phase(opd : Array, wavelength : Array) -> Array:
+def opd_to_phase(opd: Array, wavelength: Array) -> Array:
     """
     Converts the input Optical Path Difference (opd) in units of metres to
     phases in units of radians for the given wavelength.
@@ -23,10 +22,10 @@ def opd_to_phase(opd : Array, wavelength : Array) -> Array:
     phase : Array, radians
         The equivalent phase value for the given opd and wavelength.
     """
-    return 2*np.pi*opd/wavelength
+    return 2 * np.pi * opd / wavelength
 
 
-def phase_to_opd(phase : Array, wavelength : Array) -> Array:
+def phase_to_opd(phase: Array, wavelength: Array) -> Array:
     """
     Converts the input phase in units of radians to the equivalent Optical Path
     Difference (opd) in metres for the given wavelength.
@@ -43,10 +42,10 @@ def phase_to_opd(phase : Array, wavelength : Array) -> Array:
     opd : Array, metres
         The equivalent opd value for the given phase and wavelength.
     """
-    return phase*wavelength/(2*np.pi)
+    return phase * wavelength / (2 * np.pi)
 
 
-def get_fringe_size(wavelength : Array, aperture : Array) -> Array:
+def get_fringe_size(wavelength: Array, aperture: Array) -> Array:
     """
     Calculates the angular size of the diffraction fringes.
 
@@ -62,13 +61,13 @@ def get_fringe_size(wavelength : Array, aperture : Array) -> Array:
     fringe_size : Array, radians
         The angular fringe size in units of radians.
     """
-    return wavelength/aperture
+    return wavelength / aperture
 
 
-def get_pixels_per_fringe(wavelength   : Array,
-                          aperture     : Array,
-                          pixel_scale  : Array,
-                          focal_length : Array = None) -> Array:
+def get_pixels_per_fringe(wavelength: Array,
+                          aperture: Array,
+                          pixel_scale: Array,
+                          focal_length: Array = None) -> Array:
     """
     Calculates the number of pixels per diffraction fringe, ie the fringe
     sampling rate.
@@ -101,14 +100,14 @@ def get_pixels_per_fringe(wavelength   : Array,
         fringe_size *= focal_length
 
     # Return sampling
-    return fringe_size/pixel_scale
+    return fringe_size / pixel_scale
     # return pixel_scale/fringe_size
 
 
-def get_pixel_scale(sampling_rate : Array,
-                    wavelength    : Array,
-                    aperture      : Array,
-                    focal_length  : Array = None) -> Array:
+def get_pixel_scale(sampling_rate: Array,
+                    wavelength: Array,
+                    aperture: Array,
+                    focal_length: Array = None) -> Array:
     """
     Calculates the pixel_size needed in order to sample the diffraction fringes
     at the given sampling rate.
@@ -145,10 +144,10 @@ def get_pixel_scale(sampling_rate : Array,
     return fringe_size / sampling_rate
 
 
-def get_airy_pixel_scale(sampling_rate : Array,
-                         wavelength    : Array,
-                         aperture      : Array,
-                         focal_length  : Array = None) -> Array:
+def get_airy_pixel_scale(sampling_rate: Array,
+                         wavelength: Array,
+                         aperture: Array,
+                         focal_length: Array = None) -> Array:
     """
     Calculates the pixel_size needed to sample the diffraction fringes
     at the given sampling rate. Applies the 1.22 multiplier for Airy disk
@@ -175,5 +174,5 @@ def get_airy_pixel_scale(sampling_rate : Array,
         sampling rate, in units of radians per pixel if no focal length is
         provided, else in units of metres per pixel.
     """
-    return get_pixel_scale(sampling_rate, 1.22*wavelength, aperture,
+    return get_pixel_scale(sampling_rate, 1.22 * wavelength, aperture,
                            focal_length)

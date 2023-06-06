@@ -1,6 +1,6 @@
 # Coordinates Utility Functions
 
-This module contains a series of functions that are used to calculate coordinates arrays, apply transformations to coordinate those arrays, and convert between cartesian and polar coordiantes.
+This module contains a series of functions that are used to calculate coordinates arrays, apply transformations to coordinate those arrays, and convert between cartesian and polar coordinates.
 
 ## Polar to Cartesian
 

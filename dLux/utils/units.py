@@ -1,16 +1,15 @@
 import jax.numpy as np
 from jax import Array
 
-
 __all__ = [
-    "rad_to_arcsec", "rad_to_deg", "rad_to_arcmin", 
-    "deg_to_rad", "deg_to_arcmin", "deg_to_arcsec", 
-    "arcmin_to_rad", "arcmin_to_deg", "arcmin_to_arcsec", 
+    "rad_to_arcsec", "rad_to_deg", "rad_to_arcmin",
+    "deg_to_rad", "deg_to_arcmin", "deg_to_arcsec",
+    "arcmin_to_rad", "arcmin_to_deg", "arcmin_to_arcsec",
     "arcsec_to_rad", "arcsec_to_deg", "arcsec_to_arcmin"]
 
 
 # Radians to:
-def rad_to_arcsec(values : Array) -> Array:
+def rad_to_arcsec(values: Array) -> Array:
     """
     Converts the inputs values from radians to arcseconds.
 
@@ -29,7 +28,7 @@ def rad_to_arcsec(values : Array) -> Array:
     return values * 3600 * 180 / np.pi
 
 
-def rad_to_deg(values : Array) -> Array:
+def rad_to_deg(values: Array) -> Array:
     """
     Converts the inputs values from radians to degrees.
 
@@ -48,7 +47,7 @@ def rad_to_deg(values : Array) -> Array:
     return values * 180 / np.pi
 
 
-def rad_to_arcmin(values : Array) -> Array:
+def rad_to_arcmin(values: Array) -> Array:
     """
     Converts the inputs values from radians to arcminutes.
 
@@ -68,7 +67,7 @@ def rad_to_arcmin(values : Array) -> Array:
 
 
 # Degrees to:
-def deg_to_rad(values : Array) -> Array:
+def deg_to_rad(values: Array) -> Array:
     """
     Converts the inputs values from degrees to radians.
 
@@ -87,7 +86,7 @@ def deg_to_rad(values : Array) -> Array:
     return values * np.pi / 180
 
 
-def deg_to_arcmin(values : Array) -> Array:
+def deg_to_arcmin(values: Array) -> Array:
     """
     Converts the inputs values from degrees to arcminutes.
 
@@ -106,7 +105,7 @@ def deg_to_arcmin(values : Array) -> Array:
     return values * 60
 
 
-def deg_to_arcsec(values : Array) -> Array:
+def deg_to_arcsec(values: Array) -> Array:
     """
     Converts the inputs values from degrees to arcseconds.
 
@@ -124,8 +123,9 @@ def deg_to_arcsec(values : Array) -> Array:
     """
     return values * 3600
 
+
 # Arcminutes to:
-def arcmin_to_rad(values : Array) -> Array:
+def arcmin_to_rad(values: Array) -> Array:
     """
     Converts the inputs values from arcminutes to radians.
 
@@ -144,7 +144,7 @@ def arcmin_to_rad(values : Array) -> Array:
     return values * np.pi / (60 * 180)
 
 
-def arcmin_to_deg(values : Array) -> Array:
+def arcmin_to_deg(values: Array) -> Array:
     """
     Converts the inputs values from arcminutes to degrees.
 
@@ -163,7 +163,7 @@ def arcmin_to_deg(values : Array) -> Array:
     return values / 60
 
 
-def arcmin_to_arcsec(values : Array) -> Array:
+def arcmin_to_arcsec(values: Array) -> Array:
     """
     Converts the inputs values from arcminutes to arcseconds.
 
@@ -183,7 +183,7 @@ def arcmin_to_arcsec(values : Array) -> Array:
 
 
 # Arcseconds to:
-def arcsec_to_rad(values : Array) -> Array:
+def arcsec_to_rad(values: Array) -> Array:
     """
     Converts the inputs values from arcseconds to radians.
 
@@ -202,7 +202,7 @@ def arcsec_to_rad(values : Array) -> Array:
     return values * np.pi / (3600 * 180)
 
 
-def arcsec_to_deg(values : Array) -> Array:
+def arcsec_to_deg(values: Array) -> Array:
     """
     Converts the inputs values from arcseconds to degrees.
 
@@ -221,7 +221,7 @@ def arcsec_to_deg(values : Array) -> Array:
     return values / 3600
 
 
-def arcsec_to_arcmin(values : Array) -> Array:
+def arcsec_to_arcmin(values: Array) -> Array:
     """
     Converts the inputs values from arcseconds to arcminutes.
 

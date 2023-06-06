@@ -4,57 +4,57 @@ from jax.tree_util import tree_map
 from typing import Union
 
 __all__ = ["cart_to_polar", "polar_to_cart", "pixel_coords",
-    "pixel_coordinates"]
+           "pixel_coordinates"]
 
 
-### Coordinates convertions ###
-def cart_to_polar(coordinates : Array) -> Array:
+### Coordinate conversions ###
+def cart_to_polar(coordinates: Array) -> Array:
     """
-    Converts the input (x, y) cartesian cordinates into (r, phi) polar
+    Converts the input (x, y) cartesian coordinates into (r, phi) polar
     coordinates.
 
     Parameters
     ----------
     coordinates : Array
-        The (x, y) cartesian coordinates to be converted into polar cordinates.
+        The (x, y) cartesian coordinates to be converted into polar coordinates.
 
     Returns
     -------
     coordinates : Array
         The input cartesian coordinates converted into (r, phi) polar
-        cordinates.
+        coordinates.
     """
     x, y = coordinates
     return np.array([np.hypot(x, y), np.arctan2(y, x)])
 
 
-def polar_to_cart(coordinates : Array) -> Array:
+def polar_to_cart(coordinates: Array) -> Array:
     """
     Converts the input (r, phi) polar coordinates into (x, y) cartesian
-    cordinates.
+    coordinates.
 
     Parameters
     ----------
     coordinates : Array
         The (r, phi) polar coordinates to be converted into cartesian
-        cordinates.
+        coordinates.
 
     Returns
     -------
     coordinates : Array
-        The input polar coordinates converted into (x, y) cartesian cordinates.
+        The input polar coordinates converted into (x, y) cartesian coordinates.
     """
     r, phi = coordinates
-    return np.array([r*np.cos(phi), r*np.sin(phi)])
+    return np.array([r * np.cos(phi), r * np.sin(phi)])
 
 
 ### Positions Calculations ###
 def pixel_coords(
-    npixels : int, 
-    pixel_scale : float = 1, 
-    ndims : int = 2, 
-    polar = False
-    ) -> Array:
+        npixels: int,
+        pixel_scale: float = 1,
+        ndims: int = 2,
+        polar=False,
+        ) -> Array:
     """
     Calculates the coordinates of the pixel centers for the given input,
     assuming an equal size and pixel scale in all dimensions. All 
@@ -69,14 +69,14 @@ def pixel_coords(
     pixel_scale : float = 1
         The pixel scale in all dimensions.
     ndims : int = 2
-        The number of outut dimensions.
+        The number of output dimensions.
     polar : bool = False
         If True, the output is in polar coordinates. If False, the output is in
         cartesian coordinates. ndims must be 2 if polar is True.
     
     Returns
     -------
-    coordaintes : Array
+    coordinates : Array
         The array of pixel center coordinates.
     """
     npixels = (npixels,) * ndims
@@ -85,12 +85,12 @@ def pixel_coords(
 
 
 def pixel_coordinates(
-    npixels      : Union[int, tuple], 
-    pixel_scales : Union[tuple, float] = 1.,
-    offsets      : Union[tuple, float] = 0.,
-    polar        : bool = False,
-    indexing     : str = 'xy'
-    ) -> Array:
+        npixels: Union[int, tuple],
+        pixel_scales: Union[tuple, float] = 1.,
+        offsets: Union[tuple, float] = 0.,
+        polar: bool = False,
+        indexing: str = 'xy'
+) -> Array:
     """
     Calculates the coordinates of the pixel centers for the given input. All 
     coordinates are output in units of metres. 
@@ -101,7 +101,7 @@ def pixel_coordinates(
     and N, the outputs are of shape (N, M) for ‘xy’ indexing and (M, N) for
     ‘ij’ indexing. In the 3-D case with inputs of length M, N and P, outputs
     are of shape (N, M, P) for ‘xy’ indexing and (M, N, P) for ‘ij’ indexing.
-    If the output is in polar coordainates, indexing is set to 'xy' and the
+    If the output is in polar coordinates, indexing is set to 'xy' and the
     input must be 2d.
     
     Parameters
@@ -131,17 +131,17 @@ def pixel_coordinates(
     """
     if indexing not in ['xy', 'ij']:
         raise ValueError("indexing must be either 'xy' or 'ij'.")
-    
+
     if polar and indexing == 'ij':
         indexing = 'xy'
-    
+
     if not isinstance(npixels, tuple):
         npixels = (npixels,)
 
     # Assume equal pixel scales if not given
     if not isinstance(pixel_scales, tuple):
         pixel_scales = (pixel_scales,) * len(npixels)
-    
+
     # Assume no offset if not given
     if not isinstance(offsets, tuple):
         offsets = (offsets,) * len(npixels)
@@ -151,9 +151,10 @@ def pixel_coordinates(
         pix *= scale
         pix -= offset
         return pix
+
     pixels = tree_map(pixel_fn, npixels, offsets, pixel_scales)
 
-    # ouput (x, y) for 2d, else in order
+    # output (x, y) for 2d, else in order
     positions = np.array(np.meshgrid(*pixels, indexing=indexing))
 
     if polar:

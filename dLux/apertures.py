@@ -391,7 +391,7 @@ class DynamicAperture(BaseDynamicAperture):
         steepness = 3. / self.softening * distances.shape[-1]
         return (np.tanh(steepness * distances) + 1.) / 2.
 
-    def _transmission(self: ApertureLayer, coordainates: Array) -> Array:
+    def _transmission(self: ApertureLayer, coordinates: Array) -> Array:
         """
         Compute the array representing the aperture transmission on the 
         provided coordinates.
@@ -406,7 +406,7 @@ class DynamicAperture(BaseDynamicAperture):
         transmission : Array 
             The array representing the transmission of the aperture.
         """
-        coordinates = self._coordinates(coordainates)
+        coordinates = self._coordinates(coordinates)
 
         aperture = lax.cond(
             (self.softening != 0.).any(),
