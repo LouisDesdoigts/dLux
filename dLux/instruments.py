@@ -49,7 +49,7 @@ class Instrument(Base):
         instrumental effects on a psf.
     observation : Observation
         An class that inherits from Observation. This is to allow flexibility
-        in the different kind of observations, ie applying dithers, switching
+        in the different kind of observations, i.e. applying dithers, switching
         filters, etc.
     """
     optics: Optics()
@@ -76,7 +76,7 @@ class Instrument(Base):
             A pre-configured Detector object.
         observation : Observation = None
             An class that inherits from Observation. This is to allow
-            flexibility in the different kind of observations, ie applying
+            flexibility in the different kind of observations, i.e. applying
             dithers, switching filters, etc.
         """
         # Optics

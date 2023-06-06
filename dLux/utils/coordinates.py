@@ -95,7 +95,7 @@ def pixel_coordinates(
     Calculates the coordinates of the pixel centers for the given input. All 
     coordinates are output in units of metres. 
     
-    The indexing argument is the same as in numpy.meshgrid., ie: Giving the
+    The indexing argument is the same as in numpy.meshgrid., i.e.: Giving the
     string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a
     meshgrid with Cartesian indexing. In the 2-D case with inputs of length M
     and N, the outputs are of shape (N, M) for ‘xy’ indexing and (M, N) for

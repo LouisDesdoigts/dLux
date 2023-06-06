@@ -12,7 +12,7 @@ You can also build from source. To do so, clone the git repo, enter the director
 pip install .
 ```
 
-We encourage the creation of a virtual enironment to run dLux to prevent software conflicts as we keep the software up to date with the lastest version of the core packages.
+We encourage the creation of a virtual environment to run ∂Lux to prevent software conflicts as we keep the software up to date with the latest version of the core packages.
 
 ## Windows/Google Colab Quickstart
 `jaxlib` is currently not supported by the jax team on windows, however there are two work-arounds!

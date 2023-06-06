@@ -88,7 +88,7 @@ def generate_coordinates(npixels_in: int,
         The number of pixel in the output array.
     sampling_ratio : Array
         The ratio of pixel sizes in the input and output array,
-        ie pixel_scale_out/pixel_scale_in.
+        i.e. pixel_scale_out/pixel_scale_in.
     x_shift : Array, pixels = np.array(0.)
         How much to shift the x_coordinates in the output array, in the pixel
         units of the output array.
@@ -128,7 +128,7 @@ def scale(array: Array,
         The number of pixel in the output array.
     ratio : float
         The relative input to output scales, TODO: does 2 make it bigger or 
-        smaller? ie input scale/output scale. <- get this right.
+        smaller? i.e. input scale/output scale. <- get this right.
     order : int = 1
         The interpolation order to use.
 

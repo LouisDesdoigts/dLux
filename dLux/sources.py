@@ -100,7 +100,7 @@ class Source(BaseSource):
             raise ValueError("position must be a 1d array of shape (2,).")
 
         if self.flux.shape != ():
-            raise ValueError("flux must be a scalar, ie shape == ().")
+            raise ValueError("flux must be a scalar, i.e. shape == ().")
 
         # Spectrum
         if spectrum is not None:

@@ -69,7 +69,7 @@ def get_pixels_per_fringe(wavelength: Array,
                           pixel_scale: Array,
                           focal_length: Array = None) -> Array:
     """
-    Calculates the number of pixels per diffraction fringe, ie the fringe
+    Calculates the number of pixels per diffraction fringe, i.e. the fringe
     sampling rate.
 
     Parameters

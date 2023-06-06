@@ -145,7 +145,7 @@ class Wavefront(Base):
     @property
     def psf(self: Wavefront) -> Array:
         """
-        Calculates the Point Spread Function (PSF), ie the squared modulus
+        Calculates the Point Spread Function (PSF), i.e. the squared modulus
         of the complex wavefront.
 
         Returns
@@ -538,7 +538,7 @@ class Wavefront(Base):
         """
         Paraxially zero-pads the `Wavefront` to the size determined by
         npixels. Note this only supports padding arrays of even dimension
-        to even dimension, and odd dimension to odd dimension, ie 2 -> 4 or
+        to even dimension, and odd dimension to odd dimension, i.e. 2 -> 4 or
         3 -> 5.
 
         Parameters
@@ -577,7 +577,7 @@ class Wavefront(Base):
         """
         Paraxially crops the `Wavefront` to the size determined by npixels.
         Note this only supports padding arrays of even dimension to even
-        dimension, and odd dimension to odd dimension, ie 4 -> 2 or 5 -> 3.
+        dimension, and odd dimension to odd dimension, i.e. 4 -> 2 or 5 -> 3.
 
         Parameters
         ----------

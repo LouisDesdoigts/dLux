@@ -84,7 +84,7 @@ class Filter(Base):
     def get_throughput(self : Filter, sample_wavelenghts : Array) -> Array:
         """
         Gets the average throughput of the bandpass defined the differences
-        between each sample wavelength, ie if sample wavelengths are:
+        between each sample wavelength, i.e. if sample wavelengths are:
             [10, 20, 30, 40],
         the bandpasses for each sample wavelength will be
             [5-15, 15-25, 25-30, 35-40].

@@ -1890,7 +1890,7 @@ class CompoundAperture(CompositeAperture):
     
     This class is distinct from the MultiAperture class in that the 
     sub-apertures are combined by multiplying their respective transmissions 
-    together, ie the sub-apertures are overlapping.
+    together, i.e. the sub-apertures are overlapping.
 
     This class should not contain a MultiAperture, but MultiApertures can 
     contain CompoundApertures.
@@ -1976,7 +1976,7 @@ class MultiAperture(CompositeAperture):
     
     This class is distinct from the CompoundAperture class in that the 
     sub-apertures are combined by adding their respective transmissions 
-    together, ie the sub-apertures are not overlapping.
+    together, i.e. the sub-apertures are not overlapping.
 
     This class can contain multiple CompoundApertures.
 

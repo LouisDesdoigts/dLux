@@ -259,7 +259,7 @@ class FarFieldFresnel(ShiftedMFT):
     A propagator class to for Far-Field fresnel propagations. This classes
     implements algorithms that use quadratic phase factors to better represent
     out-of-plane behaviour of wavefronts, close to the focal plane. This class
-    is designed to work on Cartesian wavefronts, ie pixel units are in
+    is designed to work on Cartesian wavefronts, i.e. pixel units are in
     metres/pixel in the output plane.
 
     Attributes
