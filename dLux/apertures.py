@@ -768,7 +768,7 @@ class PolyAperture(DynamicAperture):
                                xs: Array,
                                ys: Array) -> Array:
         """
-        Calculates the perpendicular distance of the cartesian (x, y) 
+        Calculates the perpendicular distance of the Cartesian (x, y)
         coordinates from a line. The line is parameterised by its gradient m and
         a point (x1, y1) that lies on the line.
         

@@ -95,7 +95,7 @@ class FFT(Propagator):
 class MFT(Propagator):
     """
     A Propagator class designed to propagate a wavefront to a plane that is
-    defined in cartesian units (ie metres/pixel).
+    defined in Cartesian units (ie metres/pixel).
 
     Attributes
     ----------
@@ -168,7 +168,7 @@ class MFT(Propagator):
 class ShiftedMFT(MFT):
     """
     A Propagator class designed to propagate a wavefront to a plane that is
-    defined in cartesian units (ie metres/pixel), with a variable output
+    defined in Cartesian units (ie metres/pixel), with a variable output
     sampling in that plane.
 
     Attributes

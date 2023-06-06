@@ -101,7 +101,7 @@ The `CartesianOptics` class is very similar to the `AngularOptics` class, but it
 ??? info "Cartesian Optics API"
     :::dLux.optics.CartesianOptics
 
-The following code snippet shows how to construct a simple cartesian optical system and propagate a point source through it.
+The following code snippet shows how to construct a simple Cartesian optical system and propagate a point source through it.
 
 ```python
 import jax.numpy as np
@@ -143,7 +143,7 @@ psf = optics.propagate(wavelengths)
     plt.savefig('cartesian_psf.png')
     ```
 
-![cartesian_psf](../assets/cartesian_psf.png)
+![Cartesian_psf](../assets/cartesian_psf.png)
 
 ---
 

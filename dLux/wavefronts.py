@@ -623,7 +623,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
         inverse : bool = False
             If True, the propagation is treated as an inverse FFT.
 
@@ -701,7 +701,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
 
         Returns
         -------
@@ -737,7 +737,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
 
         Returns
         -------
@@ -769,7 +769,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
         inverse : bool = False
             If True, the inverse MFT is used.
         
@@ -822,7 +822,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
         
         Returns
         -------
@@ -859,7 +859,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
         inverse : bool = False
             Is this a forward or inverse MFT.
         
@@ -896,7 +896,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
         shift : Array = np.zeros(2)
             The shift in the center of the output plane.
         inverse : bool = False
@@ -937,7 +937,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
 
         Returns
         -------
@@ -970,7 +970,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
 
         Returns
         -------
@@ -1008,7 +1008,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
         pixel : bool = True
             Whether the shift is in pixels or the units of pixel_scale.
         
@@ -1048,7 +1048,7 @@ class Wavefront(Base):
         focal_length : Array = None
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
-            'cartesian' propagation.
+            'Cartesian' propagation.
         pixel : bool = True
             Whether the shift is in pixels or the units of pixel_scale.
         

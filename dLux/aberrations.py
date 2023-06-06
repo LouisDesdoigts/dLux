@@ -201,7 +201,7 @@ class Zernike(Base):
         Parameters
         ----------
         coordinates : Array
-            The cartesian coordinates to calculate the Zernike polynomial upon.
+            The Cartesian coordinates to calculate the Zernike polynomial upon.
         
         Returns
         -------
@@ -227,7 +227,7 @@ class Zernike(Base):
         Parameters
         ----------
         coordinates : Array
-            The cartesian coordinates to calculate the Zernike polynomial upon.
+            The Cartesian coordinates to calculate the Zernike polynomial upon.
         nsides : int
             The number of sides of the aperture.
 
@@ -258,7 +258,7 @@ class Zernike(Base):
         Parameters
         ----------
         coordinates : Array
-            The cartesian coordinates to calculate the Zernike polynomial upon.
+            The Cartesian coordinates to calculate the Zernike polynomial upon.
         nsides : int
             The number of sides of the aperture. If 0, the Zernike polynomial
             is calculated on a circular aperture.
@@ -321,7 +321,7 @@ class ZernikeBasis(Base):
         Parameters
         ----------
         coordinates : Array
-            The cartesian coordinates to calculate the Zernike basis upon.
+            The Cartesian coordinates to calculate the Zernike basis upon.
         nsides : int
             The number of sides of the aperture. If 0, the Zernike basis is
             calculated on a circular aperture.

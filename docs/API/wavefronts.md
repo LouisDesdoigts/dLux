@@ -110,15 +110,15 @@ manipulation of the image:
 `Wavefront` objects also have methods used to propagate them between planes. These
 methods are:
 
-`FFT(pad, focal_length=None)` Performs a Fast Fourier Transform (FFT) on the wavefront, propagating from Pupil to Focal plane. If the `focal_length` is None, the output units will angular, otherwise cartesian.
+`FFT(pad, focal_length=None)` Performs a Fast Fourier Transform (FFT) on the wavefront, propagating from Pupil to Focal plane. If the `focal_length` is None, the output units will angular, otherwise Cartesian.
 
 `IFFT(pad, focal_length=None)` Performs an Inverse Fast Fourier Transform (IFFT) on the wavefront, propagating from Focal to Pupil plane.
 
-`MFT(npixels, pixel_scale, focal_length=None)` Performs a Matrix Fourier Transform (MFT) on the wavefront, propagating from Pupil to Focal plane. If the `focal_length` is None, the `pixel_scale` is assumed to be in angular units (radians), otherwise it is assumed to be in cartesian units (metres).
+`MFT(npixels, pixel_scale, focal_length=None)` Performs a Matrix Fourier Transform (MFT) on the wavefront, propagating from Pupil to Focal plane. If the `focal_length` is None, the `pixel_scale` is assumed to be in angular units (radians), otherwise it is assumed to be in Cartesian units (metres).
 
 `IMFT(npixels, pixel_scale, focal_length=None)` Performs an Inverse Matrix Fourier Transform (IMFT) on the wavefront, propagating from Focal to Pupil plane.
 
-`shifted_MFT(npixels, pixel_scale, shift, focal_length=None, pixel=True)` Performs a Matrix Fourier Transform (MFT) on the wavefront, propagating from Pupil to Focal plane. If the `focal_length` is None, the `pixel_scale` is assumed to be in angular units (radians), otherwise it is assumed to be in cartesian units (meters). The `shift` parameter is used to shift the center of the output plane, which is treated in units of pixels by default, otherwise it is treated in the units of the `pixel_scale`.
+`shifted_MFT(npixels, pixel_scale, shift, focal_length=None, pixel=True)` Performs a Matrix Fourier Transform (MFT) on the wavefront, propagating from Pupil to Focal plane. If the `focal_length` is None, the `pixel_scale` is assumed to be in angular units (radians), otherwise it is assumed to be in Cartesian units (meters). The `shift` parameter is used to shift the center of the output plane, which is treated in units of pixels by default, otherwise it is treated in the units of the `pixel_scale`.
 
 `shifted_IMFT(npixels, pixel_scale, shift, focal_length=None, pixel=True)` Performs an Inverse Matrix Fourier Transform (IMFT) on the wavefront, propagating from Focal to Pupil plane. The `shift` parameter is used to shift the center of the output plane, which is treated in units of pixels by default, otherwise it is treated in the units of the `pixel_scale`.
 
@@ -126,7 +126,7 @@ methods are:
 
 # Fresnel Wavefront
 
-The `FresnelWavefront` class is a subclass of the `Wavefront`, implementing the methods required to perform a FarFieldFresnel propagation (i.e., close to the focal plane). It implements two more methods that are essential extensions of the MFT methods. This class _only_ implements cartesian propagation and only propagates from the Pupil plane to the Focal plane.
+The `FresnelWavefront` class is a subclass of the `Wavefront`, implementing the methods required to perform a FarFieldFresnel propagation (i.e., close to the focal plane). It implements two more methods that are essential extensions of the MFT methods. This class _only_ implements Cartesian propagation and only propagates from the Pupil plane to the Focal plane.
 
 ??? info "Fresnel Wavefront API"
     :::dLux.wavefronts.FresnelWavefront

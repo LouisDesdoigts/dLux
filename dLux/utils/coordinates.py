@@ -10,18 +10,18 @@ __all__ = ["cart_to_polar", "polar_to_cart", "pixel_coords",
 ### Coordinate conversions ###
 def cart_to_polar(coordinates: Array) -> Array:
     """
-    Converts the input (x, y) cartesian coordinates into (r, phi) polar
+    Converts the input (x, y) Cartesian coordinates into (r, phi) polar
     coordinates.
 
     Parameters
     ----------
     coordinates : Array
-        The (x, y) cartesian coordinates to be converted into polar coordinates.
+        The (x, y) Cartesian coordinates to be converted into polar coordinates.
 
     Returns
     -------
     coordinates : Array
-        The input cartesian coordinates converted into (r, phi) polar
+        The input Cartesian coordinates converted into (r, phi) polar
         coordinates.
     """
     x, y = coordinates
@@ -30,19 +30,19 @@ def cart_to_polar(coordinates: Array) -> Array:
 
 def polar_to_cart(coordinates: Array) -> Array:
     """
-    Converts the input (r, phi) polar coordinates into (x, y) cartesian
+    Converts the input (r, phi) polar coordinates into (x, y) Cartesian
     coordinates.
 
     Parameters
     ----------
     coordinates : Array
-        The (r, phi) polar coordinates to be converted into cartesian
+        The (r, phi) polar coordinates to be converted into Cartesian
         coordinates.
 
     Returns
     -------
     coordinates : Array
-        The input polar coordinates converted into (x, y) cartesian coordinates.
+        The input polar coordinates converted into (x, y) Cartesian coordinates.
     """
     r, phi = coordinates
     return np.array([r * np.cos(phi), r * np.sin(phi)])
@@ -72,7 +72,7 @@ def pixel_coords(
         The number of output dimensions.
     polar : bool = False
         If True, the output is in polar coordinates. If False, the output is in
-        cartesian coordinates. ndims must be 2 if polar is True.
+        Cartesian coordinates. ndims must be 2 if polar is True.
     
     Returns
     -------
@@ -119,7 +119,7 @@ def pixel_coordinates(
         set to 0.
     polar : bool = False
         If True, the output is in polar coordinates. If False, the output is in
-        cartesian coordinates. Default is False.
+        Cartesian coordinates. Default is False.
     indexing : str = 'xy'
         The indexing of the output. Default is 'xy'. See numpy.meshgrid for more
         details.

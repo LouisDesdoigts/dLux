@@ -13,7 +13,7 @@ There are four public classes:
 
 ### `MFT(npixels, pixel_scale, focal_length=None, inverse=False)`
 
-Performs a Matrix Fourier Transform (MFT) on the wavefront, propagating from Pupil to Focal plane. If `focal_length` is `None`, `pixel_scale` is assumed to be in angular units (radians), otherwise it is assumed to be in cartesian units (metres).
+Performs a Matrix Fourier Transform (MFT) on the wavefront, propagating from Pupil to Focal plane. If `focal_length` is `None`, `pixel_scale` is assumed to be in angular units (radians), otherwise it is assumed to be in Cartesian units (metres).
 
 ??? info "MFT API"
     ::: dLux.propagators.MFT
@@ -27,7 +27,7 @@ Performs a Fast Fourier Transform (FFT) on the wavefront, propagating from Pupil
 
 ### `shiftedMFT(npixels, pixel_scale, shift, focal_length=None, pixel=True, inverse=False)`
 
-Performs a Matrix Fourier Transform (MFT) on the wavefront, propagating from Pupil to Focal plane. If `focal_length` is `None`, `pixel_scale` is assumed to be in angular units (radians), otherwise it is assumed to be in cartesian units (metres). The `shift` parameter is used to shift the center of the output plane, which is treated in units of pixels by default, otherwise it is treated in the units of `pixel_scale`.
+Performs a Matrix Fourier Transform (MFT) on the wavefront, propagating from Pupil to Focal plane. If `focal_length` is `None`, `pixel_scale` is assumed to be in angular units (radians), otherwise it is assumed to be in Cartesian units (metres). The `shift` parameter is used to shift the center of the output plane, which is treated in units of pixels by default, otherwise it is treated in the units of `pixel_scale`.
 
 ??? info "Shifted MFT API"
     ::: dLux.propagators.ShiftedMFT
