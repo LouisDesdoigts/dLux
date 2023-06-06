@@ -15,7 +15,7 @@ import dLux as dl
 
 # Define the optical parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -28,7 +28,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Construct Source
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 source = dl.PointSource(wavelengths)
 
 # Construct Observation
@@ -93,7 +93,7 @@ We then load this into the instrument class:
 
 ```python
 # Define the parameters of the optical system
-aperture_diameter = 1.0  # meters
+aperture_diameter = 1.0  # metres
 pixel_scale       = 2e-7 # Radians per pixel of the detector
 aperture_npixels  = 256  # Number of pixels representing the wavefront
 detector_npixels  = 64   # Number of pixels in the detector

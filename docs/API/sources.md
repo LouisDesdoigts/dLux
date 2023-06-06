@@ -43,7 +43,7 @@ import dLux as dl
 
 # Define the optical parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -60,7 +60,7 @@ Now, we define the different source classes.
 
 ```python
 # Define wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 
 # Construct PointSource
 sources = [dl.PointSource(wavelengths)]

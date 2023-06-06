@@ -58,7 +58,7 @@ def pixel_coords(
     """
     Calculates the coordinates of the pixel centers for the given input,
     assuming an equal size and pixel scale in all dimensions. All 
-    coordinates are output in units of meters. This function is essentially a
+    coordinates are output in units of metres. This function is essentially a
     reduced version of the full `pixel_coordinates` function that gives
     flexibility to have different dimension sizes and scales.
 
@@ -93,7 +93,7 @@ def pixel_coordinates(
     ) -> Array:
     """
     Calculates the coordinates of the pixel centers for the given input. All 
-    coordinates are output in units of meters. 
+    coordinates are output in units of metres. 
     
     The indexing argument is the same as in numpy.meshgrid., ie: Giving the
     string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a

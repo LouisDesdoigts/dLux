@@ -70,7 +70,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)
 ```
 
@@ -123,7 +123,7 @@ optics = dl.CartesianOptics(wf_npixels, diameter, aperture, focal_length,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)
 ```
 
@@ -216,10 +216,10 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
-focal_length = 2 # meters
+diameter = 1 # metres
+focal_length = 2 # metres
 psf_npixels = 128
-psf_pixel_scale = 0.25e-6 # meters
+psf_pixel_scale = 0.25e-6 # metres
 
 # Construct the list of optical layers
 layers = [
@@ -231,7 +231,7 @@ layers = [
 optics = dl.LayeredOptics(wf_npixels, diameter, layers)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)
 ```
 

@@ -31,14 +31,14 @@ class GaussianWavefront(dLux.Wavefront):
     
     Attributes
     ----------
-    position : float, meters
+    position : float, metres
         The position of the wavefront in the optical system.
         
-    beam_radius : float, meters 
+    beam_radius : float, metres 
         The *initial* radius of the beam. 
         
         
-    waist_position : float, meters
+    waist_position : float, metres
         The position of the beam waist along the optical axis. 
     spherical : bool
         A convinience tracker for knowing if the wavefront is 
@@ -46,7 +46,7 @@ class GaussianWavefront(dLux.Wavefront):
     rayleigh_factor : float
         Used to determine the range over which the wavefront remains
         planar. 
-    focal_length : float, meters
+    focal_length : float, metres
         Used for the conversion between angular and physical units. 
     """
     angular : bool
@@ -75,9 +75,9 @@ class GaussianWavefront(dLux.Wavefront):
 
         Parameters
         ----------
-        beam_radius : float, meters
+        beam_radius : float, metres
             Radius of the beam at the initial optical plane.
-        wavelength : float, meters
+        wavelength : float, metres
             The wavelength of the `Wavefront`.
         offset : Array, radians
             The (x, y) angular offset of the `Wavefront` from 
@@ -106,7 +106,7 @@ class GaussianWavefront(dLux.Wavefront):
         -------
         position : float 
             The position of the `Wavefront` from its starting point 
-            in meters.
+            in metres.
         """
         return self.position
     
@@ -128,7 +128,7 @@ class GaussianWavefront(dLux.Wavefront):
         """
         Returns
         -------
-        positions : Tensor, meters
+        positions : Tensor, metres
             The position of each pixel aligned according to the `fft` 
             algorithm that is implemented by `numpy`.
         """
@@ -196,7 +196,7 @@ class GaussianWavefront(dLux.Wavefront):
         ----------
         position : float
             The new position of the wavefront from its starting point 
-            assumed to be in meters. 
+            assumed to be in metres. 
         
         Returns
         -------
@@ -217,7 +217,7 @@ class GaussianWavefront(dLux.Wavefront):
         Parameters
         ----------
         phase_radius : float
-            The new phase_radius in meters.
+            The new phase_radius in metres.
 
         Returns
         -------
@@ -236,7 +236,7 @@ class GaussianWavefront(dLux.Wavefront):
         """
         Parameters
         ----------
-        waist_position : float, meters 
+        waist_position : float, metres 
             The absolute position of the waist of the wavefront.
 
         Returns
@@ -253,7 +253,7 @@ class GaussianWavefront(dLux.Wavefront):
         Parameters
         ----------
         beam_radius : float
-            The new beam_radius in meters.
+            The new beam_radius in metres.
 
         Returns
         -------
@@ -288,7 +288,7 @@ class GaussianWavefront(dLux.Wavefront):
         """
         Parameters
         ----------
-        focal_length : float, meters
+        focal_length : float, metres
             The `focal_length` of the `Wavefront`.
 
         Returns
@@ -363,7 +363,7 @@ class GaussianWavefront(dLux.Wavefront):
 
     def transfer(self : Wavefront, distance : Scalar) -> Array:
         """
-        The optical transfer function (OTF) for the gaussian beam.
+        The optical transfer function (OTF) for the Gaussian beam.
         Assumes propagation is along the axis. 
 
         Parameters
@@ -397,7 +397,7 @@ class GaussianWavefront(dLux.Wavefront):
 
         Parameters
         ----------
-        position : float, meters
+        position : float, metres
             The absolute position of the wave along the optical axis 
             from spawn.
 
@@ -418,12 +418,12 @@ class GaussianWavefront(dLux.Wavefront):
 
         Parameters
         ----------
-        position : float, meters
+        position : float, metres
             The absolute position of the `Wavefront` since spawn.
         
         Returns
         -------
-        radius : float, meters
+        radius : float, metres
             The radius of the beam. 
         """
         relative_position = position - self.waist_position
@@ -467,7 +467,7 @@ class GaussianWavefront(dLux.Wavefront):
 
         Parameters
         ----------
-        distance : float, meters
+        distance : float, metres
             The distance of propagation from the current position.
         
         Returns
@@ -487,7 +487,7 @@ class GaussianWavefront(dLux.Wavefront):
 
         Parameters
         ----------
-        distance : float, meters
+        distance : float, metres
             The distance of propagation.
         
         Returns
@@ -604,7 +604,7 @@ class GaussianPropagator(eqx.Module):
     # the wavefront class and do very little here. Damn, I need to 
     # fit it into the overall architecture. 
     # TODO: Implement the oversample in the fixed sampling propagator
-    # Coordiantes must be in meters for the propagator
+    # Coordiantes must be in metres for the propagator
     def __call__(self : Propagator, wave : Wavefront) -> Wavefront:
         # NOTE: need to understand this mystery. 
         field = np.fft.fftshift(wave.get_complex_form())

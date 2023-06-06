@@ -2,17 +2,15 @@ from __future__ import annotations
 import jax.numpy as np
 from jax.scipy.signal import convolve
 from jax import vmap, Array
-from equinox import tree_at
 from zodiax import Base
 from abc import abstractmethod
 import dLux
 
-
 __all__ = [
-    "PointSource", 
-    "PointSources", 
-    "BinarySource", 
-    "ResolvedSource", 
+    "PointSource",
+    "PointSources",
+    "BinarySource",
+    "ResolvedSource",
     "PointResolvedSource"]
 
 
@@ -23,36 +21,36 @@ class BaseSource(Base):
     # TODO: Add this to allow custom sources
 
     @abstractmethod
-    def normalise(self): # pragma: no cover
+    def normalise(self):  # pragma: no cover
         pass
 
     @abstractmethod
-    def model(self, optics, detector=None): # pragma: no cover
+    def model(self, optics, detector=None):  # pragma: no cover
         pass
 
 
 class Source(BaseSource):
     """
     Base class for source objects. The idea of these source classes is to allow
-    an arbitrary parametrisation of the underlying astrophyical objects. Each
+    an arbitrary parametrisation of the underlying astrophysical objects. Each
     source object requires a normalise(), format_inputs(), and model() methods,
     along with the regular getter and setter methods.
 
     The normalise() method should return a new instance of the class with all
-    the appropriate attribues normalised (ie spectral weights, resolved source
+    the appropriate attributes normalised (ie spectral weights, resolved source
     distribution).
 
     The format_inputs() method should return the relevant wavelengths, weights,
-    positions etc, that are correctly formatted to be used by the model()
-    method. This should primarily interface with the specrum object, and should
+    positions etc., that are correctly formatted to be used by the model()
+    method. This should primarily interface with the spectrum object, and should
     call the normalise() method.
 
     The model() method should return a single psf of the source. This is done
-    inside of the source object so that each class can be arbitrarily
+    inside the source object so that each class can be arbitrarily
     parameterised as required. This method should call the format_inputs()
     method.
 
-    A series of parameterisations have been proided to model a series of
+    A series of parametrisations have been provided to model a series of
     different astrophysical objects.
 
     Attributes
@@ -64,24 +62,23 @@ class Source(BaseSource):
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     """
-    position : Array
-    flux     : Array
-    spectrum : Spectrum
+    position: Array
+    flux: Array
+    spectrum: Spectrum
 
-
-    def __init__(self        : Source,
-                 wavelengths : Array,
-                 position    : Array    = np.zeros(2),
-                 flux        : Array    = np.array(1.),
-                 weights     : Array    = None,
-                 spectrum    : Spectrum = None,
-                 ) -> Source:
+    def __init__(self: Source,
+                 wavelengths: Array,
+                 position: Array = np.zeros(2),
+                 flux: Array = np.array(1.),
+                 weights: Array = None,
+                 spectrum: Spectrum = None,
+                 ):
         """
         Constructor for the Source class.
 
         Parameters
         ----------
-        wavelengths : Array, meters
+        wavelengths : Array, metres
             The array of wavelengths at which the spectrum is defined. Defaults
             to a PointSource with a flat spectrum.
         position : Array, radians = None
@@ -97,14 +94,14 @@ class Source(BaseSource):
         """
         # Position and Flux
         self.position = np.asarray(position, dtype=float)
-        self.flux     = np.asarray(flux,     dtype=float)
+        self.flux = np.asarray(flux, dtype=float)
 
         if self.position.shape != (2,):
             raise ValueError("position must be a 1d array of shape (2,).")
-        
+
         if self.flux.shape != ():
             raise ValueError("flux must be a scalar, ie shape == ().")
-        
+
         # Spectrum
         if spectrum is not None:
             if not isinstance(spectrum, dLux.spectra.Spectrum):
@@ -113,8 +110,7 @@ class Source(BaseSource):
         else:
             self.spectrum = dLux.spectra.Spectrum(wavelengths, weights)
 
-
-    def __getattr__(self : Source, key : str) -> Any:
+    def __getattr__(self: Source, key: str) -> Any:
         """
         Getter method for the spectrum object.
 
@@ -132,10 +128,9 @@ class Source(BaseSource):
             return getattr(self.spectrum, key)
         else:
             raise AttributeError(f"{self.__class__.__name__} has no "
-                f"attribute {key}.")
+                                 f"attribute {key}.")
 
-
-    def normalise(self : Source) -> Source:
+    def normalise(self: Source) -> Source:
         """
         Method for returning a new normalised source object.
 
@@ -147,8 +142,7 @@ class Source(BaseSource):
         norm_spectrum = self.spectrum.normalise()
         return self.set('spectrum', norm_spectrum)
 
-
-    def model(self : Source, optics : Optics) -> Array:
+    def model(self: Source, optics: Optics) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -162,7 +156,7 @@ class Source(BaseSource):
         Returns
         -------
         psf : Array
-            The psf of the source source modelled through the optics.
+            The PSF of the source modelled through the optics.
         """
         self = self.normalise()
         weights = self.weights * self.flux
@@ -186,12 +180,11 @@ class RelativeFluxSource(Source):
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     """
-    contrast : Array
+    contrast: Array
 
-
-    def __init__(self     : Source,
-                 contrast : Array,
-                 **kwargs) -> Source:
+    def __init__(self: Source,
+                 contrast: Array,
+                 **kwargs):
         """
         Constructor for the RelativeFluxSource class.
 
@@ -206,11 +199,10 @@ class RelativeFluxSource(Source):
         if self.contrast.shape != ():
             raise ValueError("contrast must have shape ().")
 
-
     @property
-    def fluxes(self : Source) -> Array:
+    def fluxes(self: Source) -> Array:
         """
-        Getter method for the fluxes. This paramterieses the source such that
+        Getter method for the fluxes. This parametrises the source such that
         flux refers to the mean_flux and contrast is defined as the ratio of
         the flux of the first entry divided by the second entry.
 
@@ -240,18 +232,17 @@ class RelativePositionSource(Source):
         The separation of the two sources in radians.
     position_angle : Array, radians
         The field angle between the two sources measure from the positive
-        x axis.
+        x-axis.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     """
-    separation     : Array
-    position_angle : Array
+    separation: Array
+    position_angle: Array
 
-
-    def __init__(self           : Source,
-                 separation     : Array,
-                 position_angle : Array,
-                 **kwargs) -> Source:
+    def __init__(self: Source,
+                 separation: Array,
+                 position_angle: Array,
+                 **kwargs):
         """
         Constructor for the RelativePositionSource class.
 
@@ -261,10 +252,10 @@ class RelativePositionSource(Source):
             The separation of the two sources in radians.
         position_angle : Array, radians
             The field angle between the two sources measure from the positive
-            x axis.
+            x-axis.
         """
         super().__init__(**kwargs)
-        self.separation     = np.asarray(separation,     dtype=float)
+        self.separation = np.asarray(separation, dtype=float)
         self.position_angle = np.asarray(position_angle, dtype=float)
 
         if self.separation.shape != ():
@@ -273,9 +264,8 @@ class RelativePositionSource(Source):
         if self.position_angle.shape != ():
             raise ValueError("position_angle must have shape ().")
 
-
     @property
-    def positions(self : Source) -> Array:
+    def positions(self: Source) -> Array:
         """
         Getter method for the position.
 
@@ -284,8 +274,8 @@ class RelativePositionSource(Source):
         position : Array, radians
             The ((x, y), (x, y)) on-sky position of this object.
         """
-        r, phi = self.separation/2, self.position_angle
-        sep_vec = np.array([r*np.sin(phi), r*np.cos(phi)])
+        r, phi = self.separation / 2, self.position_angle
+        sep_vec = np.array([r * np.sin(phi), r * np.cos(phi)])
         return np.array([self.position + sep_vec,
                          self.position - sep_vec])
 
@@ -323,36 +313,35 @@ class PointSources(Source):
         Every source in this class will have an identical spectrum.
     """
 
-
-    def __init__(self        : Source,
-                 wavelengths : Array,
-                 position    : Array    = np.zeros(2),
-                 flux        : Array    = None,
-                 weights     : Array    = None,
-                 spectrum    : Spectrum = None) -> Source:
+    def __init__(self: Source,
+                 wavelengths: Array,
+                 position: Array = np.zeros(2),
+                 flux: Array = None,
+                 weights: Array = None,
+                 spectrum: Spectrum = None):
         """
         Constructor for the PointSources class.
 
         Parameters
         ----------
         position : Array, radians
-            The ((x0, y0), (x1, y1), ...) on-sky positions of these sourcese.
+            The ((x0, y0), (x1, y1), ...) on-sky positions of these sources.
         flux : Array, photons = None
             The fluxes of the sources.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
             Every source in this class will have an identical spectrum.
-        wavelengths : Array, meters = None
+        wavelengths : Array, metres = None
             The array of wavelengths at which the spectrum is defined.
         """
         super().__init__(spectrum=spectrum, wavelengths=wavelengths,
-            weights=weights)
+                         weights=weights)
 
         # More complex parameter checks here because of extra dims
         self.position = np.asarray(position, dtype=float)
         if self.position.ndim != 2:
             raise ValueError("position must be a 2d array.")
-        
+
         if flux is None:
             self.flux = np.ones(len(self.position))
         else:
@@ -363,10 +352,9 @@ class PointSources(Source):
 
             if len(self.flux) != len(self.position):
                 raise ValueError("Length of flux must be equal to length of "
-                    "position.")
+                                 "position.")
 
-
-    def model(self : Source, optics : Optics) -> Array:
+    def model(self: Source, optics: Optics) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -378,7 +366,7 @@ class PointSources(Source):
         Returns
         -------
         psf : Array
-            The psf of the source source modelled through the optics.
+            The PSF of the source modelled through the optics.
         """
         self = self.normalise()
         weights = self.weights[None, :] * self.flux[:, None]
@@ -388,7 +376,7 @@ class PointSources(Source):
 
 class ResolvedSource(Source):
     """
-    A class for modelling resolved sources that parameterise their resolved
+    A class for modelling resolved sources that parametrise their resolved
     component using an array of intensities.
 
     Attributes
@@ -400,18 +388,17 @@ class ResolvedSource(Source):
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     distribution : Array
-        The array of intensities respresenting the resolved source.
+        The array of intensities representing the resolved source.
     """
-    distribution : Array
+    distribution: Array
 
-
-    def __init__(self         : Source,
-                 wavelengths  : Array,
-                 position     : Array    = np.zeros(2),
-                 flux         : Array    = np.array(1.),
-                 distribution : Array    = np.ones((3, 3)),
-                 weights      : Array    = None,
-                 spectrum     : Spectrum = None) -> Source:
+    def __init__(self: Source,
+                 wavelengths: Array,
+                 position: Array = np.zeros(2),
+                 flux: Array = np.array(1.),
+                 distribution: Array = np.ones((3, 3)),
+                 weights: Array = None,
+                 spectrum: Spectrum = None):
         """
         Constructor for the ResolvedSource class.
 
@@ -422,23 +409,22 @@ class ResolvedSource(Source):
         flux : Array, photons = np.array(1.)
             The flux of the object.
         distribution : Array = np.ones((3, 3))
-            The array of intensities respresenting the resolved source.
+            The array of intensities representing the resolved source.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-        wavelengths : Array, meters = None
+        wavelengths : Array, metres = None
             The array of wavelengths at which the spectrum is defined.
         """
         distribution = np.asarray(distribution, dtype=float)
-        self.distribution = distribution/distribution.sum()
+        self.distribution = distribution / distribution.sum()
 
         if self.distribution.ndim != 2:
             raise ValueError("distribution must be a 2d array.")
-        
+
         super().__init__(position=position, flux=flux, spectrum=spectrum,
-            wavelengths=wavelengths, weights=weights)
+                         wavelengths=wavelengths, weights=weights)
 
-
-    def normalise(self : Source) -> Source:
+    def normalise(self: Source) -> Source:
         """
         Method for returning a new source object with a normalised total
         spectrum and source distribution.
@@ -450,11 +436,10 @@ class ResolvedSource(Source):
         """
         spectrum = self.spectrum.normalise()
         distribution_floor = np.maximum(self.distribution, 0.)
-        distribution = distribution_floor/distribution_floor.sum()
+        distribution = distribution_floor / distribution_floor.sum()
         return self.set(['spectrum', 'distribution'], [spectrum, distribution])
 
-
-    def model(self : Source, optics : Optics) -> Array:
+    def model(self: Source, optics: Optics) -> Array:
         """
         Method to model the psf of the source through the optics. Implements a
         basic convolution with the psf and source distribution.
@@ -497,16 +482,15 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         The spectrum of this object, represented by a CombinedSpectrum object.
     """
 
-
-    def __init__(self           : Source,
-                 wavelengths    : Array    = None,
-                 position       : Array    = np.array([0., 0.]),
-                 flux           : Array    = np.array(1.),
-                 separation     : Array    = None,
-                 position_angle : Array    = np.pi/2,
-                 contrast       : Array    = np.array(1.),
-                 spectrum       : Spectrum = None,
-                 weights        : Array    = None) -> Source:
+    def __init__(self: Source,
+                 wavelengths: Array = None,
+                 position: Array = np.array([0., 0.]),
+                 flux: Array = np.array(1.),
+                 separation: Array = None,
+                 position_angle: Array = np.pi / 2,
+                 contrast: Array = np.array(1.),
+                 spectrum: Spectrum = None,
+                 weights: Array = None):
         """
         Parameters
         ----------
@@ -523,7 +507,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
             The contrast ratio between the two sources.
         spectrum : CombinedSpectrum = None
             The spectrum of this object, represented by a CombinedSpectrum.
-        wavelengths : Array, meters = None
+        wavelengths : Array, metres = None
             The array of wavelengths at which the spectrum is defined.
         """
         wavelengths = np.asarray(wavelengths, dtype=float)
@@ -531,11 +515,10 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
             weights = np.ones((2, len(wavelengths)))
 
         super().__init__(wavelengths=wavelengths, position=position, flux=flux,
-            separation=separation, position_angle=position_angle,
-            contrast=contrast, spectrum=spectrum, weights=weights)
+                         separation=separation, position_angle=position_angle,
+                         contrast=contrast, spectrum=spectrum, weights=weights)
 
-
-    def model(self : Source, optics : Optics) -> Array:
+    def model(self: Source, optics: Optics) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -547,7 +530,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         Returns
         -------
         psf : Array
-            The psf of the source source modelled through the optics.
+            The PSF of the source modelled through the optics.
         """
         self = self.normalise()
         weights = self.weights * self.fluxes[:, None]
@@ -572,7 +555,7 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
     flux : Array, photons
         The mean flux of the point and resolved source.
     distribution : Array
-        The array of intensities respresenting the resolved source.
+        The array of intensities representing the resolved source.
     contrast : Array
         The contrast ratio between the point source and the resolved
         source.
@@ -580,15 +563,14 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
         The spectrum of this object, represented by a Spectrum object.
     """
 
-
-    def __init__(self         : Source,
-                 wavelengths  : Array    = None,
-                 position     : Array    = np.zeros(2),
-                 flux         : Array    = np.array(1.),
-                 distribution : Array    = np.ones((3, 3)),
-                 contrast     : Array    = np.array(1.),
-                 spectrum     : Spectrum = None,
-                 weights      : Array    = None) -> Source:
+    def __init__(self: Source,
+                 wavelengths: Array = None,
+                 position: Array = np.zeros(2),
+                 flux: Array = np.array(1.),
+                 distribution: Array = np.ones((3, 3)),
+                 contrast: Array = np.array(1.),
+                 spectrum: Spectrum = None,
+                 weights: Array = None) -> Source:
         """
         Parameters
         ----------
@@ -597,21 +579,20 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
         flux : Array, photons = np.array(1.)
             The mean flux of the point and resolved source.
         distribution : Array = np.ones((3, 3))
-            The array of intensities respresenting the resolved source.
+            The array of intensities representing the resolved source.
         contrast : Array = np.array(1.)
             The contrast ratio between the point source and the resolved
             source.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-        wavelengths : Array, meters = None
+        wavelengths : Array, metres = None
             The array of wavelengths at which the spectrum is defined.
         """
         super().__init__(wavelengths=wavelengths, position=position, flux=flux,
-            distribution=distribution, spectrum=spectrum, weights=weights,
-            contrast=contrast)
+                         distribution=distribution, spectrum=spectrum, weights=weights,
+                         contrast=contrast)
 
-
-    def model(self : Source, optics : Optics) -> Array:
+    def model(self: Source, optics: Optics) -> Array:
         """
         Method to model the psf of the source through the optics. Implements a
         basic convolution with the psf and source distribution, while also

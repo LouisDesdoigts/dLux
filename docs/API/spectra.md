@@ -26,7 +26,7 @@ import dLux as dl
 import jax.numpy as np
 
 # Array based spectrum
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 weights = np.linspace(.5, 1, 5)
 spectrum = dl.Spectrum(wavelengths, weights)
 ```

@@ -31,7 +31,7 @@ class TestZernike(object):
         zernike = create_zernike()
         coords = dlu.pixel_coords(16, 1/16)
 
-        # Test calcualte
+        # Test calculate
         z = zernike.calculate(coords)
         p = zernike.calculate(coords, nsides=3)
 
@@ -53,5 +53,5 @@ class TestZernikeBasis(object):
         zernike_basis = create_zernike_basis()
         coords = dlu.pixel_coords(16, 1/16)
 
-        # Test calcualte
+        # Test calculate
         z = zernike_basis.calculate_basis(coords)

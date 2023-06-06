@@ -72,7 +72,7 @@ wavefront. Taken from the last axis of the amplitude array.
 `psf` Calculates the Point Spread Function (PSF), i.e. the squared modulus
 of the complex wavefront.
 
-`coordinates` Returns the physical positions of the wavefront pixels in meters.
+`coordinates` Returns the physical positions of the wavefront pixels in metres.
 
 `wavenumber` Returns the wavenumber of the wavefront ($2\pi/\lambda$).
 
@@ -99,9 +99,9 @@ manipulation of the image:
 
 `rotate(angle)` Performs a paraxial rotation on the wavefront, determined by the `angle` parameter, using interpolation.
 
-`pad_to(npixels)` Paraxially zero-pads the `Wavefront` to the size determined by `npixels`. Note this only supports padding arrays of even dimension to even dimension, and odd dimension to to odd dimension, e.g. $2 \rightarrow 4$ or $3 \rightarrow 5$.
+`pad_to(npixels)` Paraxially zero-pads the `Wavefront` to the size determined by `npixels`. Note this only supports padding arrays of even dimension to even dimension, and odd dimension to odd dimension, e.g. $2 \rightarrow 4$ or $3 \rightarrow 5$.
 
-`crop_to(npixels)` Paraxially crops the `Wavefront` to the size determined by `npixels`. Note this only supports cropping arrays of even dimension to even dimension, and odd dimension to to odd dimension, e.g. $4 \rightarrow 2$ or $5 \rightarrow 3$.
+`crop_to(npixels)` Paraxially crops the `Wavefront` to the size determined by `npixels`. Note this only supports cropping arrays of even dimension to even dimension, and odd dimension to odd dimension, e.g. $4 \rightarrow 2$ or $5 \rightarrow 3$.
 
 ---
 

@@ -23,6 +23,7 @@ Let's construct a Zernike Basis:
 
 ```python
 import dLux as dl
+import jax.numpy as np
 
 zernike_basis = dl.ZernikeBasis(np.arange(1, 7))
 ```

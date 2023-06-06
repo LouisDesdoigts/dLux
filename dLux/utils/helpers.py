@@ -25,7 +25,7 @@ def list_to_dictionary(
     Returns
     -------
     dictionary : dict
-        The equivilent dictionary or ordered dictionary.
+        The equivalent dictionary or ordered dictionary.
     """
     # Construct names list and identify repeats
     names, repeats = [], []

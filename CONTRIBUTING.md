@@ -8,8 +8,8 @@
 All units wihin dLux are SI!
 
 ---
-## Adding to doccumentation
-When adding to the doccumentation, there are a few steps that need to be done:
+## Adding to documentation
+When adding to the documentation, there are a few steps that need to be done:
 1. Create the class or function and add the docstring
 2. Create a .md file in the docs/ directory
 3. Point to the class/function as so `::: dLux.module.new_class`

@@ -7,11 +7,9 @@ from jax import vmap, Array
 from equinox import tree_at
 import dLux
 
-
 __all__ = ["Dither"]
 
-
-Instrument = lambda : dLux.core.BaseInstrument
+Instrument = lambda: dLux.core.BaseInstrument
 
 
 class BaseObservation(Base):
@@ -22,8 +20,8 @@ class BaseObservation(Base):
     """
 
     @abstractmethod
-    def model(self       : BaseObservation, 
-              instrument : Instrument()): # pragma: no cover
+    def model(self: BaseObservation,
+              instrument: Instrument()):  # pragma: no cover
         """
         Abstract method for the observation function.
         """
@@ -31,8 +29,8 @@ class BaseObservation(Base):
 
 class Dither(BaseObservation):
     """
-    Observation class designed to apply a series of dithers to the insturment
-    and return the corresponding psfs.
+    Observation class designed to apply a series of dithers to the instrument
+    and return the corresponding PSFs.
 
     Attributes
     ----------
@@ -41,10 +39,9 @@ class Dither(BaseObservation):
         array should be (ndithers, 2) where ndithers is the number of dithers
         and the second dimension is the (x, y) dither in radians.
     """
-    dithers : Array
+    dithers: Array
 
-
-    def __init__(self : Dither, dithers : Array):
+    def __init__(self: Dither, dithers: Array):
         """
         Constructor for the Dither class.
 
@@ -60,15 +57,16 @@ class Dither(BaseObservation):
         if self.dithers.ndim != 2 or self.dithers.shape[1] != 2:
             raise ValueError("dithers must be an array of shape (ndithers, 2)")
 
-
-    def dither_position(self       : Dither, 
-                        instrument : Instrument, 
-                        dither     : Array) -> Instrument:
+    def dither_position(self: Dither,
+                        instrument: Instrument,
+                        dither: Array) -> Instrument:
         """
         Dithers the position of the source objects by dither.
 
         Parameters
         ----------
+        instrument : Instrument
+            The instrument to dither.
         dither : Array, radians
             The (x, y) dither to apply to the source positions.
 
@@ -82,15 +80,14 @@ class Dither(BaseObservation):
 
         # Map the dithers across the sources
         dithered_sources = tree_map(dither_fn, instrument.sources, \
-            is_leaf = lambda leaf: isinstance(leaf, dLux.sources.Source))
+                                    is_leaf=lambda leaf: isinstance(leaf, dLux.sources.Source))
 
         # Apply updates
-        return tree_at(lambda instrument: instrument.sources, instrument, 
-            dithered_sources)
+        return tree_at(lambda instrument: instrument.sources, instrument,
+                       dithered_sources)
 
-
-    def model(self       : Dither,
-              instrument : Instrument,
+    def model(self: Dither,
+              instrument: Instrument,
               *args, **kwargs) -> Array:
         """
         Applies a series of dithers to the instrument sources and calls the
@@ -107,6 +104,6 @@ class Dither(BaseObservation):
             The psfs generated after applying the dithers to the source
             positions.
         """
-        dith_fn = lambda dither: self.dither_position(instrument, 
-            dither).model(*args, **kwargs)
+        dith_fn = lambda dither: self.dither_position(instrument,
+                                                      dither).model(*args, **kwargs)
         return vmap(dith_fn, 0)(self.dithers)
