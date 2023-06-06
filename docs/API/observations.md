@@ -1,13 +1,13 @@
 # Observations: observations.py
 
-This module contains the classes that define the behaviour of observations in dLux. Observations classes are designed to be constructed by users in order to model arbitrary observation patterns. As an example we have implemented a `Dither` class that applies a series of dithers to the source positions.
+This module contains the classes that define the behaviour of observations in ∂Lux. Observation classes are designed to be constructed by users in order to model arbitrary observation patterns. As an example, we have implemented a `Dither` class which applies a series of dithers to the source positions.
 
 ??? info "Observations API"
     ::: dLux.observations
 
-All `Observation` classes shoudl implement a `.model(instrument)` method that performs the actual calculation of the observation.
+All `Observation` classes should implement a `.model(instrument)` method that performs the actual calculation of the observation.
 
-Lets have a look how to construct a simple dither observation class.
+Let's construct a simple dither observation class.
 
 ```python
 import jax.numpy as np

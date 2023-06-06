@@ -1,12 +1,12 @@
 # Instruments: instruments.py
 
-This module contains the classes that define the behaviour of instruments in dLux. Instruments classes hold the various different types of dLux classes and handles the coherent modelling of these different classes.
+This module contains the classes that define the behaviour of instruments in ∂Lux. Instrument classes hold the various types of ∂Lux classes and handle the coherent modelling of these classes.
 
 There is one public class:
 
 - `Instrument`
 
-The Instrument class has three main methods:
+The `Instrument` class has three main methods:
 
 1. `model()` Models the sources through the instrument optics and detector.
 2. `observe()` Calls the `observe` method of the stored observation class.
@@ -19,7 +19,7 @@ The Instrument class has three main methods:
 
 # Examples
 
-Lets see how we can construct a minimal instrument object with all of its attributes populated.
+Let's construct a minimal instrument object with all of its attributes populated.
 
 ```python
 import jax.numpy as np
