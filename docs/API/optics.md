@@ -236,7 +236,7 @@ psf = optics.propagate(wavelengths)
 ```
 
 !!! tip "Accessing Layers"
-    Note that we can pass in a tuple of the form (OpticalLayer, key) to the LayeredOptics class. OpticalLayers and transformed into an OrderedDict and this key is then used for that layer. This allows us to access the layers in the class via the `class.attribute` method, ie `optics.aperture`. This can be very helpful when using zodaix methods!
+    Note that we can pass in a tuple of the form (OpticalLayer, key) to the LayeredOptics class. OpticalLayers and transformed into an OrderedDict and this key is then used for that layer. This allows us to access the layers in the class via the `class.attribute` method, ie `optics.aperture`. This can be very helpful when using Zodiax methods!
 
 ??? abstract "Plotting code"
     ```python

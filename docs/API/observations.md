@@ -139,10 +139,10 @@ psf1, psf2 = telescope.observe()
 
 ![Observation](../assets/observation.png)
 
-This is a relatively simple example, but shows the flexibilty that can be gained with this class! It can also be used to remove redunancies in calcualtions. Say you wanted to model multiple sources through the same instrument that are separated by a large on-sky angle that still fall on detector, rather than model the full array we can model only the regions that we care about in order to save a lot of redundant compute!
+This is a relatively simple example, but shows the flexibility that can be gained with this class! It can also be used to remove redundancies in calculations. Say you wanted to model multiple sources through the same instrument that are separated by a large on-sky angle that still fall on detector, rather than model the full array we can model only the regions that we care about in order to save a lot of redundant compute!
 
-!!! tip "Acessing Parameters"
-    The `AbstractObservation` class has a built in `__getattr__` class that allows for its parameters to be accessed from high level classes like `Instrument`. That means if we wanted to access the `filter1` parameter we could do so like this:
+!!! tip "Accessing Parameters"
+    The `AbstractObservation` class has a built-in `__getattr__` class that allows for its parameters to be accessed from high level classes like `Instrument`. That means if we wanted to access the `filter1` parameter we could do so like this:
     
     ```python
     filt = telescope.filter1

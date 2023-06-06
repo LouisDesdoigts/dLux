@@ -101,7 +101,7 @@ apertures = [
     ```
 ![basic_apertures](../assets/basic_apertures.png)
 
-We can esaily add aberrations to these, and make them static:
+We can easily add aberrations to these, and make them static:
 
 ```python
 import dLux as dl

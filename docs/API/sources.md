@@ -39,7 +39,6 @@ All public classes have two main methods:
 Let's look at how to construct all these different classes. First, we construct some optics to model the sources through.
 
 ```python
-import jax.numpy as np
 import dLux as dl
 
 # Define the optical parameters
