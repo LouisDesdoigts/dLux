@@ -9,8 +9,7 @@
 
 Differentiable Optical Models as _Parameterised Neural Networks_ in Jax using Zodiax
 
-Contributors: [Louis Desdoigts](https://github.com/LouisDesdoigts), [Benjamin Pope](https://github.com/benjaminpope), [Jordan
-Dennis](https://github.com/Jordan-Dennis), [Adam Taras](https://github.com/ataras2), [Peter Tuthill](https://github.com/ptuthill)
+Contributors: [Louis Desdoigts](https://github.com/LouisDesdoigts), [Jordan Dennis](https://github.com/Jordan-Dennis), [Adam Taras](https://github.com/ataras2), [Max Charles](https://github.com/maxecharles), [Benjamin Pope](https://github.com/benjaminpope), [Peter Tuthill](https://github.com/ptuthill)
 
 ∂Lux is an open-source differentiable optical modelling framework harnessing the structural isomorphism between optical systems and neural networks, giving forwards models of optical systems as _parametric neural networks_.
 
