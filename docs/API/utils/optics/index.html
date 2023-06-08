@@ -894,7 +894,11 @@ phases in units of radians for the given wavelength.</p>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The Optical Path Difference (opd) to be converted into phase.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Optical Path Difference (opd) to be converted into phase.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -904,7 +908,11 @@ phases in units of radians for the given wavelength.</p>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The wavelength at which to calculate the phase for.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavelength at which to calculate the phase for.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -925,7 +933,11 @@ phases in units of radians for the given wavelength.</p>
 <td><code>phase</code></td>          <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The equivilent phase value for the given opd and wavelength.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The equivilent phase value for the given opd and wavelength.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1006,7 +1018,11 @@ Difference (opd) in meters for the given wavelength.</p>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The phase to be converted into Optical Path Difference (opd)</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The phase to be converted into Optical Path Difference (opd)</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1016,7 +1032,11 @@ Difference (opd) in meters for the given wavelength.</p>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The wavelength at which to calculate the phase for.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavelength at which to calculate the phase for.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1037,7 +1057,11 @@ Difference (opd) in meters for the given wavelength.</p>
 <td><code>opd</code></td>          <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The equivilent opd value for the given phase and wavelength.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The equivilent opd value for the given phase and wavelength.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1117,7 +1141,11 @@ Difference (opd) in meters for the given wavelength.</p>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The wavelength at which to calculate the diffraction fringe for.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavelength at which to calculate the diffraction fringe for.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1127,7 +1155,11 @@ Difference (opd) in meters for the given wavelength.</p>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The size of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The size of the aperture.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1148,7 +1180,11 @@ Difference (opd) in meters for the given wavelength.</p>
 <td><code>fringe_size</code></td>          <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The angular fringe size in units of radians.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The angular fringe size in units of radians.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1227,7 +1263,11 @@ sampling rate.</p>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The wavelength at which to calculate the diffraction fringe for.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavelength at which to calculate the diffraction fringe for.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1237,7 +1277,11 @@ sampling rate.</p>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The size of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The size of the aperture.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1247,9 +1291,13 @@ sampling rate.</p>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The size of each pixel. This is taken in units of radians per pixel if
+          <td>
+            <div class="doc-md-description">
+              <p>The size of each pixel. This is taken in units of radians per pixel if
 no focal length is provided, else it is taken in size of meters per
-pixel.</p></td>
+pixel.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1259,9 +1307,13 @@ pixel.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The focal length of the optical system. If none is provided, the pixel
+          <td>
+            <div class="doc-md-description">
+              <p>The focal length of the optical system. If none is provided, the pixel
 scale is taken in units of radians per pixel, else it is taken in
-meters per pixel.</p></td>
+meters per pixel.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -1282,7 +1334,11 @@ meters per pixel.</p></td>
 <td><code>sampling</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The sampling rate of the fringes in units of pixels.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The sampling rate of the fringes in units of pixels.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1401,8 +1457,12 @@ at the given sampling rate.</p>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The rate at which to sample the diffraction fringes. A value of 2 will
-give nyquist sampled pixels.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The rate at which to sample the diffraction fringes. A value of 2 will
+give nyquist sampled pixels.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1412,7 +1472,11 @@ give nyquist sampled pixels.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The observation wavelength.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The observation wavelength.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1422,7 +1486,11 @@ give nyquist sampled pixels.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The size of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The size of the aperture.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1432,9 +1500,13 @@ give nyquist sampled pixels.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The focal length of the optical system. If none is provided, the pixel
+          <td>
+            <div class="doc-md-description">
+              <p>The focal length of the optical system. If none is provided, the pixel
 scale is given in units of radians per pixel, else it is given in
-meters per pixel.</p></td>
+meters per pixel.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -1455,9 +1527,13 @@ meters per pixel.</p></td>
 <td><code>pixel_scale</code></td>          <td>
                 <code>Array, radians per pixel or meters per pixel</code>
           </td>
-          <td><p>The pixel_size needed to sample the diffraction fringes at the input
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel_size needed to sample the diffraction fringes at the input
 sampling rate, in units of radans per pixel if no focal length is
-provided, else in units of meters per pixel.</p></td>
+provided, else in units of meters per pixel.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1579,8 +1655,12 @@ diffraction fringes given by a circular aperture.</p>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The rate at which to sample the diffraction fringes. A value of 2 will
-give nyquist sampled pixels.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The rate at which to sample the diffraction fringes. A value of 2 will
+give nyquist sampled pixels.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1590,7 +1670,11 @@ give nyquist sampled pixels.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The observation wavelength.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The observation wavelength.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1600,7 +1684,11 @@ give nyquist sampled pixels.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The size of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The size of the aperture.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1610,9 +1698,13 @@ give nyquist sampled pixels.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The focal length of the optical system. If none is provided, the pixel
+          <td>
+            <div class="doc-md-description">
+              <p>The focal length of the optical system. If none is provided, the pixel
 scale is given in units of radians per pixel, else it is given in
-meters per pixel.</p></td>
+meters per pixel.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -1633,9 +1725,13 @@ meters per pixel.</p></td>
 <td><code>pixel_scale</code></td>          <td>
                 <code>Array, radians per pixel or meters per pixel</code>
           </td>
-          <td><p>The pixel_size needed to sample the diffraction fringes at the input
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel_size needed to sample the diffraction fringes at the input
 sampling rate, in units of radans per pixel if no focal length is
-provided, else in units of meters per pixel.</p></td>
+provided, else in units of meters per pixel.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>

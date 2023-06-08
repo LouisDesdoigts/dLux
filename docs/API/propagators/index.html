@@ -903,30 +903,46 @@ defined in cartesian units (ie meters/pixel).</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels in the output plane.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels in the output plane.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
                 <code>Array, meters/pixel or radians/pixel</code>
           </td>
-          <td><p>The pixel scale in the output plane, measured in meters per pixel.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale in the output plane, measured in meters per pixel.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>focal_length</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The effective focal length of the lens/mirror this propagator
+          <td>
+            <div class="doc-md-description">
+              <p>The effective focal length of the lens/mirror this propagator
 represents. If None, the pixel_scale is taken to be in radians/pixel,
-else it is taken to be in meters/pixel.</p></td>
+else it is taken to be in meters/pixel.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>inverse</code></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Should the propagation be performed in the inverse direction.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Should the propagation be performed in the inverse direction.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1124,7 +1140,11 @@ else it is taken to be in meters/pixel.</p></td>
           <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The wavefront to operate on.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavefront to operate on.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1145,7 +1165,11 @@ else it is taken to be in meters/pixel.</p></td>
 <td><code>wavefront</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The transformed wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The transformed wavefront.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1227,7 +1251,11 @@ else it is taken to be in meters/pixel.</p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels in the output plane.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels in the output plane.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1237,8 +1265,12 @@ else it is taken to be in meters/pixel.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The pixel scale in the output plane, measured in radians per pixel
-if focal_length is None, else meters per pixel</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale in the output plane, measured in radians per pixel
+if focal_length is None, else meters per pixel</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1248,9 +1280,13 @@ if focal_length is None, else meters per pixel</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The focal_length of the lens/mirror this propagator represents.
+          <td>
+            <div class="doc-md-description">
+              <p>The focal_length of the lens/mirror this propagator represents.
 If None, the pixel_scale is taken to be in radians/pixel, else it
-is taken to be in meters/pixel.</p></td>
+is taken to be in meters/pixel.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -1260,7 +1296,11 @@ is taken to be in meters/pixel.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Should the propagation be performed in the inverse direction.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Should the propagation be performed in the inverse direction.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -1378,21 +1418,33 @@ Fast Fourier Transfrom.</p>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The focal_length of the lens/mirror this propagator represents.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The focal_length of the lens/mirror this propagator represents.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>pad</code></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The amount of padding to apply to the wavefront before propagating.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The amount of padding to apply to the wavefront before propagating.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>inverse</code></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Should the propagation be performed in the inverse direction.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Should the propagation be performed in the inverse direction.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1466,7 +1518,7 @@ Fast Fourier Transfrom.</p>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span>         <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> 
-        <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pad</span>          <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
         <span class="n">inverse</span>      <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Propagator</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
@@ -1536,7 +1588,11 @@ Fast Fourier Transfrom.</p>
           <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The wavefront to operate on.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavefront to operate on.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1557,7 +1613,11 @@ Fast Fourier Transfrom.</p>
 <td><code>wavefront</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The transformed wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The transformed wavefront.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1650,46 +1710,70 @@ sampling in that plane.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels in the output plane.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels in the output plane.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
                 <code>Array, meters/pixel or radians/pixel</code>
           </td>
-          <td><p>The pixel scale in the output plane, measured in meters per pixel.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale in the output plane, measured in meters per pixel.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>focal_length</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The effective focal length of the lens/mirror this propagator
+          <td>
+            <div class="doc-md-description">
+              <p>The effective focal length of the lens/mirror this propagator
 represents. If None, the pixel_scale is taken to be in radians/pixel,
-else it is taken to be in meters/pixel.</p></td>
+else it is taken to be in meters/pixel.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>shift</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) shift to apply to the wavefront in the output plane.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) shift to apply to the wavefront in the output plane.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>pixel</code></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>If True the shift value is assumed to be in units of pixels, else the
+          <td>
+            <div class="doc-md-description">
+              <p>If True the shift value is assumed to be in units of pixels, else the
 physical units of the output plane (ie radians if focal_length is None,
-else meters). </p></td>
+else meters). </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>inverse</code></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Should the propagation be performed in the inverse direction.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Should the propagation be performed in the inverse direction.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1919,7 +2003,11 @@ else meters). </p></td>
           <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The wavefront to operate on.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavefront to operate on.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1940,7 +2028,11 @@ else meters). </p></td>
 <td><code>wavefront</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The transformed wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The transformed wavefront.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2022,7 +2114,11 @@ else meters). </p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels in the output plane.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels in the output plane.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2032,8 +2128,12 @@ else meters). </p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The pixel scale in the output plane, measured in meters or radians
-per pixel for Cartesian or Angular Wavefront respectively.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale in the output plane, measured in meters or radians
+per pixel for Cartesian or Angular Wavefront respectively.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2043,7 +2143,11 @@ per pixel for Cartesian or Angular Wavefront respectively.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) shift to apply to the wavefront in the output plane.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) shift to apply to the wavefront in the output plane.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2053,9 +2157,13 @@ per pixel for Cartesian or Angular Wavefront respectively.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The effective focal_length of the lens/mirror this propagator
+          <td>
+            <div class="doc-md-description">
+              <p>The effective focal_length of the lens/mirror this propagator
 represents. If None, the pixel_scale is taken to be in 
-radians/pixel, else it is taken to be in meters/pixel.</p></td>
+radians/pixel, else it is taken to be in meters/pixel.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -2065,9 +2173,13 @@ radians/pixel, else it is taken to be in meters/pixel.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>If True the shift value is assumed to be in units of pixels, else
+          <td>
+            <div class="doc-md-description">
+              <p>If True the shift value is assumed to be in units of pixels, else
 the physical units of the output plane (ie radians if focal_length
-is None, else meters).</p></td>
+is None, else meters).</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -2077,7 +2189,11 @@ is None, else meters).</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Should the propagation be performed in the inverse direction.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Should the propagation be performed in the inverse direction.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -2215,51 +2331,79 @@ meters/pixel in the output plane.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels in the output plane.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels in the output plane.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
                 <code>Array, meters/pixel</code>
           </td>
-          <td><p>The pixel scale in the output plane, measured in meters per pixel.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale in the output plane, measured in meters per pixel.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>focal_length</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The focal_length of the lens/mirror this propagator represents.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The focal_length of the lens/mirror this propagator represents.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>focal_shift</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The shift in the propagation distance of the wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The shift in the propagation distance of the wavefront.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>shift</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) shift to apply to the wavefront in the output plane.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) shift to apply to the wavefront in the output plane.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>pixel</code></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Should the shift value be considered in units of pixels, or in the
+          <td>
+            <div class="doc-md-description">
+              <p>Should the shift value be considered in units of pixels, or in the
 physical units of the output plane (ie pixels or meters, radians). True
-interprets the shift value in pixel units.</p></td>
+interprets the shift value in pixel units.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>inverse</code></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Should the propagation be performed in the inverse direction.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Should the propagation be performed in the inverse direction.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2485,7 +2629,11 @@ interprets the shift value in pixel units.</p></td>
           <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The wavefront to operate on.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavefront to operate on.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2506,7 +2654,11 @@ interprets the shift value in pixel units.</p></td>
 <td><code>wavefront</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The transformed wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The transformed wavefront.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2580,7 +2732,11 @@ interprets the shift value in pixel units.</p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels in the output plane.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels in the output plane.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2590,7 +2746,11 @@ interprets the shift value in pixel units.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The pixel scale in the output plane, measured in meters per pixel.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale in the output plane, measured in meters per pixel.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2600,7 +2760,11 @@ interprets the shift value in pixel units.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The focal_length of the lens/mirror this propagator represents.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The focal_length of the lens/mirror this propagator represents.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2610,7 +2774,11 @@ interprets the shift value in pixel units.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The shift in the propagation distance of the wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The shift in the propagation distance of the wavefront.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2620,7 +2788,11 @@ interprets the shift value in pixel units.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) shift to apply to the wavefront in the output plane.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) shift to apply to the wavefront in the output plane.</p>
+            </div>
+          </td>
           <td>
                 <code>np.zeros(2)</code>
           </td>
@@ -2630,8 +2802,12 @@ interprets the shift value in pixel units.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Should the shift value be considered in units of pixel, or in the
-physical units of the output plane (ie pixels or meters, radians).</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Should the shift value be considered in units of pixel, or in the
+physical units of the output plane (ie pixels or meters, radians).</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -2641,7 +2817,11 @@ physical units of the output plane (ie pixels or meters, radians).</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Should the propagation be performed in the inverse direction.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Should the propagation be performed in the inverse direction.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>

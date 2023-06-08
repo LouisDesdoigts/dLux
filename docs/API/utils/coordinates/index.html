@@ -893,8 +893,12 @@ cordinates.</p>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (r, phi) polar coordinates to be converted into cartesian
-cordinates.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (r, phi) polar coordinates to be converted into cartesian
+cordinates.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -915,7 +919,11 @@ cordinates.</p></td>
 <td><code>coordinates</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The input polar coordinates converted into (x, y) cartesian cordinates.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input polar coordinates converted into (x, y) cartesian cordinates.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -995,7 +1003,11 @@ coordinates.</p>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) cartesian coordinates to be converted into polar cordinates.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) cartesian coordinates to be converted into polar cordinates.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1016,8 +1028,12 @@ coordinates.</p>
 <td><code>coordinates</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The input cartesian coordinates converted into (r, phi) polar
-cordinates.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input cartesian coordinates converted into (r, phi) polar
+cordinates.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1099,7 +1115,11 @@ flexibility to have different dimension sizes and scales.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels in all dimensions.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels in all dimensions.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1109,7 +1129,11 @@ flexibility to have different dimension sizes and scales.</p>
           <td>
                 <code>float</code>
           </td>
-          <td><p>The pixel scale in all dimensions.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale in all dimensions.</p>
+            </div>
+          </td>
           <td>
                 <code>1</code>
           </td>
@@ -1119,7 +1143,11 @@ flexibility to have different dimension sizes and scales.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of outut dimensions.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of outut dimensions.</p>
+            </div>
+          </td>
           <td>
                 <code>2</code>
           </td>
@@ -1129,8 +1157,12 @@ flexibility to have different dimension sizes and scales.</p>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>If True, the output is in polar coordinates. If False, the output is in
-cartesian coordinates. ndims must be 2 if polar is True.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>If True, the output is in polar coordinates. If False, the output is in
+cartesian coordinates. ndims must be 2 if polar is True.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -1151,7 +1183,11 @@ cartesian coordinates. ndims must be 2 if polar is True.</p></td>
 <td><code>coordaintes</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The array of pixel center coordinates.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The array of pixel center coordinates.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1268,7 +1304,11 @@ input must be 2d.</p>
           <td>
                 <code><span title="typing.Union">Union</span>[int, tuple]</code>
           </td>
-          <td><p>The number of pixels in each dimension.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels in each dimension.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1278,9 +1318,13 @@ input must be 2d.</p>
           <td>
                 <code><span title="typing.Union">Union</span>[tuple, float]</code>
           </td>
-          <td><p>The pixel scales in each dimension. If a tuple, the length
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scales in each dimension. If a tuple, the length
 of the tuple must match the number of dimensions. If a float, the same
-scale is applied to all dimensions. If None, the scale is set to 1.</p></td>
+scale is applied to all dimensions. If None, the scale is set to 1.</p>
+            </div>
+          </td>
           <td>
                 <code>1.0</code>
           </td>
@@ -1290,10 +1334,14 @@ scale is applied to all dimensions. If None, the scale is set to 1.</p></td>
           <td>
                 <code><span title="typing.Union">Union</span>[tuple, float]</code>
           </td>
-          <td><p>The offset of the pixel centers in each dimension. If a tuple, the 
+          <td>
+            <div class="doc-md-description">
+              <p>The offset of the pixel centers in each dimension. If a tuple, the 
 length of the tuple must match the number of dimensions. If a float, 
 the same offset is applied to all dimensions. If None, the offset is 
-set to 0.</p></td>
+set to 0.</p>
+            </div>
+          </td>
           <td>
                 <code>0.0</code>
           </td>
@@ -1303,8 +1351,12 @@ set to 0.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>If True, the output is in polar coordinates. If False, the output is in
-cartesian coordinates. Default is False.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>If True, the output is in polar coordinates. If False, the output is in
+cartesian coordinates. Default is False.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -1314,8 +1366,12 @@ cartesian coordinates. Default is False.</p></td>
           <td>
                 <code>str</code>
           </td>
-          <td><p>The indexing of the output. Default is 'xy'. See numpy.meshgrid for more
-details.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The indexing of the output. Default is 'xy'. See numpy.meshgrid for more
+details.</p>
+            </div>
+          </td>
           <td>
                 <code>&#39;xy&#39;</code>
           </td>
@@ -1336,7 +1392,11 @@ details.</p></td>
 <td><code>positions</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The positions of the pixel centers in the given dimensions.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The positions of the pixel centers in the given dimensions.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>

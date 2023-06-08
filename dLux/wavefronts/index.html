@@ -1874,7 +1874,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=3b0e0b9d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=06025b8e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1916,7 +1916,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=99e434c9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a7e43da4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1948,7 +1948,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=591c1ecb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=fbd2d953" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1986,7 +1986,7 @@ OpticalLayer = lambda : dLux.optical_layers.OpticalLayer</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=46d5acad" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=551943f9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2632,7 +2632,8 @@ OpticalLayer = lambda : dLux.optical_layers.OpticalLayer</div>
     <span class="c1">#############################</span>
     <span class="c1">### Propagation Functions ###</span>
     <span class="c1">#############################</span>
-    <span class="k">def</span> <span class="nf">_FFT_output</span><span class="p">(</span><span class="bp">self</span>         <span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="nf">_FFT_output</span><span class="p">(</span><span class="bp">self</span>         <span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span>
+                    <span class="n">pad_factor</span>   <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                     <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
                     <span class="n">inverse</span>      <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2656,12 +2657,12 @@ OpticalLayer = lambda : dLux.optical_layers.OpticalLayer</div>
 <span class="sd">        pixel_scale : Array</span>
 <span class="sd">            The pixel scale of the output plane.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pixel_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fringe_size</span> <span class="o">/</span> <span class="n">pad_factor</span>
         <span class="k">if</span> <span class="n">focal_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;Angular&#39;</span>
-            <span class="n">pixel_scale</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">diameter</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;Cartesian&#39;</span>
-            <span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">focal_length</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">diameter</span>
+            <span class="n">pixel_scale</span> <span class="o">*=</span> <span class="n">focal_length</span>
 
             <span class="c1"># Check for invalid propagation</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;Angular&#39;</span><span class="p">:</span>
@@ -2730,7 +2731,7 @@ OpticalLayer = lambda : dLux.optical_layers.OpticalLayer</div>
 <span class="sd">            The propagated wavefront.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Calculate</span>
-        <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">pixel_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FFT_output</span><span class="p">(</span><span class="n">focal_length</span><span class="p">)</span>
+        <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">pixel_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FFT_output</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">focal_length</span><span class="p">)</span>
 
         <span class="c1"># Pad must be int</span>
         <span class="n">npixels</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span> <span class="o">*</span> <span class="p">(</span><span class="n">pad</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">//</span> <span class="mi">2</span>
@@ -2767,7 +2768,8 @@ OpticalLayer = lambda : dLux.optical_layers.OpticalLayer</div>
 <span class="sd">            The propagated wavefront.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Calculate</span>
-        <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">pixel_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FFT_output</span><span class="p">(</span><span class="n">focal_length</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">pixel_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_FFT_output</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">focal_length</span><span class="p">,</span> 
+            <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># Pad must be int</span>
         <span class="n">npixels</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span> <span class="o">*</span> <span class="p">(</span><span class="n">pad</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">//</span> <span class="mi">2</span>
@@ -3723,7 +3725,8 @@ OpticalLayer = lambda : dLux.optical_layers.OpticalLayer</div>
     #############################
     ### Propagation Functions ###
     #############################
-    def _FFT_output(self         : Wavefront, 
+    def _FFT_output(self         : Wavefront,
+                    pad_factor   : int = 1,
                     focal_length : Array = None, 
                     inverse      : bool = False) -> tuple:
         """
@@ -3747,12 +3750,12 @@ OpticalLayer = lambda : dLux.optical_layers.OpticalLayer</div>
         pixel_scale : Array
             The pixel scale of the output plane.
         """
+        pixel_scale = self.fringe_size / pad_factor
         if focal_length is None:
             units = 'Angular'
-            pixel_scale =  self.wavelength / self.diameter
         else:
             units = 'Cartesian'
-            pixel_scale = focal_length * self.wavelength / self.diameter
+            pixel_scale *= focal_length
 
             # Check for invalid propagation
             if self.units == 'Angular':
@@ -3821,7 +3824,7 @@ OpticalLayer = lambda : dLux.optical_layers.OpticalLayer</div>
             The propagated wavefront.
         """
         # Calculate
-        plane, units, pixel_scale = self._FFT_output(focal_length)
+        plane, units, pixel_scale = self._FFT_output(pad, focal_length)
 
         # Pad must be int
         npixels = (self.npixels * (pad - 1)) // 2
@@ -3858,7 +3861,8 @@ OpticalLayer = lambda : dLux.optical_layers.OpticalLayer</div>
             The propagated wavefront.
         """
         # Calculate
-        plane, units, pixel_scale = self._FFT_output(focal_length, inverse=True)
+        plane, units, pixel_scale = self._FFT_output(pad, focal_length, 
+            inverse=True)
 
         # Pad must be int
         npixels = (self.npixels * (pad - 1)) // 2
@@ -4196,7 +4200,7 @@ OpticalLayer = lambda : dLux.optical_layers.OpticalLayer</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5e6791d6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=52536e1b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>

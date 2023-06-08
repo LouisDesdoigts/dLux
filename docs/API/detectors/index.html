@@ -895,8 +895,12 @@ response to some psf.</p>
           <td>
                 <code>dict</code>
           </td>
-          <td><p>A collections.OrderedDict of 'layers' that define the transformations
-and operations upon some input psf as it interacts with the detector.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>A collections.OrderedDict of 'layers' that define the transformations
+and operations upon some input psf as it interacts with the detector.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1095,7 +1099,11 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>The key of the item to be searched for in the layers dictionary.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key of the item to be searched for in the layers dictionary.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1116,7 +1124,11 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
 <td><code>item</code></td>          <td>
                 <code>object</code>
           </td>
-          <td><p>The item corresponding to the supplied key in the layers dictionary.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The item corresponding to the supplied key in the layers dictionary.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1198,13 +1210,17 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
           <td>
                 <code>list</code>
           </td>
-          <td><p>An list of dLux detector layer classes that define the instrumental
+          <td>
+            <div class="doc-md-description">
+              <p>An list of dLux detector layer classes that define the instrumental
 effects for some detector.</p>
 <p>A list of ∂Lux 'layers' that define the transformations and
 operations upon some input wavefront through an optical system.
 The entried can either be dLux DetectorLayers, or tuples of the
 form (DetectorLayer, key), with the key being used as the dictionary
-key for the layer.</p></td>
+key for the layer.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1285,7 +1301,11 @@ key for the layer.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The input psf to be transformed.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input psf to be transformed.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1306,7 +1326,11 @@ key for the layer.</p></td>
 <td><code>image</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The ouput 'image' after being transformed by the detector layers.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The ouput 'image' after being transformed by the detector layers.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>

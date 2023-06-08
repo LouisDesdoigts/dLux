@@ -906,51 +906,79 @@
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The radius of the aperture. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The radius of the aperture. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>centre</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>shear</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>compression</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>occulting</code></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Is the aperture occulting or tranmissive. False results in a tranmissive
-aperture, and True results in an occulting aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Is the aperture occulting or tranmissive. False results in a tranmissive
+aperture, and True results in an occulting aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>softening</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, pixels</code>
           </td>
-          <td><p>The approximate pixel width of the soft boundary applied to the 
-aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The approximate pixel width of the soft boundary applied to the 
+aperture. Hard edges can be achieved by setting the softening to 0.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>normalise</code></td>
           <td>
                 <code>bool = False</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the aperture.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1238,7 +1266,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The radius of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The radius of the aperture.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1248,7 +1280,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([0.0, 0.0])</code>
           </td>
@@ -1258,7 +1294,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([0.0, 0.0])</code>
           </td>
@@ -1268,7 +1308,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([1.0, 1.0])</code>
           </td>
@@ -1278,8 +1322,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Is the aperture occulting or tranmissive. False results in a 
-tranmissive aperture, and True results in an occulting aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Is the aperture occulting or tranmissive. False results in a 
+tranmissive aperture, and True results in an occulting aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -1289,8 +1337,12 @@ tranmissive aperture, and True results in an occulting aperture.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The approximate pixel width of the soft boundary applied to the 
-aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The approximate pixel width of the soft boundary applied to the 
+aperture. Hard edges can be achieved by setting the softening to 0.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array(1.0)</code>
           </td>
@@ -1300,8 +1352,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the
-aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the
+aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -1438,65 +1494,101 @@ aperture.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The length of the aperture in the y-direction. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The length of the aperture in the y-direction. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>width</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The length of the aperture in the x-direction. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The length of the aperture in the x-direction. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>centre</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>shear</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>compression</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>rotation</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The clockwise rotation of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The clockwise rotation of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>occulting</code></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Is the aperture occulting or tranmissive. False results in a tranmissive
-aperture, and True results in an occulting aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Is the aperture occulting or tranmissive. False results in a tranmissive
+aperture, and True results in an occulting aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>softening</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, pixels</code>
           </td>
-          <td><p>The approximate pixel width of the soft boundary applied to the 
-aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The approximate pixel width of the soft boundary applied to the 
+aperture. Hard edges can be achieved by setting the softening to 0.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>normalise</code></td>
           <td>
                 <code>bool = False</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the aperture.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1818,7 +1910,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The length of the aperture in the y-direction.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The length of the aperture in the y-direction.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1828,7 +1924,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The length of the aperture in the x-direction.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The length of the aperture in the x-direction.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1838,7 +1938,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([0.0, 0.0])</code>
           </td>
@@ -1848,7 +1952,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([0.0, 0.0])</code>
           </td>
@@ -1858,7 +1966,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([1.0, 1.0])</code>
           </td>
@@ -1868,7 +1980,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The clockwise rotation of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The clockwise rotation of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array(0.0)</code>
           </td>
@@ -1878,8 +1994,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Is the aperture occulting or tranmissive. False results in a 
-tranmissive aperture, and True results in an occulting aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Is the aperture occulting or tranmissive. False results in a 
+tranmissive aperture, and True results in an occulting aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -1889,8 +2009,12 @@ tranmissive aperture, and True results in an occulting aperture.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The approximate pixel width of the soft boundary applied to the 
-aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The approximate pixel width of the soft boundary applied to the 
+aperture. Hard edges can be achieved by setting the softening to 0.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array(1.0)</code>
           </td>
@@ -1900,8 +2024,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the
-aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the
+aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -2061,65 +2189,101 @@ radius to the vertices from its center.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of sides of the aperture. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of sides of the aperture. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>rmax</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The maximum radius to the vertices from its center.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The maximum radius to the vertices from its center.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>centre</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>shear</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>compression</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>rotation</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The clockwise rotation of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The clockwise rotation of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>occulting</code></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Is the aperture occulting or tranmissive. False results in a tranmissive
-aperture, and True results in an occulting aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Is the aperture occulting or tranmissive. False results in a tranmissive
+aperture, and True results in an occulting aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>softening</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, pixels</code>
           </td>
-          <td><p>The approximate pixel width of the soft boundary applied to the 
-aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The approximate pixel width of the soft boundary applied to the 
+aperture. Hard edges can be achieved by setting the softening to 0.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>normalise</code></td>
           <td>
                 <code>bool = False</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the aperture.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2493,7 +2657,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of sides of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of sides of the aperture.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2503,7 +2671,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The maximum radius to the vertices from its center.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The maximum radius to the vertices from its center.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2513,7 +2685,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([0.0, 0.0])</code>
           </td>
@@ -2523,7 +2699,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([0.0, 0.0])</code>
           </td>
@@ -2533,7 +2713,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([1.0, 1.0])</code>
           </td>
@@ -2543,7 +2727,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The clockwise rotation of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The clockwise rotation of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array(0.0)</code>
           </td>
@@ -2553,8 +2741,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Is the aperture occulting or tranmissive. False results in a 
-tranmissive aperture, and True results in an occulting aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Is the aperture occulting or tranmissive. False results in a 
+tranmissive aperture, and True results in an occulting aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -2564,8 +2756,12 @@ tranmissive aperture, and True results in an occulting aperture.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The approximate pixel width of the soft boundary applied to the 
-aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The approximate pixel width of the soft boundary applied to the 
+aperture. Hard edges can be achieved by setting the softening to 0.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array(1.0)</code>
           </td>
@@ -2575,8 +2771,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the
-aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the
+aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -2731,58 +2931,90 @@ the methods this looks like the case (ie, ordered).</p>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The location of the vertices of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The location of the vertices of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>centre</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>shear</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>compression</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>rotation</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The clockwise rotation of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The clockwise rotation of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>occulting</code></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Is the aperture occulting or tranmissive. False results in a tranmissive
-aperture, and True results in an occulting aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Is the aperture occulting or tranmissive. False results in a tranmissive
+aperture, and True results in an occulting aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>softening</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, pixels</code>
           </td>
-          <td><p>The approximate pixel width of the soft boundary applied to the 
-aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The approximate pixel width of the soft boundary applied to the 
+aperture. Hard edges can be achieved by setting the softening to 0.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>normalise</code></td>
           <td>
                 <code>bool = False</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the aperture.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -3240,7 +3472,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The location of the vertices of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The location of the vertices of the aperture.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -3250,7 +3486,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([0.0, 0.0])</code>
           </td>
@@ -3260,7 +3500,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([0.0, 0.0])</code>
           </td>
@@ -3270,7 +3514,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([1.0, 1.0])</code>
           </td>
@@ -3280,7 +3528,11 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The clockwise rotation of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The clockwise rotation of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array(0.0)</code>
           </td>
@@ -3290,8 +3542,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Is the aperture occulting or tranmissive. False results in a 
-tranmissive aperture, and True results in an occulting aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Is the aperture occulting or tranmissive. False results in a 
+tranmissive aperture, and True results in an occulting aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -3301,8 +3557,12 @@ tranmissive aperture, and True results in an occulting aperture.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The approximate pixel width of the soft boundary applied to the 
-aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The approximate pixel width of the soft boundary applied to the 
+aperture. Hard edges can be achieved by setting the softening to 0.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array(1.0)</code>
           </td>
@@ -3312,8 +3572,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the
-aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the
+aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -3460,29 +3724,45 @@ aberrations to be recovered simultaneously.</p>
           <td>
                 <code><span title="dLux.apertures.ApertureLayer">ApertureLayer</span></code>
           </td>
-          <td><p>The aperture on which the aberration basis is defined.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The aperture on which the aberration basis is defined.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>basis</code></td>
           <td>
                 <code>list[<a class="autorefs autorefs-internal" title="dLux.aberrations.Zernike" href="../aberrations/#dLux.aberrations.Zernike">Zernike</a>]</code>
           </td>
-          <td><p>A list of basis functions that represent the basis. The exact 
-polynomials that are represented will depend on the aperture shape. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>A list of basis functions that represent the basis. The exact 
+polynomials that are represented will depend on the aperture shape. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>coefficients</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The amplitude of each basis vector of the aberrations.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The amplitude of each basis vector of the aberrations.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>normalise</code></td>
           <td>
                 <code>bool = False</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the aperture.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -3970,7 +4250,11 @@ polynomials that are represented will depend on the aperture shape. </p></td>
           <td>
                 <code><span title="dLux.apertures.Wavefront">Wavefront</span></code>
           </td>
-          <td><p>The wavefront to operate on.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavefront to operate on.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -3991,7 +4275,11 @@ polynomials that are represented will depend on the aperture shape. </p></td>
 <td><code>wavefront</code></td>          <td>
                 <code><span title="dLux.apertures.Wavefront">Wavefront</span></code>
           </td>
-          <td><p>The transformed wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The transformed wavefront.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -4076,7 +4364,11 @@ polynomials that are represented will depend on the aperture shape. </p></td>
           <td>
                 <code><span title="dLux.apertures.ApertureLayer">ApertureLayer</span></code>
           </td>
-          <td><p>The aperture on which the aberration basis is defined.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The aperture on which the aberration basis is defined.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4086,11 +4378,15 @@ polynomials that are represented will depend on the aperture shape. </p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The noll indices are a scheme for indexing the Zernike
+          <td>
+            <div class="doc-md-description">
+              <p>The noll indices are a scheme for indexing the Zernike
 polynomials. Normally these polynomials have two 
 indices but the noll indices prevent an order to 
 these pairs. All basis can be indexed using the noll
-indices based on <code>n</code> and <code>m</code>.</p></td>
+indices based on <code>n</code> and <code>m</code>.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4100,8 +4396,12 @@ indices based on <code>n</code> and <code>m</code>.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The amplitude of each basis vector of the aberrations. If nothing 
-is provided, then the coefficients are set to zero.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The amplitude of each basis vector of the aberrations. If nothing 
+is provided, then the coefficients are set to zero.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -4225,7 +4525,11 @@ coordinates defined by npixels and diameter.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels accross one edge of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels accross one edge of the aperture.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4235,7 +4539,11 @@ coordinates defined by npixels and diameter.</p>
           <td>
                 <code>float, meters</code>
           </td>
-          <td><p>The diameter of the aperture in meters.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The diameter of the aperture in meters.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4256,7 +4564,11 @@ coordinates defined by npixels and diameter.</p>
 <td><code>aperture</code></td>          <td>
                 <code><span title="dLux.apertures.ApertureLayer">ApertureLayer</span></code>
           </td>
-          <td><p>The BasisOptic version of this aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The BasisOptic version of this aperture.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -4369,42 +4681,66 @@ contain CompoundApertures.</p>
           <td>
                 <code>dict(str, Aperture)</code>
           </td>
-          <td><p>The sub-apertures that make up the full aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The sub-apertures that make up the full aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>centre</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>shear</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>compression</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>rotation</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The clockwise rotation of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The clockwise rotation of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>normalise</code></td>
           <td>
                 <code>bool = False</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the aperture.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -4626,7 +4962,11 @@ contain CompoundApertures.</p>
           <td>
                 <code>list</code>
           </td>
-          <td><p>The sub-apertures that make up the full aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The sub-apertures that make up the full aperture.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4636,7 +4976,11 @@ contain CompoundApertures.</p>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([0.0, 0.0])</code>
           </td>
@@ -4646,7 +4990,11 @@ contain CompoundApertures.</p>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([0.0, 0.0])</code>
           </td>
@@ -4656,7 +5004,11 @@ contain CompoundApertures.</p>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array([1.0, 1.0])</code>
           </td>
@@ -4666,7 +5018,11 @@ contain CompoundApertures.</p>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The clockwise rotation of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The clockwise rotation of the aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>np.array(0.0)</code>
           </td>
@@ -4676,8 +5032,12 @@ contain CompoundApertures.</p>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the
-aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the
+aperture.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -4811,42 +5171,66 @@ together, ie the sub-apertures are not overlapping.</p>
           <td>
                 <code>dict(str, Aperture)</code>
           </td>
-          <td><p>The sub-apertures that make up the full aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The sub-apertures that make up the full aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>centre</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The (x, y) coordinates of the centre of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) coordinates of the centre of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>shear</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) linear shear of the aperutre.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) linear shear of the aperutre.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>compression</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The (x, y) compression of the aperture. </p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) compression of the aperture. </p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>rotation</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The clockwise rotation of the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The clockwise rotation of the aperture.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>normalise</code></td>
           <td>
                 <code>bool = False</code>
           </td>
-          <td><p>Whether to normalise the wavefront after passing through the aperture.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to normalise the wavefront after passing through the aperture.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
