@@ -323,7 +323,7 @@
   
     <li class="md-nav__item">
       <a href="../../../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -379,7 +379,7 @@
   
     <li class="md-nav__item">
       <a href="../../../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -823,21 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../../CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -861,9 +846,9 @@
 
 
 <h1 id="helper-utility-functions">Helper Utility Functions<a class="headerlink" href="#helper-utility-functions" title="Permanent link">¤</a></h1>
-<p>This module contains any other functions that don't fit into the rest of the utils module!</p>
+<p>This module contains the leftover functions that don't fit anywhere else in the <code>utils</code> module!</p>
 <h2 id="list-to-dictionary">List to Dictionary<a class="headerlink" href="#list-to-dictionary" title="Permanent link">¤</a></h2>
-<p>Converts a list of dLux objects into either a regular ordered dictionary. This shouldn't need to be used by the user, but is used internally in many of the constructors.</p>
+<p>Converts a list of ∂Lux objects into a regular ordered dictionary. This shouldn't need to be used by the user, but is used internally in many of the constructors.</p>
 <details class="info">
 <summary>List to Dictionary API</summary>
 <div class="mkdocstrings">
@@ -895,7 +880,7 @@ OrderedDict with the correct structure, ensuring that all keys are unique.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The list of dLux Layersto be converted into a dictionary.</p>
+              <p>The list of dLux Layers to be converted into a dictionary.</p>
             </div>
           </td>
           <td>
@@ -948,7 +933,7 @@ OrderedDict with the correct structure, ensuring that all keys are unique.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The equivilent dictionary or ordered dictionary.</p>
+              <p>The equivalent dictionary or ordered dictionary.</p>
             </div>
           </td>
         </tr>
@@ -957,7 +942,9 @@ OrderedDict with the correct structure, ensuring that all keys are unique.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/helpers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 8</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
 <span class="normal"> 9</span>
 <span class="normal">10</span>
 <span class="normal">11</span>
@@ -1024,12 +1011,10 @@ OrderedDict with the correct structure, ensuring that all keys are unique.</p>
 <span class="normal">72</span>
 <span class="normal">73</span>
 <span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">list_to_dictionary</span><span class="p">(</span>
-    <span class="n">list_in</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> 
-    <span class="n">ordered</span> <span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="n">allowed_types</span> <span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">list_to_dictionary</span><span class="p">(</span>
+        <span class="n">list_in</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="n">ordered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">allowed_types</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts some input list of dLux layers and converts them into an</span>
 <span class="sd">    OrderedDict with the correct structure, ensuring that all keys are unique.</span>
@@ -1037,7 +1022,7 @@ OrderedDict with the correct structure, ensuring that all keys are unique.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    list_in : list</span>
-<span class="sd">        The list of dLux Layersto be converted into a dictionary.</span>
+<span class="sd">        The list of dLux Layers to be converted into a dictionary.</span>
 <span class="sd">    ordered : bool</span>
 <span class="sd">        Whether to return an ordered or regular dictionary.</span>
 <span class="sd">    allowed_types : tuple</span>
@@ -1046,7 +1031,7 @@ OrderedDict with the correct structure, ensuring that all keys are unique.</p>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    dictionary : dict</span>
-<span class="sd">        The equivilent dictionary or ordered dictionary.</span>
+<span class="sd">        The equivalent dictionary or ordered dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Construct names list and identify repeats</span>
     <span class="n">names</span><span class="p">,</span> <span class="n">repeats</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -1061,7 +1046,7 @@ OrderedDict with the correct structure, ensuring that all keys are unique.</p>
         <span class="c1"># Check input types</span>
         <span class="k">if</span> <span class="n">allowed_types</span> <span class="o">!=</span> <span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">allowed_types</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is not an allowed type, got &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># Check for Repeats</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>

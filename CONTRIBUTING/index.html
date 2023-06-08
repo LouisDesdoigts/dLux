@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://louisdesdoigts.github.io/dlux/CONTRIBUTING/">
       
       
-        <link rel="prev" href="../CHANGELOG/">
+        <link rel="prev" href="../docs/faq/">
       
       
       <link rel="icon" href="../material/telescope">
@@ -321,7 +321,7 @@
   
     <li class="md-nav__item">
       <a href="../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -377,7 +377,7 @@
   
     <li class="md-nav__item">
       <a href="../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -809,21 +809,6 @@
 
   
   
-  
-    <li class="md-nav__item">
-      <a href="../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
     
   
   
@@ -859,28 +844,28 @@
 
 
 <h1 id="contributing-guide">Contributing Guide!<a class="headerlink" href="#contributing-guide" title="Permanent link">¤</a></h1>
-<h2 id="-">---<a class="headerlink" href="#-" title="Permanent link">¤</a></h2>
+<p>Note: This document is out of date and in the process of being updated!</p>
 <hr />
 <h2 id="units">Units:<a class="headerlink" href="#units" title="Permanent link">¤</a></h2>
-<p>All units wihin dLux are SI!</p>
+<p>All units within ∂Lux are SI!</p>
 <hr />
-<h2 id="adding-to-doccumentation">Adding to doccumentation<a class="headerlink" href="#adding-to-doccumentation" title="Permanent link">¤</a></h2>
-<p>When adding to the doccumentation, there are a few steps that need to be done:
+<h2 id="adding-to-documentation">Adding to documentation<a class="headerlink" href="#adding-to-documentation" title="Permanent link">¤</a></h2>
+<p>When adding to the documentation, there are a few steps that need to be done:
 1. Create the class or function and add the docstring
-2. Create a .md file in the docs/ directory
+2. Create a <code>.md</code> file in the docs/ directory
 3. Point to the class/function as so <code>::: dLux.module.new_class</code>
-4. Edit the mkdocs.yml file to add the new class
+4. Edit the <code>mkdocs.yml</code> file to add the new class
 5. Run <code>mkdocs serve</code> to deploy the docs locally at <code>localhost:8000</code> (put this into a browser)</p>
 <hr />
 <h2 id="building-and-running-unit-tests">Building and running unit-tests<a class="headerlink" href="#building-and-running-unit-tests" title="Permanent link">¤</a></h2>
-<p>Any added functionality should be unit-tested! This is done with pytest in the tests/ directory. Please have a look at the testing module and try to create tests the match the style!</p>
+<p>Any added functionality should be unit-tested! This is done with <code>pytest</code> in the <code>tests/</code> directory. Please have a look at the testing module and try to create tests to match the style!</p>
 <p>There are three main things we want to test:
-1. Constructor assert statements and input types. Ensure that the correct error is thrown and that classes cant be constructed with non compatiable inputs.
+1. Constructor assert statements and input types. Ensure that the correct error is thrown and that classes cant be constructed with incompatible inputs.
 2. Test that the different run time logic branches evaluate.
 3. Test that the different run time logic branches do not return nan or infinite values.</p>
 <hr />
 <h2 id="typing-conventions">Typing conventions<a class="headerlink" href="#typing-conventions" title="Permanent link">¤</a></h2>
-<p>So we have worked out a general typing convention for the software. There are two main data-types we care about, Jax data types and others. We denote any jax-types with the <code>Array</code> typing hint. This is simply defined as as a<code>jax.numpy.ndarray</code>, so at the start of any files one should have <code>Array = np.ndarray</code>. <em>Any</em> jax arrays should use this type-hit, regardless of data-type. All other type-hints for dLux type objects should refer to the <em>base</em> object type assuming it is not defined inside that script, ie:</p>
+<p>So we have worked out a general typing convention for the software. There are two main data-types we care about: Jax data types, and others. We denote any jax-types with the <code>Array</code> typing hint. This is simply defined as a<code>jax.numpy.ndarray</code>, so at the start of any files one should have <code>Array = np.ndarray</code>. <em>Any</em> jax arrays should use this type-hint, regardless of data-type. All other type-hints for ∂Lux type objects should refer to the <em>base</em> object type assuming it is not defined inside that script, i.e.:</p>
 <blockquote>
 <p>dLux.wavefronts.Wavefront
 dLux.propagators.Propagator
@@ -890,11 +875,11 @@ dLux.base.Instrument</p>
 <p>For classes defined in the script, add <code>from __future__ import annotations</code> to the first line of the script in order to be able to reference these types within the script.</p>
 <hr />
 <h2 id="class-inheritance">Class Inheritance<a class="headerlink" href="#class-inheritance" title="Permanent link">¤</a></h2>
-<p>dLux classes are built from <a href="https://github.com/patrick-kidger/equinox"><code>Equinox</code></a> and <a href="https://github.com/LouisDesdoigts/zodiax"><code>Zodiax</code></a>. Any new class types should inherit from either the <code>zodiax.Base</code> or <code>zodiax.ExtendedBase</code> classes, which inherit from <code>equinox.Module</code>, giving the full functionality from both of these packages.</p>
+<p>∂Lux classes are built from <a href="https://github.com/patrick-kidger/equinox"><code>Equinox</code></a> and <a href="https://github.com/LouisDesdoigts/zodiax"><code>Zodiax</code></a>. Any new class types should inherit from either the <code>zodiax.Base</code> or <code>zodiax.ExtendedBase</code> classes, which inherit from <code>equinox.Module</code>, giving the full functionality from both of these packages.</p>
 <hr />
 <h2 id="code-style-formatting">Code Style &amp; Formatting<a class="headerlink" href="#code-style-formatting" title="Permanent link">¤</a></h2>
 <blockquote>
-<p>All imported functionality should inport the specific method used, as opposed to an full package.</p>
+<p>All imported functionality should import the specific method used, as opposed to a full package.</p>
 </blockquote>
 <p>For example rather than importing whole package:
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">abc</span>
@@ -902,14 +887,14 @@ dLux.base.Instrument</p>
 <span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
     <span class="k">pass</span>
 </code></pre></div></p>
-<p>We want to specfically import the function used:
+<p>We want to specifically import the function used:
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
 
 <span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="k">pass</span>
 </code></pre></div></p>
 <blockquote>
-<p>Functions and methods with more than two input should spread those inputs over multiple lines, using spaces to format alignment of type hints and default values to help with code readability</p>
+<p>Functions and methods with more than two inputs should spread those inputs over multiple lines, using spaces to format alignment of type hints and default values to help with code readability.</p>
 </blockquote>
 <p>For example rather than this:
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">Foo</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Foo</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">Array</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">c</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -924,20 +909,20 @@ dLux.base.Instrument</p>
 </code></pre></div></p>
 <h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">¤</a></h3>
 <blockquote>
-<p>Data type enforcing for jax-type arrays: Constructors should be able to take in lists, numpy arrays and python floats, but ensure that they are correctly formatted into jax type arrays like follows:</p>
+<p>Data type enforcing for jax-type arrays: Constructors should be able to take in lists, numpy arrays and python floats, but ensure that they are correctly formatted into jax-type arrays like follows:</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="bp">self</span><span class="o">.</span><span class="n">parameter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">input_parameter</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 </code></pre></div>
-<p>This ensures that there is flexibilty in the inputs types and that all data type will match the defauly jax 32 or 64 bit types.</p>
+<p>This ensures flexibility in the input types and that all data types will match the default jax-32 or -64 bit types.</p>
 <blockquote>
 <p>All constructor methods should use assert statements to ensure that inputs are correctly formatted at init time. The goal should be if no errors are thrown at init time then all the class methods should work as intended and have correct dimensionality. For ∂Lux this would typically be testing jax-type and array dimensionality. Do be sure that these enforce correct dimensionality, not just that errors are not thrown.</p>
 </blockquote>
-<p>For example if an attribute is a scalar, most methods will work identically if it is zero or one dimenional. For example, enforcing zero-dimensionality for scalars:
+<p>For example if an attribute is a scalar, most methods will work identically if it is zero- or one-dimensional. For example, enforcing zero-dimensionality for scalars:
 <div class="highlight"><pre><span></span><code><span class="n">input_parameter</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1e3</span><span class="p">]</span>
 
 <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">input_parameter</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> \
-<span class="p">(</span><span class="s2">&quot;input_parameter must a scalar array, ie zero dimensional&quot;</span><span class="p">)</span>
+<span class="p">(</span><span class="s2">&quot;input_parameter must a scalar array, i.e. zero dimensional&quot;</span><span class="p">)</span>
 </code></pre></div></p>
 <h3 id="non-differentiable-parameters">Non-differentiable parameters<a class="headerlink" href="#non-differentiable-parameters" title="Permanent link">¤</a></h3>
 <blockquote>
@@ -945,24 +930,24 @@ dLux.base.Instrument</p>
 </blockquote>
 <h3 id="internal-logic-flow">Internal logic flow<a class="headerlink" href="#internal-logic-flow" title="Permanent link">¤</a></h3>
 <blockquote>
-<p>Most internal logic within ∂Lux should be acheived using regular python logic. In some rare cases, <code>jax.lax.cond</code> should be used, but <em>only</em> if the internal logical flow can change during run time. Ie any logic that uses a boolean class attribute can not change during run time, and so should use regular python logic. This helps jax trace through the code and reduces compile time.</p>
+<p>Most internal logic within ∂Lux should be achieved using regular python logic. In some rare cases, <code>jax.lax.cond</code> should be used, but <em>only</em> if the internal logical flow can change during run time. Ie any logic that uses a boolean class attribute can not change during run time, and so should use regular python logic. This helps jax trace through the code and reduces compile time.</p>
 </blockquote>
 <h3 id="setter-and-getters">Setter and Getters<a class="headerlink" href="#setter-and-getters" title="Permanent link">¤</a></h3>
 <blockquote>
-<p>By default, getters and setter should be avoided. Most getting and setting can be acheived with nice syntax using the <code>Zodaix</code> methods. There are however some exceptions.</p>
-<p>Setter: Some class types such as <code>Wavefronts</code> track a lot of parameters that change a lot throughout runtime and so the setter methods are used in conjunction with assert statements to ensure that parameters are not set incorrectly and that the errors are raised at the point where the issue arises, as opposed to some other method recieving an incorrectly shaped array.</p>
-<p>Getters: For some classes we want to have parameterised values, ie binary stars using sepration and field angle. However, optical modelling methods use cartesian position inputs, so the base <code>Source</code> class implements an abstract <code>.get_position()</code> method to be overwritten by all child classes. In the case of the <code>BinarySource</code> class this method uses the separation and field angle to generate these cartesian values at run time. This means that all other classes in ∂Lux can assume cartesian positional values and use a single method when working with any <code>Source</code> class. Futhermore, getters can be used to generate useful values. For example wavefronts are store pixel scale and npixles, but implement a class property method for the diameter, which is much more usefull for the <code>Propagator</code> classes.</p>
+<p>By default, getters and setter should be avoided. Most getting and setting can be achieved with nice syntax using the <code>Zodiax</code> methods. There are however some exceptions.</p>
+<p>Setter: Some class types such as <code>Wavefronts</code> track a lot of parameters that change a lot throughout runtime and so the setter methods are used in conjunction with assert statements to ensure that parameters are not set incorrectly and that the errors are raised at the point where the issue arises, as opposed to some other method receiving an incorrectly shaped array.</p>
+<p>Getters: For some classes we want to have parameterised values, i.e. binary stars using separation and field angle. However, optical modelling methods use Cartesian position inputs, so the base <code>Source</code> class implements an abstract <code>.get_position()</code> method to be overwritten by all child classes. In the case of the <code>BinarySource</code> class this method uses the separation and field angle to generate these Cartesian values at run time. This means that all other classes in ∂Lux can assume Cartesian positional values and use a single method when working with any <code>Source</code> class. Furthermore, getters can be used to generate useful values. For example wavefronts are store pixel scale and npixels, but implement a class property method for the diameter, which is much more useful for the <code>Propagator</code> classes.</p>
 </blockquote>
 <h3 id="hidden-methods">Hidden methods<a class="headerlink" href="#hidden-methods" title="Permanent link">¤</a></h3>
 <blockquote>
-<p>In general hidden class methods should be avoided and classes should try to implement methods that allow for them to used stand-alone. For example the <code>CompoundAperture</code> class implements the <code>construct_combined_aperture</code> and <code>get_aperture</code> methods that allow for users to dirctly construct and output the internally stored apertures, or use the <code>make_aperture</code> method to construcut individual apertures.</p>
+<p>In general hidden class methods should be avoided and classes should try to implement methods that allow for them to used stand-alone. For example the <code>CompoundAperture</code> class implements the <code>construct_combined_aperture</code> and <code>get_aperture</code> methods that allow for users to directly construct and output the internally stored apertures, or use the <code>make_aperture</code> method to construct individual apertures.</p>
 </blockquote>
 <hr />
 <h2 id="non-circular-imports">Non-Circular imports<a class="headerlink" href="#non-circular-imports" title="Permanent link">¤</a></h2>
-<p>To prevent circular imports, you can not import any specific classes or methods within the package, you instead need to import the whole packge (ie <code>import dLux</code>) and then in the code, refer to specific function (ie <code>dLux.sources.Source</code>). This is inconvenient, but just the way python works.</p>
+<p>To prevent circular imports, you can not import any specific classes or methods within the package, you instead need to import the whole pacakge (ie <code>import dLux</code>) and then in the code, refer to specific function (ie <code>dLux.sources.Source</code>). This is inconvenient, but just the way python works.</p>
 <blockquote>
 <p>exception: The utils package
-The utils package is the collection of functions that operate <em>independently</em> of the package, and so so can be imported as normal, ie <code>from dLux.utils.coordinates import radians_to_arcseconds</code> etc.</p>
+The utils package is the collection of functions that operate <em>independently</em> of the package, and so can be imported as normal, i.e. <code>from dLux.utils.coordinates import radians_to_arcseconds</code> etc.</p>
 </blockquote>
 
 

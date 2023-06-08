@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=f6b35b8d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=f6be3da6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1906,7 +1891,7 @@ Licensed under the Apache License, Version 2.0.
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=a1ebcf9f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=9c6e77d0" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2009,8 +1994,8 @@ Licensed under the Apache License, Version 2.0.
 
     <span class="k">def</span> <span class="nf">get_throughput</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Filter</span><span class="p">,</span> <span class="n">sample_wavelenghts</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Gets the average throughput of the bandpass defined the the differences</span>
-<span class="sd">        between each sample wavelength, ie if sample wavelengths are:</span>
+<span class="sd">        Gets the average throughput of the bandpass defined the differences</span>
+<span class="sd">        between each sample wavelength, i.e. if sample wavelengths are:</span>
 <span class="sd">            [10, 20, 30, 40],</span>
 <span class="sd">        the bandpasses for each sample wavelength will be</span>
 <span class="sd">            [5-15, 15-25, 25-30, 35-40].</span>
@@ -2019,7 +2004,7 @@ Licensed under the Apache License, Version 2.0.
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        sample_wavelengths : Array, meters</span>
+<span class="sd">        sample_wavelengths : Array, metres</span>
 <span class="sd">            The wavelengths at which to sample the filter. Must contain at</span>
 <span class="sd">            least two values.</span>
 
@@ -2190,8 +2175,8 @@ Licensed under the Apache License, Version 2.0.
 
     def get_throughput(self : Filter, sample_wavelenghts : Array) -> Array:
         """
-        Gets the average throughput of the bandpass defined the the differences
-        between each sample wavelength, ie if sample wavelengths are:
+        Gets the average throughput of the bandpass defined the differences
+        between each sample wavelength, i.e. if sample wavelengths are:
             [10, 20, 30, 40],
         the bandpasses for each sample wavelength will be
             [5-15, 15-25, 25-30, 35-40].
@@ -2200,7 +2185,7 @@ Licensed under the Apache License, Version 2.0.
 
         Parameters
         ----------
-        sample_wavelengths : Array, meters
+        sample_wavelengths : Array, metres
             The wavelengths at which to sample the filter. Must contain at
             least two values.
 

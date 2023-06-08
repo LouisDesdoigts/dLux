@@ -331,7 +331,7 @@
   
     <li class="md-nav__item">
       <a href="docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -387,7 +387,7 @@
   
     <li class="md-nav__item">
       <a href="docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -821,21 +821,6 @@
   
   
     <li class="md-nav__item">
-      <a href="CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -865,30 +850,29 @@
 <a href="https://github.com/LouisDesdoigts/dLux/actions/workflows/tests.yml"><img alt="integration" src="https://github.com/LouisDesdoigts/dLux/actions/workflows/tests.yml/badge.svg" /></a>
 <a href="https://louisdesdoigts.github.io/dLux/"><img alt="Documentation" src="https://github.com/LouisDesdoigts/dLux/actions/workflows/documentation.yml/badge.svg" /></a></p>
 <p>Differentiable Optical Models as <em>Parameterised Neural Networks</em> in Jax using Zodiax</p>
-<p>Contributors: <a href="https://github.com/LouisDesdoigts">Louis Desdoigts</a>, <a href="https://github.com/benjaminpope">Benjamin Pope</a>, <a href="https://github.com/Jordan-Dennis">Jordan
-Dennis</a>, <a href="https://github.com/ataras2">Adam Taras</a>, <a href="https://github.com/ptuthill">Peter Tuthill</a></p>
-<p>∂Lux is an open-source differentiable optical modelling framework harnessing the structural isomorphism between optical systems and neural networks, giving forwards models of optical system as a <em>parametric neural network</em>.</p>
-<p>∂Lux is built in <a href="https://github.com/LouisDesdoigts/zodiax">Zodiax</a> which is an open-source object-orineted <a href="https://github.com/google/jax">Jax</a> framework built as an extension of <a href="https://github.com/patrick-kidger/equinox">Equinox</a> for scientific programming. This framework allows for the creation of complex optical systems involving many planes, phase and amplitude screens in each, and propagate between them in the Fraunhofer or Fresnel regimes. This enables <a href="https://louisdesdoigts.github.io/dLux/notebooks/phase_retrieval_demo/">fast phase retrieval</a>, image deconvolution, and <a href="https://louisdesdoigts.github.io/dLux/notebooks/designing_a_mask/">hardware design in high dimensions</a>. Because ∂Lux models are fully differentiable, you can <a href="https://louisdesdoigts.github.io/dLux/notebooks/flatfield_calibration/">optimize them by gradient descent over millions of parameters</a>; or use <a href="https://louisdesdoigts.github.io/dLux/notebooks/HMC/">Hamiltonian Monte Carlo to accelerate MCMC sampling</a>. Our code is fully open-source under an MIT license, and we encourage you to use it and build on it to solve problems in astronomy and beyond.</p>
-<p>The ∂Lux framwork is built in <a href="https://github.com/LouisDesdoigts/zodiax">Zodiax</a>, which gives it a deep range of capabilities from both <a href="https://github.com/google/jax">Jax</a> and <a href="https://github.com/patrick-kidger/equinox">Equinox</a>:</p>
+<p>Contributors: <a href="https://github.com/LouisDesdoigts">Louis Desdoigts</a>, <a href="https://github.com/Jordan-Dennis">Jordan Dennis</a>, <a href="https://github.com/ataras2">Adam Taras</a>, <a href="https://github.com/maxecharles">Max Charles</a>, <a href="https://github.com/benjaminpope">Benjamin Pope</a>, <a href="https://github.com/ptuthill">Peter Tuthill</a></p>
+<p>∂Lux is an open-source differentiable optical modelling framework harnessing the structural isomorphism between optical systems and neural networks, giving forwards models of optical systems as <em>parametric neural networks</em>.</p>
+<p>∂Lux is built in <a href="https://github.com/LouisDesdoigts/zodiax">Zodiax</a>, which is an open-source object-oriented <a href="https://github.com/google/jax">Jax</a> framework built as an extension of <a href="https://github.com/patrick-kidger/equinox">Equinox</a> for scientific programming. This framework allows for the creation of complex optical systems involving many planes, phase and amplitude screens in each, and propagates between them in the Fraunhofer or Fresnel regimes. This enables <a href="https://louisdesdoigts.github.io/dLux/notebooks/phase_retrieval_demo/">fast phase retrieval</a>, image deconvolution, and <a href="https://louisdesdoigts.github.io/dLux/notebooks/designing_a_mask/">hardware design in high dimensions</a>. Because ∂Lux models are fully differentiable, you can <a href="https://louisdesdoigts.github.io/dLux/notebooks/flatfield_calibration/">optimize them by gradient descent over millions of parameters</a>; or use <a href="https://louisdesdoigts.github.io/dLux/notebooks/HMC/">Hamiltonian Monte Carlo to accelerate MCMC sampling</a>. Our code is fully open-source under a 3-clause BSD license, and we encourage you to use it and build on it to solve problems in astronomy and beyond.</p>
+<p>The ∂Lux framework is built in <a href="https://github.com/LouisDesdoigts/zodiax">Zodiax</a>, which gives it a deep range of capabilities from both <a href="https://github.com/google/jax">Jax</a> and <a href="https://github.com/patrick-kidger/equinox">Equinox</a>:</p>
 <blockquote>
 <ul>
 <li>
-<p><a href="https://jax.readthedocs.io/en/latest/jax-101/01-jax-basics.html">Accelerated Numpy</a>: a Numpy like API that can run on GPU and TPU</p>
+<p><a href="https://jax.readthedocs.io/en/latest/jax-101/01-jax-basics.html">Accelerated Numpy</a>: a Numpy-like API that can run on GPU and TPU</p>
 </li>
 <li>
-<p><a href="https://jax.readthedocs.io/en/latest/jax-101/04-advanced-autodiff.html">Automatic Differentiation</a>: Allows for optimisation and inference in extremely high dimensional spaces</p>
+<p><a href="https://jax.readthedocs.io/en/latest/jax-101/04-advanced-autodiff.html">Automatic Differentiation</a>: Allows for optimisation and inference in extremely high-dimensional spaces</p>
 </li>
 <li>
-<p><a href="https://jax.readthedocs.io/en/latest/jax-101/02-jitting.html">Just-In-Time Compilation</a>: Compliles code into XLA at runtime and optimising execution across hardware</p>
+<p><a href="https://jax.readthedocs.io/en/latest/jax-101/02-jitting.html">Just-In-Time Compilation</a>: Compiles code into XLA at runtime and optimising execution across hardware</p>
 </li>
 <li>
-<p><a href="https://jax.readthedocs.io/en/latest/jax-101/03-vectorization.html">Automatic Vectorisation</a>: Allows for simple parallelism across hardware and asynchronys execution</p>
+<p><a href="https://jax.readthedocs.io/en/latest/jax-101/03-vectorization.html">Automatic Vectorisation</a>: Allows for simple parallelism across hardware and asynchronous execution</p>
 </li>
 <li>
-<p><a href="https://docs.kidger.site/equinox/all-of-equinox/">Object Oriented Jax</a>: Allows for differentiable classes that are recognised as a valid <em>Jax</em> type</p>
+<p><a href="https://docs.kidger.site/equinox/all-of-equinox/">Object-Oriented Jax</a>: Allows for differentiable classes that are recognised as a valid <em>Jax</em> type</p>
 </li>
 <li>
-<p><a href="https://docs.kidger.site/equinox/api/nn/linear/">Inbuilt Neural Networks</a>: Has pre-built neural network layers classes</p>
+<p><a href="https://docs.kidger.site/equinox/api/nn/linear/">Inbuilt Neural Networks</a>: Has pre-built neural network layer classes</p>
 </li>
 <li>
 <p><a href="docs/usage/">Path-Based Pytree Interface</a>: Path based indexing allows for easy interfacing with large and highly nested physical models</p>
@@ -905,9 +889,9 @@ Dennis</a>, <a href="https://github.com/ataras2">Adam Taras</a>, <a href="https:
 <p>Docs installation: <code>pip install "dLux[docs]"</code></p>
 <p>Test installation: <code>pip install "dLux[tests]"</code></p>
 <h2 id="collaboration-development">Collaboration &amp; Development<a class="headerlink" href="#collaboration-development" title="Permanent link">¤</a></h2>
-<p>We are always looking to collaborate and further develop this software! We have focused on flexibility and ease of development, so if you have a project you want to use ∂Lux for, but it currently does not have the required capabilities, don't hesitate to <a href="louis.desdoigts@sydney.edu.au">email me</a> and we can discuss how to implement and merge it! Similarly you can take a look at the <code>CONTRIBUTING.md</code> file.</p>
+<p>We are always looking to collaborate and further develop this software! We have focused on flexibility and ease of development, so if you have a project you want to use ∂Lux for, but it currently does not have the required capabilities, don't hesitate to <a href="louis.desdoigts@sydney.edu.au">email me</a> and we can discuss how to implement and merge it! Similarly, you can take a look at the <code>CONTRIBUTING.md</code> file.</p>
 <h2 id="publications">Publications<a class="headerlink" href="#publications" title="Permanent link">¤</a></h2>
-<p>We have a multitude of publications in the pipeline using dLux, some built from our tutorials. To start we would recommend looking at <a href="https://louisdesdoigts.github.io/diff_optics/#/0/3">this invited talk</a> on ∂Lux which gives a good overview and has an attatched recording of it being presented! We also have <a href="https://spie.org/astronomical-telescopes-instrumentation/presentation/Optical-design-analysis-and-calibration-using-Lux/12180-160">this poster!</a></p>
+<p>We have a multitude of publications in the pipeline using dLux, some built from our tutorials. To start we would recommend looking at <a href="https://louisdesdoigts.github.io/diff_optics/#/0/3">this invited talk</a> on ∂Lux which gives a good overview and has an attached recording of it being presented! We also have <a href="https://spie.org/astronomical-telescopes-instrumentation/presentation/Optical-design-analysis-and-calibration-using-Lux/12180-160">this poster</a>!</p>
 
 
 

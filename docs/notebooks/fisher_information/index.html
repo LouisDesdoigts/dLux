@@ -323,7 +323,7 @@
   
     <li class="md-nav__item">
       <a href="../phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -389,7 +389,7 @@
   
     <li class="md-nav__item">
       <a href="../HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -810,21 +810,6 @@
     <li class="md-nav__item">
       <a href="../../faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1897,18 +1882,16 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="fisher-information">Fisher Information<a class="anchor-link" href="#fisher-information">&#182;</a></h1><p>Autodiff doesn't just make it faster to solve optimization and inference problems - it also allows you to use powerful ideas in statistics that require second derivatives that are intractable analytically or with finite differences.</p>
+<h1 id="fisher-information">Fisher Information<a class="anchor-link" href="#fisher-information">&#182;</a></h1><p>Autodiff doesn't just make it faster to solve optimisation and inference problems -- it also allows you to use powerful ideas in statistics requiring second derivatives that are intractable analytically or with finite differences.</p>
 <p>The Fisher Information Matrix, or the inverse of the Hessian of the likelihood, can be used for</p>
 <ul>
 <li>the <a href="https://www.sciencedirect.com/topics/mathematics/laplace-approximation">Laplace approximation</a> to a posterior for variational inference, giving you the Gaussian covariance of the posterior near the maximum likelihood point;</li>
-<li>Fisher forecasting, where you calculate this for an instrument or experiment at expected parameters, to predict how well it will constrain them; and</li>
+<li>Fisher forecasting, where you calculate this for an instrument or experiment at expected parameters to predict how well it will constrain them; and</li>
 <li>optimal design, as the <a href="https://en.wikipedia.org/wiki/Cram%C3%A9r%E2%80%93Rao_bound">Cramér-Rao lower bound</a> on the precision of an experiment is the inverse of the Fisher information matrix - so you want to make this as tight as possible!</li>
 </ul>
-<p>Because <code>jax</code> lets us compute the Hessian of our loss function, we can use the Fisher matrix for variational inference without MCMC, and also more powerfully <em>as an objective function</em> to optimize a telescope design: why bother engineering a PSF for a particular goal, when you could model the system <em>end to end</em> and optimize the precision of the Fisher forecast of the parameter of interest?</p>
-<ul>
-<li>This is the topic of a Desdoigts et al paper in prep. It wasn't quite that easy to build and we're pretty happy about it.</li>
-</ul>
-<p>This notebook follows on from <a href="designing_a_mask.ipynb">Phase Mask Design</a> and will reuse some of the same code without repeating explanations.</p>
+<p>Because <code>jax</code> lets us compute the Hessian of our loss function, we can use the Fisher matrix for variational inference without MCMC, and also more powerfully <em>as an objective function</em> to optimise a telescope design; why bother engineering a PSF for a particular goal, when you could model the system <em>end to end</em> and optimise the Fisher forecast precision of the parameter of interest? *</p>
+<p>* This is the topic of another Desdoigts et al. paper in prep.</p>
+<p>This notebook follows on from <a href="designing_a_mask.ipynb">Phase Mask Design</a> and will reuse some code without repeating explanations.</p>
 
 </div>
 </div>
@@ -2000,7 +1983,12 @@ plt.rcParams['figure.dpi'] = 120</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Now we need to construct the components of our model, the optimisable mask, the soure and the optics, using models from the <code>dLux-Toliman</code> package.</p>
+<p>Using models from the <code>dLuxToliman</code> package, we need to construct the components of our model:</p>
+<ul>
+<li>the optimisable mask</li>
+<li>the source</li>
+<li>the optics</li>
+</ul>
 
 </div>
 </div>
@@ -2070,7 +2058,7 @@ model = dl.Instrument(optics, source)</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Visualize the mask and PSF:</p>
+<p>Visualising the mask and PSF:</p>
 
 </div>
 </div>
@@ -2166,8 +2154,8 @@ class="
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Now we need to define our loss function. We want to maximize the Fisher information, <code>zodiax</code> has a bayesian module that can do the calulation of the covaraince matrix and its entropy for us. This means we only need to define the likelihood function, the parameters we want to marginalise over and those we wish to optimise.</p>
-<p>In this case we will optimise the mask coefficients and marginalise over the binary source parameters plus optical aberrations.</p>
+<p>Next, we need to define our loss function. We want to maximize the Fisher information; conveniently, <code>zodiax</code> has a Bayesian module that can calculate the covariance matrix and its entropy. This means we only need to define the likelihood function, the parameters we want to marginalise over, and the parameters we wish to optimise.</p>
+<p>We will optimise the mask coefficients and marginalise over the binary source parameters and optical aberrations.</p>
 <p>Note we define the <code>shape_dict</code> here to cast the wavelength to a single value, resulting in a marginalisation over the <em>mean</em> wavelength.</p>
 
 </div>
@@ -2526,7 +2514,7 @@ class="
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Let's calculate the covariance matrix elements:</p>
+<p>Let's calculate the elements of the covariance matrix:</p>
 
 </div>
 </div>
@@ -2596,7 +2584,7 @@ Wall time: 6.65 s
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>And using <a href="https://samreay.github.io/ChainConsumer/">ChainConsumer</a> we can easily visualize this covariance:</p>
+<p>And using <a href="https://samreay.github.io/ChainConsumer/">ChainConsumer</a> we can easily visualise this covariance:</p>
 
 </div>
 </div>
@@ -2690,45 +2678,13 @@ class="
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>It looks like the optimization worked - marginal posterior bounds for all the optical parameters are <em>much</em> tighter after the optimization than they were before.</p>
-<p>We see that in this narrowband simulation, most parameters aren't tightly correlated, but separation, plate scale and wavelength are almost indistinguishable - this makes sense, as they affect the PSF in the same way! Only independent constraints on λ can save us here. If you want to do precise astrometry, you have to nail down your plate scale and your spectrum: we see that the marginal posterior for separation is the same, but dominated entirely by this degeneracy with plate scale and λ, which is much tighter for the optimized pupil.</p>
-<p>This is why in the Toliman telescope design we superimpose a grating over our pupil (<a href="https://authors.library.caltech.edu/92050/1/107011J.pdf">design paper, Fig 6</a>) - so we can measure a stellar spectrum and separate this from the astrometry.</p>
-<p>If we were doing this properly for a telescope design, we would want to take this into account - our real goal is precisely measuring separation, and everything else is something we can just marginalize over. If we incorporate our prior constraints on plate scale and wavelength I am sure we will do even better.</p>
+<p>It looks like the optimisation worked - marginal posterior bounds for all optical parameters are <em>much</em> tighter after the optimisation.</p>
+<p>We see that in this narrowband simulation, most parameters are not tightly correlated; but separation, plate scale and wavelength are almost indistinguishable. This makes sense, as they affect the PSF in the same way! Only independent constraints on wavelength can save us here. If you want to do precise astrometry, you have to nail down your plate scale and spectrum; we see that the marginal posterior for separation is unchanged, but dominated entirely by this degeneracy with plate scale and wavelength, which is much tighter for the optimised pupil.</p>
+<p>This is why we superimpose a grating over our pupil in the Toliman telescope design (<a href="https://authors.library.caltech.edu/92050/1/107011J.pdf">design paper, Fig 6</a>) -- we can measure a stellar spectrum and separate this from the astrometry.</p>
+<p>If we were doing this properly for a telescope design, we would want to take this into account -- our real goal is precisely measuring separation, and everything else is something we can marginalise over. If we incorporate our prior constraints on plate scale and wavelength, I am sure we will do even better.</p>
 
 </div>
 </div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=d3f98713-60ab-4de6-abf5-7148a8584476" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-10">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span>
-</pre></div>
-<div id="cell-10" class="clipboard-copy-txt"></div>
-        
-        </div>
-    </div>
-
-</div>
-</div>
-
 </div>
 </div>
 </div>

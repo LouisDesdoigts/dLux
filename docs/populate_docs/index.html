@@ -319,7 +319,7 @@
   
     <li class="md-nav__item">
       <a href="../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -375,7 +375,7 @@
   
     <li class="md-nav__item">
       <a href="../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -796,21 +796,6 @@
     <li class="md-nav__item">
       <a href="../faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1954,7 +1939,7 @@ plt.rcParams['figure.dpi'] = 120</div>
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -1973,7 +1958,7 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -2045,11 +2030,11 @@ print(optics)</div>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">psf</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 </pre></div>
 <div id="cell-3" class="clipboard-copy-txt"># Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)</div>
         
         </div>
@@ -2179,7 +2164,7 @@ class="
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">arcsec_to_rad</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -2198,7 +2183,7 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = dlu.arcsec_to_rad(0.1 / 4)
 
@@ -2302,11 +2287,11 @@ optics = dl.LayeredOptics(wf_npixels, diameter, layers)</div>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">psf</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 </pre></div>
 <div id="cell-7" class="clipboard-copy-txt"># Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)</div>
         
         </div>
@@ -2436,7 +2421,7 @@ class="
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -2454,7 +2439,7 @@ class="
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 
 <span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">source</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="mf">5e4</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">jr</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">jr</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">optics</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
 </pre></div>
@@ -2464,7 +2449,7 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -2482,7 +2467,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 source = dl.PointSource(wavelengths, flux=5e4)
 data = jr.poisson(jr.PRNGKey(1), optics.model(source))</div>
         
@@ -3021,7 +3006,7 @@ class="
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -3034,7 +3019,7 @@ class="
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 
 <span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">psf</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 </pre></div>
 <div id="cell-16" class="clipboard-copy-txt">import jax.numpy as np
@@ -3042,7 +3027,7 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -3055,7 +3040,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)</div>
         
         </div>
@@ -3173,8 +3158,8 @@ class="
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
-<span class="n">focal_length</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
+<span class="n">focal_length</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># microns</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -3187,7 +3172,7 @@ class="
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 
 <span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">psf</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 </pre></div>
 <div id="cell-18" class="clipboard-copy-txt">import jax.numpy as np
@@ -3195,8 +3180,8 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
-focal_length = 2 # meters
+diameter = 1 # metres
+focal_length = 2 # metres
 psf_npixels = 128
 psf_pixel_scale = 1 # microns
 psf_oversample = 4
@@ -3209,7 +3194,7 @@ optics = dl.CartesianOptics(wf_npixels, diameter, aperture, focal_length,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)</div>
         
         </div>
@@ -3327,11 +3312,11 @@ class="
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
-<span class="n">focal_length</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
+<span class="n">focal_length</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
-<span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.25e-6</span> <span class="c1"># meters</span>
-<span class="n">focal_shift</span> <span class="o">=</span> <span class="mf">2e-5</span> <span class="c1"># meters</span>
+<span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.25e-6</span> <span class="c1"># metres</span>
+<span class="n">focal_shift</span> <span class="o">=</span> <span class="mf">2e-5</span> <span class="c1"># metres</span>
 
 <span class="c1"># Use ApertureFactory class to make a simple circular aperture</span>
 <span class="n">aperture</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">ApertureFactory</span><span class="p">(</span><span class="n">wf_npixels</span><span class="p">)</span>
@@ -3344,7 +3329,7 @@ class="
 <span class="n">optics</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">FlexibleOptics</span><span class="p">(</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">aperture</span><span class="p">,</span> <span class="n">propagator</span><span class="p">)</span>
 
 <span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">psf</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 </pre></div>
 <div id="cell-20" class="clipboard-copy-txt">import jax.numpy as np
@@ -3352,11 +3337,11 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
-focal_length = 2 # meters
+diameter = 1 # metres
+focal_length = 2 # metres
 psf_npixels = 128
-psf_pixel_scale = 0.25e-6 # meters
-focal_shift = 2e-5 # meters
+psf_pixel_scale = 0.25e-6 # metres
+focal_shift = 2e-5 # metres
 
 # Use ApertureFactory class to make a simple circular aperture
 aperture = dl.ApertureFactory(wf_npixels)
@@ -3369,7 +3354,7 @@ propagator = dl.FarFieldFresnel(psf_npixels, psf_pixel_scale, focal_length,
 optics = dl.FlexibleOptics(wf_npixels, diameter, aperture, propagator)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)</div>
         
         </div>
@@ -3487,10 +3472,10 @@ class="
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
-<span class="n">focal_length</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
+<span class="n">focal_length</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
-<span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.25e-6</span> <span class="c1"># meters</span>
+<span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.25e-6</span> <span class="c1"># metres</span>
 
 <span class="c1"># Construct the list of optical layers</span>
 <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
@@ -3502,7 +3487,7 @@ class="
 <span class="n">optics</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">LayeredOptics</span><span class="p">(</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">layers</span><span class="p">)</span>
 
 <span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">psf</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 </pre></div>
 <div id="cell-22" class="clipboard-copy-txt">import jax.numpy as np
@@ -3510,10 +3495,10 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
-focal_length = 2 # meters
+diameter = 1 # metres
+focal_length = 2 # metres
 psf_npixels = 128
-psf_pixel_scale = 0.25e-6 # meters
+psf_pixel_scale = 0.25e-6 # metres
 
 # Construct the list of optical layers
 layers = [
@@ -3525,7 +3510,7 @@ layers = [
 optics = dl.LayeredOptics(wf_npixels, diameter, layers)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)</div>
         
         </div>
@@ -3784,7 +3769,7 @@ class MyOptics(dLux.optics.BaseOptics):
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">5e-4</span> <span class="c1"># arcminutes</span>
 
@@ -3799,7 +3784,7 @@ class MyOptics(dLux.optics.BaseOptics):
     <span class="n">psf_pixel_scale</span><span class="p">)</span>
 
 <span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">psf</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 </pre></div>
 <div id="cell-25" class="clipboard-copy-txt">import jax.numpy as np
@@ -3808,7 +3793,7 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 128
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 5e-4 # arcminutes
 
@@ -3823,7 +3808,7 @@ optics = MyOptics(wf_npixels, diameter, aperture, mask, psf_npixels,
     psf_pixel_scale)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)</div>
         
         </div>
@@ -3953,7 +3938,7 @@ class="
 
 <span class="c1"># Define the optical parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -3966,7 +3951,7 @@ class="
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 
 <span class="c1"># Construct Source</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">source</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 
 <span class="c1"># Construct Detector</span>
@@ -3984,7 +3969,7 @@ import dLux as dl
 
 # Define the optical parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -3997,7 +3982,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Construct Source
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 source = dl.PointSource(wavelengths)
 
 # Construct Detector
@@ -4133,12 +4118,12 @@ class="
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Array based spectrum</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="n">spectrum</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
 </pre></div>
 <div id="cell-29" class="clipboard-copy-txt"># Array based spectrum
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 weights = np.linspace(.5, 1, 5)
 spectrum = dl.Spectrum(wavelengths, weights)</div>
         
@@ -4259,7 +4244,7 @@ class="
 
 <span class="c1"># Define the optical parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -4272,7 +4257,7 @@ class="
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 
 <span class="c1"># Construct Source</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">source</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 
 <span class="c1"># Construct Observation</span>
@@ -4288,7 +4273,7 @@ import dLux as dl
 
 # Define the optical parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -4301,7 +4286,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Construct Source
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 source = dl.PointSource(wavelengths)
 
 # Construct Observation
@@ -4431,7 +4416,7 @@ class="
 
 <span class="c1"># Define the optical parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -4448,7 +4433,7 @@ import dLux as dl
 
 # Define the optical parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -4489,7 +4474,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Define wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 
 <span class="c1"># Construct PointSource</span>
 <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="n">dl</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)]</span>
@@ -4512,7 +4497,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     <span class="n">contrast</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
 </pre></div>
 <div id="cell-34" class="clipboard-copy-txt"># Define wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 
 # Construct PointSource
 sources = [dl.PointSource(wavelengths)]
@@ -4661,7 +4646,7 @@ class="
 
 <span class="c1"># Define the optical parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -4674,7 +4659,7 @@ class="
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 
 <span class="c1"># Construct Source</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">source</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 <span class="n">raw_psf</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
 </pre></div>
@@ -4683,7 +4668,7 @@ import dLux as dl
 
 # Define the optical parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -4696,7 +4681,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Construct Source
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 source = dl.PointSource(wavelengths)
 raw_psf = source.model(optics)</div>
         
@@ -4932,12 +4917,12 @@ image /= 2</div>
 <span class="kn">import</span> <span class="nn">dLux</span> <span class="k">as</span> <span class="nn">dl</span>
 
 <span class="n">npixels</span> <span class="o">=</span> <span class="mi">16</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
-<span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
+<span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="c1"># metres</span>
 
 <span class="n">wf</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">Wavefront</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">)</span>
 
-<span class="c1"># Multiply to to modify the amplitude</span>
+<span class="c1"># Multiply to modify the amplitude</span>
 <span class="n">wf</span> <span class="o">*=</span> <span class="mf">0.5</span> <span class="c1"># Halves the amplitude</span>
 
 <span class="c1"># Multiply by complex array to transform both ampltiude and phase</span>
@@ -4955,12 +4940,12 @@ image /= 2</div>
 import dLux as dl
 
 npixels = 16
-diameter = 1 # meters
-wavelength = 1e-6 # meters
+diameter = 1 # metres
+wavelength = 1e-6 # metres
 
 wf = dl.Wavefront(npixels, diameter, wavelength)
 
-# Multiply to to modify the amplitude
+# Multiply to modify the amplitude
 wf *= 0.5 # Halves the amplitude
 
 # Multiply by complex array to transform both ampltiude and phase

@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=797a693e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=51e460ec" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1897,18 +1882,16 @@ Licensed under the Apache License, Version 2.0.
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">jax.scipy.signal</span> <span class="kn">import</span> <span class="n">convolve</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">vmap</span><span class="p">,</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">Array</span>
 <span class="kn">from</span> <span class="nn">zodiax</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">import</span> <span class="nn">dLux.utils</span> <span class="k">as</span> <span class="nn">dlu</span>
-<span class="kn">import</span> <span class="nn">dLux</span>
 </pre></div>
 <div id="cell-1" class="clipboard-copy-txt">from __future__ import annotations
 import jax.numpy as np
 from jax.scipy.signal import convolve
-from jax import vmap, Array
+from jax import Array
 from zodiax import Base
-import dLux.utils as dlu
-import dLux</div>
+import dLux.utils as dlu</div>
         
         </div>
     </div>
@@ -1918,7 +1901,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=7f03e3e4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a2d28b51" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1950,7 +1933,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=4d1d1ccf" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=c572de63" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1972,7 +1955,7 @@ import dLux</div>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">Image</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class represnting some image as it is transformed by the detector. It</span>
+<span class="sd">    A class representing some image as it is transformed by the detector. It</span>
 <span class="sd">    tracks the image via the `image` attribute, and the pixel scale via the</span>
 <span class="sd">    `pixel_scale` attribute.</span>
 
@@ -1983,10 +1966,10 @@ import dLux</div>
 <span class="sd">    pixel_scale : Array</span>
 <span class="sd">        The pixel scale of the image.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">image</span>       <span class="p">:</span> <span class="n">Array</span>
-    <span class="n">pixel_scale</span> <span class="p">:</span> <span class="n">Array</span>
-    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">image</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">pixel_scale</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1998,9 +1981,8 @@ import dLux</div>
         <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
-        
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">npixels</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">npixels</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the side length of the arrays currently representing the</span>
 <span class="sd">        image.</span>
@@ -2012,8 +1994,7 @@ import dLux</div>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-
-    <span class="k">def</span> <span class="nf">downsample</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">n</span> <span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">downsample</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Downsamples the image by a factor of n. This is done by summing the</span>
 <span class="sd">        image pixels in n x n blocks.</span>
@@ -2031,8 +2012,7 @@ import dLux</div>
         <span class="n">downsampled</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">downsampled</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">convolve</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">convolve</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convolves the image with another image. This is done using the</span>
 <span class="sd">        `jax.scipy.signal.convolve` function.</span>
@@ -2048,9 +2028,8 @@ import dLux</div>
 <span class="sd">            The convolved image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">convolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">))</span>
-        
 
-    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">angle</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">order</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Rotates the image by a given angle. This is done using interpolation</span>
 <span class="sd">        methods.</span>
@@ -2069,8 +2048,7 @@ import dLux</div>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">))</span>
 
-
-    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method for the multiplication operator. This allows for the</span>
 <span class="sd">        multiplication of the image by a scalar or another image.</span>
@@ -2086,9 +2064,8 @@ import dLux</div>
 <span class="sd">            The multiplied image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-    
 
-    <span class="k">def</span> <span class="fm">__imul__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method for the inplace multiplication operator. This allows for</span>
 <span class="sd">        the inplace multiplication of the image by a scalar or another image.</span>
@@ -2104,9 +2081,8 @@ import dLux</div>
 <span class="sd">            The multiplied image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-    
 
-    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method for the addition operator. This allows for the addition of</span>
 <span class="sd">        the image by a scalar or another image.</span>
@@ -2122,9 +2098,8 @@ import dLux</div>
 <span class="sd">            The added image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-    
 
-    <span class="k">def</span> <span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method for the inplace addition operator. This allows for the</span>
 <span class="sd">        inplace addition of the image by a scalar or another image.</span>
@@ -2140,9 +2115,8 @@ import dLux</div>
 <span class="sd">            The added image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-    
 
-    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method for the subtraction operator. This allows for the</span>
 <span class="sd">        subtraction of the image by a scalar or another image.</span>
@@ -2159,8 +2133,7 @@ import dLux</div>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="o">-</span><span class="n">other</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="fm">__isub__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method for the inplace subtraction operator. This allows for the</span>
 <span class="sd">        inplace subtraction of the image by a scalar or another image.</span>
@@ -2176,9 +2149,8 @@ import dLux</div>
 <span class="sd">            The subtracted image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__sub__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-    
 
-    <span class="k">def</span> <span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method for the division operator. This allows for the division of</span>
 <span class="sd">        the image by a scalar or another image.</span>
@@ -2194,7 +2166,6 @@ import dLux</div>
 <span class="sd">            The divided image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-    
 
     <span class="k">def</span> <span class="fm">__itruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2215,7 +2186,7 @@ import dLux</div>
 </pre></div>
 <div id="cell-3" class="clipboard-copy-txt">class Image(Base):
     """
-    A class represnting some image as it is transformed by the detector. It
+    A class representing some image as it is transformed by the detector. It
     tracks the image via the `image` attribute, and the pixel scale via the
     `pixel_scale` attribute.
 
@@ -2226,10 +2197,10 @@ import dLux</div>
     pixel_scale : Array
         The pixel scale of the image.
     """
-    image       : Array
-    pixel_scale : Array
-    
-    def __init__(self : Image, image : Array, pixel_scale : Array) -> Image:
+    image: Array
+    pixel_scale: Array
+
+    def __init__(self: Image, image: Array, pixel_scale: Array):
         """
         Parameters
         ----------
@@ -2241,9 +2212,8 @@ import dLux</div>
         self.image = np.asarray(image, dtype=float)
         self.pixel_scale = np.asarray(pixel_scale, dtype=float)
 
-        
     @property
-    def npixels(self : Image) -> int:
+    def npixels(self: Image) -> int:
         """
         Returns the side length of the arrays currently representing the
         image.
@@ -2255,8 +2225,7 @@ import dLux</div>
         """
         return self.image.shape[-1]
 
-
-    def downsample(self : Image, n : int) -> Image:
+    def downsample(self: Image, n: int) -> Image:
         """
         Downsamples the image by a factor of n. This is done by summing the
         image pixels in n x n blocks.
@@ -2274,8 +2243,7 @@ import dLux</div>
         downsampled = dlu.downsample(self.image, n, 'sum')
         return self.set('image', downsampled)
 
-
-    def convolve(self : Image, other : Array) -> Image:
+    def convolve(self: Image, other: Array) -> Image:
         """
         Convolves the image with another image. This is done using the
         `jax.scipy.signal.convolve` function.
@@ -2291,9 +2259,8 @@ import dLux</div>
             The convolved image.
         """
         return self.set('image', convolve(self.image, other, mode='same'))
-        
 
-    def rotate(self : Image, angle : float, order : int = 1) -> Image:
+    def rotate(self: Image, angle: float, order: int = 1) -> Image:
         """
         Rotates the image by a given angle. This is done using interpolation
         methods.
@@ -2312,8 +2279,7 @@ import dLux</div>
         """
         return self.set('image', dlu.rotate(self.image, angle, order=order))
 
-
-    def __mul__(self : Image, other : Array) -> Image:
+    def __mul__(self: Image, other: Array) -> Image:
         """
         Magic method for the multiplication operator. This allows for the
         multiplication of the image by a scalar or another image.
@@ -2329,9 +2295,8 @@ import dLux</div>
             The multiplied image.
         """
         return self.multiply('image', other)
-    
 
-    def __imul__(self : Image, other : Array) -> Image:
+    def __imul__(self: Image, other: Array) -> Image:
         """
         Magic method for the inplace multiplication operator. This allows for
         the inplace multiplication of the image by a scalar or another image.
@@ -2347,9 +2312,8 @@ import dLux</div>
             The multiplied image.
         """
         return self.__mul__(other)
-    
 
-    def __add__(self : Image, other : Array) -> Image:
+    def __add__(self: Image, other: Array) -> Image:
         """
         Magic method for the addition operator. This allows for the addition of
         the image by a scalar or another image.
@@ -2365,9 +2329,8 @@ import dLux</div>
             The added image.
         """
         return self.add('image', other)
-    
 
-    def __iadd__(self : Image, other : Array) -> Image:
+    def __iadd__(self: Image, other: Array) -> Image:
         """
         Magic method for the inplace addition operator. This allows for the
         inplace addition of the image by a scalar or another image.
@@ -2383,9 +2346,8 @@ import dLux</div>
             The added image.
         """
         return self.__add__(other)
-    
 
-    def __sub__(self : Image, other : Array) -> Image:
+    def __sub__(self: Image, other: Array) -> Image:
         """
         Magic method for the subtraction operator. This allows for the
         subtraction of the image by a scalar or another image.
@@ -2402,8 +2364,7 @@ import dLux</div>
         """
         return self.add('image', -other)
 
-
-    def __isub__(self : Image, other : Array) -> Image:
+    def __isub__(self: Image, other: Array) -> Image:
         """
         Magic method for the inplace subtraction operator. This allows for the
         inplace subtraction of the image by a scalar or another image.
@@ -2419,9 +2380,8 @@ import dLux</div>
             The subtracted image.
         """
         return self.__sub__(other)
-    
 
-    def __truediv__(self : Image, other : Array) -> Image:
+    def __truediv__(self: Image, other: Array) -> Image:
         """
         Magic method for the division operator. This allows for the division of
         the image by a scalar or another image.
@@ -2437,7 +2397,6 @@ import dLux</div>
             The divided image.
         """
         return self.divide('image', other)
-    
 
     def __itruediv__(self: Image, other: Array) -> Image:
         """

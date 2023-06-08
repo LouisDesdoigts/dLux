@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=45c903db" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=ead2afe6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1908,7 +1893,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=9f11d096" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=bc17ad54" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1928,10 +1913,10 @@ from jax import Array</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;opd_to_phase&quot;</span><span class="p">,</span> <span class="s2">&quot;phase_to_opd&quot;</span><span class="p">,</span> <span class="s2">&quot;get_fringe_size&quot;</span><span class="p">,</span> 
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;opd_to_phase&quot;</span><span class="p">,</span> <span class="s2">&quot;phase_to_opd&quot;</span><span class="p">,</span> <span class="s2">&quot;get_fringe_size&quot;</span><span class="p">,</span>
            <span class="s2">&quot;get_pixels_per_fringe&quot;</span><span class="p">,</span> <span class="s2">&quot;get_pixel_scale&quot;</span><span class="p">,</span> <span class="s2">&quot;get_airy_pixel_scale&quot;</span><span class="p">]</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt">__all__ = ["opd_to_phase", "phase_to_opd", "get_fringe_size", 
+<div id="cell-2" class="clipboard-copy-txt">__all__ = ["opd_to_phase", "phase_to_opd", "get_fringe_size",
            "get_pixels_per_fringe", "get_pixel_scale", "get_airy_pixel_scale"]</div>
         
         </div>
@@ -1942,7 +1927,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=eec2ef5b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=4094b6cc" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1962,43 +1947,43 @@ from jax import Array</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">opd_to_phase</span><span class="p">(</span><span class="n">opd</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">opd_to_phase</span><span class="p">(</span><span class="n">opd</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts the input Optical Path Difference (opd) in units of meters to</span>
+<span class="sd">    Converts the input Optical Path Difference (opd) in units of metres to</span>
 <span class="sd">    phases in units of radians for the given wavelength.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    opd : Array, meters</span>
+<span class="sd">    opd : Array, metres</span>
 <span class="sd">        The Optical Path Difference (opd) to be converted into phase.</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The wavelength at which to calculate the phase for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    phase : Array, radians</span>
-<span class="sd">        The equivilent phase value for the given opd and wavelength.</span>
+<span class="sd">        The equivalent phase value for the given opd and wavelength.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">opd</span><span class="o">/</span><span class="n">wavelength</span>
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">opd</span> <span class="o">/</span> <span class="n">wavelength</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt">def opd_to_phase(opd : Array, wavelength : Array) -> Array:
+<div id="cell-3" class="clipboard-copy-txt">def opd_to_phase(opd: Array, wavelength: Array) -> Array:
     """
-    Converts the input Optical Path Difference (opd) in units of meters to
+    Converts the input Optical Path Difference (opd) in units of metres to
     phases in units of radians for the given wavelength.
 
     Parameters
     ----------
-    opd : Array, meters
+    opd : Array, metres
         The Optical Path Difference (opd) to be converted into phase.
-    wavelength : Array, meters
+    wavelength : Array, metres
         The wavelength at which to calculate the phase for.
 
     Returns
     -------
     phase : Array, radians
-        The equivilent phase value for the given opd and wavelength.
+        The equivalent phase value for the given opd and wavelength.
     """
-    return 2*np.pi*opd/wavelength</div>
+    return 2 * np.pi * opd / wavelength</div>
         
         </div>
     </div>
@@ -2008,7 +1993,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=093a7e4b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=6aad41de" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2028,43 +2013,43 @@ from jax import Array</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">phase_to_opd</span><span class="p">(</span><span class="n">phase</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">phase_to_opd</span><span class="p">(</span><span class="n">phase</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts the input phase in units of radians to the equivilent Optical Path</span>
-<span class="sd">    Difference (opd) in meters for the given wavelength.</span>
+<span class="sd">    Converts the input phase in units of radians to the equivalent Optical Path</span>
+<span class="sd">    Difference (opd) in metres for the given wavelength.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    phase : Array, radians</span>
 <span class="sd">        The phase to be converted into Optical Path Difference (opd)</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The wavelength at which to calculate the phase for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    opd : Array, meters</span>
-<span class="sd">        The equivilent opd value for the given phase and wavelength.</span>
+<span class="sd">    opd : Array, metres</span>
+<span class="sd">        The equivalent opd value for the given phase and wavelength.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">phase</span><span class="o">*</span><span class="n">wavelength</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">phase</span> <span class="o">*</span> <span class="n">wavelength</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt">def phase_to_opd(phase : Array, wavelength : Array) -> Array:
+<div id="cell-4" class="clipboard-copy-txt">def phase_to_opd(phase: Array, wavelength: Array) -> Array:
     """
-    Converts the input phase in units of radians to the equivilent Optical Path
-    Difference (opd) in meters for the given wavelength.
+    Converts the input phase in units of radians to the equivalent Optical Path
+    Difference (opd) in metres for the given wavelength.
 
     Parameters
     ----------
     phase : Array, radians
         The phase to be converted into Optical Path Difference (opd)
-    wavelength : Array, meters
+    wavelength : Array, metres
         The wavelength at which to calculate the phase for.
 
     Returns
     -------
-    opd : Array, meters
-        The equivilent opd value for the given phase and wavelength.
+    opd : Array, metres
+        The equivalent opd value for the given phase and wavelength.
     """
-    return phase*wavelength/(2*np.pi)</div>
+    return phase * wavelength / (2 * np.pi)</div>
         
         </div>
     </div>
@@ -2074,7 +2059,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=10821277" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=63ebc112" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2094,15 +2079,15 @@ from jax import Array</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">get_fringe_size</span><span class="p">(</span><span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">aperture</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">get_fringe_size</span><span class="p">(</span><span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">aperture</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calcualtes the angular size of the diffraction fringes.</span>
+<span class="sd">    Calculates the angular size of the diffraction fringes.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The wavelength at which to calculate the diffraction fringe for.</span>
-<span class="sd">    aperture : Array, meters</span>
+<span class="sd">    aperture : Array, metres</span>
 <span class="sd">        The size of the aperture.</span>
 
 <span class="sd">    Returns</span>
@@ -2110,17 +2095,17 @@ from jax import Array</div>
 <span class="sd">    fringe_size : Array, radians</span>
 <span class="sd">        The angular fringe size in units of radians.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">wavelength</span><span class="o">/</span><span class="n">aperture</span>
+    <span class="k">return</span> <span class="n">wavelength</span> <span class="o">/</span> <span class="n">aperture</span>
 </pre></div>
-<div id="cell-5" class="clipboard-copy-txt">def get_fringe_size(wavelength : Array, aperture : Array) -> Array:
+<div id="cell-5" class="clipboard-copy-txt">def get_fringe_size(wavelength: Array, aperture: Array) -> Array:
     """
-    Calcualtes the angular size of the diffraction fringes.
+    Calculates the angular size of the diffraction fringes.
 
     Parameters
     ----------
-    wavelength : Array, meters
+    wavelength : Array, metres
         The wavelength at which to calculate the diffraction fringe for.
-    aperture : Array, meters
+    aperture : Array, metres
         The size of the aperture.
 
     Returns
@@ -2128,7 +2113,7 @@ from jax import Array</div>
     fringe_size : Array, radians
         The angular fringe size in units of radians.
     """
-    return wavelength/aperture</div>
+    return wavelength / aperture</div>
         
         </div>
     </div>
@@ -2138,7 +2123,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=9cec22fb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=8d5d252c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2158,28 +2143,28 @@ from jax import Array</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">get_pixels_per_fringe</span><span class="p">(</span><span class="n">wavelength</span>   <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                          <span class="n">aperture</span>     <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                          <span class="n">pixel_scale</span>  <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                          <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">get_pixels_per_fringe</span><span class="p">(</span><span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                          <span class="n">aperture</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                          <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                          <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the number of pixels per diffraction fringe, ie the fringe</span>
+<span class="sd">    Calculates the number of pixels per diffraction fringe, i.e. the fringe</span>
 <span class="sd">    sampling rate.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The wavelength at which to calculate the diffraction fringe for.</span>
-<span class="sd">    aperture : Array, meters</span>
+<span class="sd">    aperture : Array, metres</span>
 <span class="sd">        The size of the aperture.</span>
-<span class="sd">    pixel_scale : Array, meters/pixel or radians/pixel</span>
+<span class="sd">    pixel_scale : Array, metres/pixel or radians/pixel</span>
 <span class="sd">        The size of each pixel. This is taken in units of radians per pixel if</span>
-<span class="sd">        no focal length is provided, else it is taken in size of meters per</span>
+<span class="sd">        no focal length is provided, else it is taken in size of metres per</span>
 <span class="sd">        pixel.</span>
 <span class="sd">    focal_length : Array = None</span>
 <span class="sd">        The focal length of the optical system. If none is provided, the pixel</span>
 <span class="sd">        scale is taken in units of radians per pixel, else it is taken in</span>
-<span class="sd">        meters per pixel.</span>
+<span class="sd">        metres per pixel.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2189,36 +2174,36 @@ from jax import Array</div>
     <span class="c1"># Get fringe size</span>
     <span class="n">fringe_size</span> <span class="o">=</span> <span class="n">get_fringe_size</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">aperture</span><span class="p">)</span>
 
-    <span class="c1"># Convert to meters if focal_length is provided</span>
+    <span class="c1"># Convert to metres if focal_length is provided</span>
     <span class="k">if</span> <span class="n">focal_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fringe_size</span> <span class="o">*=</span> <span class="n">focal_length</span>
 
     <span class="c1"># Return sampling</span>
-    <span class="k">return</span> <span class="n">fringe_size</span><span class="o">/</span><span class="n">pixel_scale</span>
+    <span class="k">return</span> <span class="n">fringe_size</span> <span class="o">/</span> <span class="n">pixel_scale</span>
     <span class="c1"># return pixel_scale/fringe_size</span>
 </pre></div>
-<div id="cell-6" class="clipboard-copy-txt">def get_pixels_per_fringe(wavelength   : Array,
-                          aperture     : Array,
-                          pixel_scale  : Array,
-                          focal_length : Array = None) -> Array:
+<div id="cell-6" class="clipboard-copy-txt">def get_pixels_per_fringe(wavelength: Array,
+                          aperture: Array,
+                          pixel_scale: Array,
+                          focal_length: Array = None) -> Array:
     """
-    Calculates the number of pixels per diffraction fringe, ie the fringe
+    Calculates the number of pixels per diffraction fringe, i.e. the fringe
     sampling rate.
 
     Parameters
     ----------
-    wavelength : Array, meters
+    wavelength : Array, metres
         The wavelength at which to calculate the diffraction fringe for.
-    aperture : Array, meters
+    aperture : Array, metres
         The size of the aperture.
-    pixel_scale : Array, meters/pixel or radians/pixel
+    pixel_scale : Array, metres/pixel or radians/pixel
         The size of each pixel. This is taken in units of radians per pixel if
-        no focal length is provided, else it is taken in size of meters per
+        no focal length is provided, else it is taken in size of metres per
         pixel.
     focal_length : Array = None
         The focal length of the optical system. If none is provided, the pixel
         scale is taken in units of radians per pixel, else it is taken in
-        meters per pixel.
+        metres per pixel.
 
     Returns
     -------
@@ -2228,12 +2213,12 @@ from jax import Array</div>
     # Get fringe size
     fringe_size = get_fringe_size(wavelength, aperture)
 
-    # Convert to meters if focal_length is provided
+    # Convert to metres if focal_length is provided
     if focal_length is not None:
         fringe_size *= focal_length
 
     # Return sampling
-    return fringe_size/pixel_scale
+    return fringe_size / pixel_scale
     # return pixel_scale/fringe_size</div>
         
         </div>
@@ -2244,7 +2229,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=79812dc2" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=08f96b63" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2264,12 +2249,12 @@ from jax import Array</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">get_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                    <span class="n">wavelength</span>    <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                    <span class="n">aperture</span>      <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                    <span class="n">focal_length</span>  <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">get_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                    <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                    <span class="n">aperture</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                    <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calcaultes the pixel_size needed in order to sample the diffraction fringes</span>
+<span class="sd">    Calculates the pixel_size needed in order to sample the diffraction fringes</span>
 <span class="sd">    at the given sampling rate.</span>
 
 <span class="sd">    Parameters</span>
@@ -2277,38 +2262,38 @@ from jax import Array</div>
 <span class="sd">    sampling_rate : Array</span>
 <span class="sd">        The rate at which to sample the diffraction fringes. A value of 2 will</span>
 <span class="sd">        give nyquist sampled pixels.</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The observation wavelength.</span>
-<span class="sd">    aperture : Array, meters</span>
+<span class="sd">    aperture : Array, metres</span>
 <span class="sd">        The size of the aperture.</span>
 <span class="sd">    focal_length : Array = None</span>
 <span class="sd">        The focal length of the optical system. If none is provided, the pixel</span>
 <span class="sd">        scale is given in units of radians per pixel, else it is given in</span>
-<span class="sd">        meters per pixel.</span>
+<span class="sd">        metres per pixel.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    pixel_scale : Array, radians per pixel or meters per pixel</span>
+<span class="sd">    pixel_scale : Array, radians per pixel or metres per pixel</span>
 <span class="sd">        The pixel_size needed to sample the diffraction fringes at the input</span>
-<span class="sd">        sampling rate, in units of radans per pixel if no focal length is</span>
-<span class="sd">        provided, else in units of meters per pixel.</span>
+<span class="sd">        sampling rate, in units of radians per pixel if no focal length is</span>
+<span class="sd">        provided, else in units of metres per pixel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get fringe size</span>
     <span class="n">fringe_size</span> <span class="o">=</span> <span class="n">get_fringe_size</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">aperture</span><span class="p">)</span>
 
-    <span class="c1"># Convert to meters if focal_length is provided</span>
+    <span class="c1"># Convert to metres if focal_length is provided</span>
     <span class="k">if</span> <span class="n">focal_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fringe_size</span> <span class="o">*=</span> <span class="n">focal_length</span>
 
     <span class="c1"># Get sampling rate</span>
     <span class="k">return</span> <span class="n">fringe_size</span> <span class="o">/</span> <span class="n">sampling_rate</span>
 </pre></div>
-<div id="cell-7" class="clipboard-copy-txt">def get_pixel_scale(sampling_rate : Array,
-                    wavelength    : Array,
-                    aperture      : Array,
-                    focal_length  : Array = None) -> Array:
+<div id="cell-7" class="clipboard-copy-txt">def get_pixel_scale(sampling_rate: Array,
+                    wavelength: Array,
+                    aperture: Array,
+                    focal_length: Array = None) -> Array:
     """
-    Calcaultes the pixel_size needed in order to sample the diffraction fringes
+    Calculates the pixel_size needed in order to sample the diffraction fringes
     at the given sampling rate.
 
     Parameters
@@ -2316,26 +2301,26 @@ from jax import Array</div>
     sampling_rate : Array
         The rate at which to sample the diffraction fringes. A value of 2 will
         give nyquist sampled pixels.
-    wavelength : Array, meters
+    wavelength : Array, metres
         The observation wavelength.
-    aperture : Array, meters
+    aperture : Array, metres
         The size of the aperture.
     focal_length : Array = None
         The focal length of the optical system. If none is provided, the pixel
         scale is given in units of radians per pixel, else it is given in
-        meters per pixel.
+        metres per pixel.
 
     Returns
     -------
-    pixel_scale : Array, radians per pixel or meters per pixel
+    pixel_scale : Array, radians per pixel or metres per pixel
         The pixel_size needed to sample the diffraction fringes at the input
-        sampling rate, in units of radans per pixel if no focal length is
-        provided, else in units of meters per pixel.
+        sampling rate, in units of radians per pixel if no focal length is
+        provided, else in units of metres per pixel.
     """
     # Get fringe size
     fringe_size = get_fringe_size(wavelength, aperture)
 
-    # Convert to meters if focal_length is provided
+    # Convert to metres if focal_length is provided
     if focal_length is not None:
         fringe_size *= focal_length
 
@@ -2350,7 +2335,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=9a84176a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=da15ecfb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2370,12 +2355,12 @@ from jax import Array</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">get_airy_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                         <span class="n">wavelength</span>    <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                         <span class="n">aperture</span>      <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                         <span class="n">focal_length</span>  <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">get_airy_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                         <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                         <span class="n">aperture</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                         <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calcaultes the pixel_size needed in order to sample the diffraction fringes</span>
+<span class="sd">    Calculates the pixel_size needed to sample the diffraction fringes</span>
 <span class="sd">    at the given sampling rate. Applies the 1.22 multiplier for Airy disk</span>
 <span class="sd">    diffraction fringes given by a circular aperture.</span>
 
@@ -2384,31 +2369,31 @@ from jax import Array</div>
 <span class="sd">    sampling_rate : Array</span>
 <span class="sd">        The rate at which to sample the diffraction fringes. A value of 2 will</span>
 <span class="sd">        give nyquist sampled pixels.</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The observation wavelength.</span>
-<span class="sd">    aperture : Array, meters</span>
+<span class="sd">    aperture : Array, metres</span>
 <span class="sd">        The size of the aperture.</span>
 <span class="sd">    focal_length : Array = None</span>
 <span class="sd">        The focal length of the optical system. If none is provided, the pixel</span>
 <span class="sd">        scale is given in units of radians per pixel, else it is given in</span>
-<span class="sd">        meters per pixel.</span>
+<span class="sd">        metres per pixel.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    pixel_scale : Array, radians per pixel or meters per pixel</span>
+<span class="sd">    pixel_scale : Array, radians per pixel or metres per pixel</span>
 <span class="sd">        The pixel_size needed to sample the diffraction fringes at the input</span>
-<span class="sd">        sampling rate, in units of radans per pixel if no focal length is</span>
-<span class="sd">        provided, else in units of meters per pixel.</span>
+<span class="sd">        sampling rate, in units of radians per pixel if no focal length is</span>
+<span class="sd">        provided, else in units of metres per pixel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">get_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="mf">1.22</span><span class="o">*</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">aperture</span><span class="p">,</span>
+    <span class="k">return</span> <span class="n">get_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="mf">1.22</span> <span class="o">*</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">aperture</span><span class="p">,</span>
                            <span class="n">focal_length</span><span class="p">)</span>
 </pre></div>
-<div id="cell-8" class="clipboard-copy-txt">def get_airy_pixel_scale(sampling_rate : Array,
-                         wavelength    : Array,
-                         aperture      : Array,
-                         focal_length  : Array = None) -> Array:
+<div id="cell-8" class="clipboard-copy-txt">def get_airy_pixel_scale(sampling_rate: Array,
+                         wavelength: Array,
+                         aperture: Array,
+                         focal_length: Array = None) -> Array:
     """
-    Calcaultes the pixel_size needed in order to sample the diffraction fringes
+    Calculates the pixel_size needed to sample the diffraction fringes
     at the given sampling rate. Applies the 1.22 multiplier for Airy disk
     diffraction fringes given by a circular aperture.
 
@@ -2417,23 +2402,23 @@ from jax import Array</div>
     sampling_rate : Array
         The rate at which to sample the diffraction fringes. A value of 2 will
         give nyquist sampled pixels.
-    wavelength : Array, meters
+    wavelength : Array, metres
         The observation wavelength.
-    aperture : Array, meters
+    aperture : Array, metres
         The size of the aperture.
     focal_length : Array = None
         The focal length of the optical system. If none is provided, the pixel
         scale is given in units of radians per pixel, else it is given in
-        meters per pixel.
+        metres per pixel.
 
     Returns
     -------
-    pixel_scale : Array, radians per pixel or meters per pixel
+    pixel_scale : Array, radians per pixel or metres per pixel
         The pixel_size needed to sample the diffraction fringes at the input
-        sampling rate, in units of radans per pixel if no focal length is
-        provided, else in units of meters per pixel.
+        sampling rate, in units of radians per pixel if no focal length is
+        provided, else in units of metres per pixel.
     """
-    return get_pixel_scale(sampling_rate, 1.22*wavelength, aperture,
+    return get_pixel_scale(sampling_rate, 1.22 * wavelength, aperture,
                            focal_length)</div>
         
         </div>

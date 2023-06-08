@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=6830efe1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=9418eb78" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1894,11 +1879,9 @@ Licensed under the Apache License, Version 2.0.
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 </pre></div>
-<div id="cell-1" class="clipboard-copy-txt">import jax.numpy as np
-from collections import OrderedDict</div>
+<div id="cell-1" class="clipboard-copy-txt">from collections import OrderedDict</div>
         
         </div>
     </div>
@@ -1908,7 +1891,7 @@ from collections import OrderedDict</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5fbd2e9c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=4162e682" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1940,7 +1923,7 @@ from collections import OrderedDict</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=274945d4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=814c817f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1961,9 +1944,9 @@ from collections import OrderedDict</div>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">list_to_dictionary</span><span class="p">(</span>
-    <span class="n">list_in</span> <span class="p">:</span> <span class="nb">list</span><span class="p">,</span> 
-    <span class="n">ordered</span> <span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="n">allowed_types</span> <span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">list_in</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="n">ordered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">allowed_types</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts some input list of dLux layers and converts them into an</span>
 <span class="sd">    OrderedDict with the correct structure, ensuring that all keys are unique.</span>
@@ -1971,7 +1954,7 @@ from collections import OrderedDict</div>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    list_in : list</span>
-<span class="sd">        The list of dLux Layersto be converted into a dictionary.</span>
+<span class="sd">        The list of dLux Layers to be converted into a dictionary.</span>
 <span class="sd">    ordered : bool</span>
 <span class="sd">        Whether to return an ordered or regular dictionary.</span>
 <span class="sd">    allowed_types : tuple</span>
@@ -1980,7 +1963,7 @@ from collections import OrderedDict</div>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    dictionary : dict</span>
-<span class="sd">        The equivilent dictionary or ordered dictionary.</span>
+<span class="sd">        The equivalent dictionary or ordered dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Construct names list and identify repeats</span>
     <span class="n">names</span><span class="p">,</span> <span class="n">repeats</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -1995,7 +1978,7 @@ from collections import OrderedDict</div>
         <span class="c1"># Check input types</span>
         <span class="k">if</span> <span class="n">allowed_types</span> <span class="o">!=</span> <span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">allowed_types</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is not an allowed type, got &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># Check for Repeats</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
@@ -2018,11 +2001,11 @@ from collections import OrderedDict</div>
     <span class="c1"># Turn list into Dictionary</span>
     <span class="n">dict_out</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span> <span class="k">if</span> <span class="n">ordered</span> <span class="k">else</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)):</span>
-        
+
         <span class="c1"># Check for spaces in names</span>
         <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Names can not contain spaces, got </span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        
+
         <span class="c1"># Add to dict</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">list_in</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
             <span class="n">item</span> <span class="o">=</span> <span class="n">list_in</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -2032,9 +2015,9 @@ from collections import OrderedDict</div>
     <span class="k">return</span> <span class="n">dict_out</span>
 </pre></div>
 <div id="cell-3" class="clipboard-copy-txt">def list_to_dictionary(
-    list_in : list, 
-    ordered : bool,
-    allowed_types : tuple = ()) -> dict:
+        list_in: list,
+        ordered: bool,
+        allowed_types: tuple = ()) -> dict:
     """
     Converts some input list of dLux layers and converts them into an
     OrderedDict with the correct structure, ensuring that all keys are unique.
@@ -2042,7 +2025,7 @@ from collections import OrderedDict</div>
     Parameters
     ----------
     list_in : list
-        The list of dLux Layersto be converted into a dictionary.
+        The list of dLux Layers to be converted into a dictionary.
     ordered : bool
         Whether to return an ordered or regular dictionary.
     allowed_types : tuple
@@ -2051,7 +2034,7 @@ from collections import OrderedDict</div>
     Returns
     -------
     dictionary : dict
-        The equivilent dictionary or ordered dictionary.
+        The equivalent dictionary or ordered dictionary.
     """
     # Construct names list and identify repeats
     names, repeats = [], []
@@ -2066,7 +2049,7 @@ from collections import OrderedDict</div>
         # Check input types
         if allowed_types != () and not isinstance(item, allowed_types):
             raise TypeError(f"Item {name} is not an allowed type, got "
-                f"{type(item)}")
+                            f"{type(item)}")
 
         # Check for Repeats
         if name in names:
@@ -2089,11 +2072,11 @@ from collections import OrderedDict</div>
     # Turn list into Dictionary
     dict_out = OrderedDict() if ordered else {}
     for i in range(len(names)):
-        
+
         # Check for spaces in names
         if ' ' in names[i]:
             raise ValueError(f"Names can not contain spaces, got {names[i]}")
-        
+
         # Add to dict
         if isinstance(list_in[i], tuple):
             item = list_in[i][0]

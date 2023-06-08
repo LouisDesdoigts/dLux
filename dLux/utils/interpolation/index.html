@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=2034eea1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=fbcf98be" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1912,7 +1897,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c3d1b228" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=fbae757b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1934,11 +1919,11 @@ import dLux.utils as dlu</div>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># TODO: Resolve scale and scale_array</span>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;scale_array&quot;</span><span class="p">,</span> <span class="s2">&quot;downsample&quot;</span><span class="p">,</span> <span class="s2">&quot;generate_coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;rotate&quot;</span><span class="p">,</span> <span class="s2">&quot;fourier_rotate&quot;</span><span class="p">]</span>
+           <span class="s2">&quot;rotate&quot;</span><span class="p">,</span> <span class="s2">&quot;fourier_rotate&quot;</span><span class="p">]</span>
 </pre></div>
 <div id="cell-2" class="clipboard-copy-txt"># TODO: Resolve scale and scale_array
 __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
-    "rotate", "fourier_rotate"]</div>
+           "rotate", "fourier_rotate"]</div>
         
         </div>
     </div>
@@ -1948,7 +1933,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=ddabd744" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a8aeaf81" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1968,11 +1953,11 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">scale_array</span><span class="p">(</span><span class="n">array</span>    <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                <span class="n">size_out</span> <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                <span class="n">order</span>    <span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">scale_array</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                <span class="n">size_out</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Scales some input array to size_out using interolation.</span>
+<span class="sd">    Scales some input array to size_out using interpolation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1992,11 +1977,11 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
     <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">map_coordinates</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ys</span><span class="p">,</span> <span class="n">xs</span><span class="p">]),</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt">def scale_array(array    : Array,
-                size_out : int,
-                order    : int) -> Array:
+<div id="cell-3" class="clipboard-copy-txt">def scale_array(array: Array,
+                size_out: int,
+                order: int) -> Array:
     """
-    Scales some input array to size_out using interolation.
+    Scales some input array to size_out using interpolation.
 
     Parameters
     ----------
@@ -2024,7 +2009,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5ce259d1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e81fa84d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2044,7 +2029,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">downsample</span><span class="p">(</span><span class="n">array</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">n</span> <span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">downsample</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Downsamples the input array by n.</span>
 
@@ -2054,6 +2039,8 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 <span class="sd">        The input array to downsample.</span>
 <span class="sd">    n : int</span>
 <span class="sd">        The factor by which to downsample the array.</span>
+<span class="sd">    method : str = &#39;mean&#39;</span>
+<span class="sd">        The method by which to downsample the array. Can be &#39;mean&#39; or &#39;sum&#39;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2068,18 +2055,18 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid method. Choose &quot;mean&quot; or &quot;sum&quot;.&#39;</span><span class="p">)</span>
 
     <span class="n">size_in</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">size_out</span> <span class="o">=</span> <span class="n">size_in</span><span class="o">//</span><span class="n">n</span>
+    <span class="n">size_out</span> <span class="o">=</span> <span class="n">size_in</span> <span class="o">//</span> <span class="n">n</span>
 
     <span class="c1"># Downsample first dimension</span>
-    <span class="n">array</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">size_in</span><span class="o">*</span><span class="n">size_out</span><span class="p">,</span> <span class="n">n</span><span class="p">)),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">size_in</span> <span class="o">*</span> <span class="n">size_out</span><span class="p">,</span> <span class="n">n</span><span class="p">)),</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">size_in</span><span class="p">,</span> <span class="n">size_out</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
     <span class="c1"># Downsample second dimension</span>
-    <span class="n">array</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">size_out</span><span class="o">*</span><span class="n">size_out</span><span class="p">,</span> <span class="n">n</span><span class="p">)),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">size_out</span> <span class="o">*</span> <span class="n">size_out</span><span class="p">,</span> <span class="n">n</span><span class="p">)),</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">size_out</span><span class="p">,</span> <span class="n">size_out</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
     <span class="k">return</span> <span class="n">array</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt">def downsample(array : Array, n : int, method='mean') -> Array:
+<div id="cell-4" class="clipboard-copy-txt">def downsample(array: Array, n: int, method='mean') -> Array:
     """
     Downsamples the input array by n.
 
@@ -2089,6 +2076,8 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
         The input array to downsample.
     n : int
         The factor by which to downsample the array.
+    method : str = 'mean'
+        The method by which to downsample the array. Can be 'mean' or 'sum'.
 
     Returns
     -------
@@ -2103,14 +2092,14 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
         raise ValueError('Invalid method. Choose "mean" or "sum".')
 
     size_in = array.shape[0]
-    size_out = size_in//n
+    size_out = size_in // n
 
     # Downsample first dimension
-    array = method(array.reshape((size_in*size_out, n)), 1)
+    array = method(array.reshape((size_in * size_out, n)), 1)
     array = array.reshape(size_in, size_out).T
 
     # Downsample second dimension
-    array = method(array.reshape((size_out*size_out, n)), 1)
+    array = method(array.reshape((size_out * size_out, n)), 1)
     array = array.reshape(size_out, size_out).T
     return array</div>
         
@@ -2122,7 +2111,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c6f058c5" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=21229a82" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2142,11 +2131,11 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">generate_coordinates</span><span class="p">(</span><span class="n">npixels_in</span>     <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                         <span class="n">npixels_out</span>    <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                         <span class="n">sampling_ratio</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                         <span class="n">x_shift</span>        <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.</span><span class="p">),</span>
-                         <span class="n">y_shift</span>        <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">generate_coordinates</span><span class="p">(</span><span class="n">npixels_in</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                         <span class="n">npixels_out</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                         <span class="n">sampling_ratio</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                         <span class="n">x_shift</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.</span><span class="p">),</span>
+                         <span class="n">y_shift</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a new set of paraxial coordinates which can be used for</span>
 <span class="sd">    interpolation.</span>
@@ -2159,11 +2148,11 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 <span class="sd">        The number of pixel in the output array.</span>
 <span class="sd">    sampling_ratio : Array</span>
 <span class="sd">        The ratio of pixel sizes in the input and output array,</span>
-<span class="sd">        ie pixel_scale_out/pixel_scale_in.</span>
-<span class="sd">    x_shift : Array, pixles = np.array(0.)</span>
+<span class="sd">        i.e. pixel_scale_out/pixel_scale_in.</span>
+<span class="sd">    x_shift : Array, pixels = np.array(0.)</span>
 <span class="sd">        How much to shift the x_coordinates in the output array, in the pixel</span>
 <span class="sd">        units of the output array.</span>
-<span class="sd">    y_shift : Array, pixles = np.array(0.)</span>
+<span class="sd">    y_shift : Array, pixels = np.array(0.)</span>
 <span class="sd">        How much to shift the y_coordinates in the output array, in the pixel</span>
 <span class="sd">        units of the output array.</span>
 
@@ -2172,18 +2161,18 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 <span class="sd">    coordinates : Array</span>
 <span class="sd">        The output coordinates at which to interpolate onto.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">old_centre</span> <span class="o">=</span> <span class="p">(</span><span class="n">npixels_in</span>  <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">old_centre</span> <span class="o">=</span> <span class="p">(</span><span class="n">npixels_in</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
     <span class="n">new_centre</span> <span class="o">=</span> <span class="p">(</span><span class="n">npixels_out</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
     <span class="n">pixels</span> <span class="o">=</span> <span class="n">sampling_ratio</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">new_centre</span><span class="p">,</span> <span class="n">new_centre</span><span class="p">,</span>
                                           <span class="n">npixels_out</span><span class="p">)</span> <span class="o">+</span> <span class="n">old_centre</span>
     <span class="n">x_pixels</span><span class="p">,</span> <span class="n">y_pixels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">pixels</span> <span class="o">+</span> <span class="n">x_shift</span><span class="p">,</span> <span class="n">pixels</span> <span class="o">+</span> <span class="n">y_shift</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">y_pixels</span><span class="p">,</span> <span class="n">x_pixels</span><span class="p">])</span>
 </pre></div>
-<div id="cell-5" class="clipboard-copy-txt">def generate_coordinates(npixels_in     : int,
-                         npixels_out    : int,
-                         sampling_ratio : Array,
-                         x_shift        : Array = np.array(0.),
-                         y_shift        : Array = np.array(0.)) -> Array:
+<div id="cell-5" class="clipboard-copy-txt">def generate_coordinates(npixels_in: int,
+                         npixels_out: int,
+                         sampling_ratio: Array,
+                         x_shift: Array = np.array(0.),
+                         y_shift: Array = np.array(0.)) -> Array:
     """
     Generates a new set of paraxial coordinates which can be used for
     interpolation.
@@ -2196,11 +2185,11 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
         The number of pixel in the output array.
     sampling_ratio : Array
         The ratio of pixel sizes in the input and output array,
-        ie pixel_scale_out/pixel_scale_in.
-    x_shift : Array, pixles = np.array(0.)
+        i.e. pixel_scale_out/pixel_scale_in.
+    x_shift : Array, pixels = np.array(0.)
         How much to shift the x_coordinates in the output array, in the pixel
         units of the output array.
-    y_shift : Array, pixles = np.array(0.)
+    y_shift : Array, pixels = np.array(0.)
         How much to shift the y_coordinates in the output array, in the pixel
         units of the output array.
 
@@ -2209,7 +2198,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
     coordinates : Array
         The output coordinates at which to interpolate onto.
     """
-    old_centre = (npixels_in  - 1) / 2
+    old_centre = (npixels_in - 1) / 2
     new_centre = (npixels_out - 1) / 2
     pixels = sampling_ratio * np.linspace(-new_centre, new_centre,
                                           npixels_out) + old_centre
@@ -2224,7 +2213,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=38270597" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=ac95da3c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2244,13 +2233,13 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="n">array</span>   <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-          <span class="n">npixels</span> <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-          <span class="n">ratio</span>   <span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-          <span class="n">order</span>   <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+          <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+          <span class="n">ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+          <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Paraxially interpolates a wavefront field (either in ampltude and phase, or</span>
-<span class="sd">    real and imaginiary) based on the sampling ratio, and npixels_out.</span>
+<span class="sd">    Paraxially interpolates a wavefront field (either in amplitude and phase, or</span>
+<span class="sd">    real and imaginary) based on the sampling ratio, and npixels_out.</span>
 
 <span class="sd">    # TODO: Check if a half-pixel offset is produced</span>
 
@@ -2263,7 +2252,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 <span class="sd">        The number of pixel in the output array.</span>
 <span class="sd">    ratio : float</span>
 <span class="sd">        The relative input to output scales, TODO: does 2 make it bigger or </span>
-<span class="sd">        smaller? ie input scale/output scale. &lt;- get this right.</span>
+<span class="sd">        smaller? i.e. input scale/output scale. &lt;- get this right.</span>
 <span class="sd">    order : int = 1</span>
 <span class="sd">        The interpolation order to use.</span>
 
@@ -2274,17 +2263,17 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get coords arrays</span>
     <span class="n">npixels_in</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="c1"># TODO: Update with utils.pixel_coordiantes</span>
+    <span class="c1"># TODO: Update with utils.pixel_coordinates</span>
     <span class="n">coordinates</span> <span class="o">=</span> <span class="n">generate_coordinates</span><span class="p">(</span><span class="n">npixels_in</span><span class="p">,</span> <span class="n">npixels</span><span class="p">,</span> <span class="n">ratio</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">map_coordinates</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
 </pre></div>
-<div id="cell-6" class="clipboard-copy-txt">def scale(array   : Array,
-          npixels : int,
-          ratio   : float,
-          order   : int = 1) -> Array:
+<div id="cell-6" class="clipboard-copy-txt">def scale(array: Array,
+          npixels: int,
+          ratio: float,
+          order: int = 1) -> Array:
     """
-    Paraxially interpolates a wavefront field (either in ampltude and phase, or
-    real and imaginiary) based on the sampling ratio, and npixels_out.
+    Paraxially interpolates a wavefront field (either in amplitude and phase, or
+    real and imaginary) based on the sampling ratio, and npixels_out.
 
     # TODO: Check if a half-pixel offset is produced
 
@@ -2297,7 +2286,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
         The number of pixel in the output array.
     ratio : float
         The relative input to output scales, TODO: does 2 make it bigger or 
-        smaller? ie input scale/output scale. <- get this right.
+        smaller? i.e. input scale/output scale. <- get this right.
     order : int = 1
         The interpolation order to use.
 
@@ -2308,7 +2297,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
     """
     # Get coords arrays
     npixels_in = array.shape[-1]
-    # TODO: Update with utils.pixel_coordiantes
+    # TODO: Update with utils.pixel_coordinates
     coordinates = generate_coordinates(npixels_in, npixels, ratio)
     return map_coordinates(array, coordinates, order=order)</div>
         
@@ -2320,7 +2309,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=9271d3b8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=fd105a4d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2340,7 +2329,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">array</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">angle</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">order</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rotates an array by the angle, using linear interpolation.</span>
 
@@ -2358,12 +2347,13 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 <span class="sd">    array : Array</span>
 <span class="sd">        The rotated array.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">_rotate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">rotation</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">new_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="o">-</span><span class="n">rotation</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="o">-</span><span class="n">rotation</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span>
         <span class="n">new_y</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="o">-</span><span class="n">rotation</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="o">-</span><span class="n">rotation</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">])</span>
-    
+
     <span class="c1"># Get coordinates</span>
     <span class="n">npixels</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">centre</span> <span class="o">=</span> <span class="p">(</span><span class="n">npixels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
@@ -2373,7 +2363,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
     <span class="c1"># Interpolate</span>
     <span class="k">return</span> <span class="n">map_coordinates</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">coordinates_rotated</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
 </pre></div>
-<div id="cell-7" class="clipboard-copy-txt">def rotate(array : Array, angle : Array, order : int = 1) -> Array:
+<div id="cell-7" class="clipboard-copy-txt">def rotate(array: Array, angle: Array, order: int = 1) -> Array:
     """
     Rotates an array by the angle, using linear interpolation.
 
@@ -2391,12 +2381,13 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
     array : Array
         The rotated array.
     """
+
     def _rotate(coordinates: Array, rotation: Array) -> Array:
         x, y = coordinates[0], coordinates[1]
         new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
         new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
         return np.array([new_x, new_y])
-    
+
     # Get coordinates
     npixels = array.shape[0]
     centre = (npixels - 1) / 2
@@ -2414,7 +2405,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=aac955e4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=0736a8a3" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2434,9 +2425,9 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">fourier_rotate</span><span class="p">(</span><span class="n">array</span>   <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                   <span class="n">angle</span>   <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                   <span class="n">padding</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">fourier_rotate</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                   <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                   <span class="n">padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rotates an array by the angle, using a fourier rotation.</span>
 
@@ -2455,11 +2446,11 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 <span class="sd">        The rotated array.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Fourier rotation is under development.&quot;</span><span class="p">)</span>
-
+    <span class="c1"># TODO implement</span>
     <span class="n">in_shape</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">array_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">in_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span>
-    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">array_shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>\
-        <span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="n">in_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">in_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>\
+    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">array_shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> \
+                <span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span> <span class="n">in_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">in_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> \
         <span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
 
     <span class="c1"># FFT rotation only work in the -45:+45 range</span>
@@ -2469,24 +2460,24 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
     <span class="n">half_pi_to_1st_quadrant</span> <span class="o">=</span> <span class="n">angle</span> <span class="o">//</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">angle_in_1st_quadrant</span> <span class="o">=</span> <span class="o">-</span> <span class="n">angle</span> <span class="o">+</span> <span class="p">(</span><span class="n">half_pi_to_1st_quadrant</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
 
-    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">half_pi_to_1st_quadrant</span><span class="p">)</span>\
-        <span class="o">.</span><span class="n">at</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>\
+    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">half_pi_to_1st_quadrant</span><span class="p">)</span> \
+                <span class="o">.</span><span class="n">at</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
         <span class="o">.</span><span class="n">get</span><span class="p">()</span>
 
     <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
-    <span class="n">left_corner</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">padding</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="n">width</span><span class="p">)</span>
-    <span class="n">right_corner</span>  <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">padding</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="n">width</span><span class="p">)</span>
-    <span class="n">top_corner</span>    <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">padding</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="n">height</span><span class="p">)</span>
+    <span class="n">left_corner</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">padding</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="n">width</span><span class="p">)</span>
+    <span class="n">right_corner</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">padding</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="n">width</span><span class="p">)</span>
+    <span class="n">top_corner</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">padding</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="n">height</span><span class="p">)</span>
     <span class="n">bottom_corner</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">padding</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="n">height</span><span class="p">)</span>
 
     <span class="c1"># Make the padded array</span>
     <span class="n">out_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">width</span> <span class="o">*</span> <span class="n">padding</span><span class="p">,</span> <span class="n">height</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span>
-    <span class="n">padded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>\
-        <span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">left_corner</span> <span class="p">:</span> <span class="n">right_corner</span><span class="p">,</span> <span class="n">top_corner</span> <span class="p">:</span> <span class="n">bottom_corner</span><span class="p">]</span>\
+    <span class="n">padded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> \
+                       <span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">left_corner</span><span class="p">:</span> <span class="n">right_corner</span><span class="p">,</span> <span class="n">top_corner</span><span class="p">:</span> <span class="n">bottom_corner</span><span class="p">]</span> \
         <span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
 
-    <span class="n">padded_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>\
-        <span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">left_corner</span> <span class="p">:</span> <span class="n">right_corner</span><span class="p">,</span> <span class="n">top_corner</span> <span class="p">:</span> <span class="n">bottom_corner</span><span class="p">]</span>\
+    <span class="n">padded_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span> \
+                      <span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">left_corner</span><span class="p">:</span> <span class="n">right_corner</span><span class="p">,</span> <span class="n">top_corner</span><span class="p">:</span> <span class="n">bottom_corner</span><span class="p">]</span> \
         <span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">array</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
 
     <span class="c1"># Rotate the mask, to know what part is actually the array</span>
@@ -2494,7 +2485,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 
     <span class="c1"># Replace part outside the array which are NaN by 0, and go into </span>
     <span class="c1"># Fourier space.</span>
-    <span class="n">padded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">padded_array</span><span class="p">),</span> <span class="mf">0.</span> <span class="p">,</span> <span class="n">padded_array</span><span class="p">)</span>
+    <span class="n">padded_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">padded_array</span><span class="p">),</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">padded_array</span><span class="p">)</span>
 
     <span class="n">uncentered_angular_displacement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">angle_in_1st_quadrant</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
     <span class="n">centered_angular_displacement</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle_in_1st_quadrant</span><span class="p">)</span>
@@ -2505,13 +2496,13 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
     <span class="n">pi_factor</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
     <span class="n">uncentered_phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
-        <span class="n">uncentered_angular_displacement</span> <span class="o">*</span>\
-        <span class="p">((</span><span class="n">pi_factor</span> <span class="o">*</span> <span class="n">uncentered_frequencies</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span>\
-        <span class="n">centered_frequencies</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">uncentered_angular_displacement</span> <span class="o">*</span> \
+        <span class="p">((</span><span class="n">pi_factor</span> <span class="o">*</span> <span class="n">uncentered_frequencies</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> \
+         <span class="n">centered_frequencies</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 
     <span class="n">centered_phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
-        <span class="n">centered_angular_displacement</span> <span class="o">*</span>\
-        <span class="p">(</span><span class="n">pi_factor</span> <span class="o">*</span> <span class="n">centered_frequencies</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span>\
+        <span class="n">centered_angular_displacement</span> <span class="o">*</span> \
+        <span class="p">(</span><span class="n">pi_factor</span> <span class="o">*</span> <span class="n">centered_frequencies</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> \
         <span class="n">uncentered_frequencies</span><span class="p">)</span>
 
     <span class="n">f1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span>
@@ -2521,18 +2512,18 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
         <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">centered_phase</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="n">rotated_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">uncentered_phase</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>\
-        <span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">padded_mask</span><span class="p">]</span>\
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">uncentered_phase</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> \
+        <span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">padded_mask</span><span class="p">]</span> \
         <span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">rotated_array</span>\
-        <span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">left_corner</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">right_corner</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="n">top_corner</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">bottom_corner</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>\
-        <span class="o">.</span><span class="n">get</span><span class="p">())</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">rotated_array</span> \
+                   <span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">left_corner</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">right_corner</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                   <span class="n">top_corner</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">bottom_corner</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> \
+                   <span class="o">.</span><span class="n">get</span><span class="p">())</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </pre></div>
-<div id="cell-8" class="clipboard-copy-txt">def fourier_rotate(array   : Array,
-                   angle   : Array,
-                   padding : int = 2) -> Array: # pragma: no cover
+<div id="cell-8" class="clipboard-copy-txt">def fourier_rotate(array: Array,
+                   angle: Array,
+                   padding: int = 2) -> Array:  # pragma: no cover
     """
     Rotates an array by the angle, using a fourier rotation.
 
@@ -2551,11 +2542,11 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
         The rotated array.
     """
     raise NotImplementedError("Fourier rotation is under development.")
-
+    # TODO implement
     in_shape = array.shape
     array_shape = np.array(in_shape, dtype=int) + 3
-    array = np.full(array_shape, np.nan, dtype=float)\
-        .at[1 : in_shape[0] + 1, 1 : in_shape[1] + 1]\
+    array = np.full(array_shape, np.nan, dtype=float) \
+                .at[1: in_shape[0] + 1, 1: in_shape[1] + 1] \
         .set(array)
 
     # FFT rotation only work in the -45:+45 range
@@ -2565,24 +2556,24 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
     half_pi_to_1st_quadrant = angle // (np.pi / 2)
     angle_in_1st_quadrant = - angle + (half_pi_to_1st_quadrant * np.pi / 2)
 
-    array = np.rot90(array, half_pi_to_1st_quadrant)\
-        .at[:-1, :-1]\
+    array = np.rot90(array, half_pi_to_1st_quadrant) \
+                .at[:-1, :-1] \
         .get()
 
     width, height = array.shape
-    left_corner   = int(((padding - 1) / 2.) * width)
-    right_corner  = int(((padding + 1) / 2.) * width)
-    top_corner    = int(((padding - 1) / 2.) * height)
+    left_corner = int(((padding - 1) / 2.) * width)
+    right_corner = int(((padding + 1) / 2.) * width)
+    top_corner = int(((padding - 1) / 2.) * height)
     bottom_corner = int(((padding + 1) / 2.) * height)
 
     # Make the padded array
     out_shape = (width * padding, height * padding)
-    padded_array = np.full(out_shape, np.nan, dtype=float)\
-        .at[left_corner : right_corner, top_corner : bottom_corner]\
+    padded_array = np.full(out_shape, np.nan, dtype=float) \
+                       .at[left_corner: right_corner, top_corner: bottom_corner] \
         .set(array)
 
-    padded_mask = np.ones(out_shape, dtype=bool)\
-        .at[left_corner : right_corner, top_corner : bottom_corner]\
+    padded_mask = np.ones(out_shape, dtype=bool) \
+                      .at[left_corner: right_corner, top_corner: bottom_corner] \
         .set(np.where(np.isnan(array), True, False))
 
     # Rotate the mask, to know what part is actually the array
@@ -2590,7 +2581,7 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
 
     # Replace part outside the array which are NaN by 0, and go into 
     # Fourier space.
-    padded_array = np.where(np.isnan(padded_array), 0. , padded_array)
+    padded_array = np.where(np.isnan(padded_array), 0., padded_array)
 
     uncentered_angular_displacement = np.tan(angle_in_1st_quadrant / 2.)
     centered_angular_displacement = -np.sin(angle_in_1st_quadrant)
@@ -2601,13 +2592,13 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
     pi_factor = -2.j * np.pi * np.ones(out_shape, dtype=float)
 
     uncentered_phase = np.exp(
-        uncentered_angular_displacement *\
-        ((pi_factor * uncentered_frequencies).T *\
-        centered_frequencies).T)
+        uncentered_angular_displacement * \
+        ((pi_factor * uncentered_frequencies).T * \
+         centered_frequencies).T)
 
     centered_phase = np.exp(
-        centered_angular_displacement *\
-        (pi_factor * centered_frequencies).T *\
+        centered_angular_displacement * \
+        (pi_factor * centered_frequencies).T * \
         uncentered_frequencies)
 
     f1 = np.fft.ifft(
@@ -2617,14 +2608,14 @@ __all__ = ["scale_array", "downsample", "generate_coordinates", "scale",
         np.fft.fft(f1, axis=1) * centered_phase, axis=1)
 
     rotated_array = np.fft.ifft(
-        (np.fft.fft(f2, axis=0).T * uncentered_phase).T, axis=0)\
-        .at[padded_mask]\
+        (np.fft.fft(f2, axis=0).T * uncentered_phase).T, axis=0) \
+        .at[padded_mask] \
         .set(np.nan)
 
-    return np.real(rotated_array\
-        .at[left_corner + 1 : right_corner - 1,
-            top_corner + 1 : bottom_corner - 1]\
-        .get()).copy()</div>
+    return np.real(rotated_array \
+                   .at[left_corner + 1: right_corner - 1,
+                   top_corner + 1: bottom_corner - 1] \
+                   .get()).copy()</div>
         
         </div>
     </div>

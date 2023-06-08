@@ -25,7 +25,7 @@
     
     
       
-        <title>Phase Retrieval in dLux - dLux</title>
+        <title>Phase Retrieval in ∂Lux - dLux</title>
       
     
     
@@ -79,7 +79,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#phase-retrieval-in-dlux" class="md-skip">
+        <a href="#phase-retrieval-in-lux" class="md-skip">
           Skip to content
         </a>
       
@@ -113,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Phase Retrieval in dLux
+              Phase Retrieval in ∂Lux
             
           </span>
         </div>
@@ -332,7 +332,7 @@
       
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
       
     </li>
@@ -389,7 +389,7 @@
   
     <li class="md-nav__item">
       <a href="../HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -810,21 +810,6 @@
     <li class="md-nav__item">
       <a href="../../faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1897,7 +1882,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="phase-retrieval-in-dlux">Phase Retrieval in dLux<a class="anchor-link" href="#phase-retrieval-in-dlux">&#182;</a></h1><p>In this notebook, we will go through a simple example of phase retrieval in dLux, just recovering Zernike coefficients for an aberrated circular aperture by gradient descent. As noted by <a href="https://ui.adsabs.harvard.edu/abs/2013PASP..125..422M/abstract">Martinache et al 2013</a>, you can only detect the sign of even-order aberrations if your pupil is not inversion-symmetric!</p>
+<h1 id="phase-retrieval-in-lux">Phase Retrieval in &#8706;Lux<a class="anchor-link" href="#phase-retrieval-in-lux">&#182;</a></h1><p>In this notebook, we will go through a simple example of phase retrieval in ∂Lux: recovering Zernike coefficients for an aberrated circular aperture by gradient descent. As noted by <a href="https://ui.adsabs.harvard.edu/abs/2013PASP..125..422M/abstract">Martinache et al. 2013</a>, you can only detect the sign of even-order aberrations if your pupil is not inversion-symmetric.</p>
 <p>We will follow the example in the paper and recover Zernike aberrations using a circular pupil with an additional bar asymmetry.</p>
 
 </div>
@@ -1986,9 +1971,9 @@ plt.rcParams['figure.dpi'] = 120</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Now, we want to construct a basic optical system with a 2.4m aperture, along with some Zernike aberrations and a bar mask.</p>
-<p>We also create a simple PointSource object that we want to model.</p>
-<p>Lets see how we can do this in dLux.</p>
+<p>We want to construct a basic optical system with a $2.4\, \text{m}$ aperture, along with some Zernike aberrations and a bar mask.</p>
+<p>We also create a simple <code>PointSource</code> object that we want to model.</p>
+<p>Let's see how we can do this in ∂Lux.</p>
 
 </div>
 </div>
@@ -2080,7 +2065,7 @@ source = dl.PointSource(flux=1e5, wavelengths=np.linspace(1e-6, 1.5e-6, 5))</div
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Now lets examine the resulting optical system and generate some data.</p>
+<p>Let's examine the resulting optical system and generate some data.</p>
 
 </div>
 </div>
@@ -2198,7 +2183,7 @@ class="
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Excellent! Now we want to try and recover these aberrations. To do this we want to create a new optical system with a <em>different</em> set of zernike aberrations. We can do this using the <code>.set()</code> method and defining the path the optical aberration coefficients and assigning a newly-randomlised coefficient values. With this new optical system we will try and recover the original aberration coefficients using gradient descent methods.</p>
+<p>Excellent! Now we want to try and recover these aberrations. To do this, we create a new optical system with a <em>different</em> set of Zernike aberrations. If we define the path to the optical aberration coefficients, we can use the <code>.set()</code> method to assign newly randomised coefficient values. With this new optical system we will try to recover the original aberration coefficients using gradient descent methods.</p>
 
 </div>
 </div>
@@ -2248,7 +2233,7 @@ model = optics.multiply(param, 0)</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Now we need to define our loss function, and specify that we want to optimise the zernike coefficients. To do this we can pass in the string path to our zernikes that we just defined into the <code>zdx.filter_value_and_grad()</code> function. Note we also use the <code>zdx.filter_jit()</code> function in order to compile this function into XLA in order to run much faster!</p>
+<p>Now we need to define our loss function, and specify that we want to optimise the Zernike coefficients. To do this, we pass the string path to the Zernike coefficients into the <code>zdx.filter_value_and_grad()</code> function. Note that we also use the <code>zdx.filter_jit()</code> function in order to compile this function into XLA so that future evaluations will be much faster!</p>
 
 </div>
 </div>
@@ -2302,7 +2287,7 @@ def loss_func(model, source, data):
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Now we compile the function to XLA so that future evaluations will be much faster.</p>
+<p>Compiling the function into XLA:</p>
 
 </div>
 </div>
@@ -2373,7 +2358,7 @@ Wall time: 274 ms
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Now begin the optimization loop using <code>optax</code> with a low learning rate.</p>
+<p>Now, we begin the optimisation loop using <code>optax</code> with a low learning rate.</p>
 
 </div>
 </div>
@@ -2472,7 +2457,7 @@ with tqdm(range(100), desc='Gradient Descent') as t:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Now we visualize this: we have great performance, recovering the input Zernike coefficients accurately and a beautiful PSF recovery.</p>
+<p>Now, we visualise this: we have great performance, recovering the input Zernike coefficients and PSF accurately.</p>
 
 </div>
 </div>
@@ -2616,38 +2601,6 @@ class="
 
 </div>
 
-</div>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=7eb0b562" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-9">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span>
-</pre></div>
-<div id="cell-9" class="clipboard-copy-txt"></div>
-        
-        </div>
-    </div>
-
-</div>
 </div>
 
 </div>

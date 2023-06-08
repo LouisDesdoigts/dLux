@@ -323,7 +323,7 @@
   
     <li class="md-nav__item">
       <a href="../../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -379,7 +379,7 @@
   
     <li class="md-nav__item">
       <a href="../../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -823,21 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -861,12 +846,12 @@
 
 
 <h1 id="instruments-instrumentspy">Instruments: instruments.py<a class="headerlink" href="#instruments-instrumentspy" title="Permanent link">¤</a></h1>
-<p>This module contains the classes that define the behaviour of instruments in dLux. Instruments classes hold the various different types of dLux classes and handles the coherent modelling of these different classes.</p>
+<p>This module contains the classes that define the behaviour of instruments in ∂Lux. Instrument classes hold the various types of ∂Lux classes and handle the coherent modelling of these classes.</p>
 <p>There is one public class:</p>
 <ul>
 <li><code>Instrument</code></li>
 </ul>
-<p>The Instrument class has three main methods:</p>
+<p>The <code>Instrument</code> class has three main methods:</p>
 <ol>
 <li><code>model()</code> Models the sources through the instrument optics and detector.</li>
 <li><code>observe()</code> Calls the <code>observe</code> method of the stored observation class.</li>
@@ -885,7 +870,7 @@
         Bases: <code><span title="zodiax.Base">Base</span></code></p>
 
   
-      <p>A high level class desgined to model the behaviour of a telescope. It
+      <p>A high level class designed to model the behaviour of a telescope. It
 stores a series different ∂Lux objects, and primarily passes the relevant
 information between these objects in order to coherently model some
 telescope observation.</p>
@@ -943,7 +928,7 @@ instrumental effects on a psf.</p>
           <td>
             <div class="doc-md-description">
               <p>An class that inherits from Observation. This is to allow flexibility
-in the different kind of observations, ie applying dithers, switching
+in the different kind of observations, i.e. applying dithers, switching
 filters, etc.</p>
             </div>
           </td>
@@ -954,7 +939,10 @@ filters, etc.</p>
 
         <details class="quote">
           <summary>Source code in <code>dLux/instruments.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 36</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
 <span class="normal"> 37</span>
 <span class="normal"> 38</span>
 <span class="normal"> 39</span>
@@ -1096,17 +1084,9 @@ filters, etc.</p>
 <span class="normal">175</span>
 <span class="normal">176</span>
 <span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Instrument</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Instrument</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A high level class desgined to model the behaviour of a telescope. It</span>
+<span class="sd">    A high level class designed to model the behaviour of a telescope. It</span>
 <span class="sd">    stores a series different ∂Lux objects, and primarily passes the relevant</span>
 <span class="sd">    information between these objects in order to coherently model some</span>
 <span class="sd">    telescope observation.</span>
@@ -1123,21 +1103,20 @@ filters, etc.</p>
 <span class="sd">        instrumental effects on a psf.</span>
 <span class="sd">    observation : Observation</span>
 <span class="sd">        An class that inherits from Observation. This is to allow flexibility</span>
-<span class="sd">        in the different kind of observations, ie applying dithers, switching</span>
+<span class="sd">        in the different kind of observations, i.e. applying dithers, switching</span>
 <span class="sd">        filters, etc.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">optics</span>      <span class="p">:</span> <span class="n">Optics</span><span class="p">()</span>
-    <span class="n">sources</span>     <span class="p">:</span> <span class="nb">dict</span>
-    <span class="n">detector</span>    <span class="p">:</span> <span class="n">Detector</span><span class="p">()</span>
-    <span class="n">observation</span> <span class="p">:</span> <span class="n">Observation</span><span class="p">()</span>
+    <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">()</span>
+    <span class="n">sources</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span><span class="p">()</span>
+    <span class="n">observation</span><span class="p">:</span> <span class="n">Observation</span><span class="p">()</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
-                 <span class="n">optics</span>      <span class="p">:</span> <span class="n">Optics</span><span class="p">(),</span>
-                 <span class="n">sources</span>     <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Source</span><span class="p">()],</span>
-                 <span class="n">detector</span>    <span class="p">:</span> <span class="n">Detector</span><span class="p">()</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">observation</span> <span class="p">:</span> <span class="n">Observation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
+                 <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">(),</span>
+                 <span class="n">sources</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Source</span><span class="p">()],</span>
+                 <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span><span class="p">()</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">observation</span><span class="p">:</span> <span class="n">Observation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Instrument class.</span>
 
@@ -1151,7 +1130,7 @@ filters, etc.</p>
 <span class="sd">            A pre-configured Detector object.</span>
 <span class="sd">        observation : Observation = None</span>
 <span class="sd">            An class that inherits from Observation. This is to allow</span>
-<span class="sd">            flexibility in the different kind of observations, ie applying</span>
+<span class="sd">            flexibility in the different kind of observations, i.e. applying</span>
 <span class="sd">            dithers, switching filters, etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Optics</span>
@@ -1167,17 +1146,16 @@ filters, etc.</p>
         <span class="c1"># Detector</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">Detector</span><span class="p">())</span> <span class="ow">and</span> <span class="n">detector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;detector must be an Detector object. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="sa">f</span><span class="s2">&quot;Got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span>
 
         <span class="c1"># Observation</span>
-        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">observation</span><span class="p">,</span> <span class="n">Observation</span><span class="p">())</span> <span class="ow">and</span> 
-            <span class="n">observation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">observation</span><span class="p">,</span> <span class="n">Observation</span><span class="p">())</span> <span class="ow">and</span>
+                <span class="n">observation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;observation must be an Observation object.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observation</span> <span class="o">=</span> <span class="n">observation</span>
 
-
-    <span class="k">def</span> <span class="nf">observe</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">observe</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calls the `observe` method of the stored observation class, passing in</span>
 <span class="sd">        any extra keyword arguments.</span>
@@ -1189,14 +1167,13 @@ filters, etc.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span> <span class="n">key</span> <span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method designed to allow accessing of the various items within</span>
 <span class="sd">        the sub-dictionaries of this class via the &#39;class.attribute&#39; method.</span>
 <span class="sd">        It is recommended that each dictionary key in the optical layers,</span>
 <span class="sd">        detector layers, and scene sources are unique to prevent unexpected</span>
-<span class="sd">        behaviour. In the case they there are idenitcal keys across the</span>
+<span class="sd">        behaviour. In the case they there are identical keys across the</span>
 <span class="sd">        dictionaries This method prioritises searching for keys in the optical</span>
 <span class="sd">        layers, then detector layers, and then the scene sources.</span>
 
@@ -1219,10 +1196,9 @@ filters, etc.</p>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
                 <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no attribute &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method for returning a new instrument with normalised source objects.</span>
 
@@ -1236,8 +1212,7 @@ filters, etc.</p>
         <span class="n">sources</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">norm_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_source</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;sources&#39;</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">(</span><span class="n">Array</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A base level modelling function designed to robustly handle the</span>
 <span class="sd">        different combinations of inputs. Models the sources through the</span>
@@ -1286,7 +1261,7 @@ filters, etc.</p>
 the sub-dictionaries of this class via the 'class.attribute' method.
 It is recommended that each dictionary key in the optical layers,
 detector layers, and scene sources are unique to prevent unexpected
-behaviour. In the case they there are idenitcal keys across the
+behaviour. In the case they there are identical keys across the
 dictionaries This method prioritises searching for keys in the optical
 layers, then detector layers, and then the scene sources.</p>
 
@@ -1342,7 +1317,13 @@ layers, then detector layers, and then the scene sources.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/instruments.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">122</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
 <span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span>
@@ -1365,19 +1346,13 @@ layers, then detector layers, and then the scene sources.</p>
 <span class="normal">142</span>
 <span class="normal">143</span>
 <span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span> <span class="n">key</span> <span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Magic method designed to allow accessing of the various items within</span>
 <span class="sd">    the sub-dictionaries of this class via the &#39;class.attribute&#39; method.</span>
 <span class="sd">    It is recommended that each dictionary key in the optical layers,</span>
 <span class="sd">    detector layers, and scene sources are unique to prevent unexpected</span>
-<span class="sd">    behaviour. In the case they there are idenitcal keys across the</span>
+<span class="sd">    behaviour. In the case they there are identical keys across the</span>
 <span class="sd">    dictionaries This method prioritises searching for keys in the optical</span>
 <span class="sd">    layers, then detector layers, and then the scene sources.</span>
 
@@ -1400,7 +1375,7 @@ layers, then detector layers, and then the scene sources.</p>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no attribute &quot;</span>
-    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -1482,7 +1457,7 @@ layers, then detector layers, and then the scene sources.</p>
           <td>
             <div class="doc-md-description">
               <p>An class that inherits from Observation. This is to allow
-flexibility in the different kind of observations, ie applying
+flexibility in the different kind of observations, i.e. applying
 dithers, switching filters, etc.</p>
             </div>
           </td>
@@ -1495,7 +1470,11 @@ dithers, switching filters, etc.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/instruments.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 64</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
 <span class="normal"> 65</span>
 <span class="normal"> 66</span>
 <span class="normal"> 67</span>
@@ -1533,16 +1512,12 @@ dithers, switching filters, etc.</p>
 <span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
-             <span class="n">optics</span>      <span class="p">:</span> <span class="n">Optics</span><span class="p">(),</span>
-             <span class="n">sources</span>     <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Source</span><span class="p">()],</span>
-             <span class="n">detector</span>    <span class="p">:</span> <span class="n">Detector</span><span class="p">()</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">observation</span> <span class="p">:</span> <span class="n">Observation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+<span class="normal">102</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
+             <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">(),</span>
+             <span class="n">sources</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Source</span><span class="p">()],</span>
+             <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span><span class="p">()</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">observation</span><span class="p">:</span> <span class="n">Observation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor for the Instrument class.</span>
 
@@ -1556,7 +1531,7 @@ dithers, switching filters, etc.</p>
 <span class="sd">        A pre-configured Detector object.</span>
 <span class="sd">    observation : Observation = None</span>
 <span class="sd">        An class that inherits from Observation. This is to allow</span>
-<span class="sd">        flexibility in the different kind of observations, ie applying</span>
+<span class="sd">        flexibility in the different kind of observations, i.e. applying</span>
 <span class="sd">        dithers, switching filters, etc.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Optics</span>
@@ -1572,12 +1547,12 @@ dithers, switching filters, etc.</p>
     <span class="c1"># Detector</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">Detector</span><span class="p">())</span> <span class="ow">and</span> <span class="n">detector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;detector must be an Detector object. &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="sa">f</span><span class="s2">&quot;Got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span>
 
     <span class="c1"># Observation</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">observation</span><span class="p">,</span> <span class="n">Observation</span><span class="p">())</span> <span class="ow">and</span> 
-        <span class="n">observation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">observation</span><span class="p">,</span> <span class="n">Observation</span><span class="p">())</span> <span class="ow">and</span>
+            <span class="n">observation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;observation must be an Observation object.&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">observation</span> <span class="o">=</span> <span class="n">observation</span>
 </code></pre></div></td></tr></table></div>
@@ -1629,7 +1604,15 @@ each source.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/instruments.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">169</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
 <span class="normal">172</span>
@@ -1638,15 +1621,7 @@ each source.</p>
 <span class="normal">175</span>
 <span class="normal">176</span>
 <span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">(</span><span class="n">Array</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A base level modelling function designed to robustly handle the</span>
 <span class="sd">    different combinations of inputs. Models the sources through the</span>
@@ -1708,19 +1683,19 @@ each source.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/instruments.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+<span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Method for returning a new instrument with normalised source objects.</span>
 
@@ -1778,17 +1753,17 @@ any extra keyword arguments.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/instruments.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">observe</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">observe</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calls the `observe` method of the stored observation class, passing in</span>
 <span class="sd">    any extra keyword arguments.</span>
@@ -1821,13 +1796,13 @@ any extra keyword arguments.</p>
 </details>
 <hr />
 <h1 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h1>
-<p>Lets see how we can construct a minimal instrument object with all of its attributes populated.</p>
+<p>Let's construct a minimal instrument object with all of its attributes populated.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">dLux</span> <span class="k">as</span> <span class="nn">dl</span>
 
 <span class="c1"># Define the optical parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -1840,7 +1815,7 @@ any extra keyword arguments.</p>
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 
 <span class="c1"># Construct Source</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">source</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 
 <span class="c1"># Construct Detector</span>
