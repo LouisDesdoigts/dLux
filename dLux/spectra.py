@@ -1,10 +1,8 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import jax.numpy as np
-from equinox import tree_at
 from zodiax import Base
 from jax import vmap, Array
-
 
 __all__ = ["Spectrum", "PolySpectrum"]
 
@@ -15,58 +13,55 @@ class BaseSpectrum(Base):
 
     Attributes
     ----------
-    wavelengths : Array, meters
+    wavelengths : Array, metres
         The array of wavelengths at which the spectrum is defined.
     """
-    wavelengths : Array
+    wavelengths: Array
 
-
-    def __init__(self        : Spectrum,
-                 wavelengths : Array) -> Spectrum:
+    def __init__(self: Spectrum,
+                 wavelengths: Array):
         """
         Constructor for the Spectrum class.
 
         Parameters
         ----------
-        wavelengths : Array, meters
+        wavelengths : Array, metres
             The array of wavelengths at which the spectrum is defined.
         """
         self.wavelengths = np.asarray(wavelengths, dtype=float)
         super().__init__()
 
-
     @abstractmethod
-    def normalise(self : Spectrum) -> Spectrum: # pragma: no cover
+    def normalise(self: Spectrum) -> Spectrum:  # pragma: no cover
         """
-        Abstract method to normalise the spectrum. Must be overwitten by child
+        Abstract method to normalise the spectrum. Must be overwritten by child
         classes.
         """
 
 
 class Spectrum(BaseSpectrum):
     """
-    A Spectrum class that interally parametersises the spectrum via arrays (ie
+    A Spectrum class that internally parametrises the spectrum via arrays (i.e.
     wavelengths and weights)
 
     Attributes
     ----------
-    wavelengths : Array, meters
+    wavelengths : Array, metres
         The array of wavelengths at which the spectrum is defined.
     weights : Array
         The relative weights of each wavelength.
     """
-    weights : Array
+    weights: Array
 
-
-    def __init__(self        : Spectrum,
-                 wavelengths : Array,
-                 weights     : Array = None) -> Spectrum:
+    def __init__(self: Spectrum,
+                 wavelengths: Array,
+                 weights: Array = None):
         """
         Constructor for the Spectrum class.
 
         Parameters
         ----------
-        wavelengths : Array, meters
+        wavelengths : Array, metres
             The array of wavelengths at which the spectrum is defined.
         weights : Array = None
             The relative weights of each wavelength. Defaults to uniform
@@ -75,8 +70,8 @@ class Spectrum(BaseSpectrum):
         super().__init__(wavelengths)
         if weights is None:
             in_shape = self.wavelengths.shape
-            weights = np.ones(in_shape)/in_shape[-1]
-        
+            weights = np.ones(in_shape) / in_shape[-1]
+
         weights = np.asarray(weights, dtype=float)
         if weights.ndim == 2:
             self.weights = weights / weights.sum(-1)[:, None]
@@ -86,21 +81,20 @@ class Spectrum(BaseSpectrum):
         if self.weights.ndim == 1:
             if self.wavelengths.shape != self.weights.shape:
                 raise ValueError("wavelengths and weights must have the same "
-                    "shape.")
+                                 "shape.")
         else:
             if self.wavelengths.shape != self.weights.shape[-1:]:
                 raise ValueError("wavelengths and weights must have the same "
-                    "shape.")
+                                 "shape.")
 
-
-    def normalise(self : Spectrum) -> Spectrum:
+    def normalise(self: Spectrum) -> Spectrum:
         """
         Method for returning a new spectrum object with a normalised total
         spectrum.
 
         Returns
         -------
-        spectrum : Specturm
+        spectrum : Spectrum
             The spectrum object with the normalised spectrum.
         """
         if self.weights.ndim == 2:
@@ -120,23 +114,22 @@ class PolySpectrum(BaseSpectrum):
 
     Attributes
     ----------
-    wavelengths : Array, meters
+    wavelengths : Array, metres
         The array of wavelengths at which the spectrum is defined.
     coefficients : Array
         The array of polynomial coefficient values.
     """
-    coefficients : Array
+    coefficients: Array
 
-
-    def __init__(self         : Spectrum,
-                 wavelengths  : Array,
-                 coefficients : Array) -> Spectrum:
+    def __init__(self: Spectrum,
+                 wavelengths: Array,
+                 coefficients: Array):
         """
         Constructor for the PolySpectrum class.
 
         Parameters
         ----------
-        wavelengths : Array, meters
+        wavelengths : Array, metres
             The array of wavelengths at which the spectrum is defined.
         coefficients : Array
             The array of polynomial coefficient values.
@@ -147,17 +140,15 @@ class PolySpectrum(BaseSpectrum):
         if self.coefficients.ndim != 1:
             raise ValueError("Coefficients must be a 1d array.")
 
-
     def _eval_weight(self, wavelength):
-        return np.array([self.coefficients[i] * wavelength**i 
-            for i in range(len(self.coefficients))]).sum()
-
+        return np.array([self.coefficients[i] * wavelength ** i
+                         for i in range(len(self.coefficients))]).sum()
 
     @property
-    def weights(self : Spectrum) -> Array:
+    def weights(self: Spectrum) -> Array:
         """
-        Gets the relative spectral weights by evalutating the polynomial
-        function at the internal wavelengths. This automaically normalises
+        Gets the relative spectral weights by evaluating the polynomial
+        function at the internal wavelengths. This automatically normalises
         the weights to have unitary amplitude.
 
         Returns
@@ -166,17 +157,16 @@ class PolySpectrum(BaseSpectrum):
             The normalised relative weights of each wavelength.
         """
         weights = vmap(self._eval_weight)(self.wavelengths)
-        return weights/weights.sum()
+        return weights / weights.sum()
 
-
-    def normalise(self : Spectrum) -> Spectrum:
+    def normalise(self: Spectrum) -> Spectrum:
         """
         Calculated weights are automatically normalised, but could be
         calculated from the shift term (ie b in y = mx + b) 
 
         Returns
         --------
-        spectrum : Specturm
+        spectrum : Spectrum
             The unmodified spectrum object
         """
         return self

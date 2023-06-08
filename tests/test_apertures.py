@@ -10,7 +10,7 @@ config.update("jax_debug_nans", True)
 
 
 def _test_transmission(constructor):
-    """Tests the tranmission function of some input aperture"""
+    """Tests the transmission function of some input aperture"""
     constructor().transmission(16, 1)
     if 'occulting' in signature(constructor).parameters.keys():
         constructor(occulting=True).transmission(16, 1)

@@ -11,7 +11,7 @@ Scales an array to some number of output pixels.
 
 ## Downsample
 
-Downsamples an array taking either the mean or sum.
+Downsamples an array, taking either the mean or sum.
 
 ??? info "Downsample API"
     ::: dLux.utils.interpolation.downsample

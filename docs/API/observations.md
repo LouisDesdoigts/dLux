@@ -1,13 +1,13 @@
 # Observations: observations.py
 
-This module contains the classes that define the behaviour of observations in dLux. Observations classes are designed to be constructed by users in order to model arbitrary observation patterns. As an example we have implemented a `Dither` class that applies a series of dithers to the source positions.
+This module contains the classes that define the behaviour of observations in ∂Lux. Observation classes are designed to be constructed by users in order to model arbitrary observation patterns. As an example, we have implemented a `Dither` class which applies a series of dithers to the source positions.
 
 ??? info "Observations API"
     ::: dLux.observations
 
-All `Observation` classes shoudl implement a `.model(instrument)` method that performs the actual calculation of the observation.
+All `Observation` classes should implement a `.model(instrument)` method that performs the actual calculation of the observation.
 
-Lets have a look how to construct a simple dither observation class.
+Let's construct a simple dither observation class.
 
 ```python
 import jax.numpy as np
@@ -15,7 +15,7 @@ import dLux as dl
 
 # Define the optical parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -28,7 +28,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Construct Source
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 source = dl.PointSource(wavelengths)
 
 # Construct Observation
@@ -93,7 +93,7 @@ We then load this into the instrument class:
 
 ```python
 # Define the parameters of the optical system
-aperture_diameter = 1.0  # meters
+aperture_diameter = 1.0  # metres
 pixel_scale       = 2e-7 # Radians per pixel of the detector
 aperture_npixels  = 256  # Number of pixels representing the wavefront
 detector_npixels  = 64   # Number of pixels in the detector
@@ -139,10 +139,10 @@ psf1, psf2 = telescope.observe()
 
 ![Observation](../assets/observation.png)
 
-This is a relatively simple example, but shows the flexibilty that can be gained with this class! It can also be used to remove redunancies in calcualtions. Say you wanted to model multiple sources through the same instrument that are separated by a large on-sky angle that still fall on detector, rather than model the full array we can model only the regions that we care about in order to save a lot of redundant compute!
+This is a relatively simple example, but shows the flexibility that can be gained with this class! It can also be used to remove redundancies in calculations. Say you wanted to model multiple sources through the same instrument that are separated by a large on-sky angle that still fall on detector, rather than model the full array we can model only the regions that we care about in order to save a lot of redundant compute!
 
-!!! tip "Acessing Parameters"
-    The `AbstractObservation` class has a built in `__getattr__` class that allows for its parameters to be accessed from high level classes like `Instrument`. That means if we wanted to access the `filter1` parameter we could do so like this:
+!!! tip "Accessing Parameters"
+    The `AbstractObservation` class has a built-in `__getattr__` class that allows for its parameters to be accessed from high level classes like `Instrument`. That means if we wanted to access the `filter1` parameter we could do so like this:
     
     ```python
     filt = telescope.filter1

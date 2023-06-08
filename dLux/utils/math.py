@@ -1,11 +1,10 @@
 from jax import lax
 
-
 __all__ = ["factorial", "triangular_number"]
 
- 
- # TODO: Use lax.cond to make n == 0 a safe case
-def factorial(n : float) -> float:
+
+# TODO: Use lax.cond to make n == 0 a safe case
+def factorial(n: float) -> float:
     """
     Calculate n! in a jax friendly way. Note that n == 0 is not a 
     safe case.  
@@ -23,7 +22,7 @@ def factorial(n : float) -> float:
     return lax.exp(lax.lgamma(n + 1.))
 
 
-def triangular_number(n : int) -> int:
+def triangular_number(n: int) -> int:
     """
     Calculate the nth triangular number.
     
