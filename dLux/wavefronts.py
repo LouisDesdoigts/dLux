@@ -612,9 +612,10 @@ class Wavefront(Base):
     #############################
     ### Propagation Functions ###
     #############################
-    def _FFT_output(self: Wavefront,
-                    focal_length: Array = None,
-                    inverse: bool = False) -> tuple:
+    def _FFT_output(self         : Wavefront,
+                    pad_factor   : int = 1,
+                    focal_length : Array = None, 
+                    inverse      : bool = False) -> tuple:
         """
         Calculates the output plane, unit, and pixel scale.
 
@@ -636,12 +637,12 @@ class Wavefront(Base):
         pixel_scale : Array
             The pixel scale of the output plane.
         """
+        pixel_scale = self.fringe_size / pad_factor
         if focal_length is None:
             units = 'Angular'
-            pixel_scale = self.wavelength / self.diameter
         else:
             units = 'Cartesian'
-            pixel_scale = focal_length * self.wavelength / self.diameter
+            pixel_scale *= focal_length
 
             # Check for invalid propagation
             if self.units == 'Angular':
@@ -709,7 +710,7 @@ class Wavefront(Base):
             The propagated wavefront.
         """
         # Calculate
-        plane, units, pixel_scale = self._FFT_output(focal_length)
+        plane, units, pixel_scale = self._FFT_output(pad, focal_length)
 
         # Pad must be int
         npixels = (self.npixels * (pad - 1)) // 2
@@ -745,7 +746,8 @@ class Wavefront(Base):
             The propagated wavefront.
         """
         # Calculate
-        plane, units, pixel_scale = self._FFT_output(focal_length, inverse=True)
+        plane, units, pixel_scale = self._FFT_output(pad, focal_length, 
+            inverse=True)
 
         # Pad must be int
         npixels = (self.npixels * (pad - 1)) // 2
