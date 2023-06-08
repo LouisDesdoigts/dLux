@@ -70,7 +70,7 @@ class FFT(Propagator):
 
     def __init__(
         self         : Propagator, 
-        focal_length : Array,
+        focal_length : Array = None,
         pad          : int = 2,
         inverse      : bool = False) -> Propagator:
         super().__init__(focal_length=focal_length, inverse=inverse)
