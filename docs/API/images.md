@@ -42,6 +42,6 @@ Downsamples the image by a factor of $n$. This is done by summing the image pixe
 
 Convolves the image with another. This is done using the `jax.scipy.signal.convolve` function.
 
-### `Rotate(angle)`
+### `Rotate`
 
 Rotates the image by a given angle. This is done using interpolation methods.
