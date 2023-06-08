@@ -1,12 +1,12 @@
 # Instruments: instruments.py
 
-This module contains the classes that define the behaviour of instruments in dLux. Instruments classes hold the various different types of dLux classes and handles the coherent modelling of these different classes.
+This module contains the classes that define the behaviour of instruments in ∂Lux. Instrument classes hold the various types of ∂Lux classes and handle the coherent modelling of these classes.
 
 There is one public class:
 
 - `Instrument`
 
-The Instrument class has three main methods:
+The `Instrument` class has three main methods:
 
 1. `model()` Models the sources through the instrument optics and detector.
 2. `observe()` Calls the `observe` method of the stored observation class.
@@ -19,7 +19,7 @@ The Instrument class has three main methods:
 
 # Examples
 
-Lets see how we can construct a minimal instrument object with all of its attributes populated.
+Let's construct a minimal instrument object with all of its attributes populated.
 
 ```python
 import jax.numpy as np
@@ -27,7 +27,7 @@ import dLux as dl
 
 # Define the optical parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -40,7 +40,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Construct Source
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 source = dl.PointSource(wavelengths)
 
 # Construct Detector
