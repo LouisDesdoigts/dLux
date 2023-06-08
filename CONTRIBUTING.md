@@ -1,6 +1,6 @@
 # Contributing Guide!
 
-Note: This doccument is out of date and in the proccess of being updated!
+Note: This document is out of date and in the process of being updated!
 
 ---
 ## Units:
