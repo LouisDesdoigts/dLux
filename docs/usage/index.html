@@ -333,7 +333,7 @@
   
     <li class="md-nav__item">
       <a href="../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -389,7 +389,7 @@
   
     <li class="md-nav__item">
       <a href="../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -823,21 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -862,16 +847,16 @@
 
 <h1 id="using-lux">Using ∂Lux<a class="headerlink" href="#using-lux" title="Permanent link">¤</a></h1>
 <hr />
-<p>∂Lux is built in Zodiax, so users should start with the <a href="https://louisdesdoigts.github.io/zodiax/docs/usage/">Using Zodiax Tutorial</a>, which covers the the basics of the framework and how to use the optimisation tools used in ∂Lux.</p>
-<h2 id="a-simple-optical-system">A Simple Optical system<a class="headerlink" href="#a-simple-optical-system" title="Permanent link">¤</a></h2>
-<p>Two different types of optical classes: Layered, non-Layered</p>
-<p>Layered gives full control over the wavefront at each step, but non-layered objects can be simpler to work with. We will first cosntruct one non-Layered Optics class and then one Layered Optics class.</p>
+<p>∂Lux is built in Zodiax, so users should start with the <a href="https://louisdesdoigts.github.io/zodiax/docs/usage/">Using Zodiax Tutorial</a>, which covers the basics of the framework and how to use the optimisation tools used in ∂Lux.</p>
+<h2 id="a-simple-optical-system">A Simple Optical System<a class="headerlink" href="#a-simple-optical-system" title="Permanent link">¤</a></h2>
+<p>There are two different types of optical classes: <em>Layered</em>, and <em>non-Layered</em>.</p>
+<p>Layered gives full control over the wavefront at each step, but non-layered objects can be simpler to work with. We will first construct a non-Layered Optics class and then a Layered Optics class.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">dLux</span> <span class="k">as</span> <span class="nn">dl</span>
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -883,7 +868,7 @@
 <span class="n">optics</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">AngularOptics</span><span class="p">(</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">aperture</span><span class="p">,</span> 
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 </code></pre></div>
-<p>Lets have a look at our object:</p>
+<p>Let's have a look at our object:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
 
 <span class="o">&gt;</span> <span class="n">AngularOptics</span><span class="p">(</span>
@@ -896,9 +881,9 @@
 <span class="o">&gt;</span>   <span class="n">psf_pixel_scale</span><span class="o">=</span><span class="mf">0.1</span>
 <span class="o">&gt;</span> <span class="p">)</span>
 </code></pre></div>
-<p>Now we can simply propagate wavelengths throught the optics like so:</p>
+<p>Now, we can simply propagate <code>wavelengths</code> through the optics like so:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">psf</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 </code></pre></div>
 <details class="abstract">
@@ -919,14 +904,14 @@
 </code></pre></div>
 </details>
 <p><img alt="Simple Optics" src="../assets/simple_optics.png" /></p>
-<p>Now lets take a look at how we can create an identical optical system using the layered approach. This approach is more verbose, but gives us more control over the wavefront at each step.</p>
+<p>Now, let's take a look at how we can create an identical optical system using the layered approach. This approach is more verbose, but gives us more control over the wavefront at each step.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">dLux.utils</span> <span class="k">as</span> <span class="nn">dlu</span>
 <span class="kn">import</span> <span class="nn">dLux</span> <span class="k">as</span> <span class="nn">dl</span>
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">arcsec_to_rad</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
 
@@ -939,7 +924,7 @@
 <span class="c1"># Construct the optics class</span>
 <span class="n">optics</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">LayeredOptics</span><span class="p">(</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">layers</span><span class="p">)</span>
 </code></pre></div>
-<p>Lets have a look at our optics object again to see how it has changed:</p>
+<p>Let's again look at our optics object to see how it has changed:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
 
 <span class="o">&gt;</span> <span class="n">LayeredOptics</span><span class="p">(</span>
@@ -955,7 +940,7 @@
 </code></pre></div>
 <p>We use the same method to propagate the wavelengths:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">psf</span> <span class="o">=</span> <span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 </code></pre></div>
 <details class="abstract">
@@ -978,14 +963,14 @@
 <p><img alt="Simple Optics" src="../assets/simple_optics.png" /></p>
 <hr />
 <h2 id="basic-phase-retrieval">Basic Phase Retrieval<a class="headerlink" href="#basic-phase-retrieval" title="Permanent link">¤</a></h2>
-<p>Now that we know how to create a simple optical system, lets see how we can take advangate of the differentiable nature of ∂Lux to perform phase retrieval. We will use the same optical system as before, but this time we will add a phase screen to the aperture.</p>
+<p>Now that we know how to create a simple optical system, let's see how we can take advantage of the differentiable nature of ∂Lux to perform phase retrieval. We will use the same optical system as before, but this time we will add a phase screen to the aperture.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">jax.random</span> <span class="k">as</span> <span class="nn">jr</span>
 <span class="kn">import</span> <span class="nn">dLux</span> <span class="k">as</span> <span class="nn">dl</span>
 
 <span class="c1"># Define the parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -1003,7 +988,7 @@
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 
 <span class="c1"># Propagate the wavelengths</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">source</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="mf">5e4</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">jr</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">jr</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">optics</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
 </code></pre></div>
@@ -1025,7 +1010,7 @@
 </code></pre></div>
 </details>
 <p><img alt="Aberrated Optics" src="../assets/aberrated_optics.png" /></p>
-<p>Now we just need to reset our aberration coefficients to zero and define our loss function:</p>
+<p>Now, we just need to reset our aberration coefficients to zero and define our loss function:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">jax.scipy</span> <span class="k">as</span> <span class="nn">jsp</span>
 <span class="kn">import</span> <span class="nn">zodiax</span> <span class="k">as</span> <span class="nn">zdx</span>
 <span class="kn">import</span> <span class="nn">optax</span>
@@ -1044,7 +1029,7 @@
 <span class="c1"># Compile the loss function</span>
 <span class="n">loss</span><span class="p">,</span> <span class="n">grads</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 </code></pre></div>
-<p>Now we optimise in a simple loop:</p>
+<p>Now, we optimise in a simple loop:</p>
 <div class="highlight"><pre><span></span><code><span class="n">optim</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">zdx</span><span class="o">.</span><span class="n">get_optimiser</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">optax</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="mf">2e-9</span><span class="p">))</span>
 
 <span class="n">losses</span><span class="p">,</span> <span class="n">models_out</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -1110,7 +1095,7 @@
 <p><img alt="Recovered Model" src="../assets/recovered_model.png" /></p>
 <hr />
 <h2 id="complex-optical-systems">Complex Optical Systems<a class="headerlink" href="#complex-optical-systems" title="Permanent link">¤</a></h2>
-<p>So far we have looked at the dLux basics, but there is much more functionality available! Here we will show how to model the effects of a detector with a dithered observation pattern, using the same optics and source classes we defined above.</p>
+<p>So far we have looked at the ∂Lux basics, but there is much more functionality available! Here we will show how to model the effects of a detector with a dithered observation pattern, using the same optics and source classes we defined above.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Construct Detector Object</span>
 <span class="n">detector_layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">dl</span><span class="o">.</span><span class="n">ApplyJitter</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">dl</span><span class="o">.</span><span class="n">IntegerDownsample</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
 <span class="n">detector</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">LayeredDetector</span><span class="p">(</span><span class="n">detector_layers</span><span class="p">)</span>
@@ -1136,7 +1121,7 @@
 </code></pre></div>
 </details>
 <p><img alt="Full Instrument" src="../assets/full_instrument.png" /></p>
-<p>This has been a quick overview of how to use dLux! The next step from here would be to take a look at the rest of the tutorials, which show how to do more complex modelling and parameter recovery!</p>
+<p>This has been a quick overview of how to use ∂Lux! The next step from here would be to take a look at the rest of the tutorials, which show how to do more complex modelling and parameter recovery!</p>
 
 
 

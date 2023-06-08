@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=678220ea" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=18207118" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1897,7 +1882,7 @@ Licensed under the Apache License, Version 2.0.
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">vmap</span><span class="p">,</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">Array</span>
 <span class="kn">from</span> <span class="nn">jax.tree_util</span> <span class="kn">import</span> <span class="n">tree_map</span><span class="p">,</span> <span class="n">tree_flatten</span>
 <span class="kn">from</span> <span class="nn">zodiax</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
@@ -1907,7 +1892,7 @@ Licensed under the Apache License, Version 2.0.
 <div id="cell-1" class="clipboard-copy-txt">from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
-from jax import vmap, Array
+from jax import Array
 from jax.tree_util import tree_map, tree_flatten
 from zodiax import Base
 from typing import Union
@@ -1922,7 +1907,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=aee6dd10" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=6f3daaa7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1954,7 +1939,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=4c06fe94" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=c945fc58" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1975,18 +1960,18 @@ import dLux</div>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Alias classes for simplified type-checking</span>
-<span class="n">Optics</span>      <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">optics</span><span class="o">.</span><span class="n">BaseOptics</span>
-<span class="n">Detector</span>    <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">detectors</span><span class="o">.</span><span class="n">BaseDetector</span>
-<span class="n">Source</span>      <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">BaseSource</span>
-<span class="n">Observation</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">BaseObservation</span>
-<span class="n">Image</span>       <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">Image</span>
+<span class="n">Optics</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">optics</span><span class="o">.</span><span class="n">BaseOptics</span>
+<span class="n">Detector</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">detectors</span><span class="o">.</span><span class="n">BaseDetector</span>
+<span class="n">Source</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">BaseSource</span>
+<span class="n">Observation</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">BaseObservation</span>
+<span class="n">Image</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">Image</span>
 </pre></div>
 <div id="cell-3" class="clipboard-copy-txt"># Alias classes for simplified type-checking
-Optics      = lambda : dLux.optics.BaseOptics
-Detector    = lambda : dLux.detectors.BaseDetector
-Source      = lambda : dLux.sources.BaseSource
-Observation = lambda : dLux.observations.BaseObservation
-Image       = lambda : dLux.images.Image</div>
+Optics = lambda: dLux.optics.BaseOptics
+Detector = lambda: dLux.detectors.BaseDetector
+Source = lambda: dLux.sources.BaseSource
+Observation = lambda: dLux.observations.BaseObservation
+Image = lambda: dLux.images.Image</div>
         
         </div>
     </div>
@@ -1996,7 +1981,7 @@ Image       = lambda : dLux.images.Image</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=71fa05b3" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=2e9fa000" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2016,9 +2001,27 @@ Image       = lambda : dLux.images.Image</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">BaseInstrument</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Base Instrument class that all instrument classes inherit from. Can be</span>
+<span class="sd">    used to create your own instrument classes that will integrate seamlessly</span>
+<span class="sd">    with the rest of dLux.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">pass</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt"></div>
+<div id="cell-4" class="clipboard-copy-txt">class BaseInstrument(Base):
+    """
+    The Base Instrument class that all instrument classes inherit from. Can be
+    used to create your own instrument classes that will integrate seamlessly
+    with the rest of dLux.
+    """
+
+    @abstractmethod
+    def model(self):  # pragma: no cover
+        pass</div>
         
         </div>
     </div>
@@ -2028,7 +2031,7 @@ Image       = lambda : dLux.images.Image</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=26bd30ec" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=9ec21a2a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2048,59 +2051,9 @@ Image       = lambda : dLux.images.Image</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">BaseInstrument</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The Base Instrument class that all instrument classes inherit from. Can be</span>
-<span class="sd">    used to create your own instrument classes that will integrate seamlessly</span>
-<span class="sd">    with the rest of dLux.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
-        <span class="k">pass</span>
-</pre></div>
-<div id="cell-5" class="clipboard-copy-txt">class BaseInstrument(Base):
-    """
-    The Base Instrument class that all instrument classes inherit from. Can be
-    used to create your own instrument classes that will integrate seamlessly
-    with the rest of dLux.
-    """
-
-    @abstractmethod
-    def model(self): # pragma: no cover
-        pass</div>
-        
-        </div>
-    </div>
-
-</div>
-</div>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=4bf595e1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-6">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">Instrument</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A high level class desgined to model the behaviour of a telescope. It</span>
+<span class="sd">    A high level class designed to model the behaviour of a telescope. It</span>
 <span class="sd">    stores a series different ∂Lux objects, and primarily passes the relevant</span>
 <span class="sd">    information between these objects in order to coherently model some</span>
 <span class="sd">    telescope observation.</span>
@@ -2117,21 +2070,20 @@ Image       = lambda : dLux.images.Image</div>
 <span class="sd">        instrumental effects on a psf.</span>
 <span class="sd">    observation : Observation</span>
 <span class="sd">        An class that inherits from Observation. This is to allow flexibility</span>
-<span class="sd">        in the different kind of observations, ie applying dithers, switching</span>
+<span class="sd">        in the different kind of observations, i.e. applying dithers, switching</span>
 <span class="sd">        filters, etc.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">optics</span>      <span class="p">:</span> <span class="n">Optics</span><span class="p">()</span>
-    <span class="n">sources</span>     <span class="p">:</span> <span class="nb">dict</span>
-    <span class="n">detector</span>    <span class="p">:</span> <span class="n">Detector</span><span class="p">()</span>
-    <span class="n">observation</span> <span class="p">:</span> <span class="n">Observation</span><span class="p">()</span>
+    <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">()</span>
+    <span class="n">sources</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span><span class="p">()</span>
+    <span class="n">observation</span><span class="p">:</span> <span class="n">Observation</span><span class="p">()</span>
 
-    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
-                 <span class="n">optics</span>      <span class="p">:</span> <span class="n">Optics</span><span class="p">(),</span>
-                 <span class="n">sources</span>     <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Source</span><span class="p">()],</span>
-                 <span class="n">detector</span>    <span class="p">:</span> <span class="n">Detector</span><span class="p">()</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">observation</span> <span class="p">:</span> <span class="n">Observation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
+                 <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">(),</span>
+                 <span class="n">sources</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Source</span><span class="p">()],</span>
+                 <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span><span class="p">()</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">observation</span><span class="p">:</span> <span class="n">Observation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Instrument class.</span>
 
@@ -2145,14 +2097,14 @@ Image       = lambda : dLux.images.Image</div>
 <span class="sd">            A pre-configured Detector object.</span>
 <span class="sd">        observation : Observation = None</span>
 <span class="sd">            An class that inherits from Observation. This is to allow</span>
-<span class="sd">            flexibility in the different kind of observations, ie applying</span>
+<span class="sd">            flexibility in the different kind of observations, i.e. applying</span>
 <span class="sd">            dithers, switching filters, etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Optics</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optics</span><span class="p">,</span> <span class="n">Optics</span><span class="p">()):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;optics must be an Optics object.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">optics</span> <span class="o">=</span> <span class="n">optics</span>
-        
+
         <span class="c1"># Sources</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="p">(</span><span class="n">Source</span><span class="p">(),</span> <span class="nb">tuple</span><span class="p">)):</span>
             <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="n">sources</span><span class="p">]</span>
@@ -2161,17 +2113,16 @@ Image       = lambda : dLux.images.Image</div>
         <span class="c1"># Detector</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">Detector</span><span class="p">())</span> <span class="ow">and</span> <span class="n">detector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;detector must be an Detector object. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="sa">f</span><span class="s2">&quot;Got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span>
 
         <span class="c1"># Observation</span>
-        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">observation</span><span class="p">,</span> <span class="n">Observation</span><span class="p">())</span> <span class="ow">and</span> 
-            <span class="n">observation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">observation</span><span class="p">,</span> <span class="n">Observation</span><span class="p">())</span> <span class="ow">and</span>
+                <span class="n">observation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;observation must be an Observation object.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observation</span> <span class="o">=</span> <span class="n">observation</span>
 
-
-    <span class="k">def</span> <span class="nf">observe</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">observe</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calls the `observe` method of the stored observation class, passing in</span>
 <span class="sd">        any extra keyword arguments.</span>
@@ -2183,14 +2134,13 @@ Image       = lambda : dLux.images.Image</div>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span> <span class="n">key</span> <span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method designed to allow accessing of the various items within</span>
 <span class="sd">        the sub-dictionaries of this class via the &#39;class.attribute&#39; method.</span>
 <span class="sd">        It is recommended that each dictionary key in the optical layers,</span>
 <span class="sd">        detector layers, and scene sources are unique to prevent unexpected</span>
-<span class="sd">        behaviour. In the case they there are idenitcal keys across the</span>
+<span class="sd">        behaviour. In the case they there are identical keys across the</span>
 <span class="sd">        dictionaries This method prioritises searching for keys in the optical</span>
 <span class="sd">        layers, then detector layers, and then the scene sources.</span>
 
@@ -2213,10 +2163,9 @@ Image       = lambda : dLux.images.Image</div>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
                 <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no attribute &quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method for returning a new instrument with normalised source objects.</span>
 
@@ -2230,8 +2179,7 @@ Image       = lambda : dLux.images.Image</div>
         <span class="n">sources</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">norm_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_source</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;sources&#39;</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">(</span><span class="n">Array</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A base level modelling function designed to robustly handle the</span>
 <span class="sd">        different combinations of inputs. Models the sources through the</span>
@@ -2250,9 +2198,9 @@ Image       = lambda : dLux.images.Image</div>
         <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">psf</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">image</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
-<div id="cell-6" class="clipboard-copy-txt">class Instrument(Base):
+<div id="cell-5" class="clipboard-copy-txt">class Instrument(Base):
     """
-    A high level class desgined to model the behaviour of a telescope. It
+    A high level class designed to model the behaviour of a telescope. It
     stores a series different ∂Lux objects, and primarily passes the relevant
     information between these objects in order to coherently model some
     telescope observation.
@@ -2269,21 +2217,20 @@ Image       = lambda : dLux.images.Image</div>
         instrumental effects on a psf.
     observation : Observation
         An class that inherits from Observation. This is to allow flexibility
-        in the different kind of observations, ie applying dithers, switching
+        in the different kind of observations, i.e. applying dithers, switching
         filters, etc.
     """
-    optics      : Optics()
-    sources     : dict
-    detector    : Detector()
-    observation : Observation()
+    optics: Optics()
+    sources: dict
+    detector: Detector()
+    observation: Observation()
 
-    
-    def __init__(self        : Instrument,
-                 optics      : Optics(),
-                 sources     : Union[list, Source()],
-                 detector    : Detector()  = None,
-                 observation : Observation = None,
-                 ) -> Instrument:
+    def __init__(self: Instrument,
+                 optics: Optics(),
+                 sources: Union[list, Source()],
+                 detector: Detector() = None,
+                 observation: Observation = None,
+                 ):
         """
         Constructor for the Instrument class.
 
@@ -2297,14 +2244,14 @@ Image       = lambda : dLux.images.Image</div>
             A pre-configured Detector object.
         observation : Observation = None
             An class that inherits from Observation. This is to allow
-            flexibility in the different kind of observations, ie applying
+            flexibility in the different kind of observations, i.e. applying
             dithers, switching filters, etc.
         """
         # Optics
         if not isinstance(optics, Optics()):
             raise TypeError("optics must be an Optics object.")
         self.optics = optics
-        
+
         # Sources
         if isinstance(sources, (Source(), tuple)):
             sources = [sources]
@@ -2313,17 +2260,16 @@ Image       = lambda : dLux.images.Image</div>
         # Detector
         if not isinstance(detector, Detector()) and detector is not None:
             raise TypeError("detector must be an Detector object. "
-                f"Got type {type(detector)}")
+                            f"Got type {type(detector)}")
         self.detector = detector
 
         # Observation
-        if (not isinstance(observation, Observation()) and 
-            observation is not None):
+        if (not isinstance(observation, Observation()) and
+                observation is not None):
             raise TypeError("observation must be an Observation object.")
         self.observation = observation
 
-
-    def observe(self : Instrument) -> Any:
+    def observe(self: Instrument) -> Any:
         """
         Calls the `observe` method of the stored observation class, passing in
         any extra keyword arguments.
@@ -2335,14 +2281,13 @@ Image       = lambda : dLux.images.Image</div>
         """
         return self.observation.model(self)
 
-
-    def __getattr__(self : Instrument, key : str) -> object:
+    def __getattr__(self: Instrument, key: str) -> object:
         """
         Magic method designed to allow accessing of the various items within
         the sub-dictionaries of this class via the 'class.attribute' method.
         It is recommended that each dictionary key in the optical layers,
         detector layers, and scene sources are unique to prevent unexpected
-        behaviour. In the case they there are idenitcal keys across the
+        behaviour. In the case they there are identical keys across the
         dictionaries This method prioritises searching for keys in the optical
         layers, then detector layers, and then the scene sources.
 
@@ -2365,10 +2310,9 @@ Image       = lambda : dLux.images.Image</div>
             if hasattr(source, key):
                 return getattr(source, key)
         raise AttributeError(f"{self.__class__.__name__} has no attribute "
-        f"{key}.")
+                             f"{key}.")
 
-
-    def normalise(self : Instrument) -> Instrument:
+    def normalise(self: Instrument) -> Instrument:
         """
         Method for returning a new instrument with normalised source objects.
 
@@ -2382,8 +2326,7 @@ Image       = lambda : dLux.images.Image</div>
         sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
         return self.set('sources', sources)
 
-
-    def model(self : Instrument) -> Union(Array, dict):
+    def model(self: Instrument) -> Union[Array, dict]:
         """
         A base level modelling function designed to robustly handle the
         different combinations of inputs. Models the sources through the

@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=6ccc84a6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=c71b311e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1912,7 +1897,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=d73cca78" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=53bce2e3" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1944,7 +1929,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5d934cbd" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=91e56920" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1989,7 +1974,7 @@ import dLux.utils as dlu</div>
         <span class="n">zernike</span> <span class="o">=</span> <span class="n">create_zernike</span><span class="p">()</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span>
 
-        <span class="c1"># Test calcualte</span>
+        <span class="c1"># Test calculate</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">zernike</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">zernike</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">nsides</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
@@ -2021,7 +2006,7 @@ import dLux.utils as dlu</div>
         zernike = create_zernike()
         coords = dlu.pixel_coords(16, 1/16)
 
-        # Test calcualte
+        # Test calculate
         z = zernike.calculate(coords)
         p = zernike.calculate(coords, nsides=3)
 
@@ -2036,7 +2021,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=97900228" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=7f59379f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2070,7 +2055,7 @@ import dLux.utils as dlu</div>
         <span class="n">zernike_basis</span> <span class="o">=</span> <span class="n">create_zernike_basis</span><span class="p">()</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span>
 
-        <span class="c1"># Test calcualte</span>
+        <span class="c1"># Test calculate</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">zernike_basis</span><span class="o">.</span><span class="n">calculate_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
 </pre></div>
 <div id="cell-4" class="clipboard-copy-txt">class TestZernikeBasis(object):
@@ -2087,7 +2072,7 @@ import dLux.utils as dlu</div>
         zernike_basis = create_zernike_basis()
         coords = dlu.pixel_coords(16, 1/16)
 
-        # Test calcualte
+        # Test calculate
         z = zernike_basis.calculate_basis(coords)</div>
         
         </div>

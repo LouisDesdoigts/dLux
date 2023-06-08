@@ -323,7 +323,7 @@
   
     <li class="md-nav__item">
       <a href="../../../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -379,7 +379,7 @@
   
     <li class="md-nav__item">
       <a href="../../../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -823,21 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../../CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -861,9 +846,9 @@
 
 
 <h1 id="coordinates-utility-functions">Coordinates Utility Functions<a class="headerlink" href="#coordinates-utility-functions" title="Permanent link">¤</a></h1>
-<p>This module contains a series of functions that are used to calculate coordinates arrays, apply transformations to coordinate those arrays, and convert between cartesian and polar coordiantes.</p>
+<p>This module contains a series of functions which are used to calculate coordinate arrays, apply transformations to coordinate arrays, and convert between Cartesian and polar coordinates.</p>
 <h2 id="polar-to-cartesian">Polar to Cartesian<a class="headerlink" href="#polar-to-cartesian" title="Permanent link">¤</a></h2>
-<p>Converts a polar coordinate array to cartesian coordinates.</p>
+<p>Converts a polar coordinate array to Cartesian coordinates.</p>
 <details class="info">
 <summary>Polar to Cartesian API</summary>
 <div class="mkdocstrings">
@@ -874,8 +859,8 @@
 <a id="dLux.utils.coordinates.polar_to_cart"></a>
   <div class="doc doc-contents first">
   
-      <p>Converts the input (r, phi) polar coordinates into (x, y) cartesian
-cordinates.</p>
+      <p>Converts the input (r, phi) polar coordinates into (x, y) Cartesian
+coordinates.</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -895,8 +880,8 @@ cordinates.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The (r, phi) polar coordinates to be converted into cartesian
-cordinates.</p>
+              <p>The (r, phi) polar coordinates to be converted into Cartesian
+coordinates.</p>
             </div>
           </td>
           <td>
@@ -921,7 +906,7 @@ cordinates.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The input polar coordinates converted into (x, y) cartesian cordinates.</p>
+              <p>The input polar coordinates converted into (x, y) Cartesian coordinates.</p>
             </div>
           </td>
         </tr>
@@ -947,24 +932,24 @@ cordinates.</p>
 <span class="normal">45</span>
 <span class="normal">46</span>
 <span class="normal">47</span>
-<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">polar_to_cart</span><span class="p">(</span><span class="n">coordinates</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">polar_to_cart</span><span class="p">(</span><span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts the input (r, phi) polar coordinates into (x, y) cartesian</span>
-<span class="sd">    cordinates.</span>
+<span class="sd">    Converts the input (r, phi) polar coordinates into (x, y) Cartesian</span>
+<span class="sd">    coordinates.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    coordinates : Array</span>
-<span class="sd">        The (r, phi) polar coordinates to be converted into cartesian</span>
-<span class="sd">        cordinates.</span>
+<span class="sd">        The (r, phi) polar coordinates to be converted into Cartesian</span>
+<span class="sd">        coordinates.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    coordinates : Array</span>
-<span class="sd">        The input polar coordinates converted into (x, y) cartesian cordinates.</span>
+<span class="sd">        The input polar coordinates converted into (x, y) Cartesian coordinates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">r</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">coordinates</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">r</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)])</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -973,7 +958,7 @@ cordinates.</p>
 </div>
 </details>
 <h2 id="cartesian-to-polar">Cartesian to Polar<a class="headerlink" href="#cartesian-to-polar" title="Permanent link">¤</a></h2>
-<p>Converts a cartesian coordinate array to polar coordinates.</p>
+<p>Converts a Cartesian coordinate array to polar coordinates.</p>
 <details class="info">
 <summary>Cartesian to Polar API</summary>
 <div class="mkdocstrings">
@@ -984,7 +969,7 @@ cordinates.</p>
 <a id="dLux.utils.coordinates.cart_to_polar"></a>
   <div class="doc doc-contents first">
   
-      <p>Converts the input (x, y) cartesian cordinates into (r, phi) polar
+      <p>Converts the input (x, y) Cartesian coordinates into (r, phi) polar
 coordinates.</p>
 
   <p><strong>Parameters:</strong></p>
@@ -1005,7 +990,7 @@ coordinates.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The (x, y) cartesian coordinates to be converted into polar cordinates.</p>
+              <p>The (x, y) Cartesian coordinates to be converted into polar coordinates.</p>
             </div>
           </td>
           <td>
@@ -1030,8 +1015,8 @@ coordinates.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The input cartesian coordinates converted into (r, phi) polar
-cordinates.</p>
+              <p>The input Cartesian coordinates converted into (r, phi) polar
+coordinates.</p>
             </div>
           </td>
         </tr>
@@ -1057,21 +1042,21 @@ cordinates.</p>
 <span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
-<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">cart_to_polar</span><span class="p">(</span><span class="n">coordinates</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">cart_to_polar</span><span class="p">(</span><span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts the input (x, y) cartesian cordinates into (r, phi) polar</span>
+<span class="sd">    Converts the input (x, y) Cartesian coordinates into (r, phi) polar</span>
 <span class="sd">    coordinates.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    coordinates : Array</span>
-<span class="sd">        The (x, y) cartesian coordinates to be converted into polar cordinates.</span>
+<span class="sd">        The (x, y) Cartesian coordinates to be converted into polar coordinates.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    coordinates : Array</span>
-<span class="sd">        The input cartesian coordinates converted into (r, phi) polar</span>
-<span class="sd">        cordinates.</span>
+<span class="sd">        The input Cartesian coordinates converted into (r, phi) polar</span>
+<span class="sd">        coordinates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">coordinates</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)])</span>
@@ -1083,6 +1068,8 @@ cordinates.</p>
 </div>
 </details>
 <h2 id="pixel-coords">Pixel Coords<a class="headerlink" href="#pixel-coords" title="Permanent link">¤</a></h2>
+<p>Calculates the coordinates of the pixel centers for the given input,
+    assuming an equal size and pixel scale in all dimensions. Similar to <code>pixel_coordinates()</code>, but with a simplified API.</p>
 <details class="info">
 <summary>Pixel Coords API</summary>
 <div class="mkdocstrings">
@@ -1095,7 +1082,7 @@ cordinates.</p>
   
       <p>Calculates the coordinates of the pixel centers for the given input,
 assuming an equal size and pixel scale in all dimensions. All 
-coordinates are output in units of meters. This function is essentially a
+coordinates are output in units of metres. This function is essentially a
 reduced version of the full <code>pixel_coordinates</code> function that gives
 flexibility to have different dimension sizes and scales.</p>
 
@@ -1145,7 +1132,7 @@ flexibility to have different dimension sizes and scales.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The number of outut dimensions.</p>
+              <p>The number of output dimensions.</p>
             </div>
           </td>
           <td>
@@ -1160,7 +1147,7 @@ flexibility to have different dimension sizes and scales.</p>
           <td>
             <div class="doc-md-description">
               <p>If True, the output is in polar coordinates. If False, the output is in
-cartesian coordinates. ndims must be 2 if polar is True.</p>
+Cartesian coordinates. ndims must be 2 if polar is True.</p>
             </div>
           </td>
           <td>
@@ -1180,7 +1167,7 @@ cartesian coordinates. ndims must be 2 if polar is True.</p>
     </thead>
     <tbody>
         <tr>
-<td><code>coordaintes</code></td>          <td>
+<td><code>coordinates</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
           <td>
@@ -1227,15 +1214,15 @@ cartesian coordinates. ndims must be 2 if polar is True.</p>
 <span class="normal">82</span>
 <span class="normal">83</span>
 <span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">pixel_coords</span><span class="p">(</span>
-    <span class="n">npixels</span> <span class="p">:</span> <span class="nb">int</span><span class="p">,</span> 
-    <span class="n">pixel_scale</span> <span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> 
-    <span class="n">ndims</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> 
-    <span class="n">polar</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+        <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">pixel_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">polar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the coordinates of the pixel centers for the given input,</span>
 <span class="sd">    assuming an equal size and pixel scale in all dimensions. All </span>
-<span class="sd">    coordinates are output in units of meters. This function is essentially a</span>
+<span class="sd">    coordinates are output in units of metres. This function is essentially a</span>
 <span class="sd">    reduced version of the full `pixel_coordinates` function that gives</span>
 <span class="sd">    flexibility to have different dimension sizes and scales.</span>
 
@@ -1246,14 +1233,14 @@ cartesian coordinates. ndims must be 2 if polar is True.</p>
 <span class="sd">    pixel_scale : float = 1</span>
 <span class="sd">        The pixel scale in all dimensions.</span>
 <span class="sd">    ndims : int = 2</span>
-<span class="sd">        The number of outut dimensions.</span>
+<span class="sd">        The number of output dimensions.</span>
 <span class="sd">    polar : bool = False</span>
 <span class="sd">        If True, the output is in polar coordinates. If False, the output is in</span>
-<span class="sd">        cartesian coordinates. ndims must be 2 if polar is True.</span>
+<span class="sd">        Cartesian coordinates. ndims must be 2 if polar is True.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    coordaintes : Array</span>
+<span class="sd">    coordinates : Array</span>
 <span class="sd">        The array of pixel center coordinates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">npixels</span> <span class="o">=</span> <span class="p">(</span><span class="n">npixels</span><span class="p">,)</span> <span class="o">*</span> <span class="n">ndims</span>
@@ -1267,6 +1254,7 @@ cartesian coordinates. ndims must be 2 if polar is True.</p>
 </div>
 </details>
 <h2 id="pixel-coordinates">Pixel Coordinates<a class="headerlink" href="#pixel-coordinates" title="Permanent link">¤</a></h2>
+<p>Calculates the coordinates of the pixel centers for the given input, without the underlying assumptions of <code>pixel_coords()</code>.</p>
 <details class="info">
 <summary>Pixel Coordinates API</summary>
 <div class="mkdocstrings">
@@ -1278,14 +1266,14 @@ cartesian coordinates. ndims must be 2 if polar is True.</p>
   <div class="doc doc-contents first">
   
       <p>Calculates the coordinates of the pixel centers for the given input. All 
-coordinates are output in units of meters. </p>
-<p>The indexing argument is the same as in numpy.meshgrid., ie: Giving the
+coordinates are output in units of metres. </p>
+<p>The indexing argument is the same as in numpy.meshgrid., i.e.: Giving the
 string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a
 meshgrid with Cartesian indexing. In the 2-D case with inputs of length M
 and N, the outputs are of shape (N, M) for ‘xy’ indexing and (M, N) for
 ‘ij’ indexing. In the 3-D case with inputs of length M, N and P, outputs
 are of shape (N, M, P) for ‘xy’ indexing and (M, N, P) for ‘ij’ indexing.
-If the output is in polar coordainates, indexing is set to 'xy' and the
+If the output is in polar coordinates, indexing is set to 'xy' and the
 input must be 2d.</p>
 
   <p><strong>Parameters:</strong></p>
@@ -1354,7 +1342,7 @@ set to 0.</p>
           <td>
             <div class="doc-md-description">
               <p>If True, the output is in polar coordinates. If False, the output is in
-cartesian coordinates. Default is False.</p>
+Cartesian coordinates. Default is False.</p>
             </div>
           </td>
           <td>
@@ -1481,24 +1469,25 @@ details.</p>
 <span class="normal">162</span>
 <span class="normal">163</span>
 <span class="normal">164</span>
-<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">pixel_coordinates</span><span class="p">(</span>
-    <span class="n">npixels</span>      <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">],</span> 
-    <span class="n">pixel_scales</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span>
-    <span class="n">offsets</span>      <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
-    <span class="n">polar</span>        <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">indexing</span>     <span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">165</span>
+<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">pixel_coordinates</span><span class="p">(</span>
+        <span class="n">npixels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">],</span>
+        <span class="n">pixel_scales</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span>
+        <span class="n">offsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+        <span class="n">polar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">indexing</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the coordinates of the pixel centers for the given input. All </span>
-<span class="sd">    coordinates are output in units of meters. </span>
+<span class="sd">    coordinates are output in units of metres. </span>
 
-<span class="sd">    The indexing argument is the same as in numpy.meshgrid., ie: Giving the</span>
+<span class="sd">    The indexing argument is the same as in numpy.meshgrid., i.e.: Giving the</span>
 <span class="sd">    string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a</span>
 <span class="sd">    meshgrid with Cartesian indexing. In the 2-D case with inputs of length M</span>
 <span class="sd">    and N, the outputs are of shape (N, M) for ‘xy’ indexing and (M, N) for</span>
 <span class="sd">    ‘ij’ indexing. In the 3-D case with inputs of length M, N and P, outputs</span>
 <span class="sd">    are of shape (N, M, P) for ‘xy’ indexing and (M, N, P) for ‘ij’ indexing.</span>
-<span class="sd">    If the output is in polar coordainates, indexing is set to &#39;xy&#39; and the</span>
+<span class="sd">    If the output is in polar coordinates, indexing is set to &#39;xy&#39; and the</span>
 <span class="sd">    input must be 2d.</span>
 
 <span class="sd">    Parameters</span>
@@ -1516,7 +1505,7 @@ details.</p>
 <span class="sd">        set to 0.</span>
 <span class="sd">    polar : bool = False</span>
 <span class="sd">        If True, the output is in polar coordinates. If False, the output is in</span>
-<span class="sd">        cartesian coordinates. Default is False.</span>
+<span class="sd">        Cartesian coordinates. Default is False.</span>
 <span class="sd">    indexing : str = &#39;xy&#39;</span>
 <span class="sd">        The indexing of the output. Default is &#39;xy&#39;. See numpy.meshgrid for more</span>
 <span class="sd">        details.</span>
@@ -1548,9 +1537,10 @@ details.</p>
         <span class="n">pix</span> <span class="o">*=</span> <span class="n">scale</span>
         <span class="n">pix</span> <span class="o">-=</span> <span class="n">offset</span>
         <span class="k">return</span> <span class="n">pix</span>
+
     <span class="n">pixels</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">pixel_fn</span><span class="p">,</span> <span class="n">npixels</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">pixel_scales</span><span class="p">)</span>
 
-    <span class="c1"># ouput (x, y) for 2d, else in order</span>
+    <span class="c1"># output (x, y) for 2d, else in order</span>
     <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">pixels</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="n">indexing</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">polar</span><span class="p">:</span>

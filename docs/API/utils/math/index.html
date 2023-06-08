@@ -323,7 +323,7 @@
   
     <li class="md-nav__item">
       <a href="../../../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -379,7 +379,7 @@
   
     <li class="md-nav__item">
       <a href="../../../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -823,21 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../../CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -861,9 +846,9 @@
 
 
 <h1 id="math-utility-functions">Math Utility Functions<a class="headerlink" href="#math-utility-functions" title="Permanent link">¤</a></h1>
-<p>This module only contains a single function used to calcluate factorials differentiably.</p>
+<p>This module contains functions used to</p>
 <h2 id="factorial">Factorial<a class="headerlink" href="#factorial" title="Permanent link">¤</a></h2>
-<p>Calculates the factorial of a number.</p>
+<p>Differentiably calculates the factorial of a number. Jax-friendly!</p>
 <details class="info">
 <summary>Factorial API</summary>
 <div class="mkdocstrings">
@@ -929,7 +914,8 @@ safe case.  </p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/math.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 8</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 7</span>
+<span class="normal"> 8</span>
 <span class="normal"> 9</span>
 <span class="normal">10</span>
 <span class="normal">11</span>
@@ -943,8 +929,7 @@ safe case.  </p>
 <span class="normal">19</span>
 <span class="normal">20</span>
 <span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">factorial</span><span class="p">(</span><span class="n">n</span> <span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate n! in a jax friendly way. Note that n == 0 is not a </span>
 <span class="sd">    safe case.  </span>
@@ -1033,7 +1018,8 @@ safe case.  </p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/math.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
+<span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
@@ -1046,8 +1032,7 @@ safe case.  </p>
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">triangular_number</span><span class="p">(</span><span class="n">n</span> <span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">triangular_number</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the nth triangular number.</span>
 

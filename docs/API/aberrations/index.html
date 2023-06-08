@@ -323,7 +323,7 @@
   
     <li class="md-nav__item">
       <a href="../../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -379,7 +379,7 @@
   
     <li class="md-nav__item">
       <a href="../../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -823,21 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -867,7 +852,7 @@
 <li><code>Zernike</code></li>
 <li><code>ZernikeBasis</code></li>
 </ul>
-<p>These classes are designed to generate Zernike polynomials dynamically. Typically users should not need to interact with these classes directly, but rather through the <code>Aperture</code> classes.</p>
+<p>These classes are designed to generate Zernike polynomials dynamically. Typically, users should not need to interact with these classes directly, but rather through the <code>Aperture</code> classes.</p>
 <p>The Zernike class hold a single Zernike polynomial. It has one main method, <code>.calculate(coordinates, nsides)</code> that takes in a set of coordinates and calculates the Zernike polynomial on those coordinates.</p>
 <p>The ZernikeBasis class holds a set of Zernike polynomials. It has one main method, <code>.calculate_basis(coordinates, nsides)</code> that takes in a set of coordinates and calculates the Zernike polynomial basis on those coordinates.</p>
 <details class="info">
@@ -884,7 +869,7 @@
 
   
       <p>A class to calculate a set of Zernike polynomials on a dynamic set of
-coordiantes.</p>
+coordinates.</p>
 <p>The 'jth' zernike polynomial is defined <a href="https://oeis.org/A176988">here</a>.
 The basic translation between the noll index and the pair of numbers is
 shown below:</p>
@@ -920,7 +905,15 @@ shown below:</p>
 
         <details class="quote">
           <summary>Source code in <code>dLux/aberrations.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">285</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
 <span class="normal">286</span>
 <span class="normal">287</span>
 <span class="normal">288</span>
@@ -972,17 +965,10 @@ shown below:</p>
 <span class="normal">334</span>
 <span class="normal">335</span>
 <span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ZernikeBasis</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ZernikeBasis</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to calculate a set of Zernike polynomials on a dynamic set of</span>
-<span class="sd">    coordiantes.</span>
+<span class="sd">    coordinates.</span>
 
 <span class="sd">    The &#39;jth&#39; zernike polynomial is defined [here](https://oeis.org/A176988).</span>
 <span class="sd">    The basic translation between the noll index and the pair of numbers is</span>
@@ -1001,10 +987,9 @@ shown below:</p>
 <span class="sd">    noll_indices : list[Zernike]</span>
 <span class="sd">        The list of Zernike polynomial classes to calculate.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">noll_indices</span> <span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Zernike</span><span class="p">]</span>
+    <span class="n">noll_indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Zernike</span><span class="p">]</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span> <span class="n">js</span> <span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span> <span class="n">js</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the DynamicZernike class.</span>
 
@@ -1015,10 +1000,9 @@ shown below:</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">Zernike</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">js</span><span class="p">]</span>
 
-
-    <span class="k">def</span> <span class="nf">calculate_basis</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span> 
-                        <span class="n">coordinates</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> 
-                        <span class="n">nsides</span>      <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">calculate_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span>
+                        <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                        <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the full Zernike polynomial basis.</span>
 
@@ -1027,8 +1011,11 @@ shown below:</p>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        coordinates : Arraya</span>
-<span class="sd">            The cartesian coordinates to calcualte the Zernike basis upon.</span>
+<span class="sd">        coordinates : Array</span>
+<span class="sd">            The Cartesian coordinates to calculate the Zernike basis upon.</span>
+<span class="sd">        nsides : int</span>
+<span class="sd">            The number of sides of the aperture. If 0, the Zernike basis is</span>
+<span class="sd">            calculated on a circular aperture.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1037,7 +1024,7 @@ shown below:</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">leaf_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">Zernike</span><span class="p">)</span>
         <span class="n">calculate_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">nsides</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">jtu</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">calculate_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span><span class="p">,</span> 
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">jtu</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">calculate_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span><span class="p">,</span>
                                      <span class="n">is_leaf</span><span class="o">=</span><span class="n">leaf_fn</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -1098,16 +1085,16 @@ shown below:</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span> <span class="n">js</span> <span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span> <span class="n">js</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor for the DynamicZernike class.</span>
 
@@ -1153,15 +1140,30 @@ radial value of 1.</p>
         <tr>
           <td><code>coordinates</code></td>
           <td>
-                <code>Arraya</code>
+                <code><span title="jax.Array">Array</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The cartesian coordinates to calcualte the Zernike basis upon.</p>
+              <p>The Cartesian coordinates to calculate the Zernike basis upon.</p>
             </div>
           </td>
           <td>
               <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nsides</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of sides of the aperture. If 0, the Zernike basis is
+calculated on a circular aperture.</p>
+            </div>
+          </td>
+          <td>
+                <code>0</code>
           </td>
         </tr>
     </tbody>
@@ -1191,7 +1193,17 @@ radial value of 1.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">322</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
 <span class="normal">325</span>
@@ -1206,16 +1218,9 @@ radial value of 1.</p>
 <span class="normal">334</span>
 <span class="normal">335</span>
 <span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calculate_basis</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span> 
-                    <span class="n">coordinates</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> 
-                    <span class="n">nsides</span>      <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calculate_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span>
+                    <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                    <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the full Zernike polynomial basis.</span>
 
@@ -1224,8 +1229,11 @@ radial value of 1.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    coordinates : Arraya</span>
-<span class="sd">        The cartesian coordinates to calcualte the Zernike basis upon.</span>
+<span class="sd">    coordinates : Array</span>
+<span class="sd">        The Cartesian coordinates to calculate the Zernike basis upon.</span>
+<span class="sd">    nsides : int</span>
+<span class="sd">        The number of sides of the aperture. If 0, the Zernike basis is</span>
+<span class="sd">        calculated on a circular aperture.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1234,7 +1242,7 @@ radial value of 1.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">leaf_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">Zernike</span><span class="p">)</span>
     <span class="n">calculate_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">nsides</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">jtu</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">calculate_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span><span class="p">,</span> 
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">jtu</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">calculate_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span><span class="p">,</span>
                                  <span class="n">is_leaf</span><span class="o">=</span><span class="n">leaf_fn</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -1348,7 +1356,7 @@ pre-calculated parameter and should not be changed.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The array of normalisaton coefficients used in the radial calculation.
+              <p>The array of normalisation coefficients used in the radial calculation.
 This is a pre-calculated parameter and should not be changed.</p>
             </div>
           </td>
@@ -1359,7 +1367,9 @@ This is a pre-calculated parameter and should not be changed.</p>
 
         <details class="quote">
           <summary>Source code in <code>dLux/aberrations.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 67</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
 <span class="normal"> 68</span>
 <span class="normal"> 69</span>
 <span class="normal"> 70</span>
@@ -1566,15 +1576,7 @@ This is a pre-calculated parameter and should not be changed.</p>
 <span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Zernike</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<span class="normal">274</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Zernike</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to generate Zernike polynomials dynamically.</span>
 
@@ -1605,17 +1607,17 @@ This is a pre-calculated parameter and should not be changed.</p>
 <span class="sd">        The array of powers using the radial calculation. This is a </span>
 <span class="sd">        pre-calculated parameter and should not be changed.</span>
 <span class="sd">    _c : Array</span>
-<span class="sd">        The array of normalisaton coefficients used in the radial calculation.</span>
+<span class="sd">        The array of normalisation coefficients used in the radial calculation.</span>
 <span class="sd">        This is a pre-calculated parameter and should not be changed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">j</span>    <span class="p">:</span> <span class="nb">int</span>
-    <span class="n">n</span>    <span class="p">:</span> <span class="nb">int</span>
-    <span class="n">m</span>    <span class="p">:</span> <span class="nb">int</span>
-    <span class="n">name</span> <span class="p">:</span> <span class="nb">str</span>
-    <span class="n">_k</span>    <span class="p">:</span> <span class="n">Array</span>
-    <span class="n">_c</span>    <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">j</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">n</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">m</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">_k</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">_c</span><span class="p">:</span> <span class="n">Array</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">j</span> <span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct for the Zernike class.</span>
 
@@ -1629,19 +1631,18 @@ This is a pre-calculated parameter and should not be changed.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noll_indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">zernike_names</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">&lt;=</span> <span class="mi">36</span> \
-                    <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;Zernike </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;Zernike </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
 
-        <span class="c1"># Calcualte values</span>
+        <span class="c1"># Calculate values</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="n">sign</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
         <span class="n">_fact_1</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">))</span>
         <span class="n">_fact_2</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
         <span class="n">_fact_3</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
         <span class="n">_fact_4</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">_fact_1</span> <span class="o">/</span> <span class="n">_fact_2</span> <span class="o">/</span> <span class="n">_fact_3</span> <span class="o">/</span> <span class="n">_fact_4</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">_fact_1</span> <span class="o">/</span> <span class="n">_fact_2</span> <span class="o">/</span> <span class="n">_fact_3</span> <span class="o">/</span> <span class="n">_fact_4</span>
 
-
-    <span class="k">def</span> <span class="nf">_noll_indices</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">j</span> <span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_noll_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the radial and azimuthal orders of the Zernike polynomial.</span>
 
@@ -1656,15 +1657,14 @@ This is a pre-calculated parameter and should not be changed.</p>
 <span class="sd">            The radial and azimuthal orders of the Zernike polynomial.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">smallest_j_in_row</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span> 
+        <span class="n">smallest_j_in_row</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">number_of_shifts</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">smallest_j_in_row</span> <span class="o">+</span> <span class="o">~</span><span class="p">(</span><span class="n">n</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
         <span class="n">sign_of_shift</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">j</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="o">~</span><span class="p">(</span><span class="n">j</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
         <span class="n">base_case</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="n">sign_of_shift</span> <span class="o">*</span> <span class="p">(</span><span class="n">base_case</span> <span class="o">+</span> <span class="n">number_of_shifts</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">_calculate_radial</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">rho</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_calculate_radial</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the radial component of the Zernike polynomial.</span>
 
@@ -1678,12 +1678,11 @@ This is a pre-calculated parameter and should not be changed.</p>
 <span class="sd">        radial : Array</span>
 <span class="sd">            The radial component of the Zernike polynomial.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">rads</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">rho</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">],</span> 
-            <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:])</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">*</span> <span class="n">rads</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">rads</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">rho</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">],</span>
+                       <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">*</span> <span class="n">rads</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">_calculate_azimuthal</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">theta</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_calculate_azimuthal</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the azimuthal component of the Zernike polynomial.</span>
 
@@ -1706,8 +1705,7 @@ This is a pre-calculated parameter and should not be changed.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">norm_coeff</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">*</span> <span class="n">theta</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">calculate_zernike</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">coordinates</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">calculate_zernike</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the Zernike polynomial.</span>
 
@@ -1717,7 +1715,7 @@ This is a pre-calculated parameter and should not be changed.</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        coordinates : Array</span>
-<span class="sd">            The cartesian coordinates to calcualte the Zernike polynomial upon.</span>
+<span class="sd">            The Cartesian coordinates to calculate the Zernike polynomial upon.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1731,12 +1729,11 @@ This is a pre-calculated parameter and should not be changed.</p>
         <span class="k">return</span> <span class="n">aperture</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_radial</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span> <span class="o">*</span> \
             <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_azimuthal</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">calculate_polike</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> 
-                         <span class="n">coordinates</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> 
-                         <span class="n">nsides</span>      <span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">calculate_polike</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span>
+                         <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                         <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculates the Zernike polynomial on an nsided aperture.</span>
+<span class="sd">        Calculates the Zernike polynomial on an n-sided aperture.</span>
 
 <span class="sd">        Note: The zernike polynomial is defined on the coordinates up to a</span>
 <span class="sd">        radial value of 1.</span>
@@ -1744,29 +1741,28 @@ This is a pre-calculated parameter and should not be changed.</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        coordinates : Array</span>
-<span class="sd">            The cartesian coordinates to calcualte the Zernike polynomial upon.</span>
+<span class="sd">            The Cartesian coordinates to calculate the Zernike polynomial upon.</span>
 <span class="sd">        nsides : int</span>
 <span class="sd">            The number of sides of the aperture.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        polike : Array</span>
-<span class="sd">            The Zernike polynomial on an nsided aperture.</span>
+<span class="sd">            The Zernike polynomial on an n-sided aperture.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">nsides</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;nsides must be &gt;= 3, not </span><span class="si">{</span><span class="n">nsides</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
         <span class="n">theta</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">cart_to_polar</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">nsides</span>
-        <span class="n">phi</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">alpha</span>  
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">alpha</span>
         <span class="n">wedge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">phi</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">))</span>
         <span class="n">u_alpha</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">-</span> <span class="n">wedge</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span>
         <span class="n">r_alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">u_alpha</span><span class="p">)</span>
         <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">r_alpha</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_zernike</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">/</span> <span class="n">r_alpha</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> 
-                  <span class="n">coordinates</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> 
-                  <span class="n">nsides</span>      <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span>
+                  <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                  <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the Zernike polynomial.</span>
 
@@ -1776,7 +1772,7 @@ This is a pre-calculated parameter and should not be changed.</p>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        coordinates : Array</span>
-<span class="sd">            The cartesian coordinates to calcualte the Zernike polynomial upon.</span>
+<span class="sd">            The Cartesian coordinates to calculate the Zernike polynomial upon.</span>
 <span class="sd">        nsides : int</span>
 <span class="sd">            The number of sides of the aperture. If 0, the Zernike polynomial</span>
 <span class="sd">            is calculated on a circular aperture.</span>
@@ -1849,7 +1845,9 @@ This is a pre-calculated parameter and should not be changed.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
@@ -1870,9 +1868,7 @@ This is a pre-calculated parameter and should not be changed.</p>
 <span class="normal">126</span>
 <span class="normal">127</span>
 <span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">j</span> <span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct for the Zernike class.</span>
 
@@ -1886,16 +1882,16 @@ This is a pre-calculated parameter and should not be changed.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noll_indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">zernike_names</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">&lt;=</span> <span class="mi">36</span> \
-                <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;Zernike </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;Zernike </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
 
-    <span class="c1"># Calcualte values</span>
+    <span class="c1"># Calculate values</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">sign</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
     <span class="n">_fact_1</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">))</span>
     <span class="n">_fact_2</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
     <span class="n">_fact_3</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
     <span class="n">_fact_4</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">_fact_1</span> <span class="o">/</span> <span class="n">_fact_2</span> <span class="o">/</span> <span class="n">_fact_3</span> <span class="o">/</span> <span class="n">_fact_4</span> 
+    <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">_fact_1</span> <span class="o">/</span> <span class="n">_fact_2</span> <span class="o">/</span> <span class="n">_fact_3</span> <span class="o">/</span> <span class="n">_fact_4</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -1936,7 +1932,7 @@ radial value of 1.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The cartesian coordinates to calcualte the Zernike polynomial upon.</p>
+              <p>The Cartesian coordinates to calculate the Zernike polynomial upon.</p>
             </div>
           </td>
           <td>
@@ -1985,7 +1981,15 @@ is calculated on a circular aperture.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span>
 <span class="normal">260</span>
@@ -2002,17 +2006,9 @@ is calculated on a circular aperture.</p>
 <span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> 
-              <span class="n">coordinates</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> 
-              <span class="n">nsides</span>      <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">274</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span>
+              <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+              <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the Zernike polynomial.</span>
 
@@ -2022,7 +2018,7 @@ is calculated on a circular aperture.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    coordinates : Array</span>
-<span class="sd">        The cartesian coordinates to calcualte the Zernike polynomial upon.</span>
+<span class="sd">        The Cartesian coordinates to calculate the Zernike polynomial upon.</span>
 <span class="sd">    nsides : int</span>
 <span class="sd">        The number of sides of the aperture. If 0, the Zernike polynomial</span>
 <span class="sd">        is calculated on a circular aperture.</span>
@@ -2054,7 +2050,7 @@ is calculated on a circular aperture.</p>
 
   <div class="doc doc-contents ">
   
-      <p>Calculates the Zernike polynomial on an nsided aperture.</p>
+      <p>Calculates the Zernike polynomial on an n-sided aperture.</p>
 <p>Note: The zernike polynomial is defined on the coordinates up to a
 radial value of 1.</p>
 
@@ -2076,7 +2072,7 @@ radial value of 1.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The cartesian coordinates to calcualte the Zernike polynomial upon.</p>
+              <p>The Cartesian coordinates to calculate the Zernike polynomial upon.</p>
             </div>
           </td>
           <td>
@@ -2115,7 +2111,7 @@ radial value of 1.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The Zernike polynomial on an nsided aperture.</p>
+              <p>The Zernike polynomial on an n-sided aperture.</p>
             </div>
           </td>
         </tr>
@@ -2124,7 +2120,14 @@ radial value of 1.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">225</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span>
@@ -2146,18 +2149,11 @@ radial value of 1.</p>
 <span class="normal">244</span>
 <span class="normal">245</span>
 <span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calculate_polike</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> 
-                     <span class="n">coordinates</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> 
-                     <span class="n">nsides</span>      <span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">247</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calculate_polike</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span>
+                     <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                     <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the Zernike polynomial on an nsided aperture.</span>
+<span class="sd">    Calculates the Zernike polynomial on an n-sided aperture.</span>
 
 <span class="sd">    Note: The zernike polynomial is defined on the coordinates up to a</span>
 <span class="sd">    radial value of 1.</span>
@@ -2165,20 +2161,20 @@ radial value of 1.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    coordinates : Array</span>
-<span class="sd">        The cartesian coordinates to calcualte the Zernike polynomial upon.</span>
+<span class="sd">        The Cartesian coordinates to calculate the Zernike polynomial upon.</span>
 <span class="sd">    nsides : int</span>
 <span class="sd">        The number of sides of the aperture.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    polike : Array</span>
-<span class="sd">        The Zernike polynomial on an nsided aperture.</span>
+<span class="sd">        The Zernike polynomial on an n-sided aperture.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">nsides</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;nsides must be &gt;= 3, not </span><span class="si">{</span><span class="n">nsides</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
     <span class="n">theta</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">cart_to_polar</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">nsides</span>
-    <span class="n">phi</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">alpha</span>  
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">alpha</span>
     <span class="n">wedge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">phi</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">))</span>
     <span class="n">u_alpha</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">-</span> <span class="n">wedge</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span>
     <span class="n">r_alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">u_alpha</span><span class="p">)</span>
@@ -2223,7 +2219,7 @@ radial value of 1.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The cartesian coordinates to calcualte the Zernike polynomial upon.</p>
+              <p>The Cartesian coordinates to calculate the Zernike polynomial upon.</p>
             </div>
           </td>
           <td>
@@ -2257,7 +2253,13 @@ radial value of 1.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
 <span class="normal">203</span>
@@ -2273,13 +2275,7 @@ radial value of 1.</p>
 <span class="normal">213</span>
 <span class="normal">214</span>
 <span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calculate_zernike</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">coordinates</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calculate_zernike</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the Zernike polynomial.</span>
 
@@ -2289,7 +2285,7 @@ radial value of 1.</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    coordinates : Array</span>
-<span class="sd">        The cartesian coordinates to calcualte the Zernike polynomial upon.</span>
+<span class="sd">        The Cartesian coordinates to calculate the Zernike polynomial upon.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2321,8 +2317,9 @@ radial value of 1.</p>
 <h2 class="doc doc-heading" data-role="function" id="dLux.aberrations.Zernike.calculate_zernike"><a class="headerlink" href="#dLux.aberrations.Zernike.calculate_zernike" title="Permanent link">¤</a></h2>
 </div>
 </details>
-<p>Lets have a look at how to construct a Zernike Basis:</p>
+<p>Let's construct a Zernike Basis:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">dLux</span> <span class="k">as</span> <span class="nn">dl</span>
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="n">zernike_basis</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">ZernikeBasis</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
 </code></pre></div>

@@ -319,7 +319,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -375,7 +375,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -796,21 +796,6 @@
     <li class="md-nav__item">
       <a href="../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1879,7 +1864,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c792c526" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=5c9d81b1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1911,7 +1896,7 @@ Licensed under the Apache License, Version 2.0.
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c83992ea" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=2d05b9d1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1935,43 +1920,35 @@ Licensed under the Apache License, Version 2.0.
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">vmap</span><span class="p">,</span> <span class="n">Array</span>
-<span class="kn">from</span> <span class="nn">jax.tree_util</span> <span class="kn">import</span> <span class="n">tree_map</span><span class="p">,</span> <span class="n">tree_flatten</span>
-<span class="kn">from</span> <span class="nn">equinox</span> <span class="kn">import</span> <span class="n">tree_at</span>
 <span class="kn">from</span> <span class="nn">zodiax</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">dLux.utils</span> <span class="k">as</span> <span class="nn">dlu</span>
 <span class="kn">import</span> <span class="nn">dLux</span>
 
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;AngularOptics&quot;</span><span class="p">,</span> <span class="s2">&quot;CartesianOptics&quot;</span><span class="p">,</span> <span class="s2">&quot;FlexibleOptics&quot;</span><span class="p">,</span> 
-    <span class="s2">&quot;LayeredOptics&quot;</span><span class="p">]</span>
-
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;AngularOptics&quot;</span><span class="p">,</span> <span class="s2">&quot;CartesianOptics&quot;</span><span class="p">,</span> <span class="s2">&quot;FlexibleOptics&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;LayeredOptics&quot;</span><span class="p">]</span>
 
 <span class="c1"># Alias classes for simplified type-checking</span>
-<span class="n">OpticalLayer</span>  <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">optical_layers</span><span class="o">.</span><span class="n">OpticalLayer</span>
-<span class="n">Propagator</span>    <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">propagators</span><span class="o">.</span><span class="n">Propagator</span>
-<span class="n">Source</span>        <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">BaseSource</span>
+<span class="n">OpticalLayer</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">optical_layers</span><span class="o">.</span><span class="n">OpticalLayer</span>
+<span class="n">Propagator</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">propagators</span><span class="o">.</span><span class="n">Propagator</span>
+<span class="n">Source</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">BaseSource</span>
 </pre></div>
 <div id="cell-2" class="clipboard-copy-txt">from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
 from jax import vmap, Array
-from jax.tree_util import tree_map, tree_flatten
-from equinox import tree_at
 from zodiax import Base
 from typing import Union
 import dLux.utils as dlu
 import dLux
 
-
-__all__ = ["AngularOptics", "CartesianOptics", "FlexibleOptics", 
-    "LayeredOptics"]
-
+__all__ = ["AngularOptics", "CartesianOptics", "FlexibleOptics",
+           "LayeredOptics"]
 
 # Alias classes for simplified type-checking
-OpticalLayer  = lambda : dLux.optical_layers.OpticalLayer
-Propagator    = lambda : dLux.propagators.Propagator
-Source        = lambda : dLux.sources.BaseSource
+OpticalLayer = lambda: dLux.optical_layers.OpticalLayer
+Propagator = lambda: dLux.propagators.Propagator
+Source = lambda: dLux.sources.BaseSource
 </div>
         
         </div>
@@ -1982,7 +1959,7 @@ Source        = lambda : dLux.sources.BaseSource
 
 </div>
 </div>
-<div id="cell-id=9b9d69b3" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div id="cell-id=20b8a49d" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1994,7 +1971,7 @@ Source        = lambda : dLux.sources.BaseSource
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=281ba9e7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=5afe562b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2028,15 +2005,14 @@ Source        = lambda : dLux.sources.BaseSource
 <span class="sd">    </span>
 <span class="sd">    The abstract method is `propagate_mono(wavelength, offset, return_wf)`,</span>
 <span class="sd">    which propagates a monochromatic point source through the optics. This</span>
-<span class="sd">    is where the the actual operations on the wavefront are performed. This</span>
+<span class="sd">    is where the actual operations on the wavefront are performed. This</span>
 <span class="sd">    method must be implemented by any class that inherits from `BaseOptics`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span> <span class="n">key</span> <span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Accessor for attributes of the class to simplify zodiax paths by</span>
-<span class="sd">        searching for parameters in the attirbutes of the class.</span>
+<span class="sd">        searching for parameters in the attributes of the class.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2053,21 +2029,20 @@ Source        = lambda : dLux.sources.BaseSource
                 <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no attribute &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-
+                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">propagate_mono</span><span class="p">(</span>
-        <span class="bp">self</span>       <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
-        <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-        <span class="n">offset</span>     <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-        <span class="n">return_wf</span>  <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+            <span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+            <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+            <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Propagates a monochromatic point source through the optics.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        wavelength : Array, meters</span>
+<span class="sd">        wavelength : Array, metres</span>
 <span class="sd">            The wavelength of the wavefront to propagate through the optical</span>
 <span class="sd">            layers.</span>
 <span class="sd">        offset : Array, radians, = np.zeros(2)</span>
@@ -2086,17 +2061,16 @@ Source        = lambda : dLux.sources.BaseSource
 <span class="sd">            return_wf is True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-
-    <span class="k">def</span> <span class="nf">propagate</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span> 
-                  <span class="n">wavelengths</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                  <span class="n">offset</span>      <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-                  <span class="n">weights</span>     <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">propagate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+                  <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                  <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                  <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Propagates a Polychromatic point source through the optics.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        wavelengths : Array, meters</span>
+<span class="sd">        wavelengths : Array, metres</span>
 <span class="sd">            The wavelengths of the wavefronts to propagate through the optics.</span>
 <span class="sd">        offset : Array, radians, = np.zeros(2)</span>
 <span class="sd">            The (x, y) offset from the optical axis of the source. Default</span>
@@ -2113,33 +2087,32 @@ Source        = lambda : dLux.sources.BaseSource
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
 
         <span class="c1"># Check wavelengths and weights</span>
         <span class="k">if</span> <span class="n">weights</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wavelengths and weights must have the &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;same shape, got </span><span class="si">{</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> &quot;</span>
-                <span class="s2">&quot;respectively.&quot;</span><span class="p">)</span>
-        
+                             <span class="sa">f</span><span class="s2">&quot;same shape, got </span><span class="si">{</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> &quot;</span>
+                             <span class="s2">&quot;respectively.&quot;</span><span class="p">)</span>
+
         <span class="c1"># Check offset</span>
         <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">Array</span><span class="p">)</span> \
             <span class="k">else</span> <span class="n">offset</span>
         <span class="k">if</span> <span class="n">offset</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;offset must be a 2-element array, got &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;shape </span><span class="si">{</span><span class="n">offset</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                             <span class="sa">f</span><span class="s2">&quot;shape </span><span class="si">{</span><span class="n">offset</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Caluculate</span>
+        <span class="c1"># Calculate</span>
         <span class="n">propagator</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">propagate_mono</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
         <span class="n">psfs</span> <span class="o">=</span> <span class="n">propagator</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">psfs</span> <span class="o">*=</span> <span class="n">weights</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">psfs</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span>    <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
-              <span class="n">sources</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Source</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+              <span class="n">sources</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Source</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Models the input sources through the optics. The sources input can be</span>
 <span class="sd">        a single Source object, or a list of Source objects.</span>
@@ -2156,12 +2129,12 @@ Source        = lambda : dLux.sources.BaseSource
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="n">sources</span><span class="p">]</span>
-        
+
         <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">Source</span><span class="p">()):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;All input sources must be a Source &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;object. Got type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-        
+                                <span class="sa">f</span><span class="s2">&quot;object. Got type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">source</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 
@@ -2175,43 +2148,41 @@ Source        = lambda : dLux.sources.BaseSource
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wf_npixels : int</span>
-<span class="sd">        The nuber of pixels of the initial wavefront to propagte.</span>
-<span class="sd">    diameter : Array, meters</span>
-<span class="sd">        The diameter of the initial wavefront to propagte.</span>
+<span class="sd">        The nuber of pixels of the initial wavefront to propagate.</span>
+<span class="sd">    diameter : Array, metres</span>
+<span class="sd">        The diameter of the initial wavefront to propagate.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">wf_npixels</span>  <span class="p">:</span> <span class="nb">int</span>
-    <span class="n">diameter</span>    <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">wf_npixels</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">diameter</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span> 
-                 <span class="n">wf_npixels</span> <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">diameter</span>   <span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+                 <span class="n">wf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wf_npixels : int</span>
 <span class="sd">            The number of pixels representing the wavefront.</span>
-<span class="sd">        diameter : Array, meters</span>
-<span class="sd">            The diameter of the initial wavefront to propagte.</span>
+<span class="sd">        diameter : Array, metres</span>
+<span class="sd">            The diameter of the initial wavefront to propagate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wf_npixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">wf_npixels</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">diameter</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">diameter</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-
     <span class="k">def</span> <span class="nf">_construct_wavefront</span><span class="p">(</span>
-        <span class="bp">self</span>       <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
-        <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-        <span class="n">offset</span>     <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+            <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+            <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs the appropriate tilted wavefront object for the optical</span>
 <span class="sd">        system.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        wavelength : Array, meters</span>
+<span class="sd">        wavelength : Array, metres</span>
 <span class="sd">            The wavelength of the wavefront to propagate through the optics.</span>
 <span class="sd">        offset : Array, radians, = np.zeros(2)</span>
 <span class="sd">            The (x, y) offset from the optical axis of the source. Default</span>
@@ -2241,15 +2212,14 @@ Source        = lambda : dLux.sources.BaseSource
 <span class="sd">    psf_oversample : float</span>
 <span class="sd">        The oversampling factor of the final PSF.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">psf_npixels</span>     <span class="p">:</span> <span class="nb">int</span>
-    <span class="n">psf_oversample</span>  <span class="p">:</span> <span class="nb">float</span>
-    <span class="n">psf_pixel_scale</span> <span class="p">:</span> <span class="nb">float</span>
+    <span class="n">psf_npixels</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">psf_oversample</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">psf_pixel_scale</span><span class="p">:</span> <span class="nb">float</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>            <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
-                 <span class="n">psf_npixels</span>     <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">psf_pixel_scale</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">psf_oversample</span>  <span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+                 <span class="n">psf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">psf_pixel_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">psf_oversample</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
@@ -2265,7 +2235,6 @@ Source        = lambda : dLux.sources.BaseSource
         <span class="bp">self</span><span class="o">.</span><span class="n">psf_oversample</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">psf_oversample</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">psf_pixel_scale</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">true_pixel_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2288,15 +2257,14 @@ Source        = lambda : dLux.sources.BaseSource
 <span class="sd">        The mask to apply to the wavefront. Can be an Array or an OpticalLayer.</span>
 <span class="sd">        If an Array it is treated as a transmissive mask.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">aperture</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span>
-    <span class="n">mask</span>     <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span>
-
+    <span class="n">aperture</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span>     <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span> 
-        <span class="n">aperture</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()],</span>
-        <span class="n">mask</span>     <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+            <span class="n">aperture</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()],</span>
+            <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2309,29 +2277,28 @@ Source        = lambda : dLux.sources.BaseSource
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">aperture</span><span class="p">,</span> <span class="p">(</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">())):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;aperture must be an Array or &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;OpticalLayer, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">aperture</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                            <span class="sa">f</span><span class="s2">&quot;OpticalLayer, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">aperture</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span> <span class="o">=</span> <span class="n">aperture</span>
 
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">(</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">())):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;mask must be an Array or &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;OpticalLayer, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">aperture</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                                <span class="sa">f</span><span class="s2">&quot;OpticalLayer, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">aperture</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-
     <span class="k">def</span> <span class="nf">_apply_aperture</span><span class="p">(</span>
-        <span class="bp">self</span>       <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span> 
-        <span class="n">wavelength</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
-        <span class="n">offset</span>     <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">():</span>
+            <span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+            <span class="n">wavelength</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">():</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs the wavefront, applies the aperture and mask, and returns</span>
 <span class="sd">        the wavefront.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        wavelength : Array, meters</span>
+<span class="sd">        wavelength : Array, metres</span>
 <span class="sd">            The wavelength of the wavefront to propagate through the optics.</span>
 <span class="sd">        offset : Array, radians</span>
 <span class="sd">            The (x, y) offset from the optical axis of the source.</span>
@@ -2356,15 +2323,14 @@ Source        = lambda : dLux.sources.BaseSource
     
     The abstract method is `propagate_mono(wavelength, offset, return_wf)`,
     which propagates a monochromatic point source through the optics. This
-    is where the the actual operations on the wavefront are performed. This
+    is where the actual operations on the wavefront are performed. This
     method must be implemented by any class that inherits from `BaseOptics`.
     """
 
-
-    def __getattr__(self : BaseOptics, key : str) -> Any:
+    def __getattr__(self: BaseOptics, key: str) -> Any:
         """
         Accessor for attributes of the class to simplify zodiax paths by
-        searching for parameters in the attirbutes of the class.
+        searching for parameters in the attributes of the class.
 
         Parameters
         ----------
@@ -2381,21 +2347,20 @@ Source        = lambda : dLux.sources.BaseSource
                 return getattr(attribute, key)
         else:
             raise AttributeError(f"{self.__class__.__name__} has no attribute "
-            f"{key}.")
-
+                                 f"{key}.")
 
     @abstractmethod
     def propagate_mono(
-        self       : BaseOptics,
-        wavelength : Array,
-        offset     : Array = np.zeros(2),
-        return_wf  : bool = False) -> Array: # pragma: no cover
+            self: BaseOptics,
+            wavelength: Array,
+            offset: Array = np.zeros(2),
+            return_wf: bool = False) -> Array:  # pragma: no cover
         """
         Propagates a monochromatic point source through the optics.
 
         Parameters
         ----------
-        wavelength : Array, meters
+        wavelength : Array, metres
             The wavelength of the wavefront to propagate through the optical
             layers.
         offset : Array, radians, = np.zeros(2)
@@ -2414,17 +2379,16 @@ Source        = lambda : dLux.sources.BaseSource
             return_wf is True.
         """
 
-
-    def propagate(self        : BaseOptics, 
-                  wavelengths : Array,
-                  offset      : Array = np.zeros(2),
-                  weights     : Array = None) -> Array:
+    def propagate(self: BaseOptics,
+                  wavelengths: Array,
+                  offset: Array = np.zeros(2),
+                  weights: Array = None) -> Array:
         """
         Propagates a Polychromatic point source through the optics.
 
         Parameters
         ----------
-        wavelengths : Array, meters
+        wavelengths : Array, metres
             The wavelengths of the wavefronts to propagate through the optics.
         offset : Array, radians, = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
@@ -2441,33 +2405,32 @@ Source        = lambda : dLux.sources.BaseSource
         """
         wavelengths = np.atleast_1d(wavelengths)
         if weights is None:
-            weights = np.ones_like(wavelengths)/len(wavelengths)
+            weights = np.ones_like(wavelengths) / len(wavelengths)
         else:
             weights = np.atleast_1d(weights)
 
         # Check wavelengths and weights
         if weights.shape != wavelengths.shape:
             raise ValueError("wavelengths and weights must have the "
-                f"same shape, got {wavelengths.shape} and {weights.shape} "
-                "respectively.")
-        
+                             f"same shape, got {wavelengths.shape} and {weights.shape} "
+                             "respectively.")
+
         # Check offset
         offset = np.array(offset) if not isinstance(offset, Array) \
             else offset
         if offset.shape != (2,):
             raise ValueError("offset must be a 2-element array, got "
-                f"shape {offset.shape}.")
+                             f"shape {offset.shape}.")
 
-        # Caluculate
+        # Calculate
         propagator = vmap(self.propagate_mono, in_axes=(0, None))
         psfs = propagator(wavelengths, offset)
         if weights is not None:
             psfs *= weights[:, None, None]
         return psfs.sum(0)
 
-
-    def model(self    : BaseOptics,
-              sources : Union[list, Source]) -> Array:
+    def model(self: BaseOptics,
+              sources: Union[list, Source]) -> Array:
         """
         Models the input sources through the optics. The sources input can be
         a single Source object, or a list of Source objects.
@@ -2484,12 +2447,12 @@ Source        = lambda : dLux.sources.BaseSource
         """
         if not isinstance(sources, list):
             sources = [sources]
-        
+
         for source in sources:
             if not isinstance(source, Source()):
                 raise TypeError("All input sources must be a Source "
-                    f"object. Got type: {type(sources)})")
-        
+                                f"object. Got type: {type(sources)})")
+
         return np.array([source.model(self) for source in sources]).sum(0)
 
 
@@ -2503,43 +2466,41 @@ class SimpleOptics(BaseOptics):
     Attributes
     ----------
     wf_npixels : int
-        The nuber of pixels of the initial wavefront to propagte.
-    diameter : Array, meters
-        The diameter of the initial wavefront to propagte.
+        The nuber of pixels of the initial wavefront to propagate.
+    diameter : Array, metres
+        The diameter of the initial wavefront to propagate.
     """
-    wf_npixels  : int
-    diameter    : Array
+    wf_npixels: int
+    diameter: Array
 
-
-    def __init__(self       : BaseOptics, 
-                 wf_npixels : int,
-                 diameter   : float,
+    def __init__(self: BaseOptics,
+                 wf_npixels: int,
+                 diameter: float,
                  **kwargs):
         """
         Parameters
         ----------
         wf_npixels : int
             The number of pixels representing the wavefront.
-        diameter : Array, meters
-            The diameter of the initial wavefront to propagte.
+        diameter : Array, metres
+            The diameter of the initial wavefront to propagate.
         """
         self.wf_npixels = int(wf_npixels)
         self.diameter = float(diameter)
 
         super().__init__(**kwargs)
 
-
     def _construct_wavefront(
-        self       : BaseOptics,
-        wavelength : Array,
-        offset     : Array = np.zeros(2)) -> Array:
+            self: BaseOptics,
+            wavelength: Array,
+            offset: Array = np.zeros(2)) -> Array:
         """
         Constructs the appropriate tilted wavefront object for the optical
         system.
 
         Parameters
         ----------
-        wavelength : Array, meters
+        wavelength : Array, metres
             The wavelength of the wavefront to propagate through the optics.
         offset : Array, radians, = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
@@ -2569,15 +2530,14 @@ class NonPropagatorOptics(BaseOptics):
     psf_oversample : float
         The oversampling factor of the final PSF.
     """
-    psf_npixels     : int
-    psf_oversample  : float
-    psf_pixel_scale : float
+    psf_npixels: int
+    psf_oversample: float
+    psf_pixel_scale: float
 
-
-    def __init__(self            : BaseOptics,
-                 psf_npixels     : int,
-                 psf_pixel_scale : float,
-                 psf_oversample  : float = 1.,
+    def __init__(self: BaseOptics,
+                 psf_npixels: int,
+                 psf_pixel_scale: float,
+                 psf_oversample: float = 1.,
                  **kwargs):
         """
         Parameters
@@ -2593,7 +2553,6 @@ class NonPropagatorOptics(BaseOptics):
         self.psf_oversample = float(psf_oversample)
         self.psf_pixel_scale = float(psf_pixel_scale)
         super().__init__(**kwargs)
-
 
     @property
     def true_pixel_scale(self):
@@ -2616,15 +2575,14 @@ class AperturedOptics(BaseOptics):
         The mask to apply to the wavefront. Can be an Array or an OpticalLayer.
         If an Array it is treated as a transmissive mask.
     """
-    aperture : Union[Array, OpticalLayer()]
-    mask     : Union[Array, OpticalLayer()]
-
+    aperture: Union[Array, OpticalLayer()]
+    mask: Union[Array, OpticalLayer()]
 
     def __init__(
-        self     : BaseOptics, 
-        aperture : Union[Array, OpticalLayer()],
-        mask     : Union[Array, OpticalLayer()] = None,
-        **kwargs):
+            self: BaseOptics,
+            aperture: Union[Array, OpticalLayer()],
+            mask: Union[Array, OpticalLayer()] = None,
+            **kwargs):
         """
         Parameters
         ----------
@@ -2637,29 +2595,28 @@ class AperturedOptics(BaseOptics):
         """
         if not isinstance(aperture, (Array, OpticalLayer())):
             raise TypeError("aperture must be an Array or "
-                f"OpticalLayer, got {type(aperture)}.")
+                            f"OpticalLayer, got {type(aperture)}.")
         self.aperture = aperture
 
         if mask is not None:
             if not isinstance(mask, (Array, OpticalLayer())):
                 raise TypeError("mask must be an Array or "
-                    f"OpticalLayer, got {type(aperture)}.")
+                                f"OpticalLayer, got {type(aperture)}.")
         self.mask = mask
 
         super().__init__(**kwargs)
 
-
     def _apply_aperture(
-        self       : BaseOptics, 
-        wavelength : float, 
-        offset     : Array) -> Wavefront():
+            self: BaseOptics,
+            wavelength: float,
+            offset: Array) -> Wavefront():
         """
         Constructs the wavefront, applies the aperture and mask, and returns
         the wavefront.
 
         Parameters
         ----------
-        wavelength : Array, meters
+        wavelength : Array, metres
             The wavelength of the wavefront to propagate through the optics.
         offset : Array, radians
             The (x, y) offset from the optical axis of the source.
@@ -2679,7 +2636,7 @@ class AperturedOptics(BaseOptics):
 
 </div>
 </div>
-<div id="cell-id=45e44508" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div id="cell-id=61fea27c" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2691,7 +2648,7 @@ class AperturedOptics(BaseOptics):
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=597210eb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b81863e8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2720,8 +2677,8 @@ class AperturedOptics(BaseOptics):
 <span class="sd">    ----------</span>
 <span class="sd">    wf_npixels : int</span>
 <span class="sd">        The number of pixels representing the wavefront.</span>
-<span class="sd">    diameter : Array, meters</span>
-<span class="sd">        The diameter of the initial wavefront to propagte.</span>
+<span class="sd">    diameter : Array, metres</span>
+<span class="sd">        The diameter of the initial wavefront to propagate.</span>
 <span class="sd">    aperture : Union[Array, OpticalLayer]</span>
 <span class="sd">        The aperture of the system. Can be an Array or a OpticalLayer.</span>
 <span class="sd">    mask : Union[Array, OpticalLayer]</span>
@@ -2735,22 +2692,21 @@ class AperturedOptics(BaseOptics):
 <span class="sd">        The number of pixels of the final PSF.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>            <span class="p">:</span> <span class="n">AngularOptics</span><span class="p">,</span> 
-                 <span class="n">wf_npixels</span>      <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">diameter</span>        <span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">aperture</span>        <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()],</span>
-                 <span class="n">psf_npixels</span>     <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">psf_pixel_scale</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">psf_oversample</span>  <span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                 <span class="n">mask</span>            <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">AngularOptics</span><span class="p">,</span>
+                 <span class="n">wf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">aperture</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()],</span>
+                 <span class="n">psf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">psf_pixel_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">psf_oversample</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wf_npixels : int</span>
 <span class="sd">            The number of pixels representing the wavefront.</span>
-<span class="sd">        diameter : Array, meters</span>
-<span class="sd">            The diameter of the initial wavefront to propagte.</span>
+<span class="sd">        diameter : Array, metres</span>
+<span class="sd">            The diameter of the initial wavefront to propagate.</span>
 <span class="sd">        aperture : Union[Array, OpticalLayer]</span>
 <span class="sd">            The aperture of the system. Can be an Array or a OpticalLayer.</span>
 <span class="sd">        psf_npixels : int</span>
@@ -2763,21 +2719,20 @@ class AperturedOptics(BaseOptics):
 <span class="sd">            The mask to apply to the wavefront. Can be an Array or an</span>
 <span class="sd">            OpticalLayer. If an Array it is treated as a transmissive mask.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wf_npixels</span><span class="o">=</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">,</span> 
-            <span class="n">aperture</span><span class="o">=</span><span class="n">aperture</span><span class="p">,</span> <span class="n">psf_npixels</span><span class="o">=</span><span class="n">psf_npixels</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-            <span class="n">psf_pixel_scale</span><span class="o">=</span><span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="o">=</span><span class="n">psf_oversample</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wf_npixels</span><span class="o">=</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">,</span>
+                         <span class="n">aperture</span><span class="o">=</span><span class="n">aperture</span><span class="p">,</span> <span class="n">psf_npixels</span><span class="o">=</span><span class="n">psf_npixels</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+                         <span class="n">psf_pixel_scale</span><span class="o">=</span><span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="o">=</span><span class="n">psf_oversample</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">propagate_mono</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">AngularOptics</span><span class="p">,</span>
-                       <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                       <span class="n">offset</span>     <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-                       <span class="n">return_wf</span>  <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">propagate_mono</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">AngularOptics</span><span class="p">,</span>
+                       <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                       <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                       <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Propagates a monochromatic point source through the optical layers.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        wavelength : Array, meters</span>
+<span class="sd">        wavelength : Array, metres</span>
 <span class="sd">            The wavelength of the wavefront to propagate through the optical</span>
 <span class="sd">            layers.</span>
 <span class="sd">        offset : Array, radians, = np.zeros(2)</span>
@@ -2817,9 +2772,9 @@ class AperturedOptics(BaseOptics):
 <span class="sd">    ----------</span>
 <span class="sd">    wf_npixels : int</span>
 <span class="sd">        The number of pixels representing the wavefront.</span>
-<span class="sd">    diameter : Array, meters</span>
-<span class="sd">        The diameter of the initial wavefront to propagte.</span>
-<span class="sd">    focal_length : float, meters</span>
+<span class="sd">    diameter : Array, metres</span>
+<span class="sd">        The diameter of the initial wavefront to propagate.</span>
+<span class="sd">    focal_length : float, metres</span>
 <span class="sd">        The focal length of the optical system.</span>
 <span class="sd">    aperture : Union[Array, OpticalLayer]</span>
 <span class="sd">        The aperture of the system. Can be an Array or a OpticalLayer.</span>
@@ -2833,28 +2788,27 @@ class AperturedOptics(BaseOptics):
 <span class="sd">    psf_npixels : int</span>
 <span class="sd">        The number of pixels of the final PSF.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">focal_length</span> <span class="p">:</span> <span class="kc">None</span>
+    <span class="n">focal_length</span><span class="p">:</span> <span class="kc">None</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>            <span class="p">:</span> <span class="n">CartesianOptics</span><span class="p">,</span>
-                 <span class="n">wf_npixels</span>      <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">diameter</span>        <span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">aperture</span>        <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()],</span>
-                 <span class="n">focal_length</span>    <span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">psf_npixels</span>     <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">psf_pixel_scale</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">psf_oversample</span>  <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                 <span class="n">mask</span>            <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">CartesianOptics</span><span class="p">,</span>
+                 <span class="n">wf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">aperture</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()],</span>
+                 <span class="n">focal_length</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">psf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">psf_pixel_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">psf_oversample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wf_npixels : int</span>
 <span class="sd">            The number of pixels representing the wavefront.</span>
-<span class="sd">        diameter : Array, meters</span>
-<span class="sd">            The diameter of the initial wavefront to propagte.</span>
+<span class="sd">        diameter : Array, metres</span>
+<span class="sd">            The diameter of the initial wavefront to propagate.</span>
 <span class="sd">        aperture : Union[Array, OpticalLayer]</span>
 <span class="sd">            The aperture of the system. Can be an Array or a OpticalLayer.</span>
-<span class="sd">        focal_length : float, meters</span>
+<span class="sd">        focal_length : float, metres</span>
 <span class="sd">            The focal length of the optical system.</span>
 <span class="sd">        psf_npixels : int</span>
 <span class="sd">            The number of pixels of the final PSF.</span>
@@ -2869,21 +2823,20 @@ class AperturedOptics(BaseOptics):
         <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">focal_length</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wf_npixels</span><span class="o">=</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">,</span>
-            <span class="n">aperture</span><span class="o">=</span><span class="n">aperture</span><span class="p">,</span> <span class="n">psf_npixels</span><span class="o">=</span><span class="n">psf_npixels</span><span class="p">,</span>
-            <span class="n">psf_pixel_scale</span><span class="o">=</span><span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="o">=</span><span class="n">psf_oversample</span><span class="p">,</span>
-            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
+                         <span class="n">aperture</span><span class="o">=</span><span class="n">aperture</span><span class="p">,</span> <span class="n">psf_npixels</span><span class="o">=</span><span class="n">psf_npixels</span><span class="p">,</span>
+                         <span class="n">psf_pixel_scale</span><span class="o">=</span><span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="o">=</span><span class="n">psf_oversample</span><span class="p">,</span>
+                         <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">propagate_mono</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">SimpleToliman</span><span class="p">,</span>
-                       <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                       <span class="n">offset</span>     <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-                       <span class="n">return_wf</span>  <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">propagate_mono</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">SimpleToliman</span><span class="p">,</span>
+                       <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                       <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                       <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Propagates a monochromatic point source through the optical layers.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        wavelength : Array, meters</span>
+<span class="sd">        wavelength : Array, metres</span>
 <span class="sd">            The wavelength of the wavefront to propagate through the optical</span>
 <span class="sd">            layers.</span>
 <span class="sd">        offset : Array, radians, = np.zeros(2)</span>
@@ -2905,8 +2858,8 @@ class AperturedOptics(BaseOptics):
 
         <span class="c1"># Propagate</span>
         <span class="n">pixel_scale</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_pixel_scale</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">psf_oversample</span>
-        <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">psf_npixels</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">,</span> 
-            <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">psf_npixels</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">,</span>
+                    <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
 
         <span class="c1"># Return PSF or Wavefront</span>
         <span class="k">if</span> <span class="n">return_wf</span><span class="p">:</span>
@@ -2924,8 +2877,8 @@ class AperturedOptics(BaseOptics):
 <span class="sd">    ----------</span>
 <span class="sd">    wf_npixels : int</span>
 <span class="sd">        The number of pixels representing the wavefront.</span>
-<span class="sd">    diameter : Array, meters</span>
-<span class="sd">        The diameter of the initial wavefront to propagte.</span>
+<span class="sd">    diameter : Array, metres</span>
+<span class="sd">        The diameter of the initial wavefront to propagate.</span>
 <span class="sd">    aperture : Union[Array, OpticalLayer]</span>
 <span class="sd">        The aperture of the system. Can be an Array or a OpticalLayer.</span>
 <span class="sd">    mask : Union[Array, OpticalLayer]</span>
@@ -2934,21 +2887,21 @@ class AperturedOptics(BaseOptics):
 <span class="sd">    propagator : Propagator</span>
 <span class="sd">        The propagator to use to propagate the wavefront through the optics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">propagator</span> <span class="p">:</span> <span class="kc">None</span>
+    <span class="n">propagator</span><span class="p">:</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span> 
-                 <span class="n">wf_npixels</span> <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">diameter</span> <span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">aperture</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()],</span>
-                 <span class="n">propagator</span> <span class="p">:</span> <span class="n">Propagator</span><span class="p">(),</span>
-                 <span class="n">mask</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+                 <span class="n">wf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">aperture</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()],</span>
+                 <span class="n">propagator</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">(),</span>
+                 <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">()]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        wf_npixels : int</span>
 <span class="sd">            The number of pixels representing the wavefront.</span>
-<span class="sd">        diameter : Array, meters</span>
-<span class="sd">            The diameter of the initial wavefront to propagte.</span>
+<span class="sd">        diameter : Array, metres</span>
+<span class="sd">            The diameter of the initial wavefront to propagate.</span>
 <span class="sd">        aperture : Union[Array, OpticalLayer]</span>
 <span class="sd">            The aperture of the system. Can be an Array or a OpticalLayer.</span>
 <span class="sd">        propagator : Propagator</span>
@@ -2959,11 +2912,10 @@ class AperturedOptics(BaseOptics):
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">propagator</span><span class="p">,</span> <span class="n">Propagator</span><span class="p">()):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;propagator must be a Propagator object, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">propagator</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                            <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">propagator</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span> <span class="o">=</span> <span class="n">propagator</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wf_npixels</span><span class="o">=</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">,</span>
-            <span class="n">aperture</span><span class="o">=</span><span class="n">aperture</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
-
+                         <span class="n">aperture</span><span class="o">=</span><span class="n">aperture</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">true_pixel_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2971,18 +2923,18 @@ class AperturedOptics(BaseOptics):
 <span class="sd">        Returns the true pixel scale of the PSF.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">pixel_scale</span>
-    
+
     <span class="k">def</span> <span class="nf">_construct_wavefront</span><span class="p">(</span>
-        <span class="bp">self</span>       <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
-        <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-        <span class="n">offset</span>     <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+            <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+            <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs the appropriate tilted wavefront object for the optical</span>
 <span class="sd">        system.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        wavelength : Array, meters</span>
+<span class="sd">        wavelength : Array, metres</span>
 <span class="sd">            The wavelength of the wavefront to propagate through the optics.</span>
 <span class="sd">        offset : Array, radians, = np.zeros(2)</span>
 <span class="sd">            The (x, y) offset from the optical axis of the source. Default</span>
@@ -2994,23 +2946,22 @@ class AperturedOptics(BaseOptics):
 <span class="sd">            The wavefront object to propagate through the optics.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="p">,</span> <span class="n">dLux</span><span class="o">.</span><span class="n">propagators</span><span class="o">.</span><span class="n">FarFieldFresnel</span><span class="p">):</span>
-            <span class="n">wf</span> <span class="o">=</span> <span class="n">dLux</span><span class="o">.</span><span class="n">FresnelWavefront</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diameter</span><span class="p">,</span> 
-                <span class="n">wavelength</span><span class="p">)</span>
+            <span class="n">wf</span> <span class="o">=</span> <span class="n">dLux</span><span class="o">.</span><span class="n">FresnelWavefront</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diameter</span><span class="p">,</span>
+                                       <span class="n">wavelength</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">wf</span> <span class="o">=</span> <span class="n">dLux</span><span class="o">.</span><span class="n">Wavefront</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diameter</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">wf</span><span class="o">.</span><span class="n">tilt</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">propagate_mono</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">SimpleToliman</span><span class="p">,</span>
-                       <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                       <span class="n">offset</span>     <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-                       <span class="n">return_wf</span>  <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">propagate_mono</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">SimpleToliman</span><span class="p">,</span>
+                       <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                       <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                       <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Propagates a monochromatic point source through the optical layers.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        wavelength : Array, meters</span>
+<span class="sd">        wavelength : Array, metres</span>
 <span class="sd">            The wavelength of the wavefront to propagate through the optical</span>
 <span class="sd">            layers.</span>
 <span class="sd">        offset : Array, radians, = np.zeros(2)</span>
@@ -3045,20 +2996,19 @@ class AperturedOptics(BaseOptics):
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    wf_npixels : int</span>
-<span class="sd">        The size of the initial wavefront to propagte.</span>
+<span class="sd">        The size of the initial wavefront to propagate.</span>
 <span class="sd">    diameter : Array</span>
-<span class="sd">        The diameter of the wavefront to model through the system in meters.</span>
+<span class="sd">        The diameter of the wavefront to model through the system in metres.</span>
 <span class="sd">    layers : OrderedDict</span>
 <span class="sd">        A collections.OrderedDict of &#39;layers&#39; that define the transformations</span>
 <span class="sd">        and operations upon some input wavefront through an optical system.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">layers</span> <span class="p">:</span> <span class="n">OrderedDict</span>
+    <span class="n">layers</span><span class="p">:</span> <span class="n">OrderedDict</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">Optics</span><span class="p">,</span> 
-                 <span class="n">wf_npixels</span> <span class="p">:</span> <span class="nb">int</span><span class="p">,</span> 
-                 <span class="n">diameter</span>   <span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
-                 <span class="n">layers</span>     <span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optics</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Optics</span><span class="p">,</span>
+                 <span class="n">wf_npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optics</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Optics class.</span>
 
@@ -3068,19 +3018,18 @@ class AperturedOptics(BaseOptics):
 <span class="sd">            The number of pixels to use when propagating the wavefront through</span>
 <span class="sd">            the optical system.</span>
 <span class="sd">        diameter : float</span>
-<span class="sd">            The diameter of the wavefront to model through the system in meters.</span>
+<span class="sd">            The diameter of the wavefront to model through the system in metres.</span>
 <span class="sd">        layers : list</span>
 <span class="sd">            A list of dLux &#39;layers&#39; that define the transformations and</span>
 <span class="sd">            operations upon some input wavefront through an optical system.</span>
-<span class="sd">            The entried can either be dLux OtpicalLayers, or tuples of the</span>
+<span class="sd">            The entries can either be dLux OpticalLayers, or tuples of the</span>
 <span class="sd">            form (OpticalLayer, key), with the key being used as the dictionary</span>
 <span class="sd">            key for the layer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wf_npixels</span><span class="o">=</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">())</span>
 
-
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Optics</span><span class="p">,</span> <span class="n">key</span> <span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Optics</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method designed to allow accessing of the various items within</span>
 <span class="sd">        the layers dictionary of this class via the &#39;class.attribute&#39; method.</span>
@@ -3099,7 +3048,6 @@ class AperturedOptics(BaseOptics):
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">true_pixel_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -3111,18 +3059,17 @@ class AperturedOptics(BaseOptics):
                 <span class="n">propagator</span> <span class="o">=</span> <span class="n">layer</span>
         <span class="k">return</span> <span class="n">propagator</span><span class="o">.</span><span class="n">pixel_scale</span>
 
-
     <span class="k">def</span> <span class="nf">propagate_mono</span><span class="p">(</span>
-        <span class="bp">self</span>       <span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
-        <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-        <span class="n">offset</span>     <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-        <span class="n">return_wf</span>  <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span>
+            <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+            <span class="n">offset</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">return_wf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Propagates a monochromatic point source through the optical layers.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        wavelength : Array, meters</span>
+<span class="sd">        wavelength : Array, metres</span>
 <span class="sd">            The wavelength of the wavefront to propagate through the optical</span>
 <span class="sd">            layers.</span>
 <span class="sd">        offset : Array, radians, = np.zeros(2)</span>
@@ -3143,7 +3090,7 @@ class AperturedOptics(BaseOptics):
         <span class="n">wavefront</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_wavefront</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
             <span class="n">wavefront</span> <span class="o">*=</span> <span class="n">layer</span>
-        
+
         <span class="k">if</span> <span class="n">return_wf</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">wavefront</span>
         <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">psf</span>
@@ -3157,8 +3104,8 @@ class AperturedOptics(BaseOptics):
     ----------
     wf_npixels : int
         The number of pixels representing the wavefront.
-    diameter : Array, meters
-        The diameter of the initial wavefront to propagte.
+    diameter : Array, metres
+        The diameter of the initial wavefront to propagate.
     aperture : Union[Array, OpticalLayer]
         The aperture of the system. Can be an Array or a OpticalLayer.
     mask : Union[Array, OpticalLayer]
@@ -3172,22 +3119,21 @@ class AperturedOptics(BaseOptics):
         The number of pixels of the final PSF.
     """
 
-
-    def __init__(self            : AngularOptics, 
-                 wf_npixels      : int,
-                 diameter        : float,
-                 aperture        : Union[Array, OpticalLayer()],
-                 psf_npixels     : int,
-                 psf_pixel_scale : float,
-                 psf_oversample  : float = 1,
-                 mask            : Union[Array, OpticalLayer()] = None):
+    def __init__(self: AngularOptics,
+                 wf_npixels: int,
+                 diameter: float,
+                 aperture: Union[Array, OpticalLayer()],
+                 psf_npixels: int,
+                 psf_pixel_scale: float,
+                 psf_oversample: float = 1,
+                 mask: Union[Array, OpticalLayer()] = None):
         """
         Parameters
         ----------
         wf_npixels : int
             The number of pixels representing the wavefront.
-        diameter : Array, meters
-            The diameter of the initial wavefront to propagte.
+        diameter : Array, metres
+            The diameter of the initial wavefront to propagate.
         aperture : Union[Array, OpticalLayer]
             The aperture of the system. Can be an Array or a OpticalLayer.
         psf_npixels : int
@@ -3200,21 +3146,20 @@ class AperturedOptics(BaseOptics):
             The mask to apply to the wavefront. Can be an Array or an
             OpticalLayer. If an Array it is treated as a transmissive mask.
         """
-        super().__init__(wf_npixels=wf_npixels, diameter=diameter, 
-            aperture=aperture, psf_npixels=psf_npixels, mask=mask,
-            psf_pixel_scale=psf_pixel_scale, psf_oversample=psf_oversample)
+        super().__init__(wf_npixels=wf_npixels, diameter=diameter,
+                         aperture=aperture, psf_npixels=psf_npixels, mask=mask,
+                         psf_pixel_scale=psf_pixel_scale, psf_oversample=psf_oversample)
 
-
-    def propagate_mono(self       : AngularOptics,
-                       wavelength : Array,
-                       offset     : Array = np.zeros(2),
-                       return_wf  : bool = False) -> Array:
+    def propagate_mono(self: AngularOptics,
+                       wavelength: Array,
+                       offset: Array = np.zeros(2),
+                       return_wf: bool = False) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
 
         Parameters
         ----------
-        wavelength : Array, meters
+        wavelength : Array, metres
             The wavelength of the wavefront to propagate through the optical
             layers.
         offset : Array, radians, = np.zeros(2)
@@ -3254,9 +3199,9 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
     ----------
     wf_npixels : int
         The number of pixels representing the wavefront.
-    diameter : Array, meters
-        The diameter of the initial wavefront to propagte.
-    focal_length : float, meters
+    diameter : Array, metres
+        The diameter of the initial wavefront to propagate.
+    focal_length : float, metres
         The focal length of the optical system.
     aperture : Union[Array, OpticalLayer]
         The aperture of the system. Can be an Array or a OpticalLayer.
@@ -3270,28 +3215,27 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
     psf_npixels : int
         The number of pixels of the final PSF.
     """
-    focal_length : None
+    focal_length: None
 
-
-    def __init__(self            : CartesianOptics,
-                 wf_npixels      : int,
-                 diameter        : float,
-                 aperture        : Union[Array, OpticalLayer()],
-                 focal_length    : float,
-                 psf_npixels     : int,
-                 psf_pixel_scale : float,
-                 psf_oversample  : int = 1,
-                 mask            : Union[Array, OpticalLayer()] = None):
+    def __init__(self: CartesianOptics,
+                 wf_npixels: int,
+                 diameter: float,
+                 aperture: Union[Array, OpticalLayer()],
+                 focal_length: float,
+                 psf_npixels: int,
+                 psf_pixel_scale: float,
+                 psf_oversample: int = 1,
+                 mask: Union[Array, OpticalLayer()] = None):
         """
         Parameters
         ----------
         wf_npixels : int
             The number of pixels representing the wavefront.
-        diameter : Array, meters
-            The diameter of the initial wavefront to propagte.
+        diameter : Array, metres
+            The diameter of the initial wavefront to propagate.
         aperture : Union[Array, OpticalLayer]
             The aperture of the system. Can be an Array or a OpticalLayer.
-        focal_length : float, meters
+        focal_length : float, metres
             The focal length of the optical system.
         psf_npixels : int
             The number of pixels of the final PSF.
@@ -3306,21 +3250,20 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
         self.focal_length = float(focal_length)
 
         super().__init__(wf_npixels=wf_npixels, diameter=diameter,
-            aperture=aperture, psf_npixels=psf_npixels,
-            psf_pixel_scale=psf_pixel_scale, psf_oversample=psf_oversample,
-            mask=mask)
+                         aperture=aperture, psf_npixels=psf_npixels,
+                         psf_pixel_scale=psf_pixel_scale, psf_oversample=psf_oversample,
+                         mask=mask)
 
-
-    def propagate_mono(self       : SimpleToliman,
-                       wavelength : Array,
-                       offset     : Array = np.zeros(2),
-                       return_wf  : bool = False) -> Array:
+    def propagate_mono(self: SimpleToliman,
+                       wavelength: Array,
+                       offset: Array = np.zeros(2),
+                       return_wf: bool = False) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
 
         Parameters
         ----------
-        wavelength : Array, meters
+        wavelength : Array, metres
             The wavelength of the wavefront to propagate through the optical
             layers.
         offset : Array, radians, = np.zeros(2)
@@ -3342,8 +3285,8 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
 
         # Propagate
         pixel_scale = 1e-6 * self.psf_pixel_scale / self.psf_oversample
-        wf = wf.MFT(self.psf_npixels, pixel_scale, 
-            focal_length=self.focal_length)
+        wf = wf.MFT(self.psf_npixels, pixel_scale,
+                    focal_length=self.focal_length)
 
         # Return PSF or Wavefront
         if return_wf:
@@ -3361,8 +3304,8 @@ class FlexibleOptics(AperturedOptics, SimpleOptics):
     ----------
     wf_npixels : int
         The number of pixels representing the wavefront.
-    diameter : Array, meters
-        The diameter of the initial wavefront to propagte.
+    diameter : Array, metres
+        The diameter of the initial wavefront to propagate.
     aperture : Union[Array, OpticalLayer]
         The aperture of the system. Can be an Array or a OpticalLayer.
     mask : Union[Array, OpticalLayer]
@@ -3371,21 +3314,21 @@ class FlexibleOptics(AperturedOptics, SimpleOptics):
     propagator : Propagator
         The propagator to use to propagate the wavefront through the optics.
     """
-    propagator : None
+    propagator: None
 
-    def __init__(self : BaseOptics, 
-                 wf_npixels : int,
-                 diameter : float,
-                 aperture : Union[Array, OpticalLayer()],
-                 propagator : Propagator(),
-                 mask : Union[Array, OpticalLayer()] = None):
+    def __init__(self: BaseOptics,
+                 wf_npixels: int,
+                 diameter: float,
+                 aperture: Union[Array, OpticalLayer()],
+                 propagator: Propagator(),
+                 mask: Union[Array, OpticalLayer()] = None):
         """
         Parameters
         ----------
         wf_npixels : int
             The number of pixels representing the wavefront.
-        diameter : Array, meters
-            The diameter of the initial wavefront to propagte.
+        diameter : Array, metres
+            The diameter of the initial wavefront to propagate.
         aperture : Union[Array, OpticalLayer]
             The aperture of the system. Can be an Array or a OpticalLayer.
         propagator : Propagator
@@ -3396,11 +3339,10 @@ class FlexibleOptics(AperturedOptics, SimpleOptics):
         """
         if not isinstance(propagator, Propagator()):
             raise TypeError("propagator must be a Propagator object, "
-                f"got {type(propagator)}.")
+                            f"got {type(propagator)}.")
         self.propagator = propagator
         super().__init__(wf_npixels=wf_npixels, diameter=diameter,
-            aperture=aperture, mask=mask)
-
+                         aperture=aperture, mask=mask)
 
     @property
     def true_pixel_scale(self):
@@ -3408,18 +3350,18 @@ class FlexibleOptics(AperturedOptics, SimpleOptics):
         Returns the true pixel scale of the PSF.
         """
         return self.propagator.pixel_scale
-    
+
     def _construct_wavefront(
-        self       : BaseOptics,
-        wavelength : Array,
-        offset     : Array = np.zeros(2)) -> Array:
+            self: BaseOptics,
+            wavelength: Array,
+            offset: Array = np.zeros(2)) -> Array:
         """
         Constructs the appropriate tilted wavefront object for the optical
         system.
 
         Parameters
         ----------
-        wavelength : Array, meters
+        wavelength : Array, metres
             The wavelength of the wavefront to propagate through the optics.
         offset : Array, radians, = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
@@ -3431,23 +3373,22 @@ class FlexibleOptics(AperturedOptics, SimpleOptics):
             The wavefront object to propagate through the optics.
         """
         if isinstance(self.propagator, dLux.propagators.FarFieldFresnel):
-            wf = dLux.FresnelWavefront(self.wf_npixels, self.diameter, 
-                wavelength)
+            wf = dLux.FresnelWavefront(self.wf_npixels, self.diameter,
+                                       wavelength)
         else:
             wf = dLux.Wavefront(self.wf_npixels, self.diameter, wavelength)
         return wf.tilt(offset)
 
-
-    def propagate_mono(self       : SimpleToliman,
-                       wavelength : Array,
-                       offset     : Array = np.zeros(2),
-                       return_wf  : bool = False) -> Array:
+    def propagate_mono(self: SimpleToliman,
+                       wavelength: Array,
+                       offset: Array = np.zeros(2),
+                       return_wf: bool = False) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
 
         Parameters
         ----------
-        wavelength : Array, meters
+        wavelength : Array, metres
             The wavelength of the wavefront to propagate through the optical
             layers.
         offset : Array, radians, = np.zeros(2)
@@ -3482,20 +3423,19 @@ class LayeredOptics(SimpleOptics):
     Attributes
     ----------
     wf_npixels : int
-        The size of the initial wavefront to propagte.
+        The size of the initial wavefront to propagate.
     diameter : Array
-        The diameter of the wavefront to model through the system in meters.
+        The diameter of the wavefront to model through the system in metres.
     layers : OrderedDict
         A collections.OrderedDict of 'layers' that define the transformations
         and operations upon some input wavefront through an optical system.
     """
-    layers : OrderedDict
+    layers: OrderedDict
 
-
-    def __init__(self       : Optics, 
-                 wf_npixels : int, 
-                 diameter   : float, 
-                 layers     : list) -> Optics:
+    def __init__(self: Optics,
+                 wf_npixels: int,
+                 diameter: float,
+                 layers: list) -> Optics:
         """
         Constructor for the Optics class.
 
@@ -3505,19 +3445,18 @@ class LayeredOptics(SimpleOptics):
             The number of pixels to use when propagating the wavefront through
             the optical system.
         diameter : float
-            The diameter of the wavefront to model through the system in meters.
+            The diameter of the wavefront to model through the system in metres.
         layers : list
             A list of dLux 'layers' that define the transformations and
             operations upon some input wavefront through an optical system.
-            The entried can either be dLux OtpicalLayers, or tuples of the
+            The entries can either be dLux OpticalLayers, or tuples of the
             form (OpticalLayer, key), with the key being used as the dictionary
             key for the layer.
         """
         super().__init__(wf_npixels=wf_npixels, diameter=diameter)
         self.layers = dlu.list_to_dictionary(layers, True, OpticalLayer())
 
-
-    def __getattr__(self : Optics, key : str) -> object:
+    def __getattr__(self: Optics, key: str) -> object:
         """
         Magic method designed to allow accessing of the various items within
         the layers dictionary of this class via the 'class.attribute' method.
@@ -3536,7 +3475,6 @@ class LayeredOptics(SimpleOptics):
             return self.layers[key]
         super().__getattr__(key)
 
-
     @property
     def true_pixel_scale(self):
         """
@@ -3548,18 +3486,17 @@ class LayeredOptics(SimpleOptics):
                 propagator = layer
         return propagator.pixel_scale
 
-
     def propagate_mono(
-        self       : BaseOptics,
-        wavelength : Array,
-        offset     : Array = np.zeros(2),
-        return_wf  : bool = False) -> Array:
+            self: BaseOptics,
+            wavelength: Array,
+            offset: Array = np.zeros(2),
+            return_wf: bool = False) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
 
         Parameters
         ----------
-        wavelength : Array, meters
+        wavelength : Array, metres
             The wavelength of the wavefront to propagate through the optical
             layers.
         offset : Array, radians, = np.zeros(2)
@@ -3580,7 +3517,7 @@ class LayeredOptics(SimpleOptics):
         wavefront = self._construct_wavefront(wavelength, offset)
         for layer in list(self.layers.values()):
             wavefront *= layer
-        
+
         if return_wf:
             return wavefront
         return wavefront.psf</div>

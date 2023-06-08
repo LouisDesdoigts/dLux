@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=983a6800" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=ae4bebf9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1900,13 +1885,15 @@ Licensed under the Apache License, Version 2.0.
 <span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">Array</span>
 <span class="kn">from</span> <span class="nn">jax.scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
 <span class="kn">from</span> <span class="nn">zodiax</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">import</span> <span class="nn">dLux</span>
 </pre></div>
 <div id="cell-1" class="clipboard-copy-txt">from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
 from jax import Array
 from jax.scipy.stats import norm
-from zodiax import Base</div>
+from zodiax import Base
+import dLux</div>
         
         </div>
     </div>
@@ -1916,7 +1903,7 @@ from zodiax import Base</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=13350c87" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=683eb4dd" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1937,10 +1924,10 @@ from zodiax import Base</div>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ApplyPixelResponse&quot;</span><span class="p">,</span> <span class="s2">&quot;ApplyJitter&quot;</span><span class="p">,</span> <span class="s2">&quot;ApplySaturation&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;AddConstant&quot;</span><span class="p">,</span> <span class="s2">&quot;IntegerDownsample&quot;</span><span class="p">,</span> <span class="s2">&quot;Rotate&quot;</span><span class="p">]</span>
+           <span class="s2">&quot;AddConstant&quot;</span><span class="p">,</span> <span class="s2">&quot;IntegerDownsample&quot;</span><span class="p">,</span> <span class="s2">&quot;Rotate&quot;</span><span class="p">]</span>
 </pre></div>
 <div id="cell-2" class="clipboard-copy-txt">__all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
-    "AddConstant", "IntegerDownsample", "Rotate"]</div>
+           "AddConstant", "IntegerDownsample", "Rotate"]</div>
         
         </div>
     </div>
@@ -1950,7 +1937,7 @@ from zodiax import Base</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=968283ec" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=84b9a3f7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1970,9 +1957,9 @@ from zodiax import Base</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">Image</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">Image</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">Image</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">Image</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt">Image = lambda : dLux.images.Image</div>
+<div id="cell-3" class="clipboard-copy-txt">Image = lambda: dLux.images.Image</div>
         
         </div>
     </div>
@@ -1982,7 +1969,7 @@ from zodiax import Base</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=614c9e48" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=85f35d66" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2004,21 +1991,19 @@ from zodiax import Base</div>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">DetectorLayer</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A base Detector layer class to help with type checking throuhgout the rest</span>
+<span class="sd">    A base Detector layer class to help with type checking throughout the rest</span>
 <span class="sd">    of the software.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the DetectorLayer class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> 
-                 <span class="n">image</span> <span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span>
+                 <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the Image.</span>
 
@@ -2035,21 +2020,19 @@ from zodiax import Base</div>
 </pre></div>
 <div id="cell-4" class="clipboard-copy-txt">class DetectorLayer(Base):
     """
-    A base Detector layer class to help with type checking throuhgout the rest
+    A base Detector layer class to help with type checking throughout the rest
     of the software.
     """
 
-
-    def __init__(self : DetectorLayer) -> DetectorLayer:
+    def __init__(self: DetectorLayer):
         """
         Constructor for the DetectorLayer class.
         """
         super().__init__()
 
-
     @abstractmethod
-    def __call__(self : DetectorLayer, 
-                 image : Image()) -> Image: # pragma: no cover
+    def __call__(self: DetectorLayer,
+                 image: Image()) -> Image:  # pragma: no cover
         """
         Applies the layer to the Image.
 
@@ -2072,7 +2055,7 @@ from zodiax import Base</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=2f598de3" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=872c2bad" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2094,34 +2077,32 @@ from zodiax import Base</div>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">ApplyPixelResponse</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Applies a pixel response array to the the input image, via a multiplication.</span>
+<span class="sd">    Applies a pixel response array to the input image, via a multiplication.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    pixel_response : Array</span>
 <span class="sd">        The pixel_response to apply to the input image.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">pixel_response</span> <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">pixel_response</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>           <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span>
-                 <span class="n">pixel_response</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span>
+                 <span class="n">pixel_response</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the ApplyPixelResponse class.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        pixel_response : Array</span>
-<span class="sd">            The pixel_response to apply to the input image. Must be a 2</span>
-<span class="sd">            dimensional array equal to size of the image at time of application.</span>
+<span class="sd">            The pixel_response to apply to the input image. Must be a 2-dimensional</span>
+<span class="sd">            array equal to size of the image at time of application.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pixel_response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pixel_response</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_response</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;pixel_response must be a 2 dimensional array.&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span> <span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the Image.</span>
 
@@ -2139,34 +2120,32 @@ from zodiax import Base</div>
 </pre></div>
 <div id="cell-5" class="clipboard-copy-txt">class ApplyPixelResponse(DetectorLayer):
     """
-    Applies a pixel response array to the the input image, via a multiplication.
+    Applies a pixel response array to the input image, via a multiplication.
 
     Attributes
     ----------
     pixel_response : Array
         The pixel_response to apply to the input image.
     """
-    pixel_response : Array
+    pixel_response: Array
 
-
-    def __init__(self           : DetectorLayer,
-                 pixel_response : Array) -> DetectorLayer:
+    def __init__(self: DetectorLayer,
+                 pixel_response: Array):
         """
         Constructor for the ApplyPixelResponse class.
 
         Parameters
         ----------
         pixel_response : Array
-            The pixel_response to apply to the input image. Must be a 2
-            dimensional array equal to size of the image at time of application.
+            The pixel_response to apply to the input image. Must be a 2-dimensional
+            array equal to size of the image at time of application.
         """
         super().__init__()
         self.pixel_response = np.asarray(pixel_response, dtype=float)
         if self.pixel_response.ndim != 2:
             raise ValueError("pixel_response must be a 2 dimensional array.")
 
-
-    def __call__(self : DetectorLayer, image : Image()) -> Image:
+    def __call__(self: DetectorLayer, image: Image()) -> Image:
         """
         Applies the layer to the Image.
 
@@ -2190,7 +2169,7 @@ from zodiax import Base</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=df4ebcd9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=29aa2e16" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2212,30 +2191,29 @@ from zodiax import Base</div>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">ApplyJitter</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convolves the image with a gaussian kernel parameterised by the standard</span>
+<span class="sd">    Convolves the image with a Gaussian kernel parameterised by the standard</span>
 <span class="sd">    deviation (sigma).</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    sigma : Array, pixels</span>
-<span class="sd">        The standard deviation of the guassian kernel, in units of pixels.</span>
+<span class="sd">        The standard deviation of the Gaussian kernel, in units of pixels.</span>
 <span class="sd">    kernel_size : int</span>
 <span class="sd">        The size of the convolution kernel to use.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">kernel_size</span> <span class="p">:</span> <span class="nb">int</span>
-    <span class="n">sigma</span>       <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">sigma</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span>
-                 <span class="n">sigma</span>       <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">kernel_size</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span>
+                 <span class="n">sigma</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the ApplyJitter class.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        sigma : Array, pixels</span>
-<span class="sd">            The standard deviation of the guassian kernel, in units of pixels.</span>
+<span class="sd">            The standard deviation of the Gaussian kernel, in units of pixels.</span>
 <span class="sd">        kernel_size : int = 10</span>
 <span class="sd">            The size of the convolution kernel to use.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2245,24 +2223,22 @@ from zodiax import Base</div>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sigma must be a scalar array.&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">generate_kernel</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">pixel_scale</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">generate_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generates the normalised guassian kernel.</span>
+<span class="sd">        Generates the normalised Gaussian kernel.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        kernel : Array</span>
-<span class="sd">            The gaussian kernel.</span>
+<span class="sd">            The Gaussian kernel.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Generate distribution</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">pixel_scale</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">)</span>  <span class="o">*</span> <span class="n">pixel_scale</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixel_scale</span>
         <span class="n">kernel</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">kernel</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">kernel</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span> <span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">():</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the Image.</span>
 
@@ -2281,30 +2257,29 @@ from zodiax import Base</div>
 </pre></div>
 <div id="cell-6" class="clipboard-copy-txt">class ApplyJitter(DetectorLayer):
     """
-    Convolves the image with a gaussian kernel parameterised by the standard
+    Convolves the image with a Gaussian kernel parameterised by the standard
     deviation (sigma).
 
     Attributes
     ----------
     sigma : Array, pixels
-        The standard deviation of the guassian kernel, in units of pixels.
+        The standard deviation of the Gaussian kernel, in units of pixels.
     kernel_size : int
         The size of the convolution kernel to use.
     """
-    kernel_size : int
-    sigma       : Array
+    kernel_size: int
+    sigma: Array
 
-
-    def __init__(self        : DetectorLayer,
-                 sigma       : Array,
-                 kernel_size : int = 10) -> DetectorLayer:
+    def __init__(self: DetectorLayer,
+                 sigma: Array,
+                 kernel_size: int = 10):
         """
         Constructor for the ApplyJitter class.
 
         Parameters
         ----------
         sigma : Array, pixels
-            The standard deviation of the guassian kernel, in units of pixels.
+            The standard deviation of the Gaussian kernel, in units of pixels.
         kernel_size : int = 10
             The size of the convolution kernel to use.
         """
@@ -2314,24 +2289,22 @@ from zodiax import Base</div>
         if self.sigma.ndim != 0:
             raise ValueError("sigma must be a scalar array.")
 
-
-    def generate_kernel(self : DetectorLayer, pixel_scale : Array) -> Array:
+    def generate_kernel(self: DetectorLayer, pixel_scale: Array) -> Array:
         """
-        Generates the normalised guassian kernel.
+        Generates the normalised Gaussian kernel.
 
         Returns
         -------
         kernel : Array
-            The gaussian kernel.
+            The Gaussian kernel.
         """
         # Generate distribution
         sigma = self.sigma * pixel_scale
-        x = np.linspace(-10, 10, self.kernel_size)  * pixel_scale
+        x = np.linspace(-10, 10, self.kernel_size) * pixel_scale
         kernel = norm.pdf(x, scale=sigma) * norm.pdf(x[:, None], scale=sigma)
-        return kernel/np.sum(kernel)
+        return kernel / np.sum(kernel)
 
-
-    def __call__(self : DetectorLayer, image : Image()) -> Image():
+    def __call__(self: DetectorLayer, image: Image()) -> Image():
         """
         Applies the layer to the Image.
 
@@ -2356,7 +2329,7 @@ from zodiax import Base</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=f0ed6ba6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e122d44c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2386,10 +2359,9 @@ from zodiax import Base</div>
 <span class="sd">    saturation : Array</span>
 <span class="sd">        The value at which the saturation is applied.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">saturation</span> <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">saturation</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">saturation</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">saturation</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the ApplySaturation class.</span>
 
@@ -2403,8 +2375,7 @@ from zodiax import Base</div>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saturation</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;saturation must be a scalar array.&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span> <span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">():</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the Image.</span>
 
@@ -2430,10 +2401,9 @@ from zodiax import Base</div>
     saturation : Array
         The value at which the saturation is applied.
     """
-    saturation : Array
+    saturation: Array
 
-
-    def __init__(self : DetectorLayer, saturation : Array) -> DetectorLayer:
+    def __init__(self: DetectorLayer, saturation: Array) -> DetectorLayer:
         """
         Constructor for the ApplySaturation class.
 
@@ -2447,8 +2417,7 @@ from zodiax import Base</div>
         if self.saturation.ndim != 0:
             raise ValueError("saturation must be a scalar array.")
 
-
-    def __call__(self : DetectorLayer, image : Image()) -> Image():
+    def __call__(self: DetectorLayer, image: Image()) -> Image():
         """
         Applies the layer to the Image.
 
@@ -2472,7 +2441,7 @@ from zodiax import Base</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=f31d99ac" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=80a09771" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2502,10 +2471,9 @@ from zodiax import Base</div>
 <span class="sd">    value : Array</span>
 <span class="sd">        The value to add to the image.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">value</span> <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">value</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the AddConstant class.</span>
 
@@ -2519,8 +2487,7 @@ from zodiax import Base</div>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;value must be a scalar array.&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span> <span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">():</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the Image.</span>
 
@@ -2546,10 +2513,9 @@ from zodiax import Base</div>
     value : Array
         The value to add to the image.
     """
-    value : Array
+    value: Array
 
-
-    def __init__(self : DetectorLayer, value : Array) -> DetectorLayer:
+    def __init__(self: DetectorLayer, value: Array) -> DetectorLayer:
         """
         Constructor for the AddConstant class.
 
@@ -2563,8 +2529,7 @@ from zodiax import Base</div>
         if self.value.ndim != 0:
             raise ValueError("value must be a scalar array.")
 
-
-    def __call__(self : DetectorLayer, image : Image()) -> Image():
+    def __call__(self: DetectorLayer, image: Image()) -> Image():
         """
         Applies the layer to the Image.
 
@@ -2588,7 +2553,7 @@ from zodiax import Base</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=771e2a4a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=51aabc30" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2611,7 +2576,7 @@ from zodiax import Base</div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">IntegerDownsample</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Downsamples an input image by an integer number of pixels via a sum.</span>
-<span class="sd">    The number of pixels in the input image must by integer divisible by the</span>
+<span class="sd">    The number of pixels in the input image must be integer divisible by the</span>
 <span class="sd">    kernel_size.</span>
 
 <span class="sd">    Attributes</span>
@@ -2619,10 +2584,9 @@ from zodiax import Base</div>
 <span class="sd">    kernel_size : int</span>
 <span class="sd">        The size of the downsampling kernel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">kernel_size</span> <span class="p">:</span> <span class="nb">int</span>
+    <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">kernel_size</span> <span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the IntegerDownsample class.</span>
 
@@ -2633,7 +2597,6 @@ from zodiax import Base</div>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kernel_size</span><span class="p">)</span>
-
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2654,7 +2617,7 @@ from zodiax import Base</div>
 <div id="cell-9" class="clipboard-copy-txt">class IntegerDownsample(DetectorLayer):
     """
     Downsamples an input image by an integer number of pixels via a sum.
-    The number of pixels in the input image must by integer divisible by the
+    The number of pixels in the input image must be integer divisible by the
     kernel_size.
 
     Attributes
@@ -2662,10 +2625,9 @@ from zodiax import Base</div>
     kernel_size : int
         The size of the downsampling kernel.
     """
-    kernel_size : int
+    kernel_size: int
 
-
-    def __init__(self : DetectorLayer, kernel_size : int) -> DetectorLayer:
+    def __init__(self: DetectorLayer, kernel_size: int) -> DetectorLayer:
         """
         Constructor for the IntegerDownsample class.
 
@@ -2676,7 +2638,6 @@ from zodiax import Base</div>
         """
         super().__init__()
         self.kernel_size = int(kernel_size)
-
 
     def __call__(self, image):
         """
@@ -2702,7 +2663,7 @@ from zodiax import Base</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=bfba67da" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e634e5cb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2733,13 +2694,12 @@ from zodiax import Base</div>
 <span class="sd">    order : int</span>
 <span class="sd">        The order of the interpolation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">angle</span> <span class="p">:</span> <span class="n">Array</span>
-    <span class="n">order</span> <span class="p">:</span> <span class="nb">int</span>
+    <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">int</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>  <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> 
-                 <span class="n">angle</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> 
-                 <span class="n">order</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span>
+                 <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Rotate class.</span>
 
@@ -2754,8 +2714,7 @@ from zodiax import Base</div>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;angle must be a scalar array.&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span> <span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">():</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the Image.</span>
 
@@ -2782,13 +2741,12 @@ from zodiax import Base</div>
     order : int
         The order of the interpolation.
     """
-    angle : Array
-    order : int
+    angle: Array
+    order: int
 
-
-    def __init__(self  : DetectorLayer, 
-                 angle : Array, 
-                 order : int = 1) -> DetectorLayer:
+    def __init__(self: DetectorLayer,
+                 angle: Array,
+                 order: int = 1):
         """
         Constructor for the Rotate class.
 
@@ -2803,8 +2761,7 @@ from zodiax import Base</div>
         if self.angle.ndim != 0:
             raise ValueError("angle must be a scalar array.")
 
-
-    def __call__(self : DetectorLayer, image : Image()) -> Image():
+    def __call__(self: DetectorLayer, image: Image()) -> Image():
         """
         Applies the layer to the Image.
 

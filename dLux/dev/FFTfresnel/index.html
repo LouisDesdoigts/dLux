@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=a2b6a2f7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=43a9c610" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1906,7 +1891,7 @@ Licensed under the Apache License, Version 2.0.
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=169794b8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=67cd26ee" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1946,7 +1931,7 @@ import equinox as eqx</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=13671733" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=913fa369" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1982,7 +1967,7 @@ Array =  typing.NewType("Array",  np.ndarray) # 2d +</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=f717e37e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d281a740" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2022,7 +2007,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=dd97de46" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=0623786c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2058,14 +2043,14 @@ Layer       = typing.NewType("Layers",  object)</div>
 <span class="sd">    </span>
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    position : float, meters</span>
+<span class="sd">    position : float, metres</span>
 <span class="sd">        The position of the wavefront in the optical system.</span>
 <span class="sd">        </span>
-<span class="sd">    beam_radius : float, meters </span>
+<span class="sd">    beam_radius : float, metres </span>
 <span class="sd">        The *initial* radius of the beam. </span>
 <span class="sd">        </span>
 <span class="sd">        </span>
-<span class="sd">    waist_position : float, meters</span>
+<span class="sd">    waist_position : float, metres</span>
 <span class="sd">        The position of the beam waist along the optical axis. </span>
 <span class="sd">    spherical : bool</span>
 <span class="sd">        A convinience tracker for knowing if the wavefront is </span>
@@ -2073,7 +2058,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 <span class="sd">    rayleigh_factor : float</span>
 <span class="sd">        Used to determine the range over which the wavefront remains</span>
 <span class="sd">        planar. </span>
-<span class="sd">    focal_length : float, meters</span>
+<span class="sd">    focal_length : float, metres</span>
 <span class="sd">        Used for the conversion between angular and physical units. </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">angular</span> <span class="p">:</span> <span class="nb">bool</span>
@@ -2102,9 +2087,9 @@ Layer       = typing.NewType("Layers",  object)</div>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        beam_radius : float, meters</span>
+<span class="sd">        beam_radius : float, metres</span>
 <span class="sd">            Radius of the beam at the initial optical plane.</span>
-<span class="sd">        wavelength : float, meters</span>
+<span class="sd">        wavelength : float, metres</span>
 <span class="sd">            The wavelength of the `Wavefront`.</span>
 <span class="sd">        offset : Array, radians</span>
 <span class="sd">            The (x, y) angular offset of the `Wavefront` from </span>
@@ -2133,7 +2118,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 <span class="sd">        -------</span>
 <span class="sd">        position : float </span>
 <span class="sd">            The position of the `Wavefront` from its starting point </span>
-<span class="sd">            in meters.</span>
+<span class="sd">            in metres.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span>
     
@@ -2155,7 +2140,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        positions : Tensor, meters</span>
+<span class="sd">        positions : Tensor, metres</span>
 <span class="sd">            The position of each pixel aligned according to the `fft` </span>
 <span class="sd">            algorithm that is implemented by `numpy`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2223,7 +2208,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 <span class="sd">        ----------</span>
 <span class="sd">        position : float</span>
 <span class="sd">            The new position of the wavefront from its starting point </span>
-<span class="sd">            assumed to be in meters. </span>
+<span class="sd">            assumed to be in metres. </span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -2244,7 +2229,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        phase_radius : float</span>
-<span class="sd">            The new phase_radius in meters.</span>
+<span class="sd">            The new phase_radius in metres.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -2263,7 +2248,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        waist_position : float, meters </span>
+<span class="sd">        waist_position : float, metres </span>
 <span class="sd">            The absolute position of the waist of the wavefront.</span>
 
 <span class="sd">        Returns</span>
@@ -2280,7 +2265,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        beam_radius : float</span>
-<span class="sd">            The new beam_radius in meters.</span>
+<span class="sd">            The new beam_radius in metres.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -2315,7 +2300,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        focal_length : float, meters</span>
+<span class="sd">        focal_length : float, metres</span>
 <span class="sd">            The `focal_length` of the `Wavefront`.</span>
 
 <span class="sd">        Returns</span>
@@ -2390,7 +2375,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
     <span class="k">def</span> <span class="nf">transfer</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Wavefront</span><span class="p">,</span> <span class="n">distance</span> <span class="p">:</span> <span class="n">Scalar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The optical transfer function (OTF) for the gaussian beam.</span>
+<span class="sd">        The optical transfer function (OTF) for the Gaussian beam.</span>
 <span class="sd">        Assumes propagation is along the axis. </span>
 
 <span class="sd">        Parameters</span>
@@ -2424,7 +2409,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        position : float, meters</span>
+<span class="sd">        position : float, metres</span>
 <span class="sd">            The absolute position of the wave along the optical axis </span>
 <span class="sd">            from spawn.</span>
 
@@ -2445,12 +2430,12 @@ Layer       = typing.NewType("Layers",  object)</div>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        position : float, meters</span>
+<span class="sd">        position : float, metres</span>
 <span class="sd">            The absolute position of the `Wavefront` since spawn.</span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        radius : float, meters</span>
+<span class="sd">        radius : float, metres</span>
 <span class="sd">            The radius of the beam. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">relative_position</span> <span class="o">=</span> <span class="n">position</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">waist_position</span>
@@ -2494,7 +2479,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        distance : float, meters</span>
+<span class="sd">        distance : float, metres</span>
 <span class="sd">            The distance of propagation from the current position.</span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
@@ -2514,7 +2499,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        distance : float, meters</span>
+<span class="sd">        distance : float, metres</span>
 <span class="sd">            The distance of propagation.</span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
@@ -2541,14 +2526,14 @@ Layer       = typing.NewType("Layers",  object)</div>
     
     Attributes
     ----------
-    position : float, meters
+    position : float, metres
         The position of the wavefront in the optical system.
         
-    beam_radius : float, meters 
+    beam_radius : float, metres 
         The *initial* radius of the beam. 
         
         
-    waist_position : float, meters
+    waist_position : float, metres
         The position of the beam waist along the optical axis. 
     spherical : bool
         A convinience tracker for knowing if the wavefront is 
@@ -2556,7 +2541,7 @@ Layer       = typing.NewType("Layers",  object)</div>
     rayleigh_factor : float
         Used to determine the range over which the wavefront remains
         planar. 
-    focal_length : float, meters
+    focal_length : float, metres
         Used for the conversion between angular and physical units. 
     """
     angular : bool
@@ -2585,9 +2570,9 @@ Layer       = typing.NewType("Layers",  object)</div>
 
         Parameters
         ----------
-        beam_radius : float, meters
+        beam_radius : float, metres
             Radius of the beam at the initial optical plane.
-        wavelength : float, meters
+        wavelength : float, metres
             The wavelength of the `Wavefront`.
         offset : Array, radians
             The (x, y) angular offset of the `Wavefront` from 
@@ -2616,7 +2601,7 @@ Layer       = typing.NewType("Layers",  object)</div>
         -------
         position : float 
             The position of the `Wavefront` from its starting point 
-            in meters.
+            in metres.
         """
         return self.position
     
@@ -2638,7 +2623,7 @@ Layer       = typing.NewType("Layers",  object)</div>
         """
         Returns
         -------
-        positions : Tensor, meters
+        positions : Tensor, metres
             The position of each pixel aligned according to the `fft` 
             algorithm that is implemented by `numpy`.
         """
@@ -2706,7 +2691,7 @@ Layer       = typing.NewType("Layers",  object)</div>
         ----------
         position : float
             The new position of the wavefront from its starting point 
-            assumed to be in meters. 
+            assumed to be in metres. 
         
         Returns
         -------
@@ -2727,7 +2712,7 @@ Layer       = typing.NewType("Layers",  object)</div>
         Parameters
         ----------
         phase_radius : float
-            The new phase_radius in meters.
+            The new phase_radius in metres.
 
         Returns
         -------
@@ -2746,7 +2731,7 @@ Layer       = typing.NewType("Layers",  object)</div>
         """
         Parameters
         ----------
-        waist_position : float, meters 
+        waist_position : float, metres 
             The absolute position of the waist of the wavefront.
 
         Returns
@@ -2763,7 +2748,7 @@ Layer       = typing.NewType("Layers",  object)</div>
         Parameters
         ----------
         beam_radius : float
-            The new beam_radius in meters.
+            The new beam_radius in metres.
 
         Returns
         -------
@@ -2798,7 +2783,7 @@ Layer       = typing.NewType("Layers",  object)</div>
         """
         Parameters
         ----------
-        focal_length : float, meters
+        focal_length : float, metres
             The `focal_length` of the `Wavefront`.
 
         Returns
@@ -2873,7 +2858,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
     def transfer(self : Wavefront, distance : Scalar) -> Array:
         """
-        The optical transfer function (OTF) for the gaussian beam.
+        The optical transfer function (OTF) for the Gaussian beam.
         Assumes propagation is along the axis. 
 
         Parameters
@@ -2907,7 +2892,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
         Parameters
         ----------
-        position : float, meters
+        position : float, metres
             The absolute position of the wave along the optical axis 
             from spawn.
 
@@ -2928,12 +2913,12 @@ Layer       = typing.NewType("Layers",  object)</div>
 
         Parameters
         ----------
-        position : float, meters
+        position : float, metres
             The absolute position of the `Wavefront` since spawn.
         
         Returns
         -------
-        radius : float, meters
+        radius : float, metres
             The radius of the beam. 
         """
         relative_position = position - self.waist_position
@@ -2977,7 +2962,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
         Parameters
         ----------
-        distance : float, meters
+        distance : float, metres
             The distance of propagation from the current position.
         
         Returns
@@ -2997,7 +2982,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
         Parameters
         ----------
-        distance : float, meters
+        distance : float, metres
             The distance of propagation.
         
         Returns
@@ -3016,7 +3001,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=858fb10e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=074a6b64" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3048,7 +3033,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=9ce460d3" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=483b7e6b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3172,7 +3157,7 @@ Layer       = typing.NewType("Layers",  object)</div>
     <span class="c1"># the wavefront class and do very little here. Damn, I need to </span>
     <span class="c1"># fit it into the overall architecture. </span>
     <span class="c1"># TODO: Implement the oversample in the fixed sampling propagator</span>
-    <span class="c1"># Coordiantes must be in meters for the propagator</span>
+    <span class="c1"># Coordiantes must be in metres for the propagator</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wave</span> <span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
         <span class="c1"># NOTE: need to understand this mystery. </span>
         <span class="n">field</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">wave</span><span class="o">.</span><span class="n">get_complex_form</span><span class="p">())</span>
@@ -3293,7 +3278,7 @@ Layer       = typing.NewType("Layers",  object)</div>
     # the wavefront class and do very little here. Damn, I need to 
     # fit it into the overall architecture. 
     # TODO: Implement the oversample in the fixed sampling propagator
-    # Coordiantes must be in meters for the propagator
+    # Coordiantes must be in metres for the propagator
     def __call__(self : Propagator, wave : Wavefront) -> Wavefront:
         # NOTE: need to understand this mystery. 
         field = np.fft.fftshift(wave.get_complex_form())
@@ -3318,7 +3303,7 @@ Layer       = typing.NewType("Layers",  object)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=07379e1c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3c28964a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>

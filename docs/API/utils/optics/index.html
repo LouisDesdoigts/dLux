@@ -323,7 +323,7 @@
   
     <li class="md-nav__item">
       <a href="../../../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -379,7 +379,7 @@
   
     <li class="md-nav__item">
       <a href="../../../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -823,21 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../../CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -861,10 +846,10 @@
 
 
 <h1 id="optics-utility-functions">Optics Utility Functions<a class="headerlink" href="#optics-utility-functions" title="Permanent link">¤</a></h1>
-<p>This module contains a number of common equations used in optics, such as converting between OPDs and phases, and a few functions used to calcualte sampling rates in focal planes.</p>
+<p>This module contains a number of common equations used in optics, such as converting between Optical Path Difference (OPD) and phase, and a few functions used to calculate sampling rates in focal planes.</p>
 <hr />
 <h2 id="opd-to-phase">OPD to Phase<a class="headerlink" href="#opd-to-phase" title="Permanent link">¤</a></h2>
-<p>Converts an input OPD and wavelength in meters to converts it to phase in radians.</p>
+<p>Converts an input OPD and wavelength (metres) to phase (radians).</p>
 <details class="info">
 <summary>OPD to Phase API</summary>
 <div class="mkdocstrings">
@@ -875,7 +860,7 @@
 <a id="dLux.utils.optics.opd_to_phase"></a>
   <div class="doc doc-contents first">
   
-      <p>Converts the input Optical Path Difference (opd) in units of meters to
+      <p>Converts the input Optical Path Difference (opd) in units of metres to
 phases in units of radians for the given wavelength.</p>
 
   <p><strong>Parameters:</strong></p>
@@ -892,7 +877,7 @@ phases in units of radians for the given wavelength.</p>
         <tr>
           <td><code>opd</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -906,7 +891,7 @@ phases in units of radians for the given wavelength.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -935,7 +920,7 @@ phases in units of radians for the given wavelength.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The equivilent phase value for the given opd and wavelength.</p>
+              <p>The equivalent phase value for the given opd and wavelength.</p>
             </div>
           </td>
         </tr>
@@ -944,7 +929,8 @@ phases in units of radians for the given wavelength.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 9</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 8</span>
+<span class="normal"> 9</span>
 <span class="normal">10</span>
 <span class="normal">11</span>
 <span class="normal">12</span>
@@ -960,25 +946,24 @@ phases in units of radians for the given wavelength.</p>
 <span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">opd_to_phase</span><span class="p">(</span><span class="n">opd</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">opd_to_phase</span><span class="p">(</span><span class="n">opd</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts the input Optical Path Difference (opd) in units of meters to</span>
+<span class="sd">    Converts the input Optical Path Difference (opd) in units of metres to</span>
 <span class="sd">    phases in units of radians for the given wavelength.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    opd : Array, meters</span>
+<span class="sd">    opd : Array, metres</span>
 <span class="sd">        The Optical Path Difference (opd) to be converted into phase.</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The wavelength at which to calculate the phase for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    phase : Array, radians</span>
-<span class="sd">        The equivilent phase value for the given opd and wavelength.</span>
+<span class="sd">        The equivalent phase value for the given opd and wavelength.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">opd</span><span class="o">/</span><span class="n">wavelength</span>
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">opd</span> <span class="o">/</span> <span class="n">wavelength</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -988,7 +973,7 @@ phases in units of radians for the given wavelength.</p>
 </details>
 <hr />
 <h2 id="phase-to-opd">Phase to OPD<a class="headerlink" href="#phase-to-opd" title="Permanent link">¤</a></h2>
-<p>Converts an input phase in radians and wavelength in meters to converts it to OPD in meters.</p>
+<p>Converts an input phase (radians) and wavelength (metres) to OPD (metres).</p>
 <details class="info">
 <summary>Phase to OPD API</summary>
 <div class="mkdocstrings">
@@ -999,8 +984,8 @@ phases in units of radians for the given wavelength.</p>
 <a id="dLux.utils.optics.phase_to_opd"></a>
   <div class="doc doc-contents first">
   
-      <p>Converts the input phase in units of radians to the equivilent Optical Path
-Difference (opd) in meters for the given wavelength.</p>
+      <p>Converts the input phase in units of radians to the equivalent Optical Path
+Difference (opd) in metres for the given wavelength.</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1030,7 +1015,7 @@ Difference (opd) in meters for the given wavelength.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1055,11 +1040,11 @@ Difference (opd) in meters for the given wavelength.</p>
     <tbody>
         <tr>
 <td><code>opd</code></td>          <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The equivilent opd value for the given phase and wavelength.</p>
+              <p>The equivalent opd value for the given phase and wavelength.</p>
             </div>
           </td>
         </tr>
@@ -1068,7 +1053,8 @@ Difference (opd) in meters for the given wavelength.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
+<span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span>
 <span class="normal">32</span>
@@ -1084,25 +1070,24 @@ Difference (opd) in meters for the given wavelength.</p>
 <span class="normal">42</span>
 <span class="normal">43</span>
 <span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">phase_to_opd</span><span class="p">(</span><span class="n">phase</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">45</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">phase_to_opd</span><span class="p">(</span><span class="n">phase</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts the input phase in units of radians to the equivilent Optical Path</span>
-<span class="sd">    Difference (opd) in meters for the given wavelength.</span>
+<span class="sd">    Converts the input phase in units of radians to the equivalent Optical Path</span>
+<span class="sd">    Difference (opd) in metres for the given wavelength.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    phase : Array, radians</span>
 <span class="sd">        The phase to be converted into Optical Path Difference (opd)</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The wavelength at which to calculate the phase for.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    opd : Array, meters</span>
-<span class="sd">        The equivilent opd value for the given phase and wavelength.</span>
+<span class="sd">    opd : Array, metres</span>
+<span class="sd">        The equivalent opd value for the given phase and wavelength.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">phase</span><span class="o">*</span><span class="n">wavelength</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">phase</span> <span class="o">*</span> <span class="n">wavelength</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -1112,7 +1097,7 @@ Difference (opd) in meters for the given wavelength.</p>
 </details>
 <hr />
 <h2 id="get-fringe-size">Get Fringe Size<a class="headerlink" href="#get-fringe-size" title="Permanent link">¤</a></h2>
-<p>Calcualtes the angular size in radians of the diffraction fringes in a focal plane based on the wavelength and aperture in meters.</p>
+<p>Calculates the angular size of the diffraction fringes (radians) in a focal plane based on the wavelength and aperture (metres).</p>
 <details class="info">
 <summary>Get Fringe Size API</summary>
 <div class="mkdocstrings">
@@ -1123,7 +1108,7 @@ Difference (opd) in meters for the given wavelength.</p>
 <a id="dLux.utils.optics.get_fringe_size"></a>
   <div class="doc doc-contents first">
   
-      <p>Calcualtes the angular size of the diffraction fringes.</p>
+      <p>Calculates the angular size of the diffraction fringes.</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1139,7 +1124,7 @@ Difference (opd) in meters for the given wavelength.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1153,7 +1138,7 @@ Difference (opd) in meters for the given wavelength.</p>
         <tr>
           <td><code>aperture</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1191,7 +1176,8 @@ Difference (opd) in meters for the given wavelength.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">49</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">48</span>
+<span class="normal">49</span>
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
@@ -1206,16 +1192,15 @@ Difference (opd) in meters for the given wavelength.</p>
 <span class="normal">61</span>
 <span class="normal">62</span>
 <span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_fringe_size</span><span class="p">(</span><span class="n">wavelength</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">aperture</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_fringe_size</span><span class="p">(</span><span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">aperture</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calcualtes the angular size of the diffraction fringes.</span>
+<span class="sd">    Calculates the angular size of the diffraction fringes.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The wavelength at which to calculate the diffraction fringe for.</span>
-<span class="sd">    aperture : Array, meters</span>
+<span class="sd">    aperture : Array, metres</span>
 <span class="sd">        The size of the aperture.</span>
 
 <span class="sd">    Returns</span>
@@ -1223,7 +1208,7 @@ Difference (opd) in meters for the given wavelength.</p>
 <span class="sd">    fringe_size : Array, radians</span>
 <span class="sd">        The angular fringe size in units of radians.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">wavelength</span><span class="o">/</span><span class="n">aperture</span>
+    <span class="k">return</span> <span class="n">wavelength</span> <span class="o">/</span> <span class="n">aperture</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -1233,7 +1218,7 @@ Difference (opd) in meters for the given wavelength.</p>
 </details>
 <hr />
 <h2 id="get-pixels-per-fringe">Get Pixels Per Fringe<a class="headerlink" href="#get-pixels-per-fringe" title="Permanent link">¤</a></h2>
-<p>Calcualtes the number of pixels per diffraction fringe in a focal plane based on the wavelength and aperture in meters. A Nyquist sampled system will have 2 pixels per fringe.</p>
+<p>Calculates the number of pixels per diffraction fringe in a focal plane based on the wavelength and aperture in metres. A Nyquist-sampled system will have 2 pixels per fringe.</p>
 <details class="info">
 <summary>Get Pixels Per Fringe API</summary>
 <div class="mkdocstrings">
@@ -1244,7 +1229,7 @@ Difference (opd) in meters for the given wavelength.</p>
 <a id="dLux.utils.optics.get_pixels_per_fringe"></a>
   <div class="doc doc-contents first">
   
-      <p>Calculates the number of pixels per diffraction fringe, ie the fringe
+      <p>Calculates the number of pixels per diffraction fringe, i.e. the fringe
 sampling rate.</p>
 
   <p><strong>Parameters:</strong></p>
@@ -1261,7 +1246,7 @@ sampling rate.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1275,7 +1260,7 @@ sampling rate.</p>
         <tr>
           <td><code>aperture</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1289,12 +1274,12 @@ sampling rate.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
               <p>The size of each pixel. This is taken in units of radians per pixel if
-no focal length is provided, else it is taken in size of meters per
+no focal length is provided, else it is taken in size of metres per
 pixel.</p>
             </div>
           </td>
@@ -1311,7 +1296,7 @@ pixel.</p>
             <div class="doc-md-description">
               <p>The focal length of the optical system. If none is provided, the pixel
 scale is taken in units of radians per pixel, else it is taken in
-meters per pixel.</p>
+metres per pixel.</p>
             </div>
           </td>
           <td>
@@ -1345,7 +1330,8 @@ meters per pixel.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 68</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 67</span>
+<span class="normal"> 68</span>
 <span class="normal"> 69</span>
 <span class="normal"> 70</span>
 <span class="normal"> 71</span>
@@ -1380,29 +1366,28 @@ meters per pixel.</p>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_pixels_per_fringe</span><span class="p">(</span><span class="n">wavelength</span>   <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                          <span class="n">aperture</span>     <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                          <span class="n">pixel_scale</span>  <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                          <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_pixels_per_fringe</span><span class="p">(</span><span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                          <span class="n">aperture</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                          <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                          <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the number of pixels per diffraction fringe, ie the fringe</span>
+<span class="sd">    Calculates the number of pixels per diffraction fringe, i.e. the fringe</span>
 <span class="sd">    sampling rate.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The wavelength at which to calculate the diffraction fringe for.</span>
-<span class="sd">    aperture : Array, meters</span>
+<span class="sd">    aperture : Array, metres</span>
 <span class="sd">        The size of the aperture.</span>
-<span class="sd">    pixel_scale : Array, meters/pixel or radians/pixel</span>
+<span class="sd">    pixel_scale : Array, metres/pixel or radians/pixel</span>
 <span class="sd">        The size of each pixel. This is taken in units of radians per pixel if</span>
-<span class="sd">        no focal length is provided, else it is taken in size of meters per</span>
+<span class="sd">        no focal length is provided, else it is taken in size of metres per</span>
 <span class="sd">        pixel.</span>
 <span class="sd">    focal_length : Array = None</span>
 <span class="sd">        The focal length of the optical system. If none is provided, the pixel</span>
 <span class="sd">        scale is taken in units of radians per pixel, else it is taken in</span>
-<span class="sd">        meters per pixel.</span>
+<span class="sd">        metres per pixel.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1412,12 +1397,12 @@ meters per pixel.</p>
     <span class="c1"># Get fringe size</span>
     <span class="n">fringe_size</span> <span class="o">=</span> <span class="n">get_fringe_size</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">aperture</span><span class="p">)</span>
 
-    <span class="c1"># Convert to meters if focal_length is provided</span>
+    <span class="c1"># Convert to metres if focal_length is provided</span>
     <span class="k">if</span> <span class="n">focal_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fringe_size</span> <span class="o">*=</span> <span class="n">focal_length</span>
 
     <span class="c1"># Return sampling</span>
-    <span class="k">return</span> <span class="n">fringe_size</span><span class="o">/</span><span class="n">pixel_scale</span>
+    <span class="k">return</span> <span class="n">fringe_size</span> <span class="o">/</span> <span class="n">pixel_scale</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -1427,7 +1412,7 @@ meters per pixel.</p>
 </details>
 <hr />
 <h2 id="get-pixel-scale">Get Pixel Scale<a class="headerlink" href="#get-pixel-scale" title="Permanent link">¤</a></h2>
-<p>Calcualtes the pixel scale in either radians or meters per pixel in a focal plane based on the wavelength and aperture in meters, in order to sample the diffraction fringes by some smapling rate. A sampling rate of 2 will give a Nyquist sampled system. If a focal length is provided the output will be in meters per pixel, otherwise it will be in radians per pixel.</p>
+<p>Calculates the required pixel scale (radians/pixel or metres/pixel) in a focal plane based on the wavelength and aperture (metres) in order to sample the diffraction fringes by some sampling rate. A sampling rate of 2 will give a Nyquist-sampled system. If a focal length is provided, the output will be in metres per pixel, otherwise it will be in radians per pixel.</p>
 <details class="info">
 <summary>Get Pixel Scale API</summary>
 <div class="mkdocstrings">
@@ -1438,7 +1423,7 @@ meters per pixel.</p>
 <a id="dLux.utils.optics.get_pixel_scale"></a>
   <div class="doc doc-contents first">
   
-      <p>Calcaultes the pixel_size needed in order to sample the diffraction fringes
+      <p>Calculates the pixel_size needed in order to sample the diffraction fringes
 at the given sampling rate.</p>
 
   <p><strong>Parameters:</strong></p>
@@ -1470,7 +1455,7 @@ give nyquist sampled pixels.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1484,7 +1469,7 @@ give nyquist sampled pixels.</p>
         <tr>
           <td><code>aperture</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1504,7 +1489,7 @@ give nyquist sampled pixels.</p>
             <div class="doc-md-description">
               <p>The focal length of the optical system. If none is provided, the pixel
 scale is given in units of radians per pixel, else it is given in
-meters per pixel.</p>
+metres per pixel.</p>
             </div>
           </td>
           <td>
@@ -1525,13 +1510,13 @@ meters per pixel.</p>
     <tbody>
         <tr>
 <td><code>pixel_scale</code></td>          <td>
-                <code>Array, radians per pixel or meters per pixel</code>
+                <code>Array, radians per pixel or metres per pixel</code>
           </td>
           <td>
             <div class="doc-md-description">
               <p>The pixel_size needed to sample the diffraction fringes at the input
-sampling rate, in units of radans per pixel if no focal length is
-provided, else in units of meters per pixel.</p>
+sampling rate, in units of radians per pixel if no focal length is
+provided, else in units of metres per pixel.</p>
             </div>
           </td>
         </tr>
@@ -1540,7 +1525,8 @@ provided, else in units of meters per pixel.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">107</span>
+<span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
@@ -1576,13 +1562,12 @@ provided, else in units of meters per pixel.</p>
 <span class="normal">141</span>
 <span class="normal">142</span>
 <span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                    <span class="n">wavelength</span>    <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                    <span class="n">aperture</span>      <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                    <span class="n">focal_length</span>  <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                    <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                    <span class="n">aperture</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                    <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calcaultes the pixel_size needed in order to sample the diffraction fringes</span>
+<span class="sd">    Calculates the pixel_size needed in order to sample the diffraction fringes</span>
 <span class="sd">    at the given sampling rate.</span>
 
 <span class="sd">    Parameters</span>
@@ -1590,26 +1575,26 @@ provided, else in units of meters per pixel.</p>
 <span class="sd">    sampling_rate : Array</span>
 <span class="sd">        The rate at which to sample the diffraction fringes. A value of 2 will</span>
 <span class="sd">        give nyquist sampled pixels.</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The observation wavelength.</span>
-<span class="sd">    aperture : Array, meters</span>
+<span class="sd">    aperture : Array, metres</span>
 <span class="sd">        The size of the aperture.</span>
 <span class="sd">    focal_length : Array = None</span>
 <span class="sd">        The focal length of the optical system. If none is provided, the pixel</span>
 <span class="sd">        scale is given in units of radians per pixel, else it is given in</span>
-<span class="sd">        meters per pixel.</span>
+<span class="sd">        metres per pixel.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    pixel_scale : Array, radians per pixel or meters per pixel</span>
+<span class="sd">    pixel_scale : Array, radians per pixel or metres per pixel</span>
 <span class="sd">        The pixel_size needed to sample the diffraction fringes at the input</span>
-<span class="sd">        sampling rate, in units of radans per pixel if no focal length is</span>
-<span class="sd">        provided, else in units of meters per pixel.</span>
+<span class="sd">        sampling rate, in units of radians per pixel if no focal length is</span>
+<span class="sd">        provided, else in units of metres per pixel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get fringe size</span>
     <span class="n">fringe_size</span> <span class="o">=</span> <span class="n">get_fringe_size</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">aperture</span><span class="p">)</span>
 
-    <span class="c1"># Convert to meters if focal_length is provided</span>
+    <span class="c1"># Convert to metres if focal_length is provided</span>
     <span class="k">if</span> <span class="n">focal_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fringe_size</span> <span class="o">*=</span> <span class="n">focal_length</span>
 
@@ -1624,7 +1609,7 @@ provided, else in units of meters per pixel.</p>
 </details>
 <hr />
 <h2 id="get-airy-pixel-scale">Get Airy Pixel Scale<a class="headerlink" href="#get-airy-pixel-scale" title="Permanent link">¤</a></h2>
-<p>Calcualtes the pixel scale in either radians or meters per pixel in a focal plane based on the wavelength and aperture in meters, in order to sample the diffraction fringes by some smapling rate, based on the slightly larger diffraction fringes given by an airy disk PSF. A sampling rate of 2 will give a Nyquist sampled system. If a focal length is provided the output will be in meters per pixel, otherwise it will be in radians per pixel.</p>
+<p>Calculates the required pixel scale (radians/pixel or metres/pixel) in a focal plane based on the wavelength and aperture (metres) in order to sample the diffraction fringes by some sampling rate, based on the slightly larger diffraction fringes given by an Airy disk PSF. A sampling rate of 2 will give a Nyquist-sampled system. If a focal length is provided the output will be in metres per pixel, otherwise it will be in radians per pixel.</p>
 <details class="info">
 <summary>Get Airy Pixel Scale API</summary>
 <div class="mkdocstrings">
@@ -1635,7 +1620,7 @@ provided, else in units of meters per pixel.</p>
 <a id="dLux.utils.optics.get_airy_pixel_scale"></a>
   <div class="doc doc-contents first">
   
-      <p>Calcaultes the pixel_size needed in order to sample the diffraction fringes
+      <p>Calculates the pixel_size needed to sample the diffraction fringes
 at the given sampling rate. Applies the 1.22 multiplier for Airy disk
 diffraction fringes given by a circular aperture.</p>
 
@@ -1668,7 +1653,7 @@ give nyquist sampled pixels.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1682,7 +1667,7 @@ give nyquist sampled pixels.</p>
         <tr>
           <td><code>aperture</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, meters</code>
+                <code><span title="jax.Array">Array</span>, metres</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1702,7 +1687,7 @@ give nyquist sampled pixels.</p>
             <div class="doc-md-description">
               <p>The focal length of the optical system. If none is provided, the pixel
 scale is given in units of radians per pixel, else it is given in
-meters per pixel.</p>
+metres per pixel.</p>
             </div>
           </td>
           <td>
@@ -1723,13 +1708,13 @@ meters per pixel.</p>
     <tbody>
         <tr>
 <td><code>pixel_scale</code></td>          <td>
-                <code>Array, radians per pixel or meters per pixel</code>
+                <code>Array, radians per pixel or metres per pixel</code>
           </td>
           <td>
             <div class="doc-md-description">
               <p>The pixel_size needed to sample the diffraction fringes at the input
-sampling rate, in units of radans per pixel if no focal length is
-provided, else in units of meters per pixel.</p>
+sampling rate, in units of radians per pixel if no focal length is
+provided, else in units of metres per pixel.</p>
             </div>
           </td>
         </tr>
@@ -1738,7 +1723,8 @@ provided, else in units of meters per pixel.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">148</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">147</span>
+<span class="normal">148</span>
 <span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span>
@@ -1768,13 +1754,12 @@ provided, else in units of meters per pixel.</p>
 <span class="normal">175</span>
 <span class="normal">176</span>
 <span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_airy_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                         <span class="n">wavelength</span>    <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                         <span class="n">aperture</span>      <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                         <span class="n">focal_length</span>  <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_airy_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                         <span class="n">wavelength</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                         <span class="n">aperture</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                         <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calcaultes the pixel_size needed in order to sample the diffraction fringes</span>
+<span class="sd">    Calculates the pixel_size needed to sample the diffraction fringes</span>
 <span class="sd">    at the given sampling rate. Applies the 1.22 multiplier for Airy disk</span>
 <span class="sd">    diffraction fringes given by a circular aperture.</span>
 
@@ -1783,23 +1768,23 @@ provided, else in units of meters per pixel.</p>
 <span class="sd">    sampling_rate : Array</span>
 <span class="sd">        The rate at which to sample the diffraction fringes. A value of 2 will</span>
 <span class="sd">        give nyquist sampled pixels.</span>
-<span class="sd">    wavelength : Array, meters</span>
+<span class="sd">    wavelength : Array, metres</span>
 <span class="sd">        The observation wavelength.</span>
-<span class="sd">    aperture : Array, meters</span>
+<span class="sd">    aperture : Array, metres</span>
 <span class="sd">        The size of the aperture.</span>
 <span class="sd">    focal_length : Array = None</span>
 <span class="sd">        The focal length of the optical system. If none is provided, the pixel</span>
 <span class="sd">        scale is given in units of radians per pixel, else it is given in</span>
-<span class="sd">        meters per pixel.</span>
+<span class="sd">        metres per pixel.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    pixel_scale : Array, radians per pixel or meters per pixel</span>
+<span class="sd">    pixel_scale : Array, radians per pixel or metres per pixel</span>
 <span class="sd">        The pixel_size needed to sample the diffraction fringes at the input</span>
-<span class="sd">        sampling rate, in units of radans per pixel if no focal length is</span>
-<span class="sd">        provided, else in units of meters per pixel.</span>
+<span class="sd">        sampling rate, in units of radians per pixel if no focal length is</span>
+<span class="sd">        provided, else in units of metres per pixel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">get_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="mf">1.22</span><span class="o">*</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">aperture</span><span class="p">,</span>
+    <span class="k">return</span> <span class="n">get_pixel_scale</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="mf">1.22</span> <span class="o">*</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">aperture</span><span class="p">,</span>
                            <span class="n">focal_length</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>

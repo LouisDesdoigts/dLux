@@ -323,7 +323,7 @@
   
     <li class="md-nav__item">
       <a href="../../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -379,7 +379,7 @@
   
     <li class="md-nav__item">
       <a href="../../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -823,21 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -861,7 +846,7 @@
 
 
 <h1 id="observations-observationspy">Observations: observations.py<a class="headerlink" href="#observations-observationspy" title="Permanent link">¤</a></h1>
-<p>This module contains the classes that define the behaviour of observations in dLux. Observations classes are designed to be constructed by users in order to model arbitrary observation patterns. As an example we have implemented a <code>Dither</code> class that applies a series of dithers to the source positions.</p>
+<p>This module contains the classes that define the behaviour of observations in ∂Lux. Observation classes are designed to be constructed by users in order to model arbitrary observation patterns. As an example, we have implemented a <code>Dither</code> class which applies a series of dithers to the source positions.</p>
 <details class="info">
 <summary>Observations API</summary>
 <div class="mkdocstrings">
@@ -906,7 +891,9 @@ single instance of <code>dLux.Instrument</code>.</p>
 
         <details class="quote">
           <summary>Source code in <code>dLux/observations.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">17</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
@@ -916,9 +903,7 @@ single instance of <code>dLux.Instrument</code>.</p>
 <span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BaseObservation</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BaseObservation</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class for observations. All observations should inherit from</span>
 <span class="sd">    this class and must implement an `.model()` method that only takes in a</span>
@@ -926,8 +911,8 @@ single instance of <code>dLux.Instrument</code>.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">BaseObservation</span><span class="p">,</span> 
-              <span class="n">instrument</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">()):</span> <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseObservation</span><span class="p">,</span>
+              <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">()):</span>  <span class="c1"># pragma: no cover</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Abstract method for the observation function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -966,14 +951,14 @@ single instance of <code>dLux.Instrument</code>.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/observations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
-<span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">BaseObservation</span><span class="p">,</span> 
-          <span class="n">instrument</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">()):</span> <span class="c1"># pragma: no cover</span>
+<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseObservation</span><span class="p">,</span>
+          <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">()):</span>  <span class="c1"># pragma: no cover</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract method for the observation function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1007,8 +992,8 @@ single instance of <code>dLux.Instrument</code>.</p>
         Bases: <code><a class="autorefs autorefs-internal" title="dLux.observations.BaseObservation" href="#dLux.observations.BaseObservation">BaseObservation</a></code></p>
 
   
-      <p>Observation class designed to apply a series of dithers to the insturment
-and return the corresponding psfs.</p>
+      <p>Observation class designed to apply a series of dithers to the instrument
+and return the corresponding PSFs.</p>
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1039,7 +1024,9 @@ and the second dimension is the (x, y) dither in radians.</p>
 
         <details class="quote">
           <summary>Source code in <code>dLux/observations.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 32</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
 <span class="normal"> 33</span>
 <span class="normal"> 34</span>
 <span class="normal"> 35</span>
@@ -1116,13 +1103,10 @@ and the second dimension is the (x, y) dither in radians.</p>
 <span class="normal">106</span>
 <span class="normal">107</span>
 <span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Dither</span><span class="p">(</span><span class="n">BaseObservation</span><span class="p">):</span>
+<span class="normal">109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Dither</span><span class="p">(</span><span class="n">BaseObservation</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Observation class designed to apply a series of dithers to the insturment</span>
-<span class="sd">    and return the corresponding psfs.</span>
+<span class="sd">    Observation class designed to apply a series of dithers to the instrument</span>
+<span class="sd">    and return the corresponding PSFs.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -1131,10 +1115,9 @@ and the second dimension is the (x, y) dither in radians.</p>
 <span class="sd">        array should be (ndithers, 2) where ndithers is the number of dithers</span>
 <span class="sd">        and the second dimension is the (x, y) dither in radians.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">dithers</span> <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">dithers</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> <span class="n">dithers</span> <span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> <span class="n">dithers</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Dither class.</span>
 
@@ -1150,15 +1133,16 @@ and the second dimension is the (x, y) dither in radians.</p>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dithers must be an array of shape (ndithers, 2)&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">dither_position</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> 
-                        <span class="n">instrument</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span> 
-                        <span class="n">dither</span>     <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">dither_position</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span>
+                        <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
+                        <span class="n">dither</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dithers the position of the source objects by dither.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        instrument : Instrument</span>
+<span class="sd">            The instrument to dither.</span>
 <span class="sd">        dither : Array, radians</span>
 <span class="sd">            The (x, y) dither to apply to the source positions.</span>
 
@@ -1172,15 +1156,14 @@ and the second dimension is the (x, y) dither in radians.</p>
 
         <span class="c1"># Map the dithers across the sources</span>
         <span class="n">dithered_sources</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">dither_fn</span><span class="p">,</span> <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> \
-            <span class="n">is_leaf</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">dLux</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">Source</span><span class="p">))</span>
+                                    <span class="n">is_leaf</span><span class="o">=</span><span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">dLux</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">Source</span><span class="p">))</span>
 
         <span class="c1"># Apply updates</span>
-        <span class="k">return</span> <span class="n">tree_at</span><span class="p">(</span><span class="k">lambda</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> 
-            <span class="n">dithered_sources</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tree_at</span><span class="p">(</span><span class="k">lambda</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span>
+                       <span class="n">dithered_sources</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">Dither</span><span class="p">,</span>
-              <span class="n">instrument</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span>
+              <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
               <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies a series of dithers to the instrument sources and calls the</span>
@@ -1197,8 +1180,8 @@ and the second dimension is the (x, y) dither in radians.</p>
 <span class="sd">            The psfs generated after applying the dithers to the source</span>
 <span class="sd">            positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">dith_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">dither</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dither_position</span><span class="p">(</span><span class="n">instrument</span><span class="p">,</span> 
-            <span class="n">dither</span><span class="p">)</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">dith_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">dither</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dither_position</span><span class="p">(</span><span class="n">instrument</span><span class="p">,</span>
+                                                      <span class="n">dither</span><span class="p">)</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">vmap</span><span class="p">(</span><span class="n">dith_fn</span><span class="p">,</span> <span class="mi">0</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -1261,7 +1244,10 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/observations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">47</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
 <span class="normal">50</span>
@@ -1272,10 +1258,7 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
 <span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> <span class="n">dithers</span> <span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
+<span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> <span class="n">dithers</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor for the Dither class.</span>
 
@@ -1322,6 +1305,20 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
     </thead>
     <tbody>
         <tr>
+          <td><code>instrument</code></td>
+          <td>
+                <code><span title="dLux.observations.Instrument">Instrument</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The instrument to dither.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
           <td><code>dither</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
@@ -1362,7 +1359,11 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/observations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">64</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
 <span class="normal">67</span>
@@ -1385,16 +1386,16 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
 <span class="normal">84</span>
 <span class="normal">85</span>
 <span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">dither_position</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> 
-                    <span class="n">instrument</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span> 
-                    <span class="n">dither</span>     <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">dither_position</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span>
+                    <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
+                    <span class="n">dither</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dithers the position of the source objects by dither.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
+<span class="sd">    instrument : Instrument</span>
+<span class="sd">        The instrument to dither.</span>
 <span class="sd">    dither : Array, radians</span>
 <span class="sd">        The (x, y) dither to apply to the source positions.</span>
 
@@ -1408,11 +1409,11 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
 
     <span class="c1"># Map the dithers across the sources</span>
     <span class="n">dithered_sources</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">dither_fn</span><span class="p">,</span> <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> \
-        <span class="n">is_leaf</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">dLux</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">Source</span><span class="p">))</span>
+                                <span class="n">is_leaf</span><span class="o">=</span><span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">dLux</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">Source</span><span class="p">))</span>
 
     <span class="c1"># Apply updates</span>
-    <span class="k">return</span> <span class="n">tree_at</span><span class="p">(</span><span class="k">lambda</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> 
-        <span class="n">dithered_sources</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tree_at</span><span class="p">(</span><span class="k">lambda</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span>
+                   <span class="n">dithered_sources</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -1487,7 +1488,10 @@ positions.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/observations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 92</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
 <span class="normal"> 93</span>
 <span class="normal"> 94</span>
 <span class="normal"> 95</span>
@@ -1504,11 +1508,8 @@ positions.</p>
 <span class="normal">106</span>
 <span class="normal">107</span>
 <span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span>       <span class="p">:</span> <span class="n">Dither</span><span class="p">,</span>
-          <span class="n">instrument</span> <span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
+<span class="normal">109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span>
+          <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
           <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies a series of dithers to the instrument sources and calls the</span>
@@ -1525,8 +1526,8 @@ positions.</p>
 <span class="sd">        The psfs generated after applying the dithers to the source</span>
 <span class="sd">        positions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">dith_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">dither</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dither_position</span><span class="p">(</span><span class="n">instrument</span><span class="p">,</span> 
-        <span class="n">dither</span><span class="p">)</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">dith_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">dither</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dither_position</span><span class="p">(</span><span class="n">instrument</span><span class="p">,</span>
+                                                  <span class="n">dither</span><span class="p">)</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">vmap</span><span class="p">(</span><span class="n">dith_fn</span><span class="p">,</span> <span class="mi">0</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -1558,14 +1559,14 @@ positions.</p>
 <h3 class="doc doc-heading" data-role="function" id="dLux.observations.Dither.model"><a class="headerlink" href="#dLux.observations.Dither.model" title="Permanent link">¤</a></h3>
 </div>
 </details>
-<p>All <code>Observation</code> classes shoudl implement a <code>.model(instrument)</code> method that performs the actual calculation of the observation.</p>
-<p>Lets have a look how to construct a simple dither observation class.</p>
+<p>All <code>Observation</code> classes should implement a <code>.model(instrument)</code> method that performs the actual calculation of the observation.</p>
+<p>Let's construct a simple dither observation class.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">dLux</span> <span class="k">as</span> <span class="nn">dl</span>
 
 <span class="c1"># Define the optical parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -1578,7 +1579,7 @@ positions.</p>
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 
 <span class="c1"># Construct Source</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">source</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 
 <span class="c1"># Construct Observation</span>
@@ -1639,7 +1640,7 @@ The observations class is designed to give users complete control over how the i
 We then load this into the instrument class:
 
 <div class="highlight"><pre><span></span><code><span class="c1"># Define the parameters of the optical system</span>
-<span class="n">aperture_diameter</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># meters</span>
+<span class="n">aperture_diameter</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># metres</span>
 <span class="n">pixel_scale</span>       <span class="o">=</span> <span class="mf">2e-7</span> <span class="c1"># Radians per pixel of the detector</span>
 <span class="n">aperture_npixels</span>  <span class="o">=</span> <span class="mi">256</span>  <span class="c1"># Number of pixels representing the wavefront</span>
 <span class="n">detector_npixels</span>  <span class="o">=</span> <span class="mi">64</span>   <span class="c1"># Number of pixels in the detector</span>
@@ -1684,10 +1685,10 @@ We then load this into the instrument class:
 
 ![Observation](../assets/observation.png)
 
-This is a relatively simple example, but shows the flexibilty that can be gained with this class! It can also be used to remove redunancies in calcualtions. Say you wanted to model multiple sources through the same instrument that are separated by a large on-sky angle that still fall on detector, rather than model the full array we can model only the regions that we care about in order to save a lot of redundant compute!
+This is a relatively simple example, but shows the flexibility that can be gained with this class! It can also be used to remove redundancies in calculations. Say you wanted to model multiple sources through the same instrument that are separated by a large on-sky angle that still fall on detector, rather than model the full array we can model only the regions that we care about in order to save a lot of redundant compute!
 
-!!! tip "Acessing Parameters"
-    The `AbstractObservation` class has a built in `__getattr__` class that allows for its parameters to be accessed from high level classes like `Instrument`. That means if we wanted to access the `filter1` parameter we could do so like this:
+!!! tip "Accessing Parameters"
+    The `AbstractObservation` class has a built-in `__getattr__` class that allows for its parameters to be accessed from high level classes like `Instrument`. That means if we wanted to access the `filter1` parameter we could do so like this:
 
     <div class="highlight"><pre><span></span><code><span class="n">filt</span> <span class="o">=</span> <span class="n">telescope</span><span class="o">.</span><span class="n">filter1</span>
 </code></pre></div>

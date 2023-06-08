@@ -323,7 +323,7 @@
   
     <li class="md-nav__item">
       <a href="../../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -379,7 +379,7 @@
   
     <li class="md-nav__item">
       <a href="../../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -823,21 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -860,10 +845,10 @@
                   
 
 
-<h1 id="detector-detectorpy">Detector: detector.py<a class="headerlink" href="#detector-detectorpy" title="Permanent link">¤</a></h1>
-<p>This module contains the classes that define the behaviour of Detectors in dLux.</p>
+<h1 id="detector-detectorpy">Detector: <code>detector.py</code><a class="headerlink" href="#detector-detectorpy" title="Permanent link">¤</a></h1>
+<p>This module contains the classes that define the behaviour of detectors in ∂Lux.</p>
 <p>There is one public class: <code>LayeredDetector</code>.</p>
-<p>This essentially operates in the same way as <code>LayeredOptics</code>, taking in a list of <code>DetectorLayers</code> and applying them sequentially. DetectorLayers operate on <code>Image</code> classes. It has one main method, <code>.model(image)</code> that applies the detector layers to the input image.</p>
+<p>This essentially operates in the same way as <code>LayeredOptics</code>; taking in a list of <code>DetectorLayer</code> objects and applying them sequentially (although they operate on <code>Image</code> classes). <code>LayeredOptics</code> has one main method: <code>.model(image)</code>, which applies the detector layers to the input image.</p>
 <details class="info">
 <summary>Detector API</summary>
 <div class="mkdocstrings">
@@ -877,7 +862,7 @@
         Bases: <code><span title="dLux.detectors.BaseDetector">BaseDetector</span></code></p>
 
   
-      <p>A high level class desgined to model the behaviour of some detectors
+      <p>A high level class designed to model the behaviour of some detectors
 response to some psf.</p>
 
   <p><strong>Attributes:</strong></p>
@@ -908,7 +893,8 @@ and operations upon some input psf as it interacts with the detector.</p>
 
         <details class="quote">
           <summary>Source code in <code>dLux/detectors.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">23</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">22</span>
+<span class="normal">23</span>
 <span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span>
@@ -976,13 +962,9 @@ and operations upon some input psf as it interacts with the detector.</p>
 <span class="normal">88</span>
 <span class="normal">89</span>
 <span class="normal">90</span>
-<span class="normal">91</span>
-<span class="normal">92</span>
-<span class="normal">93</span>
-<span class="normal">94</span>
-<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">LayeredDetector</span><span class="p">(</span><span class="n">BaseDetector</span><span class="p">):</span>
+<span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">LayeredDetector</span><span class="p">(</span><span class="n">BaseDetector</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A high level class desgined to model the behaviour of some detectors</span>
+<span class="sd">    A high level class designed to model the behaviour of some detectors</span>
 <span class="sd">    response to some psf.</span>
 
 <span class="sd">    Attributes</span>
@@ -991,10 +973,9 @@ and operations upon some input psf as it interacts with the detector.</p>
 <span class="sd">        A collections.OrderedDict of &#39;layers&#39; that define the transformations</span>
 <span class="sd">        and operations upon some input psf as it interacts with the detector.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">layers</span> <span class="p">:</span> <span class="n">OrderedDict</span>
+    <span class="n">layers</span><span class="p">:</span> <span class="n">OrderedDict</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">layers</span> <span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Detector class.</span>
 
@@ -1006,15 +987,14 @@ and operations upon some input psf as it interacts with the detector.</p>
 
 <span class="sd">            A list of ∂Lux &#39;layers&#39; that define the transformations and</span>
 <span class="sd">            operations upon some input wavefront through an optical system.</span>
-<span class="sd">            The entried can either be dLux DetectorLayers, or tuples of the</span>
+<span class="sd">            The entries can either be dLux DetectorLayers, or tuples of the</span>
 <span class="sd">            form (DetectorLayer, key), with the key being used as the dictionary</span>
 <span class="sd">            key for the layer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">DetectorLayer</span><span class="p">())</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">key</span> <span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method designed to allow accessing of the various items within</span>
 <span class="sd">        the layers dictionary of this class via the &#39;class.attribute&#39; method.</span>
@@ -1032,11 +1012,10 @@ and operations upon some input psf as it interacts with the detector.</p>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span>\
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span>
                                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">key</span><span class="p">))</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applied the stored detector layers to the input image.</span>
 
@@ -1048,7 +1027,7 @@ and operations upon some input psf as it interacts with the detector.</p>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Array</span>
-<span class="sd">            The ouput &#39;image&#39; after being transformed by the detector layers.</span>
+<span class="sd">            The output &#39;image&#39; after being transformed by the detector layers.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">image</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
@@ -1135,7 +1114,10 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/detectors.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">57</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span>
 <span class="normal">60</span>
@@ -1151,10 +1133,7 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
 <span class="normal">70</span>
 <span class="normal">71</span>
 <span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">key</span> <span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Magic method designed to allow accessing of the various items within</span>
 <span class="sd">    the layers dictionary of this class via the &#39;class.attribute&#39; method.</span>
@@ -1172,7 +1151,7 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
     <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span>\
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span>
                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">key</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -1216,7 +1195,7 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
 effects for some detector.</p>
 <p>A list of ∂Lux 'layers' that define the transformations and
 operations upon some input wavefront through an optical system.
-The entried can either be dLux DetectorLayers, or tuples of the
+The entries can either be dLux DetectorLayers, or tuples of the
 form (DetectorLayer, key), with the key being used as the dictionary
 key for the layer.</p>
             </div>
@@ -1230,7 +1209,9 @@ key for the layer.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/detectors.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span>
 <span class="normal">40</span>
@@ -1245,9 +1226,7 @@ key for the layer.</p>
 <span class="normal">49</span>
 <span class="normal">50</span>
 <span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">layers</span> <span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+<span class="normal">52</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor for the Detector class.</span>
 
@@ -1259,7 +1238,7 @@ key for the layer.</p>
 
 <span class="sd">        A list of ∂Lux &#39;layers&#39; that define the transformations and</span>
 <span class="sd">        operations upon some input wavefront through an optical system.</span>
-<span class="sd">        The entried can either be dLux DetectorLayers, or tuples of the</span>
+<span class="sd">        The entries can either be dLux DetectorLayers, or tuples of the</span>
 <span class="sd">        form (DetectorLayer, key), with the key being used as the dictionary</span>
 <span class="sd">        key for the layer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1328,7 +1307,7 @@ key for the layer.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The ouput 'image' after being transformed by the detector layers.</p>
+              <p>The output 'image' after being transformed by the detector layers.</p>
             </div>
           </td>
         </tr>
@@ -1337,7 +1316,11 @@ key for the layer.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/detectors.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">79</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
 <span class="normal">80</span>
 <span class="normal">81</span>
 <span class="normal">82</span>
@@ -1349,11 +1332,7 @@ key for the layer.</p>
 <span class="normal">88</span>
 <span class="normal">89</span>
 <span class="normal">90</span>
-<span class="normal">91</span>
-<span class="normal">92</span>
-<span class="normal">93</span>
-<span class="normal">94</span>
-<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applied the stored detector layers to the input image.</span>
 
@@ -1365,7 +1344,7 @@ key for the layer.</p>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    image : Array</span>
-<span class="sd">        The ouput &#39;image&#39; after being transformed by the detector layers.</span>
+<span class="sd">        The output &#39;image&#39; after being transformed by the detector layers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">image</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
@@ -1390,14 +1369,14 @@ key for the layer.</p>
 </details>
 <hr />
 <h1 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¤</a></h1>
-<p>Lets have a look at how we can construct a <code>LayeredDetector</code> class and apply it to some psf.</p>
+<p>Let's look at how we can construct a <code>LayeredDetector</code> class and apply it to a PSF.</p>
 <p>First we construct some optics and a source:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">dLux</span> <span class="k">as</span> <span class="nn">dl</span>
 
 <span class="c1"># Define the optical parameters</span>
 <span class="n">wf_npixels</span> <span class="o">=</span> <span class="mi">256</span>
-<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># meters</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># metres</span>
 <span class="n">psf_npixels</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># arcseconds</span>
 <span class="n">psf_oversample</span> <span class="o">=</span> <span class="mi">4</span>
@@ -1410,7 +1389,7 @@ key for the layer.</p>
     <span class="n">psf_npixels</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">psf_oversample</span><span class="p">)</span>
 
 <span class="c1"># Construct Source</span>
-<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># meters</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1.2e-6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="c1"># metres</span>
 <span class="n">source</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span>
 <span class="n">raw_psf</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
 </code></pre></div>

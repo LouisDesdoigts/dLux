@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=d2e34da2" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b18ac4eb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1908,7 +1893,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=ae6d6b47" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=0d2ff282" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1929,15 +1914,15 @@ from jax import Array</div>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;rad_to_arcsec&quot;</span><span class="p">,</span> <span class="s2">&quot;rad_to_deg&quot;</span><span class="p">,</span> <span class="s2">&quot;rad_to_arcmin&quot;</span><span class="p">,</span> 
-    <span class="s2">&quot;deg_to_rad&quot;</span><span class="p">,</span> <span class="s2">&quot;deg_to_arcmin&quot;</span><span class="p">,</span> <span class="s2">&quot;deg_to_arcsec&quot;</span><span class="p">,</span> 
-    <span class="s2">&quot;arcmin_to_rad&quot;</span><span class="p">,</span> <span class="s2">&quot;arcmin_to_deg&quot;</span><span class="p">,</span> <span class="s2">&quot;arcmin_to_arcsec&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;rad_to_arcsec&quot;</span><span class="p">,</span> <span class="s2">&quot;rad_to_deg&quot;</span><span class="p">,</span> <span class="s2">&quot;rad_to_arcmin&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;deg_to_rad&quot;</span><span class="p">,</span> <span class="s2">&quot;deg_to_arcmin&quot;</span><span class="p">,</span> <span class="s2">&quot;deg_to_arcsec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;arcmin_to_rad&quot;</span><span class="p">,</span> <span class="s2">&quot;arcmin_to_deg&quot;</span><span class="p">,</span> <span class="s2">&quot;arcmin_to_arcsec&quot;</span><span class="p">,</span>
     <span class="s2">&quot;arcsec_to_rad&quot;</span><span class="p">,</span> <span class="s2">&quot;arcsec_to_deg&quot;</span><span class="p">,</span> <span class="s2">&quot;arcsec_to_arcmin&quot;</span><span class="p">]</span>
 </pre></div>
 <div id="cell-2" class="clipboard-copy-txt">__all__ = [
-    "rad_to_arcsec", "rad_to_deg", "rad_to_arcmin", 
-    "deg_to_rad", "deg_to_arcmin", "deg_to_arcsec", 
-    "arcmin_to_rad", "arcmin_to_deg", "arcmin_to_arcsec", 
+    "rad_to_arcsec", "rad_to_deg", "rad_to_arcmin",
+    "deg_to_rad", "deg_to_arcmin", "deg_to_arcsec",
+    "arcmin_to_rad", "arcmin_to_deg", "arcmin_to_arcsec",
     "arcsec_to_rad", "arcsec_to_deg", "arcsec_to_arcmin"]</div>
         
         </div>
@@ -1948,7 +1933,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=67ed31eb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3185eaa8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1969,7 +1954,7 @@ from jax import Array</div>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Radians to:</span>
-<span class="k">def</span> <span class="nf">rad_to_arcsec</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">rad_to_arcsec</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from radians to arcseconds.</span>
 
@@ -1988,7 +1973,7 @@ from jax import Array</div>
     <span class="k">return</span> <span class="n">values</span> <span class="o">*</span> <span class="mi">3600</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 </pre></div>
 <div id="cell-3" class="clipboard-copy-txt"># Radians to:
-def rad_to_arcsec(values : Array) -> Array:
+def rad_to_arcsec(values: Array) -> Array:
     """
     Converts the inputs values from radians to arcseconds.
 
@@ -2014,7 +1999,7 @@ def rad_to_arcsec(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=daa57b6e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=34255432" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2034,7 +2019,7 @@ def rad_to_arcsec(values : Array) -> Array:
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">rad_to_deg</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">rad_to_deg</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from radians to degrees.</span>
 
@@ -2052,7 +2037,7 @@ def rad_to_arcsec(values : Array) -> Array:
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">values</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt">def rad_to_deg(values : Array) -> Array:
+<div id="cell-4" class="clipboard-copy-txt">def rad_to_deg(values: Array) -> Array:
     """
     Converts the inputs values from radians to degrees.
 
@@ -2078,7 +2063,7 @@ def rad_to_arcsec(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=297dae5d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=2b9a5ab2" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2098,7 +2083,7 @@ def rad_to_arcsec(values : Array) -> Array:
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">rad_to_arcmin</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">rad_to_arcmin</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from radians to arcminutes.</span>
 
@@ -2116,7 +2101,7 @@ def rad_to_arcsec(values : Array) -> Array:
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">values</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 </pre></div>
-<div id="cell-5" class="clipboard-copy-txt">def rad_to_arcmin(values : Array) -> Array:
+<div id="cell-5" class="clipboard-copy-txt">def rad_to_arcmin(values: Array) -> Array:
     """
     Converts the inputs values from radians to arcminutes.
 
@@ -2142,7 +2127,7 @@ def rad_to_arcsec(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=e565afed" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=c10a4b32" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2163,7 +2148,7 @@ def rad_to_arcsec(values : Array) -> Array:
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Degrees to:</span>
-<span class="k">def</span> <span class="nf">deg_to_rad</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">deg_to_rad</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from degrees to radians.</span>
 
@@ -2182,7 +2167,7 @@ def rad_to_arcsec(values : Array) -> Array:
     <span class="k">return</span> <span class="n">values</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
 </pre></div>
 <div id="cell-6" class="clipboard-copy-txt"># Degrees to:
-def deg_to_rad(values : Array) -> Array:
+def deg_to_rad(values: Array) -> Array:
     """
     Converts the inputs values from degrees to radians.
 
@@ -2208,7 +2193,7 @@ def deg_to_rad(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=792dc334" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b58bf7cd" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2228,7 +2213,7 @@ def deg_to_rad(values : Array) -> Array:
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">deg_to_arcmin</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">deg_to_arcmin</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from degrees to arcminutes.</span>
 
@@ -2246,7 +2231,7 @@ def deg_to_rad(values : Array) -> Array:
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">values</span> <span class="o">*</span> <span class="mi">60</span>
 </pre></div>
-<div id="cell-7" class="clipboard-copy-txt">def deg_to_arcmin(values : Array) -> Array:
+<div id="cell-7" class="clipboard-copy-txt">def deg_to_arcmin(values: Array) -> Array:
     """
     Converts the inputs values from degrees to arcminutes.
 
@@ -2272,7 +2257,7 @@ def deg_to_rad(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=41f05949" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=328887ac" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2292,7 +2277,7 @@ def deg_to_rad(values : Array) -> Array:
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">deg_to_arcsec</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">deg_to_arcsec</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from degrees to arcseconds.</span>
 
@@ -2310,7 +2295,7 @@ def deg_to_rad(values : Array) -> Array:
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">values</span> <span class="o">*</span> <span class="mi">3600</span>
 </pre></div>
-<div id="cell-8" class="clipboard-copy-txt">def deg_to_arcsec(values : Array) -> Array:
+<div id="cell-8" class="clipboard-copy-txt">def deg_to_arcsec(values: Array) -> Array:
     """
     Converts the inputs values from degrees to arcseconds.
 
@@ -2336,7 +2321,7 @@ def deg_to_rad(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=61888c1c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=10de1746" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2357,7 +2342,7 @@ def deg_to_rad(values : Array) -> Array:
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Arcminutes to:</span>
-<span class="k">def</span> <span class="nf">arcmin_to_rad</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">arcmin_to_rad</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from arcminutes to radians.</span>
 
@@ -2376,7 +2361,7 @@ def deg_to_rad(values : Array) -> Array:
     <span class="k">return</span> <span class="n">values</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">180</span><span class="p">)</span>
 </pre></div>
 <div id="cell-9" class="clipboard-copy-txt"># Arcminutes to:
-def arcmin_to_rad(values : Array) -> Array:
+def arcmin_to_rad(values: Array) -> Array:
     """
     Converts the inputs values from arcminutes to radians.
 
@@ -2402,7 +2387,7 @@ def arcmin_to_rad(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=70db6b83" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=85306868" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2422,7 +2407,7 @@ def arcmin_to_rad(values : Array) -> Array:
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">arcmin_to_deg</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">arcmin_to_deg</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from arcminutes to degrees.</span>
 
@@ -2440,7 +2425,7 @@ def arcmin_to_rad(values : Array) -> Array:
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">values</span> <span class="o">/</span> <span class="mi">60</span>
 </pre></div>
-<div id="cell-10" class="clipboard-copy-txt">def arcmin_to_deg(values : Array) -> Array:
+<div id="cell-10" class="clipboard-copy-txt">def arcmin_to_deg(values: Array) -> Array:
     """
     Converts the inputs values from arcminutes to degrees.
 
@@ -2466,7 +2451,7 @@ def arcmin_to_rad(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=aeea386d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e6ac8bdf" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2486,7 +2471,7 @@ def arcmin_to_rad(values : Array) -> Array:
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">arcmin_to_arcsec</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">arcmin_to_arcsec</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from arcminutes to arcseconds.</span>
 
@@ -2504,7 +2489,7 @@ def arcmin_to_rad(values : Array) -> Array:
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">values</span> <span class="o">*</span> <span class="mi">60</span>
 </pre></div>
-<div id="cell-11" class="clipboard-copy-txt">def arcmin_to_arcsec(values : Array) -> Array:
+<div id="cell-11" class="clipboard-copy-txt">def arcmin_to_arcsec(values: Array) -> Array:
     """
     Converts the inputs values from arcminutes to arcseconds.
 
@@ -2530,7 +2515,7 @@ def arcmin_to_rad(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=1121b9b1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a599ab26" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2551,7 +2536,7 @@ def arcmin_to_rad(values : Array) -> Array:
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Arcseconds to:</span>
-<span class="k">def</span> <span class="nf">arcsec_to_rad</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">arcsec_to_rad</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from arcseconds to radians.</span>
 
@@ -2570,7 +2555,7 @@ def arcmin_to_rad(values : Array) -> Array:
     <span class="k">return</span> <span class="n">values</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3600</span> <span class="o">*</span> <span class="mi">180</span><span class="p">)</span>
 </pre></div>
 <div id="cell-12" class="clipboard-copy-txt"># Arcseconds to:
-def arcsec_to_rad(values : Array) -> Array:
+def arcsec_to_rad(values: Array) -> Array:
     """
     Converts the inputs values from arcseconds to radians.
 
@@ -2596,7 +2581,7 @@ def arcsec_to_rad(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=fa52fd8f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=4cc90f18" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2616,7 +2601,7 @@ def arcsec_to_rad(values : Array) -> Array:
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">arcsec_to_deg</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">arcsec_to_deg</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from arcseconds to degrees.</span>
 
@@ -2634,7 +2619,7 @@ def arcsec_to_rad(values : Array) -> Array:
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">values</span> <span class="o">/</span> <span class="mi">3600</span>
 </pre></div>
-<div id="cell-13" class="clipboard-copy-txt">def arcsec_to_deg(values : Array) -> Array:
+<div id="cell-13" class="clipboard-copy-txt">def arcsec_to_deg(values: Array) -> Array:
     """
     Converts the inputs values from arcseconds to degrees.
 
@@ -2660,7 +2645,7 @@ def arcsec_to_rad(values : Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=ed758ed1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=bc373cd2" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2680,7 +2665,7 @@ def arcsec_to_rad(values : Array) -> Array:
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">arcsec_to_arcmin</span><span class="p">(</span><span class="n">values</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">arcsec_to_arcmin</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the inputs values from arcseconds to arcminutes.</span>
 
@@ -2698,7 +2683,7 @@ def arcsec_to_rad(values : Array) -> Array:
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">values</span> <span class="o">/</span> <span class="mi">60</span>
 </pre></div>
-<div id="cell-14" class="clipboard-copy-txt">def arcsec_to_arcmin(values : Array) -> Array:
+<div id="cell-14" class="clipboard-copy-txt">def arcsec_to_arcmin(values: Array) -> Array:
     """
     Converts the inputs values from arcseconds to arcminutes.
 

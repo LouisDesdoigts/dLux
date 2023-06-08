@@ -319,7 +319,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -375,7 +375,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -796,21 +796,6 @@
     <li class="md-nav__item">
       <a href="../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1879,7 +1864,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b76ab34d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=cd3977b7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1911,7 +1896,7 @@ Licensed under the Apache License, Version 2.0.
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b8fdcd7b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=efe20d40" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1935,34 +1920,30 @@ Licensed under the Apache License, Version 2.0.
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">jax.scipy.signal</span> <span class="kn">import</span> <span class="n">convolve</span>
 <span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">vmap</span><span class="p">,</span> <span class="n">Array</span>
-<span class="kn">from</span> <span class="nn">equinox</span> <span class="kn">import</span> <span class="n">tree_at</span>
 <span class="kn">from</span> <span class="nn">zodiax</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">dLux</span>
 
-
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;PointSource&quot;</span><span class="p">,</span> 
-    <span class="s2">&quot;PointSources&quot;</span><span class="p">,</span> 
-    <span class="s2">&quot;BinarySource&quot;</span><span class="p">,</span> 
-    <span class="s2">&quot;ResolvedSource&quot;</span><span class="p">,</span> 
+    <span class="s2">&quot;PointSource&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PointSources&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BinarySource&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ResolvedSource&quot;</span><span class="p">,</span>
     <span class="s2">&quot;PointResolvedSource&quot;</span><span class="p">]</span>
 </pre></div>
 <div id="cell-2" class="clipboard-copy-txt">from __future__ import annotations
 import jax.numpy as np
 from jax.scipy.signal import convolve
 from jax import vmap, Array
-from equinox import tree_at
 from zodiax import Base
 from abc import abstractmethod
 import dLux
 
-
 __all__ = [
-    "PointSource", 
-    "PointSources", 
-    "BinarySource", 
-    "ResolvedSource", 
+    "PointSource",
+    "PointSources",
+    "BinarySource",
+    "ResolvedSource",
     "PointResolvedSource"]
 </div>
         
@@ -1974,7 +1955,7 @@ __all__ = [
 
 </div>
 </div>
-<div id="cell-id=c46b3aed" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div id="cell-id=7c6e32fc" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1986,7 +1967,7 @@ __all__ = [
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b3ea0126" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=f7419b47" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2010,36 +1991,36 @@ __all__ = [
     <span class="c1"># TODO: Add this to allow custom sources</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optics</span><span class="p">,</span> <span class="n">detector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optics</span><span class="p">,</span> <span class="n">detector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">pass</span>
 
 
 <span class="k">class</span> <span class="nc">Source</span><span class="p">(</span><span class="n">BaseSource</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for source objects. The idea of these source classes is to allow</span>
-<span class="sd">    an arbitrary parametrisation of the underlying astrophyical objects. Each</span>
+<span class="sd">    an arbitrary parametrisation of the underlying astrophysical objects. Each</span>
 <span class="sd">    source object requires a normalise(), format_inputs(), and model() methods,</span>
 <span class="sd">    along with the regular getter and setter methods.</span>
 
 <span class="sd">    The normalise() method should return a new instance of the class with all</span>
-<span class="sd">    the appropriate attribues normalised (ie spectral weights, resolved source</span>
+<span class="sd">    the appropriate attributes normalised (ie spectral weights, resolved source</span>
 <span class="sd">    distribution).</span>
 
 <span class="sd">    The format_inputs() method should return the relevant wavelengths, weights,</span>
-<span class="sd">    positions etc, that are correctly formatted to be used by the model()</span>
-<span class="sd">    method. This should primarily interface with the specrum object, and should</span>
+<span class="sd">    positions etc., that are correctly formatted to be used by the model()</span>
+<span class="sd">    method. This should primarily interface with the spectrum object, and should</span>
 <span class="sd">    call the normalise() method.</span>
 
 <span class="sd">    The model() method should return a single psf of the source. This is done</span>
-<span class="sd">    inside of the source object so that each class can be arbitrarily</span>
+<span class="sd">    inside the source object so that each class can be arbitrarily</span>
 <span class="sd">    parameterised as required. This method should call the format_inputs()</span>
 <span class="sd">    method.</span>
 
-<span class="sd">    A series of parameterisations have been proided to model a series of</span>
+<span class="sd">    A series of parametrisations have been provided to model a series of</span>
 <span class="sd">    different astrophysical objects.</span>
 
 <span class="sd">    Attributes</span>
@@ -2051,24 +2032,23 @@ __all__ = [
 <span class="sd">    spectrum : Spectrum</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">position</span> <span class="p">:</span> <span class="n">Array</span>
-    <span class="n">flux</span>     <span class="p">:</span> <span class="n">Array</span>
-    <span class="n">spectrum</span> <span class="p">:</span> <span class="n">Spectrum</span>
+    <span class="n">position</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">flux</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">spectrum</span><span class="p">:</span> <span class="n">Spectrum</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
-                 <span class="n">wavelengths</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">position</span>    <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-                 <span class="n">flux</span>        <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
-                 <span class="n">weights</span>     <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">spectrum</span>    <span class="p">:</span> <span class="n">Spectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
+                 <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">position</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                 <span class="n">flux</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
+                 <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">spectrum</span><span class="p">:</span> <span class="n">Spectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Source class.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        wavelengths : Array, meters</span>
+<span class="sd">        wavelengths : Array, metres</span>
 <span class="sd">            The array of wavelengths at which the spectrum is defined. Defaults</span>
 <span class="sd">            to a PointSource with a flat spectrum.</span>
 <span class="sd">        position : Array, radians = None</span>
@@ -2084,14 +2064,14 @@ __all__ = [
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Position and Flux</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">flux</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">flux</span><span class="p">,</span>     <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">flux</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;position must be a 1d array of shape (2,).&quot;</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flux</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;flux must be a scalar, ie shape == ().&quot;</span><span class="p">)</span>
-        
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;flux must be a scalar, i.e. shape == ().&quot;</span><span class="p">)</span>
+
         <span class="c1"># Spectrum</span>
         <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">dLux</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">):</span>
@@ -2100,8 +2080,7 @@ __all__ = [
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span> <span class="o">=</span> <span class="n">dLux</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">key</span> <span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Getter method for the spectrum object.</span>
 
@@ -2119,10 +2098,9 @@ __all__ = [
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;attribute </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                                 <span class="sa">f</span><span class="s2">&quot;attribute </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method for returning a new normalised source object.</span>
 
@@ -2134,8 +2112,7 @@ __all__ = [
         <span class="n">norm_spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;spectrum&#39;</span><span class="p">,</span> <span class="n">norm_spectrum</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">optics</span> <span class="p">:</span> <span class="n">Optics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method to model the psf of the point source through the optics.</span>
 
@@ -2149,7 +2126,7 @@ __all__ = [
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        psf : Array</span>
-<span class="sd">            The psf of the source source modelled through the optics.</span>
+<span class="sd">            The PSF of the source modelled through the optics.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">flux</span>
@@ -2173,12 +2150,11 @@ __all__ = [
 <span class="sd">    spectrum : Spectrum</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">contrast</span> <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">contrast</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>     <span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
-                 <span class="n">contrast</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
+                 <span class="n">contrast</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the RelativeFluxSource class.</span>
 
@@ -2193,11 +2169,10 @@ __all__ = [
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">contrast</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;contrast must have shape ().&quot;</span><span class="p">)</span>
 
-
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">fluxes</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Getter method for the fluxes. This paramterieses the source such that</span>
+<span class="sd">        Getter method for the fluxes. This parametrises the source such that</span>
 <span class="sd">        flux refers to the mean_flux and contrast is defined as the ratio of</span>
 <span class="sd">        the flux of the first entry divided by the second entry.</span>
 
@@ -2227,18 +2202,17 @@ __all__ = [
 <span class="sd">        The separation of the two sources in radians.</span>
 <span class="sd">    position_angle : Array, radians</span>
 <span class="sd">        The field angle between the two sources measure from the positive</span>
-<span class="sd">        x axis.</span>
+<span class="sd">        x-axis.</span>
 <span class="sd">    spectrum : Spectrum</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">separation</span>     <span class="p">:</span> <span class="n">Array</span>
-    <span class="n">position_angle</span> <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">separation</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">position_angle</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>           <span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
-                 <span class="n">separation</span>     <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">position_angle</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
+                 <span class="n">separation</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">position_angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the RelativePositionSource class.</span>
 
@@ -2248,10 +2222,10 @@ __all__ = [
 <span class="sd">            The separation of the two sources in radians.</span>
 <span class="sd">        position_angle : Array, radians</span>
 <span class="sd">            The field angle between the two sources measure from the positive</span>
-<span class="sd">            x axis.</span>
+<span class="sd">            x-axis.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">separation</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">separation</span><span class="p">,</span>     <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">separation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">separation</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">position_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">position_angle</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">separation</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">():</span>
@@ -2260,9 +2234,8 @@ __all__ = [
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_angle</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;position_angle must have shape ().&quot;</span><span class="p">)</span>
 
-
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">positions</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">positions</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Getter method for the position.</span>
 
@@ -2271,8 +2244,8 @@ __all__ = [
 <span class="sd">        position : Array, radians</span>
 <span class="sd">            The ((x, y), (x, y)) on-sky position of this object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">r</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">separation</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_angle</span>
-        <span class="n">sep_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">r</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)])</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">separation</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_angle</span>
+        <span class="n">sep_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)])</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">+</span> <span class="n">sep_vec</span><span class="p">,</span>
                          <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">-</span> <span class="n">sep_vec</span><span class="p">])</span>
 </pre></div>
@@ -2280,36 +2253,36 @@ __all__ = [
     # TODO: Add this to allow custom sources
 
     @abstractmethod
-    def normalise(self): # pragma: no cover
+    def normalise(self):  # pragma: no cover
         pass
 
     @abstractmethod
-    def model(self, optics, detector=None): # pragma: no cover
+    def model(self, optics, detector=None):  # pragma: no cover
         pass
 
 
 class Source(BaseSource):
     """
     Base class for source objects. The idea of these source classes is to allow
-    an arbitrary parametrisation of the underlying astrophyical objects. Each
+    an arbitrary parametrisation of the underlying astrophysical objects. Each
     source object requires a normalise(), format_inputs(), and model() methods,
     along with the regular getter and setter methods.
 
     The normalise() method should return a new instance of the class with all
-    the appropriate attribues normalised (ie spectral weights, resolved source
+    the appropriate attributes normalised (ie spectral weights, resolved source
     distribution).
 
     The format_inputs() method should return the relevant wavelengths, weights,
-    positions etc, that are correctly formatted to be used by the model()
-    method. This should primarily interface with the specrum object, and should
+    positions etc., that are correctly formatted to be used by the model()
+    method. This should primarily interface with the spectrum object, and should
     call the normalise() method.
 
     The model() method should return a single psf of the source. This is done
-    inside of the source object so that each class can be arbitrarily
+    inside the source object so that each class can be arbitrarily
     parameterised as required. This method should call the format_inputs()
     method.
 
-    A series of parameterisations have been proided to model a series of
+    A series of parametrisations have been provided to model a series of
     different astrophysical objects.
 
     Attributes
@@ -2321,24 +2294,23 @@ class Source(BaseSource):
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     """
-    position : Array
-    flux     : Array
-    spectrum : Spectrum
+    position: Array
+    flux: Array
+    spectrum: Spectrum
 
-
-    def __init__(self        : Source,
-                 wavelengths : Array,
-                 position    : Array    = np.zeros(2),
-                 flux        : Array    = np.array(1.),
-                 weights     : Array    = None,
-                 spectrum    : Spectrum = None,
-                 ) -> Source:
+    def __init__(self: Source,
+                 wavelengths: Array,
+                 position: Array = np.zeros(2),
+                 flux: Array = np.array(1.),
+                 weights: Array = None,
+                 spectrum: Spectrum = None,
+                 ):
         """
         Constructor for the Source class.
 
         Parameters
         ----------
-        wavelengths : Array, meters
+        wavelengths : Array, metres
             The array of wavelengths at which the spectrum is defined. Defaults
             to a PointSource with a flat spectrum.
         position : Array, radians = None
@@ -2354,14 +2326,14 @@ class Source(BaseSource):
         """
         # Position and Flux
         self.position = np.asarray(position, dtype=float)
-        self.flux     = np.asarray(flux,     dtype=float)
+        self.flux = np.asarray(flux, dtype=float)
 
         if self.position.shape != (2,):
             raise ValueError("position must be a 1d array of shape (2,).")
-        
+
         if self.flux.shape != ():
-            raise ValueError("flux must be a scalar, ie shape == ().")
-        
+            raise ValueError("flux must be a scalar, i.e. shape == ().")
+
         # Spectrum
         if spectrum is not None:
             if not isinstance(spectrum, dLux.spectra.Spectrum):
@@ -2370,8 +2342,7 @@ class Source(BaseSource):
         else:
             self.spectrum = dLux.spectra.Spectrum(wavelengths, weights)
 
-
-    def __getattr__(self : Source, key : str) -> Any:
+    def __getattr__(self: Source, key: str) -> Any:
         """
         Getter method for the spectrum object.
 
@@ -2389,10 +2360,9 @@ class Source(BaseSource):
             return getattr(self.spectrum, key)
         else:
             raise AttributeError(f"{self.__class__.__name__} has no "
-                f"attribute {key}.")
+                                 f"attribute {key}.")
 
-
-    def normalise(self : Source) -> Source:
+    def normalise(self: Source) -> Source:
         """
         Method for returning a new normalised source object.
 
@@ -2404,8 +2374,7 @@ class Source(BaseSource):
         norm_spectrum = self.spectrum.normalise()
         return self.set('spectrum', norm_spectrum)
 
-
-    def model(self : Source, optics : Optics) -> Array:
+    def model(self: Source, optics: Optics) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -2419,7 +2388,7 @@ class Source(BaseSource):
         Returns
         -------
         psf : Array
-            The psf of the source source modelled through the optics.
+            The PSF of the source modelled through the optics.
         """
         self = self.normalise()
         weights = self.weights * self.flux
@@ -2443,12 +2412,11 @@ class RelativeFluxSource(Source):
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     """
-    contrast : Array
+    contrast: Array
 
-
-    def __init__(self     : Source,
-                 contrast : Array,
-                 **kwargs) -> Source:
+    def __init__(self: Source,
+                 contrast: Array,
+                 **kwargs):
         """
         Constructor for the RelativeFluxSource class.
 
@@ -2463,11 +2431,10 @@ class RelativeFluxSource(Source):
         if self.contrast.shape != ():
             raise ValueError("contrast must have shape ().")
 
-
     @property
-    def fluxes(self : Source) -> Array:
+    def fluxes(self: Source) -> Array:
         """
-        Getter method for the fluxes. This paramterieses the source such that
+        Getter method for the fluxes. This parametrises the source such that
         flux refers to the mean_flux and contrast is defined as the ratio of
         the flux of the first entry divided by the second entry.
 
@@ -2497,18 +2464,17 @@ class RelativePositionSource(Source):
         The separation of the two sources in radians.
     position_angle : Array, radians
         The field angle between the two sources measure from the positive
-        x axis.
+        x-axis.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     """
-    separation     : Array
-    position_angle : Array
+    separation: Array
+    position_angle: Array
 
-
-    def __init__(self           : Source,
-                 separation     : Array,
-                 position_angle : Array,
-                 **kwargs) -> Source:
+    def __init__(self: Source,
+                 separation: Array,
+                 position_angle: Array,
+                 **kwargs):
         """
         Constructor for the RelativePositionSource class.
 
@@ -2518,10 +2484,10 @@ class RelativePositionSource(Source):
             The separation of the two sources in radians.
         position_angle : Array, radians
             The field angle between the two sources measure from the positive
-            x axis.
+            x-axis.
         """
         super().__init__(**kwargs)
-        self.separation     = np.asarray(separation,     dtype=float)
+        self.separation = np.asarray(separation, dtype=float)
         self.position_angle = np.asarray(position_angle, dtype=float)
 
         if self.separation.shape != ():
@@ -2530,9 +2496,8 @@ class RelativePositionSource(Source):
         if self.position_angle.shape != ():
             raise ValueError("position_angle must have shape ().")
 
-
     @property
-    def positions(self : Source) -> Array:
+    def positions(self: Source) -> Array:
         """
         Getter method for the position.
 
@@ -2541,8 +2506,8 @@ class RelativePositionSource(Source):
         position : Array, radians
             The ((x, y), (x, y)) on-sky position of this object.
         """
-        r, phi = self.separation/2, self.position_angle
-        sep_vec = np.array([r*np.sin(phi), r*np.cos(phi)])
+        r, phi = self.separation / 2, self.position_angle
+        sep_vec = np.array([r * np.sin(phi), r * np.cos(phi)])
         return np.array([self.position + sep_vec,
                          self.position - sep_vec])
 </div>
@@ -2555,7 +2520,7 @@ class RelativePositionSource(Source):
 
 </div>
 </div>
-<div id="cell-id=a19c8f2e" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div id="cell-id=dda204c0" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2567,7 +2532,7 @@ class RelativePositionSource(Source):
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=f7ff811e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=6f7f9f2b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2617,36 +2582,35 @@ class RelativePositionSource(Source):
 <span class="sd">        Every source in this class will have an identical spectrum.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
-                 <span class="n">wavelengths</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">position</span>    <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-                 <span class="n">flux</span>        <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">weights</span>     <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">spectrum</span>    <span class="p">:</span> <span class="n">Spectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
+                 <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">position</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                 <span class="n">flux</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">spectrum</span><span class="p">:</span> <span class="n">Spectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the PointSources class.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        position : Array, radians</span>
-<span class="sd">            The ((x0, y0), (x1, y1), ...) on-sky positions of these sourcese.</span>
+<span class="sd">            The ((x0, y0), (x1, y1), ...) on-sky positions of these sources.</span>
 <span class="sd">        flux : Array, photons = None</span>
 <span class="sd">            The fluxes of the sources.</span>
 <span class="sd">        spectrum : Spectrum = None</span>
 <span class="sd">            The spectrum of this object, represented by a Spectrum object.</span>
 <span class="sd">            Every source in this class will have an identical spectrum.</span>
-<span class="sd">        wavelengths : Array, meters = None</span>
+<span class="sd">        wavelengths : Array, metres = None</span>
 <span class="sd">            The array of wavelengths at which the spectrum is defined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">wavelengths</span><span class="o">=</span><span class="n">wavelengths</span><span class="p">,</span>
-            <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+                         <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
 
         <span class="c1"># More complex parameter checks here because of extra dims</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;position must be a 2d array.&quot;</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="n">flux</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2657,10 +2621,9 @@ class RelativePositionSource(Source):
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Length of flux must be equal to length of &quot;</span>
-                    <span class="s2">&quot;position.&quot;</span><span class="p">)</span>
+                                 <span class="s2">&quot;position.&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">optics</span> <span class="p">:</span> <span class="n">Optics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method to model the psf of the point source through the optics.</span>
 
@@ -2672,7 +2635,7 @@ class RelativePositionSource(Source):
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        psf : Array</span>
-<span class="sd">            The psf of the source source modelled through the optics.</span>
+<span class="sd">            The PSF of the source modelled through the optics.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">flux</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
@@ -2682,7 +2645,7 @@ class RelativePositionSource(Source):
 
 <span class="k">class</span> <span class="nc">ResolvedSource</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class for modelling resolved sources that parameterise their resolved</span>
+<span class="sd">    A class for modelling resolved sources that parametrise their resolved</span>
 <span class="sd">    component using an array of intensities.</span>
 
 <span class="sd">    Attributes</span>
@@ -2694,18 +2657,17 @@ class RelativePositionSource(Source):
 <span class="sd">    spectrum : Spectrum</span>
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
 <span class="sd">    distribution : Array</span>
-<span class="sd">        The array of intensities respresenting the resolved source.</span>
+<span class="sd">        The array of intensities representing the resolved source.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">distribution</span> <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">distribution</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>         <span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
-                 <span class="n">wavelengths</span>  <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">position</span>     <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-                 <span class="n">flux</span>         <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
-                 <span class="n">distribution</span> <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
-                 <span class="n">weights</span>      <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">spectrum</span>     <span class="p">:</span> <span class="n">Spectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
+                 <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">position</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                 <span class="n">flux</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
+                 <span class="n">distribution</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+                 <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">spectrum</span><span class="p">:</span> <span class="n">Spectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the ResolvedSource class.</span>
 
@@ -2716,23 +2678,22 @@ class RelativePositionSource(Source):
 <span class="sd">        flux : Array, photons = np.array(1.)</span>
 <span class="sd">            The flux of the object.</span>
 <span class="sd">        distribution : Array = np.ones((3, 3))</span>
-<span class="sd">            The array of intensities respresenting the resolved source.</span>
+<span class="sd">            The array of intensities representing the resolved source.</span>
 <span class="sd">        spectrum : Spectrum = None</span>
 <span class="sd">            The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">        wavelengths : Array, meters = None</span>
+<span class="sd">        wavelengths : Array, metres = None</span>
 <span class="sd">            The array of wavelengths at which the spectrum is defined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">distribution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution</span><span class="o">/</span><span class="n">distribution</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution</span> <span class="o">/</span> <span class="n">distribution</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;distribution must be a 2d array.&quot;</span><span class="p">)</span>
-        
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span>
-            <span class="n">wavelengths</span><span class="o">=</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+                         <span class="n">wavelengths</span><span class="o">=</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method for returning a new source object with a normalised total</span>
 <span class="sd">        spectrum and source distribution.</span>
@@ -2744,11 +2705,10 @@ class RelativePositionSource(Source):
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="n">distribution_floor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
-        <span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution_floor</span><span class="o">/</span><span class="n">distribution_floor</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution_floor</span> <span class="o">/</span> <span class="n">distribution_floor</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s1">&#39;spectrum&#39;</span><span class="p">,</span> <span class="s1">&#39;distribution&#39;</span><span class="p">],</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">distribution</span><span class="p">])</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">optics</span> <span class="p">:</span> <span class="n">Optics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method to model the psf of the source through the optics. Implements a</span>
 <span class="sd">        basic convolution with the psf and source distribution.</span>
@@ -2791,16 +2751,15 @@ class RelativePositionSource(Source):
 <span class="sd">        The spectrum of this object, represented by a CombinedSpectrum object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>           <span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
-                 <span class="n">wavelengths</span>    <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">position</span>       <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span>
-                 <span class="n">flux</span>           <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
-                 <span class="n">separation</span>     <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">position_angle</span> <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
-                 <span class="n">contrast</span>       <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
-                 <span class="n">spectrum</span>       <span class="p">:</span> <span class="n">Spectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">weights</span>        <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
+                 <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">position</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span>
+                 <span class="n">flux</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
+                 <span class="n">separation</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">position_angle</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                 <span class="n">contrast</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
+                 <span class="n">spectrum</span><span class="p">:</span> <span class="n">Spectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2817,7 +2776,7 @@ class RelativePositionSource(Source):
 <span class="sd">            The contrast ratio between the two sources.</span>
 <span class="sd">        spectrum : CombinedSpectrum = None</span>
 <span class="sd">            The spectrum of this object, represented by a CombinedSpectrum.</span>
-<span class="sd">        wavelengths : Array, meters = None</span>
+<span class="sd">        wavelengths : Array, metres = None</span>
 <span class="sd">            The array of wavelengths at which the spectrum is defined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -2825,11 +2784,10 @@ class RelativePositionSource(Source):
             <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)))</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="o">=</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux</span><span class="p">,</span>
-            <span class="n">separation</span><span class="o">=</span><span class="n">separation</span><span class="p">,</span> <span class="n">position_angle</span><span class="o">=</span><span class="n">position_angle</span><span class="p">,</span>
-            <span class="n">contrast</span><span class="o">=</span><span class="n">contrast</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+                         <span class="n">separation</span><span class="o">=</span><span class="n">separation</span><span class="p">,</span> <span class="n">position_angle</span><span class="o">=</span><span class="n">position_angle</span><span class="p">,</span>
+                         <span class="n">contrast</span><span class="o">=</span><span class="n">contrast</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">optics</span> <span class="p">:</span> <span class="n">Optics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method to model the psf of the point source through the optics.</span>
 
@@ -2841,7 +2799,7 @@ class RelativePositionSource(Source):
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        psf : Array</span>
-<span class="sd">            The psf of the source source modelled through the optics.</span>
+<span class="sd">            The PSF of the source modelled through the optics.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
@@ -2866,7 +2824,7 @@ class RelativePositionSource(Source):
 <span class="sd">    flux : Array, photons</span>
 <span class="sd">        The mean flux of the point and resolved source.</span>
 <span class="sd">    distribution : Array</span>
-<span class="sd">        The array of intensities respresenting the resolved source.</span>
+<span class="sd">        The array of intensities representing the resolved source.</span>
 <span class="sd">    contrast : Array</span>
 <span class="sd">        The contrast ratio between the point source and the resolved</span>
 <span class="sd">        source.</span>
@@ -2874,15 +2832,14 @@ class RelativePositionSource(Source):
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>         <span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
-                 <span class="n">wavelengths</span>  <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">position</span>     <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-                 <span class="n">flux</span>         <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
-                 <span class="n">distribution</span> <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
-                 <span class="n">contrast</span>     <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
-                 <span class="n">spectrum</span>     <span class="p">:</span> <span class="n">Spectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">weights</span>      <span class="p">:</span> <span class="n">Array</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span>
+                 <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">position</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                 <span class="n">flux</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
+                 <span class="n">distribution</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+                 <span class="n">contrast</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
+                 <span class="n">spectrum</span><span class="p">:</span> <span class="n">Spectrum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">weights</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Source</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2891,21 +2848,20 @@ class RelativePositionSource(Source):
 <span class="sd">        flux : Array, photons = np.array(1.)</span>
 <span class="sd">            The mean flux of the point and resolved source.</span>
 <span class="sd">        distribution : Array = np.ones((3, 3))</span>
-<span class="sd">            The array of intensities respresenting the resolved source.</span>
+<span class="sd">            The array of intensities representing the resolved source.</span>
 <span class="sd">        contrast : Array = np.array(1.)</span>
 <span class="sd">            The contrast ratio between the point source and the resolved</span>
 <span class="sd">            source.</span>
 <span class="sd">        spectrum : Spectrum = None</span>
 <span class="sd">            The spectrum of this object, represented by a Spectrum object.</span>
-<span class="sd">        wavelengths : Array, meters = None</span>
+<span class="sd">        wavelengths : Array, metres = None</span>
 <span class="sd">            The array of wavelengths at which the spectrum is defined.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="o">=</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux</span><span class="p">,</span>
-            <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span>
-            <span class="n">contrast</span><span class="o">=</span><span class="n">contrast</span><span class="p">)</span>
+                         <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span>
+                         <span class="n">contrast</span><span class="o">=</span><span class="n">contrast</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">optics</span> <span class="p">:</span> <span class="n">Optics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Source</span><span class="p">,</span> <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method to model the psf of the source through the optics. Implements a</span>
 <span class="sd">        basic convolution with the psf and source distribution, while also</span>
@@ -2957,36 +2913,35 @@ class PointSources(Source):
         Every source in this class will have an identical spectrum.
     """
 
-
-    def __init__(self        : Source,
-                 wavelengths : Array,
-                 position    : Array    = np.zeros(2),
-                 flux        : Array    = None,
-                 weights     : Array    = None,
-                 spectrum    : Spectrum = None) -> Source:
+    def __init__(self: Source,
+                 wavelengths: Array,
+                 position: Array = np.zeros(2),
+                 flux: Array = None,
+                 weights: Array = None,
+                 spectrum: Spectrum = None):
         """
         Constructor for the PointSources class.
 
         Parameters
         ----------
         position : Array, radians
-            The ((x0, y0), (x1, y1), ...) on-sky positions of these sourcese.
+            The ((x0, y0), (x1, y1), ...) on-sky positions of these sources.
         flux : Array, photons = None
             The fluxes of the sources.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
             Every source in this class will have an identical spectrum.
-        wavelengths : Array, meters = None
+        wavelengths : Array, metres = None
             The array of wavelengths at which the spectrum is defined.
         """
         super().__init__(spectrum=spectrum, wavelengths=wavelengths,
-            weights=weights)
+                         weights=weights)
 
         # More complex parameter checks here because of extra dims
         self.position = np.asarray(position, dtype=float)
         if self.position.ndim != 2:
             raise ValueError("position must be a 2d array.")
-        
+
         if flux is None:
             self.flux = np.ones(len(self.position))
         else:
@@ -2997,10 +2952,9 @@ class PointSources(Source):
 
             if len(self.flux) != len(self.position):
                 raise ValueError("Length of flux must be equal to length of "
-                    "position.")
+                                 "position.")
 
-
-    def model(self : Source, optics : Optics) -> Array:
+    def model(self: Source, optics: Optics) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -3012,7 +2966,7 @@ class PointSources(Source):
         Returns
         -------
         psf : Array
-            The psf of the source source modelled through the optics.
+            The PSF of the source modelled through the optics.
         """
         self = self.normalise()
         weights = self.weights[None, :] * self.flux[:, None]
@@ -3022,7 +2976,7 @@ class PointSources(Source):
 
 class ResolvedSource(Source):
     """
-    A class for modelling resolved sources that parameterise their resolved
+    A class for modelling resolved sources that parametrise their resolved
     component using an array of intensities.
 
     Attributes
@@ -3034,18 +2988,17 @@ class ResolvedSource(Source):
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     distribution : Array
-        The array of intensities respresenting the resolved source.
+        The array of intensities representing the resolved source.
     """
-    distribution : Array
+    distribution: Array
 
-
-    def __init__(self         : Source,
-                 wavelengths  : Array,
-                 position     : Array    = np.zeros(2),
-                 flux         : Array    = np.array(1.),
-                 distribution : Array    = np.ones((3, 3)),
-                 weights      : Array    = None,
-                 spectrum     : Spectrum = None) -> Source:
+    def __init__(self: Source,
+                 wavelengths: Array,
+                 position: Array = np.zeros(2),
+                 flux: Array = np.array(1.),
+                 distribution: Array = np.ones((3, 3)),
+                 weights: Array = None,
+                 spectrum: Spectrum = None):
         """
         Constructor for the ResolvedSource class.
 
@@ -3056,23 +3009,22 @@ class ResolvedSource(Source):
         flux : Array, photons = np.array(1.)
             The flux of the object.
         distribution : Array = np.ones((3, 3))
-            The array of intensities respresenting the resolved source.
+            The array of intensities representing the resolved source.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-        wavelengths : Array, meters = None
+        wavelengths : Array, metres = None
             The array of wavelengths at which the spectrum is defined.
         """
         distribution = np.asarray(distribution, dtype=float)
-        self.distribution = distribution/distribution.sum()
+        self.distribution = distribution / distribution.sum()
 
         if self.distribution.ndim != 2:
             raise ValueError("distribution must be a 2d array.")
-        
+
         super().__init__(position=position, flux=flux, spectrum=spectrum,
-            wavelengths=wavelengths, weights=weights)
+                         wavelengths=wavelengths, weights=weights)
 
-
-    def normalise(self : Source) -> Source:
+    def normalise(self: Source) -> Source:
         """
         Method for returning a new source object with a normalised total
         spectrum and source distribution.
@@ -3084,11 +3036,10 @@ class ResolvedSource(Source):
         """
         spectrum = self.spectrum.normalise()
         distribution_floor = np.maximum(self.distribution, 0.)
-        distribution = distribution_floor/distribution_floor.sum()
+        distribution = distribution_floor / distribution_floor.sum()
         return self.set(['spectrum', 'distribution'], [spectrum, distribution])
 
-
-    def model(self : Source, optics : Optics) -> Array:
+    def model(self: Source, optics: Optics) -> Array:
         """
         Method to model the psf of the source through the optics. Implements a
         basic convolution with the psf and source distribution.
@@ -3131,16 +3082,15 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         The spectrum of this object, represented by a CombinedSpectrum object.
     """
 
-
-    def __init__(self           : Source,
-                 wavelengths    : Array    = None,
-                 position       : Array    = np.array([0., 0.]),
-                 flux           : Array    = np.array(1.),
-                 separation     : Array    = None,
-                 position_angle : Array    = np.pi/2,
-                 contrast       : Array    = np.array(1.),
-                 spectrum       : Spectrum = None,
-                 weights        : Array    = None) -> Source:
+    def __init__(self: Source,
+                 wavelengths: Array = None,
+                 position: Array = np.array([0., 0.]),
+                 flux: Array = np.array(1.),
+                 separation: Array = None,
+                 position_angle: Array = np.pi / 2,
+                 contrast: Array = np.array(1.),
+                 spectrum: Spectrum = None,
+                 weights: Array = None):
         """
         Parameters
         ----------
@@ -3157,7 +3107,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
             The contrast ratio between the two sources.
         spectrum : CombinedSpectrum = None
             The spectrum of this object, represented by a CombinedSpectrum.
-        wavelengths : Array, meters = None
+        wavelengths : Array, metres = None
             The array of wavelengths at which the spectrum is defined.
         """
         wavelengths = np.asarray(wavelengths, dtype=float)
@@ -3165,11 +3115,10 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
             weights = np.ones((2, len(wavelengths)))
 
         super().__init__(wavelengths=wavelengths, position=position, flux=flux,
-            separation=separation, position_angle=position_angle,
-            contrast=contrast, spectrum=spectrum, weights=weights)
+                         separation=separation, position_angle=position_angle,
+                         contrast=contrast, spectrum=spectrum, weights=weights)
 
-
-    def model(self : Source, optics : Optics) -> Array:
+    def model(self: Source, optics: Optics) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -3181,7 +3130,7 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         Returns
         -------
         psf : Array
-            The psf of the source source modelled through the optics.
+            The PSF of the source modelled through the optics.
         """
         self = self.normalise()
         weights = self.weights * self.fluxes[:, None]
@@ -3206,7 +3155,7 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
     flux : Array, photons
         The mean flux of the point and resolved source.
     distribution : Array
-        The array of intensities respresenting the resolved source.
+        The array of intensities representing the resolved source.
     contrast : Array
         The contrast ratio between the point source and the resolved
         source.
@@ -3214,15 +3163,14 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
         The spectrum of this object, represented by a Spectrum object.
     """
 
-
-    def __init__(self         : Source,
-                 wavelengths  : Array    = None,
-                 position     : Array    = np.zeros(2),
-                 flux         : Array    = np.array(1.),
-                 distribution : Array    = np.ones((3, 3)),
-                 contrast     : Array    = np.array(1.),
-                 spectrum     : Spectrum = None,
-                 weights      : Array    = None) -> Source:
+    def __init__(self: Source,
+                 wavelengths: Array = None,
+                 position: Array = np.zeros(2),
+                 flux: Array = np.array(1.),
+                 distribution: Array = np.ones((3, 3)),
+                 contrast: Array = np.array(1.),
+                 spectrum: Spectrum = None,
+                 weights: Array = None) -> Source:
         """
         Parameters
         ----------
@@ -3231,21 +3179,20 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
         flux : Array, photons = np.array(1.)
             The mean flux of the point and resolved source.
         distribution : Array = np.ones((3, 3))
-            The array of intensities respresenting the resolved source.
+            The array of intensities representing the resolved source.
         contrast : Array = np.array(1.)
             The contrast ratio between the point source and the resolved
             source.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-        wavelengths : Array, meters = None
+        wavelengths : Array, metres = None
             The array of wavelengths at which the spectrum is defined.
         """
         super().__init__(wavelengths=wavelengths, position=position, flux=flux,
-            distribution=distribution, spectrum=spectrum, weights=weights,
-            contrast=contrast)
+                         distribution=distribution, spectrum=spectrum, weights=weights,
+                         contrast=contrast)
 
-
-    def model(self : Source, optics : Optics) -> Array:
+    def model(self: Source, optics: Optics) -> Array:
         """
         Method to model the psf of the source through the optics. Implements a
         basic convolution with the psf and source distribution, while also

@@ -323,7 +323,7 @@
   
     <li class="md-nav__item">
       <a href="../../notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -379,7 +379,7 @@
   
     <li class="md-nav__item">
       <a href="../../notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -823,21 +823,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../CHANGELOG/" class="md-nav__link">
-        Change Log
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../CONTRIBUTING/" class="md-nav__link">
         Contributing
       </a>
@@ -862,26 +847,30 @@
 
 <h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¤</a></h1>
 <p>∂Lux has two modules, <code>dLux</code> and <code>dLux.utils</code>. The <code>dLux</code> repo contains the core functionality of ∂Lux, while <code>dLux.utils</code> contains various functions that are used throughout the package. </p>
-<p>In dLux there are a few different sets of classes:</p>
+<p>∂Lux contains a few different sets of classes:</p>
 <hr />
-<h2 id="wavefronts-and-classes-that-modify-them"><code>Wavefronts</code> and classes that modify them<a class="headerlink" href="#wavefronts-and-classes-that-modify-them" title="Permanent link">¤</a></h2>
-<p>dLux at its core is a diffraction engine that models optical system via performing transformations on wavefronts. There are three main types of classes: <code>Wavefronts</code> (<code>wavefronts.py</code>) which represent the state of some monochromatic wavefront. <code>OpticalLayers</code> perform transformations on <code>Wavefronts</code> and <code>Optics</code> (<code>optics.py</code>) classes which hold a series of <code>OpticalLayers</code> in order to model some optical system.</p>
-<p>The <code>OpticalLayers</code> classes are split up into four different scripts:</p>
+<h2 id="wavefront-objects-and-classes-that-modify-them"><code>Wavefront</code> objects and classes that modify them<a class="headerlink" href="#wavefront-objects-and-classes-that-modify-them" title="Permanent link">¤</a></h2>
+<p>∂Lux, at its core, is a diffraction engine that models optical systems by performing transformations on wavefronts. There are three main types of classes: Wavefronts, Optical Layers and Optics. <code>Wavefront</code> objects (<code>wavefronts.py</code>) represent the state of some monochromatic wavefront. <code>OpticalLayer</code> classes perform transformations on <code>Wavefront</code> objects. Finally, <code>Optics</code> classes (<code>optics.py</code>) hold a series of Optical Layers in order to model an optical system.</p>
+<p>The <code>OpticalLayers</code> classes are split into four different scripts:</p>
 <ul>
-<li><code>optical_layers.py</code> Which contain basic optics classes allowing for the modification of the amplitude, opd and phase of wavefronts, plus titls, rotations etc.</li>
-<li><code>apertures.py</code> Which contain classes that model apertures dynamically. It is very extensive and allows for the modelling of most apertures.</li>
-<li><code>aberrations.py</code> Which contain classes that model aberrations dynamically.</li>
-<li><code>propagators.py</code> Which contain classes that perform the propagation of the wavefront.</li>
+<li><code>optical_layers.py</code>, containing basic optics classes allowing for the modification of the amplitude, OPD and phase of wavefronts (plus tilts, rotations, etc.).</li>
+<li><code>apertures.py</code>, containing classes that model apertures dynamically. It is extensive and allows for the modelling of most apertures.</li>
+<li><code>aberrations.py</code>, containing classes that model aberrations dynamically.</li>
+<li><code>propagators.py</code>, containing classes that perform the wavefront propagation.</li>
 </ul>
 <hr />
-<h2 id="images-and-classes-that-modify-them"><code>Images</code> and classes that modify them<a class="headerlink" href="#images-and-classes-that-modify-them" title="Permanent link">¤</a></h2>
-<p>The <code>dLux</code> module also contains a series of classes that modify <code>Images</code> (<code>images.py</code>) which represent the state of some psf as it is transformed through a detector. The structure matches that of the <code>Wavefront</code> classes, with <code>DetectorLayers</code> (<code>detector_layers.py</code>) performing transformations on <code>Images</code> and <code>Detectors</code> (<code>detectors.py</code>) holding a series of <code>DetectorLayers</code> in order to model some detector.</p>
+<h2 id="image-objects-and-classes-that-modify-them"><code>Image</code> objects and classes that modify them<a class="headerlink" href="#image-objects-and-classes-that-modify-them" title="Permanent link">¤</a></h2>
+<p>The <code>dLux</code> module also contains a series of <code>Image</code> classes (<code>images.py</code>), which represent and modify the state of some PSF as it is transformed through a detector.
+The structure of <code>Image</code> classes matches that of <code>Wavefront</code> classes; here, <code>DetectorLayer</code> classes (<code>detector_layers.py</code>) perform transformations on <code>Image</code> objects, and <code>Detector</code> classes (<code>detectors.py</code>) hold a series of Detector Layers in order to model some detector.</p>
 <hr />
-<h2 id="sources-and-spectra"><code>Sources</code> and <code>Spectra</code><a class="headerlink" href="#sources-and-spectra" title="Permanent link">¤</a></h2>
-<p>The <code>dLux</code> module also contains a series of classes that represent sources and their spectra. The <code>Source</code> classes (<code>sources.py</code>) represent some parametric source, while the <code>Spectrum</code> classes (<code>spectrums.py</code>) represent the spectrum of the source.</p>
+<h2 id="source-and-spectrum-objects"><code>Source</code> and <code>Spectrum</code> objects<a class="headerlink" href="#source-and-spectrum-objects" title="Permanent link">¤</a></h2>
+<p>The <code>dLux</code> module also contains a series of classes that represent sources and their spectra.
+The <code>Source</code> classes (<code>sources.py</code>) represent some parametric source, while the <code>Spectrum</code> classes (<code>spectra.py</code>) represent the source's spectrum.</p>
 <hr />
-<h2 id="instruments-and-observations"><code>Instrument</code>s and <code>Observation</code>s<a class="headerlink" href="#instruments-and-observations" title="Permanent link">¤</a></h2>
-<p>The <code>Instrument</code> (<code>instruments.py</code>) is designed to coherently model the interaction between these different components and the <code>Observation</code> (<code>observations.py</code>) classes allow for fine-grained control over the modelling of the <code>Instrument</code> class. An example of this is to allow for dithering patterns modelled, or for observing the same source using different instrumental filters.</p>
+<h2 id="instrument-and-observation-objects"><code>Instrument</code> and <code>Observation</code> objects<a class="headerlink" href="#instrument-and-observation-objects" title="Permanent link">¤</a></h2>
+<p>The <code>Instrument</code> class (<code>instruments.py</code>) is designed to coherently model the interaction between these aforementioned components. 
+The <code>Observation</code> classes (<code>observations.py</code>) allow for fine-grained control over the modelling of <code>Instrument</code> objects.
+An example of this is the modelling of dithering patterns, or observing a source with different instrumental filters.</p>
 
 
 

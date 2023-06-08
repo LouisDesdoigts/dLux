@@ -314,7 +314,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/phase_retrieval_demo/" class="md-nav__link">
-        Phase Retrieval in dLux
+        Phase Retrieval in ∂Lux
       </a>
     </li>
   
@@ -370,7 +370,7 @@
   
     <li class="md-nav__item">
       <a href="../../docs/notebooks/HMC/" class="md-nav__link">
-        Numpyro and Hamiltonian Monte Carlo
+        NumPyro and Hamiltonian Monte Carlo
       </a>
     </li>
   
@@ -791,21 +791,6 @@
     <li class="md-nav__item">
       <a href="../../docs/faq/" class="md-nav__link">
         FAQ & Troubleshooting
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../CHANGELOG/" class="md-nav__link">
-        Change Log
       </a>
     </li>
   
@@ -1874,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=321e88fe" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=4f3832e0" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1895,13 +1880,11 @@ Licensed under the Apache License, Version 2.0.
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">Array</span>
 <span class="kn">import</span> <span class="nn">dLux</span>
 </pre></div>
 <div id="cell-1" class="clipboard-copy-txt">from __future__ import annotations
-from abc import abstractmethod
 import jax.numpy as np
 from jax import Array
 import dLux</div>
@@ -1914,7 +1897,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=ba1be237" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=96b0472a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1946,7 +1929,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=3bdb1a7c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=7ce14122" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1973,21 +1956,20 @@ import dLux</div>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    focal_length : Array, meters</span>
+<span class="sd">    focal_length : Array, metres</span>
 <span class="sd">        The effective focal length of the lens/mirror this propagator</span>
 <span class="sd">        represents. If None, the output pixel_scales are taken to be </span>
-<span class="sd">        radians/pixel, else they are taken to be in meters/pixel.</span>
+<span class="sd">        radians/pixel, else they are taken to be in metres/pixel.</span>
 <span class="sd">    inverse : bool</span>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span>
-    <span class="n">inverse</span> <span class="p">:</span> <span class="nb">bool</span>
-
+    <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span> <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> 
-        <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">inverse</span> <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Propagator</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+            <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Propagator.</span>
 
@@ -2002,7 +1984,7 @@ import dLux</div>
             <span class="n">focal_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">focal_length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">focal_length</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;focal_length must be a scalar.&#39;</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span> <span class="o">=</span> <span class="n">focal_length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">inverse</span><span class="p">)</span>
 </pre></div>
@@ -2013,21 +1995,20 @@ import dLux</div>
 
     Attributes
     ----------
-    focal_length : Array, meters
+    focal_length : Array, metres
         The effective focal length of the lens/mirror this propagator
         represents. If None, the output pixel_scales are taken to be 
-        radians/pixel, else they are taken to be in meters/pixel.
+        radians/pixel, else they are taken to be in metres/pixel.
     inverse : bool
         Should the propagation be performed in the inverse direction.
     """
-    focal_length : Array
-    inverse : bool
-
+    focal_length: Array
+    inverse: bool
 
     def __init__(
-        self : Propagator, 
-        focal_length : Array = None,
-        inverse : bool = False) -> Propagator:
+            self: Propagator,
+            focal_length: Array = None,
+            inverse: bool = False):
         """
         Constructor for the Propagator.
 
@@ -2042,7 +2023,7 @@ import dLux</div>
             focal_length = np.asarray(focal_length, dtype=float)
             if focal_length.ndim != 0:
                 raise TypeError('focal_length must be a scalar.')
-        
+
         self.focal_length = focal_length
         self.inverse = bool(inverse)</div>
         
@@ -2054,7 +2035,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=98bf3456" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=c5e99709" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2077,21 +2058,20 @@ import dLux</div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">FFT</span><span class="p">(</span><span class="n">Propagator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Propagator class designed to propagate a wavefront to a plane using a</span>
-<span class="sd">    Fast Fourier Transfrom.</span>
+<span class="sd">    Fast Fourier Transform.</span>
 
-<span class="sd">    # TODO: Update padding to take in untis of npixels, rather than factor.</span>
+<span class="sd">    # TODO: Update padding to take in units of npixels, rather than factor.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
-<span class="sd">    focal_length : Array, meters</span>
+<span class="sd">    focal_length : Array, metres</span>
 <span class="sd">        The focal_length of the lens/mirror this propagator represents.</span>
 <span class="sd">    pad : int</span>
 <span class="sd">        The amount of padding to apply to the wavefront before propagating.</span>
 <span class="sd">    inverse : bool</span>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">pad</span> <span class="p">:</span> <span class="nb">int</span>
-
+    <span class="n">pad</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span>         <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> 
@@ -2100,9 +2080,8 @@ import dLux</div>
         <span class="n">inverse</span>      <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Propagator</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pad</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span>
-    
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span> <span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the wavefront.</span>
 
@@ -2124,21 +2103,20 @@ import dLux</div>
 <div id="cell-4" class="clipboard-copy-txt">class FFT(Propagator):
     """
     A Propagator class designed to propagate a wavefront to a plane using a
-    Fast Fourier Transfrom.
+    Fast Fourier Transform.
 
-    # TODO: Update padding to take in untis of npixels, rather than factor.
+    # TODO: Update padding to take in units of npixels, rather than factor.
 
     Attributes
     ----------
-    focal_length : Array, meters
+    focal_length : Array, metres
         The focal_length of the lens/mirror this propagator represents.
     pad : int
         The amount of padding to apply to the wavefront before propagating.
     inverse : bool
         Should the propagation be performed in the inverse direction.
     """
-    pad : int
-
+    pad: int
 
     def __init__(
         self         : Propagator, 
@@ -2147,9 +2125,8 @@ import dLux</div>
         inverse      : bool = False) -> Propagator:
         super().__init__(focal_length=focal_length, inverse=inverse)
         self.pad = int(pad)
-    
 
-    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
+    def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -2176,7 +2153,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=45c17263" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3d01edc4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2199,30 +2176,29 @@ import dLux</div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">MFT</span><span class="p">(</span><span class="n">Propagator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Propagator class designed to propagate a wavefront to a plane that is</span>
-<span class="sd">    defined in cartesian units (ie meters/pixel).</span>
+<span class="sd">    defined in Cartesian units (ie metres/pixel).</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    npixels : int</span>
 <span class="sd">        The number of pixels in the output plane.</span>
-<span class="sd">    pixel_scale : Array, meters/pixel or radians/pixel</span>
-<span class="sd">        The pixel scale in the output plane, measured in meters per pixel.</span>
-<span class="sd">    focal_length : Array, meters</span>
+<span class="sd">    pixel_scale : Array, metres/pixel or radians/pixel</span>
+<span class="sd">        The pixel scale in the output plane, measured in metres per pixel.</span>
+<span class="sd">    focal_length : Array, metres</span>
 <span class="sd">        The effective focal length of the lens/mirror this propagator</span>
 <span class="sd">        represents. If None, the pixel_scale is taken to be in radians/pixel,</span>
-<span class="sd">        else it is taken to be in meters/pixel.</span>
+<span class="sd">        else it is taken to be in metres/pixel.</span>
 <span class="sd">    inverse : bool</span>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">npixels</span> <span class="p">:</span> <span class="nb">int</span>
-    <span class="n">pixel_scale</span> <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>         <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
-                 <span class="n">npixels</span>      <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">pixel_scale</span>  <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">inverse</span>      <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Propagator</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+                 <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for VariableSampling propagators.</span>
 
@@ -2230,13 +2206,13 @@ import dLux</div>
 <span class="sd">        ----------</span>
 <span class="sd">        npixels : int</span>
 <span class="sd">            The number of pixels in the output plane.</span>
-<span class="sd">        pixel_scale : Array, meters/pixel or radians/pixel</span>
+<span class="sd">        pixel_scale : Array, metres/pixel or radians/pixel</span>
 <span class="sd">            The pixel scale in the output plane, measured in radians per pixel</span>
-<span class="sd">            if focal_length is None, else meters per pixel</span>
-<span class="sd">        focal_length : Array = None, meters</span>
+<span class="sd">            if focal_length is None, else metres per pixel</span>
+<span class="sd">        focal_length : Array = None, metres</span>
 <span class="sd">            The focal_length of the lens/mirror this propagator represents.</span>
 <span class="sd">            If None, the pixel_scale is taken to be in radians/pixel, else it</span>
-<span class="sd">            is taken to be in meters/pixel.</span>
+<span class="sd">            is taken to be in metres/pixel.</span>
 <span class="sd">        inverse : bool = False</span>
 <span class="sd">            Should the propagation be performed in the inverse direction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2248,8 +2224,7 @@ import dLux</div>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;pixel_scale must be a scalar.&#39;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span> <span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the wavefront.</span>
 
@@ -2265,38 +2240,37 @@ import dLux</div>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">IMFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
+                                  <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
+                                 <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
 </pre></div>
 <div id="cell-5" class="clipboard-copy-txt">class MFT(Propagator):
     """
     A Propagator class designed to propagate a wavefront to a plane that is
-    defined in cartesian units (ie meters/pixel).
+    defined in Cartesian units (ie metres/pixel).
 
     Attributes
     ----------
     npixels : int
         The number of pixels in the output plane.
-    pixel_scale : Array, meters/pixel or radians/pixel
-        The pixel scale in the output plane, measured in meters per pixel.
-    focal_length : Array, meters
+    pixel_scale : Array, metres/pixel or radians/pixel
+        The pixel scale in the output plane, measured in metres per pixel.
+    focal_length : Array, metres
         The effective focal length of the lens/mirror this propagator
         represents. If None, the pixel_scale is taken to be in radians/pixel,
-        else it is taken to be in meters/pixel.
+        else it is taken to be in metres/pixel.
     inverse : bool
         Should the propagation be performed in the inverse direction.
     """
-    npixels : int
-    pixel_scale : Array
+    npixels: int
+    pixel_scale: Array
 
-
-    def __init__(self         : Propagator,
-                 npixels      : int,
-                 pixel_scale  : Array,
-                 focal_length : Array = None,
-                 inverse      : bool = False) -> Propagator:
+    def __init__(self: Propagator,
+                 npixels: int,
+                 pixel_scale: Array,
+                 focal_length: Array = None,
+                 inverse: bool = False):
         """
         Constructor for VariableSampling propagators.
 
@@ -2304,13 +2278,13 @@ import dLux</div>
         ----------
         npixels : int
             The number of pixels in the output plane.
-        pixel_scale : Array, meters/pixel or radians/pixel
+        pixel_scale : Array, metres/pixel or radians/pixel
             The pixel scale in the output plane, measured in radians per pixel
-            if focal_length is None, else meters per pixel
-        focal_length : Array = None, meters
+            if focal_length is None, else metres per pixel
+        focal_length : Array = None, metres
             The focal_length of the lens/mirror this propagator represents.
             If None, the pixel_scale is taken to be in radians/pixel, else it
-            is taken to be in meters/pixel.
+            is taken to be in metres/pixel.
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
         """
@@ -2322,8 +2296,7 @@ import dLux</div>
         if self.pixel_scale.ndim != 0:
             raise TypeError('pixel_scale must be a scalar.')
 
-
-    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
+    def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -2339,10 +2312,10 @@ import dLux</div>
         """
         if self.inverse:
             return wavefront.IMFT(self.npixels, self.pixel_scale,
-                focal_length=self.focal_length)
+                                  focal_length=self.focal_length)
         else:
             return wavefront.MFT(self.npixels, self.pixel_scale,
-                focal_length=self.focal_length)</div>
+                                 focal_length=self.focal_length)</div>
         
         </div>
     </div>
@@ -2352,7 +2325,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c5bc831c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=decb086b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2375,39 +2348,38 @@ import dLux</div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">ShiftedMFT</span><span class="p">(</span><span class="n">MFT</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Propagator class designed to propagate a wavefront to a plane that is</span>
-<span class="sd">    defined in cartesian units (ie meters/pixel), with a variable output</span>
+<span class="sd">    defined in Cartesian units (ie metres/pixel), with a variable output</span>
 <span class="sd">    sampling in that plane.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    npixels : int</span>
 <span class="sd">        The number of pixels in the output plane.</span>
-<span class="sd">    pixel_scale : Array, meters/pixel or radians/pixel</span>
-<span class="sd">        The pixel scale in the output plane, measured in meters per pixel.</span>
-<span class="sd">    focal_length : Array, meters</span>
+<span class="sd">    pixel_scale : Array, metres/pixel or radians/pixel</span>
+<span class="sd">        The pixel scale in the output plane, measured in metres per pixel.</span>
+<span class="sd">    focal_length : Array, metres</span>
 <span class="sd">        The effective focal length of the lens/mirror this propagator</span>
 <span class="sd">        represents. If None, the pixel_scale is taken to be in radians/pixel,</span>
-<span class="sd">        else it is taken to be in meters/pixel.</span>
+<span class="sd">        else it is taken to be in metres/pixel.</span>
 <span class="sd">    shift : Array</span>
 <span class="sd">        The (x, y) shift to apply to the wavefront in the output plane.</span>
 <span class="sd">    pixel : bool</span>
 <span class="sd">        If True the shift value is assumed to be in units of pixels, else the</span>
 <span class="sd">        physical units of the output plane (ie radians if focal_length is None,</span>
-<span class="sd">        else meters). </span>
+<span class="sd">        else metres). </span>
 <span class="sd">    inverse : bool</span>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">shift</span> <span class="p">:</span> <span class="n">Array</span>
-    <span class="n">pixel</span> <span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>         <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
-                 <span class="n">npixels</span>      <span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">pixel_scale</span>  <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">shift</span>        <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">pixel</span>        <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">inverse</span>      <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Propagator</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+                 <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for VariableSampling propagators.</span>
 
@@ -2415,33 +2387,32 @@ import dLux</div>
 <span class="sd">        ----------</span>
 <span class="sd">        npixels : int</span>
 <span class="sd">            The number of pixels in the output plane.</span>
-<span class="sd">        pixel_scale : Array, meters/pixel or radians/pixel</span>
-<span class="sd">            The pixel scale in the output plane, measured in meters or radians</span>
+<span class="sd">        pixel_scale : Array, metres/pixel or radians/pixel</span>
+<span class="sd">            The pixel scale in the output plane, measured in metres or radians</span>
 <span class="sd">            per pixel for Cartesian or Angular Wavefront respectively.</span>
 <span class="sd">        shift : Array</span>
 <span class="sd">            The (x, y) shift to apply to the wavefront in the output plane.</span>
-<span class="sd">        focal_length : Array = None, meters</span>
+<span class="sd">        focal_length : Array = None, metres</span>
 <span class="sd">            The effective focal_length of the lens/mirror this propagator</span>
 <span class="sd">            represents. If None, the pixel_scale is taken to be in </span>
-<span class="sd">            radians/pixel, else it is taken to be in meters/pixel.</span>
+<span class="sd">            radians/pixel, else it is taken to be in metres/pixel.</span>
 <span class="sd">        pixel : bool = False</span>
 <span class="sd">            If True the shift value is assumed to be in units of pixels, else</span>
 <span class="sd">            the physical units of the output plane (ie radians if focal_length</span>
-<span class="sd">            is None, else meters). </span>
+<span class="sd">            is None, else metres). </span>
 <span class="sd">        inverse : bool = False</span>
 <span class="sd">            Should the propagation be performed in the inverse direction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span> 
-            <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
-        
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span>
+                         <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pixel</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;shift must be an array of shape (2,).&#39;</span><span class="p">)</span>
-        
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span> <span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the wavefront.</span>
 
@@ -2457,47 +2428,46 @@ import dLux</div>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_IMFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_MFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
 </pre></div>
 <div id="cell-6" class="clipboard-copy-txt">class ShiftedMFT(MFT):
     """
     A Propagator class designed to propagate a wavefront to a plane that is
-    defined in cartesian units (ie meters/pixel), with a variable output
+    defined in Cartesian units (ie metres/pixel), with a variable output
     sampling in that plane.
 
     Attributes
     ----------
     npixels : int
         The number of pixels in the output plane.
-    pixel_scale : Array, meters/pixel or radians/pixel
-        The pixel scale in the output plane, measured in meters per pixel.
-    focal_length : Array, meters
+    pixel_scale : Array, metres/pixel or radians/pixel
+        The pixel scale in the output plane, measured in metres per pixel.
+    focal_length : Array, metres
         The effective focal length of the lens/mirror this propagator
         represents. If None, the pixel_scale is taken to be in radians/pixel,
-        else it is taken to be in meters/pixel.
+        else it is taken to be in metres/pixel.
     shift : Array
         The (x, y) shift to apply to the wavefront in the output plane.
     pixel : bool
         If True the shift value is assumed to be in units of pixels, else the
         physical units of the output plane (ie radians if focal_length is None,
-        else meters). 
+        else metres). 
     inverse : bool
         Should the propagation be performed in the inverse direction.
     """
-    shift : Array
-    pixel : bool
+    shift: Array
+    pixel: bool
 
-
-    def __init__(self         : Propagator,
-                 npixels      : int,
-                 pixel_scale  : Array,
-                 shift        : Array,
-                 focal_length : Array = None,
-                 pixel        : bool = False,
-                 inverse      : bool = False) -> Propagator:
+    def __init__(self: Propagator,
+                 npixels: int,
+                 pixel_scale: Array,
+                 shift: Array,
+                 focal_length: Array = None,
+                 pixel: bool = False,
+                 inverse: bool = False):
         """
         Constructor for VariableSampling propagators.
 
@@ -2505,33 +2475,32 @@ import dLux</div>
         ----------
         npixels : int
             The number of pixels in the output plane.
-        pixel_scale : Array, meters/pixel or radians/pixel
-            The pixel scale in the output plane, measured in meters or radians
+        pixel_scale : Array, metres/pixel or radians/pixel
+            The pixel scale in the output plane, measured in metres or radians
             per pixel for Cartesian or Angular Wavefront respectively.
         shift : Array
             The (x, y) shift to apply to the wavefront in the output plane.
-        focal_length : Array = None, meters
+        focal_length : Array = None, metres
             The effective focal_length of the lens/mirror this propagator
             represents. If None, the pixel_scale is taken to be in 
-            radians/pixel, else it is taken to be in meters/pixel.
+            radians/pixel, else it is taken to be in metres/pixel.
         pixel : bool = False
             If True the shift value is assumed to be in units of pixels, else
             the physical units of the output plane (ie radians if focal_length
-            is None, else meters). 
+            is None, else metres). 
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
         """
-        super().__init__(pixel_scale=pixel_scale, npixels=npixels, 
-            focal_length=focal_length, inverse=inverse)
-        
+        super().__init__(pixel_scale=pixel_scale, npixels=npixels,
+                         focal_length=focal_length, inverse=inverse)
+
         self.shift = np.asarray(shift, dtype=float)
         self.pixel = bool(pixel)
 
         if self.shift.shape != (2,):
             raise TypeError('shift must be an array of shape (2,).')
-        
 
-    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
+    def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -2547,10 +2516,10 @@ import dLux</div>
         """
         if self.inverse:
             return wavefront.shifted_IMFT(self.npixels, self.pixel_scale,
-                self.shift, self.focal_length, self.pixel)
+                                          self.shift, self.focal_length, self.pixel)
         else:
             return wavefront.shifted_MFT(self.npixels, self.pixel_scale,
-                self.shift, self.focal_length, self.pixel)</div>
+                                         self.shift, self.focal_length, self.pixel)</div>
         
         </div>
     </div>
@@ -2560,7 +2529,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=6970cba5" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=2dcfee25" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2585,39 +2554,38 @@ import dLux</div>
 <span class="sd">    A propagator class to for Far-Field fresnel propagations. This classes</span>
 <span class="sd">    implements algorithms that use quadratic phase factors to better represent</span>
 <span class="sd">    out-of-plane behaviour of wavefronts, close to the focal plane. This class</span>
-<span class="sd">    is designed to work on Cartesian wavefronts, ie pixel units are in</span>
-<span class="sd">    meters/pixel in the output plane.</span>
+<span class="sd">    is designed to work on Cartesian wavefronts, i.e. pixel units are in</span>
+<span class="sd">    metres/pixel in the output plane.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    npixels : int</span>
 <span class="sd">        The number of pixels in the output plane.</span>
-<span class="sd">    pixel_scale : Array, meters/pixel</span>
-<span class="sd">        The pixel scale in the output plane, measured in meters per pixel.</span>
-<span class="sd">    focal_length : Array, meters</span>
+<span class="sd">    pixel_scale : Array, metres/pixel</span>
+<span class="sd">        The pixel scale in the output plane, measured in metres per pixel.</span>
+<span class="sd">    focal_length : Array, metres</span>
 <span class="sd">        The focal_length of the lens/mirror this propagator represents.</span>
-<span class="sd">    focal_shift : Array, meters</span>
+<span class="sd">    focal_shift : Array, metres</span>
 <span class="sd">        The shift in the propagation distance of the wavefront.</span>
 <span class="sd">    shift : Array</span>
 <span class="sd">        The (x, y) shift to apply to the wavefront in the output plane.</span>
 <span class="sd">    pixel : bool</span>
 <span class="sd">        Should the shift value be considered in units of pixels, or in the</span>
-<span class="sd">        physical units of the output plane (ie pixels or meters, radians). True</span>
+<span class="sd">        physical units of the output plane (ie pixels or metres, radians). True</span>
 <span class="sd">        interprets the shift value in pixel units.</span>
 <span class="sd">    inverse : bool</span>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">focal_shift</span> <span class="p">:</span> <span class="n">Array</span>
+    <span class="n">focal_shift</span><span class="p">:</span> <span class="n">Array</span>
 
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>         <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
-                 <span class="n">npixels</span>      <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">pixel_scale</span>  <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">focal_shift</span>  <span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">shift</span>        <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-                 <span class="n">pixel</span>        <span class="p">:</span> <span class="nb">bool</span>  <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">inverse</span>      <span class="p">:</span> <span class="nb">bool</span>  <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Propagator</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+                 <span class="n">npixels</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">focal_shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+                 <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                 <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the CartesianFresnel propagator</span>
 
@@ -2625,33 +2593,32 @@ import dLux</div>
 <span class="sd">        ----------</span>
 <span class="sd">        npixels : int</span>
 <span class="sd">            The number of pixels in the output plane.</span>
-<span class="sd">        pixel_scale : Array, meters/pixel</span>
-<span class="sd">            The pixel scale in the output plane, measured in meters per pixel.</span>
-<span class="sd">        focal_length : Array, meters</span>
+<span class="sd">        pixel_scale : Array, metres/pixel</span>
+<span class="sd">            The pixel scale in the output plane, measured in metres per pixel.</span>
+<span class="sd">        focal_length : Array, metres</span>
 <span class="sd">            The focal_length of the lens/mirror this propagator represents.</span>
-<span class="sd">        focal_shift : Array, meters</span>
+<span class="sd">        focal_shift : Array, metres</span>
 <span class="sd">            The shift in the propagation distance of the wavefront.</span>
 <span class="sd">        shift : Array = np.array([0., 0.])</span>
 <span class="sd">            The (x, y) shift to apply to the wavefront in the output plane.</span>
 <span class="sd">        pixel : bool = False</span>
 <span class="sd">            Should the shift value be considered in units of pixel, or in the</span>
-<span class="sd">            physical units of the output plane (ie pixels or meters, radians).</span>
+<span class="sd">            physical units of the output plane (ie pixels or metres, radians).</span>
 <span class="sd">        inverse : bool = False</span>
 <span class="sd">            Should the propagation be performed in the inverse direction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">inverse</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Inverse propagation not implemented &#39;</span>
-                <span class="s1">&#39;for CartesianFresnel.&#39;</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">focal_shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+                                      <span class="s1">&#39;for CartesianFresnel.&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">focal_shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;focal_shift must be a scalar.&#39;</span><span class="p">)</span>
-        
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">pixel</span><span class="o">=</span><span class="n">pixel</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span> 
-            <span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
 
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">pixel</span><span class="o">=</span><span class="n">pixel</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span>
+                         <span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span> <span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the wavefront.</span>
 
@@ -2666,46 +2633,45 @@ import dLux</div>
 <span class="sd">            The transformed wavefront.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_fresnel_prop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
 </pre></div>
 <div id="cell-7" class="clipboard-copy-txt">class FarFieldFresnel(ShiftedMFT):
     """
     A propagator class to for Far-Field fresnel propagations. This classes
     implements algorithms that use quadratic phase factors to better represent
     out-of-plane behaviour of wavefronts, close to the focal plane. This class
-    is designed to work on Cartesian wavefronts, ie pixel units are in
-    meters/pixel in the output plane.
+    is designed to work on Cartesian wavefronts, i.e. pixel units are in
+    metres/pixel in the output plane.
 
     Attributes
     ----------
     npixels : int
         The number of pixels in the output plane.
-    pixel_scale : Array, meters/pixel
-        The pixel scale in the output plane, measured in meters per pixel.
-    focal_length : Array, meters
+    pixel_scale : Array, metres/pixel
+        The pixel scale in the output plane, measured in metres per pixel.
+    focal_length : Array, metres
         The focal_length of the lens/mirror this propagator represents.
-    focal_shift : Array, meters
+    focal_shift : Array, metres
         The shift in the propagation distance of the wavefront.
     shift : Array
         The (x, y) shift to apply to the wavefront in the output plane.
     pixel : bool
         Should the shift value be considered in units of pixels, or in the
-        physical units of the output plane (ie pixels or meters, radians). True
+        physical units of the output plane (ie pixels or metres, radians). True
         interprets the shift value in pixel units.
     inverse : bool
         Should the propagation be performed in the inverse direction.
     """
-    focal_shift : Array
+    focal_shift: Array
 
-
-    def __init__(self         : Propagator,
-                 npixels      : Array,
-                 pixel_scale  : Array,
-                 focal_length : Array,
-                 focal_shift  : Array,
-                 shift        : Array = np.zeros(2),
-                 pixel        : bool  = False,
-                 inverse      : bool  = False) -> Propagator:
+    def __init__(self: Propagator,
+                 npixels: Array,
+                 pixel_scale: Array,
+                 focal_length: Array,
+                 focal_shift: Array,
+                 shift: Array = np.zeros(2),
+                 pixel: bool = False,
+                 inverse: bool = False):
         """
         Constructor for the CartesianFresnel propagator
 
@@ -2713,33 +2679,32 @@ import dLux</div>
         ----------
         npixels : int
             The number of pixels in the output plane.
-        pixel_scale : Array, meters/pixel
-            The pixel scale in the output plane, measured in meters per pixel.
-        focal_length : Array, meters
+        pixel_scale : Array, metres/pixel
+            The pixel scale in the output plane, measured in metres per pixel.
+        focal_length : Array, metres
             The focal_length of the lens/mirror this propagator represents.
-        focal_shift : Array, meters
+        focal_shift : Array, metres
             The shift in the propagation distance of the wavefront.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
         pixel : bool = False
             Should the shift value be considered in units of pixel, or in the
-            physical units of the output plane (ie pixels or meters, radians).
+            physical units of the output plane (ie pixels or metres, radians).
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
         """
         if inverse:
             raise NotImplementedError('Inverse propagation not implemented '
-                'for CartesianFresnel.')
-        
-        self.focal_shift  = np.asarray(focal_shift, dtype=float)
+                                      'for CartesianFresnel.')
+
+        self.focal_shift = np.asarray(focal_shift, dtype=float)
         if self.focal_shift.ndim != 0:
             raise TypeError('focal_shift must be a scalar.')
-        
-        super().__init__(shift=shift, pixel=pixel, focal_length=focal_length, 
-            pixel_scale=pixel_scale, npixels=npixels, inverse=inverse)
 
+        super().__init__(shift=shift, pixel=pixel, focal_length=focal_length,
+                         pixel_scale=pixel_scale, npixels=npixels, inverse=inverse)
 
-    def __call__(self : Propagator, wavefront : Wavefront) -> Wavefront:
+    def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -2754,7 +2719,7 @@ import dLux</div>
             The transformed wavefront.
         """
         return wavefront.shifted_fresnel_prop(self.npixels, self.pixel_scale,
-            self.shift, self.focal_length, self.focal_shift, self.pixel)</div>
+                                              self.shift, self.focal_length, self.focal_shift, self.pixel)</div>
         
         </div>
     </div>
