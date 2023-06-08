@@ -16,7 +16,6 @@ The `image` attribute is a 2D array of the image. The `pixel_scale` is the pixel
 ??? info "Image API"
     ::: dLux.images.Image
 
-[Comment]: <> (it doesn't actually say what the standard arithmetic operators do)
 The `Image` class has a number of methods that allow for image manipulation. They are implemented as standard arithmetic operators, i.e.:
 
 ```python
@@ -25,11 +24,15 @@ import dLux as dl
 
 image = dl.Image(np.ones((256, 256)), 0.1)
 image *= 2
-image += 1
 image /= 2
+image += 1
+image -= 1
 ```
-[Comment]: <> (it doesn't say HOW to implement these other methods)
-On top of these, it implements a number of methods that allow for the manipulation of the image, these are:
+
+Here `*` and `/` scale the pixel values by the given factor, and `+` and `-` add or subtract the given value from all pixel values.
+
+On top of these operators, the `Image` class also implements a number of methods that allow for the manipulation of the image.
+For more details on these, see the `Image API` above. These methods are:
 
 ### `Downsample`
 
