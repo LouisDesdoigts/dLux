@@ -1,6 +1,6 @@
 # Units Utility Functions
 
-This module contains functions for converting scales of cartesian and angular coordinates, and for converting between the different angular units.
+This module contains functions for converting between different angular units.
 
 ## Radians to Degrees
 

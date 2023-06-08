@@ -1,14 +1,12 @@
-import jax.numpy as np
 from collections import OrderedDict
-
 
 __all__ = ["list_to_dictionary"]
 
 
 def list_to_dictionary(
-    list_in : list, 
-    ordered : bool,
-    allowed_types : tuple = ()) -> dict:
+        list_in: list,
+        ordered: bool,
+        allowed_types: tuple = ()) -> dict:
     """
     Converts some input list of dLux layers and converts them into an
     OrderedDict with the correct structure, ensuring that all keys are unique.
@@ -16,7 +14,7 @@ def list_to_dictionary(
     Parameters
     ----------
     list_in : list
-        The list of dLux Layersto be converted into a dictionary.
+        The list of dLux Layers to be converted into a dictionary.
     ordered : bool
         Whether to return an ordered or regular dictionary.
     allowed_types : tuple
@@ -25,7 +23,7 @@ def list_to_dictionary(
     Returns
     -------
     dictionary : dict
-        The equivilent dictionary or ordered dictionary.
+        The equivalent dictionary or ordered dictionary.
     """
     # Construct names list and identify repeats
     names, repeats = [], []
@@ -40,7 +38,7 @@ def list_to_dictionary(
         # Check input types
         if allowed_types != () and not isinstance(item, allowed_types):
             raise TypeError(f"Item {name} is not an allowed type, got "
-                f"{type(item)}")
+                            f"{type(item)}")
 
         # Check for Repeats
         if name in names:
@@ -63,11 +61,11 @@ def list_to_dictionary(
     # Turn list into Dictionary
     dict_out = OrderedDict() if ordered else {}
     for i in range(len(names)):
-        
+
         # Check for spaces in names
         if ' ' in names[i]:
             raise ValueError(f"Names can not contain spaces, got {names[i]}")
-        
+
         # Add to dict
         if isinstance(list_in[i], tuple):
             item = list_in[i][0]

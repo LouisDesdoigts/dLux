@@ -1,10 +1,10 @@
 # Math Utility Functions
 
-This module only contains a single function used to calcluate factorials differentiably.
+This module contains functions used to
 
 ## Factorial
 
-Calculates the factorial of a number.
+Differentiably calculates the factorial of a number. Jax-friendly!
 
 ??? info "Factorial API"
     ::: dLux.utils.math.factorial

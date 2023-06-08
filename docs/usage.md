@@ -16,7 +16,7 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -81,7 +81,7 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = dlu.arcsec_to_rad(0.1 / 4)
 
@@ -116,7 +116,7 @@ We use the same method to propagate the wavelengths:
 
 ```python
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)
 ```
 
@@ -152,7 +152,7 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -170,7 +170,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 source = dl.PointSource(wavelengths, flux=5e4)
 data = jr.poisson(jr.PRNGKey(1), optics.model(source))
 ```
