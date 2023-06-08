@@ -905,32 +905,48 @@ telescope observation.</p>
           <td>
                 <code><span title="dLux.instruments.Optics">Optics</span></code>
           </td>
-          <td><p>A Optics object that defines some optical configuration.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>A Optics object that defines some optical configuration.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>sources</code></td>
           <td>
                 <code>dict</code>
           </td>
-          <td><p>A dictionary of the various source objects that the instrument is
-observing.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>A dictionary of the various source objects that the instrument is
+observing.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>detector</code></td>
           <td>
                 <code><span title="dLux.instruments.Detector">Detector</span></code>
           </td>
-          <td><p>A Detector object that is used to model the various
-instrumental effects on a psf.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>A Detector object that is used to model the various
+instrumental effects on a psf.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>observation</code></td>
           <td>
                 <code><span title="dLux.instruments.Observation">Observation</span></code>
           </td>
-          <td><p>An class that inherits from Observation. This is to allow flexibility
+          <td>
+            <div class="doc-md-description">
+              <p>An class that inherits from Observation. This is to allow flexibility
 in the different kind of observations, ie applying dithers, switching
-filters, etc.</p></td>
+filters, etc.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1290,7 +1306,11 @@ layers, then detector layers, and then the scene sources.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>The key of the item to be searched for in the sub-dictionaries.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key of the item to be searched for in the sub-dictionaries.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1311,7 +1331,11 @@ layers, then detector layers, and then the scene sources.</p>
 <td><code>item</code></td>          <td>
                 <code>object</code>
           </td>
-          <td><p>The item corresponding to the supplied key in the sub-dictionaries.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The item corresponding to the supplied key in the sub-dictionaries.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1413,7 +1437,11 @@ layers, then detector layers, and then the scene sources.</p>
           <td>
                 <code><span title="dLux.instruments.Optics">Optics</span></code>
           </td>
-          <td><p>A pre-configured Optics object.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>A pre-configured Optics object.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1423,7 +1451,11 @@ layers, then detector layers, and then the scene sources.</p>
           <td>
                 <code><span title="typing.Union">Union</span>[list, <span title="dLux.instruments.Source">Source</span>]</code>
           </td>
-          <td><p>Either a list of sources or an individual Source object.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Either a list of sources or an individual Source object.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1433,7 +1465,11 @@ layers, then detector layers, and then the scene sources.</p>
           <td>
                 <code><span title="dLux.instruments.Detector">Detector</span></code>
           </td>
-          <td><p>A pre-configured Detector object.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>A pre-configured Detector object.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -1443,9 +1479,13 @@ layers, then detector layers, and then the scene sources.</p>
           <td>
                 <code><span title="dLux.instruments.Observation">Observation</span></code>
           </td>
-          <td><p>An class that inherits from Observation. This is to allow
+          <td>
+            <div class="doc-md-description">
+              <p>An class that inherits from Observation. This is to allow
 flexibility in the different kind of observations, ie applying
-dithers, switching filters, etc.</p></td>
+dithers, switching filters, etc.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -1575,10 +1615,14 @@ instrument optics and detector.</p>
 <td><code>image</code></td>          <td>
                 <code><span title="jax.Array">Array</span>, dict</code>
           </td>
-          <td><p>The image of the scene modelled through the optics with detector and
+          <td>
+            <div class="doc-md-description">
+              <p>The image of the scene modelled through the optics with detector and
 filter effects applied if they are supplied. Returns either as a
 single array (if return_tree is false), or a dict of the output for
-each source.</p></td>
+each source.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1653,7 +1697,11 @@ each source.</p></td>
 <td><code>instrument</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.instruments.Instrument" href="#dLux.instruments.Instrument">Instrument</a></code>
           </td>
-          <td><p>The normalised instrument object.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The normalised instrument object.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1719,7 +1767,11 @@ any extra keyword arguments.</p>
           <td>
                 <code> </code>
           </td>
-          <td><p>The output of the stored observation class.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The output of the stored observation class.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>

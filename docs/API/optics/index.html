@@ -915,50 +915,78 @@ with <code>psf_pixel_scale</code> in units of arcseconds.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels representing the wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels representing the wavefront.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>diameter</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The diameter of the initial wavefront to propagte.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The diameter of the initial wavefront to propagte.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>aperture</code></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The aperture of the system. Can be an Array or a OpticalLayer.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The aperture of the system. Can be an Array or a OpticalLayer.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>mask</code></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The mask to apply to the wavefront. Can be an Array or an OpticalLayer.
-If an Array it is treated as a transmissive mask.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The mask to apply to the wavefront. Can be an Array or an OpticalLayer.
+If an Array it is treated as a transmissive mask.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>psf_pixel_scale</code></td>
           <td>
                 <code>float</code>
           </td>
-          <td><p>The pixel scale of the final PSF.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale of the final PSF.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>psf_oversample</code></td>
           <td>
                 <code>float</code>
           </td>
-          <td><p>The oversampling factor of the final PSF.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The oversampling factor of the final PSF.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>psf_npixels</code></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels of the final PSF.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels of the final PSF.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1199,7 +1227,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels representing the wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels representing the wavefront.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1209,7 +1241,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The diameter of the initial wavefront to propagte.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The diameter of the initial wavefront to propagte.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1219,7 +1255,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The aperture of the system. Can be an Array or a OpticalLayer.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The aperture of the system. Can be an Array or a OpticalLayer.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1229,7 +1269,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels of the final PSF.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels of the final PSF.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1239,7 +1283,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code>float, arcseconds</code>
           </td>
-          <td><p>The pixel scale of the final PSF in units of arcseconds.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale of the final PSF in units of arcseconds.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1249,7 +1297,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code>float</code>
           </td>
-          <td><p>The oversampling factor of the final PSF.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The oversampling factor of the final PSF.</p>
+            </div>
+          </td>
           <td>
                 <code>1</code>
           </td>
@@ -1259,8 +1311,12 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The mask to apply to the wavefront. Can be an Array or an
-OpticalLayer. If an Array it is treated as a transmissive mask.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The mask to apply to the wavefront. Can be an Array or an
+OpticalLayer. If an Array it is treated as a transmissive mask.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -1365,8 +1421,12 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The wavelength of the wavefront to propagate through the optical
-layers.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavelength of the wavefront to propagate through the optical
+layers.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1376,8 +1436,12 @@ layers.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The (x, y) offset from the optical axis of the source. Default
-value is (0, 0), on axis.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) offset from the optical axis of the source. Default
+value is (0, 0), on axis.</p>
+            </div>
+          </td>
           <td>
                 <code>np.zeros(2)</code>
           </td>
@@ -1387,7 +1451,11 @@ value is (0, 0), on axis.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>If True, the wavefront object after propagation is returned.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>If True, the wavefront object after propagation is returned.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -1408,15 +1476,23 @@ value is (0, 0), on axis.</p></td>
 <td><code>psf</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The monochromatic point spread function after being propagated
-though the optical layers.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The monochromatic point spread function after being propagated
+though the optical layers.</p>
+            </div>
+          </td>
         </tr>
         <tr>
 <td><code>wavefront</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The wavefront object after propagation. Only returned if
-return_wf is True.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavefront object after propagation. Only returned if
+return_wf is True.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1605,57 +1681,89 @@ with <code>psf_pixel_scale</code> in units of microns.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels representing the wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels representing the wavefront.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>diameter</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The diameter of the initial wavefront to propagte.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The diameter of the initial wavefront to propagte.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>focal_length</code></td>
           <td>
                 <code>float, meters</code>
           </td>
-          <td><p>The focal length of the optical system.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The focal length of the optical system.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>aperture</code></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The aperture of the system. Can be an Array or a OpticalLayer.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The aperture of the system. Can be an Array or a OpticalLayer.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>mask</code></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The mask to apply to the wavefront. Can be an Array or an OpticalLayer.
-If an Array it is treated as a transmissive mask.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The mask to apply to the wavefront. Can be an Array or an OpticalLayer.
+If an Array it is treated as a transmissive mask.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>psf_pixel_scale</code></td>
           <td>
                 <code>float</code>
           </td>
-          <td><p>The pixel scale of the final PSF.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale of the final PSF.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>psf_oversample</code></td>
           <td>
                 <code>float</code>
           </td>
-          <td><p>The oversampling factor of the final PSF.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The oversampling factor of the final PSF.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>psf_npixels</code></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels of the final PSF.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels of the final PSF.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1914,7 +2022,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels representing the wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels representing the wavefront.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1924,7 +2036,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The diameter of the initial wavefront to propagte.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The diameter of the initial wavefront to propagte.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1934,7 +2050,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The aperture of the system. Can be an Array or a OpticalLayer.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The aperture of the system. Can be an Array or a OpticalLayer.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1944,7 +2064,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code>float, meters</code>
           </td>
-          <td><p>The focal length of the optical system.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The focal length of the optical system.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1954,7 +2078,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels of the final PSF.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels of the final PSF.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1964,7 +2092,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code>float, microns</code>
           </td>
-          <td><p>The pixel scale of the final PSF in units of microns.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pixel scale of the final PSF in units of microns.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1974,7 +2106,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code>float</code>
           </td>
-          <td><p>The oversampling factor of the final PSF.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The oversampling factor of the final PSF.</p>
+            </div>
+          </td>
           <td>
                 <code>1</code>
           </td>
@@ -1984,8 +2120,12 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The mask to apply to the wavefront. Can be an Array or an
-OpticalLayer. If an Array it is treated as a transmissive mask.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The mask to apply to the wavefront. Can be an Array or an
+OpticalLayer. If an Array it is treated as a transmissive mask.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -2102,8 +2242,12 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The wavelength of the wavefront to propagate through the optical
-layers.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavelength of the wavefront to propagate through the optical
+layers.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2113,8 +2257,12 @@ layers.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The (x, y) offset from the optical axis of the source. Default
-value is (0, 0), on axis.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) offset from the optical axis of the source. Default
+value is (0, 0), on axis.</p>
+            </div>
+          </td>
           <td>
                 <code>np.zeros(2)</code>
           </td>
@@ -2124,7 +2272,11 @@ value is (0, 0), on axis.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>If True, the wavefront object after propagation is returned.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>If True, the wavefront object after propagation is returned.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -2145,15 +2297,23 @@ value is (0, 0), on axis.</p></td>
 <td><code>psf</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The monochromatic point spread function after being propagated
-though the optical layers.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The monochromatic point spread function after being propagated
+though the optical layers.</p>
+            </div>
+          </td>
         </tr>
         <tr>
 <td><code>wavefront</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The wavefront object after propagation. Only returned if
-return_wf is True.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavefront object after propagation. Only returned if
+return_wf is True.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2327,36 +2487,56 @@ wavefronts.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels representing the wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels representing the wavefront.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>diameter</code></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The diameter of the initial wavefront to propagte.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The diameter of the initial wavefront to propagte.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>aperture</code></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The aperture of the system. Can be an Array or a OpticalLayer.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The aperture of the system. Can be an Array or a OpticalLayer.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>mask</code></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The mask to apply to the wavefront. Can be an Array or an OpticalLayer.
-If an Array it is treated as a transmissive mask.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The mask to apply to the wavefront. Can be an Array or an OpticalLayer.
+If an Array it is treated as a transmissive mask.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>propagator</code></td>
           <td>
                 <code><span title="dLux.optics.Propagator">Propagator</span></code>
           </td>
-          <td><p>The propagator to use to propagate the wavefront through the optics.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The propagator to use to propagate the wavefront through the optics.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2670,7 +2850,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels representing the wavefront.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels representing the wavefront.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2680,7 +2864,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The diameter of the initial wavefront to propagte.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The diameter of the initial wavefront to propagte.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2690,7 +2878,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The aperture of the system. Can be an Array or a OpticalLayer.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The aperture of the system. Can be an Array or a OpticalLayer.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2700,7 +2892,11 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="dLux.optics.Propagator">Propagator</span></code>
           </td>
-          <td><p>The propagator to use to propagate the wavefront through the optics.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The propagator to use to propagate the wavefront through the optics.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2710,8 +2906,12 @@ If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="typing.Union">Union</span>[<span title="jax.Array">Array</span>, <span title="dLux.optics.OpticalLayer">OpticalLayer</span>]</code>
           </td>
-          <td><p>The mask to apply to the wavefront. Can be an Array or an
-OpticalLayer. If an Array it is treated as a transmissive mask.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The mask to apply to the wavefront. Can be an Array or an
+OpticalLayer. If an Array it is treated as a transmissive mask.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -2810,8 +3010,12 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The wavelength of the wavefront to propagate through the optical
-layers.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavelength of the wavefront to propagate through the optical
+layers.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2821,8 +3025,12 @@ layers.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The (x, y) offset from the optical axis of the source. Default
-value is (0, 0), on axis.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) offset from the optical axis of the source. Default
+value is (0, 0), on axis.</p>
+            </div>
+          </td>
           <td>
                 <code>np.zeros(2)</code>
           </td>
@@ -2832,7 +3040,11 @@ value is (0, 0), on axis.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>If True, the wavefront object after propagation is returned.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>If True, the wavefront object after propagation is returned.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -2853,15 +3065,23 @@ value is (0, 0), on axis.</p></td>
 <td><code>psf</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The monochromatic point spread function after being propagated
-though the optical layers.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The monochromatic point spread function after being propagated
+though the optical layers.</p>
+            </div>
+          </td>
         </tr>
         <tr>
 <td><code>wavefront</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The wavefront object after propagation. Only returned if
-return_wf is True.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavefront object after propagation. Only returned if
+return_wf is True.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -3029,22 +3249,34 @@ dLux OpticalLayers.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The size of the initial wavefront to propagte.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The size of the initial wavefront to propagte.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>diameter</code></td>
           <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The diameter of the wavefront to model through the system in meters.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The diameter of the wavefront to model through the system in meters.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>layers</code></td>
           <td>
                 <code>OrderedDict</code>
           </td>
-          <td><p>A collections.OrderedDict of 'layers' that define the transformations
-and operations upon some input wavefront through an optical system.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>A collections.OrderedDict of 'layers' that define the transformations
+and operations upon some input wavefront through an optical system.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -3338,7 +3570,11 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>The key of the item to be searched for in the layers dictionary.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key of the item to be searched for in the layers dictionary.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -3359,7 +3595,11 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
 <td><code>item</code></td>          <td>
                 <code>object</code>
           </td>
-          <td><p>The item corresponding to the supplied key in the layers dictionary.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The item corresponding to the supplied key in the layers dictionary.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -3437,8 +3677,12 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The number of pixels to use when propagating the wavefront through
-the optical system.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of pixels to use when propagating the wavefront through
+the optical system.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -3448,7 +3692,11 @@ the optical system.</p></td>
           <td>
                 <code>float</code>
           </td>
-          <td><p>The diameter of the wavefront to model through the system in meters.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The diameter of the wavefront to model through the system in meters.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -3458,11 +3706,15 @@ the optical system.</p></td>
           <td>
                 <code>list</code>
           </td>
-          <td><p>A list of dLux 'layers' that define the transformations and
+          <td>
+            <div class="doc-md-description">
+              <p>A list of dLux 'layers' that define the transformations and
 operations upon some input wavefront through an optical system.
 The entried can either be dLux OtpicalLayers, or tuples of the
 form (OpticalLayer, key), with the key being used as the dictionary
-key for the layer.</p></td>
+key for the layer.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -3553,8 +3805,12 @@ key for the layer.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, meters</code>
           </td>
-          <td><p>The wavelength of the wavefront to propagate through the optical
-layers.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavelength of the wavefront to propagate through the optical
+layers.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -3564,8 +3820,12 @@ layers.</p></td>
           <td>
                 <code><span title="jax.Array">Array</span>, radians</code>
           </td>
-          <td><p>The (x, y) offset from the optical axis of the source. Default
-value is (0, 0), on axis.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The (x, y) offset from the optical axis of the source. Default
+value is (0, 0), on axis.</p>
+            </div>
+          </td>
           <td>
                 <code>np.zeros(2)</code>
           </td>
@@ -3575,7 +3835,11 @@ value is (0, 0), on axis.</p></td>
           <td>
                 <code>bool</code>
           </td>
-          <td><p>If True, the wavefront object after propagation is returned.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>If True, the wavefront object after propagation is returned.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -3596,15 +3860,23 @@ value is (0, 0), on axis.</p></td>
 <td><code>psf</code></td>          <td>
                 <code><span title="jax.Array">Array</span></code>
           </td>
-          <td><p>The monochromatic point spread function after being propagated
-though the optical layers.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The monochromatic point spread function after being propagated
+though the optical layers.</p>
+            </div>
+          </td>
         </tr>
         <tr>
 <td><code>wavefront</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
           </td>
-          <td><p>The wavefront object after propagation. Only returned if
-return_wf is True.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The wavefront object after propagation. Only returned if
+return_wf is True.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
