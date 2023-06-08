@@ -1,6 +1,6 @@
-# Optical Systems: optics.py
+# Optical Systems: `optics.py`
 
-This module contains the classes that define the behaviour of optical systems in dLux. The classes are designed to be as flexible as possible, allowing users to easily create their own optical systems.
+This module contains the classes that define the behaviour of optical systems in ∂Lux. The classes are designed to be as flexible as possible, allowing users to easily create their own optical systems.
 
 There are four public classes:
 
@@ -9,33 +9,32 @@ There are four public classes:
 - `FlexibleOptics`
 - `LayeredOptics`
 
-Optics classes store `OpticalLayers` that operatre on `Wavefronts`.
+Optics classes store `OpticalLayers` that operate on `Wavefronts`.
 
-There are two types of optics classes, Layered and non-Layered. Layered optics classes take in a list of `OpticalLayers` and apply them sequentially to the wavefront, giving users full control and flexibilty in the modelling of their optical system.
+There are two types of optics classes: _Layered_ and _non-Layered_. Layered optics classes take in a list of `OpticalLayers` and apply them sequentially to the wavefront, giving users full control and flexibility in the modelling of their optical system.
 
-Non-Layered optics classes are designed to be simple and easy to use, taking in a few parameters that define the behaviour of common optical system. We will explore these mode in the Examples section.
+Non-Layered optics classes are designed to be simple and easy to use, taking in few parameters that define the behaviour of a common optical system. We will explore these further in the Examples section below.
 
-All public optics classes have 3 main methods:
+All public optics classes have three main methods:
 
-1. `model(sources)` Models dLux Source objects through the optics.
+1. `model(sources)` Models ∂Lux `Source` objects through the optics.
 2. `propagate(wavelengths, offset, weights)` Models a polychromatic point source through the optics.
 3. `propagate_mono(wavelength, offset)` Propagates a monochromatic point source through the optics.
 
-The `propagate_mono(wavelength, offset)` method is where the actual propagation of the wavefront through the optics occurs, but the `.propagate` vectorises the calcluations across wavelengths for efficiency.
+The `propagate_mono` method is where the actual wavefront propagation through the optics occurs, but `propagate` vectorises the calculations across wavelengths for efficiency.
 
 ---
 
 # Examples
 
-We will start here with the non-layered optics classes as they are simpler than
-the LayeredOptics class.
+We will start here with the non-layered optics classes as they are simpler.
 
 ## AngularOptics
 
 ??? info "Angular Optics API"
     :::dLux.optics.AngularOptics
 
-To construct a `AngularOptics` class we need to define 5 things:
+To construct an `AngularOptics` class we need to define five things:
 
 1. The number of pixels of the initial wavefront
 2. The diameter of the initial wavefront
@@ -44,12 +43,12 @@ To construct a `AngularOptics` class we need to define 5 things:
 5. The pixel scale of the final PSF
 
 !!! tip "Units"
-    Most code in dLux is written in SI units, but this class breaks from this convention, with `psf_pixel_scale` taken in units of arcseconds typical of astronomical optical sysetms.
+    Most code in ∂Lux is written in SI units, but this class breaks from this convention, with `psf_pixel_scale` taken in units of arcseconds.
 
 !!! tip "Apertures"
-    The 'aperture' parameter can also be supplied as an array, where it will treated as a array of transmission values!
+    The `aperture` parameter can also be supplied as an array, where it will treated as an array of transmission values!
 
-The following code snippet shows how to construct a simple optical system and
+The following code snippet shows how to construct a simple angular optical system and
 propagate a point source through it.
 
 ```python
@@ -58,7 +57,7 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 0.1 # arcseconds
 psf_oversample = 4
@@ -71,7 +70,7 @@ optics = dl.AngularOptics(wf_npixels, diameter, aperture,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)
 ```
 
@@ -97,12 +96,12 @@ psf = optics.propagate(wavelengths)
 
 ## CartesianOptics
 
-The `CartesianOptics` class is very similar to the `AngularOptics` class, but it also takes in a focal length, and the units of psf_pixel_scale is taken in microns.
+The `CartesianOptics` class is very similar to the `AngularOptics` class, but it also takes in a focal length, and the units of `psf_pixel_scale` are microns.
 
 ??? info "Cartesian Optics API"
     :::dLux.optics.CartesianOptics
 
-The following code snippet shows how to construct a simple optical system and propagate a point source through it.
+The following code snippet shows how to construct a simple Cartesian optical system and propagate a point source through it.
 
 ```python
 import jax.numpy as np
@@ -110,8 +109,8 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
-focal_length = 2 # meters
+diameter = 1 # metres
+focal_length = 2 # metres
 psf_npixels = 128
 psf_pixel_scale = 1 # microns
 psf_oversample = 4
@@ -124,7 +123,7 @@ optics = dl.CartesianOptics(wf_npixels, diameter, aperture, focal_length,
     psf_npixels, psf_pixel_scale, psf_oversample)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)
 ```
 
@@ -144,13 +143,13 @@ psf = optics.propagate(wavelengths)
     plt.savefig('cartesian_psf.png')
     ```
 
-![cartesian_psf](../assets/cartesian_psf.png)
+![Cartesian_psf](../assets/cartesian_psf.png)
 
 ---
 
-# FlexibleOptics
+## FlexibleOptics
 
-The `FlexibleOptics` class allows for the use of any `Propagator` class in dLux. Lets have a look at how we can use this propagator to model a psf with a fresnel defocus.
+The `FlexibleOptics` class allows for the use of any `Propagator` class in ∂Lux. Let's have a look at how we can use this propagator to model a PSF with a Fresnel defocus.
 
 ??? info "Flexible Optics API"
     :::dLux.optics.FlexibleOptics
@@ -161,11 +160,11 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
-focal_length = 2 # meters
+diameter = 1 # metres
+focal_length = 2 # metres
 psf_npixels = 128
-psf_pixel_scale = 0.25e-6 # meters
-focal_shift = 2e-5 # meters
+psf_pixel_scale = 0.25e-6 # metres
+focal_shift = 2e-5 # metres
 
 # Use ApertureFactory class to make a simple circular aperture
 aperture = dl.ApertureFactory(wf_npixels)
@@ -178,7 +177,7 @@ propagator = dl.FarFieldFresnel(psf_npixels, psf_pixel_scale, focal_length,
 optics = dl.FlexibleOptics(wf_npixels, diameter, aperture, propagator)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)
 ```
 
@@ -204,12 +203,12 @@ psf = optics.propagate(wavelengths)
 
 ## LayeredOptics
 
-The Layered Optics class allows us to define a list of `OpticalLayers` that operate on a wavefront. This allows us to model more complex optical systems than the previous classes, while also allowing users to define their own OpticalLayers! Look at the OpticalLayers documentation for more information.
+The `LayeredOptics` class allows us to define a list of `OpticalLayers` that operate on a wavefront. This allows us to model more complex optical systems than the previous classes, while also allowing users to define their own `OpticalLayers`! Look at the `OpticalLayers` documentation for more information.
 
 ??? info "Layered Optics API"
     :::dLux.optics.LayeredOptics
 
-Lets have a look at how we can use this class to model a simple optical system.
+Let's have a look at how we can use this class to model a simple optical system.
 
 ```python
 import jax.numpy as np
@@ -217,10 +216,10 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 256
-diameter = 1 # meters
-focal_length = 2 # meters
+diameter = 1 # metres
+focal_length = 2 # metres
 psf_npixels = 128
-psf_pixel_scale = 0.25e-6 # meters
+psf_pixel_scale = 0.25e-6 # metres
 
 # Construct the list of optical layers
 layers = [
@@ -232,12 +231,12 @@ layers = [
 optics = dl.LayeredOptics(wf_npixels, diameter, layers)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)
 ```
 
 !!! tip "Accessing Layers"
-    Note that we can pass in a tuple of the form (OpticalLayer, key) to the LayeredOptics class. OpticalLayers and transformed into an OrderedDict and this key is then used for that layer. This allows us to access the layers in the class via the `class.attribute` method, ie `optics.aperture`. This can be very helpful when using zodaix methods!
+    Note that we can pass in a tuple of the form (OpticalLayer, key) to the LayeredOptics class. OpticalLayers and transformed into an OrderedDict and this key is then used for that layer. This allows us to access the layers in the class via the `class.attribute` method, i.e. `optics.aperture`. This can be very helpful when using Zodiax methods!
 
 ??? abstract "Plotting code"
     ```python
@@ -261,13 +260,13 @@ psf = optics.propagate(wavelengths)
 
 # Building your own Optical System
 
-*TODO: Add link to dLux-JWST and dLux-Toliman repos*
+[comment]: <> (TODO: Add link to dLuxJWST repos)
 
-It can often be helpful to create your own Optical System class to provide a more complex optical models. For example the dLux-JWST and dLux-Toliman repos built by the dLux devs! dLux is designed to facilitate this, requiring users to only implement two methods in order to have a class that entirely integrates with the wider dLux ecosystem.
+It can often be helpful to create your own Optical System class to provide a more complex optical models. For example, the dLuxJWST and [dLuxToliman](https://github.com/maxecharles/dLuxToliman) repos built by the ∂Lux devs! ∂Lux is designed to facilitate this, requiring users to only implement two methods in order to have a class that entirely integrates with the wider ∂Lux ecosystem.
 
-Note: dLux is built in [Zodiax](https://github.com/LouisDesdoigts/zodiax). If you are unfamiliar, you should read [this tutorial](https://louisdesdoigts.github.io/zodiax/docs/usage/) before this example.
+Note: ∂Lux is built in [Zodiax](https://github.com/LouisDesdoigts/zodiax). If you are unfamiliar, you should read [this tutorial](https://louisdesdoigts.github.io/zodiax/docs/usage/) before this example.
 
-Lets have a look at how we can create a very simple optical system from the ground up with a pixel scale in units of arcseconds, and a tranmissive mask. To do this we need to implement both the `__init__` and `propagate_mono` methods. It will have 6 attributes: `wf_npixels`, `diameter`, `aperture`, `mask`, `psf_pixel_scale`, `psf_npixels`.
+Let's have a look at how we can create a simple optical system from the ground up, using a pixel scale in units of arcseconds and a transmissive mask. To do this, we need to implement both the `__init__` and `propagate_mono` methods. It will have six attributes: `wf_npixels`, `diameter`, `aperture`, `mask`, `psf_pixel_scale`, `psf_npixels`.
 
 ```python
 from jax import Array
@@ -327,9 +326,9 @@ class MyOptics(dLux.optics.BaseOptics):
 ```
 
 !!! tip "Applying Optical Layers"
-    We can apply OpticalLayer and arrays to wavefronts using the `*=` operator. This is equivalent to `wf = layer(wf)`.
+    We can apply `OpticalLayer` and arrays to wavefronts using the `*=` operator. This is equivalent to `wf = layer(wf)`.
 
-Now we can use it as per usual! This class will now be recognised by all dLux functions that take in an optics class, such as `Sources` and `Instruments`
+Now we can use this optical system as per usual! This class will now be recognised by all ∂Lux functions that take in an optics class, such as `Sources` and `Instruments`.
 
 ```python
 import jax.numpy as np
@@ -338,7 +337,7 @@ import dLux as dl
 
 # Define the parameters
 wf_npixels = 128
-diameter = 1 # meters
+diameter = 1 # metres
 psf_npixels = 128
 psf_pixel_scale = 5e-4 # arcminutes
 
@@ -353,7 +352,7 @@ optics = MyOptics(wf_npixels, diameter, aperture, mask, psf_npixels,
     psf_pixel_scale)
 
 # Propagate the wavelengths
-wavelengths = np.linspace(1e-6, 1.2e-6, 5) # meters
+wavelengths = np.linspace(1e-6, 1.2e-6, 5) # metres
 psf = optics.propagate(wavelengths)
 ```
 
@@ -379,7 +378,9 @@ psf = optics.propagate(wavelengths)
 
 ## Private classes
 
-To further facilitate the creation of custom optics classes, dLux provides a few base classes that can be used to build your own optics classes.
+[comment]: <> (source code?)
+
+To further facilitate the creation of custom optics classes, ∂Lux provides a few base classes that can be used to build your own optics classes.
 
 The private classes are as follows:
 
@@ -388,12 +389,12 @@ The private classes are as follows:
 - `NonPropagatorOptics`
 - `AperturedOptics`
 
-These classes are not intended to be used directly, but rather to be inherited from and extended. Lets look at them one by one.
+These classes are not intended to be used directly, but rather to be inherited from and extended. Let's look at them one by one.
 
-The `BaseOptics` class is the base class for all optics classes in dLux, so if you inherit from the any of the `SimpleOptics`,`NonPropagatorOptics`, or `AperturedOptics` classes, you will automatically inherit from `BaseOptics`. It implements the`model` and `proapgate` methods, and defines the `propagate_mono` method as an abstract method. This means that any class that inherits from `BaseOptics` must implement a `propagate_mono` method with the same signature as the abstract method. This is the only requirement for a class to be recognised as an optics class by dLux.
+The `BaseOptics` class is the base class for all optics classes in ∂Lux, so if you inherit from `SimpleOptics`,`NonPropagatorOptics`, or `AperturedOptics`, you will automatically inherit from `BaseOptics`. It implements the `model` and `propagate` methods, and defines the `propagate_mono` method as an abstract method. This means that any class that inherits from `BaseOptics` must implement a `propagate_mono` method with the same signature as the abstract method. This is the only requirement for a class to be recognised as an optics class by ∂Lux.
 
-The `SimpleOptics` class simply adds the `wf_npixels` and `diameter` attributes, along with a single method `_construct_wavefront(wavelength, offset)` that constructs a wavefront of the correct size and width, and performs the initial tilt from the `offset` value.
+The `SimpleOptics` class adds the `wf_npixels` and `diameter` attributes, and adds a single method: `_construct_wavefront(wavelength, offset)`, which constructs a wavefront of the correct size and width and performs the initial tilt from the `offset` value.
 
-The `NonPropagatorOptics` class adds the `psf_npixels`, `psf_pixel_scale`, and `psf_oversample` attributes, along with a `true_pixel_scale.
+The `NonPropagatorOptics` class adds the `psf_npixels`, `psf_pixel_scale`, and `psf_oversample` attributes, along with a `true_pixel_scale`.
 
-The `AperturedOptics` class adds the `aperture` and `mask` attributes, along with a `_apply_aperture(wavelength, offset)` method that applies the aperture and mask to the wavefront, calling the `_construct_wavefront` method under the hood. Note that by default, the `mask` attribute is applied as a transmissive mask if it supplied as an array.
+The `AperturedOptics` class adds the `aperture` and `mask` attributes, along with an `_apply_aperture(wavelength, offset)` method that applies the aperture and mask to the wavefront, calling the `_construct_wavefront` method under the hood. Note that by default, the `mask` attribute is applied as a transmissive mask if it supplied as an array.

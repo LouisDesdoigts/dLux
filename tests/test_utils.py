@@ -14,7 +14,7 @@ config.update("jax_debug_nans", True)
 
 
 """
-coordaintes.py
+coordinates.py
 """
 def test_polar_to_cart():
     """Tests the polar_to_cart function."""

@@ -1,11 +1,8 @@
 from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
-from jax import vmap, Array
-from jax.tree_util import tree_map
+from jax import Array
 from zodiax import Base
-import dLux
-
 
 __all__ = [
 
@@ -37,17 +34,16 @@ class OpticalLayer(Base):
 
     Note: I have chosen __call__ over apply as the method name for the layer 
     to be applied to the wavefront. This is because even though it prevents
-    the simple interface with optax (not having to wrap in a list), becuase
+    the simple interface with optax (not having to wrap in a list), because
     wavefront should in general not be able to be an object you take a gradient
     with respect to, it is just a latent class to store information throughout
     the calculation, plus its use of strings as a way to track parameters can
     make interactions with jax difficult.
     """
 
-
     @abstractmethod
-    def __call__(self : OpticalLayer, 
-        wavefront : Wavefront) -> Wavefront: # pragma: no cover
+    def __call__(self: OpticalLayer,
+                 wavefront: Wavefront) -> Wavefront:  # pragma: no cover
         """
         Applies the layer to the wavefront.
 
@@ -65,15 +61,14 @@ class OpticalLayer(Base):
 
 class TransmissiveLayer(OpticalLayer):
     """
-    Base class to hold tranmissive layers embuing them with a normalise 
+    Base class to hold transmissive layers imbuing them with a normalise 
     parameter.
     """
-    normalise : bool
+    normalise: bool
 
-
-    def __init__(self      : OpticalLayer, 
-                 normalise : bool = False,
-                 **kwargs) -> OpticalLayer:
+    def __init__(self: OpticalLayer,
+                 normalise: bool = False,
+                 **kwargs):
         """
         Parameters
         ----------
@@ -96,12 +91,11 @@ class ShapedLayer(OpticalLayer):
     Base class used for layers that have a specified output shape.
     """
 
-
     @abstractmethod
-    def applied_shape(self : OpticalLayer) -> int:
+    def applied_shape(self: OpticalLayer) -> int:
         """
         Returns the 'shape' of the layer, more specifically the required 
-        matching shape of the waevefront to be applied to.
+        matching shape of the wavefront to be applied to.
 
         Returns
         -------
@@ -122,13 +116,12 @@ class BasisLayer(OpticalLayer):
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
     """
-    basis        : Union[Array, list]
-    coefficients : Array
+    basis: Union[Array, list]
+    coefficients: Array
 
-
-    def __init__(self         : OpticalLayer,
-                 basis        : Array = None,
-                 coefficients : Array = None,
+    def __init__(self: OpticalLayer,
+                 basis: Array = None,
+                 coefficients: Array = None,
                  **kwargs) -> OpticalLayer:
         """
         Parameters
@@ -147,14 +140,13 @@ class BasisLayer(OpticalLayer):
             self.coefficients = np.asarray(coefficients, dtype=float)
             if self.basis.shape[:-2] != self.coefficients.shape:
                 raise ValueError("The number of basis vectors must be equal to "
-                    "the number of coefficients.")
+                                 "the number of coefficients.")
 
-
-    def calculate(self         : OpticalLayer, 
-                  basis        : Array, 
-                  coefficients : Array) -> Array:
+    def calculate(self: OpticalLayer,
+                  basis: Array,
+                  coefficients: Array) -> Array:
         """
-        Performs an n-dimentional dot-product between the basis and coefficients
+        Performs an n-dimensional dot-product between the basis and coefficients
         arrays.
 
         Parameters
@@ -167,6 +159,7 @@ class BasisLayer(OpticalLayer):
         ndim = coefficients.ndim
         axes = (tuple(range(ndim)), tuple(range(ndim)))
         return np.tensordot(basis, coefficients, axes=axes)
+
 
 ######### Optics #########
 class BaseTransmissiveOptic(TransmissiveLayer, ShapedLayer):
@@ -181,9 +174,8 @@ class BaseTransmissiveOptic(TransmissiveLayer, ShapedLayer):
     """
     transmission: Array
 
-
-    def __init__(self         : OpticalLayer,
-                 transmission : Array,
+    def __init__(self: OpticalLayer,
+                 transmission: Array,
                  **kwargs) -> OpticalLayer:
         """
         Parameters
@@ -197,12 +189,11 @@ class BaseTransmissiveOptic(TransmissiveLayer, ShapedLayer):
         self.transmission = transmission
         super().__init__(**kwargs)
 
-
     @property
-    def applied_shape(self : OpticalLayer) -> int:
+    def applied_shape(self: OpticalLayer) -> int:
         """
         Returns the 'shape' of the layer, more specifically the required 
-        matching shape of the waevefront to be applied to.
+        matching shape of the wavefront to be applied to.
 
         Returns
         -------
@@ -218,17 +209,16 @@ class BaseOPDOptic(AberratedLayer, ShapedLayer):
 
     Attributes
     ----------
-    opd : Array, meters
+    opd : Array, metres
         The Array of OPD values to be applied to the input wavefront.
     """
-    opd : Array
+    opd: Array
 
-
-    def __init__(self : OpticalLayer, opd : Array, **kwargs) -> OpticalLayer:
+    def __init__(self: OpticalLayer, opd: Array, **kwargs) -> OpticalLayer:
         """
         Parameters
         ----------
-        opd : Array, meters
+        opd : Array, metres
             The Array of OPD values to be applied to the input wavefront.
         """
         if opd is not None:
@@ -246,10 +236,9 @@ class BasePhaseOptic(AberratedLayer, ShapedLayer):
     phase : Array, radians
         The Array of phase values to be applied to the input wavefront.
     """
-    phase : Array
+    phase: Array
 
-
-    def __init__(self : OpticalLayer, phase : Array, **kwargs) -> OpticalLayer:
+    def __init__(self: OpticalLayer, phase: Array, **kwargs) -> OpticalLayer:
         """
         Parameters
         ----------
@@ -273,7 +262,7 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
     ----------
     transmission: Array
         The Array of transmission values to be applied to the input wavefront.
-    basis: Array, meters
+    basis: Array, metres
         Arrays holding the pre-calculated basis vectors.
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
@@ -282,16 +271,15 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
         optic.
     """
 
-
-    def __init__(self         : OpticalLayer,
-                 basis        : Array,
-                 transmission : Array = None,
-                 coefficients : Array = None,
-                 normalise    : bool = False) -> OpticalLayer:
+    def __init__(self: OpticalLayer,
+                 basis: Array,
+                 transmission: Array = None,
+                 coefficients: Array = None,
+                 normalise: bool = False) -> OpticalLayer:
         """
         Parameters
         ----------
-        basis: Array, meters
+        basis: Array, metres
             Arrays holding the pre-calculated basis vectors.
         transmission: Array = None
             The Array of transmission values to be applied to the input
@@ -301,15 +289,14 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
         normalise: bool = False
             Whether to normalise the wavefront after passing through the
         """
-        super().__init__(transmission=transmission, basis=basis, 
-        coefficients=coefficients, normalise=normalise)
-    
+        super().__init__(transmission=transmission, basis=basis,
+                         coefficients=coefficients, normalise=normalise)
 
     @property
-    def applied_shape(self : OpticalLayer) -> int:
+    def applied_shape(self: OpticalLayer) -> int:
         """
         Returns the 'shape' of the layer, more specifically the required
-        matching shape of the waevefront to be applied to.
+        matching shape of the wavefront to be applied to.
 
         Returns
         -------
@@ -330,40 +317,38 @@ class Optic(BaseTransmissiveOptic, BaseOPDOptic):
     ----------
     transmission: Array
         The Array of transmission values to be applied to the input wavefront.
-    opd : Array, meters
+    opd : Array, metres
         The Array of OPD values to be applied to the input wavefront.
     normalise: bool
         Whether to normalise the wavefront after passing through the
         optic.
     """
 
-
-    def __init__(self         : OpticalLayer,
-                 transmission : Array = None,
-                 opd          : Array = None,
-                 normalise    : bool = False) -> OpticalLayer:
+    def __init__(self: OpticalLayer,
+                 transmission: Array = None,
+                 opd: Array = None,
+                 normalise: bool = False):
         """
         Parameters
         ----------
         transmission: Array = None
             The Array of transmission values to be applied to the input
             wavefront.
-        opd : Array, meters = None
+        opd : Array, metres = None
             The Array of OPD values to be applied to the input wavefront.
         normalise: bool = False
             Whether to normalise the wavefront after passing through the
             optic.
         """
-        super().__init__(transmission=transmission, opd=opd, 
-            normalise=normalise)
-        
+        super().__init__(transmission=transmission, opd=opd,
+                         normalise=normalise)
+
         if self.opd is not None and self.transmission is not None:
             if opd.shape != self.transmission.shape:
                 raise ValueError("opd and transmission must have the same "
-                    "shape.")
-    
+                                 "shape.")
 
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -395,27 +380,25 @@ class BasisOptic(BaseBasisOptic):
     ----------
     transmission: Array
         The Array of transmission values to be applied to the input wavefront.
-    basis: Array, meters
+    basis: Array, metres
         Arrays holding the pre-calculated basis vectors.
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
     """
 
-
     @property
-    def opd(self : OpticalLayer) -> Array:
+    def opd(self: OpticalLayer) -> Array:
         """
-        Calcualtes the total opd from the basis vectors and coefficients.
+        Calculates the total opd from the basis vectors and coefficients.
 
         Returns
         -------
-        opd : Array, meters
+        opd : Array, metres
             The total opd.
         """
         return self.calculate(self.basis, self.coefficients)
-    
 
-    def __call__(self : OpticalLayer, wavefront : Wavefront()) -> Wavefront():
+    def __call__(self: OpticalLayer, wavefront: Wavefront()) -> Wavefront():
         """
         Applies the layer to the wavefront.
 
@@ -451,11 +434,10 @@ class PhaseOptic(BaseTransmissiveOptic, BasePhaseOptic):
         optic.
     """
 
-
-    def __init__(self         : OpticalLayer,
-                 transmission : Array = None,
-                 phase        : Array = None,
-                 normalise    : bool = False) -> OpticalLayer:
+    def __init__(self: OpticalLayer,
+                 transmission: Array = None,
+                 phase: Array = None,
+                 normalise: bool = False) -> OpticalLayer:
         """
         Parameters
         ----------
@@ -469,15 +451,14 @@ class PhaseOptic(BaseTransmissiveOptic, BasePhaseOptic):
             optic.
         """
         super().__init__(transmission=transmission, phase=phase,
-            normalise=normalise)
+                         normalise=normalise)
 
         if self.phase is not None and self.transmission is not None:
             if phase.shape != self.transmission.shape:
                 raise ValueError("phase and transmission must have the same "
-                    "shape.")
-    
+                                 "shape.")
 
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -509,17 +490,16 @@ class PhaseBasisOptic(BaseBasisOptic):
     ----------
     transmission: Array
         The Array of transmission values to be applied to the input wavefront.
-    basis: Array, meters
+    basis: Array, metres
         Arrays holding the pre-calculated basis vectors.
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
     """
 
-
     @property
-    def phase(self : OpticalLayer) -> Array:
+    def phase(self: OpticalLayer) -> Array:
         """
-        Calcualtes the total phase from the basis vectors and coefficients.
+        Calculates the total phase from the basis vectors and coefficients.
 
         Returns
         -------
@@ -528,8 +508,7 @@ class PhaseBasisOptic(BaseBasisOptic):
         """
         return self.calculate(self.basis, self.coefficients)
 
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -559,10 +538,9 @@ class Tilt(OpticalLayer):
     angles : Array, radians
         The (x, y) angles by which to tilt the wavefront.
     """
-    angles : Array
+    angles: Array
 
-
-    def __init__(self  : OpticalLayer, angles : Array) -> OpticalLayer:
+    def __init__(self: OpticalLayer, angles: Array) -> OpticalLayer:
         """
         Constructor for the TiltWavefront class.
 
@@ -577,8 +555,7 @@ class Tilt(OpticalLayer):
         if self.angles.shape != (2,):
             raise ValueError("angles must have have (2,)")
 
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -597,8 +574,8 @@ class Tilt(OpticalLayer):
 
 class Normalise(OpticalLayer):
     """Normalises the wavefront."""
-    
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+
+    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -630,15 +607,14 @@ class Rotate(OpticalLayer):
         Should the rotation be performed on the 'complex' (real, imaginary),
         as opposed to the default 'phasor' (amplitude, phase) arrays.
     """
-    angle   : Array
-    order   : int
-    complex : bool
+    angle: Array
+    order: int
+    complex: bool
 
-
-    def __init__(self    : OpticalLayer,
-                 angle   : Array,
-                 order   : int  = 1,
-                 complex : bool = False) -> OpticalLayer:
+    def __init__(self: OpticalLayer,
+                 angle: Array,
+                 order: int = 1,
+                 complex: bool = False):
         """
         Constructor for the Rotate class.
 
@@ -654,18 +630,17 @@ class Rotate(OpticalLayer):
             as opposed to the default 'phasor' (amplitude, phase) arrays.
         """
         super().__init__()
-        self.angle   = np.asarray(angle, dtype=float)
-        self.order   = int(order)
+        self.angle = np.asarray(angle, dtype=float)
+        self.order = int(order)
         self.complex = bool(complex)
 
         if self.order not in (0, 1):
             raise ValueError("Order must be 0, 1")
         if self.angle.ndim != 0:
             raise ValueError(f"angle must be a zero-dimensional, has "
-                f"{self.angle.ndim} dimensions.")
+                             f"{self.angle.ndim} dimensions.")
 
-
-    def __call__(self : OpticalLayer, wavefront : Wavefront) -> Wavefront:
+    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 

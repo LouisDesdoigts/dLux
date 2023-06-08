@@ -140,5 +140,5 @@ nav:
         - Helpers:       docs/API/utils/helpers.md
 
     - FAQ & Troubleshooting: docs/faq.md
-    - Change Log: CHANGELOG.md
+#    - Change Log: CHANGELOG.md
     - Contributing: CONTRIBUTING.md
