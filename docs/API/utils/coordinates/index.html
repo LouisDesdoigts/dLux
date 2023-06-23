@@ -21,7 +21,7 @@
         <link rel="next" href="../interpolation/">
       
       <link rel="icon" href="../../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
     
     
       
@@ -1114,7 +1114,7 @@ flexibility to have different dimension sizes and scales.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>float</code>
+                <code>float = 1</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1128,7 +1128,7 @@ flexibility to have different dimension sizes and scales.</p>
         <tr>
           <td><code>ndims</code></td>
           <td>
-                <code>int</code>
+                <code>int = 2</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1142,7 +1142,7 @@ flexibility to have different dimension sizes and scales.</p>
         <tr>
           <td><code>polar</code></td>
           <td>
-                <code>bool</code>
+                <code>bool = False</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1304,7 +1304,7 @@ input must be 2d.</p>
         <tr>
           <td><code>pixel_scales</code></td>
           <td>
-                <code><span title="typing.Union">Union</span>[tuple, float]</code>
+                <code>Union[tuple, float] = 1.</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1320,7 +1320,7 @@ scale is applied to all dimensions. If None, the scale is set to 1.</p>
         <tr>
           <td><code>offsets</code></td>
           <td>
-                <code><span title="typing.Union">Union</span>[tuple, float]</code>
+                <code>Union[tuple, float] = 0.</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1337,7 +1337,7 @@ set to 0.</p>
         <tr>
           <td><code>polar</code></td>
           <td>
-                <code>bool</code>
+                <code>bool = False</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1352,7 +1352,7 @@ Cartesian coordinates. Default is False.</p>
         <tr>
           <td><code>indexing</code></td>
           <td>
-                <code>str</code>
+                <code>str = &#39;xy&#39;</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1602,13 +1602,19 @@ details.</p>
     <script id="__config" type="application/json">{"base": "../../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.b4d07000.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.a51614de.min.js"></script>
       
-        <script src="../../../../javascripts/mathjax.js"></script>
+        
+          <script src="../../../../javascripts/mathjax.js"></script>
+        
       
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
+          <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
+          <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
       
     
   </body>

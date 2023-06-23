@@ -21,7 +21,7 @@
         <link rel="next" href="../images/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
     
     
       
@@ -1227,7 +1227,7 @@ Every source in this class will have an identical spectrum.</p>
         <tr>
           <td><code>flux</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, photons</code>
+                <code>Array, photons = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1241,7 +1241,7 @@ Every source in this class will have an identical spectrum.</p>
         <tr>
           <td><code>spectrum</code></td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.spectra.Spectrum" href="../spectra/#dLux.spectra.Spectrum">Spectrum</a></code>
+                <code>Spectrum = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1256,7 +1256,7 @@ Every source in this class will have an identical spectrum.</p>
         <tr>
           <td><code>wavelengths</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>Array, metres = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1764,7 +1764,7 @@ the vertical axis.</p>
         <tr>
           <td><code>position</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>Array, radians = np.array([0., 0.])</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1778,7 +1778,7 @@ the vertical axis.</p>
         <tr>
           <td><code>flux</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, photons</code>
+                <code>Array, photons = np.array(1.)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1792,7 +1792,7 @@ the vertical axis.</p>
         <tr>
           <td><code>separation</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>Array, radians = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1806,7 +1806,7 @@ the vertical axis.</p>
         <tr>
           <td><code>position_angle</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>Array, radians = np.pi/2</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1821,7 +1821,7 @@ the vertical axis.</p>
         <tr>
           <td><code>contrast</code></td>
           <td>
-                <code><span title="jax.Array">Array</span></code>
+                <code>Array = np.array(1.)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1835,7 +1835,7 @@ the vertical axis.</p>
         <tr>
           <td><code>spectrum</code></td>
           <td>
-                <code>CombinedSpectrum</code>
+                <code>CombinedSpectrum = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1849,7 +1849,7 @@ the vertical axis.</p>
         <tr>
           <td><code>wavelengths</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>Array, metres = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2346,7 +2346,7 @@ component using an array of intensities.</p>
         <tr>
           <td><code>position</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>Array, radians = np.array([0., 0.])</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2360,7 +2360,7 @@ component using an array of intensities.</p>
         <tr>
           <td><code>flux</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, photons</code>
+                <code>Array, photons = np.array(1.)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2374,7 +2374,7 @@ component using an array of intensities.</p>
         <tr>
           <td><code>distribution</code></td>
           <td>
-                <code><span title="jax.Array">Array</span></code>
+                <code>Array = np.ones((3, 3))</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2388,7 +2388,7 @@ component using an array of intensities.</p>
         <tr>
           <td><code>spectrum</code></td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.spectra.Spectrum" href="../spectra/#dLux.spectra.Spectrum">Spectrum</a></code>
+                <code>Spectrum = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2402,7 +2402,7 @@ component using an array of intensities.</p>
         <tr>
           <td><code>wavelengths</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>Array, metres = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2965,7 +2965,7 @@ source.</p>
         <tr>
           <td><code>position</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>Array, radians = np.array([0., 0.])</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2979,7 +2979,7 @@ source.</p>
         <tr>
           <td><code>flux</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, photons</code>
+                <code>Array, photons = np.array(1.)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2993,7 +2993,7 @@ source.</p>
         <tr>
           <td><code>distribution</code></td>
           <td>
-                <code><span title="jax.Array">Array</span></code>
+                <code>Array = np.ones((3, 3))</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3007,7 +3007,7 @@ source.</p>
         <tr>
           <td><code>contrast</code></td>
           <td>
-                <code><span title="jax.Array">Array</span></code>
+                <code>Array = np.array(1.)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3022,7 +3022,7 @@ source.</p>
         <tr>
           <td><code>spectrum</code></td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.spectra.Spectrum" href="../spectra/#dLux.spectra.Spectrum">Spectrum</a></code>
+                <code>Spectrum = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3036,7 +3036,7 @@ source.</p>
         <tr>
           <td><code>wavelengths</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>Array, metres = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3344,13 +3344,19 @@ modelling the single point source psf.</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.b4d07000.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.a51614de.min.js"></script>
       
-        <script src="../../../javascripts/mathjax.js"></script>
+        
+          <script src="../../../javascripts/mathjax.js"></script>
+        
       
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
+          <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
+          <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
       
     
   </body>
