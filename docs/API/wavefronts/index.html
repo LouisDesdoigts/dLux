@@ -21,7 +21,7 @@
         <link rel="next" href="../optics/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
     
     
       
@@ -3464,7 +3464,7 @@ of the complex wavefront.</p>
     <tbody>
         <tr>
 <td><code>wavenumber</code></td>          <td>
-                <code><span title="jax.Array">Array</span>, 1</code>
+                <code>Array, 1/meters</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3508,7 +3508,7 @@ of the complex wavefront.</p>
         <tr>
           <td><code>pad</code></td>
           <td>
-                <code>int</code>
+                <code>int = 2</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3523,7 +3523,7 @@ performing the FFT.</p>
         <tr>
           <td><code>focal_length</code></td>
           <td>
-                <code><span title="jax.Array">Array</span></code>
+                <code>Array = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3665,7 +3665,7 @@ Transform.</p>
         <tr>
           <td><code>pad</code></td>
           <td>
-                <code>int</code>
+                <code>int = 2</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3680,7 +3680,7 @@ performing the FFT.</p>
         <tr>
           <td><code>focal_length</code></td>
           <td>
-                <code><span title="jax.Array">Array</span></code>
+                <code>Array = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3854,7 +3854,7 @@ Transform. TODO: Add link to Soumer et al. 2007(?).</p>
         <tr>
           <td><code>focal_length</code></td>
           <td>
-                <code><span title="jax.Array">Array</span></code>
+                <code>Array = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -4020,7 +4020,7 @@ Transform. TODO: Add link to Soumer et al. 2007(?).</p>
         <tr>
           <td><code>focal_length</code></td>
           <td>
-                <code><span title="jax.Array">Array</span></code>
+                <code>Array = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -5527,7 +5527,7 @@ imaginary components by passing <code>complex=True</code>.</p>
         <tr>
           <td><code>order</code></td>
           <td>
-                <code>int</code>
+                <code>int = 1</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -5541,7 +5541,7 @@ imaginary components by passing <code>complex=True</code>.</p>
         <tr>
           <td><code>complex</code></td>
           <td>
-                <code>bool</code>
+                <code>bool = False</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -5721,7 +5721,7 @@ interpolation.</p>
         <tr>
           <td><code>complex</code></td>
           <td>
-                <code>bool</code>
+                <code>bool = False</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -5918,7 +5918,7 @@ TODO: Add link to Soumer et al. 2007(?), </p>
         <tr>
           <td><code>focal_length</code></td>
           <td>
-                <code><span title="jax.Array">Array</span></code>
+                <code>Array = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -5934,7 +5934,7 @@ treated as an 'angular' propagation, else it is treated as a
         <tr>
           <td><code>pixel</code></td>
           <td>
-                <code>bool</code>
+                <code>bool = True</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -6129,7 +6129,7 @@ TODO: Add link to Soumer et al. 2007(?), </p>
         <tr>
           <td><code>focal_length</code></td>
           <td>
-                <code><span title="jax.Array">Array</span></code>
+                <code>Array = None</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -6145,7 +6145,7 @@ treated as an 'angular' propagation, else it is treated as a
         <tr>
           <td><code>pixel</code></td>
           <td>
-                <code>bool</code>
+                <code>bool = True</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -6528,7 +6528,7 @@ Fresnel plane.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>float, metres</code>
+                <code>float, metres/pixel</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -7327,7 +7327,7 @@ Fresnel plane.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>float, metres</code>
+                <code>float, metres/pixel</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -7447,7 +7447,7 @@ a Fresnel Transform using a Matrix Fourier Transform.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>Array, metres/pixel</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -8030,13 +8030,19 @@ wavefront when propagating to a non-conjugate plane.</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.b4d07000.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.a51614de.min.js"></script>
       
-        <script src="../../../javascripts/mathjax.js"></script>
+        
+          <script src="../../../javascripts/mathjax.js"></script>
+        
       
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
+          <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
+          <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
       
     
   </body>
