@@ -21,6 +21,6 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
-test = ["pytest"]
+tests = ["pytest"]
 tutorials = ["matplotlib", "jupyter", "jupyterlab", "tqdm", "chainconsumer", "numpyro", "dLuxToliman", "scikit-learn"]
 docs = ["mkdocs", "mkdocs-jupyter", "mkdocs-same-dir", "mkdocs-autorefs", "mkdocs-simple-plugin", "mkdocstrings-python", "jupyter_contrib_nbextensions"]
