@@ -9,12 +9,12 @@ from . import optics
 from . import math
 
 # Dont import all functions from modules
-from .coordinates     import *
-from .helpers         import *
-from .interpolation   import *
-from .units           import *
-from .optics          import *
-from .math            import *
+from .coordinates import *
+from .helpers import *
+from .interpolation import *
+from .units import *
+from .optics import *
+from .math import *
 
 # Add to __all__
 modules = [

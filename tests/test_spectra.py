@@ -1,7 +1,6 @@
-import jax.numpy as np
 import pytest
-import dLux
-from jax import config, Array
+from jax import config
+
 config.update("jax_debug_nans", True)
 
 
@@ -9,7 +8,8 @@ def _test_normalise(constructor):
     """Tests the normalise method."""
     constructor().normalise()
 
-class TestSpectrum():
+
+class TestSpectrum:
     """Tests the Spectrum class."""
 
     def test_constructor(self, create_spectrum):
@@ -27,7 +27,7 @@ class TestSpectrum():
         _test_normalise(create_spectrum)
 
 
-class TestPolySpectrum():
+class TestPolySpectrum:
     """Tests the PolySpectrum class."""
 
     def test_constructor(self, create_poly_spectrum):
@@ -35,11 +35,11 @@ class TestPolySpectrum():
         create_poly_spectrum()
         with pytest.raises(ValueError):
             create_poly_spectrum(coefficients=1)
-    
+
     def test_normalise(self, create_poly_spectrum):
         """Tests the normalise method."""
         _test_normalise(create_poly_spectrum)
-    
+
     def test_weights(self, create_poly_spectrum):
         """Tests the weights property."""
         create_poly_spectrum().weights

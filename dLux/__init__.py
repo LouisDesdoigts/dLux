@@ -27,22 +27,22 @@ from . import utils
 
 # Import core functions from modules
 # Wavefronts and Optics
-from .wavefronts     import *
-from .optics         import *
+from .wavefronts import *
+from .optics import *
 from .optical_layers import *
-from .propagators    import *
-from .apertures      import *
-from .aberrations    import *
+from .propagators import *
+from .apertures import *
+from .aberrations import *
 
 # Images and Detectors
-from .images          import *
-from .detectors       import *
+from .images import *
+from .detectors import *
 from .detector_layers import *
 
 # All other classes
-from .sources      import *
-from .spectra    import *
-from .instruments  import *
+from .sources import *
+from .spectra import *
+from .instruments import *
 from .observations import *
 
 # Sub Modules
@@ -57,14 +57,11 @@ modules = [
     propagators,
     apertures,
     aberrations,
-
     images,
     detectors,
     detector_layers,
-
     sources,
     spectra,
-
     instruments,
     observations,
 ]

@@ -1,8 +1,14 @@
 import jax.numpy as np
 from jax import Array
 
-__all__ = ["opd_to_phase", "phase_to_opd", "get_fringe_size",
-           "get_pixels_per_fringe", "get_pixel_scale", "get_airy_pixel_scale"]
+__all__ = [
+    "opd_to_phase",
+    "phase_to_opd",
+    "get_fringe_size",
+    "get_pixels_per_fringe",
+    "get_pixel_scale",
+    "get_airy_pixel_scale",
+]
 
 
 def opd_to_phase(opd: Array, wavelength: Array) -> Array:
@@ -64,10 +70,12 @@ def get_fringe_size(wavelength: Array, aperture: Array) -> Array:
     return wavelength / aperture
 
 
-def get_pixels_per_fringe(wavelength: Array,
-                          aperture: Array,
-                          pixel_scale: Array,
-                          focal_length: Array = None) -> Array:
+def get_pixels_per_fringe(
+    wavelength: Array,
+    aperture: Array,
+    pixel_scale: Array,
+    focal_length: Array = None,
+) -> Array:
     """
     Calculates the number of pixels per diffraction fringe, i.e. the fringe
     sampling rate.
@@ -104,10 +112,12 @@ def get_pixels_per_fringe(wavelength: Array,
     # return pixel_scale/fringe_size
 
 
-def get_pixel_scale(sampling_rate: Array,
-                    wavelength: Array,
-                    aperture: Array,
-                    focal_length: Array = None) -> Array:
+def get_pixel_scale(
+    sampling_rate: Array,
+    wavelength: Array,
+    aperture: Array,
+    focal_length: Array = None,
+) -> Array:
     """
     Calculates the pixel_size needed in order to sample the diffraction fringes
     at the given sampling rate.
@@ -144,10 +154,12 @@ def get_pixel_scale(sampling_rate: Array,
     return fringe_size / sampling_rate
 
 
-def get_airy_pixel_scale(sampling_rate: Array,
-                         wavelength: Array,
-                         aperture: Array,
-                         focal_length: Array = None) -> Array:
+def get_airy_pixel_scale(
+    sampling_rate: Array,
+    wavelength: Array,
+    aperture: Array,
+    focal_length: Array = None,
+) -> Array:
     """
     Calculates the pixel_size needed to sample the diffraction fringes
     at the given sampling rate. Applies the 1.22 multiplier for Airy disk
@@ -174,5 +186,6 @@ def get_airy_pixel_scale(sampling_rate: Array,
         sampling rate, in units of radians per pixel if no focal length is
         provided, else in units of metres per pixel.
     """
-    return get_pixel_scale(sampling_rate, 1.22 * wavelength, aperture,
-                           focal_length)
+    return get_pixel_scale(
+        sampling_rate, 1.22 * wavelength, aperture, focal_length
+    )

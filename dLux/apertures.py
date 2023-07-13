@@ -79,7 +79,9 @@ class ApertureLayer(TransmissiveLayer()):
             The array representing the transmission of the aperture.
         """
 
-    def transmission(self: ApertureLayer, npixels: int, diameter: float) -> Array:
+    def transmission(
+        self: ApertureLayer, npixels: int, diameter: float
+    ) -> Array:
         """
         Compute the array representing the aperture on a set of coordinates
         with the specified number of pixels and diameter.
@@ -96,7 +98,9 @@ class ApertureLayer(TransmissiveLayer()):
         transmission : Array
             The array representing the transmission of the aperture.
         """
-        return self._transmission(dlu.pixel_coords(npixels, diameter / npixels))
+        return self._transmission(
+            dlu.pixel_coords(npixels, diameter / npixels)
+        )
 
 
 class BaseDynamicAperture(ApertureLayer):
@@ -104,8 +108,8 @@ class BaseDynamicAperture(ApertureLayer):
     Base class instantiating a series of methods designed to generate
     apertures differentiably at run-time. This class primarily implements the
     coordinate transformations that can be applied to each aperture in order to
-    have fully control over the aperture shape, and apply global transformations
-    to the apertures.
+    have fully control over the aperture shape, and apply global
+    transformations to the apertures.
 
     Attributes
     ----------
@@ -189,7 +193,9 @@ class BaseDynamicAperture(ApertureLayer):
 
         is_trans = (self.centre != np.zeros((2,), float)).any()
         coordinates = lax.cond(
-            is_trans, lambda: translate(coordinates, self.centre), lambda: coordinates
+            is_trans,
+            lambda: translate(coordinates, self.centre),
+            lambda: coordinates,
         )
 
         def compress(coords, compress):
@@ -208,7 +214,9 @@ class BaseDynamicAperture(ApertureLayer):
 
         is_shear = (self.shear != np.zeros((2,), float)).any()
         coordinates = lax.cond(
-            is_shear, lambda: shear(coordinates, self.shear), lambda: coordinates
+            is_shear,
+            lambda: shear(coordinates, self.shear),
+            lambda: coordinates,
         )
 
         def rotate(coordinates: Array, rotation: Array) -> Array:
@@ -219,7 +227,9 @@ class BaseDynamicAperture(ApertureLayer):
 
         is_rot = self.rotation != 0.0
         coordinates = lax.cond(
-            is_rot, lambda: rotate(coordinates, self.rotation), lambda: coordinates
+            is_rot,
+            lambda: rotate(coordinates, self.rotation),
+            lambda: coordinates,
         )
 
         return coordinates
@@ -277,8 +287,8 @@ class DynamicAperture(BaseDynamicAperture):
     Attributes
     ----------
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -393,8 +403,8 @@ class DynamicAperture(BaseDynamicAperture):
 
     def _soften(self: ApertureLayer, distances: Array) -> Array:
         """
-        Converts the distances from an edge into a soft-edged transmission array
-        using a tanh function.
+        Converts the distances from an edge into a soft-edged transmission
+        array using a tanh function.
 
         Parameters
         ----------
@@ -438,10 +448,12 @@ class DynamicAperture(BaseDynamicAperture):
             aperture = 1.0 - aperture
         return aperture
 
-    def _normalised_coordinates(self: ApertureLayer, coordinates: Array) -> Array:
+    def _normalised_coordinates(
+        self: ApertureLayer, coordinates: Array
+    ) -> Array:
         """
-        Shift a set of coordinates to be centered on the aperture and scaled such
-        that the radial distance is 1 to the edge of the aperture.
+        Shift a set of coordinates to be centered on the aperture and scaled
+        such that the radial distance is 1 to the edge of the aperture.
 
         ### Here
 
@@ -459,9 +471,9 @@ class DynamicAperture(BaseDynamicAperture):
         return self._coordinates(coordinates) / self._extent()
 
 
-#################################
-### Concrete Aperture Classes ###
-#################################
+#############################
+# Concrete Aperture Classes #
+#############################
 class CircularAperture(DynamicAperture):
     """
     A circular aperture parameterised by its radius.
@@ -477,8 +489,8 @@ class CircularAperture(DynamicAperture):
     compression: Array
         The (x, y) compression of the aperture.
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -548,7 +560,6 @@ class CircularAperture(DynamicAperture):
         aperture: Array
             The soft-edged aperture shape.
         """
-        scale = coordinates[0, 1] - coordinates[0, 0]
         coordinates = np.hypot(coordinates[0], coordinates[1])
         return self._soften(-coordinates + self.radius)
 
@@ -602,8 +613,8 @@ class RectangularAperture(DynamicAperture):
     rotation: Array, radians
         The clockwise rotation of the aperture.
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -742,8 +753,8 @@ class PolyAperture(DynamicAperture):
     rotation: Array, radians
         The clockwise rotation of the aperture.
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -795,12 +806,17 @@ class PolyAperture(DynamicAperture):
         )
 
     def _perp_dists_from_lines(
-        self: ApertureLayer, m: float, x1: float, y1: float, xs: Array, ys: Array
+        self: ApertureLayer,
+        m: float,
+        x1: float,
+        y1: float,
+        xs: Array,
+        ys: Array,
     ) -> Array:
         """
         Calculates the perpendicular distance of the Cartesian (x, y)
-        coordinates from a line. The line is parameterised by its gradient m and
-        a point (x1, y1) that lies on the line.
+        coordinates from a line. The line is parameterised by its gradient m
+        and a point (x1, y1) that lies on the line.
 
         Parameters
         ----------
@@ -868,7 +884,9 @@ class PolyAperture(DynamicAperture):
         """
         # NOTE: see class docs.
         bc_orig = np.array([[0.0]])
-        dist_from_orig = self._perp_dists_from_lines(ms, xs, ys, bc_orig, bc_orig)
+        dist_from_orig = self._perp_dists_from_lines(
+            ms, xs, ys, bc_orig, bc_orig
+        )
         return np.sign(dist_from_orig)
 
 
@@ -892,8 +910,8 @@ class IrregPolyAperture(PolyAperture):
     rotation: Array, radians
         The clockwise rotation of the aperture.
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -953,7 +971,9 @@ class IrregPolyAperture(PolyAperture):
         if self.vertices.ndim != 2 or self.vertices.shape[1] != 2:
             raise ValueError("vertices must have shape (n, 2).")
 
-    def _grads_from_many_points(self: ApertureLayer, xs: float, ys: float) -> float:
+    def _grads_from_many_points(
+        self: ApertureLayer, xs: float, ys: float
+    ) -> float:
         """
         Given a set of points, calculate the gradient of the line that connects
         those points. This function assumes that the points are provided in the
@@ -1097,8 +1117,8 @@ class RegPolyAperture(PolyAperture):
     rotation: Array, radians
         The clockwise rotation of the aperture.
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -1193,11 +1213,11 @@ class RegPolyAperture(PolyAperture):
         x = coordinates[0]
         y = coordinates[1]
 
-        neg_pi_to_pi_phi = np.arctan2(y, x)
+        # neg_pi_to_pi_phi = np.arctan2(y, x)
         alpha = np.pi / self.nsides
 
         i = np.arange(self.nsides)[:, None, None]  # Dummy index
-        bounds = 2.0 * i * alpha
+        # bounds = 2.0 * i * alpha
 
         ms = -1 / np.tan(2.0 * i * alpha + alpha)
         xs = self.rmax * np.cos(2.0 * i * alpha)
@@ -1225,11 +1245,11 @@ class RegPolyAperture(PolyAperture):
         x = coordinates[0]
         y = coordinates[1]
 
-        neg_pi_to_pi_phi = np.arctan2(y, x)
+        # neg_pi_to_pi_phi = np.arctan2(y, x)
         alpha = np.pi / self.nsides
 
         i = np.arange(self.nsides)[:, None, None]  # Dummy index
-        bounds = 2.0 * i * alpha
+        # bounds = 2.0 * i * alpha
 
         ms = -1 / np.tan(2.0 * i * alpha + alpha)
         xs = self.rmax * np.cos(2.0 * i * alpha)
@@ -1241,9 +1261,9 @@ class RegPolyAperture(PolyAperture):
         return dist.prod(axis=0)
 
 
-###################
-### Aberrations ###
-###################
+###############
+# Aberrations #
+###############
 class AberratedAperture(ApertureLayer, BasisLayer()):
     """
     A class for generating apertures with aberrations. This class generates the
@@ -1367,7 +1387,9 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
         coordinates = self.aperture._normalised_coordinates(coordinates)
 
         if isinstance(self.aperture, RegPolyAperture):
-            ikes = self.basis.calculate_basis(coordinates, self.aperture.nsides)
+            ikes = self.basis.calculate_basis(
+                coordinates, self.aperture.nsides
+            )
         else:
             ikes = self.basis.calculate_basis(coordinates)
 
@@ -1381,8 +1403,8 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
 
     def _opd(self: ApertureLayer, coordinates: Array) -> Array:
         """
-        Compute the array representing the opd of the optical aberrations on the
-        provided coordinates.
+        Compute the array representing the opd of the optical aberrations on
+        the provided coordinates.
 
         Parameters
         ----------
@@ -1396,7 +1418,9 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
         """
         return self.calculate(self._basis(coordinates), self.coefficients)
 
-    def _orthonormalise(self: ApertureLayer, aperture: Array, zernikes: Array) -> Array:
+    def _orthonormalise(
+        self: ApertureLayer, aperture: Array, zernikes: Array
+    ) -> Array:
         """
         Orthonomalises the zernike polynomials on the aperture.
 
@@ -1467,9 +1491,9 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
         )
 
 
-###############
-### Spiders ###
-###############
+###########
+# Spiders #
+###########
 class Spider(DynamicAperture):
     """
     An abstract class for generating aperture spiders struts.
@@ -1548,9 +1572,13 @@ class Spider(DynamicAperture):
         gradient = np.tan(angle)
         dist = np.abs(y - gradient * x) / np.sqrt(1 + gradient**2)
         theta = np.arctan2(y, x) + np.pi
-        theta = np.where(theta > angle, theta - angle, theta + 2 * np.pi - angle)
+        theta = np.where(
+            theta > angle, theta - angle, theta + 2 * np.pi - angle
+        )
         theta = np.where(theta > 2 * np.pi, theta - 2 * np.pi, theta)
-        strut = np.where((theta > np.pi / 2.0) & (theta < 3.0 * np.pi / 2.0), 1.0, dist)
+        strut = np.where(
+            (theta > np.pi / 2.0) & (theta < 3.0 * np.pi / 2.0), 1.0, dist
+        )
         return strut
 
     def _extent(self: ApertureLayer) -> Array:
@@ -1611,8 +1639,7 @@ class UniformSpider(Spider):
         Parameters
         ----------
         nstruts: int
-            The number of struts to equally space around the circle. This is not
-            a differentiable parameter.
+            The number of struts to equally space around the circle.
         strut_width: Array, metres
             The width of each strut.
         centre: Array, metres = np.array([0., 0.])
@@ -1700,9 +1727,9 @@ class UniformSpider(Spider):
         return struts.prod(axis=0)
 
 
-###########################
-### Composite Apertures ###
-###########################
+#######################
+# Composite Apertures #
+#######################
 class CompositeAperture(BaseDynamicAperture):
     """
     An abstract class used to combine multiple apertures so that more complex
@@ -1756,7 +1783,9 @@ class CompositeAperture(BaseDynamicAperture):
             Whether to normalise the wavefront after passing through the
             aperture.
         """
-        self.apertures = dlu.list_to_dictionary(apertures, False, ApertureLayer)
+        self.apertures = dlu.list_to_dictionary(
+            apertures, False, ApertureLayer
+        )
         super().__init__(
             centre=centre,
             shear=shear,
@@ -1782,7 +1811,9 @@ class CompositeAperture(BaseDynamicAperture):
         """
         coordinates = self._coordinates(coordinates)
         get_transmission = lambda ap: ap._transmission(coordinates)
-        transmissions = [get_transmission(ap) for ap in self.apertures.values()]
+        transmissions = [
+            get_transmission(ap) for ap in self.apertures.values()
+        ]
         return np.array(transmissions)
 
     def _aberrated_apertures(self: ApertureLayer) -> list:
@@ -1808,7 +1839,9 @@ class CompositeAperture(BaseDynamicAperture):
 
         # Get aberrated apertures
         # TODO: use partition
-        filter_map = tree_map(is_aberrated, self.apertures, is_leaf=is_aberrated)
+        filter_map = tree_map(
+            is_aberrated, self.apertures, is_leaf=is_aberrated
+        )
         aberrated = filter(self.apertures, filter_map)
         return tree_flatten(aberrated, is_leaf=is_aberrated)[0]
 
@@ -1845,8 +1878,8 @@ class CompositeAperture(BaseDynamicAperture):
 
     def _opd(self: ApertureLayer, coordinates: Array) -> Array:
         """
-        Compute the array representing the opd of the optical aberrations on the
-        provided coordinates.
+        Compute the array representing the opd of the optical aberrations on
+        the provided coordinates.
 
         Parameters
         ----------
@@ -1882,7 +1915,9 @@ class CompositeAperture(BaseDynamicAperture):
         else:
             opd = self._opd(coordinates)
             phase = wavefront.phase + opd * wavefront.wavenumber
-            wavefront = wavefront.set(["amplitude", "phase"], [amplitude, phase])
+            wavefront = wavefront.set(
+                ["amplitude", "phase"], [amplitude, phase]
+            )
 
         if self.normalise:
             wavefront = wavefront.normalise()
@@ -1907,7 +1942,9 @@ class CompositeAperture(BaseDynamicAperture):
         aperture: ApertureLayer
             The BasisOptic version of this aperture.
         """
-        coordinates = self._coordinates(dlu.pixel_coords(npixels, diameter / npixels))
+        coordinates = self._coordinates(
+            dlu.pixel_coords(npixels, diameter / npixels)
+        )
         transmission = self._transmission(coordinates)
 
         if len(self._aberrated_apertures()) == 0:
@@ -1943,8 +1980,9 @@ class CompositeAperture(BaseDynamicAperture):
 
 class CompoundAperture(CompositeAperture):
     """
-    A  class used to combine multiple apertures into a single coherent aperture.
-    An example would be an aperture with spiders holding a secondary mirror.
+    A  class used to combine multiple apertures into a single coherent
+    aperture. An example would be an aperture with spiders holding a secondary
+    mirror.
 
     This class is distinct from the MultiAperture class in that the
     sub-apertures are combined by multiplying their respective transmissions
@@ -2015,7 +2053,8 @@ class CompoundAperture(CompositeAperture):
                 naberrated += 1
             if naberrated > 1:
                 raise TypeError(
-                    "CompoundAperture can only have a single " "AberratedAperture."
+                    "CompoundAperture can only have a single "
+                    "AberratedAperture."
                 )
 
     def _transmission(self: ApertureLayer, coordinates: Array) -> Array:
@@ -2038,8 +2077,8 @@ class CompoundAperture(CompositeAperture):
 
 class MultiAperture(CompositeAperture):
     """
-    A  class used to combine multiple apertures into a single coherent aperture.
-    An example would be an aperture mask.
+    A  class used to combine multiple apertures into a single coherent
+    aperture. An example would be an aperture mask.
 
     This class is distinct from the CompoundAperture class in that the
     sub-apertures are combined by adding their respective transmissions
@@ -2081,9 +2120,9 @@ class MultiAperture(CompositeAperture):
         return self._stacked_apertures(coordinates).sum(axis=0)
 
 
-###############
-### Factory ###
-###############
+###########
+# Factory #
+###########
 def ApertureFactory(
     npixels: int,
     radial_orders: Array = None,
@@ -2110,12 +2149,12 @@ def ApertureFactory(
     the `aperture_ratio` parameter, with secondary mirror obscurations and
     struts being scaled relative to the aperture diameter.
 
-    Let's look at an example of how to construct a simple circular aperture with
-    a secondary mirror obscuration held by 4 struts. For this example lets take
-    a 2m diameter aperture, with a 20cm secondary mirror held by 3 struts with
-    a width of 2cm. In this example the secondary mirror is 10% of the primary
-    aperture diameter and the struts are 1% of the primary aperture diameter,
-    giving us values of 0.1 and 0.01 for the `secondary_ratio` and
+    Let's look at an example of how to construct a simple circular aperture
+    with a secondary mirror obscuration held by 4 struts. For this example lets
+    take a 2m diameter aperture, with a 20cm secondary mirror held by 3 struts
+    with a width of 2cm. In this example the secondary mirror is 10% of the
+    primary aperture diameter and the struts are 1% of the primary aperture
+    diameter, giving us values of 0.1 and 0.01 for the `secondary_ratio` and
     `strut_ratio` parameters. Let calculate this for a 512x512 array with the
     aperture spanning the full array.
 
@@ -2228,7 +2267,9 @@ def ApertureFactory(
     if nsides == 0:
         ap = CircularAperture(aperture_ratio / 2, softening=0)
     else:
-        ap = RegPolyAperture(nsides, aperture_ratio / 2, softening=0, rotation=rotation)
+        ap = RegPolyAperture(
+            nsides, aperture_ratio / 2, softening=0, rotation=rotation
+        )
 
     # Aberrations
     if radial_orders is not None:
@@ -2257,7 +2298,9 @@ def ApertureFactory(
         # Circular
         if secondary_nsides == 0:
             apertures.append(
-                CircularAperture(secondary_rel / 2, softening=0, occulting=True)
+                CircularAperture(
+                    secondary_rel / 2, softening=0, occulting=True
+                )
             )
         # Polygonal
         else:
@@ -2278,7 +2321,9 @@ def ApertureFactory(
         strut_rel = aperture_ratio * strut_ratio
         full_rotation = strut_rotation + rotation
         apertures.append(
-            UniformSpider(nstruts, strut_rel, rotation=full_rotation, softening=0)
+            UniformSpider(
+                nstruts, strut_rel, rotation=full_rotation, softening=0
+            )
         )
 
     # Construct CompoundAperture

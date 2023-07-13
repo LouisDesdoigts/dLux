@@ -7,7 +7,12 @@ from typing import Union
 import dLux.utils as dlu
 import dLux
 
-__all__ = ["AngularOptics", "CartesianOptics", "FlexibleOptics", "LayeredOptics"]
+__all__ = [
+    "AngularOptics",
+    "CartesianOptics",
+    "FlexibleOptics",
+    "LayeredOptics",
+]
 
 # Alias classes for simplified type-checking
 OpticalLayer = lambda: dLux.optical_layers.OpticalLayer
@@ -15,9 +20,9 @@ Propagator = lambda: dLux.propagators.Propagator
 Source = lambda: dLux.sources.BaseSource
 
 
-#######################
-### Private Classes ###
-#######################
+###################
+# Private Classes #
+###################
 class BaseOptics(Base):
     """
     The Base Optics class that all optics classes inherit from. Can be used to
@@ -134,7 +139,8 @@ class BaseOptics(Base):
         offset = np.array(offset) if not isinstance(offset, Array) else offset
         if offset.shape != (2,):
             raise ValueError(
-                "offset must be a 2-element array, got " f"shape {offset.shape}."
+                "offset must be a 2-element array, got "
+                f"shape {offset.shape}."
             )
 
         # Calculate
@@ -182,7 +188,7 @@ class SimpleOptics(BaseOptics):
     Attributes
     ----------
     wf_npixels : int
-        The nuber of pixels of the initial wavefront to propagate.
+        The number of pixels of the initial wavefront to propagate.
     diameter : Array, metres
         The diameter of the initial wavefront to propagate.
     """
@@ -313,14 +319,16 @@ class AperturedOptics(BaseOptics):
         """
         if not isinstance(aperture, (Array, OpticalLayer())):
             raise TypeError(
-                "aperture must be an Array or " f"OpticalLayer, got {type(aperture)}."
+                "aperture must be an Array or "
+                f"OpticalLayer, got {type(aperture)}."
             )
         self.aperture = aperture
 
         if mask is not None:
             if not isinstance(mask, (Array, OpticalLayer())):
                 raise TypeError(
-                    "mask must be an Array or " f"OpticalLayer, got {type(aperture)}."
+                    "mask must be an Array or "
+                    f"OpticalLayer, got {type(aperture)}."
                 )
         self.mask = mask
 
@@ -347,9 +355,9 @@ class AperturedOptics(BaseOptics):
         return wf
 
 
-######################
-### Public Classes ###
-######################
+##################
+# Public Classes #
+##################
 class AngularOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
     """
     A simple optical system that propagates a wavefront to an image plane
@@ -528,7 +536,7 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
         )
 
     def propagate_mono(
-        self: SimpleToliman,
+        self: CartesianOptics,
         wavelength: Array,
         offset: Array = np.zeros(2),
         return_wf: bool = False,
@@ -560,7 +568,9 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
 
         # Propagate
         pixel_scale = 1e-6 * self.psf_pixel_scale / self.psf_oversample
-        wf = wf.MFT(self.psf_npixels, pixel_scale, focal_length=self.focal_length)
+        wf = wf.MFT(
+            self.psf_npixels, pixel_scale, focal_length=self.focal_length
+        )
 
         # Return PSF or Wavefront
         if return_wf:
@@ -609,18 +619,23 @@ class FlexibleOptics(AperturedOptics, SimpleOptics):
         aperture : Union[Array, OpticalLayer]
             The aperture of the system. Can be an Array or a OpticalLayer.
         propagator : Propagator
-            The propagator to use to propagate the wavefront through the optics.
+            The propagator to use to propagate the wavefront through the
+            optics.
         mask : Union[Array, OpticalLayer] = None
             The mask to apply to the wavefront. Can be an Array or an
             OpticalLayer. If an Array it is treated as a transmissive mask.
         """
         if not isinstance(propagator, Propagator()):
             raise TypeError(
-                "propagator must be a Propagator object, " f"got {type(propagator)}."
+                "propagator must be a Propagator object, "
+                f"got {type(propagator)}."
             )
         self.propagator = propagator
         super().__init__(
-            wf_npixels=wf_npixels, diameter=diameter, aperture=aperture, mask=mask
+            wf_npixels=wf_npixels,
+            diameter=diameter,
+            aperture=aperture,
+            mask=mask,
         )
 
     @property
@@ -651,13 +666,15 @@ class FlexibleOptics(AperturedOptics, SimpleOptics):
             The wavefront object to propagate through the optics.
         """
         if isinstance(self.propagator, dLux.propagators.FarFieldFresnel):
-            wf = dLux.FresnelWavefront(self.wf_npixels, self.diameter, wavelength)
+            wf = dLux.FresnelWavefront(
+                self.wf_npixels, self.diameter, wavelength
+            )
         else:
             wf = dLux.Wavefront(self.wf_npixels, self.diameter, wavelength)
         return wf.tilt(offset)
 
     def propagate_mono(
-        self: SimpleToliman,
+        self: BaseOptics,
         wavelength: Array,
         offset: Array = np.zeros(2),
         return_wf: bool = False,
@@ -724,7 +741,8 @@ class LayeredOptics(SimpleOptics):
             The number of pixels to use when propagating the wavefront through
             the optical system.
         diameter : float
-            The diameter of the wavefront to model through the system in metres.
+            The diameter of the wavefront to model through the system in
+            metres.
         layers : list
             A list of dLux 'layers' that define the transformations and
             operations upon some input wavefront through an optical system.
@@ -748,7 +766,8 @@ class LayeredOptics(SimpleOptics):
         Returns
         -------
         item : object
-            The item corresponding to the supplied key in the layers dictionary.
+            The item corresponding to the supplied key in the layers
+            dictionary.
         """
         if key in self.layers.keys():
             return self.layers[key]

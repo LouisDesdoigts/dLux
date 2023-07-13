@@ -5,6 +5,7 @@ import jax.numpy as np
 from jax import Array
 from zodiax import Base
 
+
 __all__ = [
     # OpticalLayer
     # TransmissiveLayer
@@ -28,12 +29,12 @@ class OpticalLayer(Base):
     """
     Base class for optical layers. Primarily used for input type checking.
 
-    Child classes must implement the __call__ method that takes in the wavefront
-    as the first parameter
+    Child classes must implement the __call__ method that takes in the
+    wavefront as the first parameter.
 
     Note: I have chosen __call__ over apply as the method name for the layer
     to be applied to the wavefront. This is because even though it prevents
-    the simple interface with optax (not having to wrap in a list), because
+    the simple interface with Optax (not having to wrap in a list), because
     wavefront should in general not be able to be an object you take a gradient
     with respect to, it is just a latent class to store information throughout
     the calculation, plus its use of strings as a way to track parameters can
@@ -150,8 +151,8 @@ class BasisLayer(OpticalLayer):
         self: OpticalLayer, basis: Array, coefficients: Array
     ) -> Array:
         """
-        Performs an n-dimensional dot-product between the basis and coefficients
-        arrays.
+        Performs an n-dimensional dot-product between the basis and
+        coefficients arrays.
 
         Parameters
         ----------
@@ -165,7 +166,6 @@ class BasisLayer(OpticalLayer):
         return np.tensordot(basis, coefficients, axes=axes)
 
 
-######### Optics #########
 class BaseTransmissiveOptic(TransmissiveLayer, ShapedLayer):
     """
     Base class for transmissive optics. Implements the transmission attribute
@@ -319,9 +319,9 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
         return self.basis.shape[-2:]
 
 
-######################
-### Public Classes ###
-######################
+##################
+# Public Classes #
+##################
 class Optic(BaseTransmissiveOptic, BaseOPDOptic):
     """
     Optics class that holds both a transmission and OPD array.
@@ -651,8 +651,9 @@ class Rotate(OpticalLayer):
         order : int = 1
             The order of the interpolation to use. Must be 0, or 1.
         complex : bool = False
-            Should the rotation be performed on the 'complex' (real, imaginary),
-            as opposed to the default 'phasor' (amplitude, phase) arrays.
+            Should the rotation be performed on the 'complex' (real,
+            imaginary), as opposed to the default 'phasor' (amplitude, phase)
+            arrays.
         """
         super().__init__()
         self.angle = np.asarray(angle, dtype=float)
