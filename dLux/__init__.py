@@ -1,5 +1,5 @@
-name = "dLux"
-__version__ = "0.13.1"
+import importlib.metadata
+__version__ = importlib.metadata.version("dLux")
 
 # Import as modules
 # Wavefronts and Optics

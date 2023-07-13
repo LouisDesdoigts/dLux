@@ -1,0 +1,26 @@
+[project]
+name = "dLux"
+version = "0.13.2"
+description = "Differentiable Optical Models as Parameterised Neural Networks in Jax using Zodiax."
+readme = "README.md"
+requires-python =">=3.9"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Louis Desdoigts", email = "louis.desdoigts@sydney.edu.au"},
+]
+keywords = ["python", "optics", "machine-learning", "jax", "autodiff", "differentiable", "diffraction", "simulation", "telescope", "dLux"]
+urls = {repository = "https://github.com/LouisDesdoigts/dLux"}
+dependencies = ["jax", "jaxlib", "zodiax>=0.4.1"]
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+test = ["pytest"]
+tutorials = ["matplotlib", "jupyter", "jupyterlab", "tqdm", "chainconsumer", "numpyro", "dLuxToliman", "scikit-learn"]
+docs = ["mkdocs", "mkdocs-jupyter", "mkdocs-same-dir", "mkdocs-autorefs", "mkdocs-simple-plugin", "mkdocstrings-python", "jupyter_contrib_nbextensions"]
