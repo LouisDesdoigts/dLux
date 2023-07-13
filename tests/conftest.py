@@ -329,6 +329,8 @@ optical_layers.py classes:
     Tilt
     Normalise
     Rotate
+    Flip
+    Resize
     Optic
     BasisOptic
     PhaseOptic
@@ -367,6 +369,26 @@ def create_rotate():
         return optical_layers.Rotate(angle=angle, order=order, complex=complex)
 
     return _create_rotate
+
+
+@pytest.fixture
+def create_flip():
+    """Constructs the Flip class for testing."""
+
+    def _create_flip(axes: int = 0):
+        return optical_layers.Flip(axes=axes)
+
+    return _create_flip
+
+
+@pytest.fixture
+def create_resize():
+    """Constructs the Resize class for testing."""
+
+    def _create_resize(npixels: int = 16):
+        return optical_layers.Resize(npixels=npixels)
+
+    return _create_resize
 
 
 @pytest.fixture

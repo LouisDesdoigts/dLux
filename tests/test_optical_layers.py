@@ -172,16 +172,19 @@ class TestRotate:
         create_rotate(complex=True)(wf)
 
 
-# TODO: Actually make these tests, not just placeholders.
-# TODO: Make the pytest fixtures for these classes
 class TestFlip:
     """Tests the Flip class."""
 
     def test_constructor(self, create_flip):
         """Tests the constructor."""
         create_flip()
+        create_flip((0, 1, 2))
         with pytest.raises(ValueError):
-            create_flip(axis=np.ones(1))
+            create_flip(axes="1")
+        with pytest.raises(ValueError):
+            create_flip(axes=1.0)
+        with pytest.raises(ValueError):
+            create_flip(axes=(1, 1.0))
 
     def test_call(self, create_flip, create_wavefront):
         """Tests the __call__ method."""
@@ -195,10 +198,15 @@ class TestRezise:
     def test_constructor(self, create_resize):
         """Tests the constructor."""
         create_resize()
-        with pytest.raises(ValueError):
-            create_resize(shape=np.ones(1))
 
     def test_call(self, create_resize, create_wavefront):
         """Tests the __call__ method."""
-        wf = create_wavefront()
-        create_resize()(wf)
+
+        wf = create_wavefront(npixels=10)
+        create_resize(npixels=16)(wf)
+
+        wf = create_wavefront(npixels=20)
+        create_resize(npixels=16)(wf)
+
+        wf = create_wavefront(npixels=16)
+        create_resize(npixels=16)(wf)

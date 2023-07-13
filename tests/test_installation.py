@@ -12,7 +12,7 @@ if platform not in ["linux", "linux2"]:
 
 
 def test_install_dLux():
-    install_ok: int = os.system("pip install --quiet .")
+    install_ok = os.system("pip install --quiet .")
 
     assert install_ok == 0
 
@@ -21,7 +21,7 @@ def test_install_dLux():
 
 
 def test_import_dLux():
-    from dLux import dLux
+    import dLux
 
     dLux.optics
     assert True

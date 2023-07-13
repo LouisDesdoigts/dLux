@@ -22,6 +22,8 @@ __all__ = [
     "Tilt",
     "Normalise",
     "Rotate",
+    "Flip",
+    "Resize",
 ]
 
 
@@ -698,30 +700,28 @@ class Flip(OpticalLayer):
         convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.
     """
 
-    axes: Union[tuple, int]
+    axes: Union[tuple[int], int]
 
-    def __init__(self: OpticalLayer, axes: Union[tuple, int]):
+    def __init__(self: OpticalLayer, axes: Union[tuple[int], int]):
         """
         Constructor for the Flip class.
 
         Parameters
         ----------
-        axes : Union[tuple, int]
+        axes : Union[tuple[int], int]
             The axes to flip the wavefront about. This class uses the 'ij'
             indexing convention, ie axis 0 is the y-axis, and axis 1 is the
             x-axis.
         """
         super().__init__()
-        self.axes = int(axes)
+        self.axes = axes
 
         if isinstance(self.axes, tuple):
             for axes in self.axes:
                 if not isinstance(axes, int):
-                    raise ValueError("All axes must be in integer")
+                    raise ValueError("All axes must be integers.")
         elif not isinstance(self.axes, int):
-            raise ValueError("axes must be in integer")
-        else:
-            raise ValueError("axes must be a tuple or int")
+            raise ValueError("axes must be integers.")
 
     def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
