@@ -2,6 +2,7 @@ import jax.numpy as np
 import pytest
 from jax import config
 
+
 config.update("jax_debug_nans", True)
 
 

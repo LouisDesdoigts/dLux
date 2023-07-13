@@ -3,7 +3,11 @@ import jax.numpy as np
 from jax import Array
 import dLux
 
+
 __all__ = ["MFT", "FFT", "ShiftedMFT", "FarFieldFresnel"]
+
+
+Wavefront = dLux.wavefronts.Wavefront
 
 
 class Propagator(dLux.optical_layers.OpticalLayer):

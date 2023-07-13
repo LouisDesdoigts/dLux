@@ -1,5 +1,7 @@
 from __future__ import annotations
 from abc import abstractmethod
+from typing import Any
+from collections import OrderedDict
 import jax.numpy as np
 from jax import vmap, Array
 from zodiax import Base
@@ -18,6 +20,7 @@ __all__ = [
 OpticalLayer = lambda: dLux.optical_layers.OpticalLayer
 Propagator = lambda: dLux.propagators.Propagator
 Source = lambda: dLux.sources.BaseSource
+Wavefront = lambda: dLux.wavefronts.Wavefront
 
 
 ###################
@@ -730,8 +733,8 @@ class LayeredOptics(SimpleOptics):
     layers: OrderedDict
 
     def __init__(
-        self: Optics, wf_npixels: int, diameter: float, layers: list
-    ) -> Optics:
+        self: BaseOptics, wf_npixels: int, diameter: float, layers: list
+    ) -> BaseOptics:
         """
         Constructor for the Optics class.
 
@@ -753,7 +756,7 @@ class LayeredOptics(SimpleOptics):
         super().__init__(wf_npixels=wf_npixels, diameter=diameter)
         self.layers = dlu.list_to_dictionary(layers, True, OpticalLayer())
 
-    def __getattr__(self: Optics, key: str) -> object:
+    def __getattr__(self: BaseOptics, key: str) -> object:
         """
         Magic method designed to allow accessing of the various items within
         the layers dictionary of this class via the 'class.attribute' method.

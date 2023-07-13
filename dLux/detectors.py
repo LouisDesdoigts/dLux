@@ -31,7 +31,7 @@ class LayeredDetector(BaseDetector):
 
     layers: OrderedDict
 
-    def __init__(self: Detector, layers: list):
+    def __init__(self: BaseDetector, layers: list):
         """
         Constructor for the Detector class.
 
@@ -50,7 +50,7 @@ class LayeredDetector(BaseDetector):
         self.layers = dlu.list_to_dictionary(layers, True, DetectorLayer())
         super().__init__()
 
-    def __getattr__(self: Detector, key: str) -> object:
+    def __getattr__(self: BaseDetector, key: str) -> object:
         """
         Magic method designed to allow accessing of the various items within
         the layers dictionary of this class via the 'class.attribute' method.
@@ -73,7 +73,7 @@ class LayeredDetector(BaseDetector):
                 "'{}' object has no attribute '{}'".format(type(self), key)
             )
 
-    def model(self: Detector, image: Array) -> Array:
+    def model(self: BaseDetector, image: Array) -> Array:
         """
         Applied the stored detector layers to the input image.
 

@@ -10,7 +10,7 @@ authors = [
 ]
 keywords = ["python", "optics", "machine-learning", "jax", "autodiff", "differentiable", "diffraction", "simulation", "telescope", "dLux"]
 urls = {repository = "https://github.com/LouisDesdoigts/dLux"}
-dependencies = ["jax", "jaxlib", "zodiax>=0.4.1"]
+dependencies = ["jax", "jaxlib", "zodiax>=0.4.1", "pre-commit"]
 classifiers=[
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -24,3 +24,17 @@ build-backend = "setuptools.build_meta"
 tests = ["pytest"]
 tutorials = ["matplotlib", "jupyter", "jupyterlab", "tqdm", "chainconsumer", "numpyro", "dLuxToliman", "scikit-learn"]
 docs = ["mkdocs", "mkdocs-jupyter", "mkdocs-same-dir", "mkdocs-autorefs", "mkdocs-simple-plugin", "mkdocstrings-python", "jupyter_contrib_nbextensions"]
+
+[tool.black]
+line-length = 79
+
+[tool.ruff]
+line-length = 79
+select = ["E", "F"]
+ignore = ["E402", "E721", "E731", "E741", "F722"]
+ignore-init-module-imports = true
+
+
+[tool.ruff.isort]
+combine-as-imports = true
+lines-after-imports = 2

@@ -12,7 +12,7 @@ __all__ = [
     "ApplySaturation",
     "AddConstant",
     "IntegerDownsample",
-    "Rotate",
+    "RotateDetector",
 ]
 
 Image = lambda: dLux.images.Image
@@ -291,7 +291,7 @@ class IntegerDownsample(DetectorLayer):
         return image.downsample(self.kernel_size)
 
 
-class Rotate(DetectorLayer):
+class RotateDetector(DetectorLayer):
     """
     Applies a rotation to the image using interpolation methods.
 
@@ -308,7 +308,7 @@ class Rotate(DetectorLayer):
 
     def __init__(self: DetectorLayer, angle: Array, order: int = 1):
         """
-        Constructor for the Rotate class.
+        Constructor for the RotateDetector class.
 
         Parameters
         ----------

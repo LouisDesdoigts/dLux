@@ -1,22 +1,23 @@
-import pytest
 import jax.numpy as np
+import pytest
 from jax import Array
 
 from dLux import (
-    wavefronts,
-    optical_layers,
-    propagators,
-    apertures,
     aberrations,
-    optics,
-    images,
-    detectors,
+    apertures,
     detector_layers,
+    detectors,
+    images,
     instruments,
     observations,
+    optical_layers,
+    optics,
+    propagators,
     sources,
     spectra,
+    wavefronts,
 )
+
 
 """
 There are Four main parts of dLux:
@@ -752,7 +753,7 @@ image_layers.py classes:
     ApplySaturation
     AddConstant
     IntegerDownsample
-    Rotate
+    RotateDetector
 
 """
 
@@ -806,7 +807,7 @@ def create_rotate_detector():
     def _create_rotate_detector(
         angle: Array = np.array(np.pi), order: int = 1
     ):
-        return detector_layers.Rotate(angle=angle, order=order)
+        return detector_layers.RotateDetector(angle=angle, order=order)
 
     return _create_rotate_detector
 

@@ -1,10 +1,12 @@
 from __future__ import annotations
+from typing import Any
 import jax.numpy as np
 from jax.scipy.signal import convolve
 from jax import vmap, Array
 from zodiax import Base
 from abc import abstractmethod
 import dLux
+
 
 __all__ = [
     "PointSource",
@@ -13,6 +15,10 @@ __all__ = [
     "ResolvedSource",
     "PointResolvedSource",
 ]
+
+
+Spectrum = lambda: dLux.spectra.Spectrum
+Optics = lambda: dLux.optics.BaseOptics
 
 
 ###################

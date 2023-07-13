@@ -244,7 +244,7 @@ def fourier_rotate(
     )
 
     # Rotate the mask, to know what part is actually the array
-    padded_mask = self.__rotate(padded_mask, -angle_in_1st_quadrant)
+    padded_mask = rotate(padded_mask, -angle_in_1st_quadrant)
 
     # Replace part outside the array which are NaN by 0, and go into
     # Fourier space.

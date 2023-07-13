@@ -4,6 +4,7 @@ from typing import Union
 import jax.numpy as np
 from jax import Array
 from zodiax import Base
+import dLux
 
 
 __all__ = [
@@ -25,6 +26,9 @@ __all__ = [
     "Flip",
     "Resize",
 ]
+
+
+Wavefront = lambda: dLux.wavefronts.Wavefront
 
 
 class OpticalLayer(Base):

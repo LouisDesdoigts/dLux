@@ -1,11 +1,15 @@
 from __future__ import annotations
-from jax import numpy as np, lax, vmap, Array
-from jax.tree_util import tree_map, tree_flatten
-from typing import Any
+
 from abc import abstractmethod
+from typing import Any
+
 from equinox import filter
-import dLux.utils as dlu
+from jax import Array, lax, numpy as np, vmap
+from jax.tree_util import tree_flatten, tree_map
+
 import dLux
+import dLux.utils as dlu
+
 
 Wavefront = lambda: dLux.wavefronts.Wavefront
 Optic = lambda: dLux.optical_layers.Optic
@@ -13,6 +17,7 @@ BasisOptic = lambda: dLux.optical_layers.BasisOptic
 TransmissiveLayer = lambda: dLux.optical_layers.TransmissiveLayer
 BasisLayer = lambda: dLux.optical_layers.BasisLayer
 ZernikeBasis = lambda: dLux.aberrations.ZernikeBasis
+
 
 __all__ = [
     "CircularAperture",
@@ -1810,7 +1815,10 @@ class CompositeAperture(BaseDynamicAperture):
             The array of all the individual apertures.
         """
         coordinates = self._coordinates(coordinates)
-        get_transmission = lambda ap: ap._transmission(coordinates)
+
+        def get_transmission(ap):
+            return ap._transmission(coordinates)
+
         transmissions = [
             get_transmission(ap) for ap in self.apertures.values()
         ]

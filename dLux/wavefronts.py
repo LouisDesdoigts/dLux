@@ -1,5 +1,6 @@
 from __future__ import annotations
 import jax.numpy as np
+from typing import Any
 from jax import vmap, Array
 from zodiax import Base
 import dLux.utils as dlu

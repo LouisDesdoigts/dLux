@@ -78,8 +78,8 @@ class TestIntegerDownsample:
         _test_call(create_integer_downsample, create_image)
 
 
-class TestRotate:
-    """Tests the Rotate class."""
+class TestRotateDetector:
+    """Tests the RotateDetector class."""
 
     def test_constructor(self, create_rotate_detector):
         """Tests the constructor."""

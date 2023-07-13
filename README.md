@@ -41,10 +41,13 @@ Requires: Python 3.8+, Jax 0.4.3+, Zodiax 0.4+
 
 Installation: ```pip install dLux```
 
-Docs installation: ```pip install "dLux[docs]"```
+If you want to run the tutorials, you can install the tutorials dependencies: ```pip install 'dLux[tutorials]'```
 
-Test installation: ```pip install "dLux[tests]"```
+The same applies for the doccumentation and tests dependencies:
 
+Docs installation: ```pip install 'dLux[docs]'```
+
+Test installation: ```pip install 'dLux[tests]'```
 
 ## Collaboration & Development
 

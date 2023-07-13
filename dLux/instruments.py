@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 from abc import abstractmethod
 import jax.numpy as np
 from jax import Array
