@@ -1,20 +1,20 @@
 name = "utils"
 
 # Import as modules
-from . import coordinates
-from . import helpers
-from . import interpolation
-from . import units
-from . import optics
-from . import math
+from . import coordinates  # noqa
+from . import helpers  # noqa
+from . import interpolation  # noqa
+from . import units  # noqa
+from . import optics  # noqa
+from . import math  # noqa
 
 # Dont import all functions from modules
-from .coordinates import *
-from .helpers import *
-from .interpolation import *
-from .units import *
-from .optics import *
-from .math import *
+from .coordinates import *  # noqa
+from .helpers import *  # noqa
+from .interpolation import *  # noqa
+from .units import *  # noqa
+from .optics import *  # noqa
+from .math import *  # noqa
 
 # Add to __all__
 modules = [
