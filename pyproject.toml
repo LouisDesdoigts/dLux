@@ -3,7 +3,7 @@ name = "dLux"
 version = "0.13.2"
 description = "Differentiable Optical Models as Parameterised Neural Networks in Jax using Zodiax."
 readme = "README.md"
-requires-python =">=3.9"
+requires-python =">=3.8"
 license = {file = "LICENSE"}
 authors = [
   {name = "Louis Desdoigts", email = "louis.desdoigts@sydney.edu.au"},
