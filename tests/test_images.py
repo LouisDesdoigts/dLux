@@ -1,12 +1,10 @@
 import jax.numpy as np
-from jax import config, Array
-import pytest
-import dLux
+from jax import config
 
 config.update("jax_debug_nans", True)
 
 
-class TestImage():
+class TestImage:
     """Test the Image class."""
 
     def test_constructor(self, create_image):
@@ -16,15 +14,15 @@ class TestImage():
     def test_npixels(self, create_image):
         """Tests the npixels property."""
         create_image().npixels
-    
+
     def test_downsample(self, create_image):
         """Tests the downsample method."""
         create_image().downsample(2)
-    
+
     def test_convolve(self, create_image):
         """Tests the convolve method."""
         create_image().convolve(np.ones((2, 2)))
-    
+
     def test_rotate(self, create_image):
         """Tests the rotate method."""
         create_image().rotate(np.pi, order=1)

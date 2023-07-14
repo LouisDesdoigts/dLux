@@ -5,6 +5,7 @@ from jax import Array
 from zodiax import Base
 import dLux.utils as dlu
 
+
 __all__ = ["Image"]
 
 
@@ -21,6 +22,7 @@ class Image(Base):
     pixel_scale : Array
         The pixel scale of the image.
     """
+
     image: Array
     pixel_scale: Array
 
@@ -58,14 +60,14 @@ class Image(Base):
         ----------
         n : int
             The factor by which to downsample the image.
-        
+
         Returns
         -------
         image : Image
             The downsampled image.
         """
-        downsampled = dlu.downsample(self.image, n, 'sum')
-        return self.set('image', downsampled)
+        downsampled = dlu.downsample(self.image, n, "sum")
+        return self.set("image", downsampled)
 
     def convolve(self: Image, other: Array) -> Image:
         """
@@ -76,13 +78,13 @@ class Image(Base):
         ----------
         other : Array
             The image to convolve with.
-        
+
         Returns
         -------
         image : Image
             The convolved image.
         """
-        return self.set('image', convolve(self.image, other, mode='same'))
+        return self.set("image", convolve(self.image, other, mode="same"))
 
     def rotate(self: Image, angle: float, order: int = 1) -> Image:
         """
@@ -95,13 +97,13 @@ class Image(Base):
             The angle by which to rotate the image.
         order : int
             The order of the interpolation method to use.
-        
+
         Returns
         -------
         image : Image
             The rotated image.
         """
-        return self.set('image', dlu.rotate(self.image, angle, order=order))
+        return self.set("image", dlu.rotate(self.image, angle, order=order))
 
     def __mul__(self: Image, other: Array) -> Image:
         """
@@ -112,13 +114,13 @@ class Image(Base):
         ----------
         other : Array
             The scalar or image to multiply the image by.
-        
+
         Returns
         -------
         image : Image
             The multiplied image.
         """
-        return self.multiply('image', other)
+        return self.multiply("image", other)
 
     def __imul__(self: Image, other: Array) -> Image:
         """
@@ -129,7 +131,7 @@ class Image(Base):
         ----------
         other : Array
             The scalar or image to multiply the image by.
-        
+
         Returns
         -------
         image : Image
@@ -146,13 +148,13 @@ class Image(Base):
         ----------
         other : Array
             The scalar or image to add to the image.
-        
+
         Returns
         -------
         image : Image
             The added image.
         """
-        return self.add('image', other)
+        return self.add("image", other)
 
     def __iadd__(self: Image, other: Array) -> Image:
         """
@@ -163,7 +165,7 @@ class Image(Base):
         ----------
         other : Array
             The scalar or image to add to the image.
-        
+
         Returns
         -------
         image : Image
@@ -180,13 +182,13 @@ class Image(Base):
         ----------
         other : Array
             The scalar or image to subtract from the image.
-        
+
         Returns
         -------
         image : Image
             The subtracted image.
         """
-        return self.add('image', -other)
+        return self.add("image", -other)
 
     def __isub__(self: Image, other: Array) -> Image:
         """
@@ -197,7 +199,7 @@ class Image(Base):
         ----------
         other : Array
             The scalar or image to subtract from the image.
-        
+
         Returns
         -------
         image : Image
@@ -214,13 +216,13 @@ class Image(Base):
         ----------
         other : Array
             The scalar or image to divide the image by.
-        
+
         Returns
         -------
         image : Image
             The divided image.
         """
-        return self.divide('image', other)
+        return self.divide("image", other)
 
     def __itruediv__(self: Image, other: Array) -> Image:
         """
@@ -231,7 +233,7 @@ class Image(Base):
         ----------
         other : Array
             The scalar or image to divide the image by.
-        
+
         Returns
         -------
         image : Image

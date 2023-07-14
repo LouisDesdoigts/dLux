@@ -20,8 +20,9 @@ class BaseObservation(Base):
     """
 
     @abstractmethod
-    def model(self: BaseObservation,
-              instrument: Instrument()):  # pragma: no cover
+    def model(
+        self: BaseObservation, instrument: Instrument()
+    ):  # pragma: no cover
         """
         Abstract method for the observation function.
         """
@@ -39,6 +40,7 @@ class Dither(BaseObservation):
         array should be (ndithers, 2) where ndithers is the number of dithers
         and the second dimension is the (x, y) dither in radians.
     """
+
     dithers: Array
 
     def __init__(self: Dither, dithers: Array):
@@ -57,9 +59,9 @@ class Dither(BaseObservation):
         if self.dithers.ndim != 2 or self.dithers.shape[1] != 2:
             raise ValueError("dithers must be an array of shape (ndithers, 2)")
 
-    def dither_position(self: Dither,
-                        instrument: Instrument,
-                        dither: Array) -> Instrument:
+    def dither_position(
+        self: Dither, instrument: Instrument, dither: Array
+    ) -> Instrument:
         """
         Dithers the position of the source objects by dither.
 
@@ -76,19 +78,21 @@ class Dither(BaseObservation):
             The instrument with the sources dithered.
         """
         # Define the dither function
-        dither_fn = lambda source: source.add('position', dither)
+        dither_fn = lambda source: source.add("position", dither)
 
         # Map the dithers across the sources
-        dithered_sources = tree_map(dither_fn, instrument.sources, \
-                                    is_leaf=lambda leaf: isinstance(leaf, dLux.sources.Source))
+        dithered_sources = tree_map(
+            dither_fn,
+            instrument.sources,
+            is_leaf=lambda leaf: isinstance(leaf, dLux.sources.Source),
+        )
 
         # Apply updates
-        return tree_at(lambda instrument: instrument.sources, instrument,
-                       dithered_sources)
+        return tree_at(
+            lambda instrument: instrument.sources, instrument, dithered_sources
+        )
 
-    def model(self: Dither,
-              instrument: Instrument,
-              *args, **kwargs) -> Array:
+    def model(self: Dither, instrument: Instrument, *args, **kwargs) -> Array:
         """
         Applies a series of dithers to the instrument sources and calls the
         .model() method after applying each dither.
@@ -104,6 +108,7 @@ class Dither(BaseObservation):
             The psfs generated after applying the dithers to the source
             positions.
         """
-        dith_fn = lambda dither: self.dither_position(instrument,
-                                                      dither).model(*args, **kwargs)
+        dith_fn = lambda dither: self.dither_position(
+            instrument, dither
+        ).model(*args, **kwargs)
         return vmap(dith_fn, 0)(self.dithers)

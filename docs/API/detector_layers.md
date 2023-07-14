@@ -9,7 +9,7 @@ There are six public classes:
 - `ApplySaturation`
 - `AddConstant`
 - `IntegerDownsample`
-- `Rotate`
+- `RotateDetector`
 
 These classes operate on `Image` classes. They have one main method: `.__call__(image)`, which takes in a ∂Lux `Image` class and applies the detector layer to it.
 
@@ -50,9 +50,9 @@ Downsamples an input image by an integer number of pixels via a summation. The n
 ??? info "IntegerDownsample API"
     :::dLux.detector_layers.IntegerDownsample
 
-### `Rotate`
+### `RotateDetector`
 
 Applies a rotation to the image using interpolation methods.
 
-??? info "Rotate API"
-    :::dLux.detector_layers.Rotate
+??? info "RotateDetector API"
+    :::dLux.detector_layers.RotateDetector

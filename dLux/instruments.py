@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 from abc import abstractmethod
 import jax.numpy as np
 from jax import Array
@@ -52,17 +53,19 @@ class Instrument(Base):
         in the different kind of observations, i.e. applying dithers, switching
         filters, etc.
     """
+
     optics: Optics()
     sources: dict
     detector: Detector()
     observation: Observation()
 
-    def __init__(self: Instrument,
-                 optics: Optics(),
-                 sources: Union[list, Source()],
-                 detector: Detector() = None,
-                 observation: Observation = None,
-                 ):
+    def __init__(
+        self: Instrument,
+        optics: Optics(),
+        sources: Union[list, Source()],
+        detector: Detector() = None,
+        observation: Observation = None,
+    ):
         """
         Constructor for the Instrument class.
 
@@ -91,13 +94,17 @@ class Instrument(Base):
 
         # Detector
         if not isinstance(detector, Detector()) and detector is not None:
-            raise TypeError("detector must be an Detector object. "
-                            f"Got type {type(detector)}")
+            raise TypeError(
+                "detector must be an Detector object. "
+                f"Got type {type(detector)}"
+            )
         self.detector = detector
 
         # Observation
-        if (not isinstance(observation, Observation()) and
-                observation is not None):
+        if (
+            not isinstance(observation, Observation())
+            and observation is not None
+        ):
             raise TypeError("observation must be an Observation object.")
         self.observation = observation
 
@@ -141,8 +148,9 @@ class Instrument(Base):
         for source in self.sources.values():
             if hasattr(source, key):
                 return getattr(source, key)
-        raise AttributeError(f"{self.__class__.__name__} has no attribute "
-                             f"{key}.")
+        raise AttributeError(
+            f"{self.__class__.__name__} has no attribute " f"{key}."
+        )
 
     def normalise(self: Instrument) -> Instrument:
         """
@@ -156,7 +164,7 @@ class Instrument(Base):
         is_source = lambda leaf: isinstance(leaf, Source())
         norm_fn = lambda source: source.normalise()
         sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
-        return self.set('sources', sources)
+        return self.set("sources", sources)
 
     def model(self: Instrument) -> Union[Array, dict]:
         """
@@ -167,12 +175,14 @@ class Instrument(Base):
         Returns
         -------
         image : Array, dict
-            The image of the scene modelled through the optics with detector and
-            filter effects applied if they are supplied. Returns either as a
-            single array (if return_tree is false), or a dict of the output for
-            each source.
+            The image of the scene modelled through the optics with detector
+            and filter effects applied if they are supplied. Returns either as
+            a single array (if return_tree is false), or a dict of the output
+            for each source.
         """
         psf = self.optics.model(list(self.sources.values()))
         image = Image()(psf, self.optics.true_pixel_scale)
-        image = self.detector.model(image) if self.detector is not None else psf
+        image = (
+            self.detector.model(image) if self.detector is not None else psf
+        )
         return np.array(tree_flatten(image)[0]).sum(0)
