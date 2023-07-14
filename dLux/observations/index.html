@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=da54731c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3040c8ae" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1905,7 +1905,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b95ee82f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d0f92ca0" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1937,7 +1937,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5360df62" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=03f4381f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1969,7 +1969,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=d08edf58" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=1d0ae7e7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1997,8 +1997,9 @@ import dLux</div>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseObservation</span><span class="p">,</span>
-              <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">()):</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">BaseObservation</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">()</span>
+    <span class="p">):</span>  <span class="c1"># pragma: no cover</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Abstract method for the observation function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2011,8 +2012,9 @@ import dLux</div>
     """
 
     @abstractmethod
-    def model(self: BaseObservation,
-              instrument: Instrument()):  # pragma: no cover
+    def model(
+        self: BaseObservation, instrument: Instrument()
+    ):  # pragma: no cover
         """
         Abstract method for the observation function.
         """</div>
@@ -2025,7 +2027,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=15606116" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=28a65836" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2057,6 +2059,7 @@ import dLux</div>
 <span class="sd">        array should be (ndithers, 2) where ndithers is the number of dithers</span>
 <span class="sd">        and the second dimension is the (x, y) dither in radians.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">dithers</span><span class="p">:</span> <span class="n">Array</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> <span class="n">dithers</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
@@ -2075,9 +2078,9 @@ import dLux</div>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dithers must be an array of shape (ndithers, 2)&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">dither_position</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span>
-                        <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
-                        <span class="n">dither</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">dither_position</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span> <span class="n">dither</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dithers the position of the source objects by dither.</span>
 
@@ -2094,19 +2097,21 @@ import dLux</div>
 <span class="sd">            The instrument with the sources dithered.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Define the dither function</span>
-        <span class="n">dither_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">source</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="n">dither</span><span class="p">)</span>
+        <span class="n">dither_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">source</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="n">dither</span><span class="p">)</span>
 
         <span class="c1"># Map the dithers across the sources</span>
-        <span class="n">dithered_sources</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">dither_fn</span><span class="p">,</span> <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> \
-                                    <span class="n">is_leaf</span><span class="o">=</span><span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">dLux</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">Source</span><span class="p">))</span>
+        <span class="n">dithered_sources</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span>
+            <span class="n">dither_fn</span><span class="p">,</span>
+            <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span>
+            <span class="n">is_leaf</span><span class="o">=</span><span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">dLux</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">Source</span><span class="p">),</span>
+        <span class="p">)</span>
 
         <span class="c1"># Apply updates</span>
-        <span class="k">return</span> <span class="n">tree_at</span><span class="p">(</span><span class="k">lambda</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span>
-                       <span class="n">dithered_sources</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tree_at</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> <span class="n">dithered_sources</span>
+        <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span>
-              <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
-              <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Dither</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies a series of dithers to the instrument sources and calls the</span>
 <span class="sd">        .model() method after applying each dither.</span>
@@ -2122,8 +2127,9 @@ import dLux</div>
 <span class="sd">            The psfs generated after applying the dithers to the source</span>
 <span class="sd">            positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">dith_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">dither</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dither_position</span><span class="p">(</span><span class="n">instrument</span><span class="p">,</span>
-                                                      <span class="n">dither</span><span class="p">)</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">dith_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">dither</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dither_position</span><span class="p">(</span>
+            <span class="n">instrument</span><span class="p">,</span> <span class="n">dither</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">vmap</span><span class="p">(</span><span class="n">dith_fn</span><span class="p">,</span> <span class="mi">0</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="p">)</span>
 </pre></div>
 <div id="cell-5" class="clipboard-copy-txt">class Dither(BaseObservation):
@@ -2138,6 +2144,7 @@ import dLux</div>
         array should be (ndithers, 2) where ndithers is the number of dithers
         and the second dimension is the (x, y) dither in radians.
     """
+
     dithers: Array
 
     def __init__(self: Dither, dithers: Array):
@@ -2156,9 +2163,9 @@ import dLux</div>
         if self.dithers.ndim != 2 or self.dithers.shape[1] != 2:
             raise ValueError("dithers must be an array of shape (ndithers, 2)")
 
-    def dither_position(self: Dither,
-                        instrument: Instrument,
-                        dither: Array) -> Instrument:
+    def dither_position(
+        self: Dither, instrument: Instrument, dither: Array
+    ) -> Instrument:
         """
         Dithers the position of the source objects by dither.
 
@@ -2175,19 +2182,21 @@ import dLux</div>
             The instrument with the sources dithered.
         """
         # Define the dither function
-        dither_fn = lambda source: source.add('position', dither)
+        dither_fn = lambda source: source.add("position", dither)
 
         # Map the dithers across the sources
-        dithered_sources = tree_map(dither_fn, instrument.sources, \
-                                    is_leaf=lambda leaf: isinstance(leaf, dLux.sources.Source))
+        dithered_sources = tree_map(
+            dither_fn,
+            instrument.sources,
+            is_leaf=lambda leaf: isinstance(leaf, dLux.sources.Source),
+        )
 
         # Apply updates
-        return tree_at(lambda instrument: instrument.sources, instrument,
-                       dithered_sources)
+        return tree_at(
+            lambda instrument: instrument.sources, instrument, dithered_sources
+        )
 
-    def model(self: Dither,
-              instrument: Instrument,
-              *args, **kwargs) -> Array:
+    def model(self: Dither, instrument: Instrument, *args, **kwargs) -> Array:
         """
         Applies a series of dithers to the instrument sources and calls the
         .model() method after applying each dither.
@@ -2203,8 +2212,9 @@ import dLux</div>
             The psfs generated after applying the dithers to the source
             positions.
         """
-        dith_fn = lambda dither: self.dither_position(instrument,
-                                                      dither).model(*args, **kwargs)
+        dith_fn = lambda dither: self.dither_position(
+            instrument, dither
+        ).model(*args, **kwargs)
         return vmap(dith_fn, 0)(self.dithers)</div>
         
         </div>
@@ -2260,10 +2270,10 @@ import dLux</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

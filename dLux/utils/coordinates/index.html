@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=e0743dee" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a93bd23d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1897,7 +1897,7 @@ from typing import Union</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=185c9a34" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e13f96f2" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1917,11 +1917,19 @@ from typing import Union</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cart_to_polar&quot;</span><span class="p">,</span> <span class="s2">&quot;polar_to_cart&quot;</span><span class="p">,</span> <span class="s2">&quot;pixel_coords&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;pixel_coordinates&quot;</span><span class="p">]</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;cart_to_polar&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;polar_to_cart&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pixel_coords&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pixel_coordinates&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt">__all__ = ["cart_to_polar", "polar_to_cart", "pixel_coords",
-           "pixel_coordinates"]</div>
+<div id="cell-2" class="clipboard-copy-txt">__all__ = [
+    "cart_to_polar",
+    "polar_to_cart",
+    "pixel_coords",
+    "pixel_coordinates",
+]</div>
         
         </div>
     </div>
@@ -1931,7 +1939,7 @@ from typing import Union</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=db788f8d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=853c751b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1951,7 +1959,7 @@ from typing import Union</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1">### Coordinate conversions ###</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Coordinate conversions #</span>
 <span class="k">def</span> <span class="nf">cart_to_polar</span><span class="p">(</span><span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts the input (x, y) Cartesian coordinates into (r, phi) polar</span>
@@ -1960,7 +1968,8 @@ from typing import Union</div>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    coordinates : Array</span>
-<span class="sd">        The (x, y) Cartesian coordinates to be converted into polar coordinates.</span>
+<span class="sd">        The (x, y) Cartesian coordinates to be converted into polar</span>
+<span class="sd">        coordinates.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1971,7 +1980,7 @@ from typing import Union</div>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">coordinates</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)])</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt">### Coordinate conversions ###
+<div id="cell-3" class="clipboard-copy-txt"># Coordinate conversions #
 def cart_to_polar(coordinates: Array) -> Array:
     """
     Converts the input (x, y) Cartesian coordinates into (r, phi) polar
@@ -1980,7 +1989,8 @@ def cart_to_polar(coordinates: Array) -> Array:
     Parameters
     ----------
     coordinates : Array
-        The (x, y) Cartesian coordinates to be converted into polar coordinates.
+        The (x, y) Cartesian coordinates to be converted into polar
+        coordinates.
 
     Returns
     -------
@@ -1999,7 +2009,7 @@ def cart_to_polar(coordinates: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=65d2b617" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3720648f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2033,7 +2043,8 @@ def cart_to_polar(coordinates: Array) -> Array:
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    coordinates : Array</span>
-<span class="sd">        The input polar coordinates converted into (x, y) Cartesian coordinates.</span>
+<span class="sd">        The input polar coordinates converted into (x, y) Cartesian</span>
+<span class="sd">        coordinates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">r</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">coordinates</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)])</span>
@@ -2052,7 +2063,8 @@ def cart_to_polar(coordinates: Array) -> Array:
     Returns
     -------
     coordinates : Array
-        The input polar coordinates converted into (x, y) Cartesian coordinates.
+        The input polar coordinates converted into (x, y) Cartesian
+        coordinates.
     """
     r, phi = coordinates
     return np.array([r * np.cos(phi), r * np.sin(phi)])</div>
@@ -2065,7 +2077,7 @@ def cart_to_polar(coordinates: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=26159ef6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=054a1604" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2085,16 +2097,16 @@ def cart_to_polar(coordinates: Array) -> Array:
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1">### Positions Calculations ###</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Positions Calculations #</span>
 <span class="k">def</span> <span class="nf">pixel_coords</span><span class="p">(</span>
-        <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">pixel_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">polar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">pixel_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">ndims</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">polar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the coordinates of the pixel centers for the given input,</span>
-<span class="sd">    assuming an equal size and pixel scale in all dimensions. All </span>
+<span class="sd">    assuming an equal size and pixel scale in all dimensions. All</span>
 <span class="sd">    coordinates are output in units of metres. This function is essentially a</span>
 <span class="sd">    reduced version of the full `pixel_coordinates` function that gives</span>
 <span class="sd">    flexibility to have different dimension sizes and scales.</span>
@@ -2110,7 +2122,7 @@ def cart_to_polar(coordinates: Array) -> Array:
 <span class="sd">    polar : bool = False</span>
 <span class="sd">        If True, the output is in polar coordinates. If False, the output is in</span>
 <span class="sd">        Cartesian coordinates. ndims must be 2 if polar is True.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    coordinates : Array</span>
@@ -2120,16 +2132,16 @@ def cart_to_polar(coordinates: Array) -> Array:
     <span class="n">pixel_scale</span> <span class="o">=</span> <span class="p">(</span><span class="n">pixel_scale</span><span class="p">,)</span> <span class="o">*</span> <span class="n">ndims</span>
     <span class="k">return</span> <span class="n">pixel_coordinates</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">polar</span><span class="o">=</span><span class="n">polar</span><span class="p">)</span>
 </pre></div>
-<div id="cell-5" class="clipboard-copy-txt">### Positions Calculations ###
+<div id="cell-5" class="clipboard-copy-txt"># Positions Calculations #
 def pixel_coords(
-        npixels: int,
-        pixel_scale: float = 1,
-        ndims: int = 2,
-        polar=False,
-        ) -> Array:
+    npixels: int,
+    pixel_scale: float = 1,
+    ndims: int = 2,
+    polar=False,
+) -> Array:
     """
     Calculates the coordinates of the pixel centers for the given input,
-    assuming an equal size and pixel scale in all dimensions. All 
+    assuming an equal size and pixel scale in all dimensions. All
     coordinates are output in units of metres. This function is essentially a
     reduced version of the full `pixel_coordinates` function that gives
     flexibility to have different dimension sizes and scales.
@@ -2145,7 +2157,7 @@ def pixel_coords(
     polar : bool = False
         If True, the output is in polar coordinates. If False, the output is in
         Cartesian coordinates. ndims must be 2 if polar is True.
-    
+
     Returns
     -------
     coordinates : Array
@@ -2163,7 +2175,7 @@ def pixel_coords(
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=ccf567a6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=2a2d30b8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2184,16 +2196,16 @@ def pixel_coords(
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">pixel_coordinates</span><span class="p">(</span>
-        <span class="n">npixels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">],</span>
-        <span class="n">pixel_scales</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span>
-        <span class="n">offsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
-        <span class="n">polar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">indexing</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span>
+    <span class="n">npixels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">],</span>
+    <span class="n">pixel_scales</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">offsets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">polar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">indexing</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xy&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the coordinates of the pixel centers for the given input. All </span>
-<span class="sd">    coordinates are output in units of metres. </span>
-<span class="sd">    </span>
+<span class="sd">    Calculates the coordinates of the pixel centers for the given input. All</span>
+<span class="sd">    coordinates are output in units of metres.</span>
+
 <span class="sd">    The indexing argument is the same as in numpy.meshgrid., i.e.: Giving the</span>
 <span class="sd">    string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a</span>
 <span class="sd">    meshgrid with Cartesian indexing. In the 2-D case with inputs of length M</span>
@@ -2202,7 +2214,7 @@ def pixel_coords(
 <span class="sd">    are of shape (N, M, P) for ‘xy’ indexing and (M, N, P) for ‘ij’ indexing.</span>
 <span class="sd">    If the output is in polar coordinates, indexing is set to &#39;xy&#39; and the</span>
 <span class="sd">    input must be 2d.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    npixels : Union[int, tuple]</span>
@@ -2212,27 +2224,27 @@ def pixel_coords(
 <span class="sd">        of the tuple must match the number of dimensions. If a float, the same</span>
 <span class="sd">        scale is applied to all dimensions. If None, the scale is set to 1.</span>
 <span class="sd">    offsets : Union[tuple, float] = 0.</span>
-<span class="sd">        The offset of the pixel centers in each dimension. If a tuple, the </span>
-<span class="sd">        length of the tuple must match the number of dimensions. If a float, </span>
-<span class="sd">        the same offset is applied to all dimensions. If None, the offset is </span>
+<span class="sd">        The offset of the pixel centers in each dimension. If a tuple, the</span>
+<span class="sd">        length of the tuple must match the number of dimensions. If a float,</span>
+<span class="sd">        the same offset is applied to all dimensions. If None, the offset is</span>
 <span class="sd">        set to 0.</span>
 <span class="sd">    polar : bool = False</span>
 <span class="sd">        If True, the output is in polar coordinates. If False, the output is in</span>
 <span class="sd">        Cartesian coordinates. Default is False.</span>
 <span class="sd">    indexing : str = &#39;xy&#39;</span>
-<span class="sd">        The indexing of the output. Default is &#39;xy&#39;. See numpy.meshgrid for more</span>
-<span class="sd">        details.</span>
-<span class="sd">    </span>
+<span class="sd">        The indexing of the output. Default is &#39;xy&#39;. See numpy.meshgrid for</span>
+<span class="sd">        more details.</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    positions : Array</span>
 <span class="sd">        The positions of the pixel centers in the given dimensions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">indexing</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="s1">&#39;ij&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">indexing</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span> <span class="s2">&quot;ij&quot;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;indexing must be either &#39;xy&#39; or &#39;ij&#39;.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">polar</span> <span class="ow">and</span> <span class="n">indexing</span> <span class="o">==</span> <span class="s1">&#39;ij&#39;</span><span class="p">:</span>
-        <span class="n">indexing</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span>
+    <span class="k">if</span> <span class="n">polar</span> <span class="ow">and</span> <span class="n">indexing</span> <span class="o">==</span> <span class="s2">&quot;ij&quot;</span><span class="p">:</span>
+        <span class="n">indexing</span> <span class="o">=</span> <span class="s2">&quot;xy&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
         <span class="n">npixels</span> <span class="o">=</span> <span class="p">(</span><span class="n">npixels</span><span class="p">,)</span>
@@ -2246,7 +2258,7 @@ def pixel_coords(
         <span class="n">offsets</span> <span class="o">=</span> <span class="p">(</span><span class="n">offsets</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">npixels</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">pixel_fn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
-        <span class="n">pix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">pix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
         <span class="n">pix</span> <span class="o">*=</span> <span class="n">scale</span>
         <span class="n">pix</span> <span class="o">-=</span> <span class="n">offset</span>
         <span class="k">return</span> <span class="n">pix</span>
@@ -2258,23 +2270,25 @@ def pixel_coords(
 
     <span class="k">if</span> <span class="n">polar</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">npixels</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;polar coordinates are only defined for 2D arrays.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;polar coordinates are only defined for 2D arrays.&quot;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">cart_to_polar</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
 
     <span class="c1"># Squeeze for empty axis removal with 1d</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
 </pre></div>
 <div id="cell-6" class="clipboard-copy-txt">def pixel_coordinates(
-        npixels: Union[int, tuple],
-        pixel_scales: Union[tuple, float] = 1.,
-        offsets: Union[tuple, float] = 0.,
-        polar: bool = False,
-        indexing: str = 'xy'
+    npixels: Union[int, tuple],
+    pixel_scales: Union[tuple, float] = 1.0,
+    offsets: Union[tuple, float] = 0.0,
+    polar: bool = False,
+    indexing: str = "xy",
 ) -> Array:
     """
-    Calculates the coordinates of the pixel centers for the given input. All 
-    coordinates are output in units of metres. 
-    
+    Calculates the coordinates of the pixel centers for the given input. All
+    coordinates are output in units of metres.
+
     The indexing argument is the same as in numpy.meshgrid., i.e.: Giving the
     string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a
     meshgrid with Cartesian indexing. In the 2-D case with inputs of length M
@@ -2283,7 +2297,7 @@ def pixel_coords(
     are of shape (N, M, P) for ‘xy’ indexing and (M, N, P) for ‘ij’ indexing.
     If the output is in polar coordinates, indexing is set to 'xy' and the
     input must be 2d.
-    
+
     Parameters
     ----------
     npixels : Union[int, tuple]
@@ -2293,27 +2307,27 @@ def pixel_coords(
         of the tuple must match the number of dimensions. If a float, the same
         scale is applied to all dimensions. If None, the scale is set to 1.
     offsets : Union[tuple, float] = 0.
-        The offset of the pixel centers in each dimension. If a tuple, the 
-        length of the tuple must match the number of dimensions. If a float, 
-        the same offset is applied to all dimensions. If None, the offset is 
+        The offset of the pixel centers in each dimension. If a tuple, the
+        length of the tuple must match the number of dimensions. If a float,
+        the same offset is applied to all dimensions. If None, the offset is
         set to 0.
     polar : bool = False
         If True, the output is in polar coordinates. If False, the output is in
         Cartesian coordinates. Default is False.
     indexing : str = 'xy'
-        The indexing of the output. Default is 'xy'. See numpy.meshgrid for more
-        details.
-    
+        The indexing of the output. Default is 'xy'. See numpy.meshgrid for
+        more details.
+
     Returns
     -------
     positions : Array
         The positions of the pixel centers in the given dimensions.
     """
-    if indexing not in ['xy', 'ij']:
+    if indexing not in ["xy", "ij"]:
         raise ValueError("indexing must be either 'xy' or 'ij'.")
 
-    if polar and indexing == 'ij':
-        indexing = 'xy'
+    if polar and indexing == "ij":
+        indexing = "xy"
 
     if not isinstance(npixels, tuple):
         npixels = (npixels,)
@@ -2327,7 +2341,7 @@ def pixel_coords(
         offsets = (offsets,) * len(npixels)
 
     def pixel_fn(n, offset, scale):
-        pix = np.arange(n) - (n - 1) / 2.
+        pix = np.arange(n) - (n - 1) / 2.0
         pix *= scale
         pix -= offset
         return pix
@@ -2339,7 +2353,9 @@ def pixel_coords(
 
     if polar:
         if len(npixels) != 2:
-            raise ValueError("polar coordinates are only defined for 2D arrays.")
+            raise ValueError(
+                "polar coordinates are only defined for 2D arrays."
+            )
         return cart_to_polar(positions)
 
     # Squeeze for empty axis removal with 1d
@@ -2398,10 +2414,10 @@ def pixel_coords(
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../../javascripts/mathjax.js"></script>

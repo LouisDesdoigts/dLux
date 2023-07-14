@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=777dd8aa" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=40538dbf" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1879,13 +1879,11 @@ Licensed under the Apache License, Version 2.0.
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span><span class="p">,</span> <span class="n">Array</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span>
 <span class="kn">import</span> <span class="nn">pytest</span>
 <span class="kn">import</span> <span class="nn">dLux.utils</span> <span class="k">as</span> <span class="nn">dlu</span>
 </pre></div>
-<div id="cell-1" class="clipboard-copy-txt">import jax.numpy as np
-from jax import config, Array
+<div id="cell-1" class="clipboard-copy-txt">from jax import config
 import pytest
 import dLux.utils as dlu</div>
         
@@ -1897,7 +1895,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=115b4297" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=cc7acb70" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1929,7 +1927,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=42fa6276" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=7af36713" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1954,7 +1952,6 @@ import dLux.utils as dlu</div>
 <span class="sd">    Tests the Zernike class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
     <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_zernike</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tests the constructor.</span>
@@ -1964,19 +1961,18 @@ import dLux.utils as dlu</div>
             <span class="n">create_zernike</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># Test constructor</span>
-        <span class="n">zernike</span> <span class="o">=</span> <span class="n">create_zernike</span><span class="p">()</span>
-
+        <span class="n">create_zernike</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">test_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_zernike</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tests the calculate method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">zernike</span> <span class="o">=</span> <span class="n">create_zernike</span><span class="p">()</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">16</span><span class="p">)</span>
 
         <span class="c1"># Test calculate</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="n">zernike</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="n">zernike</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">nsides</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">zernike</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">zernike</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">nsides</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">zernike</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">nsides</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1985,7 +1981,6 @@ import dLux.utils as dlu</div>
     """
     Tests the Zernike class.
     """
-
 
     def test_constructor(self, create_zernike):
         """
@@ -1996,19 +1991,18 @@ import dLux.utils as dlu</div>
             create_zernike(0)
 
         # Test constructor
-        zernike = create_zernike()
-
+        create_zernike()
 
     def test_calculate(self, create_zernike):
         """
         Tests the calculate method.
         """
         zernike = create_zernike()
-        coords = dlu.pixel_coords(16, 1/16)
+        coords = dlu.pixel_coords(16, 1 / 16)
 
         # Test calculate
-        z = zernike.calculate(coords)
-        p = zernike.calculate(coords, nsides=3)
+        zernike.calculate(coords)
+        zernike.calculate(coords, nsides=3)
 
         with pytest.raises(ValueError):
             zernike.calculate(coords, nsides=1)</div>
@@ -2021,7 +2015,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=e1b878d7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=4afd5c27" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2046,34 +2040,30 @@ import dLux.utils as dlu</div>
 <span class="sd">    Tests the ZernikeBasis class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
     <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_zernike_basis</span><span class="p">):</span>
-        <span class="n">zernike_basis</span> <span class="o">=</span> <span class="n">create_zernike_basis</span><span class="p">()</span>
-
+        <span class="n">create_zernike_basis</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">test_calculate_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_zernike_basis</span><span class="p">):</span>
         <span class="n">zernike_basis</span> <span class="o">=</span> <span class="n">create_zernike_basis</span><span class="p">()</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">16</span><span class="p">)</span>
 
         <span class="c1"># Test calculate</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="n">zernike_basis</span><span class="o">.</span><span class="n">calculate_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">zernike_basis</span><span class="o">.</span><span class="n">calculate_basis</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
 </pre></div>
 <div id="cell-4" class="clipboard-copy-txt">class TestZernikeBasis(object):
     """
     Tests the ZernikeBasis class.
     """
 
-
     def test_constructor(self, create_zernike_basis):
-        zernike_basis = create_zernike_basis()
-
+        create_zernike_basis()
 
     def test_calculate_basis(self, create_zernike_basis):
         zernike_basis = create_zernike_basis()
-        coords = dlu.pixel_coords(16, 1/16)
+        coords = dlu.pixel_coords(16, 1 / 16)
 
         # Test calculate
-        z = zernike_basis.calculate_basis(coords)</div>
+        zernike_basis.calculate_basis(coords)</div>
         
         </div>
     </div>
@@ -2128,10 +2118,10 @@ import dLux.utils as dlu</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

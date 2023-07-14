@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=33399a4f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=ce0aaa4b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1880,6 +1880,7 @@ Licensed under the Apache License, Version 2.0.
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">Array</span>
@@ -1890,6 +1891,7 @@ Licensed under the Apache License, Version 2.0.
 <span class="kn">import</span> <span class="nn">dLux</span>
 </pre></div>
 <div id="cell-1" class="clipboard-copy-txt">from __future__ import annotations
+from typing import Any
 from abc import abstractmethod
 import jax.numpy as np
 from jax import Array
@@ -1907,7 +1909,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=cc510568" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=57c7240c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1939,7 +1941,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=83b8a191" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=5daec953" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1981,7 +1983,7 @@ Image = lambda: dLux.images.Image</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=27815446" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=eace31d9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2031,7 +2033,7 @@ Image = lambda: dLux.images.Image</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=ae9d8b27" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=2911ef39" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2073,17 +2075,19 @@ Image = lambda: dLux.images.Image</div>
 <span class="sd">        in the different kind of observations, i.e. applying dithers, switching</span>
 <span class="sd">        filters, etc.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">()</span>
     <span class="n">sources</span><span class="p">:</span> <span class="nb">dict</span>
     <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span><span class="p">()</span>
     <span class="n">observation</span><span class="p">:</span> <span class="n">Observation</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
-                 <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">(),</span>
-                 <span class="n">sources</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Source</span><span class="p">()],</span>
-                 <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span><span class="p">()</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">observation</span><span class="p">:</span> <span class="n">Observation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">,</span>
+        <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">(),</span>
+        <span class="n">sources</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">Source</span><span class="p">()],</span>
+        <span class="n">detector</span><span class="p">:</span> <span class="n">Detector</span><span class="p">()</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">observation</span><span class="p">:</span> <span class="n">Observation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Instrument class.</span>
 
@@ -2112,13 +2116,17 @@ Image = lambda: dLux.images.Image</div>
 
         <span class="c1"># Detector</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detector</span><span class="p">,</span> <span class="n">Detector</span><span class="p">())</span> <span class="ow">and</span> <span class="n">detector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;detector must be an Detector object. &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;detector must be an Detector object. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span>
 
         <span class="c1"># Observation</span>
-        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">observation</span><span class="p">,</span> <span class="n">Observation</span><span class="p">())</span> <span class="ow">and</span>
-                <span class="n">observation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">observation</span><span class="p">,</span> <span class="n">Observation</span><span class="p">())</span>
+            <span class="ow">and</span> <span class="n">observation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;observation must be an Observation object.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observation</span> <span class="o">=</span> <span class="n">observation</span>
 
@@ -2162,8 +2170,9 @@ Image = lambda: dLux.images.Image</div>
         <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
                 <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no attribute &quot;</span>
-                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no attribute &quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Instrument</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2177,7 +2186,7 @@ Image = lambda: dLux.images.Image</div>
         <span class="n">is_source</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">Source</span><span class="p">())</span>
         <span class="n">norm_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">source</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="n">sources</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">norm_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_source</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;sources&#39;</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;sources&quot;</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Instrument</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2188,14 +2197,16 @@ Image = lambda: dLux.images.Image</div>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Array, dict</span>
-<span class="sd">            The image of the scene modelled through the optics with detector and</span>
-<span class="sd">            filter effects applied if they are supplied. Returns either as a</span>
-<span class="sd">            single array (if return_tree is false), or a dict of the output for</span>
-<span class="sd">            each source.</span>
+<span class="sd">            The image of the scene modelled through the optics with detector</span>
+<span class="sd">            and filter effects applied if they are supplied. Returns either as</span>
+<span class="sd">            a single array (if return_tree is false), or a dict of the output</span>
+<span class="sd">            for each source.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">psf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optics</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
         <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="p">()(</span><span class="n">psf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">optics</span><span class="o">.</span><span class="n">true_pixel_scale</span><span class="p">)</span>
-        <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">psf</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">psf</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">image</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 <div id="cell-5" class="clipboard-copy-txt">class Instrument(Base):
@@ -2220,17 +2231,19 @@ Image = lambda: dLux.images.Image</div>
         in the different kind of observations, i.e. applying dithers, switching
         filters, etc.
     """
+
     optics: Optics()
     sources: dict
     detector: Detector()
     observation: Observation()
 
-    def __init__(self: Instrument,
-                 optics: Optics(),
-                 sources: Union[list, Source()],
-                 detector: Detector() = None,
-                 observation: Observation = None,
-                 ):
+    def __init__(
+        self: Instrument,
+        optics: Optics(),
+        sources: Union[list, Source()],
+        detector: Detector() = None,
+        observation: Observation = None,
+    ):
         """
         Constructor for the Instrument class.
 
@@ -2259,13 +2272,17 @@ Image = lambda: dLux.images.Image</div>
 
         # Detector
         if not isinstance(detector, Detector()) and detector is not None:
-            raise TypeError("detector must be an Detector object. "
-                            f"Got type {type(detector)}")
+            raise TypeError(
+                "detector must be an Detector object. "
+                f"Got type {type(detector)}"
+            )
         self.detector = detector
 
         # Observation
-        if (not isinstance(observation, Observation()) and
-                observation is not None):
+        if (
+            not isinstance(observation, Observation())
+            and observation is not None
+        ):
             raise TypeError("observation must be an Observation object.")
         self.observation = observation
 
@@ -2309,8 +2326,9 @@ Image = lambda: dLux.images.Image</div>
         for source in self.sources.values():
             if hasattr(source, key):
                 return getattr(source, key)
-        raise AttributeError(f"{self.__class__.__name__} has no attribute "
-                             f"{key}.")
+        raise AttributeError(
+            f"{self.__class__.__name__} has no attribute " f"{key}."
+        )
 
     def normalise(self: Instrument) -> Instrument:
         """
@@ -2324,7 +2342,7 @@ Image = lambda: dLux.images.Image</div>
         is_source = lambda leaf: isinstance(leaf, Source())
         norm_fn = lambda source: source.normalise()
         sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
-        return self.set('sources', sources)
+        return self.set("sources", sources)
 
     def model(self: Instrument) -> Union[Array, dict]:
         """
@@ -2335,14 +2353,16 @@ Image = lambda: dLux.images.Image</div>
         Returns
         -------
         image : Array, dict
-            The image of the scene modelled through the optics with detector and
-            filter effects applied if they are supplied. Returns either as a
-            single array (if return_tree is false), or a dict of the output for
-            each source.
+            The image of the scene modelled through the optics with detector
+            and filter effects applied if they are supplied. Returns either as
+            a single array (if return_tree is false), or a dict of the output
+            for each source.
         """
         psf = self.optics.model(list(self.sources.values()))
         image = Image()(psf, self.optics.true_pixel_scale)
-        image = self.detector.model(image) if self.detector is not None else psf
+        image = (
+            self.detector.model(image) if self.detector is not None else psf
+        )
         return np.array(tree_flatten(image)[0]).sum(0)</div>
         
         </div>
@@ -2398,10 +2418,10 @@ Image = lambda: dLux.images.Image</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

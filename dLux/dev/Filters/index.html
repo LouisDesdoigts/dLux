@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=9a6b141e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=2ecc62a4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1870,38 +1870,6 @@ Licensed under the Apache License, Version 2.0.
         <div class="CodeMirror cm-s-jupyter">
             <div class="zeroclipboard-container">
                 <clipboard-copy for="cell-1">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span>
-</pre></div>
-<div id="cell-1" class="clipboard-copy-txt"></div>
-        
-        </div>
-    </div>
-
-</div>
-</div>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=1f00f038" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-2">
                 <div>
                     <span class="notice" hidden>Copied!</span>
                     <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
@@ -1926,15 +1894,17 @@ Licensed under the Apache License, Version 2.0.
 <span class="sd">    filter_name : str</span>
 <span class="sd">        A string identifier that can be used to initialise specific filters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">wavelengths</span>  <span class="p">:</span> <span class="n">Array</span>
-    <span class="n">throughput</span>   <span class="p">:</span> <span class="n">Array</span>
-    <span class="n">filter_name</span>  <span class="p">:</span> <span class="nb">str</span>
 
+    <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">throughput</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">filter_name</span><span class="p">:</span> <span class="nb">str</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span>        <span class="p">:</span> <span class="n">Filter</span><span class="p">,</span>
-                 <span class="n">wavelengths</span> <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">throughput</span>  <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">filter_name</span> <span class="p">:</span> <span class="nb">str</span>   <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Filter</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">Filter</span><span class="p">,</span>
+        <span class="n">wavelengths</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">throughput</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">filter_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Filter</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Filter class. All inputs are optional and defaults</span>
 <span class="sd">        to uniform unitary throughput. If filter_name is specified then</span>
@@ -1947,8 +1917,8 @@ Licensed under the Apache License, Version 2.0.
 <span class="sd">        throughput : Array = None</span>
 <span class="sd">            The throughput of the filter at the corresponding wavelength.</span>
 <span class="sd">        filter_name : str = None</span>
-<span class="sd">            A string identifier that can be used to initialise specific filters.</span>
-<span class="sd">            Currently no pre-built filters are implemented.</span>
+<span class="sd">            A string identifier that can be used to initialise specific</span>
+<span class="sd">            filters. Currently no pre-built filters are implemented.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Take the filter name as the priority input</span>
         <span class="k">if</span> <span class="n">filter_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1958,41 +1928,50 @@ Licensed under the Apache License, Version 2.0.
 
             <span class="c1"># Check that wavelengths and throughput are not specified</span>
             <span class="k">if</span> <span class="n">wavelengths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">throughput</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If filter_name is specified, wavelengths &quot;</span>
-                <span class="s2">&quot;and throughput can not be specified.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;If filter_name is specified, wavelengths &quot;</span>
+                    <span class="s2">&quot;and throughput can not be specified.&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># Check that both wavelengths and throughput are specified</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">wavelengths</span> <span class="ow">is</span>     <span class="kc">None</span> <span class="ow">and</span> <span class="n">throughput</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> \
-             <span class="p">(</span><span class="n">wavelengths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">throughput</span> <span class="ow">is</span>     <span class="kc">None</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If either wavelengths or throughput is &quot;</span>
-            <span class="s2">&quot;specified, then both must be specified.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">wavelengths</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">throughput</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">wavelengths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">throughput</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;If either wavelengths or throughput is &quot;</span>
+                <span class="s2">&quot;specified, then both must be specified.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Neither is specified</span>
         <span class="k">elif</span> <span class="n">wavelengths</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">throughput</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">throughput</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">filter_name</span> <span class="o">=</span> <span class="s1">&#39;Unitary&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">throughput</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_name</span> <span class="o">=</span> <span class="s2">&quot;Unitary&quot;</span>
 
         <span class="c1"># Both wavelengths and throughputs are specified</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">throughput</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">throughput</span><span class="p">,</span>  <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">filter_name</span> <span class="o">=</span> <span class="s1">&#39;Custom&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">throughput</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">throughput</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_name</span> <span class="o">=</span> <span class="s2">&quot;Custom&quot;</span>
 
             <span class="c1"># Check bounds</span>
-            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">throughput</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> \
-            <span class="s2">&quot;Both wavelengths and throughput must be 1 dimensional.&quot;</span>
-            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">throughput</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> \
-            <span class="p">(</span><span class="s2">&quot;wavelengths and throughput must have the same length.&quot;</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> \
-            <span class="p">(</span><span class="s2">&quot;wavelengths can not be less than 0.&quot;</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">throughput</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> \
-            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">throughput</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="p">(</span><span class="s2">&quot;throughput must be between 0-1.&quot;</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">),</span> \
-            <span class="p">(</span><span class="s2">&quot;wavelengths must be in-order from small to large.&quot;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">throughput</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="p">),</span> <span class="s2">&quot;Both wavelengths and throughput must be 1 dimensional.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">throughput</span><span class="o">.</span><span class="n">shape</span>
+            <span class="p">),</span> <span class="s2">&quot;wavelengths and throughput must have the same length.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+            <span class="p">),</span> <span class="s2">&quot;wavelengths can not be less than 0.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">throughput</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">throughput</span> <span class="o">&lt;=</span> <span class="mi">1</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s2">&quot;throughput must be between 0-1.&quot;</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
+                <span class="n">wavelengths</span>
+            <span class="p">),</span> <span class="s2">&quot;wavelengths must be in-order from small to large.&quot;</span>
 
-
-    <span class="k">def</span> <span class="nf">get_throughput</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Filter</span><span class="p">,</span> <span class="n">sample_wavelenghts</span> <span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_throughput</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Filter</span><span class="p">,</span> <span class="n">sample_wavelengths</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the average throughput of the bandpass defined the differences</span>
 <span class="sd">        between each sample wavelength, i.e. if sample wavelengths are:</span>
@@ -2014,13 +1993,13 @@ Licensed under the Apache License, Version 2.0.
 <span class="sd">            The average throughput for each bandpass defined by</span>
 <span class="sd">            sample_wavelengths.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">mids</span> <span class="o">=</span> <span class="p">(</span><span class="n">sample_wavelenghts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">sample_wavelenghts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
-        <span class="n">diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sample_wavelenghts</span><span class="p">)</span>
+        <span class="n">mids</span> <span class="o">=</span> <span class="p">(</span><span class="n">sample_wavelengths</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">sample_wavelengths</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sample_wavelengths</span><span class="p">)</span>
 
-        <span class="n">start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sample_wavelenghts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">diffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">])</span>
-        <span class="n">end</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sample_wavelenghts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">diffs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">])</span>
-        <span class="n">min_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">min</span><span class="p">()])</span>
-        <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sample_wavelengths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">diffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sample_wavelengths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">diffs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="c1"># min_val = np.array([self.wavelengths.min()])</span>
+        <span class="c1"># max_val = np.array([self.wavelengths.max()])</span>
         <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">start</span><span class="p">,</span> <span class="n">mids</span><span class="p">,</span> <span class="n">end</span><span class="p">])</span>
 
         <span class="c1"># Translate input wavelengths to indexes</span>
@@ -2028,32 +2007,36 @@ Licensed under the Apache License, Version 2.0.
         <span class="n">max_wavelength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="n">num_wavelength</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">)</span>
         <span class="n">wavelength_range</span> <span class="o">=</span> <span class="n">max_wavelength</span> <span class="o">-</span> <span class="n">min_wavelength</span>
-        <span class="n">bnd_indxs</span> <span class="o">=</span> <span class="n">num_wavelength</span> <span class="o">*</span> <span class="p">(</span><span class="n">bounds</span> <span class="o">-</span> <span class="n">min_wavelength</span><span class="p">)</span><span class="o">/</span><span class="n">wavelength_range</span>
+        <span class="n">bnd_indxs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">num_wavelength</span> <span class="o">*</span> <span class="p">(</span><span class="n">bounds</span> <span class="o">-</span> <span class="n">min_wavelength</span><span class="p">)</span> <span class="o">/</span> <span class="n">wavelength_range</span>
+        <span class="p">)</span>
         <span class="n">bnd_indxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">bnd_indxs</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">))</span>
         <span class="n">bnd_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">bnd_indxs</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">nan_div</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
             <span class="n">x_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">y</span><span class="o">/</span><span class="n">x_new</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span> <span class="o">/</span> <span class="n">x_new</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">get_tp</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">indexes</span><span class="p">):</span>
-            <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">indexes</span> <span class="o">&lt;=</span> <span class="n">start</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">indexes</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">),</span> \
-                           <span class="mf">0.</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">indexes</span> <span class="o">&lt;=</span> <span class="n">start</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">indexes</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">weights</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">nan_div</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
 
         <span class="n">starts</span> <span class="o">=</span> <span class="n">bnd_inds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">ends</span>   <span class="o">=</span> <span class="n">bnd_inds</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">ends</span> <span class="o">=</span> <span class="n">bnd_inds</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
         <span class="c1"># dwavelength = self.wavelengths[1] - self.wavelengths[0]</span>
         <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">))</span>
 
         <span class="c1"># weights = self.throughput/self.throughput.sum()</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">throughput</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="n">get_tp</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))(</span><span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">indexes</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="n">get_tp</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))(</span>
+            <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">indexes</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
 
-
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Filter</span><span class="p">,</span> <span class="n">optics</span> <span class="p">:</span> <span class="n">Optics</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Filter</span><span class="p">,</span> <span class="n">optics</span><span class="p">:</span> <span class="n">Optics</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A base level modelling function designed to robustly handle the</span>
 <span class="sd">        different combinations of inputs. Models the sources through the</span>
@@ -2085,14 +2068,14 @@ Licensed under the Apache License, Version 2.0.
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Array, Pytree</span>
-<span class="sd">            The image of the scene modelled through the optics with detector and</span>
-<span class="sd">            filter effects applied if they are supplied. Returns either as a</span>
-<span class="sd">            single array (if return_tree is false), or a pytree like object</span>
-<span class="sd">            with matching tree strucutre as the input scene/sources/source.</span>
+<span class="sd">            The image of the scene modelled through the optics with detector</span>
+<span class="sd">            and filter effects applied if they are supplied. Returns either as</span>
+<span class="sd">            a single array (if return_tree is false), or a pytree like object</span>
+<span class="sd">            with matching tree structure as the input scene/sources/source.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">model</span><span class="p">(</span><span class="n">optics</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt">class Filter(Base):
+<div id="cell-1" class="clipboard-copy-txt">class Filter(Base):
     """
     NOTE: This class is under development.
 
@@ -2107,15 +2090,17 @@ Licensed under the Apache License, Version 2.0.
     filter_name : str
         A string identifier that can be used to initialise specific filters.
     """
-    wavelengths  : Array
-    throughput   : Array
-    filter_name  : str
 
+    wavelengths: Array
+    throughput: Array
+    filter_name: str
 
-    def __init__(self        : Filter,
-                 wavelengths : Array = None,
-                 throughput  : Array = None,
-                 filter_name : str   = None) -> Filter:
+    def __init__(
+        self: Filter,
+        wavelengths: Array = None,
+        throughput: Array = None,
+        filter_name: str = None,
+    ) -> Filter:
         """
         Constructor for the Filter class. All inputs are optional and defaults
         to uniform unitary throughput. If filter_name is specified then
@@ -2128,8 +2113,8 @@ Licensed under the Apache License, Version 2.0.
         throughput : Array = None
             The throughput of the filter at the corresponding wavelength.
         filter_name : str = None
-            A string identifier that can be used to initialise specific filters.
-            Currently no pre-built filters are implemented.
+            A string identifier that can be used to initialise specific
+            filters. Currently no pre-built filters are implemented.
         """
         # Take the filter name as the priority input
         if filter_name is not None:
@@ -2139,41 +2124,50 @@ Licensed under the Apache License, Version 2.0.
 
             # Check that wavelengths and throughput are not specified
             if wavelengths is not None or throughput is not None:
-                raise ValueError("If filter_name is specified, wavelengths "
-                "and throughput can not be specified.")
+                raise ValueError(
+                    "If filter_name is specified, wavelengths "
+                    "and throughput can not be specified."
+                )
 
         # Check that both wavelengths and throughput are specified
-        elif (wavelengths is     None and throughput is not None) or \
-             (wavelengths is not None and throughput is     None):
-            raise ValueError("If either wavelengths or throughput is "
-            "specified, then both must be specified.")
+        elif (wavelengths is None and throughput is not None) or (
+            wavelengths is not None and throughput is None
+        ):
+            raise ValueError(
+                "If either wavelengths or throughput is "
+                "specified, then both must be specified."
+            )
 
         # Neither is specified
         elif wavelengths is None and throughput is None:
-            self.wavelengths = np.array([0., np.inf])
-            self.throughput  = np.array([1., 1.])
-            self.filter_name = 'Unitary'
+            self.wavelengths = np.array([0.0, np.inf])
+            self.throughput = np.array([1.0, 1.0])
+            self.filter_name = "Unitary"
 
         # Both wavelengths and throughputs are specified
         else:
             self.wavelengths = np.asarray(wavelengths, dtype=float)
-            self.throughput  = np.asarray(throughput,  dtype=float)
-            self.filter_name = 'Custom'
+            self.throughput = np.asarray(throughput, dtype=float)
+            self.filter_name = "Custom"
 
             # Check bounds
-            assert self.wavelengths.ndim == 1 and self.throughput.ndim == 1, \
-            "Both wavelengths and throughput must be 1 dimensional."
-            assert self.wavelengths.shape == self.throughput.shape, \
-            ("wavelengths and throughput must have the same length.")
-            assert np.min(self.wavelengths) >= 0, \
-            ("wavelengths can not be less than 0.")
-            assert (self.throughput >= 0).all() and \
-            (self.throughput <= 1).all(), ("throughput must be between 0-1.")
-            assert np.min(wavelengths) < np.max(wavelengths), \
-            ("wavelengths must be in-order from small to large.")
+            assert (
+                self.wavelengths.ndim == 1 and self.throughput.ndim == 1
+            ), "Both wavelengths and throughput must be 1 dimensional."
+            assert (
+                self.wavelengths.shape == self.throughput.shape
+            ), "wavelengths and throughput must have the same length."
+            assert (
+                np.min(self.wavelengths) >= 0
+            ), "wavelengths can not be less than 0."
+            assert (self.throughput >= 0).all() and (
+                self.throughput <= 1
+            ).all(), "throughput must be between 0-1."
+            assert np.min(wavelengths) < np.max(
+                wavelengths
+            ), "wavelengths must be in-order from small to large."
 
-
-    def get_throughput(self : Filter, sample_wavelenghts : Array) -> Array:
+    def get_throughput(self: Filter, sample_wavelengths: Array) -> Array:
         """
         Gets the average throughput of the bandpass defined the differences
         between each sample wavelength, i.e. if sample wavelengths are:
@@ -2195,13 +2189,13 @@ Licensed under the Apache License, Version 2.0.
             The average throughput for each bandpass defined by
             sample_wavelengths.
         """
-        mids = (sample_wavelenghts[1:] + sample_wavelenghts[:-1]) / 2
-        diffs = np.diff(sample_wavelenghts)
+        mids = (sample_wavelengths[1:] + sample_wavelengths[:-1]) / 2
+        diffs = np.diff(sample_wavelengths)
 
-        start = np.array([sample_wavelenghts[0] - diffs[0]/2])
-        end = np.array([sample_wavelenghts[-1] + diffs[-1]/2])
-        min_val = np.array([self.wavelengths.min()])
-        max_val = np.array([self.wavelengths.max()])
+        start = np.array([sample_wavelengths[0] - diffs[0] / 2])
+        end = np.array([sample_wavelengths[-1] + diffs[-1] / 2])
+        # min_val = np.array([self.wavelengths.min()])
+        # max_val = np.array([self.wavelengths.max()])
         bounds = np.concatenate([start, mids, end])
 
         # Translate input wavelengths to indexes
@@ -2209,32 +2203,36 @@ Licensed under the Apache License, Version 2.0.
         max_wavelength = self.wavelengths.max()
         num_wavelength = len(self.wavelengths)
         wavelength_range = max_wavelength - min_wavelength
-        bnd_indxs = num_wavelength * (bounds - min_wavelength)/wavelength_range
+        bnd_indxs = (
+            num_wavelength * (bounds - min_wavelength) / wavelength_range
+        )
         bnd_indxs = np.clip(bnd_indxs, a_min=0, a_max=len(self.wavelengths))
         bnd_inds = np.round(bnd_indxs, decimals=0).astype(int)
 
         def nan_div(y, x):
             x_new = np.where(x == 0, 1, x)
-            return np.where(x == 0, 0., y/x_new)
+            return np.where(x == 0, 0.0, y / x_new)
 
         def get_tp(start, end, weights, indexes):
-            size = (end - start)
-            val = np.where((indexes <= start) | (indexes >= end), \
-                           0., weights).sum()
+            size = end - start
+            val = np.where(
+                (indexes <= start) | (indexes >= end), 0.0, weights
+            ).sum()
             return nan_div(val, size)
 
         starts = bnd_inds[:-1]
-        ends   = bnd_inds[1:]
+        ends = bnd_inds[1:]
         # dwavelength = self.wavelengths[1] - self.wavelengths[0]
         indexes = np.arange(len(self.wavelengths))
 
         # weights = self.throughput/self.throughput.sum()
         weights = self.throughput
-        out = vmap(get_tp, in_axes=(0, 0, None, None))(starts, ends, weights, indexes)
+        out = vmap(get_tp, in_axes=(0, 0, None, None))(
+            starts, ends, weights, indexes
+        )
         return out
 
-
-    def model(self : Filter, optics : Optics, **kwargs):
+    def model(self: Filter, optics: Optics, **kwargs):
         """
         A base level modelling function designed to robustly handle the
         different combinations of inputs. Models the sources through the
@@ -2266,10 +2264,10 @@ Licensed under the Apache License, Version 2.0.
         Returns
         -------
         image : Array, Pytree
-            The image of the scene modelled through the optics with detector and
-            filter effects applied if they are supplied. Returns either as a
-            single array (if return_tree is false), or a pytree like object
-            with matching tree strucutre as the input scene/sources/source.
+            The image of the scene modelled through the optics with detector
+            and filter effects applied if they are supplied. Returns either as
+            a single array (if return_tree is false), or a pytree like object
+            with matching tree structure as the input scene/sources/source.
         """
         return model(optics, filter=self, **kwargs)</div>
         
@@ -2326,10 +2324,10 @@ Licensed under the Apache License, Version 2.0.
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../../javascripts/mathjax.js"></script>

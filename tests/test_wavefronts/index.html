@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b6c78d48" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=75b960ca" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1880,12 +1880,12 @@ Licensed under the Apache License, Version 2.0.
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span><span class="p">,</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span>
 <span class="kn">import</span> <span class="nn">pytest</span>
 <span class="kn">import</span> <span class="nn">dLux</span>
 </pre></div>
 <div id="cell-1" class="clipboard-copy-txt">import jax.numpy as np
-from jax import config, Array
+from jax import config
 import pytest
 import dLux</div>
         
@@ -1897,7 +1897,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=38c9cc70" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=56c18590" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1929,7 +1929,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=3334cd88" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=1232acfc" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1949,7 +1949,7 @@ import dLux</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestWavefront</span><span class="p">():</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestWavefront</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the Wavefront class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
@@ -1960,7 +1960,7 @@ import dLux</div>
         <span class="c1"># Test 1d array</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">create_wavefront</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="p">[</span><span class="mf">1e3</span><span class="p">])</span>
-        
+
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">create_wavefront</span><span class="p">(</span><span class="n">diameter</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 
@@ -1987,7 +1987,7 @@ import dLux</div>
     <span class="k">def</span> <span class="nf">test_phasor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the phasor property.&quot;&quot;&quot;</span>
         <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
-        <span class="k">assert</span> <span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">phasor</span> <span class="o">==</span> <span class="n">wf</span><span class="o">.</span><span class="n">amplitude</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">wf</span><span class="o">.</span><span class="n">phase</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">phasor</span> <span class="o">==</span> <span class="n">wf</span><span class="o">.</span><span class="n">amplitude</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">wf</span><span class="o">.</span><span class="n">phase</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">test_psf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the psf property.&quot;&quot;&quot;</span>
@@ -1998,7 +1998,7 @@ import dLux</div>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the coordinates property.&quot;&quot;&quot;</span>
         <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
         <span class="n">wf</span><span class="o">.</span><span class="n">coordinates</span>
-    
+
     <span class="k">def</span> <span class="nf">test_add_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the add_phase method.&quot;&quot;&quot;</span>
         <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
@@ -2028,7 +2028,7 @@ import dLux</div>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the normalise method.&quot;&quot;&quot;</span>
         <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
         <span class="n">new_wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">new_wf</span><span class="o">.</span><span class="n">amplitude</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">new_wf</span><span class="o">.</span><span class="n">amplitude</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
 
     <span class="k">def</span> <span class="nf">test_flip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the flip method.&quot;&quot;&quot;</span>
@@ -2041,13 +2041,13 @@ import dLux</div>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the interpolate method.&quot;&quot;&quot;</span>
         <span class="n">k</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
-        <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">scale_to</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">npixels</span><span class="o">//</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">*</span> <span class="n">wf</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">)</span>
-        <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">scale_to</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">npixels</span><span class="o">//</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">*</span> <span class="n">wf</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="nb">complex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">scale_to</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">npixels</span> <span class="o">//</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">*</span> <span class="n">wf</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">)</span>
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">scale_to</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">npixels</span> <span class="o">//</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">*</span> <span class="n">wf</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="nb">complex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">test_rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the rotate method.&quot;&quot;&quot;</span>
         <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
-        <span class="n">wf</span> <span class="o">=</span> <span class="n">dLux</span><span class="o">.</span><span class="n">CircularAperture</span><span class="p">(</span><span class="mf">1.</span><span class="p">)(</span><span class="n">wf</span><span class="p">)</span>
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">dLux</span><span class="o">.</span><span class="n">CircularAperture</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)(</span><span class="n">wf</span><span class="p">)</span>
         <span class="n">flipped_amplitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">amplitude</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
         <span class="n">flipped_phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">wf</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
 
@@ -2059,13 +2059,15 @@ import dLux</div>
 
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">new_wf</span><span class="o">.</span><span class="n">amplitude</span><span class="p">,</span> <span class="n">flipped_amplitude</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
         <span class="c1"># Add small remainer to fix 0-pi instability</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">((</span><span class="n">new_wf</span><span class="o">.</span><span class="n">phase</span><span class="o">+</span><span class="mf">1e-6</span><span class="p">)</span><span class="o">%</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">flipped_phase</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">new_wf</span><span class="o">.</span><span class="n">phase</span> <span class="o">+</span> <span class="mf">1e-6</span><span class="p">)</span> <span class="o">%</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">flipped_phase</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">test_pad_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the pad_to method.&quot;&quot;&quot;</span>
         <span class="n">even_wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">(</span><span class="n">npixels</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
         <span class="n">odd_wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">(</span><span class="n">npixels</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-        
+
         <span class="c1"># Smaller value</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">even_wf</span><span class="o">.</span><span class="n">pad_to</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
@@ -2103,15 +2105,15 @@ import dLux</div>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the magic methods.&quot;&quot;&quot;</span>
         <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
         <span class="n">wf</span> <span class="o">+=</span> <span class="n">create_optic</span><span class="p">()</span>
-        
+
         <span class="n">wf</span> <span class="o">*=</span> <span class="kc">None</span>
         <span class="n">wf</span> <span class="o">*=</span> <span class="n">wf</span><span class="o">.</span><span class="n">phasor</span>
 
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
             <span class="n">create_wavefront</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;a string&quot;</span>
-        
+
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
-            <span class="n">create_wavefront</span><span class="p">()</span> <span class="o">*</span> <span class="s1">&#39;a string&#39;</span>
+            <span class="n">create_wavefront</span><span class="p">()</span> <span class="o">*</span> <span class="s2">&quot;a string&quot;</span>
 
     <span class="k">def</span> <span class="nf">test_FFT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the FFT method.&quot;&quot;&quot;</span>
@@ -2119,31 +2121,34 @@ import dLux</div>
 
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;Angular&quot;</span><span class="p">)</span>
-            <span class="n">wf</span><span class="o">.</span><span class="n">FFT</span><span class="p">(</span><span class="n">focal_length</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">FFT</span><span class="p">(</span><span class="n">focal_length</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">wf</span><span class="o">.</span><span class="n">IFFT</span><span class="p">()</span>
-        
+
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;plane&quot;</span><span class="p">,</span> <span class="s2">&quot;Focal&quot;</span><span class="p">)</span>
             <span class="n">wf</span><span class="o">.</span><span class="n">FFT</span><span class="p">()</span>
-    
+
     <span class="k">def</span> <span class="nf">test_MFT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the MFT method.&quot;&quot;&quot;</span>
         <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
 
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;Angular&quot;</span><span class="p">)</span>
-            <span class="n">wf</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">16</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">wf</span><span class="o">.</span><span class="n">IMFT</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">,</span> <span class="p">)</span>
-        
+            <span class="n">wf</span><span class="o">.</span><span class="n">IMFT</span><span class="p">(</span>
+                <span class="mi">16</span><span class="p">,</span>
+                <span class="mi">1</span> <span class="o">/</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="p">)</span>
+
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;plane&quot;</span><span class="p">,</span> <span class="s2">&quot;Focal&quot;</span><span class="p">)</span>
-            <span class="n">wf</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">16</span><span class="p">)</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt">class TestWavefront():
+<div id="cell-3" class="clipboard-copy-txt">class TestWavefront:
     """Test the Wavefront class."""
 
     def test_constructor(self, create_wavefront):
@@ -2154,7 +2159,7 @@ import dLux</div>
         # Test 1d array
         with pytest.raises(ValueError):
             create_wavefront(wavelength=[1e3])
-        
+
         with pytest.raises(ValueError):
             create_wavefront(diameter=np.ones(2))
 
@@ -2181,7 +2186,7 @@ import dLux</div>
     def test_phasor(self, create_wavefront):
         """Tests the phasor property."""
         wf = create_wavefront()
-        assert (wf.phasor == wf.amplitude * np.exp(1j*wf.phase)).all()
+        assert (wf.phasor == wf.amplitude * np.exp(1j * wf.phase)).all()
 
     def test_psf(self, create_wavefront):
         """Tests the psf property."""
@@ -2192,7 +2197,7 @@ import dLux</div>
         """Tests the coordinates property."""
         wf = create_wavefront()
         wf.coordinates
-    
+
     def test_add_phase(self, create_wavefront):
         """Tests the add_phase method."""
         wf = create_wavefront()
@@ -2222,7 +2227,7 @@ import dLux</div>
         """Tests the normalise method."""
         wf = create_wavefront()
         new_wf = wf.normalise()
-        assert np.sum(new_wf.amplitude**2) == 1.
+        assert np.sum(new_wf.amplitude**2) == 1.0
 
     def test_flip(self, create_wavefront):
         """Tests the flip method."""
@@ -2235,13 +2240,13 @@ import dLux</div>
         """Tests the interpolate method."""
         k = 2
         wf = create_wavefront()
-        wf = wf.scale_to(wf.npixels//k, k * wf.pixel_scale)
-        wf = wf.scale_to(wf.npixels//k, k * wf.pixel_scale, complex=True)
+        wf = wf.scale_to(wf.npixels // k, k * wf.pixel_scale)
+        wf = wf.scale_to(wf.npixels // k, k * wf.pixel_scale, complex=True)
 
     def test_rotate(self, create_wavefront):
         """Tests the rotate method."""
         wf = create_wavefront()
-        wf = dLux.CircularAperture(1.)(wf)
+        wf = dLux.CircularAperture(1.0)(wf)
         flipped_amplitude = np.flip(wf.amplitude, axis=(-1, -2))
         flipped_phase = np.flip(wf.phase, axis=(-1, -2))
 
@@ -2253,13 +2258,15 @@ import dLux</div>
 
         assert np.allclose(new_wf.amplitude, flipped_amplitude, atol=1e-5)
         # Add small remainer to fix 0-pi instability
-        assert np.allclose((new_wf.phase+1e-6)%np.pi, flipped_phase, atol=1e-5)
+        assert np.allclose(
+            (new_wf.phase + 1e-6) % np.pi, flipped_phase, atol=1e-5
+        )
 
     def test_pad_to(self, create_wavefront):
         """Tests the pad_to method."""
         even_wf = create_wavefront(npixels=16)
         odd_wf = create_wavefront(npixels=15)
-        
+
         # Smaller value
         with pytest.raises(ValueError):
             even_wf.pad_to(14)
@@ -2297,15 +2304,15 @@ import dLux</div>
         """Tests the magic methods."""
         wf = create_wavefront()
         wf += create_optic()
-        
+
         wf *= None
         wf *= wf.phasor
 
         with pytest.raises(TypeError):
             create_wavefront() + "a string"
-        
+
         with pytest.raises(TypeError):
-            create_wavefront() * 'a string'
+            create_wavefront() * "a string"
 
     def test_FFT(self, create_wavefront):
         """Tests the FFT method."""
@@ -2313,29 +2320,32 @@ import dLux</div>
 
         with pytest.raises(ValueError):
             wf = wf.set("units", "Angular")
-            wf.FFT(focal_length=1.)
+            wf.FFT(focal_length=1.0)
 
         with pytest.raises(ValueError):
             wf.IFFT()
-        
+
         with pytest.raises(ValueError):
             wf = wf.set("plane", "Focal")
             wf.FFT()
-    
+
     def test_MFT(self, create_wavefront):
         """Tests the MFT method."""
         wf = create_wavefront()
 
         with pytest.raises(ValueError):
             wf = wf.set("units", "Angular")
-            wf.MFT(16, 1/16, focal_length=1.)
+            wf.MFT(16, 1 / 16, focal_length=1.0)
 
         with pytest.raises(ValueError):
-            wf.IMFT(16, 1/16, )
-        
+            wf.IMFT(
+                16,
+                1 / 16,
+            )
+
         with pytest.raises(ValueError):
             wf = wf.set("plane", "Focal")
-            wf.MFT(16, 1/16)</div>
+            wf.MFT(16, 1 / 16)</div>
         
         </div>
     </div>
@@ -2345,7 +2355,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=109aef35" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d7e3f905" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2365,7 +2375,7 @@ import dLux</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestFresnelWavefront</span><span class="p">():</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestFresnelWavefront</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the FresnelWavefront class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
@@ -2376,20 +2386,20 @@ import dLux</div>
         <span class="c1"># Test 1d array</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">create_wavefront</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="p">[</span><span class="mf">1e3</span><span class="p">])</span>
-        
+
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
             <span class="n">create_wavefront</span><span class="p">(</span><span class="n">diameter</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">test_fresnel_prop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_fresnel_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the fresnel_prop method.&quot;&quot;&quot;</span>
         <span class="n">wf</span> <span class="o">=</span> <span class="n">create_fresnel_wavefront</span><span class="p">()</span>
-        <span class="n">wf</span><span class="o">.</span><span class="n">fresnel_prop</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">,</span> <span class="mf">1e2</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">)</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">fresnel_prop</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">16</span><span class="p">,</span> <span class="mf">1e2</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;plane&#39;</span><span class="p">,</span> <span class="s1">&#39;not Pupil&#39;</span><span class="p">)</span>
-            <span class="n">wf</span><span class="o">.</span><span class="n">fresnel_prop</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">,</span> <span class="mf">1e2</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">)</span>
+            <span class="n">wf</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;plane&quot;</span><span class="p">,</span> <span class="s2">&quot;not Pupil&quot;</span><span class="p">)</span>
+            <span class="n">wf</span><span class="o">.</span><span class="n">fresnel_prop</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">16</span><span class="p">,</span> <span class="mf">1e2</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">)</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt">class TestFresnelWavefront():
+<div id="cell-4" class="clipboard-copy-txt">class TestFresnelWavefront:
     """Test the FresnelWavefront class."""
 
     def test_constructor(self, create_wavefront):
@@ -2400,18 +2410,18 @@ import dLux</div>
         # Test 1d array
         with pytest.raises(ValueError):
             create_wavefront(wavelength=[1e3])
-        
+
         with pytest.raises(ValueError):
             create_wavefront(diameter=np.ones(2))
 
     def test_fresnel_prop(self, create_fresnel_wavefront):
         """Tests the fresnel_prop method."""
         wf = create_fresnel_wavefront()
-        wf.fresnel_prop(16, 1/16, 1e2, 1e-2)
+        wf.fresnel_prop(16, 1 / 16, 1e2, 1e-2)
 
         with pytest.raises(ValueError):
-            wf = wf.set('plane', 'not Pupil')
-            wf.fresnel_prop(16, 1/16, 1e2, 1e-2)</div>
+            wf = wf.set("plane", "not Pupil")
+            wf.fresnel_prop(16, 1 / 16, 1e2, 1e-2)</div>
         
         </div>
     </div>
@@ -2466,10 +2476,10 @@ import dLux</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

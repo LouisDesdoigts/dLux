@@ -21,7 +21,7 @@
         <link rel="next" href="../coordinates/">
       
       <link rel="icon" href="../../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -859,8 +859,8 @@
 <a id="dLux.utils.math.factorial"></a>
   <div class="doc doc-contents first">
   
-      <p>Calculate n! in a jax friendly way. Note that n == 0 is not a 
-safe case.  </p>
+      <p>Calculate n! in a jax friendly way. Note that n == 0 is not a
+safe case.</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -931,8 +931,8 @@ safe case.  </p>
 <span class="normal">21</span>
 <span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate n! in a jax friendly way. Note that n == 0 is not a </span>
-<span class="sd">    safe case.  </span>
+<span class="sd">    Calculate n! in a jax friendly way. Note that n == 0 is not a</span>
+<span class="sd">    safe case.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -944,7 +944,7 @@ safe case.  </p>
 <span class="sd">    n! : float</span>
 <span class="sd">        The factorial of the value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">lax</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">lax</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mf">1.</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">lax</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">lax</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -1096,10 +1096,10 @@ safe case.  </p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../../../javascripts/mathjax.js"></script>

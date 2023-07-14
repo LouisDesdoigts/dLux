@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -843,112 +843,41 @@
                   
 
 
-<h1 id="contributing-guide">Contributing Guide!<a class="headerlink" href="#contributing-guide" title="Permanent link">¤</a></h1>
-<p>Note: This document is out of date and in the process of being updated!</p>
+<h1 id="contributing-guide">Contributing Guide<a class="headerlink" href="#contributing-guide" title="Permanent link">¤</a></h1>
+<p>dLux is an open-source framework and as such is very welcoming to contributions via pull requests! If you would like to contribute but are unfamiliar with any of this process, as I imagine many coming from a science background will be, please feel free to reach out to me at my <a href="louis.desdoigts@sydney.edu.au">email</a> or on <a href="https://twitter.com/gradientrider">twitter</a> and I will be happy to help you through the process!</p>
 <hr />
-<h2 id="units">Units:<a class="headerlink" href="#units" title="Permanent link">¤</a></h2>
-<p>All units within ∂Lux are SI!</p>
-<hr />
-<h2 id="adding-to-documentation">Adding to documentation<a class="headerlink" href="#adding-to-documentation" title="Permanent link">¤</a></h2>
-<p>When adding to the documentation, there are a few steps that need to be done:
-1. Create the class or function and add the docstring
-2. Create a <code>.md</code> file in the docs/ directory
-3. Point to the class/function as so <code>::: dLux.module.new_class</code>
-4. Edit the <code>mkdocs.yml</code> file to add the new class
-5. Run <code>mkdocs serve</code> to deploy the docs locally at <code>localhost:8000</code> (put this into a browser)</p>
-<hr />
-<h2 id="building-and-running-unit-tests">Building and running unit-tests<a class="headerlink" href="#building-and-running-unit-tests" title="Permanent link">¤</a></h2>
-<p>Any added functionality should be unit-tested! This is done with <code>pytest</code> in the <code>tests/</code> directory. Please have a look at the testing module and try to create tests to match the style!</p>
-<p>There are three main things we want to test:
-1. Constructor assert statements and input types. Ensure that the correct error is thrown and that classes cant be constructed with incompatible inputs.
-2. Test that the different run time logic branches evaluate.
-3. Test that the different run time logic branches do not return nan or infinite values.</p>
-<hr />
-<h2 id="typing-conventions">Typing conventions<a class="headerlink" href="#typing-conventions" title="Permanent link">¤</a></h2>
-<p>So we have worked out a general typing convention for the software. There are two main data-types we care about: Jax data types, and others. We denote any jax-types with the <code>Array</code> typing hint. This is simply defined as a<code>jax.numpy.ndarray</code>, so at the start of any files one should have <code>Array = np.ndarray</code>. <em>Any</em> jax arrays should use this type-hint, regardless of data-type. All other type-hints for ∂Lux type objects should refer to the <em>base</em> object type assuming it is not defined inside that script, i.e.:</p>
-<blockquote>
-<p>dLux.wavefronts.Wavefront
-dLux.propagators.Propagator
-dLux.optics.OpticalLayer
-dLux.base.Instrument</p>
-</blockquote>
-<p>For classes defined in the script, add <code>from __future__ import annotations</code> to the first line of the script in order to be able to reference these types within the script.</p>
-<hr />
-<h2 id="class-inheritance">Class Inheritance<a class="headerlink" href="#class-inheritance" title="Permanent link">¤</a></h2>
-<p>∂Lux classes are built from <a href="https://github.com/patrick-kidger/equinox"><code>Equinox</code></a> and <a href="https://github.com/LouisDesdoigts/zodiax"><code>Zodiax</code></a>. Any new class types should inherit from either the <code>zodiax.Base</code> or <code>zodiax.ExtendedBase</code> classes, which inherit from <code>equinox.Module</code>, giving the full functionality from both of these packages.</p>
-<hr />
-<h2 id="code-style-formatting">Code Style &amp; Formatting<a class="headerlink" href="#code-style-formatting" title="Permanent link">¤</a></h2>
-<blockquote>
-<p>All imported functionality should import the specific method used, as opposed to a full package.</p>
-</blockquote>
-<p>For example rather than importing whole package:
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">abc</span>
-
-<span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="k">pass</span>
-</code></pre></div></p>
-<p>We want to specifically import the function used:
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
-
-<span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="k">pass</span>
-</code></pre></div></p>
-<blockquote>
-<p>Functions and methods with more than two inputs should spread those inputs over multiple lines, using spaces to format alignment of type hints and default values to help with code readability.</p>
-</blockquote>
-<p>For example rather than this:
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">Foo</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Foo</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">Array</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">c</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="k">pass</span>
-</code></pre></div></p>
-<p>Format like this:
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">Foo</span><span class="p">(</span><span class="bp">self</span> <span class="p">:</span> <span class="n">Foo</span><span class="p">,</span>
-        <span class="n">a</span>    <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">b</span>    <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-        <span class="n">c</span>    <span class="p">:</span> <span class="nb">int</span>   <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="k">pass</span>
-</code></pre></div></p>
-<h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">¤</a></h3>
-<blockquote>
-<p>Data type enforcing for jax-type arrays: Constructors should be able to take in lists, numpy arrays and python floats, but ensure that they are correctly formatted into jax-type arrays like follows:</p>
-</blockquote>
-<div class="highlight"><pre><span></span><code><span class="bp">self</span><span class="o">.</span><span class="n">parameter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">input_parameter</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">¤</a></h2>
+<p>Firstly, you will need to fork the repository to your own github account. This will allow you to make changes to the code and then submit a pull request to the main repository. To do this, click the fork button in the top right of the repository page. This will create a copy of the repository in your own account that you can make changes to and then request to merge with the main repository.</p>
+<p>Next, you will need to clone the repository to your local machine. To do this, open a terminal and navigate to the directory you would like to clone the repository to. Then run the following command:</p>
+<div class="highlight"><pre><span></span><code>https://github.com/your-username-here/dLux.git<span class="w"> </span>
+<span class="nb">cd</span><span class="w"> </span>dLux
+pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;.[dev]&#39;</span>
 </code></pre></div>
-<p>This ensures flexibility in the input types and that all data types will match the default jax-32 or -64 bit types.</p>
-<blockquote>
-<p>All constructor methods should use assert statements to ensure that inputs are correctly formatted at init time. The goal should be if no errors are thrown at init time then all the class methods should work as intended and have correct dimensionality. For ∂Lux this would typically be testing jax-type and array dimensionality. Do be sure that these enforce correct dimensionality, not just that errors are not thrown.</p>
-</blockquote>
-<p>For example if an attribute is a scalar, most methods will work identically if it is zero- or one-dimensional. For example, enforcing zero-dimensionality for scalars:
-<div class="highlight"><pre><span></span><code><span class="n">input_parameter</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1e3</span><span class="p">]</span>
-
-<span class="bp">self</span><span class="o">.</span><span class="n">parameter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">input_parameter</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> \
-<span class="p">(</span><span class="s2">&quot;input_parameter must a scalar array, i.e. zero dimensional&quot;</span><span class="p">)</span>
-</code></pre></div></p>
-<h3 id="non-differentiable-parameters">Non-differentiable parameters<a class="headerlink" href="#non-differentiable-parameters" title="Permanent link">¤</a></h3>
-<blockquote>
-<p>By default, all parameters should be jax-types. However, parameters that define array shapes or logical flow can be python types (ie int, bool). This prevents issues with jax tracing through arrays of integers which can cause jax errors at runtime.</p>
-</blockquote>
-<h3 id="internal-logic-flow">Internal logic flow<a class="headerlink" href="#internal-logic-flow" title="Permanent link">¤</a></h3>
-<blockquote>
-<p>Most internal logic within ∂Lux should be achieved using regular python logic. In some rare cases, <code>jax.lax.cond</code> should be used, but <em>only</em> if the internal logical flow can change during run time. Ie any logic that uses a boolean class attribute can not change during run time, and so should use regular python logic. This helps jax trace through the code and reduces compile time.</p>
-</blockquote>
-<h3 id="setter-and-getters">Setter and Getters<a class="headerlink" href="#setter-and-getters" title="Permanent link">¤</a></h3>
-<blockquote>
-<p>By default, getters and setter should be avoided. Most getting and setting can be achieved with nice syntax using the <code>Zodiax</code> methods. There are however some exceptions.</p>
-<p>Setter: Some class types such as <code>Wavefronts</code> track a lot of parameters that change a lot throughout runtime and so the setter methods are used in conjunction with assert statements to ensure that parameters are not set incorrectly and that the errors are raised at the point where the issue arises, as opposed to some other method receiving an incorrectly shaped array.</p>
-<p>Getters: For some classes we want to have parameterised values, i.e. binary stars using separation and field angle. However, optical modelling methods use Cartesian position inputs, so the base <code>Source</code> class implements an abstract <code>.get_position()</code> method to be overwritten by all child classes. In the case of the <code>BinarySource</code> class this method uses the separation and field angle to generate these Cartesian values at run time. This means that all other classes in ∂Lux can assume Cartesian positional values and use a single method when working with any <code>Source</code> class. Furthermore, getters can be used to generate useful values. For example wavefronts are store pixel scale and npixels, but implement a class property method for the diameter, which is much more useful for the <code>Propagator</code> classes.</p>
-</blockquote>
-<h3 id="hidden-methods">Hidden methods<a class="headerlink" href="#hidden-methods" title="Permanent link">¤</a></h3>
-<blockquote>
-<p>In general hidden class methods should be avoided and classes should try to implement methods that allow for them to used stand-alone. For example the <code>CompoundAperture</code> class implements the <code>construct_combined_aperture</code> and <code>get_aperture</code> methods that allow for users to directly construct and output the internally stored apertures, or use the <code>make_aperture</code> method to construct individual apertures.</p>
-</blockquote>
+<p>Then you will need to install the pre-commit hooks. This will ensure that the code is formatted correctly and that the unit tests pass before you can commit your changes. To do this, run the following command:</p>
+<div class="highlight"><pre><span></span><code>pre-commit<span class="w"> </span>install
+</code></pre></div>
+<p>This will ensure that any changes you make will adhere to the code style and formatting guidelines of the rest of the package!</p>
 <hr />
-<h2 id="non-circular-imports">Non-Circular imports<a class="headerlink" href="#non-circular-imports" title="Permanent link">¤</a></h2>
-<p>To prevent circular imports, you can not import any specific classes or methods within the package, you instead need to import the whole pacakge (ie <code>import dLux</code>) and then in the code, refer to specific function (ie <code>dLux.sources.Source</code>). This is inconvenient, but just the way python works.</p>
-<blockquote>
-<p>exception: The utils package
-The utils package is the collection of functions that operate <em>independently</em> of the package, and so can be imported as normal, i.e. <code>from dLux.utils.coordinates import radians_to_arcseconds</code> etc.</p>
-</blockquote>
+<h2 id="making-changes">Making Changes<a class="headerlink" href="#making-changes" title="Permanent link">¤</a></h2>
+<p>Next you can start to make any changes you desire!</p>
+<p><strong>Unit Tests</strong></p>
+<p>It is important that any changes you make are tested to ensure that they work as intended and do not break any existing functionality. If you are creating <em>new</em> functionality you will need to create some new unit tests, otherwise you should be able to modify the existing tests.</p>
+<p>To ensure that everything is working as expected, you can run the unit tests by running the following command:</p>
+<div class="highlight"><pre><span></span><code>pytest<span class="w"> </span>tests/*
+</code></pre></div>
+<p>This will run all the scripts labelled with <code>test_</code> in the <code>tests</code> directory. If you would like to run a specific test, you can run the following command:</p>
+<div class="highlight"><pre><span></span><code>pytest<span class="w"> </span>tests/test_file.py
+</code></pre></div>
+<p>Note that just because the tests pass on your local machine, that does not mean that it will necessarily pass on all others! This can be due to a number of reasons such a different operating system, different python version, or different dependencies. This is why github actions are used to run the unit tests on a number of different operating systems and python versions. This should help ensure that the code works as expected on all platforms.</p>
+<p><strong>Documentation</strong></p>
+<p>Any changes you make should also be appropriately documented! For small API changes this shouldn't require any changes, however if you are adding new functionality you will need to add some documentation. This can be done by modifying the appropriates files in the <code>docs</code> directory.</p>
+<p>To build the documentation locally and make sure everything is working correctly, you can run the following command:</p>
+<div class="highlight"><pre><span></span><code>mkdocs<span class="w"> </span>serve
+</code></pre></div>
+<p>This will build the documentation and serve it on a local server. You can then navigate to <code>localhost:8000</code> in your browser to view the documentation.</p>
+<hr />
+<h2 id="contributing-the-changes">Contributing the Changes<a class="headerlink" href="#contributing-the-changes" title="Permanent link">¤</a></h2>
+<p>After these steps have been completed, you can commit your changes and push them to your forked repository. These changes should have its formatting and linting checked by the pre-commit hooks. If there are any issues, you will need to fix them before you can commit your changes. Once you have pushed your changes to your forked repository, you can submit a pull request to the main repository. This will allow the maintainers to review your changes and merge them into the main repository!</p>
 
 
 
@@ -991,10 +920,10 @@ The utils package is the collection of functions that operate <em>independently<
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../javascripts/mathjax.js"></script>

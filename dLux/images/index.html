@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=ed209657" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=894d0de8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1901,7 +1901,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=f6356b05" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=ec551942" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1933,7 +1933,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=3b5e979d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=20ea4630" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1966,6 +1966,7 @@ import dLux.utils as dlu</div>
 <span class="sd">    pixel_scale : Array</span>
 <span class="sd">        The pixel scale of the image.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">image</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span>
 
@@ -2003,14 +2004,14 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        n : int</span>
 <span class="sd">            The factor by which to downsample the image.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
 <span class="sd">            The downsampled image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">downsampled</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">downsampled</span><span class="p">)</span>
+        <span class="n">downsampled</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="n">downsampled</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">convolve</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2021,13 +2022,13 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        other : Array</span>
 <span class="sd">            The image to convolve with.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
 <span class="sd">            The convolved image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">convolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="n">convolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2040,13 +2041,13 @@ import dLux.utils as dlu</div>
 <span class="sd">            The angle by which to rotate the image.</span>
 <span class="sd">        order : int</span>
 <span class="sd">            The order of the interpolation method to use.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
 <span class="sd">            The rotated image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="n">dlu</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2057,13 +2058,13 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        other : Array</span>
 <span class="sd">            The scalar or image to multiply the image by.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
 <span class="sd">            The multiplied image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2074,7 +2075,7 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        other : Array</span>
 <span class="sd">            The scalar or image to multiply the image by.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
@@ -2091,13 +2092,13 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        other : Array</span>
 <span class="sd">            The scalar or image to add to the image.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
 <span class="sd">            The added image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2108,7 +2109,7 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        other : Array</span>
 <span class="sd">            The scalar or image to add to the image.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
@@ -2125,13 +2126,13 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        other : Array</span>
 <span class="sd">            The scalar or image to subtract from the image.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
 <span class="sd">            The subtracted image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="o">-</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="o">-</span><span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2142,7 +2143,7 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        other : Array</span>
 <span class="sd">            The scalar or image to subtract from the image.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
@@ -2159,13 +2160,13 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        other : Array</span>
 <span class="sd">            The scalar or image to divide the image by.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
 <span class="sd">            The divided image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__itruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Image</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2176,7 +2177,7 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        other : Array</span>
 <span class="sd">            The scalar or image to divide the image by.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        image : Image</span>
@@ -2197,6 +2198,7 @@ import dLux.utils as dlu</div>
     pixel_scale : Array
         The pixel scale of the image.
     """
+
     image: Array
     pixel_scale: Array
 
@@ -2234,14 +2236,14 @@ import dLux.utils as dlu</div>
         ----------
         n : int
             The factor by which to downsample the image.
-        
+
         Returns
         -------
         image : Image
             The downsampled image.
         """
-        downsampled = dlu.downsample(self.image, n, 'sum')
-        return self.set('image', downsampled)
+        downsampled = dlu.downsample(self.image, n, "sum")
+        return self.set("image", downsampled)
 
     def convolve(self: Image, other: Array) -> Image:
         """
@@ -2252,13 +2254,13 @@ import dLux.utils as dlu</div>
         ----------
         other : Array
             The image to convolve with.
-        
+
         Returns
         -------
         image : Image
             The convolved image.
         """
-        return self.set('image', convolve(self.image, other, mode='same'))
+        return self.set("image", convolve(self.image, other, mode="same"))
 
     def rotate(self: Image, angle: float, order: int = 1) -> Image:
         """
@@ -2271,13 +2273,13 @@ import dLux.utils as dlu</div>
             The angle by which to rotate the image.
         order : int
             The order of the interpolation method to use.
-        
+
         Returns
         -------
         image : Image
             The rotated image.
         """
-        return self.set('image', dlu.rotate(self.image, angle, order=order))
+        return self.set("image", dlu.rotate(self.image, angle, order=order))
 
     def __mul__(self: Image, other: Array) -> Image:
         """
@@ -2288,13 +2290,13 @@ import dLux.utils as dlu</div>
         ----------
         other : Array
             The scalar or image to multiply the image by.
-        
+
         Returns
         -------
         image : Image
             The multiplied image.
         """
-        return self.multiply('image', other)
+        return self.multiply("image", other)
 
     def __imul__(self: Image, other: Array) -> Image:
         """
@@ -2305,7 +2307,7 @@ import dLux.utils as dlu</div>
         ----------
         other : Array
             The scalar or image to multiply the image by.
-        
+
         Returns
         -------
         image : Image
@@ -2322,13 +2324,13 @@ import dLux.utils as dlu</div>
         ----------
         other : Array
             The scalar or image to add to the image.
-        
+
         Returns
         -------
         image : Image
             The added image.
         """
-        return self.add('image', other)
+        return self.add("image", other)
 
     def __iadd__(self: Image, other: Array) -> Image:
         """
@@ -2339,7 +2341,7 @@ import dLux.utils as dlu</div>
         ----------
         other : Array
             The scalar or image to add to the image.
-        
+
         Returns
         -------
         image : Image
@@ -2356,13 +2358,13 @@ import dLux.utils as dlu</div>
         ----------
         other : Array
             The scalar or image to subtract from the image.
-        
+
         Returns
         -------
         image : Image
             The subtracted image.
         """
-        return self.add('image', -other)
+        return self.add("image", -other)
 
     def __isub__(self: Image, other: Array) -> Image:
         """
@@ -2373,7 +2375,7 @@ import dLux.utils as dlu</div>
         ----------
         other : Array
             The scalar or image to subtract from the image.
-        
+
         Returns
         -------
         image : Image
@@ -2390,13 +2392,13 @@ import dLux.utils as dlu</div>
         ----------
         other : Array
             The scalar or image to divide the image by.
-        
+
         Returns
         -------
         image : Image
             The divided image.
         """
-        return self.divide('image', other)
+        return self.divide("image", other)
 
     def __itruediv__(self: Image, other: Array) -> Image:
         """
@@ -2407,7 +2409,7 @@ import dLux.utils as dlu</div>
         ----------
         other : Array
             The scalar or image to divide the image by.
-        
+
         Returns
         -------
         image : Image
@@ -2468,10 +2470,10 @@ import dLux.utils as dlu</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

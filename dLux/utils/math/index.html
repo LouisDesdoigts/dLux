@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=239c5e78" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=4bfc520e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1891,7 +1891,7 @@ Licensed under the Apache License, Version 2.0.
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=d6b60fc8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=ffed13a1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1923,7 +1923,7 @@ Licensed under the Apache License, Version 2.0.
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=93aa3662" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=423a52dc" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1946,38 +1946,38 @@ Licensed under the Apache License, Version 2.0.
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># TODO: Use lax.cond to make n == 0 a safe case</span>
 <span class="k">def</span> <span class="nf">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate n! in a jax friendly way. Note that n == 0 is not a </span>
-<span class="sd">    safe case.  </span>
-<span class="sd"> </span>
+<span class="sd">    Calculate n! in a jax friendly way. Note that n == 0 is not a</span>
+<span class="sd">    safe case.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    n : float</span>
 <span class="sd">        The value to calculate the factorial of.</span>
-<span class="sd"> </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    n! : float</span>
 <span class="sd">        The factorial of the value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">lax</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">lax</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mf">1.</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">lax</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">lax</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">))</span>
 </pre></div>
 <div id="cell-3" class="clipboard-copy-txt"># TODO: Use lax.cond to make n == 0 a safe case
 def factorial(n: float) -> float:
     """
-    Calculate n! in a jax friendly way. Note that n == 0 is not a 
-    safe case.  
- 
+    Calculate n! in a jax friendly way. Note that n == 0 is not a
+    safe case.
+
     Parameters
     ----------
     n : float
         The value to calculate the factorial of.
- 
+
     Returns
     -------
     n! : float
         The factorial of the value.
     """
-    return lax.exp(lax.lgamma(n + 1.))</div>
+    return lax.exp(lax.lgamma(n + 1.0))</div>
         
         </div>
     </div>
@@ -1987,7 +1987,7 @@ def factorial(n: float) -> float:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=2065aca1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b4c6def5" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2010,12 +2010,12 @@ def factorial(n: float) -> float:
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">triangular_number</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the nth triangular number.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    n : int</span>
 <span class="sd">        The nth triangular number to calculate.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    n : int</span>
@@ -2026,12 +2026,12 @@ def factorial(n: float) -> float:
 <div id="cell-4" class="clipboard-copy-txt">def triangular_number(n: int) -> int:
     """
     Calculate the nth triangular number.
-    
+
     Parameters
     ----------
     n : int
         The nth triangular number to calculate.
-    
+
     Returns
     -------
     n : int
@@ -2092,10 +2092,10 @@ def factorial(n: float) -> float:
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../../javascripts/mathjax.js"></script>
