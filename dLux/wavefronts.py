@@ -1,5 +1,6 @@
 from __future__ import annotations
 import jax.numpy as np
+from typing import Any
 from jax import vmap, Array
 from zodiax import Base
 import dLux.utils as dlu
@@ -39,6 +40,7 @@ class Wavefront(Base):
     units : str
         The current units of the wavefront, can be 'Cartesian' or 'Angular'.
     """
+
     wavelength: Array
     pixel_scale: Array
     amplitude: Array
@@ -46,10 +48,9 @@ class Wavefront(Base):
     plane: str
     units: str
 
-    def __init__(self: Wavefront,
-                 npixels: int,
-                 diameter: Array,
-                 wavelength: Array):
+    def __init__(
+        self: Wavefront, npixels: int, diameter: Array, wavelength: Array
+    ):
         """
         Constructor for the wavefront.
 
@@ -74,12 +75,12 @@ class Wavefront(Base):
             raise ValueError("diameter must have shape ().")
 
         # Always initialised in Pupil plane with Cartesian Coords
-        self.plane = 'Pupil'
-        self.units = 'Cartesian'
+        self.plane = "Pupil"
+        self.units = "Cartesian"
 
-    ########################
-    ### Getter Functions ###
-    ########################
+    ####################
+    # Getter Functions #
+    ####################
     @property
     def diameter(self: Wavefront) -> Array:
         """
@@ -153,7 +154,7 @@ class Wavefront(Base):
         psf : Array
             The PSF of the wavefront.
         """
-        return self.amplitude ** 2
+        return self.amplitude**2
 
     @property
     def coordinates(self: Wavefront) -> Array:
@@ -195,9 +196,9 @@ class Wavefront(Base):
         """
         return self.wavelength / self.diameter
 
-    #####################
-    ### Magic Methods ###
-    #####################
+    #################
+    # Magic Methods #
+    #################
     def __add__(self: Wavefront, other: Any) -> Wavefront:
         """
         Magic method used to give a simple API for interaction with different
@@ -205,12 +206,12 @@ class Wavefront(Base):
         as an array of OPD values and is added to the wavefront. If it is an
         Aberration, the wavefront is passed to the layer and the output
         wavefront is returned.
-        
+
         Parameters
         ----------
         other : Array or Aberration
             The input to add to the wavefront.
-        
+
         Returns
         -------
         wavefront : Wavefront
@@ -230,8 +231,10 @@ class Wavefront(Base):
 
         # Other
         else:
-            raise TypeError("Can only add an array or OpticalLayer to "
-                            f"Wavefront. Got: {type(other)}.")
+            raise TypeError(
+                "Can only add an array or OpticalLayer to "
+                f"Wavefront. Got: {type(other)}."
+            )
 
     def __iadd__(self: Wavefront, other: Any) -> Wavefront:
         """
@@ -240,12 +243,12 @@ class Wavefront(Base):
         as an array of OPD values and is added to the wavefront. If it is an
         Aberration, the wavefront is passed to the layer and the output
         wavefront is returned.
-        
+
         Parameters
         ----------
         other : Array or Aberration
             The input to add to the wavefront.
-        
+
         Returns
         -------
         wavefront : Wavefront
@@ -260,12 +263,12 @@ class Wavefront(Base):
         as an array of transmission values and is multiplied by the wavefront
         amplitude. If it is an Aperture, Aberration, or Propagator, the
         wavefront is passed to the layer and the output wavefront is returned.
-        
+
         Parameters
         ----------
         other : Array or Aberration or Aperture or Propagator
             The input to add to the wavefront.
-        
+
         Returns
         -------
         wavefront : Wavefront
@@ -281,21 +284,23 @@ class Wavefront(Base):
 
         # Array based inputs
         if isinstance(other, (Array, float, int)):
-
             # Complex array - Multiply the phasors
-            if isinstance(other, Array) and other.dtype.kind == 'c':
+            if isinstance(other, Array) and other.dtype.kind == "c":
                 phasor = self.phasor * other
-                return self.set(["amplitude", "phase"],
-                                [np.abs(phasor), np.angle(phasor)])
+                return self.set(
+                    ["amplitude", "phase"], [np.abs(phasor), np.angle(phasor)]
+                )
 
             # Scalar array - Multiply amplitude
             else:
-                return self.multiply('amplitude', other)
+                return self.multiply("amplitude", other)
 
         # Other
         else:
-            raise TypeError("Can only multiply Wavefront by array or "
-                            f"OpticalLayer. Got: {type(other)}.")
+            raise TypeError(
+                "Can only multiply Wavefront by array or "
+                f"OpticalLayer. Got: {type(other)}."
+            )
 
     def __imul__(self: Wavefront, other: Any) -> Wavefront:
         """
@@ -304,12 +309,12 @@ class Wavefront(Base):
         as an array of transmission values and is multiplied by the wavefront
         amplitude. If it is an Aperture, Aberration, or Propagator, the
         wavefront is passed to the layer and the output wavefront is returned.
-        
+
         Parameters
         ----------
         other : Array or Aberration or Aperture or Propagator
             The input to add to the wavefront.
-        
+
         Returns
         -------
         wavefront : Wavefront
@@ -317,9 +322,9 @@ class Wavefront(Base):
         """
         return self.__mul__(other)
 
-    #######################
-    ### Adder Functions ###
-    #######################
+    ###################
+    # Adder Functions #
+    ###################
     def add_opd(self: Wavefront, path_difference: Array) -> Wavefront:
         """
         Applies the wavelength-dependent phase based on the supplied optical
@@ -338,7 +343,7 @@ class Wavefront(Base):
             path_difference
         """
         phase_difference = self.wavenumber * path_difference
-        return self.add('phase', phase_difference)
+        return self.add("phase", phase_difference)
 
     def add_phase(self: Wavefront, phase: Array) -> Wavefront:
         """
@@ -355,18 +360,18 @@ class Wavefront(Base):
             The new wavefront with updated phases.
         """
         # Add this extra None check to allow PhaseOptics to have a None phase
-        # and still be able to be 'added' to it, making this the phase 
+        # and still be able to be 'added' to it, making this the phase
         # equivalent of `wf += opd` -> `wf = wf.add_phase(phase)`
         if phase is not None:
-            return self.add('phase', phase)
+            return self.add("phase", phase)
         return self
 
-    #######################
-    ### Other Functions ###
-    #######################
+    ###################
+    # Other Functions #
+    ###################
     def tilt(self: Wavefront, angles: Array) -> Wavefront:
         """
-        Tilts the wavefront by the angles in the (x, y) by modifying the 
+        Tilts the wavefront by the angles in the (x, y) by modifying the
         phase arrays.
 
         Parameters
@@ -381,7 +386,7 @@ class Wavefront(Base):
         """
         if not isinstance(angles, Array) or angles.shape != (2,):
             raise ValueError("angles must be an array of shape (2,).")
-        opd = - (angles[:, None, None] * self.coordinates).sum(0)
+        opd = -(angles[:, None, None] * self.coordinates).sum(0)
         return self.add_opd(opd)
 
     def normalise(self: Wavefront) -> Wavefront:
@@ -393,7 +398,7 @@ class Wavefront(Base):
         wavefront : Wavefront
             The new wavefront with the normalised electric field amplitudes.
         """
-        return self.divide('amplitude', np.linalg.norm(self.amplitude))
+        return self.divide("amplitude", np.linalg.norm(self.amplitude))
 
     def _to_field(self: Wavefront, complex: bool = False) -> Array:
         """
@@ -404,11 +409,12 @@ class Wavefront(Base):
         ----------
         complex : bool = False
             Whether to return the wavefront in (real, imaginary) form.
-        
+
         Returns
         -------
         field : Array
-            The wavefront in either (amplitude, phase) or (real, imaginary) form.
+            The wavefront in either (amplitude, phase) or (real, imaginary)
+            form.
         """
         if complex:
             return np.array([self.real, self.imaginary])
@@ -422,7 +428,7 @@ class Wavefront(Base):
         ----------
         field : Array
             The wavefront field in (amplitude, phase) form.
-        
+
         Returns
         -------
         field : Array
@@ -434,13 +440,14 @@ class Wavefront(Base):
 
     def flip(self: Wavefront, axis: tuple) -> Wavefront:
         """
-        Flips the amplitude and phase of the wavefront along the specified axes.
+        Flips the amplitude and phase of the wavefront along the specified
+        axes.
 
         Parameters
         ----------
         axis : tuple
             The axes along which to flip the wavefront.
-        
+
         Returns
         -------
         wavefront : Wavefront
@@ -449,12 +456,14 @@ class Wavefront(Base):
         field = self._to_field()
         flipper = vmap(np.flip, (0, None))
         amplitude, phase = flipper(field, axis)
-        return self.set(['amplitude', 'phase'], [amplitude, phase])
+        return self.set(["amplitude", "phase"], [amplitude, phase])
 
-    def scale_to(self: Wavefront,
-                 npixels: int,
-                 pixel_scale: Array,
-                 complex: bool = False) -> Wavefront:
+    def scale_to(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        complex: bool = False,
+    ) -> Wavefront:
         """
         Performs a paraxial interpolation on the wavefront, determined by the
         pixel_scale_out and npixels parameters. The transformation is done
@@ -490,12 +499,11 @@ class Wavefront(Base):
             field = self._to_amplitude_phase(field)
 
         # Return new wavefront
-        return self.set(['amplitude', 'phase'], [field[0], field[1]])
+        return self.set(["amplitude", "phase"], [field[0], field[1]])
 
-    def rotate(self: Wavefront,
-               angle: Array,
-               order: int = 1,
-               complex: bool = False) -> Wavefront:
+    def rotate(
+        self: Wavefront, angle: Array, order: int = 1, complex: bool = False
+    ) -> Wavefront:
         """
         Performs a paraxial rotation on the wavefront, determined by the
         angle parameter, using interpolation. The transformation is done
@@ -505,7 +513,8 @@ class Wavefront(Base):
         Parameters
         ----------
         angle : Array, radians
-            The angle by which to rotate the wavefront in a clockwise direction.
+            The angle by which to rotate the wavefront in a clockwise
+            direction.
         order : int = 1
             The interpolation order to use.
         complex : bool = False
@@ -529,11 +538,11 @@ class Wavefront(Base):
             field = self._to_amplitude_phase(field)
 
         # Return new wavefront
-        return self.set(['amplitude', 'phase'], [field[0], field[1]])
+        return self.set(["amplitude", "phase"], [field[0], field[1]])
 
-    ############################
-    ### Padding and Cropping ###
-    ############################
+    ########################
+    # Padding and Cropping #
+    ########################
     def pad_to(self: Wavefront, npixels: int) -> Wavefront:
         """
         Paraxially zero-pads the `Wavefront` to the size determined by
@@ -555,8 +564,10 @@ class Wavefront(Base):
         if npixels_in % 2 != npixels % 2:
             raise ValueError("Only supports even -> even or odd -> odd input.")
         if npixels < npixels_in:
-            raise ValueError("npixels must be larger than the current array "
-                             "size: {}".format(npixels_in))
+            raise ValueError(
+                "npixels must be larger than the current array "
+                "size: {}".format(npixels_in)
+            )
 
         new_centre = npixels // 2
         centre = npixels_in // 2
@@ -564,14 +575,14 @@ class Wavefront(Base):
         padded = np.zeros([npixels, npixels])
 
         amplitude = padded.at[
-                    new_centre - centre: centre + new_centre + remainder,
-                    new_centre - centre: centre + new_centre + remainder
-                    ].set(self.amplitude)
+            new_centre - centre : centre + new_centre + remainder,
+            new_centre - centre : centre + new_centre + remainder,
+        ].set(self.amplitude)
         phase = padded.at[
-                new_centre - centre: centre + new_centre + remainder,
-                new_centre - centre: centre + new_centre + remainder
-                ].set(self.phase)
-        return self.set(['amplitude', 'phase'], [amplitude, phase])
+            new_centre - centre : centre + new_centre + remainder,
+            new_centre - centre : centre + new_centre + remainder,
+        ].set(self.phase)
+        return self.set(["amplitude", "phase"], [amplitude, phase])
 
     def crop_to(self: Wavefront, npixels: int) -> Wavefront:
         """
@@ -594,28 +605,34 @@ class Wavefront(Base):
         if npixels_in % 2 != npixels % 2:
             raise ValueError("Only supports even -> even or odd -> odd input.")
         if npixels > npixels_in:
-            raise ValueError("npixels must be smaller than the current array "
-                             "size: {}".format(npixels_in))
+            raise ValueError(
+                "npixels must be smaller than the current array "
+                "size: {}".format(npixels_in)
+            )
 
         new_centre = npixels_in // 2
         centre = npixels // 2
 
         amplitude = self.amplitude[
-                    new_centre - centre: new_centre + centre,
-                    new_centre - centre: new_centre + centre]
+            new_centre - centre : new_centre + centre,
+            new_centre - centre : new_centre + centre,
+        ]
         phase = self.phase[
-                new_centre - centre: new_centre + centre,
-                new_centre - centre: new_centre + centre]
+            new_centre - centre : new_centre + centre,
+            new_centre - centre : new_centre + centre,
+        ]
 
-        return self.set(['amplitude', 'phase'], [amplitude, phase])
+        return self.set(["amplitude", "phase"], [amplitude, phase])
 
-    #############################
-    ### Propagation Functions ###
-    #############################
-    def _FFT_output(self         : Wavefront,
-                    pad_factor   : int = 1,
-                    focal_length : Array = None, 
-                    inverse      : bool = False) -> tuple:
+    #########################
+    # Propagation Functions #
+    #########################
+    def _FFT_output(
+        self: Wavefront,
+        pad_factor: int = 1,
+        focal_length: Array = None,
+        inverse: bool = False,
+    ) -> tuple:
         """
         Calculates the output plane, unit, and pixel scale.
 
@@ -639,36 +656,44 @@ class Wavefront(Base):
         """
         pixel_scale = self.fringe_size / pad_factor
         if focal_length is None:
-            units = 'Angular'
+            units = "Angular"
         else:
-            units = 'Cartesian'
+            units = "Cartesian"
             pixel_scale *= focal_length
 
             # Check for invalid propagation
-            if self.units == 'Angular':
-                raise ValueError("focal_length can not be specific when"
-                                 "propagating from a Focal plane with angular units.")
+            if self.units == "Angular":
+                raise ValueError(
+                    "focal_length can not be specific when"
+                    "propagating from a Focal plane with angular units."
+                )
 
         # Check planes
         if inverse:
-            if self.plane != 'Focal':
-                raise ValueError("Can only do an IFFT from a Focal plane, "
-                                 f"current plane is {self.plane}.")
-            plane = 'Pupil'
-            units = 'Cartesian'
+            if self.plane != "Focal":
+                raise ValueError(
+                    "Can only do an IFFT from a Focal plane, "
+                    f"current plane is {self.plane}."
+                )
+            plane = "Pupil"
+            units = "Cartesian"
         else:
-            if self.plane != 'Pupil':
-                raise ValueError("Can only do an FFT from a Pupil plane, "
-                                 f"current plane is {self.plane}.")
-            plane = 'Focal'
+            if self.plane != "Pupil":
+                raise ValueError(
+                    "Can only do an FFT from a Pupil plane, "
+                    f"current plane is {self.plane}."
+                )
+            plane = "Focal"
 
         return plane, units, pixel_scale
 
     # TODO: focal_length not used?
-    def _FFT(self: Wavefront,
-             phasor: Array,
-             focal_length: Array = None,
-             inverse: bool = False) -> tuple:
+    def _FFT(
+        self: Wavefront,
+        phasor: Array,
+        focal_length: Array = None,
+        inverse: bool = False,
+    ) -> tuple:
         """
         Calculates the output plane, unit, pixel scale, and returns the
         appropriate propagation function
@@ -677,7 +702,7 @@ class Wavefront(Base):
         ----------
         inverse : bool = False
             If True, the inverse FFT is used.
-        
+
         Returns
         -------
         phasor : Array
@@ -688,9 +713,9 @@ class Wavefront(Base):
         else:
             return np.fft.fftshift(np.fft.ifft2(phasor)) * phasor.shape[-1]
 
-    def FFT(self: Wavefront,
-            pad: int = 2,
-            focal_length: Array = None) -> Wavefront:
+    def FFT(
+        self: Wavefront, pad: int = 2, focal_length: Array = None
+    ) -> Wavefront:
         """
         Propagates the wavefront by performing a Fast Fourier Transform.
 
@@ -720,12 +745,14 @@ class Wavefront(Base):
         phasor = self._FFT(phasor, focal_length)
 
         # Return new wavefront
-        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
-                        [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
+        return self.set(
+            ["amplitude", "phase", "pixel_scale", "plane", "units"],
+            [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units],
+        )
 
-    def IFFT(self: Wavefront,
-             pad: int = 2,
-             focal_length: Array = None) -> Wavefront:
+    def IFFT(
+        self: Wavefront, pad: int = 2, focal_length: Array = None
+    ) -> Wavefront:
         """
         Propagates the wavefront by performing an Inverse Fast Fourier
         Transform.
@@ -746,8 +773,9 @@ class Wavefront(Base):
             The propagated wavefront.
         """
         # Calculate
-        plane, units, pixel_scale = self._FFT_output(pad, focal_length, 
-            inverse=True)
+        plane, units, pixel_scale = self._FFT_output(
+            pad, focal_length, inverse=True
+        )
 
         # Pad must be int
         npixels = (self.npixels * (pad - 1)) // 2
@@ -757,12 +785,14 @@ class Wavefront(Base):
         phasor = self._FFT(phasor, focal_length, inverse=True)
 
         # Return new wavefront
-        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
-                        [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
+        return self.set(
+            ["amplitude", "phase", "pixel_scale", "plane", "units"],
+            [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units],
+        )
 
-    def _MFT_output(self: Wavefront,
-                    focal_length: Array = None,
-                    inverse: bool = False) -> tuple:
+    def _MFT_output(
+        self: Wavefront, focal_length: Array = None, inverse: bool = False
+    ) -> tuple:
         """
         Calculates the output plane and unit for the MFT
 
@@ -774,7 +804,7 @@ class Wavefront(Base):
             'Cartesian' propagation.
         inverse : bool = False
             If True, the inverse MFT is used.
-        
+
         Returns
         -------
         plane : str
@@ -784,34 +814,42 @@ class Wavefront(Base):
         """
         # Get units
         if focal_length is None:
-            units = 'Angular'
+            units = "Angular"
         else:
-            units = 'Cartesian'
+            units = "Cartesian"
 
             # Check for invalid propagation
-            if self.units == 'Angular':
-                raise ValueError("focal_length can not be specific when"
-                                 "propagating from a Focal plane with angular units.")
+            if self.units == "Angular":
+                raise ValueError(
+                    "focal_length can not be specific when"
+                    "propagating from a Focal plane with angular units."
+                )
 
         # Check planes
         if inverse:
-            if self.plane != 'Focal':
-                raise ValueError("Can only do an IMFT from a Focal plane, "
-                                 f"current plane is {self.plane}.")
-            plane = 'Pupil'
-            units = 'Cartesian'
+            if self.plane != "Focal":
+                raise ValueError(
+                    "Can only do an IMFT from a Focal plane, "
+                    f"current plane is {self.plane}."
+                )
+            plane = "Pupil"
+            units = "Cartesian"
         else:
-            if self.plane != 'Pupil':
-                raise ValueError("Can only do an MFT from a Pupil plane, "
-                                 f"current plane is {self.plane}.")
-            plane = 'Focal'
+            if self.plane != "Pupil":
+                raise ValueError(
+                    "Can only do an MFT from a Pupil plane, "
+                    f"current plane is {self.plane}."
+                )
+            plane = "Focal"
 
         return plane, units
 
-    def _nfringes(self: Wavefront,
-                  npixels: int,
-                  pixel_scale: Array,
-                  focal_length: Array = None) -> Array:
+    def _nfringes(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        focal_length: Array = None,
+    ) -> Array:
         """
         Calculates the number of fringes in the output plane.
 
@@ -825,7 +863,7 @@ class Wavefront(Base):
             The focal length of the propagation. If None, the propagation is
             treated as an 'angular' propagation, else it is treated as a
             'Cartesian' propagation.
-        
+
         Returns
         -------
         nfringes : Array
@@ -841,12 +879,14 @@ class Wavefront(Base):
         else:
             return output_size / (self.fringe_size * focal_length)
 
-    def _transfer_matrix(self: Wavefront,
-                         npixels: int,
-                         pixel_scale: Array,
-                         shift: Array = 0.,
-                         focal_length: Array = None,
-                         inverse: bool = False) -> Array:
+    def _transfer_matrix(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        shift: Array = 0.0,
+        focal_length: Array = None,
+        inverse: bool = False,
+    ) -> Array:
         """
         Calculates the transfer matrix for the MFT.
 
@@ -864,15 +904,19 @@ class Wavefront(Base):
             'Cartesian' propagation.
         inverse : bool = False
             Is this a forward or inverse MFT.
-        
+
         Returns
         -------
         transfer_matrix : Array
             The transfer matrix for the MFT.
         """
         scale_in = 1.0 / self.npixels
-        scale_out = self._nfringes(npixels, pixel_scale, focal_length) / npixels
-        in_vec = dlu.pixel_coordinates(self.npixels, scale_in, shift * scale_in)
+        scale_out = (
+            self._nfringes(npixels, pixel_scale, focal_length) / npixels
+        )
+        in_vec = dlu.pixel_coordinates(
+            self.npixels, scale_in, shift * scale_in
+        )
         out_vec = dlu.pixel_coordinates(npixels, scale_out, shift * scale_out)
 
         if not inverse:
@@ -880,12 +924,14 @@ class Wavefront(Base):
         else:
             return np.exp(-2j * np.pi * np.outer(in_vec, out_vec))
 
-    def _MFT(self: Wavefront,
-             npixels: int,
-             pixel_scale: Array,
-             focal_length: Array = None,
-             shift: Array = np.zeros(2),
-             inverse: bool = False) -> Array:
+    def _MFT(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        focal_length: Array = None,
+        shift: Array = np.zeros(2),
+        inverse: bool = False,
+    ) -> Array:
         """
         Performs the actual phasor propagation and normalises the output
 
@@ -903,29 +949,34 @@ class Wavefront(Base):
             The shift in the center of the output plane.
         inverse : bool = False
             Is this a forward or inverse MFT.
-        
+
         Returns
         -------
         phasor : Array
             The propagated phasor.
         """
         # Transfer Matrices
-        x_matrix = self._transfer_matrix(npixels, pixel_scale, shift[0],
-                                         focal_length, inverse=inverse)
-        y_matrix = self._transfer_matrix(npixels, pixel_scale, shift[1],
-                                         focal_length, inverse=inverse).T
+        x_matrix = self._transfer_matrix(
+            npixels, pixel_scale, shift[0], focal_length, inverse=inverse
+        )
+        y_matrix = self._transfer_matrix(
+            npixels, pixel_scale, shift[1], focal_length, inverse=inverse
+        ).T
 
         # Propagation
         phasor = (y_matrix @ self.phasor) @ x_matrix
         nfringes = self._nfringes(npixels, pixel_scale, focal_length)
-        phasor *= np.exp(np.log(nfringes) -
-                         (np.log(self.npixels) + np.log(npixels)))
+        phasor *= np.exp(
+            np.log(nfringes) - (np.log(self.npixels) + np.log(npixels))
+        )
         return phasor
 
-    def MFT(self: Wavefront,
-            npixels: int,
-            pixel_scale: Array,
-            focal_length: Array = None) -> Wavefront:
+    def MFT(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        focal_length: Array = None,
+    ) -> Wavefront:
         """
         Propagates the wavefront by performing a 2-sided Matrix Fourier
         Transform. TODO: Add link to Soumer et al. 2007(?).
@@ -952,16 +1003,20 @@ class Wavefront(Base):
 
         # Return new wavefront
         pixel_scale = np.array(pixel_scale)  # Allow float input
-        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
-                        [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
+        return self.set(
+            ["amplitude", "phase", "pixel_scale", "plane", "units"],
+            [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units],
+        )
 
-    def IMFT(self: Wavefront,
-             npixels: int,
-             pixel_scale: Array,
-             focal_length: Array = None) -> Wavefront:
+    def IMFT(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        focal_length: Array = None,
+    ) -> Wavefront:
         """
-        Propagates the wavefront by performing a, inverse 2-sided Matrix Fourier
-        Transform. TODO: Add link to Soumer et al. 2007(?).
+        Propagates the wavefront by performing a, inverse 2-sided Matrix
+        Fourier Transform. TODO: Add link to Soumer et al. 2007(?).
 
         Parameters
         ----------
@@ -985,19 +1040,23 @@ class Wavefront(Base):
 
         # Return new wavefront
         pixel_scale = np.array(pixel_scale)  # Allow float input
-        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
-                        [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
+        return self.set(
+            ["amplitude", "phase", "pixel_scale", "plane", "units"],
+            [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units],
+        )
 
-    def shifted_MFT(self: Wavefront,
-                    npixels: int,
-                    pixel_scale: Array,
-                    shift: Array,
-                    focal_length: Array = None,
-                    pixel: bool = True) -> Wavefront:
+    def shifted_MFT(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        shift: Array,
+        focal_length: Array = None,
+        pixel: bool = True,
+    ) -> Wavefront:
         """
         Propagates the wavefront by performing a 2-sided Matrix Fourier
         Transform with a shift in the center of the output plane.
-        TODO: Add link to Soumer et al. 2007(?), 
+        TODO: Add link to Soumer et al. 2007(?),
 
         Parameters
         ----------
@@ -1013,7 +1072,7 @@ class Wavefront(Base):
             'Cartesian' propagation.
         pixel : bool = True
             Whether the shift is in pixels or the units of pixel_scale.
-        
+
         Returns
         -------
         wavefront : Wavefront
@@ -1025,19 +1084,23 @@ class Wavefront(Base):
         phasor = self._MFT(npixels, pixel_scale, focal_length, shift)
 
         # Return new wavefront
-        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
-                        [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
+        return self.set(
+            ["amplitude", "phase", "pixel_scale", "plane", "units"],
+            [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units],
+        )
 
-    def shifted_IMFT(self: Wavefront,
-                     npixels: int,
-                     pixel_scale: Array,
-                     shift: Array,
-                     focal_length: Array = None,
-                     pixel: bool = True) -> Wavefront:
+    def shifted_IMFT(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        shift: Array,
+        focal_length: Array = None,
+        pixel: bool = True,
+    ) -> Wavefront:
         """
-        Propagates the wavefront by performing a, Inverse 2-sided Matrix Fourier
-        Transform with a shift in the center of the output plane.
-        TODO: Add link to Soumer et al. 2007(?), 
+        Propagates the wavefront by performing a, Inverse 2-sided Matrix
+        Fourier Transform with a shift in the center of the output plane.
+        TODO: Add link to Soumer et al. 2007(?),
 
         Parameters
         ----------
@@ -1053,7 +1116,7 @@ class Wavefront(Base):
             'Cartesian' propagation.
         pixel : bool = True
             Whether the shift is in pixels or the units of pixel_scale.
-        
+
         Returns
         -------
         wavefront : Wavefront
@@ -1062,12 +1125,15 @@ class Wavefront(Base):
         # Calculate
         plane, units = self._MFT_output(focal_length, inverse=True)
         shift = shift if pixel else shift / pixel_scale
-        phasor = self._MFT(npixels, pixel_scale, focal_length, shift,
-                           inverse=True)
+        phasor = self._MFT(
+            npixels, pixel_scale, focal_length, shift, inverse=True
+        )
 
         # Return new wavefront
-        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
-                        [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units])
+        return self.set(
+            ["amplitude", "phase", "pixel_scale", "plane", "units"],
+            [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units],
+        )
 
 
 class FresnelWavefront(Wavefront):
@@ -1091,10 +1157,9 @@ class FresnelWavefront(Wavefront):
         The units of the wavefront, can be 'Cartesian' or 'Angular'.
     """
 
-    def __init__(self: Wavefront,
-                 npixels: int,
-                 diameter: Array,
-                 wavelength: Array) -> Wavefront:
+    def __init__(
+        self: Wavefront, npixels: int, diameter: Array, wavelength: Array
+    ) -> Wavefront:
         """
         Constructor for the wavefront.
 
@@ -1113,11 +1178,13 @@ class FresnelWavefront(Wavefront):
             diameter=diameter,
         )
 
-    def _nfringes(self: Wavefront,
-                  npixels: int,
-                  pixel_scale: Array,
-                  focal_shift: Array,
-                  focal_length: Array) -> Array:
+    def _nfringes(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        focal_shift: Array,
+        focal_length: Array,
+    ) -> Array:
         """
         Calculates the number of fringes in the output plane.
 
@@ -1131,7 +1198,7 @@ class FresnelWavefront(Wavefront):
             The distance the focal plane is shifted from the focal length.
         focal_length : Array, metres
             The focal length of the lens.
-        
+
         Returns
         -------
         nfringes : Array
@@ -1148,10 +1215,12 @@ class FresnelWavefront(Wavefront):
         return output_size / (self.fringe_size * propagation_distance)
 
     # Move to utils as thinlens?
-    def quadratic_phase(self: Wavefront,
-                        x_coordinates: Array,
-                        y_coordinates: Array,
-                        distance: Array) -> Array:
+    def quadratic_phase(
+        self: Wavefront,
+        x_coordinates: Array,
+        y_coordinates: Array,
+        distance: Array,
+    ) -> Array:
         """
         A convenience function for calculating quadratic phase factors.
 
@@ -1172,10 +1241,9 @@ class FresnelWavefront(Wavefront):
             A set of phase factors that are useful in optical calculations.
         """
         r_coordinates = np.hypot(x_coordinates, y_coordinates)
-        return np.exp(0.5j * self.wavenumber * r_coordinates ** 2 / distance)
+        return np.exp(0.5j * self.wavenumber * r_coordinates**2 / distance)
 
-    def transfer_function(self: Wavefront,
-                          distance: Array) -> Array:
+    def transfer_function(self: Wavefront, distance: Array) -> Array:
         """
         The Optical Transfer Function defining the phase evolution of the
         wavefront when propagating to a non-conjugate plane.
@@ -1192,12 +1260,14 @@ class FresnelWavefront(Wavefront):
         """
         return np.exp(1.0j * self.wavenumber * distance)
 
-    def _transfer_matrix(self: Wavefront,
-                         npixels: int,
-                         pixel_scale: Array,
-                         focal_shift: Array,
-                         focal_length: Array,
-                         shift: Array = 0.) -> Array:
+    def _transfer_matrix(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        focal_shift: Array,
+        focal_length: Array,
+        shift: Array = 0.0,
+    ) -> Array:
         """
         Calculates the transfer matrix for the MFT.
 
@@ -1220,12 +1290,16 @@ class FresnelWavefront(Wavefront):
             The transfer matrix for the MFT.
         """
         scale_in = 1.0 / self.npixels
-        scale_out = self._nfringes(npixels, pixel_scale, focal_shift,
-                                   focal_length) / npixels
-        in_vec = dlu.pixel_coordinates(self.npixels, scale_in, shift * scale_in)
+        scale_out = (
+            self._nfringes(npixels, pixel_scale, focal_shift, focal_length)
+            / npixels
+        )
+        in_vec = dlu.pixel_coordinates(
+            self.npixels, scale_in, shift * scale_in
+        )
         out_vec = dlu.pixel_coordinates(npixels, scale_out, shift * scale_out)
 
-        if self.plane == 'Pupil':
+        if self.plane == "Pupil":
             return np.exp(2j * np.pi * np.outer(in_vec, out_vec))
         else:
             raise ValueError(f"plane must be 'Pupil' Got {self.plane}")
@@ -1233,13 +1307,15 @@ class FresnelWavefront(Wavefront):
         # elif self.plane == 'Focal':
         #     return np.exp(-2j * np.pi * np.outer(in_vec, out_vec))
 
-    def _MFT(self: Wavefront,
-             phasor: Array,
-             npixels: int,
-             pixel_scale: Array,
-             focal_length: Array,
-             focal_shift: Array,
-             shift: Array = np.zeros(2)) -> Array:
+    def _MFT(
+        self: Wavefront,
+        phasor: Array,
+        npixels: int,
+        pixel_scale: Array,
+        focal_length: Array,
+        focal_shift: Array,
+        shift: Array = np.zeros(2),
+    ) -> Array:
         """
         Performs the MFT.
 
@@ -1257,31 +1333,37 @@ class FresnelWavefront(Wavefront):
             The distance the focal plane is shifted from the focal length.
         shift : Array = np.zeros(2), metres
             The shift to apply to the output plane.
-        
+
         Returns
         -------
         phasor : Array
             The propagated phasor.
         """
         # Set up
-        nfringes = self._nfringes(npixels, pixel_scale, focal_shift,
-                                  focal_length)
-        x_matrix = self._transfer_matrix(npixels, pixel_scale, focal_shift,
-                                         focal_length, shift[0])
-        y_matrix = self._transfer_matrix(npixels, pixel_scale, focal_shift,
-                                         focal_length, shift[1]).T
+        nfringes = self._nfringes(
+            npixels, pixel_scale, focal_shift, focal_length
+        )
+        x_matrix = self._transfer_matrix(
+            npixels, pixel_scale, focal_shift, focal_length, shift[0]
+        )
+        y_matrix = self._transfer_matrix(
+            npixels, pixel_scale, focal_shift, focal_length, shift[1]
+        ).T
 
         # Perform and normalise
         phasor = (y_matrix @ phasor) @ x_matrix
-        phasor *= np.exp(np.log(nfringes) - \
-                         (np.log(self.npixels) + np.log(npixels)))
+        phasor *= np.exp(
+            np.log(nfringes) - (np.log(self.npixels) + np.log(npixels))
+        )
         return phasor
 
-    def _phase_factors(self: Wavefront,
-                       npixels: int,
-                       pixel_scale: Array,
-                       focal_length: Array,
-                       focal_shift: Array) -> tuple:
+    def _phase_factors(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        focal_length: Array,
+        focal_shift: Array,
+    ) -> tuple:
         """
         Calculates the phase factors for the Fresnel propagation.
 
@@ -1295,7 +1377,7 @@ class FresnelWavefront(Wavefront):
             The focal length of the lens.
         focal_shift : Array, metres
             The distance the focal plane is shifted from the focal length.
-        
+
         Returns
         -------
         first_factor : Array
@@ -1319,11 +1401,13 @@ class FresnelWavefront(Wavefront):
         fourth_factor = self.quadratic_phase(*output_positions, prop_dist)
         return first_factor, second_factor, third_factor, fourth_factor
 
-    def fresnel_prop(self: Wavefront,
-                     npixels: int,
-                     pixel_scale: Array,
-                     focal_length: Array,
-                     focal_shift: Array) -> Array:
+    def fresnel_prop(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        focal_length: Array,
+        focal_shift: Array,
+    ) -> Array:
         """
         Propagates the wavefront from the input plane to the output plane using
         a Fresnel Transform using a Matrix Fourier Transform.
@@ -1345,8 +1429,9 @@ class FresnelWavefront(Wavefront):
             The propagated wavefront.
         """
         # Calculate phase values
-        first, second, third, fourth = self._phase_factors(npixels, pixel_scale,
-                                                           focal_length, focal_shift)
+        first, second, third, fourth = self._phase_factors(
+            npixels, pixel_scale, focal_length, focal_shift
+        )
 
         # Apply phases
         phasor = self.phasor
@@ -1354,8 +1439,9 @@ class FresnelWavefront(Wavefront):
         phasor *= second
 
         # Propagate
-        phasor = self._MFT(phasor, npixels, pixel_scale, focal_length,
-                           focal_shift)
+        phasor = self._MFT(
+            phasor, npixels, pixel_scale, focal_length, focal_shift
+        )
 
         # Apply phases
         phasor *= third
@@ -1363,29 +1449,39 @@ class FresnelWavefront(Wavefront):
 
         # Update
         pixel_scale = np.array(pixel_scale)
-        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
-                        [np.abs(phasor), np.angle(phasor), pixel_scale, 'Intermediate',
-                         'Cartesian'])
+        return self.set(
+            ["amplitude", "phase", "pixel_scale", "plane", "units"],
+            [
+                np.abs(phasor),
+                np.angle(phasor),
+                pixel_scale,
+                "Intermediate",
+                "Cartesian",
+            ],
+        )
 
-    def shifted_fresnel_prop(self: Wavefront,
-                             npixels: int,
-                             pixel_scale: Array,
-                             shift: Array,
-                             focal_length: Array,
-                             focal_shift: Array,
-                             pixel: bool = True) -> Array:
+    def shifted_fresnel_prop(
+        self: Wavefront,
+        npixels: int,
+        pixel_scale: Array,
+        shift: Array,
+        focal_length: Array,
+        focal_shift: Array,
+        pixel: bool = True,
+    ) -> Array:
         """
         Propagates the wavefront from the input plane to the output plane using
         a Fresnel Transform using a Matrix Fourier Transform with a shift in
         the center of the output plane.
-        TODO: Add link to Soumer et al. 2007(?), 
+        TODO: Add link to Soumer et al. 2007(?),
         """
         # Get shift
         shift = shift if pixel else shift / pixel_scale
 
         # Calculate phase values
-        first, second, third, fourth = self._phase_factors(npixels, pixel_scale,
-                                                           focal_length, focal_shift)
+        first, second, third, fourth = self._phase_factors(
+            npixels, pixel_scale, focal_length, focal_shift
+        )
 
         # Apply phases
         phasor = self.phasor
@@ -1393,8 +1489,9 @@ class FresnelWavefront(Wavefront):
         phasor *= second
 
         # Propagate
-        phasor = self._MFT(phasor, npixels, pixel_scale, focal_length,
-                           focal_shift, shift)
+        phasor = self._MFT(
+            phasor, npixels, pixel_scale, focal_length, focal_shift, shift
+        )
 
         # Apply phases
         phasor *= third
@@ -1402,6 +1499,13 @@ class FresnelWavefront(Wavefront):
 
         # Update
         pixel_scale = np.array(pixel_scale)
-        return self.set(['amplitude', 'phase', 'pixel_scale', 'plane', 'units'],
-                        [np.abs(phasor), np.angle(phasor), pixel_scale, 'Intermediate',
-                         'Cartesian'])
+        return self.set(
+            ["amplitude", "phase", "pixel_scale", "plane", "units"],
+            [
+                np.abs(phasor),
+                np.angle(phasor),
+                pixel_scale,
+                "Intermediate",
+                "Cartesian",
+            ],
+        )

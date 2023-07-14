@@ -4,7 +4,7 @@ This module contains the classes that define the behaviour of OpticalLayers in â
 
 These classes provide a simple set of classes used to perform basic transformations on wavefronts.
 
-There are seven public classes:
+There are Nine public classes:
 
 - `Optic`
 - `PhaseOptic`
@@ -13,6 +13,8 @@ There are seven public classes:
 - `Tilt`
 - `Normalise`
 - `Rotate`
+- `Flip`
+- `Resize`
 
 The _optic_ classes (`Optic`, `PhaseOptic`, `BasisOptic`, `PhaseBasisOptic`) are quite general and are used to perform basic modifications to the wavefront amplitude and phase. They all have `transmission` and `normalise` attributes that modify the amplitude of the wavefront. It is optional to normalise the wavefront after it passes through the optic.
 
@@ -46,3 +48,13 @@ The `Rotate` class rotates the wavefront by the input angle.
 
 ??? info "Rotate API"
     ::: dLux.optical_layers.Rotate
+
+The `Flip` class flips the wavefront about the input axes.
+
+??? info "Flip API"
+    ::: dLux.optical_layers.Flip
+
+The `Resize` class resizes the wavefront to the input size. If the input size is smaller than the wavefront, the wavefront is cropped. If the input size is larger than the wavefront, the wavefront is padded with zeros.
+
+??? info "Resize API"
+    ::: dLux.optical_layers.Resize

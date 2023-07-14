@@ -3,11 +3,15 @@ from jax import Array
 from jax.tree_util import tree_map
 from typing import Union
 
-__all__ = ["cart_to_polar", "polar_to_cart", "pixel_coords",
-           "pixel_coordinates"]
+__all__ = [
+    "cart_to_polar",
+    "polar_to_cart",
+    "pixel_coords",
+    "pixel_coordinates",
+]
 
 
-### Coordinate conversions ###
+# Coordinate conversions #
 def cart_to_polar(coordinates: Array) -> Array:
     """
     Converts the input (x, y) Cartesian coordinates into (r, phi) polar
@@ -16,7 +20,8 @@ def cart_to_polar(coordinates: Array) -> Array:
     Parameters
     ----------
     coordinates : Array
-        The (x, y) Cartesian coordinates to be converted into polar coordinates.
+        The (x, y) Cartesian coordinates to be converted into polar
+        coordinates.
 
     Returns
     -------
@@ -42,22 +47,23 @@ def polar_to_cart(coordinates: Array) -> Array:
     Returns
     -------
     coordinates : Array
-        The input polar coordinates converted into (x, y) Cartesian coordinates.
+        The input polar coordinates converted into (x, y) Cartesian
+        coordinates.
     """
     r, phi = coordinates
     return np.array([r * np.cos(phi), r * np.sin(phi)])
 
 
-### Positions Calculations ###
+# Positions Calculations #
 def pixel_coords(
-        npixels: int,
-        pixel_scale: float = 1,
-        ndims: int = 2,
-        polar=False,
-        ) -> Array:
+    npixels: int,
+    pixel_scale: float = 1,
+    ndims: int = 2,
+    polar=False,
+) -> Array:
     """
     Calculates the coordinates of the pixel centers for the given input,
-    assuming an equal size and pixel scale in all dimensions. All 
+    assuming an equal size and pixel scale in all dimensions. All
     coordinates are output in units of metres. This function is essentially a
     reduced version of the full `pixel_coordinates` function that gives
     flexibility to have different dimension sizes and scales.
@@ -73,7 +79,7 @@ def pixel_coords(
     polar : bool = False
         If True, the output is in polar coordinates. If False, the output is in
         Cartesian coordinates. ndims must be 2 if polar is True.
-    
+
     Returns
     -------
     coordinates : Array
@@ -85,16 +91,16 @@ def pixel_coords(
 
 
 def pixel_coordinates(
-        npixels: Union[int, tuple],
-        pixel_scales: Union[tuple, float] = 1.,
-        offsets: Union[tuple, float] = 0.,
-        polar: bool = False,
-        indexing: str = 'xy'
+    npixels: Union[int, tuple],
+    pixel_scales: Union[tuple, float] = 1.0,
+    offsets: Union[tuple, float] = 0.0,
+    polar: bool = False,
+    indexing: str = "xy",
 ) -> Array:
     """
-    Calculates the coordinates of the pixel centers for the given input. All 
-    coordinates are output in units of metres. 
-    
+    Calculates the coordinates of the pixel centers for the given input. All
+    coordinates are output in units of metres.
+
     The indexing argument is the same as in numpy.meshgrid., i.e.: Giving the
     string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a
     meshgrid with Cartesian indexing. In the 2-D case with inputs of length M
@@ -103,7 +109,7 @@ def pixel_coordinates(
     are of shape (N, M, P) for ‘xy’ indexing and (M, N, P) for ‘ij’ indexing.
     If the output is in polar coordinates, indexing is set to 'xy' and the
     input must be 2d.
-    
+
     Parameters
     ----------
     npixels : Union[int, tuple]
@@ -113,27 +119,27 @@ def pixel_coordinates(
         of the tuple must match the number of dimensions. If a float, the same
         scale is applied to all dimensions. If None, the scale is set to 1.
     offsets : Union[tuple, float] = 0.
-        The offset of the pixel centers in each dimension. If a tuple, the 
-        length of the tuple must match the number of dimensions. If a float, 
-        the same offset is applied to all dimensions. If None, the offset is 
+        The offset of the pixel centers in each dimension. If a tuple, the
+        length of the tuple must match the number of dimensions. If a float,
+        the same offset is applied to all dimensions. If None, the offset is
         set to 0.
     polar : bool = False
         If True, the output is in polar coordinates. If False, the output is in
         Cartesian coordinates. Default is False.
     indexing : str = 'xy'
-        The indexing of the output. Default is 'xy'. See numpy.meshgrid for more
-        details.
-    
+        The indexing of the output. Default is 'xy'. See numpy.meshgrid for
+        more details.
+
     Returns
     -------
     positions : Array
         The positions of the pixel centers in the given dimensions.
     """
-    if indexing not in ['xy', 'ij']:
+    if indexing not in ["xy", "ij"]:
         raise ValueError("indexing must be either 'xy' or 'ij'.")
 
-    if polar and indexing == 'ij':
-        indexing = 'xy'
+    if polar and indexing == "ij":
+        indexing = "xy"
 
     if not isinstance(npixels, tuple):
         npixels = (npixels,)
@@ -147,7 +153,7 @@ def pixel_coordinates(
         offsets = (offsets,) * len(npixels)
 
     def pixel_fn(n, offset, scale):
-        pix = np.arange(n) - (n - 1) / 2.
+        pix = np.arange(n) - (n - 1) / 2.0
         pix *= scale
         pix -= offset
         return pix
@@ -159,7 +165,9 @@ def pixel_coordinates(
 
     if polar:
         if len(npixels) != 2:
-            raise ValueError("polar coordinates are only defined for 2D arrays.")
+            raise ValueError(
+                "polar coordinates are only defined for 2D arrays."
+            )
         return cart_to_polar(positions)
 
     # Squeeze for empty axis removal with 1d

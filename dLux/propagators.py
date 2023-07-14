@@ -3,7 +3,11 @@ import jax.numpy as np
 from jax import Array
 import dLux
 
+
 __all__ = ["MFT", "FFT", "ShiftedMFT", "FarFieldFresnel"]
+
+
+Wavefront = dLux.wavefronts.Wavefront
 
 
 class Propagator(dLux.optical_layers.OpticalLayer):
@@ -15,18 +19,18 @@ class Propagator(dLux.optical_layers.OpticalLayer):
     ----------
     focal_length : Array, metres
         The effective focal length of the lens/mirror this propagator
-        represents. If None, the output pixel_scales are taken to be 
+        represents. If None, the output pixel_scales are taken to be
         radians/pixel, else they are taken to be in metres/pixel.
     inverse : bool
         Should the propagation be performed in the inverse direction.
     """
+
     focal_length: Array
     inverse: bool
 
     def __init__(
-            self: Propagator,
-            focal_length: Array = None,
-            inverse: bool = False):
+        self: Propagator, focal_length: Array = None, inverse: bool = False
+    ):
         """
         Constructor for the Propagator.
 
@@ -40,7 +44,7 @@ class Propagator(dLux.optical_layers.OpticalLayer):
         if focal_length is not None:
             focal_length = np.asarray(focal_length, dtype=float)
             if focal_length.ndim != 0:
-                raise TypeError('focal_length must be a scalar.')
+                raise TypeError("focal_length must be a scalar.")
 
         self.focal_length = focal_length
         self.inverse = bool(inverse)
@@ -62,13 +66,15 @@ class FFT(Propagator):
     inverse : bool
         Should the propagation be performed in the inverse direction.
     """
+
     pad: int
 
     def __init__(
-        self         : Propagator, 
-        focal_length : Array = None,
-        pad          : int = 2,
-        inverse      : bool = False) -> Propagator:
+        self: Propagator,
+        focal_length: Array = None,
+        pad: int = 2,
+        inverse: bool = False,
+    ) -> Propagator:
         super().__init__(focal_length=focal_length, inverse=inverse)
         self.pad = int(pad)
 
@@ -110,14 +116,17 @@ class MFT(Propagator):
     inverse : bool
         Should the propagation be performed in the inverse direction.
     """
+
     npixels: int
     pixel_scale: Array
 
-    def __init__(self: Propagator,
-                 npixels: int,
-                 pixel_scale: Array,
-                 focal_length: Array = None,
-                 inverse: bool = False):
+    def __init__(
+        self: Propagator,
+        npixels: int,
+        pixel_scale: Array,
+        focal_length: Array = None,
+        inverse: bool = False,
+    ):
         """
         Constructor for VariableSampling propagators.
 
@@ -141,7 +150,7 @@ class MFT(Propagator):
         self.npixels = int(npixels)
 
         if self.pixel_scale.ndim != 0:
-            raise TypeError('pixel_scale must be a scalar.')
+            raise TypeError("pixel_scale must be a scalar.")
 
     def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
@@ -158,11 +167,13 @@ class MFT(Propagator):
             The transformed wavefront.
         """
         if self.inverse:
-            return wavefront.IMFT(self.npixels, self.pixel_scale,
-                                  focal_length=self.focal_length)
+            return wavefront.IMFT(
+                self.npixels, self.pixel_scale, focal_length=self.focal_length
+            )
         else:
-            return wavefront.MFT(self.npixels, self.pixel_scale,
-                                 focal_length=self.focal_length)
+            return wavefront.MFT(
+                self.npixels, self.pixel_scale, focal_length=self.focal_length
+            )
 
 
 class ShiftedMFT(MFT):
@@ -186,20 +197,23 @@ class ShiftedMFT(MFT):
     pixel : bool
         If True the shift value is assumed to be in units of pixels, else the
         physical units of the output plane (ie radians if focal_length is None,
-        else metres). 
+        else metres).
     inverse : bool
         Should the propagation be performed in the inverse direction.
     """
+
     shift: Array
     pixel: bool
 
-    def __init__(self: Propagator,
-                 npixels: int,
-                 pixel_scale: Array,
-                 shift: Array,
-                 focal_length: Array = None,
-                 pixel: bool = False,
-                 inverse: bool = False):
+    def __init__(
+        self: Propagator,
+        npixels: int,
+        pixel_scale: Array,
+        shift: Array,
+        focal_length: Array = None,
+        pixel: bool = False,
+        inverse: bool = False,
+    ):
         """
         Constructor for VariableSampling propagators.
 
@@ -214,23 +228,27 @@ class ShiftedMFT(MFT):
             The (x, y) shift to apply to the wavefront in the output plane.
         focal_length : Array = None, metres
             The effective focal_length of the lens/mirror this propagator
-            represents. If None, the pixel_scale is taken to be in 
+            represents. If None, the pixel_scale is taken to be in
             radians/pixel, else it is taken to be in metres/pixel.
         pixel : bool = False
             If True the shift value is assumed to be in units of pixels, else
             the physical units of the output plane (ie radians if focal_length
-            is None, else metres). 
+            is None, else metres).
         inverse : bool = False
             Should the propagation be performed in the inverse direction.
         """
-        super().__init__(pixel_scale=pixel_scale, npixels=npixels,
-                         focal_length=focal_length, inverse=inverse)
+        super().__init__(
+            pixel_scale=pixel_scale,
+            npixels=npixels,
+            focal_length=focal_length,
+            inverse=inverse,
+        )
 
         self.shift = np.asarray(shift, dtype=float)
         self.pixel = bool(pixel)
 
         if self.shift.shape != (2,):
-            raise TypeError('shift must be an array of shape (2,).')
+            raise TypeError("shift must be an array of shape (2,).")
 
     def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
@@ -247,11 +265,21 @@ class ShiftedMFT(MFT):
             The transformed wavefront.
         """
         if self.inverse:
-            return wavefront.shifted_IMFT(self.npixels, self.pixel_scale,
-                                          self.shift, self.focal_length, self.pixel)
+            return wavefront.shifted_IMFT(
+                self.npixels,
+                self.pixel_scale,
+                self.shift,
+                self.focal_length,
+                self.pixel,
+            )
         else:
-            return wavefront.shifted_MFT(self.npixels, self.pixel_scale,
-                                         self.shift, self.focal_length, self.pixel)
+            return wavefront.shifted_MFT(
+                self.npixels,
+                self.pixel_scale,
+                self.shift,
+                self.focal_length,
+                self.pixel,
+            )
 
 
 class FarFieldFresnel(ShiftedMFT):
@@ -281,16 +309,19 @@ class FarFieldFresnel(ShiftedMFT):
     inverse : bool
         Should the propagation be performed in the inverse direction.
     """
+
     focal_shift: Array
 
-    def __init__(self: Propagator,
-                 npixels: Array,
-                 pixel_scale: Array,
-                 focal_length: Array,
-                 focal_shift: Array,
-                 shift: Array = np.zeros(2),
-                 pixel: bool = False,
-                 inverse: bool = False):
+    def __init__(
+        self: Propagator,
+        npixels: Array,
+        pixel_scale: Array,
+        focal_length: Array,
+        focal_shift: Array,
+        shift: Array = np.zeros(2),
+        pixel: bool = False,
+        inverse: bool = False,
+    ):
         """
         Constructor for the CartesianFresnel propagator
 
@@ -313,15 +344,22 @@ class FarFieldFresnel(ShiftedMFT):
             Should the propagation be performed in the inverse direction.
         """
         if inverse:
-            raise NotImplementedError('Inverse propagation not implemented '
-                                      'for CartesianFresnel.')
+            raise NotImplementedError(
+                "Inverse propagation not implemented " "for CartesianFresnel."
+            )
 
         self.focal_shift = np.asarray(focal_shift, dtype=float)
         if self.focal_shift.ndim != 0:
-            raise TypeError('focal_shift must be a scalar.')
+            raise TypeError("focal_shift must be a scalar.")
 
-        super().__init__(shift=shift, pixel=pixel, focal_length=focal_length,
-                         pixel_scale=pixel_scale, npixels=npixels, inverse=inverse)
+        super().__init__(
+            shift=shift,
+            pixel=pixel,
+            focal_length=focal_length,
+            pixel_scale=pixel_scale,
+            npixels=npixels,
+            inverse=inverse,
+        )
 
     def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
@@ -337,5 +375,11 @@ class FarFieldFresnel(ShiftedMFT):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        return wavefront.shifted_fresnel_prop(self.npixels, self.pixel_scale,
-                                              self.shift, self.focal_length, self.focal_shift, self.pixel)
+        return wavefront.shifted_fresnel_prop(
+            self.npixels,
+            self.pixel_scale,
+            self.shift,
+            self.focal_length,
+            self.focal_shift,
+            self.pixel,
+        )
