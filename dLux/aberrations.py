@@ -5,60 +5,53 @@ from jax import lax, Array
 import jax.tree_util as jtu
 import dLux.utils as dlu
 
-__all__ = ['Zernike', 'ZernikeBasis']
+__all__ = ["Zernike", "ZernikeBasis"]
 
 zernike_names = {
     # 0th Radial
-    1: 'Piston',
-
+    1: "Piston",
     # 1st Radial
-    2: 'Tilt X',
-    3: 'Tilt Y',
-
+    2: "Tilt X",
+    3: "Tilt Y",
     # Second Radial
-    4: 'Defocus',
-    5: 'Astig X',
-    6: 'Astig Y',
-
+    4: "Defocus",
+    5: "Astig X",
+    6: "Astig Y",
     # Third Radial
-    7: 'Coma X',
-    8: 'Coma Y',
-    9: 'Trefoil X',
-    10: 'Trefoil Y',
-
+    7: "Coma X",
+    8: "Coma Y",
+    9: "Trefoil X",
+    10: "Trefoil Y",
     # Fourth Radial
-    11: 'Spherical',
-    12: '2nd Astig X',
-    13: '2nd Astig Y',
-    14: 'Quadrafoil X',
-    15: 'Quadrafoil Y',
-
+    11: "Spherical",
+    12: "2nd Astig X",
+    13: "2nd Astig Y",
+    14: "Quadrafoil X",
+    15: "Quadrafoil Y",
     # Fifth Radial
-    16: '2nd Coma X',
-    17: '2nd Coma Y',
-    18: '2nd Trefoil X',
-    19: '2nd Trefoil Y',
-    20: 'Pentafoil X',
-    21: 'Pentafoil Y',
-
+    16: "2nd Coma X",
+    17: "2nd Coma Y",
+    18: "2nd Trefoil X",
+    19: "2nd Trefoil Y",
+    20: "Pentafoil X",
+    21: "Pentafoil Y",
     # Sixth Radial
-    22: '2nd Spherical',
-    23: '3rd Coma X',
-    24: '3rd Coma Y',
-    25: '3rd Astig X',
-    26: '3rd Astig Y',
-    27: 'Hexafoil X',
-    28: 'Hexafoil Y',
-
+    22: "2nd Spherical",
+    23: "3rd Coma X",
+    24: "3rd Coma Y",
+    25: "3rd Astig X",
+    26: "3rd Astig Y",
+    27: "Hexafoil X",
+    28: "Hexafoil Y",
     # Seventh Radial
-    29: '4th Coma X',
-    30: '4th Coma Y',
-    31: '4th Astig X',
-    32: '4th Astig Y',
-    33: '3rd Trefoil X',
-    34: '3rd Trefoil Y',
-    35: 'Heptafoil X',
-    36: 'Heptafoil Y',
+    29: "4th Coma X",
+    30: "4th Coma Y",
+    31: "4th Astig X",
+    32: "4th Astig Y",
+    33: "3rd Trefoil X",
+    34: "3rd Trefoil Y",
+    35: "Heptafoil X",
+    36: "Heptafoil Y",
 }
 
 
@@ -78,7 +71,7 @@ class Zernike(Base):
 
     7, 8, 9, 10 -> (3, -3), (3, -1), (3, 1), (3, 3)
 
-    
+
     Attributes
     ----------
     j : int
@@ -90,12 +83,13 @@ class Zernike(Base):
     name : str
         The name of the Zernike polynomial.
     _k : Array
-        The array of powers using the radial calculation. This is a 
+        The array of powers using the radial calculation. This is a
         pre-calculated parameter and should not be changed.
     _c : Array
         The array of normalisation coefficients used in the radial calculation.
         This is a pre-calculated parameter and should not be changed.
     """
+
     j: int
     n: int
     m: int
@@ -113,15 +107,18 @@ class Zernike(Base):
             The Zernike (noll) index.
         """
         if int(j) < 1:
-            raise ValueError('The Zernike index must be greater than 0.')
+            raise ValueError("The Zernike index must be greater than 0.")
         self.j = int(j)
         self.n, self.m = self._noll_indices(self.j)
-        self.name = zernike_names[int(self.j)] if self.j >= 1 and self.j <= 36 \
-            else f'Zernike {int(self.j)}'
+        self.name = (
+            zernike_names[int(self.j)]
+            if self.j >= 1 and self.j <= 36
+            else f"Zernike {int(self.j)}"
+        )
 
         # Calculate values
         self._k = np.arange(((self.n - self.m) // 2) + 1, dtype=float)
-        sign = lax.pow(-1., self._k)
+        sign = lax.pow(-1.0, self._k)
         _fact_1 = dlu.factorial(np.abs(self.n - self._k))
         _fact_2 = dlu.factorial(self._k)
         _fact_3 = dlu.factorial(((self.n + self.m) // 2) - self._k)
@@ -146,7 +143,7 @@ class Zernike(Base):
         smallest_j_in_row = n * (n + 1) / 2 + 1
         number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
         sign_of_shift = -(j & 1) + ~(j & 1) + 2
-        base_case = (n & 1)
+        base_case = n & 1
         m = (sign_of_shift * (base_case + number_of_shifts * 2)).astype(int)
         return int(n), int(m)
 
@@ -158,14 +155,15 @@ class Zernike(Base):
         ----------
         rho : Array
             The radial coordinate of the Zernike polynomial.
-        
+
         Returns
         -------
         radial : Array
             The radial component of the Zernike polynomial.
         """
-        rads = lax.pow(rho[:, :, None],
-                       (np.abs(self.n) - 2 * self._k)[None, None, :])
+        rads = lax.pow(
+            rho[:, :, None], (np.abs(self.n) - 2 * self._k)[None, None, :]
+        )
         return (self._c * rads).sum(axis=2)
 
     def _calculate_azimuthal(self: Zernike, theta: Array) -> Array:
@@ -202,7 +200,7 @@ class Zernike(Base):
         ----------
         coordinates : Array
             The Cartesian coordinates to calculate the Zernike polynomial upon.
-        
+
         Returns
         -------
         zernike : Array
@@ -211,13 +209,16 @@ class Zernike(Base):
         polar_coordinates = dlu.cart_to_polar(coordinates)
         rho = polar_coordinates[0]
         theta = polar_coordinates[1]
-        aperture = rho <= 1.
-        return aperture * self._calculate_radial(rho) * \
-            self._calculate_azimuthal(theta)
+        aperture = rho <= 1.0
+        return (
+            aperture
+            * self._calculate_radial(rho)
+            * self._calculate_azimuthal(theta)
+        )
 
-    def calculate_polike(self: Zernike,
-                         coordinates: Array,
-                         nsides: int) -> Array:
+    def calculate_polike(
+        self: Zernike, coordinates: Array, nsides: int
+    ) -> Array:
         """
         Calculates the Zernike polynomial on an n-sided aperture.
 
@@ -237,18 +238,16 @@ class Zernike(Base):
             The Zernike polynomial on an n-sided aperture.
         """
         if nsides < 3:
-            raise ValueError(f'nsides must be >= 3, not {nsides}.')
+            raise ValueError(f"nsides must be >= 3, not {nsides}.")
         theta = dlu.cart_to_polar(coordinates)[1]
         alpha = np.pi / nsides
         phi = theta + alpha
-        wedge = np.floor((phi + alpha) / (2. * alpha))
+        wedge = np.floor((phi + alpha) / (2.0 * alpha))
         u_alpha = phi - wedge * (2 * alpha)
         r_alpha = np.cos(alpha) / np.cos(u_alpha)
         return 1 / r_alpha * self.calculate_zernike(coordinates / r_alpha)
 
-    def calculate(self: Zernike,
-                  coordinates: Array,
-                  nsides: int = 0) -> Array:
+    def calculate(self: Zernike, coordinates: Array, nsides: int = 0) -> Array:
         """
         Calculates the Zernike polynomial.
 
@@ -282,13 +281,13 @@ class ZernikeBasis(Base):
     The 'jth' zernike polynomial is defined [here](https://oeis.org/A176988).
     The basic translation between the noll index and the pair of numbers is
     shown below:
-    
+
     1 -> (0, 0)
-    
+
     2, 3 -> (1, -1), (1, 1)
-    
+
     4, 5, 6 -> (2, -2), (2, 0), (2, 2)
-    
+
     7, 8, 9, 10 -> (3, -3), (3, -1), (3, 1), (3, 3)
 
     Attributes
@@ -296,6 +295,7 @@ class ZernikeBasis(Base):
     noll_indices : list[Zernike]
         The list of Zernike polynomial classes to calculate.
     """
+
     noll_indices: list[Zernike]
 
     def __init__(self: ZernikeBasis, js: list[int]):
@@ -309,9 +309,9 @@ class ZernikeBasis(Base):
         """
         self.noll_indices = [Zernike(j) for j in js]
 
-    def calculate_basis(self: ZernikeBasis,
-                        coordinates: Array,
-                        nsides: int = 0) -> Array:
+    def calculate_basis(
+        self: ZernikeBasis, coordinates: Array, nsides: int = 0
+    ) -> Array:
         """
         Calculates the full Zernike polynomial basis.
 
@@ -333,5 +333,6 @@ class ZernikeBasis(Base):
         """
         leaf_fn = lambda leaf: isinstance(leaf, Zernike)
         calculate_fn = lambda z: z.calculate(coordinates, nsides)
-        return np.array(jtu.tree_map(calculate_fn, self.noll_indices,
-                                     is_leaf=leaf_fn))
+        return np.array(
+            jtu.tree_map(calculate_fn, self.noll_indices, is_leaf=leaf_fn)
+        )

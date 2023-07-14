@@ -1,125 +1,67 @@
-# Contributing Guide!
+# Contributing Guide
 
-Note: This document is out of date and in the process of being updated!
-
----
-## Units:
-All units within ∂Lux are SI!
+dLux is an open-source framework and as such is very welcoming to contributions via pull requests! If you would like to contribute but are unfamiliar with any of this process, as I imagine many coming from a science background will be, please feel free to reach out to me at my [email](louis.desdoigts@sydney.edu.au) or on [twitter](https://twitter.com/gradientrider) and I will be happy to help you through the process!
 
 ---
-## Adding to documentation
-When adding to the documentation, there are a few steps that need to be done:
-1. Create the class or function and add the docstring
-2. Create a `.md` file in the docs/ directory
-3. Point to the class/function as so `::: dLux.module.new_class`
-4. Edit the `mkdocs.yml` file to add the new class
-5. Run `mkdocs serve` to deploy the docs locally at `localhost:8000` (put this into a browser)
 
----
-## Building and running unit-tests
-Any added functionality should be unit-tested! This is done with `pytest` in the `tests/` directory. Please have a look at the testing module and try to create tests to match the style!
+## Getting Started
 
-There are three main things we want to test:
-1. Constructor assert statements and input types. Ensure that the correct error is thrown and that classes cant be constructed with incompatible inputs.
-2. Test that the different run time logic branches evaluate.
-3. Test that the different run time logic branches do not return nan or infinite values.
----
+Firstly, you will need to fork the repository to your own github account. This will allow you to make changes to the code and then submit a pull request to the main repository. To do this, click the fork button in the top right of the repository page. This will create a copy of the repository in your own account that you can make changes to and then request to merge with the main repository.
 
-## Typing conventions
-So we have worked out a general typing convention for the software. There are two main data-types we care about: Jax data types, and others. We denote any jax-types with the `Array` typing hint. This is simply defined as a`jax.numpy.ndarray`, so at the start of any files one should have `Array = np.ndarray`. *Any* jax arrays should use this type-hint, regardless of data-type. All other type-hints for ∂Lux type objects should refer to the *base* object type assuming it is not defined inside that script, i.e.:
-> dLux.wavefronts.Wavefront
-> dLux.propagators.Propagator
-> dLux.optics.OpticalLayer
-> dLux.base.Instrument
+Next, you will need to clone the repository to your local machine. To do this, open a terminal and navigate to the directory you would like to clone the repository to. Then run the following command:
 
-For classes defined in the script, add `from __future__ import annotations` to the first line of the script in order to be able to reference these types within the script.
-
-
----
-## Class Inheritance
-∂Lux classes are built from [`Equinox`](https://github.com/patrick-kidger/equinox) and [`Zodiax`](https://github.com/LouisDesdoigts/zodiax). Any new class types should inherit from either the `zodiax.Base` or `zodiax.ExtendedBase` classes, which inherit from `equinox.Module`, giving the full functionality from both of these packages.
-
----
-## Code Style & Formatting
-
-> All imported functionality should import the specific method used, as opposed to a full package.
-
-For example rather than importing whole package:
-```python
-import abc
-
-class Foo(abc.ABC):
-    pass
+```bash
+https://github.com/your-username-here/dLux.git 
+cd dLux
+pip install '.[dev]'
 ```
 
-We want to specifically import the function used:
-```python
-from abc import ABC
+Then you will need to install the pre-commit hooks. This will ensure that the code is formatted correctly and that the unit tests pass before you can commit your changes. To do this, run the following command:
 
-class Foo(ABC):
-    pass
+```bash
+pre-commit install
 ```
 
-> Functions and methods with more than two inputs should spread those inputs over multiple lines, using spaces to format alignment of type hints and default values to help with code readability.
-
-For example rather than this:
-```python
-def Foo(self: Foo, a: Array = None, b: Array=np.ones(2), c: int=2) -> float:
-    pass
-```
-
-Format like this:
-```python
-def Foo(self : Foo,
-        a    : Array = None,
-        b    : Array = np.ones(2),
-        c    : int   = 2) -> float:
-    pass
-```
-
-### Constructors
-> Data type enforcing for jax-type arrays: Constructors should be able to take in lists, numpy arrays and python floats, but ensure that they are correctly formatted into jax-type arrays like follows:
-
-```python
-self.parameter = np.asarray(input_parameter, dtype=float)
-```
-
-This ensures flexibility in the input types and that all data types will match the default jax-32 or -64 bit types.
-
-
-> All constructor methods should use assert statements to ensure that inputs are correctly formatted at init time. The goal should be if no errors are thrown at init time then all the class methods should work as intended and have correct dimensionality. For ∂Lux this would typically be testing jax-type and array dimensionality. Do be sure that these enforce correct dimensionality, not just that errors are not thrown.
-
-For example if an attribute is a scalar, most methods will work identically if it is zero- or one-dimensional. For example, enforcing zero-dimensionality for scalars:
-```python
-input_parameter = [1e3]
-
-self.parameter = np.asarray(input_parameter, dtype=float)
-assert self.parameter.ndim == 0, \
-("input_parameter must a scalar array, i.e. zero dimensional")
-```
-
-### Non-differentiable parameters
-> By default, all parameters should be jax-types. However, parameters that define array shapes or logical flow can be python types (ie int, bool). This prevents issues with jax tracing through arrays of integers which can cause jax errors at runtime.
-
-### Internal logic flow
-> Most internal logic within ∂Lux should be achieved using regular python logic. In some rare cases, `jax.lax.cond` should be used, but *only* if the internal logical flow can change during run time. Ie any logic that uses a boolean class attribute can not change during run time, and so should use regular python logic. This helps jax trace through the code and reduces compile time.
-
-### Setter and Getters
-> By default, getters and setter should be avoided. Most getting and setting can be achieved with nice syntax using the `Zodiax` methods. There are however some exceptions.
-
-> Setter: Some class types such as `Wavefronts` track a lot of parameters that change a lot throughout runtime and so the setter methods are used in conjunction with assert statements to ensure that parameters are not set incorrectly and that the errors are raised at the point where the issue arises, as opposed to some other method receiving an incorrectly shaped array.
-
-> Getters: For some classes we want to have parameterised values, i.e. binary stars using separation and field angle. However, optical modelling methods use Cartesian position inputs, so the base `Source` class implements an abstract `.get_position()` method to be overwritten by all child classes. In the case of the `BinarySource` class this method uses the separation and field angle to generate these Cartesian values at run time. This means that all other classes in ∂Lux can assume Cartesian positional values and use a single method when working with any `Source` class. Furthermore, getters can be used to generate useful values. For example wavefronts are store pixel scale and npixels, but implement a class property method for the diameter, which is much more useful for the `Propagator` classes.
-
-
-### Hidden methods
-> In general hidden class methods should be avoided and classes should try to implement methods that allow for them to used stand-alone. For example the `CompoundAperture` class implements the `construct_combined_aperture` and `get_aperture` methods that allow for users to directly construct and output the internally stored apertures, or use the `make_aperture` method to construct individual apertures.
-
-
+This will ensure that any changes you make will adhere to the code style and formatting guidelines of the rest of the package!
 
 ---
-## Non-Circular imports
-To prevent circular imports, you can not import any specific classes or methods within the package, you instead need to import the whole pacakge (ie `import dLux`) and then in the code, refer to specific function (ie `dLux.sources.Source`). This is inconvenient, but just the way python works.
 
-> exception: The utils package
-> The utils package is the collection of functions that operate *independently* of the package, and so can be imported as normal, i.e. `from dLux.utils.coordinates import radians_to_arcseconds` etc.
+## Making Changes
+
+Next you can start to make any changes you desire!
+
+**Unit Tests**
+
+It is important that any changes you make are tested to ensure that they work as intended and do not break any existing functionality. If you are creating _new_ functionality you will need to create some new unit tests, otherwise you should be able to modify the existing tests.
+
+To ensure that everything is working as expected, you can run the unit tests by running the following command:
+
+```bash
+pytest tests/*
+```
+
+This will run all the scripts labelled with `test_` in the `tests` directory. If you would like to run a specific test, you can run the following command:
+
+```bash
+pytest tests/test_file.py
+```
+
+Note that just because the tests pass on your local machine, that does not mean that it will necessarily pass on all others! This can be due to a number of reasons such a different operating system, different python version, or different dependencies. This is why github actions are used to run the unit tests on a number of different operating systems and python versions. This should help ensure that the code works as expected on all platforms.
+
+**Documentation**
+
+Any changes you make should also be appropriately documented! For small API changes this shouldn't require any changes, however if you are adding new functionality you will need to add some documentation. This can be done by modifying the appropriates files in the `docs` directory.
+
+To build the documentation locally and make sure everything is working correctly, you can run the following command:
+
+```bash
+mkdocs serve
+```
+
+This will build the documentation and serve it on a local server. You can then navigate to `localhost:8000` in your browser to view the documentation.
+
+---
+
+## Contributing the Changes
+
+After these steps have been completed, you can commit your changes and push them to your forked repository. These changes should have its formatting and linting checked by the pre-commit hooks. If there are any issues, you will need to fix them before you can commit your changes. Once you have pushed your changes to your forked repository, you can submit a pull request to the main repository. This will allow the maintainers to review your changes and merge them into the main repository!
