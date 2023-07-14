@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=7da01de1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=555f1fc3" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1893,7 +1893,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=e36db86e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3b8ed712" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1914,16 +1914,34 @@ from jax import Array</div>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;rad_to_arcsec&quot;</span><span class="p">,</span> <span class="s2">&quot;rad_to_deg&quot;</span><span class="p">,</span> <span class="s2">&quot;rad_to_arcmin&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;deg_to_rad&quot;</span><span class="p">,</span> <span class="s2">&quot;deg_to_arcmin&quot;</span><span class="p">,</span> <span class="s2">&quot;deg_to_arcsec&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;arcmin_to_rad&quot;</span><span class="p">,</span> <span class="s2">&quot;arcmin_to_deg&quot;</span><span class="p">,</span> <span class="s2">&quot;arcmin_to_arcsec&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;arcsec_to_rad&quot;</span><span class="p">,</span> <span class="s2">&quot;arcsec_to_deg&quot;</span><span class="p">,</span> <span class="s2">&quot;arcsec_to_arcmin&quot;</span><span class="p">]</span>
+    <span class="s2">&quot;rad_to_arcsec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rad_to_deg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rad_to_arcmin&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;deg_to_rad&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;deg_to_arcmin&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;deg_to_arcsec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;arcmin_to_rad&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;arcmin_to_deg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;arcmin_to_arcsec&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;arcsec_to_rad&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;arcsec_to_deg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;arcsec_to_arcmin&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 </pre></div>
 <div id="cell-2" class="clipboard-copy-txt">__all__ = [
-    "rad_to_arcsec", "rad_to_deg", "rad_to_arcmin",
-    "deg_to_rad", "deg_to_arcmin", "deg_to_arcsec",
-    "arcmin_to_rad", "arcmin_to_deg", "arcmin_to_arcsec",
-    "arcsec_to_rad", "arcsec_to_deg", "arcsec_to_arcmin"]</div>
+    "rad_to_arcsec",
+    "rad_to_deg",
+    "rad_to_arcmin",
+    "deg_to_rad",
+    "deg_to_arcmin",
+    "deg_to_arcsec",
+    "arcmin_to_rad",
+    "arcmin_to_deg",
+    "arcmin_to_arcsec",
+    "arcsec_to_rad",
+    "arcsec_to_deg",
+    "arcsec_to_arcmin",
+]</div>
         
         </div>
     </div>
@@ -1933,7 +1951,7 @@ from jax import Array</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=45d0ae02" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a5a98dfb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1999,7 +2017,7 @@ def rad_to_arcsec(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=618ed2de" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=edca8eff" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2063,7 +2081,7 @@ def rad_to_arcsec(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=efbad2a1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=625d4e8d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2127,7 +2145,7 @@ def rad_to_arcsec(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=04f08e10" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=758bf4ec" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2193,7 +2211,7 @@ def deg_to_rad(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=49f6dbbd" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=2703d544" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2257,7 +2275,7 @@ def deg_to_rad(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=fc7ce547" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=1a632a22" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2321,7 +2339,7 @@ def deg_to_rad(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=631dad02" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b212f49c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2387,7 +2405,7 @@ def arcmin_to_rad(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=8710663a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=8041eef7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2451,7 +2469,7 @@ def arcmin_to_rad(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=4868cef9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=92177f6d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2480,7 +2498,8 @@ def arcmin_to_rad(values: Array) -> Array:
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    values : Array, arcminutes</span>
-<span class="sd">        The input values in units of arcminutes to be converted into arcseconds.</span>
+<span class="sd">        The input values in units of arcminutes to be converted into</span>
+<span class="sd">        arcseconds.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2498,7 +2517,8 @@ def arcmin_to_rad(values: Array) -> Array:
     Parameters
     ----------
     values : Array, arcminutes
-        The input values in units of arcminutes to be converted into arcseconds.
+        The input values in units of arcminutes to be converted into
+        arcseconds.
 
     Returns
     -------
@@ -2515,7 +2535,7 @@ def arcmin_to_rad(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=32ba3347" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=1296f3ed" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2581,7 +2601,7 @@ def arcsec_to_rad(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=d6554db4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=13e2e368" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2645,7 +2665,7 @@ def arcsec_to_rad(values: Array) -> Array:
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c18f49b6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=40278f83" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2674,7 +2694,8 @@ def arcsec_to_rad(values: Array) -> Array:
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    values : Array, arcseconds</span>
-<span class="sd">        The input values in units of arcseconds to be converted into arcminutes.</span>
+<span class="sd">        The input values in units of arcseconds to be converted into</span>
+<span class="sd">        arcminutes.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2692,7 +2713,8 @@ def arcsec_to_rad(values: Array) -> Array:
     Parameters
     ----------
     values : Array, arcseconds
-        The input values in units of arcseconds to be converted into arcminutes.
+        The input values in units of arcseconds to be converted into
+        arcminutes.
 
     Returns
     -------
@@ -2754,10 +2776,10 @@ def arcsec_to_rad(values: Array) -> Array:
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../../javascripts/mathjax.js"></script>

@@ -21,7 +21,7 @@
         <link rel="next" href="../helpers/">
       
       <link rel="icon" href="../../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -941,13 +941,7 @@
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
@@ -963,9 +957,11 @@
 <span class="normal">30</span>
 <span class="normal">31</span>
 <span class="normal">32</span>
-<span class="normal">33</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">scale_array</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                <span class="n">size_out</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">scale_array</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">size_out</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Scales some input array to size_out using interpolation.</span>
 
@@ -1087,11 +1083,7 @@
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
@@ -1122,7 +1114,11 @@
 <span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span>
-<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">downsample</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">downsample</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Downsamples the input array by n.</span>
 
@@ -1140,9 +1136,9 @@
 <span class="sd">    array : Array</span>
 <span class="sd">        The downsampled array.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;sum&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;sum&quot;</span><span class="p">:</span>
         <span class="n">method</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span>
-    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
         <span class="n">method</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid method. Choose &quot;mean&quot; or &quot;sum&quot;.&#39;</span><span class="p">)</span>
@@ -1177,8 +1173,8 @@
 <a id="dLux.utils.interpolation.scale"></a>
   <div class="doc doc-contents first">
   
-      <p>Paraxially interpolates a wavefront field (either in amplitude and phase, or
-real and imaginary) based on the sampling ratio, and npixels_out.</p>
+      <p>Paraxially interpolates a wavefront field (either in amplitude and phase,
+or real and imaginary) based on the sampling ratio, and npixels_out.</p>
 <h2 id="dLux.utils.interpolation.scale--todo-check-if-a-half-pixel-offset-is-produced">TODO: Check if a half-pixel offset is produced<a class="headerlink" href="#dLux.utils.interpolation.scale--todo-check-if-a-half-pixel-offset-is-produced" title="Permanent link">¤</a></h2>
 
   <p><strong>Parameters:</strong></p>
@@ -1228,7 +1224,7 @@ and imaginary.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The relative input to output scales, TODO: does 2 make it bigger or 
+              <p>The relative input to output scales, TODO: does 2 make it bigger or
 smaller? i.e. input scale/output scale. &lt;- get this right.</p>
             </div>
           </td>
@@ -1277,15 +1273,7 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
 <span class="normal">123</span>
@@ -1309,13 +1297,15 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
 <span class="normal">141</span>
 <span class="normal">142</span>
 <span class="normal">143</span>
-<span class="normal">144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-          <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-          <span class="n">ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-          <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Paraxially interpolates a wavefront field (either in amplitude and phase, or</span>
-<span class="sd">    real and imaginary) based on the sampling ratio, and npixels_out.</span>
+<span class="sd">    Paraxially interpolates a wavefront field (either in amplitude and phase,</span>
+<span class="sd">    or real and imaginary) based on the sampling ratio, and npixels_out.</span>
 
 <span class="sd">    # TODO: Check if a half-pixel offset is produced</span>
 
@@ -1327,7 +1317,7 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
 <span class="sd">    npixels : int</span>
 <span class="sd">        The number of pixel in the output array.</span>
 <span class="sd">    ratio : float</span>
-<span class="sd">        The relative input to output scales, TODO: does 2 make it bigger or </span>
+<span class="sd">        The relative input to output scales, TODO: does 2 make it bigger or</span>
 <span class="sd">        smaller? i.e. input scale/output scale. &lt;- get this right.</span>
 <span class="sd">    order : int = 1</span>
 <span class="sd">        The interpolation order to use.</span>
@@ -1444,12 +1434,7 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
@@ -1476,7 +1461,12 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
 <span class="normal">176</span>
 <span class="normal">177</span>
 <span class="normal">178</span>
-<span class="normal">179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rotates an array by the angle, using linear interpolation.</span>
 
@@ -1504,7 +1494,7 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
     <span class="c1"># Get coordinates</span>
     <span class="n">npixels</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">centre</span> <span class="o">=</span> <span class="p">(</span><span class="n">npixels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="n">npixels</span><span class="p">,</span> <span class="n">npixels</span><span class="p">),</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="n">npixels</span><span class="p">,</span> <span class="n">npixels</span><span class="p">),</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
     <span class="n">coordinates_rotated</span> <span class="o">=</span> <span class="n">_rotate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span> <span class="o">+</span> <span class="n">centre</span>
 
     <span class="c1"># Interpolate</span>
@@ -1558,10 +1548,10 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../../../javascripts/mathjax.js"></script>

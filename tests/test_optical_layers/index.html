@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=2f691425" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=49e1757b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1881,15 +1881,11 @@ Licensed under the Apache License, Version 2.0.
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pytest</span>
-<span class="kn">import</span> <span class="nn">dLux</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span><span class="p">,</span> <span class="n">Array</span>
-<span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_debug_nans&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span>
 </pre></div>
 <div id="cell-1" class="clipboard-copy-txt">import jax.numpy as np
 import pytest
-import dLux
-from jax import config, Array
-config.update("jax_debug_nans", True)</div>
+from jax import config</div>
         
         </div>
     </div>
@@ -1899,7 +1895,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=2aab8de6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=22cebe3f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1919,13 +1915,9 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_transmissive_layer</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a transmissive layer.&quot;&quot;&quot;</span>
-    <span class="n">constructor</span><span class="p">()</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_debug_nans&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt">def _test_transmissive_layer(constructor):
-    """Tests the constructor of a transmissive layer."""
-    constructor()</div>
+<div id="cell-2" class="clipboard-copy-txt">config.update("jax_debug_nans", True)</div>
         
         </div>
     </div>
@@ -1935,7 +1927,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=4cf33b9e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=1e878276" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1955,17 +1947,13 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_call_transmissive_layer</span><span class="p">(</span><span class="n">constructor</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method of a transmissive layer.&quot;&quot;&quot;</span>
-    <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
-    <span class="n">constructor</span><span class="p">(</span><span class="n">normalise</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">wf</span><span class="p">)</span>
-    <span class="n">constructor</span><span class="p">(</span><span class="n">normalise</span><span class="o">=</span><span class="kc">False</span><span class="p">)(</span><span class="n">wf</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_transmissive_layer</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a transmissive layer.&quot;&quot;&quot;</span>
+    <span class="n">constructor</span><span class="p">()</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt">def _test_call_transmissive_layer(constructor, create_wavefront):
-    """Tests the __call__ method of a transmissive layer."""
-    wf = create_wavefront()
-    constructor(normalise=True)(wf)
-    constructor(normalise=False)(wf)</div>
+<div id="cell-3" class="clipboard-copy-txt">def _test_transmissive_layer(constructor):
+    """Tests the constructor of a transmissive layer."""
+    constructor()</div>
         
         </div>
     </div>
@@ -1975,7 +1963,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=3e63cc54" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=0ed6add0" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1995,13 +1983,17 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_applied_shape</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the applied_shape method of a shaped layer.&quot;&quot;&quot;</span>
-    <span class="n">constructor</span><span class="p">()</span><span class="o">.</span><span class="n">applied_shape</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_call_transmissive_layer</span><span class="p">(</span><span class="n">constructor</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method of a transmissive layer.&quot;&quot;&quot;</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
+    <span class="n">constructor</span><span class="p">(</span><span class="n">normalise</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">wf</span><span class="p">)</span>
+    <span class="n">constructor</span><span class="p">(</span><span class="n">normalise</span><span class="o">=</span><span class="kc">False</span><span class="p">)(</span><span class="n">wf</span><span class="p">)</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt">def _test_applied_shape(constructor):
-    """Tests the applied_shape method of a shaped layer."""
-    constructor().applied_shape</div>
+<div id="cell-4" class="clipboard-copy-txt">def _test_call_transmissive_layer(constructor, create_wavefront):
+    """Tests the __call__ method of a transmissive layer."""
+    wf = create_wavefront()
+    constructor(normalise=True)(wf)
+    constructor(normalise=False)(wf)</div>
         
         </div>
     </div>
@@ -2011,7 +2003,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b9079fd8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=7a4648eb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2031,25 +2023,13 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_basis_layer_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a basis layer.&quot;&quot;&quot;</span>
-    <span class="n">constructor</span><span class="p">()</span>
-    <span class="n">constructor</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="n">constructor</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">constructor</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">constructor</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_applied_shape</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the applied_shape method of a shaped layer.&quot;&quot;&quot;</span>
+    <span class="n">constructor</span><span class="p">()</span><span class="o">.</span><span class="n">applied_shape</span>
 </pre></div>
-<div id="cell-5" class="clipboard-copy-txt">def _test_basis_layer_constructor(constructor):
-    """Tests the constructor of a basis layer."""
-    constructor()
-    constructor(basis=None)
-    constructor(coefficients=None)
-    with pytest.raises(ValueError):
-        constructor(basis=np.ones((2, 1, 1)), coefficients=np.ones(1))
-    with pytest.raises(ValueError):
-        constructor(basis=[(2, 1, 1)], coefficients=np.ones(1))</div>
+<div id="cell-5" class="clipboard-copy-txt">def _test_applied_shape(constructor):
+    """Tests the applied_shape method of a shaped layer."""
+    constructor().applied_shape</div>
         
         </div>
     </div>
@@ -2059,7 +2039,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=58d3a578" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=985839b1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2079,15 +2059,25 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_base_transmissive_optic_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a base transmissive optic.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_basis_layer_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a basis layer.&quot;&quot;&quot;</span>
     <span class="n">constructor</span><span class="p">()</span>
-    <span class="n">constructor</span><span class="p">(</span><span class="n">transmission</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">constructor</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">constructor</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">constructor</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">constructor</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 </pre></div>
-<div id="cell-6" class="clipboard-copy-txt">def _test_base_transmissive_optic_constructor(constructor):
-    """Tests the constructor of a base transmissive optic."""
+<div id="cell-6" class="clipboard-copy-txt">def _test_basis_layer_constructor(constructor):
+    """Tests the constructor of a basis layer."""
     constructor()
-    constructor(transmission=None)</div>
+    constructor(basis=None)
+    constructor(coefficients=None)
+    with pytest.raises(ValueError):
+        constructor(basis=np.ones((2, 1, 1)), coefficients=np.ones(1))
+    with pytest.raises(ValueError):
+        constructor(basis=[(2, 1, 1)], coefficients=np.ones(1))</div>
         
         </div>
     </div>
@@ -2097,7 +2087,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=1072f4a8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3a87acd6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2117,15 +2107,15 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_base_opd_optic_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a base opd optic.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_base_transmissive_optic_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a base transmissive optic.&quot;&quot;&quot;</span>
     <span class="n">constructor</span><span class="p">()</span>
-    <span class="n">constructor</span><span class="p">(</span><span class="n">opd</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">constructor</span><span class="p">(</span><span class="n">transmission</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
-<div id="cell-7" class="clipboard-copy-txt">def _test_base_opd_optic_constructor(constructor):
-    """Tests the constructor of a base opd optic."""
+<div id="cell-7" class="clipboard-copy-txt">def _test_base_transmissive_optic_constructor(constructor):
+    """Tests the constructor of a base transmissive optic."""
     constructor()
-    constructor(opd=None)</div>
+    constructor(transmission=None)</div>
         
         </div>
     </div>
@@ -2135,7 +2125,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=d0e583c4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=26dc0e41" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2155,15 +2145,15 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_base_phase_optic_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a base phase optic.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_base_opd_optic_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a base opd optic.&quot;&quot;&quot;</span>
     <span class="n">constructor</span><span class="p">()</span>
-    <span class="n">constructor</span><span class="p">(</span><span class="n">phase</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">constructor</span><span class="p">(</span><span class="n">opd</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
-<div id="cell-8" class="clipboard-copy-txt">def _test_base_phase_optic_constructor(constructor):
-    """Tests the constructor of a base phase optic."""
+<div id="cell-8" class="clipboard-copy-txt">def _test_base_opd_optic_constructor(constructor):
+    """Tests the constructor of a base opd optic."""
     constructor()
-    constructor(phase=None)</div>
+    constructor(opd=None)</div>
         
         </div>
     </div>
@@ -2173,7 +2163,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=52f8af7b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=009af71b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2193,17 +2183,15 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_base_basis_optic_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a base basis optic.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_base_phase_optic_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a base phase optic.&quot;&quot;&quot;</span>
     <span class="n">constructor</span><span class="p">()</span>
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">constructor</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">constructor</span><span class="p">(</span><span class="n">phase</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
-<div id="cell-9" class="clipboard-copy-txt">def _test_base_basis_optic_constructor(constructor):
-    """Tests the constructor of a base basis optic."""
+<div id="cell-9" class="clipboard-copy-txt">def _test_base_phase_optic_constructor(constructor):
+    """Tests the constructor of a base phase optic."""
     constructor()
-    with pytest.raises(ValueError):
-        constructor(basis=np.ones((2, 1, 1)), coefficients=np.ones(1))</div>
+    constructor(phase=None)</div>
         
         </div>
     </div>
@@ -2213,7 +2201,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=571db840" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=1aafe06b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2233,41 +2221,17 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestOptic</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the Optic class.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_optic</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">_test_base_transmissive_optic_constructor</span><span class="p">(</span><span class="n">create_optic</span><span class="p">)</span>
-        <span class="n">_test_base_opd_optic_constructor</span><span class="p">(</span><span class="n">create_optic</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">create_optic</span><span class="p">(</span><span class="n">transmission</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">opd</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-    
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call_transmissive_layer</span><span class="p">(</span><span class="n">create_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_optic</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the applied_shape method.&quot;&quot;&quot;</span>
-        <span class="n">_test_applied_shape</span><span class="p">(</span><span class="n">create_optic</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_base_basis_optic_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of a base basis optic.&quot;&quot;&quot;</span>
+    <span class="n">constructor</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">constructor</span><span class="p">(</span><span class="n">basis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">coefficients</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 </pre></div>
-<div id="cell-10" class="clipboard-copy-txt">class TestOptic():
-    """Tests the Optic class."""
-
-    def test_constructor(self, create_optic):
-        """Tests the constructor."""
-        _test_base_transmissive_optic_constructor(create_optic)
-        _test_base_opd_optic_constructor(create_optic)
-        with pytest.raises(ValueError):
-            create_optic(transmission=np.ones(1), opd=np.ones(2))
-    
-    def test_call(self, create_optic, create_wavefront):
-        """Tests the __call__ method."""
-        _test_call_transmissive_layer(create_optic, create_wavefront)
-    
-    def test_applied_shape(self, create_optic):
-        """Tests the applied_shape method."""
-        _test_applied_shape(create_optic)</div>
+<div id="cell-10" class="clipboard-copy-txt">def _test_base_basis_optic_constructor(constructor):
+    """Tests the constructor of a base basis optic."""
+    constructor()
+    with pytest.raises(ValueError):
+        constructor(basis=np.ones((2, 1, 1)), coefficients=np.ones(1))</div>
         
         </div>
     </div>
@@ -2277,7 +2241,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=517c63ce" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=4a5c4095" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2297,41 +2261,41 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestPhaseOptic</span><span class="p">():</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestOptic</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the Optic class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_optic</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_optic</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">_test_base_transmissive_optic_constructor</span><span class="p">(</span><span class="n">create_phase_optic</span><span class="p">)</span>
-        <span class="n">_test_base_phase_optic_constructor</span><span class="p">(</span><span class="n">create_phase_optic</span><span class="p">)</span>
+        <span class="n">_test_base_transmissive_optic_constructor</span><span class="p">(</span><span class="n">create_optic</span><span class="p">)</span>
+        <span class="n">_test_base_opd_optic_constructor</span><span class="p">(</span><span class="n">create_optic</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">create_phase_optic</span><span class="p">(</span><span class="n">transmission</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">phase</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-    
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call_transmissive_layer</span><span class="p">(</span><span class="n">create_phase_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
+            <span class="n">create_optic</span><span class="p">(</span><span class="n">transmission</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">opd</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">test_applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_optic</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
+        <span class="n">_test_call_transmissive_layer</span><span class="p">(</span><span class="n">create_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_optic</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the applied_shape method.&quot;&quot;&quot;</span>
-        <span class="n">_test_applied_shape</span><span class="p">(</span><span class="n">create_phase_optic</span><span class="p">)</span>
+        <span class="n">_test_applied_shape</span><span class="p">(</span><span class="n">create_optic</span><span class="p">)</span>
 </pre></div>
-<div id="cell-11" class="clipboard-copy-txt">class TestPhaseOptic():
+<div id="cell-11" class="clipboard-copy-txt">class TestOptic:
     """Tests the Optic class."""
 
-    def test_constructor(self, create_phase_optic):
+    def test_constructor(self, create_optic):
         """Tests the constructor."""
-        _test_base_transmissive_optic_constructor(create_phase_optic)
-        _test_base_phase_optic_constructor(create_phase_optic)
+        _test_base_transmissive_optic_constructor(create_optic)
+        _test_base_opd_optic_constructor(create_optic)
         with pytest.raises(ValueError):
-            create_phase_optic(transmission=np.ones(1), phase=np.ones(2))
-    
-    def test_call(self, create_phase_optic, create_wavefront):
-        """Tests the __call__ method."""
-        _test_call_transmissive_layer(create_phase_optic, create_wavefront)
+            create_optic(transmission=np.ones(1), opd=np.ones(2))
 
-    def test_applied_shape(self, create_phase_optic):
+    def test_call(self, create_optic, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call_transmissive_layer(create_optic, create_wavefront)
+
+    def test_applied_shape(self, create_optic):
         """Tests the applied_shape method."""
-        _test_applied_shape(create_phase_optic)</div>
+        _test_applied_shape(create_optic)</div>
         
         </div>
     </div>
@@ -2341,7 +2305,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=9efec8b0" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=c3fd39b8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2361,37 +2325,41 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestBasisOptic</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the BasisOptics class.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestPhaseOptic</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the Optic class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_basis_optic</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_optic</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">_test_base_transmissive_optic_constructor</span><span class="p">(</span><span class="n">create_basis_optic</span><span class="p">)</span>
-        <span class="n">_test_base_basis_optic_constructor</span><span class="p">(</span><span class="n">create_basis_optic</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_basis_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+        <span class="n">_test_base_transmissive_optic_constructor</span><span class="p">(</span><span class="n">create_phase_optic</span><span class="p">)</span>
+        <span class="n">_test_base_phase_optic_constructor</span><span class="p">(</span><span class="n">create_phase_optic</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">create_phase_optic</span><span class="p">(</span><span class="n">transmission</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">phase</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call_transmissive_layer</span><span class="p">(</span><span class="n">create_basis_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
+        <span class="n">_test_call_transmissive_layer</span><span class="p">(</span><span class="n">create_phase_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">test_applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_basis_optic</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_optic</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the applied_shape method.&quot;&quot;&quot;</span>
-        <span class="n">_test_applied_shape</span><span class="p">(</span><span class="n">create_basis_optic</span><span class="p">)</span>
+        <span class="n">_test_applied_shape</span><span class="p">(</span><span class="n">create_phase_optic</span><span class="p">)</span>
 </pre></div>
-<div id="cell-12" class="clipboard-copy-txt">class TestBasisOptic():
-    """Tests the BasisOptics class."""
+<div id="cell-12" class="clipboard-copy-txt">class TestPhaseOptic:
+    """Tests the Optic class."""
 
-    def test_constructor(self, create_basis_optic):
+    def test_constructor(self, create_phase_optic):
         """Tests the constructor."""
-        _test_base_transmissive_optic_constructor(create_basis_optic)
-        _test_base_basis_optic_constructor(create_basis_optic)
-    
-    def test_call(self, create_basis_optic, create_wavefront):
-        """Tests the __call__ method."""
-        _test_call_transmissive_layer(create_basis_optic, create_wavefront)
+        _test_base_transmissive_optic_constructor(create_phase_optic)
+        _test_base_phase_optic_constructor(create_phase_optic)
+        with pytest.raises(ValueError):
+            create_phase_optic(transmission=np.ones(1), phase=np.ones(2))
 
-    def test_applied_shape(self, create_basis_optic):
+    def test_call(self, create_phase_optic, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call_transmissive_layer(create_phase_optic, create_wavefront)
+
+    def test_applied_shape(self, create_phase_optic):
         """Tests the applied_shape method."""
-        _test_applied_shape(create_basis_optic)</div>
+        _test_applied_shape(create_phase_optic)</div>
         
         </div>
     </div>
@@ -2401,7 +2369,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5f8d0a67" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a36ab100" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2421,39 +2389,37 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestPhaseBasisOptic</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the PhaseBasisOptics class.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestBasisOptic</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the BasisOptics class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_basis_optic</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_basis_optic</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">_test_base_transmissive_optic_constructor</span><span class="p">(</span><span class="n">create_phase_basis_optic</span><span class="p">)</span>
-        <span class="n">_test_base_basis_optic_constructor</span><span class="p">(</span><span class="n">create_phase_basis_optic</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_basis_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+        <span class="n">_test_base_transmissive_optic_constructor</span><span class="p">(</span><span class="n">create_basis_optic</span><span class="p">)</span>
+        <span class="n">_test_base_basis_optic_constructor</span><span class="p">(</span><span class="n">create_basis_optic</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_basis_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call_transmissive_layer</span><span class="p">(</span><span class="n">create_phase_basis_optic</span><span class="p">,</span> 
-            <span class="n">create_wavefront</span><span class="p">)</span>
+        <span class="n">_test_call_transmissive_layer</span><span class="p">(</span><span class="n">create_basis_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">test_applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_basis_optic</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_basis_optic</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the applied_shape method.&quot;&quot;&quot;</span>
-        <span class="n">_test_applied_shape</span><span class="p">(</span><span class="n">create_phase_basis_optic</span><span class="p">)</span>
+        <span class="n">_test_applied_shape</span><span class="p">(</span><span class="n">create_basis_optic</span><span class="p">)</span>
 </pre></div>
-<div id="cell-13" class="clipboard-copy-txt">class TestPhaseBasisOptic():
-    """Tests the PhaseBasisOptics class."""
+<div id="cell-13" class="clipboard-copy-txt">class TestBasisOptic:
+    """Tests the BasisOptics class."""
 
-    def test_constructor(self, create_phase_basis_optic):
+    def test_constructor(self, create_basis_optic):
         """Tests the constructor."""
-        _test_base_transmissive_optic_constructor(create_phase_basis_optic)
-        _test_base_basis_optic_constructor(create_phase_basis_optic)
-    
-    def test_call(self, create_phase_basis_optic, create_wavefront):
-        """Tests the __call__ method."""
-        _test_call_transmissive_layer(create_phase_basis_optic, 
-            create_wavefront)
+        _test_base_transmissive_optic_constructor(create_basis_optic)
+        _test_base_basis_optic_constructor(create_basis_optic)
 
-    def test_applied_shape(self, create_phase_basis_optic):
+    def test_call(self, create_basis_optic, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call_transmissive_layer(create_basis_optic, create_wavefront)
+
+    def test_applied_shape(self, create_basis_optic):
         """Tests the applied_shape method."""
-        _test_applied_shape(create_phase_basis_optic)</div>
+        _test_applied_shape(create_basis_optic)</div>
         
         </div>
     </div>
@@ -2463,7 +2429,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5db4e0eb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=82e7f388" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2483,7 +2449,71 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestTilt</span><span class="p">():</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestPhaseBasisOptic</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the PhaseBasisOptics class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_basis_optic</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
+        <span class="n">_test_base_transmissive_optic_constructor</span><span class="p">(</span><span class="n">create_phase_basis_optic</span><span class="p">)</span>
+        <span class="n">_test_base_basis_optic_constructor</span><span class="p">(</span><span class="n">create_phase_basis_optic</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_basis_optic</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
+        <span class="n">_test_call_transmissive_layer</span><span class="p">(</span>
+            <span class="n">create_phase_basis_optic</span><span class="p">,</span> <span class="n">create_wavefront</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_phase_basis_optic</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the applied_shape method.&quot;&quot;&quot;</span>
+        <span class="n">_test_applied_shape</span><span class="p">(</span><span class="n">create_phase_basis_optic</span><span class="p">)</span>
+</pre></div>
+<div id="cell-14" class="clipboard-copy-txt">class TestPhaseBasisOptic:
+    """Tests the PhaseBasisOptics class."""
+
+    def test_constructor(self, create_phase_basis_optic):
+        """Tests the constructor."""
+        _test_base_transmissive_optic_constructor(create_phase_basis_optic)
+        _test_base_basis_optic_constructor(create_phase_basis_optic)
+
+    def test_call(self, create_phase_basis_optic, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call_transmissive_layer(
+            create_phase_basis_optic, create_wavefront
+        )
+
+    def test_applied_shape(self, create_phase_basis_optic):
+        """Tests the applied_shape method."""
+        _test_applied_shape(create_phase_basis_optic)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=8a5e66f4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-15">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestTilt</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the Tilt class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_tilt</span><span class="p">):</span>
@@ -2496,7 +2526,7 @@ config.update("jax_debug_nans", True)</div>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
         <span class="n">create_tilt</span><span class="p">()(</span><span class="n">create_wavefront</span><span class="p">())</span>
 </pre></div>
-<div id="cell-14" class="clipboard-copy-txt">class TestTilt():
+<div id="cell-15" class="clipboard-copy-txt">class TestTilt:
     """Tests the Tilt class."""
 
     def test_constructor(self, create_tilt):
@@ -2517,49 +2547,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=564f6e75" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-15">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestNormalise</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the Normalise class.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_normalise</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">wf</span> <span class="o">=</span> <span class="n">create_normalise</span><span class="p">()(</span><span class="n">create_wavefront</span><span class="p">())</span>
-</pre></div>
-<div id="cell-15" class="clipboard-copy-txt">class TestNormalise():
-    """Tests the Normalise class."""
-
-    def test_call(self, create_normalise, create_wavefront):
-        """Tests the __call__ method."""
-        wf = create_normalise()(create_wavefront())</div>
-        
-        </div>
-    </div>
-
-</div>
-</div>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b2e7a991" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=064759c3" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2579,7 +2567,49 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestRotate</span><span class="p">():</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestNormalise</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the Normalise class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_normalise</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
+        <span class="n">create_normalise</span><span class="p">()(</span><span class="n">create_wavefront</span><span class="p">())</span>
+</pre></div>
+<div id="cell-16" class="clipboard-copy-txt">class TestNormalise:
+    """Tests the Normalise class."""
+
+    def test_call(self, create_normalise, create_wavefront):
+        """Tests the __call__ method."""
+        create_normalise()(create_wavefront())</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a99bc236" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-17">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestRotate</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the Rotate class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rotate</span><span class="p">):</span>
@@ -2596,7 +2626,7 @@ config.update("jax_debug_nans", True)</div>
         <span class="n">create_rotate</span><span class="p">()(</span><span class="n">wf</span><span class="p">)</span>
         <span class="n">create_rotate</span><span class="p">(</span><span class="nb">complex</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="n">wf</span><span class="p">)</span>
 </pre></div>
-<div id="cell-16" class="clipboard-copy-txt">class TestRotate():
+<div id="cell-17" class="clipboard-copy-txt">class TestRotate:
     """Tests the Rotate class."""
 
     def test_constructor(self, create_rotate):
@@ -2612,6 +2642,138 @@ config.update("jax_debug_nans", True)</div>
         wf = create_wavefront()
         create_rotate()(wf)
         create_rotate(complex=True)(wf)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=c2ba4184" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-18">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestFlip</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the Flip class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_flip</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
+        <span class="n">create_flip</span><span class="p">()</span>
+        <span class="n">create_flip</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">create_flip</span><span class="p">(</span><span class="n">axes</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">create_flip</span><span class="p">(</span><span class="n">axes</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">create_flip</span><span class="p">(</span><span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_flip</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">()</span>
+        <span class="n">create_flip</span><span class="p">()(</span><span class="n">wf</span><span class="p">)</span>
+</pre></div>
+<div id="cell-18" class="clipboard-copy-txt">class TestFlip:
+    """Tests the Flip class."""
+
+    def test_constructor(self, create_flip):
+        """Tests the constructor."""
+        create_flip()
+        create_flip((0, 1, 2))
+        with pytest.raises(ValueError):
+            create_flip(axes="1")
+        with pytest.raises(ValueError):
+            create_flip(axes=1.0)
+        with pytest.raises(ValueError):
+            create_flip(axes=(1, 1.0))
+
+    def test_call(self, create_flip, create_wavefront):
+        """Tests the __call__ method."""
+        wf = create_wavefront()
+        create_flip()(wf)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=2f895ed8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-19">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestRezise</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the Resize class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_resize</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
+        <span class="n">create_resize</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_resize</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
+
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">(</span><span class="n">npixels</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">create_resize</span><span class="p">(</span><span class="n">npixels</span><span class="o">=</span><span class="mi">16</span><span class="p">)(</span><span class="n">wf</span><span class="p">)</span>
+
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">(</span><span class="n">npixels</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">create_resize</span><span class="p">(</span><span class="n">npixels</span><span class="o">=</span><span class="mi">16</span><span class="p">)(</span><span class="n">wf</span><span class="p">)</span>
+
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">create_wavefront</span><span class="p">(</span><span class="n">npixels</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">create_resize</span><span class="p">(</span><span class="n">npixels</span><span class="o">=</span><span class="mi">16</span><span class="p">)(</span><span class="n">wf</span><span class="p">)</span>
+</pre></div>
+<div id="cell-19" class="clipboard-copy-txt">class TestRezise:
+    """Tests the Resize class."""
+
+    def test_constructor(self, create_resize):
+        """Tests the constructor."""
+        create_resize()
+
+    def test_call(self, create_resize, create_wavefront):
+        """Tests the __call__ method."""
+
+        wf = create_wavefront(npixels=10)
+        create_resize(npixels=16)(wf)
+
+        wf = create_wavefront(npixels=20)
+        create_resize(npixels=16)(wf)
+
+        wf = create_wavefront(npixels=16)
+        create_resize(npixels=16)(wf)</div>
         
         </div>
     </div>
@@ -2666,10 +2828,10 @@ config.update("jax_debug_nans", True)</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=db682e01" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=05ad6a62" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1879,9 +1879,17 @@ Licensed under the Apache License, Version 2.0.
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">import</span> <span class="nn">dLux</span>
+<span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">signature</span>
+<span class="kn">import</span> <span class="nn">dLux.utils</span> <span class="k">as</span> <span class="nn">dlu</span>
 </pre></div>
-<div id="cell-1" class="clipboard-copy-txt"></div>
+<div id="cell-1" class="clipboard-copy-txt">from jax import config
+import pytest
+import dLux
+from inspect import signature
+import dLux.utils as dlu</div>
         
         </div>
     </div>
@@ -1891,7 +1899,7 @@ Licensed under the Apache License, Version 2.0.
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c69b55cb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=9e427209" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1911,19 +1919,9 @@ Licensed under the Apache License, Version 2.0.
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">Array</span><span class="p">,</span> <span class="n">config</span>
-<span class="kn">import</span> <span class="nn">pytest</span>
-<span class="kn">import</span> <span class="nn">dLux</span>
-<span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">signature</span>
-<span class="kn">import</span> <span class="nn">dLux.utils</span> <span class="k">as</span> <span class="nn">dlu</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_debug_nans&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt">import jax.numpy as np
-from jax import Array, config
-import pytest
-import dLux
-from inspect import signature
-import dLux.utils as dlu</div>
+<div id="cell-2" class="clipboard-copy-txt">config.update("jax_debug_nans", True)</div>
         
         </div>
     </div>
@@ -1933,7 +1931,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=9e60f82c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=8197c50a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1953,9 +1951,17 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_debug_nans&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_transmission</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the transmission function of some input aperture&quot;&quot;&quot;</span>
+    <span class="n">constructor</span><span class="p">()</span><span class="o">.</span><span class="n">transmission</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;occulting&quot;</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">(</span><span class="n">constructor</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">constructor</span><span class="p">(</span><span class="n">occulting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">transmission</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt">config.update("jax_debug_nans", True)</div>
+<div id="cell-3" class="clipboard-copy-txt">def _test_transmission(constructor):
+    """Tests the transmission function of some input aperture"""
+    constructor().transmission(16, 1)
+    if "occulting" in signature(constructor).parameters.keys():
+        constructor(occulting=True).transmission(16, 1)</div>
         
         </div>
     </div>
@@ -1965,7 +1971,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=00c6a2d5" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=cd1c3b07" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1985,17 +1991,13 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_transmission</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the transmission function of some input aperture&quot;&quot;&quot;</span>
-    <span class="n">constructor</span><span class="p">()</span><span class="o">.</span><span class="n">transmission</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s1">&#39;occulting&#39;</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">(</span><span class="n">constructor</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">constructor</span><span class="p">(</span><span class="n">occulting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">transmission</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_extent</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the extent function of some input aperture&quot;&quot;&quot;</span>
+    <span class="n">constructor</span><span class="p">()</span><span class="o">.</span><span class="n">_extent</span><span class="p">()</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt">def _test_transmission(constructor):
-    """Tests the transmission function of some input aperture"""
-    constructor().transmission(16, 1)
-    if 'occulting' in signature(constructor).parameters.keys():
-        constructor(occulting=True).transmission(16, 1)</div>
+<div id="cell-4" class="clipboard-copy-txt">def _test_extent(constructor):
+    """Tests the extent function of some input aperture"""
+    constructor()._extent()</div>
         
         </div>
     </div>
@@ -2005,7 +2007,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=6e72337e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=f1335b25" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2025,13 +2027,35 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_extent</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the extent function of some input aperture&quot;&quot;&quot;</span>
-    <span class="n">constructor</span><span class="p">()</span><span class="o">.</span><span class="n">_extent</span><span class="p">()</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_base_dynamic_aperture_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of some input aperture&quot;&quot;&quot;</span>
+    <span class="n">constructor</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">constructor</span><span class="p">(</span><span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">constructor</span><span class="p">(</span><span class="n">shear</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">constructor</span><span class="p">(</span><span class="n">compression</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Have to add this here since CircularAperture is a special case</span>
+    <span class="k">if</span> <span class="s2">&quot;rotation&quot;</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">(</span><span class="n">constructor</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">constructor</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
-<div id="cell-5" class="clipboard-copy-txt">def _test_extent(constructor):
-    """Tests the extent function of some input aperture"""
-    constructor()._extent()</div>
+<div id="cell-5" class="clipboard-copy-txt">def _test_base_dynamic_aperture_constructor(constructor):
+    """Tests the constructor of some input aperture"""
+    constructor()
+    with pytest.raises(ValueError):
+        constructor(centre=[0])
+    with pytest.raises(ValueError):
+        constructor(shear=[0])
+    with pytest.raises(ValueError):
+        constructor(compression=[0])
+
+    # Have to add this here since CircularAperture is a special case
+    if "rotation" in signature(constructor).parameters.keys():
+        with pytest.raises(ValueError):
+            constructor(rotation=[0])</div>
         
         </div>
     </div>
@@ -2041,7 +2065,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=6b616a8f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=338aa89a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2061,35 +2085,13 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_base_dynamic_aperture_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of some input aperture&quot;&quot;&quot;</span>
-    <span class="n">constructor</span><span class="p">()</span>
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">constructor</span><span class="p">(</span><span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">constructor</span><span class="p">(</span><span class="n">shear</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">constructor</span><span class="p">(</span><span class="n">compression</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    
-    <span class="c1"># Have to add this here since CircularAperture is a special case</span>
-    <span class="k">if</span> <span class="s1">&#39;rotation&#39;</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">(</span><span class="n">constructor</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">constructor</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_call</span><span class="p">(</span><span class="n">constructor</span><span class="p">,</span> <span class="n">wf_constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the __call__ function of some input aperture&quot;&quot;&quot;</span>
+    <span class="n">constructor</span><span class="p">()(</span><span class="n">wf_constructor</span><span class="p">())</span>
 </pre></div>
-<div id="cell-6" class="clipboard-copy-txt">def _test_base_dynamic_aperture_constructor(constructor):
-    """Tests the constructor of some input aperture"""
-    constructor()
-    with pytest.raises(ValueError):
-        constructor(centre=[0])
-    with pytest.raises(ValueError):
-        constructor(shear=[0])
-    with pytest.raises(ValueError):
-        constructor(compression=[0])
-    
-    # Have to add this here since CircularAperture is a special case
-    if 'rotation' in signature(constructor).parameters.keys():
-        with pytest.raises(ValueError):
-            constructor(rotation=[0])</div>
+<div id="cell-6" class="clipboard-copy-txt">def _test_call(constructor, wf_constructor):
+    """Tests the __call__ function of some input aperture"""
+    constructor()(wf_constructor())</div>
         
         </div>
     </div>
@@ -2099,7 +2101,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=abc38404" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=cf254118" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2119,13 +2121,17 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_call</span><span class="p">(</span><span class="n">constructor</span><span class="p">,</span> <span class="n">wf_constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the __call__ function of some input aperture&quot;&quot;&quot;</span>
-    <span class="n">constructor</span><span class="p">()(</span><span class="n">wf_constructor</span><span class="p">())</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_dyanmic_aperture_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of some input aperture&quot;&quot;&quot;</span>
+    <span class="n">constructor</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">constructor</span><span class="p">(</span><span class="n">softening</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 </pre></div>
-<div id="cell-7" class="clipboard-copy-txt">def _test_call(constructor, wf_constructor):
-    """Tests the __call__ function of some input aperture"""
-    constructor()(wf_constructor())</div>
+<div id="cell-7" class="clipboard-copy-txt">def _test_dyanmic_aperture_constructor(constructor):
+    """Tests the constructor of some input aperture"""
+    constructor()
+    with pytest.raises(ValueError):
+        constructor(softening=[0, 0])</div>
         
         </div>
     </div>
@@ -2135,7 +2141,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=d5edb219" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d5152299" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2155,17 +2161,13 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_dyanmic_aperture_constructor</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the constructor of some input aperture&quot;&quot;&quot;</span>
-    <span class="n">constructor</span><span class="p">()</span>
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">constructor</span><span class="p">(</span><span class="n">softening</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_make_static</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the make_static function of some input aperture&quot;&quot;&quot;</span>
+    <span class="n">constructor</span><span class="p">()</span><span class="o">.</span><span class="n">make_static</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-8" class="clipboard-copy-txt">def _test_dyanmic_aperture_constructor(constructor):
-    """Tests the constructor of some input aperture"""
-    constructor()
-    with pytest.raises(ValueError):
-        constructor(softening=[0, 0])</div>
+<div id="cell-8" class="clipboard-copy-txt">def _test_make_static(constructor):
+    """Tests the make_static function of some input aperture"""
+    constructor().make_static(16, 1)</div>
         
         </div>
     </div>
@@ -2175,7 +2177,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c4759930" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=4fa7f61b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2195,13 +2197,19 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_make_static</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the make_static function of some input aperture&quot;&quot;&quot;</span>
-    <span class="n">constructor</span><span class="p">()</span><span class="o">.</span><span class="n">make_static</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_basis</span><span class="p">(</span><span class="n">constructor</span><span class="p">,</span> <span class="n">aperture_constructor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the basis function of some input aperture&quot;&quot;&quot;</span>
+    <span class="c1"># constructor()._basis(dlu.pixel_coords(16, 1/16))</span>
+    <span class="k">if</span> <span class="n">aperture_constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">aperture</span> <span class="o">=</span> <span class="n">aperture_constructor</span><span class="p">()</span>
+        <span class="n">constructor</span><span class="p">(</span><span class="n">aperture</span><span class="o">=</span><span class="n">aperture</span><span class="p">)</span><span class="o">.</span><span class="n">_basis</span><span class="p">(</span><span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">16</span><span class="p">))</span>
 </pre></div>
-<div id="cell-9" class="clipboard-copy-txt">def _test_make_static(constructor):
-    """Tests the make_static function of some input aperture"""
-    constructor().make_static(16, 1)</div>
+<div id="cell-9" class="clipboard-copy-txt">def _test_basis(constructor, aperture_constructor=None):
+    """Tests the basis function of some input aperture"""
+    # constructor()._basis(dlu.pixel_coords(16, 1/16))
+    if aperture_constructor is not None:
+        aperture = aperture_constructor()
+        constructor(aperture=aperture)._basis(dlu.pixel_coords(16, 1 / 16))</div>
         
         </div>
     </div>
@@ -2211,7 +2219,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=a7f14d4c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=01c63003" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2231,19 +2239,13 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_basis</span><span class="p">(</span><span class="n">constructor</span><span class="p">,</span> <span class="n">aperture_constructor</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the basis function of some input aperture&quot;&quot;&quot;</span>
-    <span class="c1"># constructor()._basis(dlu.pixel_coords(16, 1/16))</span>
-    <span class="k">if</span> <span class="n">aperture_constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">aperture</span> <span class="o">=</span> <span class="n">aperture_constructor</span><span class="p">()</span>
-        <span class="n">constructor</span><span class="p">(</span><span class="n">aperture</span><span class="o">=</span><span class="n">aperture</span><span class="p">)</span><span class="o">.</span><span class="n">_basis</span><span class="p">(</span><span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">))</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_opd</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the opd function of some input aperture&quot;&quot;&quot;</span>
+    <span class="n">constructor</span><span class="p">()</span><span class="o">.</span><span class="n">_opd</span><span class="p">(</span><span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">16</span><span class="p">))</span>
 </pre></div>
-<div id="cell-10" class="clipboard-copy-txt">def _test_basis(constructor, aperture_constructor=None):
-    """Tests the basis function of some input aperture"""
-    # constructor()._basis(dlu.pixel_coords(16, 1/16))
-    if aperture_constructor is not None:
-        aperture = aperture_constructor()
-        constructor(aperture=aperture)._basis(dlu.pixel_coords(16, 1/16))</div>
+<div id="cell-10" class="clipboard-copy-txt">def _test_opd(constructor):
+    """Tests the opd function of some input aperture"""
+    constructor()._opd(dlu.pixel_coords(16, 1 / 16))</div>
         
         </div>
     </div>
@@ -2253,7 +2255,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=8edb534f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3636aabe" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2273,13 +2275,57 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">_test_opd</span><span class="p">(</span><span class="n">constructor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the opd function of some input aperture&quot;&quot;&quot;</span>
-    <span class="n">constructor</span><span class="p">()</span><span class="o">.</span><span class="n">_opd</span><span class="p">(</span><span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">16</span><span class="p">))</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestCircularAperture</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the CircularAperture class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_circular_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
+        <span class="n">_test_base_dynamic_aperture_constructor</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">)</span>
+        <span class="n">_test_dyanmic_aperture_constructor</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">create_circular_aperture</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_circular_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
+        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_circular_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
+        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_circular_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
+        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_circular_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the extent method.&quot;&quot;&quot;</span>
+        <span class="n">_test_extent</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">)</span>
 </pre></div>
-<div id="cell-11" class="clipboard-copy-txt">def _test_opd(constructor):
-    """Tests the opd function of some input aperture"""
-    constructor()._opd(dlu.pixel_coords(16, 1/16))</div>
+<div id="cell-11" class="clipboard-copy-txt">class TestCircularAperture:
+    """Tests the CircularAperture class."""
+
+    def test_constructor(self, create_circular_aperture):
+        """Tests the constructor."""
+        _test_base_dynamic_aperture_constructor(create_circular_aperture)
+        _test_dyanmic_aperture_constructor(create_circular_aperture)
+        with pytest.raises(ValueError):
+            create_circular_aperture(radius=[0])
+
+    def test_call(self, create_circular_aperture, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call(create_circular_aperture, create_wavefront)
+
+    def test_transmission(self, create_circular_aperture):
+        """Tests the transmission method."""
+        _test_transmission(create_circular_aperture)
+
+    def test_make_static(self, create_circular_aperture):
+        """Tests the make_static method."""
+        _test_make_static(create_circular_aperture)
+
+    def test_extent(self, create_circular_aperture):
+        """Tests the extent method."""
+        _test_extent(create_circular_aperture)</div>
         
         </div>
     </div>
@@ -2289,7 +2335,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=50597956" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=9d137953" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2309,57 +2355,61 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestCircularAperture</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the CircularAperture class.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestRectangularAperture</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the RectangularAperture class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_circular_aperture</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rectangular_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">_test_base_dynamic_aperture_constructor</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">)</span>
-        <span class="n">_test_dyanmic_aperture_constructor</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">)</span>
+        <span class="n">_test_base_dynamic_aperture_constructor</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">)</span>
+        <span class="n">_test_dyanmic_aperture_constructor</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">create_circular_aperture</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">create_rectangular_aperture</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">create_rectangular_aperture</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_circular_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rectangular_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_circular_aperture</span><span class="p">):</span>
+        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rectangular_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
-        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_circular_aperture</span><span class="p">):</span>
+        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rectangular_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
-        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_circular_aperture</span><span class="p">):</span>
+        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rectangular_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the extent method.&quot;&quot;&quot;</span>
-        <span class="n">_test_extent</span><span class="p">(</span><span class="n">create_circular_aperture</span><span class="p">)</span>
+        <span class="n">_test_extent</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">)</span>
 </pre></div>
-<div id="cell-12" class="clipboard-copy-txt">class TestCircularAperture():
-    """Tests the CircularAperture class."""
+<div id="cell-12" class="clipboard-copy-txt">class TestRectangularAperture:
+    """Tests the RectangularAperture class."""
 
-    def test_constructor(self, create_circular_aperture):
+    def test_constructor(self, create_rectangular_aperture):
         """Tests the constructor."""
-        _test_base_dynamic_aperture_constructor(create_circular_aperture)
-        _test_dyanmic_aperture_constructor(create_circular_aperture)
+        _test_base_dynamic_aperture_constructor(create_rectangular_aperture)
+        _test_dyanmic_aperture_constructor(create_rectangular_aperture)
         with pytest.raises(ValueError):
-            create_circular_aperture(radius=[0])
+            create_rectangular_aperture(height=[0])
+        with pytest.raises(ValueError):
+            create_rectangular_aperture(width=[0])
 
-    def test_call(self, create_circular_aperture, create_wavefront):
+    def test_call(self, create_rectangular_aperture, create_wavefront):
         """Tests the __call__ method."""
-        _test_call(create_circular_aperture, create_wavefront)
-    
-    def test_transmission(self, create_circular_aperture):
+        _test_call(create_rectangular_aperture, create_wavefront)
+
+    def test_transmission(self, create_rectangular_aperture):
         """Tests the transmission method."""
-        _test_transmission(create_circular_aperture)
-    
-    def test_make_static(self, create_circular_aperture):
+        _test_transmission(create_rectangular_aperture)
+
+    def test_make_static(self, create_rectangular_aperture):
         """Tests the make_static method."""
-        _test_make_static(create_circular_aperture)
-    
-    def test_extent(self, create_circular_aperture):
+        _test_make_static(create_rectangular_aperture)
+
+    def test_extent(self, create_rectangular_aperture):
         """Tests the extent method."""
-        _test_extent(create_circular_aperture)</div>
+        _test_extent(create_rectangular_aperture)</div>
         
         </div>
     </div>
@@ -2369,7 +2419,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=3775cc07" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=9ffe1540" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2389,61 +2439,57 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestRectangularAperture</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the RectangularAperture class.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestRegPolyAperture</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the RegPolyAperture class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rectangular_aperture</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">_test_base_dynamic_aperture_constructor</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">)</span>
-        <span class="n">_test_dyanmic_aperture_constructor</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">)</span>
+        <span class="n">_test_base_dynamic_aperture_constructor</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">)</span>
+        <span class="n">_test_dyanmic_aperture_constructor</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">create_rectangular_aperture</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">create_rectangular_aperture</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">create_reg_poly_aperture</span><span class="p">(</span><span class="n">rmax</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rectangular_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rectangular_aperture</span><span class="p">):</span>
+        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
-        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rectangular_aperture</span><span class="p">):</span>
+        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
-        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_rectangular_aperture</span><span class="p">):</span>
+        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the extent method.&quot;&quot;&quot;</span>
-        <span class="n">_test_extent</span><span class="p">(</span><span class="n">create_rectangular_aperture</span><span class="p">)</span>
+        <span class="n">_test_extent</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">)</span>
 </pre></div>
-<div id="cell-13" class="clipboard-copy-txt">class TestRectangularAperture():
-    """Tests the RectangularAperture class."""
+<div id="cell-13" class="clipboard-copy-txt">class TestRegPolyAperture:
+    """Tests the RegPolyAperture class."""
 
-    def test_constructor(self, create_rectangular_aperture):
+    def test_constructor(self, create_reg_poly_aperture):
         """Tests the constructor."""
-        _test_base_dynamic_aperture_constructor(create_rectangular_aperture)
-        _test_dyanmic_aperture_constructor(create_rectangular_aperture)
+        _test_base_dynamic_aperture_constructor(create_reg_poly_aperture)
+        _test_dyanmic_aperture_constructor(create_reg_poly_aperture)
         with pytest.raises(ValueError):
-            create_rectangular_aperture(height=[0])
-        with pytest.raises(ValueError):
-            create_rectangular_aperture(width=[0])
+            create_reg_poly_aperture(rmax=[0])
 
-    def test_call(self, create_rectangular_aperture, create_wavefront):
+    def test_call(self, create_reg_poly_aperture, create_wavefront):
         """Tests the __call__ method."""
-        _test_call(create_rectangular_aperture, create_wavefront)
-    
-    def test_transmission(self, create_rectangular_aperture):
+        _test_call(create_reg_poly_aperture, create_wavefront)
+
+    def test_transmission(self, create_reg_poly_aperture):
         """Tests the transmission method."""
-        _test_transmission(create_rectangular_aperture)
-    
-    def test_make_static(self, create_rectangular_aperture):
+        _test_transmission(create_reg_poly_aperture)
+
+    def test_make_static(self, create_reg_poly_aperture):
         """Tests the make_static method."""
-        _test_make_static(create_rectangular_aperture)
-    
-    def test_extent(self, create_rectangular_aperture):
+        _test_make_static(create_reg_poly_aperture)
+
+    def test_extent(self, create_reg_poly_aperture):
         """Tests the extent method."""
-        _test_extent(create_rectangular_aperture)</div>
+        _test_extent(create_reg_poly_aperture)</div>
         
         </div>
     </div>
@@ -2453,7 +2499,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=563c63da" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=6c732f6c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2473,57 +2519,57 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestRegPolyAperture</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the RegPolyAperture class.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestIrregPolyAperture</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the IrregPolyAperture class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">_test_base_dynamic_aperture_constructor</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">)</span>
-        <span class="n">_test_dyanmic_aperture_constructor</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">)</span>
+        <span class="n">_test_base_dynamic_aperture_constructor</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
+        <span class="n">_test_dyanmic_aperture_constructor</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">create_reg_poly_aperture</span><span class="p">(</span><span class="n">rmax</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
-        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
-        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the extent method.&quot;&quot;&quot;</span>
-        <span class="n">_test_extent</span><span class="p">(</span><span class="n">create_reg_poly_aperture</span><span class="p">)</span>
-</pre></div>
-<div id="cell-14" class="clipboard-copy-txt">class TestRegPolyAperture():
-    """Tests the RegPolyAperture class."""
+            <span class="n">create_irreg_poly_aperture</span><span class="p">(</span><span class="n">vertices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    def test_constructor(self, create_reg_poly_aperture):
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
+        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
+        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
+        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the extent method.&quot;&quot;&quot;</span>
+        <span class="n">_test_extent</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
+</pre></div>
+<div id="cell-14" class="clipboard-copy-txt">class TestIrregPolyAperture:
+    """Tests the IrregPolyAperture class."""
+
+    def test_constructor(self, create_irreg_poly_aperture):
         """Tests the constructor."""
-        _test_base_dynamic_aperture_constructor(create_reg_poly_aperture)
-        _test_dyanmic_aperture_constructor(create_reg_poly_aperture)
+        _test_base_dynamic_aperture_constructor(create_irreg_poly_aperture)
+        _test_dyanmic_aperture_constructor(create_irreg_poly_aperture)
         with pytest.raises(ValueError):
-            create_reg_poly_aperture(rmax=[0])
-    
-    def test_call(self, create_reg_poly_aperture, create_wavefront):
+            create_irreg_poly_aperture(vertices=[0])
+
+    def test_call(self, create_irreg_poly_aperture, create_wavefront):
         """Tests the __call__ method."""
-        _test_call(create_reg_poly_aperture, create_wavefront)
-    
-    def test_transmission(self, create_reg_poly_aperture):
+        _test_call(create_irreg_poly_aperture, create_wavefront)
+
+    def test_transmission(self, create_irreg_poly_aperture):
         """Tests the transmission method."""
-        _test_transmission(create_reg_poly_aperture)
-    
-    def test_make_static(self, create_reg_poly_aperture):
+        _test_transmission(create_irreg_poly_aperture)
+
+    def test_make_static(self, create_irreg_poly_aperture):
         """Tests the make_static method."""
-        _test_make_static(create_reg_poly_aperture)
-    
-    def test_extent(self, create_reg_poly_aperture):
+        _test_make_static(create_irreg_poly_aperture)
+
+    def test_extent(self, create_irreg_poly_aperture):
         """Tests the extent method."""
-        _test_extent(create_reg_poly_aperture)</div>
+        _test_extent(create_irreg_poly_aperture)</div>
         
         </div>
     </div>
@@ -2533,7 +2579,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=412b58af" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d86f9b6f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2553,57 +2599,89 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestIrregPolyAperture</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the IrregPolyAperture class.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestAberratedAperture</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the AberratedAperture class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_circular_aperture</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">_test_base_dynamic_aperture_constructor</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
-        <span class="n">_test_dyanmic_aperture_constructor</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
+        <span class="n">create_aberrated_aperture</span><span class="p">()</span>
+        <span class="n">create_aberrated_aperture</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+            <span class="n">create_aberrated_aperture</span><span class="p">(</span><span class="n">aperture</span><span class="o">=</span><span class="s2">&quot;Not an aperture&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">create_irreg_poly_aperture</span><span class="p">(</span><span class="n">vertices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+            <span class="n">ap</span> <span class="o">=</span> <span class="n">create_circular_aperture</span><span class="p">(</span><span class="n">occulting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">create_aberrated_aperture</span><span class="p">(</span><span class="n">aperture</span><span class="o">=</span><span class="n">ap</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">):</span>
+        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
-        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
+        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
-        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the extent method.&quot;&quot;&quot;</span>
-        <span class="n">_test_extent</span><span class="p">(</span><span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
+        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_basis</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">create_aberrated_aperture</span><span class="p">,</span>
+        <span class="n">create_reg_poly_aperture</span><span class="p">,</span>
+        <span class="n">create_irreg_poly_aperture</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the basis method.&quot;&quot;&quot;</span>
+        <span class="n">_test_basis</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">)</span>
+        <span class="n">_test_basis</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">)</span>
+        <span class="n">_test_basis</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_opd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the _opd method.&quot;&quot;&quot;</span>
+        <span class="n">_test_opd</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">)</span>
 </pre></div>
-<div id="cell-15" class="clipboard-copy-txt">class TestIrregPolyAperture():
-    """Tests the IrregPolyAperture class."""
+<div id="cell-15" class="clipboard-copy-txt">class TestAberratedAperture:
+    """Tests the AberratedAperture class."""
 
-    def test_constructor(self, create_irreg_poly_aperture):
+    def test_constructor(
+        self, create_aberrated_aperture, create_circular_aperture
+    ):
         """Tests the constructor."""
-        _test_base_dynamic_aperture_constructor(create_irreg_poly_aperture)
-        _test_dyanmic_aperture_constructor(create_irreg_poly_aperture)
+        create_aberrated_aperture()
+        create_aberrated_aperture(coefficients=None)
+        with pytest.raises(TypeError):
+            create_aberrated_aperture(aperture="Not an aperture")
         with pytest.raises(ValueError):
-            create_irreg_poly_aperture(vertices=[0])
-    
-    def test_call(self, create_irreg_poly_aperture, create_wavefront):
-        """Tests the __call__ method."""
-        _test_call(create_irreg_poly_aperture, create_wavefront)
-    
-    def test_transmission(self, create_irreg_poly_aperture):
-        """Tests the transmission method."""
-        _test_transmission(create_irreg_poly_aperture)
+            ap = create_circular_aperture(occulting=True)
+            create_aberrated_aperture(aperture=ap)
 
-    def test_make_static(self, create_irreg_poly_aperture):
+    def test_call(self, create_aberrated_aperture, create_wavefront):
+        """Tests the __call__ method."""
+        _test_call(create_aberrated_aperture, create_wavefront)
+
+    def test_transmission(self, create_aberrated_aperture):
+        """Tests the transmission method."""
+        _test_transmission(create_aberrated_aperture)
+
+    def test_make_static(self, create_aberrated_aperture):
         """Tests the make_static method."""
-        _test_make_static(create_irreg_poly_aperture)
-    
-    def test_extent(self, create_irreg_poly_aperture):
-        """Tests the extent method."""
-        _test_extent(create_irreg_poly_aperture)</div>
+        _test_make_static(create_aberrated_aperture)
+
+    def test_basis(
+        self,
+        create_aberrated_aperture,
+        create_reg_poly_aperture,
+        create_irreg_poly_aperture,
+    ):
+        """Tests the basis method."""
+        _test_basis(create_aberrated_aperture)
+        _test_basis(create_aberrated_aperture, create_reg_poly_aperture)
+        _test_basis(create_aberrated_aperture, create_irreg_poly_aperture)
+
+    def test_opd(self, create_aberrated_aperture):
+        """Tests the _opd method."""
+        _test_opd(create_aberrated_aperture)</div>
         
         </div>
     </div>
@@ -2613,7 +2691,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=fdf4bc1a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3449d045" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2633,79 +2711,55 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestAberratedAperture</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the AberratedAperture class.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestUniformSpider</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the UniformSpider class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">,</span> 
-        <span class="n">create_circular_aperture</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_uniform_spider</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">create_aberrated_aperture</span><span class="p">()</span>
-        <span class="n">create_aberrated_aperture</span><span class="p">(</span><span class="n">coefficients</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
-            <span class="n">create_aberrated_aperture</span><span class="p">(</span><span class="n">aperture</span><span class="o">=</span><span class="s1">&#39;Not an aperture&#39;</span><span class="p">)</span>
+        <span class="n">create_uniform_spider</span><span class="p">()</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">ap</span> <span class="o">=</span> <span class="n">create_circular_aperture</span><span class="p">(</span><span class="n">occulting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">create_aberrated_aperture</span><span class="p">(</span><span class="n">aperture</span><span class="o">=</span><span class="n">ap</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
-        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
-        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">,</span> 
-        <span class="n">create_irreg_poly_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the basis method.&quot;&quot;&quot;</span>
-        <span class="n">_test_basis</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">)</span>
-        <span class="n">_test_basis</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_reg_poly_aperture</span><span class="p">)</span>
-        <span class="n">_test_basis</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_irreg_poly_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_opd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the _opd method.&quot;&quot;&quot;</span>
-        <span class="n">_test_opd</span><span class="p">(</span><span class="n">create_aberrated_aperture</span><span class="p">)</span>
-</pre></div>
-<div id="cell-16" class="clipboard-copy-txt">class TestAberratedAperture():
-    """Tests the AberratedAperture class."""
+            <span class="n">create_uniform_spider</span><span class="p">(</span><span class="n">strut_width</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    def test_constructor(self, create_aberrated_aperture, 
-        create_circular_aperture):
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_uniform_spider</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
+        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_uniform_spider</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_uniform_spider</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
+        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_uniform_spider</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_uniform_spider</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
+        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_uniform_spider</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_uniform_spider</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the extent method.&quot;&quot;&quot;</span>
+        <span class="n">_test_extent</span><span class="p">(</span><span class="n">create_uniform_spider</span><span class="p">)</span>
+</pre></div>
+<div id="cell-16" class="clipboard-copy-txt">class TestUniformSpider:
+    """Tests the UniformSpider class."""
+
+    def test_constructor(self, create_uniform_spider):
         """Tests the constructor."""
-        create_aberrated_aperture()
-        create_aberrated_aperture(coefficients=None)
-        with pytest.raises(TypeError):
-            create_aberrated_aperture(aperture='Not an aperture')
+        create_uniform_spider()
         with pytest.raises(ValueError):
-            ap = create_circular_aperture(occulting=True)
-            create_aberrated_aperture(aperture=ap)
-    
-    def test_call(self, create_aberrated_aperture, create_wavefront):
+            create_uniform_spider(strut_width=[0])
+
+    def test_call(self, create_uniform_spider, create_wavefront):
         """Tests the __call__ method."""
-        _test_call(create_aberrated_aperture, create_wavefront)
-    
-    def test_transmission(self, create_aberrated_aperture):
+        _test_call(create_uniform_spider, create_wavefront)
+
+    def test_transmission(self, create_uniform_spider):
         """Tests the transmission method."""
-        _test_transmission(create_aberrated_aperture)
-    
-    def test_make_static(self, create_aberrated_aperture):
+        _test_transmission(create_uniform_spider)
+
+    def test_make_static(self, create_uniform_spider):
         """Tests the make_static method."""
-        _test_make_static(create_aberrated_aperture)
-    
-    def test_basis(self, create_aberrated_aperture, create_reg_poly_aperture, 
-        create_irreg_poly_aperture):
-        """Tests the basis method."""
-        _test_basis(create_aberrated_aperture)
-        _test_basis(create_aberrated_aperture, create_reg_poly_aperture)
-        _test_basis(create_aberrated_aperture, create_irreg_poly_aperture)
-    
-    def test_opd(self, create_aberrated_aperture):
-        """Tests the _opd method."""
-        _test_opd(create_aberrated_aperture)</div>
+        _test_make_static(create_uniform_spider)
+
+    def test_extent(self, create_uniform_spider):
+        """Tests the extent method."""
+        _test_extent(create_uniform_spider)</div>
         
         </div>
     </div>
@@ -2715,7 +2769,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=865f4b98" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=f5a06165" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2735,55 +2789,69 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestUniformSpider</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the UniformSpider class.&quot;&quot;&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestCompoundAperture</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the CompoundAperture class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_uniform_spider</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">create_uniform_spider</span><span class="p">()</span>
-        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">create_uniform_spider</span><span class="p">(</span><span class="n">strut_width</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_uniform_spider</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_uniform_spider</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_uniform_spider</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
-        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_uniform_spider</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_uniform_spider</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
-        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_uniform_spider</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_uniform_spider</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the extent method.&quot;&quot;&quot;</span>
-        <span class="n">_test_extent</span><span class="p">(</span><span class="n">create_uniform_spider</span><span class="p">)</span>
-</pre></div>
-<div id="cell-17" class="clipboard-copy-txt">class TestUniformSpider():
-    """Tests the UniformSpider class."""
+        <span class="n">create_compound_aperture</span><span class="p">()</span>
+        <span class="n">aber_ap</span> <span class="o">=</span> <span class="n">create_aberrated_aperture</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+            <span class="n">create_compound_aperture</span><span class="p">(</span><span class="n">apers</span><span class="o">=</span><span class="p">[</span><span class="n">aber_ap</span><span class="p">,</span> <span class="n">aber_ap</span><span class="p">])</span>
 
-    def test_constructor(self, create_uniform_spider):
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
+        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_compound_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
+        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_compound_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
+        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_compound_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the basis method.&quot;&quot;&quot;</span>
+        <span class="n">_test_basis</span><span class="p">(</span><span class="n">create_compound_aperture</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_opd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the _opd method.&quot;&quot;&quot;</span>
+        <span class="n">_test_opd</span><span class="p">(</span><span class="n">create_compound_aperture</span><span class="p">)</span>
+</pre></div>
+<div id="cell-17" class="clipboard-copy-txt">class TestCompoundAperture:
+    """Tests the CompoundAperture class."""
+
+    def test_constructor(
+        self, create_compound_aperture, create_aberrated_aperture
+    ):
         """Tests the constructor."""
-        create_uniform_spider()
-        with pytest.raises(ValueError):
-            create_uniform_spider(strut_width=[0])
-    
-    def test_call(self, create_uniform_spider, create_wavefront):
+        create_compound_aperture()
+        aber_ap = create_aberrated_aperture()
+        with pytest.raises(TypeError):
+            create_compound_aperture(apers=[aber_ap, aber_ap])
+
+    def test_call(self, create_compound_aperture, create_wavefront):
         """Tests the __call__ method."""
-        _test_call(create_uniform_spider, create_wavefront)
-    
-    def test_transmission(self, create_uniform_spider):
+        _test_call(create_compound_aperture, create_wavefront)
+
+    def test_transmission(self, create_compound_aperture):
         """Tests the transmission method."""
-        _test_transmission(create_uniform_spider)
-    
-    def test_make_static(self, create_uniform_spider):
+        _test_transmission(create_compound_aperture)
+
+    def test_make_static(self, create_compound_aperture):
         """Tests the make_static method."""
-        _test_make_static(create_uniform_spider)
-    
-    def test_extent(self, create_uniform_spider):
-        """Tests the extent method."""
-        _test_extent(create_uniform_spider)</div>
+        _test_make_static(create_compound_aperture)
+
+    def test_basis(self, create_compound_aperture):
+        """Tests the basis method."""
+        _test_basis(create_compound_aperture)
+
+    def test_opd(self, create_compound_aperture):
+        """Tests the _opd method."""
+        _test_opd(create_compound_aperture)</div>
         
         </div>
     </div>
@@ -2793,7 +2861,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=353f67ad" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=0668f101" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2813,117 +2881,36 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestCompoundAperture</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the CompoundAperture class.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">,</span> 
-        <span class="n">create_aberrated_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
-        <span class="n">create_compound_aperture</span><span class="p">()</span>
-        <span class="n">aber_ap</span> <span class="o">=</span> <span class="n">create_aberrated_aperture</span><span class="p">()</span>
-        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
-            <span class="n">create_compound_aperture</span><span class="p">(</span><span class="n">apers</span><span class="o">=</span><span class="p">[</span><span class="n">aber_ap</span><span class="p">,</span> <span class="n">aber_ap</span><span class="p">])</span>
-    
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
-        <span class="n">_test_call</span><span class="p">(</span><span class="n">create_compound_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
-        <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_compound_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
-        <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_compound_aperture</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">test_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the basis method.&quot;&quot;&quot;</span>
-        <span class="n">_test_basis</span><span class="p">(</span><span class="n">create_compound_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_opd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the _opd method.&quot;&quot;&quot;</span>
-        <span class="n">_test_opd</span><span class="p">(</span><span class="n">create_compound_aperture</span><span class="p">)</span>
-</pre></div>
-<div id="cell-18" class="clipboard-copy-txt">class TestCompoundAperture():
-    """Tests the CompoundAperture class."""
-
-    def test_constructor(self, create_compound_aperture, 
-        create_aberrated_aperture):
-        """Tests the constructor."""
-        create_compound_aperture()
-        aber_ap = create_aberrated_aperture()
-        with pytest.raises(TypeError):
-            create_compound_aperture(apers=[aber_ap, aber_ap])
-    
-    def test_call(self, create_compound_aperture, create_wavefront):
-        """Tests the __call__ method."""
-        _test_call(create_compound_aperture, create_wavefront)
-    
-    def test_transmission(self, create_compound_aperture):
-        """Tests the transmission method."""
-        _test_transmission(create_compound_aperture)
-    
-    def test_make_static(self, create_compound_aperture):
-        """Tests the make_static method."""
-        _test_make_static(create_compound_aperture)
-
-    def test_basis(self, create_compound_aperture):
-        """Tests the basis method."""
-        _test_basis(create_compound_aperture)
-    
-    def test_opd(self, create_compound_aperture):
-        """Tests the _opd method."""
-        _test_opd(create_compound_aperture)</div>
-        
-        </div>
-    </div>
-
-</div>
-</div>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c35f5f3c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-19">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestMultiAperture</span><span class="p">():</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestMultiAperture</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the MultiAperture class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_multi_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the constructor.&quot;&quot;&quot;</span>
         <span class="n">create_multi_aperture</span><span class="p">()</span>
-    
-    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_multi_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">,</span> 
-        <span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_call</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">create_multi_aperture</span><span class="p">,</span>
+        <span class="n">create_wavefront</span><span class="p">,</span>
+        <span class="n">create_aberrated_aperture</span><span class="p">,</span>
+        <span class="n">create_compound_aperture</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __call__ method.&quot;&quot;&quot;</span>
         <span class="n">_test_call</span><span class="p">(</span><span class="n">create_multi_aperture</span><span class="p">,</span> <span class="n">create_wavefront</span><span class="p">)</span>
         <span class="n">aber_ap</span> <span class="o">=</span> <span class="n">create_aberrated_aperture</span><span class="p">()</span>
         <span class="n">comp_ap</span> <span class="o">=</span> <span class="n">create_compound_aperture</span><span class="p">(</span><span class="n">apers</span><span class="o">=</span><span class="p">[</span><span class="n">aber_ap</span><span class="p">])</span>
         <span class="n">create_multi_aperture</span><span class="p">(</span><span class="n">apers</span><span class="o">=</span><span class="p">[</span><span class="n">comp_ap</span><span class="p">])(</span><span class="n">create_wavefront</span><span class="p">())</span>
-    
+
     <span class="k">def</span> <span class="nf">test_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_multi_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the transmission method.&quot;&quot;&quot;</span>
         <span class="n">_test_transmission</span><span class="p">(</span><span class="n">create_multi_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_multi_aperture</span><span class="p">,</span> <span class="n">create_aberrated_aperture</span><span class="p">,</span>
-        <span class="n">create_compound_aperture</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_make_static</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">create_multi_aperture</span><span class="p">,</span>
+        <span class="n">create_aberrated_aperture</span><span class="p">,</span>
+        <span class="n">create_compound_aperture</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the make_static method.&quot;&quot;&quot;</span>
         <span class="n">_test_make_static</span><span class="p">(</span><span class="n">create_multi_aperture</span><span class="p">)</span>
         <span class="n">aber_ap</span> <span class="o">=</span> <span class="n">create_aberrated_aperture</span><span class="p">()</span>
@@ -2933,46 +2920,59 @@ import dLux.utils as dlu</div>
     <span class="k">def</span> <span class="nf">test_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_multi_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the basis method.&quot;&quot;&quot;</span>
         <span class="n">_test_basis</span><span class="p">(</span><span class="n">create_multi_aperture</span><span class="p">)</span>
-    
+
     <span class="k">def</span> <span class="nf">test_opd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_multi_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the _opd method.&quot;&quot;&quot;</span>
         <span class="n">_test_opd</span><span class="p">(</span><span class="n">create_multi_aperture</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">test_aberrated_apertures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_multi_aperture</span><span class="p">,</span> 
-        <span class="n">create_aberrated_aperture</span><span class="p">,</span> <span class="n">create_compound_aperture</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_aberrated_apertures</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">create_multi_aperture</span><span class="p">,</span>
+        <span class="n">create_aberrated_aperture</span><span class="p">,</span>
+        <span class="n">create_compound_aperture</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the _aberrated_aperture method.&quot;&quot;&quot;</span>
         <span class="n">create_multi_aperture</span><span class="p">()</span><span class="o">.</span><span class="n">_aberrated_apertures</span><span class="p">()</span>
         <span class="n">aber_ap</span> <span class="o">=</span> <span class="n">create_aberrated_aperture</span><span class="p">()</span>
         <span class="n">comp_ap</span> <span class="o">=</span> <span class="n">create_compound_aperture</span><span class="p">(</span><span class="n">apers</span><span class="o">=</span><span class="p">[</span><span class="n">aber_ap</span><span class="p">])</span>
         <span class="n">create_multi_aperture</span><span class="p">(</span><span class="n">apers</span><span class="o">=</span><span class="p">[</span><span class="n">comp_ap</span><span class="p">])</span><span class="o">.</span><span class="n">_aberrated_apertures</span><span class="p">()</span>
-    
+
     <span class="k">def</span> <span class="nf">test_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_multi_aperture</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __getattr__ method.&quot;&quot;&quot;</span>
         <span class="n">create_multi_aperture</span><span class="p">()</span><span class="o">.</span><span class="n">CircularAperture</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">):</span>
             <span class="n">create_multi_aperture</span><span class="p">()</span><span class="o">.</span><span class="n">not_an_aperture</span>
 </pre></div>
-<div id="cell-19" class="clipboard-copy-txt">class TestMultiAperture():
+<div id="cell-18" class="clipboard-copy-txt">class TestMultiAperture:
     """Tests the MultiAperture class."""
 
     def test_constructor(self, create_multi_aperture):
         """Tests the constructor."""
         create_multi_aperture()
-    
-    def test_call(self, create_multi_aperture, create_wavefront, 
-        create_aberrated_aperture, create_compound_aperture):
+
+    def test_call(
+        self,
+        create_multi_aperture,
+        create_wavefront,
+        create_aberrated_aperture,
+        create_compound_aperture,
+    ):
         """Tests the __call__ method."""
         _test_call(create_multi_aperture, create_wavefront)
         aber_ap = create_aberrated_aperture()
         comp_ap = create_compound_aperture(apers=[aber_ap])
         create_multi_aperture(apers=[comp_ap])(create_wavefront())
-    
+
     def test_transmission(self, create_multi_aperture):
         """Tests the transmission method."""
         _test_transmission(create_multi_aperture)
-    
-    def test_make_static(self, create_multi_aperture, create_aberrated_aperture,
-        create_compound_aperture):
+
+    def test_make_static(
+        self,
+        create_multi_aperture,
+        create_aberrated_aperture,
+        create_compound_aperture,
+    ):
         """Tests the make_static method."""
         _test_make_static(create_multi_aperture)
         aber_ap = create_aberrated_aperture()
@@ -2982,19 +2982,23 @@ import dLux.utils as dlu</div>
     def test_basis(self, create_multi_aperture):
         """Tests the basis method."""
         _test_basis(create_multi_aperture)
-    
+
     def test_opd(self, create_multi_aperture):
         """Tests the _opd method."""
         _test_opd(create_multi_aperture)
-    
-    def test_aberrated_apertures(self, create_multi_aperture, 
-        create_aberrated_aperture, create_compound_aperture):
+
+    def test_aberrated_apertures(
+        self,
+        create_multi_aperture,
+        create_aberrated_aperture,
+        create_compound_aperture,
+    ):
         """Tests the _aberrated_aperture method."""
         create_multi_aperture()._aberrated_apertures()
         aber_ap = create_aberrated_aperture()
         comp_ap = create_compound_aperture(apers=[aber_ap])
         create_multi_aperture(apers=[comp_ap])._aberrated_apertures()
-    
+
     def test_getattr(self, create_multi_aperture):
         """Tests the __getattr__ method."""
         create_multi_aperture().CircularAperture
@@ -3009,7 +3013,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=e64713c9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e16a8f2b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3019,7 +3023,7 @@ import dLux.utils as dlu</div>
         
         <div class="CodeMirror cm-s-jupyter">
             <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-20">
+                <clipboard-copy for="cell-19">
                 <div>
                     <span class="notice" hidden>Copied!</span>
                     <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
@@ -3053,7 +3057,7 @@ import dLux.utils as dlu</div>
 
     <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
         <span class="n">dLux</span><span class="o">.</span><span class="n">ApertureFactory</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="n">secondary_nsides</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    
+
     <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
         <span class="n">dLux</span><span class="o">.</span><span class="n">ApertureFactory</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="n">aperture_ratio</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
@@ -3063,7 +3067,7 @@ import dLux.utils as dlu</div>
     <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
         <span class="n">dLux</span><span class="o">.</span><span class="n">ApertureFactory</span><span class="p">(</span><span class="n">npix</span><span class="p">,</span> <span class="n">strut_ratio</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-20" class="clipboard-copy-txt">def test_aperture_factory():
+<div id="cell-19" class="clipboard-copy-txt">def test_aperture_factory():
     """Tests the ApertureFactory method"""
     npix = 16
 
@@ -3087,7 +3091,7 @@ import dLux.utils as dlu</div>
 
     with pytest.raises(ValueError):
         dLux.ApertureFactory(npix, secondary_nsides=1)
-    
+
     with pytest.raises(ValueError):
         dLux.ApertureFactory(npix, aperture_ratio=-1)
 
@@ -3150,10 +3154,10 @@ import dLux.utils as dlu</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

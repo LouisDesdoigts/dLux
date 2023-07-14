@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=e13514cb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d9f8d56f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1879,11 +1879,9 @@ Licensed under the Apache License, Version 2.0.
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;dLux&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.13.1&quot;</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">import</span> <span class="nn">importlib.metadata</span>
 </pre></div>
-<div id="cell-1" class="clipboard-copy-txt">name = "dLux"
-__version__ = "0.13.1"</div>
+<div id="cell-1" class="clipboard-copy-txt">import importlib.metadata</div>
         
         </div>
     </div>
@@ -1893,7 +1891,7 @@ __version__ = "0.13.1"</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=66e178fd" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b62837f6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1913,23 +1911,9 @@ __version__ = "0.13.1"</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Import as modules</span>
-<span class="c1"># Wavefronts and Optics</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">wavefronts</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">optics</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">optical_layers</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">propagators</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">apertures</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">aberrations</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">&quot;dLux&quot;</span><span class="p">)</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt"># Import as modules
-# Wavefronts and Optics
-from . import wavefronts
-from . import optics
-from . import optical_layers
-from . import propagators
-from . import apertures
-from . import aberrations</div>
+<div id="cell-2" class="clipboard-copy-txt">__version__ = importlib.metadata.version("dLux")</div>
         
         </div>
     </div>
@@ -1939,7 +1923,7 @@ from . import aberrations</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=0b2d3b63" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=643fd0a9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1959,15 +1943,23 @@ from . import aberrations</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Images and Detectors</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">images</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">detectors</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">detector_layers</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Import as modules</span>
+<span class="c1"># Wavefronts and Optics</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">wavefronts</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">optics</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">optical_layers</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">propagators</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">apertures</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">aberrations</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt"># Images and Detectors
-from . import images
-from . import detectors
-from . import detector_layers</div>
+<div id="cell-3" class="clipboard-copy-txt"># Import as modules
+# Wavefronts and Optics
+from . import wavefronts
+from . import optics
+from . import optical_layers
+from . import propagators
+from . import apertures
+from . import aberrations</div>
         
         </div>
     </div>
@@ -1977,7 +1969,7 @@ from . import detector_layers</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=0680002c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=c22f364c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1997,17 +1989,15 @@ from . import detector_layers</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># All other classes</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">instruments</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">observations</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">sources</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">spectra</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Images and Detectors</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">images</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">detectors</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">detector_layers</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt"># All other classes
-from . import instruments
-from . import observations
-from . import sources
-from . import spectra</div>
+<div id="cell-4" class="clipboard-copy-txt"># Images and Detectors
+from . import images
+from . import detectors
+from . import detector_layers</div>
         
         </div>
     </div>
@@ -2017,7 +2007,7 @@ from . import spectra</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5fbb2a5b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=560980f4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2037,11 +2027,17 @@ from . import spectra</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Sub Modules</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># All other classes</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">instruments</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">observations</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">sources</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">spectra</span>
 </pre></div>
-<div id="cell-5" class="clipboard-copy-txt"># Sub Modules
-from . import utils</div>
+<div id="cell-5" class="clipboard-copy-txt"># All other classes
+from . import instruments
+from . import observations
+from . import sources
+from . import spectra</div>
         
         </div>
     </div>
@@ -2051,7 +2047,7 @@ from . import utils</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=cee6e363" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=1a57ee5b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2071,23 +2067,11 @@ from . import utils</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Import core functions from modules</span>
-<span class="c1"># Wavefronts and Optics</span>
-<span class="kn">from</span> <span class="nn">.wavefronts</span>     <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.optics</span>         <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.optical_layers</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.propagators</span>    <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.apertures</span>      <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.aberrations</span>    <span class="kn">import</span> <span class="o">*</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Sub Modules</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">utils</span>
 </pre></div>
-<div id="cell-6" class="clipboard-copy-txt"># Import core functions from modules
-# Wavefronts and Optics
-from .wavefronts     import *
-from .optics         import *
-from .optical_layers import *
-from .propagators    import *
-from .apertures      import *
-from .aberrations    import *</div>
+<div id="cell-6" class="clipboard-copy-txt"># Sub Modules
+from . import utils as utils</div>
         
         </div>
     </div>
@@ -2097,7 +2081,7 @@ from .aberrations    import *</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c4409e84" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=820b3c34" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2117,15 +2101,95 @@ from .aberrations    import *</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Images and Detectors</span>
-<span class="kn">from</span> <span class="nn">.images</span>          <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.detectors</span>       <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.detector_layers</span> <span class="kn">import</span> <span class="o">*</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Import core functions from modules</span>
+<span class="c1"># Wavefronts and Optics</span>
+<span class="kn">from</span> <span class="nn">.wavefronts</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Wavefront</span> <span class="k">as</span> <span class="n">Wavefront</span><span class="p">,</span>
+    <span class="n">FresnelWavefront</span> <span class="k">as</span> <span class="n">FresnelWavefront</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.optics</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AngularOptics</span> <span class="k">as</span> <span class="n">AngularOptics</span><span class="p">,</span>
+    <span class="n">CartesianOptics</span> <span class="k">as</span> <span class="n">CartesianOptics</span><span class="p">,</span>
+    <span class="n">FlexibleOptics</span> <span class="k">as</span> <span class="n">FlexibleOptics</span><span class="p">,</span>
+    <span class="n">LayeredOptics</span> <span class="k">as</span> <span class="n">LayeredOptics</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.optical_layers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Optic</span> <span class="k">as</span> <span class="n">Optic</span><span class="p">,</span>
+    <span class="n">PhaseOptic</span> <span class="k">as</span> <span class="n">PhaseOptic</span><span class="p">,</span>
+    <span class="n">BasisOptic</span> <span class="k">as</span> <span class="n">BasisOptic</span><span class="p">,</span>
+    <span class="n">PhaseBasisOptic</span> <span class="k">as</span> <span class="n">PhaseBasisOptic</span><span class="p">,</span>
+    <span class="n">Tilt</span> <span class="k">as</span> <span class="n">Tilt</span><span class="p">,</span>
+    <span class="n">Normalise</span> <span class="k">as</span> <span class="n">Normalise</span><span class="p">,</span>
+    <span class="n">Rotate</span> <span class="k">as</span> <span class="n">Rotate</span><span class="p">,</span>
+    <span class="n">Flip</span> <span class="k">as</span> <span class="n">Flip</span><span class="p">,</span>
+    <span class="n">Resize</span> <span class="k">as</span> <span class="n">Resize</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.propagators</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MFT</span> <span class="k">as</span> <span class="n">MFT</span><span class="p">,</span>
+    <span class="n">FFT</span> <span class="k">as</span> <span class="n">FFT</span><span class="p">,</span>
+    <span class="n">ShiftedMFT</span> <span class="k">as</span> <span class="n">ShiftedMFT</span><span class="p">,</span>
+    <span class="n">FarFieldFresnel</span> <span class="k">as</span> <span class="n">FarFieldFresnel</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.apertures</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CircularAperture</span> <span class="k">as</span> <span class="n">CircularAperture</span><span class="p">,</span>
+    <span class="n">RectangularAperture</span> <span class="k">as</span> <span class="n">RectangularAperture</span><span class="p">,</span>
+    <span class="n">RegPolyAperture</span> <span class="k">as</span> <span class="n">RegPolyAperture</span><span class="p">,</span>
+    <span class="n">IrregPolyAperture</span> <span class="k">as</span> <span class="n">IrregPolyAperture</span><span class="p">,</span>
+    <span class="n">AberratedAperture</span> <span class="k">as</span> <span class="n">AberratedAperture</span><span class="p">,</span>
+    <span class="n">UniformSpider</span> <span class="k">as</span> <span class="n">UniformSpider</span><span class="p">,</span>
+    <span class="n">CompoundAperture</span> <span class="k">as</span> <span class="n">CompoundAperture</span><span class="p">,</span>
+    <span class="n">MultiAperture</span> <span class="k">as</span> <span class="n">MultiAperture</span><span class="p">,</span>
+    <span class="n">ApertureFactory</span> <span class="k">as</span> <span class="n">ApertureFactory</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.aberrations</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Zernike</span> <span class="k">as</span> <span class="n">Zernike</span><span class="p">,</span>
+    <span class="n">ZernikeBasis</span> <span class="k">as</span> <span class="n">ZernikeBasis</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
-<div id="cell-7" class="clipboard-copy-txt"># Images and Detectors
-from .images          import *
-from .detectors       import *
-from .detector_layers import *</div>
+<div id="cell-7" class="clipboard-copy-txt"># Import core functions from modules
+# Wavefronts and Optics
+from .wavefronts import (
+    Wavefront as Wavefront,
+    FresnelWavefront as FresnelWavefront,
+)
+from .optics import (
+    AngularOptics as AngularOptics,
+    CartesianOptics as CartesianOptics,
+    FlexibleOptics as FlexibleOptics,
+    LayeredOptics as LayeredOptics,
+)
+from .optical_layers import (
+    Optic as Optic,
+    PhaseOptic as PhaseOptic,
+    BasisOptic as BasisOptic,
+    PhaseBasisOptic as PhaseBasisOptic,
+    Tilt as Tilt,
+    Normalise as Normalise,
+    Rotate as Rotate,
+    Flip as Flip,
+    Resize as Resize,
+)
+from .propagators import (
+    MFT as MFT,
+    FFT as FFT,
+    ShiftedMFT as ShiftedMFT,
+    FarFieldFresnel as FarFieldFresnel,
+)
+from .apertures import (
+    CircularAperture as CircularAperture,
+    RectangularAperture as RectangularAperture,
+    RegPolyAperture as RegPolyAperture,
+    IrregPolyAperture as IrregPolyAperture,
+    AberratedAperture as AberratedAperture,
+    UniformSpider as UniformSpider,
+    CompoundAperture as CompoundAperture,
+    MultiAperture as MultiAperture,
+    ApertureFactory as ApertureFactory,
+)
+from .aberrations import (
+    Zernike as Zernike,
+    ZernikeBasis as ZernikeBasis,
+)</div>
         
         </div>
     </div>
@@ -2135,7 +2199,7 @@ from .detector_layers import *</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b5007e5d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=f6cdeb75" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2155,17 +2219,29 @@ from .detector_layers import *</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># All other classes</span>
-<span class="kn">from</span> <span class="nn">.sources</span>      <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.spectra</span>    <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.instruments</span>  <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.observations</span> <span class="kn">import</span> <span class="o">*</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Images and Detectors</span>
+<span class="kn">from</span> <span class="nn">.images</span> <span class="kn">import</span> <span class="n">Image</span> <span class="k">as</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">.detectors</span> <span class="kn">import</span> <span class="n">LayeredDetector</span> <span class="k">as</span> <span class="n">LayeredDetector</span>
+<span class="kn">from</span> <span class="nn">.detector_layers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ApplyPixelResponse</span> <span class="k">as</span> <span class="n">ApplyPixelResponse</span><span class="p">,</span>
+    <span class="n">ApplyJitter</span> <span class="k">as</span> <span class="n">ApplyJitter</span><span class="p">,</span>
+    <span class="n">ApplySaturation</span> <span class="k">as</span> <span class="n">ApplySaturation</span><span class="p">,</span>
+    <span class="n">AddConstant</span> <span class="k">as</span> <span class="n">AddConstant</span><span class="p">,</span>
+    <span class="n">IntegerDownsample</span> <span class="k">as</span> <span class="n">IntegerDownsample</span><span class="p">,</span>
+    <span class="n">RotateDetector</span> <span class="k">as</span> <span class="n">RotateDetector</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
-<div id="cell-8" class="clipboard-copy-txt"># All other classes
-from .sources      import *
-from .spectra    import *
-from .instruments  import *
-from .observations import *</div>
+<div id="cell-8" class="clipboard-copy-txt"># Images and Detectors
+from .images import Image as Image
+from .detectors import LayeredDetector as LayeredDetector
+from .detector_layers import (
+    ApplyPixelResponse as ApplyPixelResponse,
+    ApplyJitter as ApplyJitter,
+    ApplySaturation as ApplySaturation,
+    AddConstant as AddConstant,
+    IntegerDownsample as IntegerDownsample,
+    RotateDetector as RotateDetector,
+)</div>
         
         </div>
     </div>
@@ -2174,21 +2250,8 @@ from .observations import *</div>
 </div>
 
 </div>
-</div>
-<div id="cell-id=9f32a0b4" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Sub Modules
-from .utils      import *</p>
-
-</div>
-</div>
-</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=1f103014" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e60a111e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2208,45 +2271,35 @@ from .utils      import *</p>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Add to __all__</span>
-<span class="n">modules</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">wavefronts</span><span class="p">,</span>
-    <span class="n">optics</span><span class="p">,</span>
-    <span class="n">optical_layers</span><span class="p">,</span>
-    <span class="n">propagators</span><span class="p">,</span>
-    <span class="n">apertures</span><span class="p">,</span>
-    <span class="n">aberrations</span><span class="p">,</span>
-
-    <span class="n">images</span><span class="p">,</span>
-    <span class="n">detectors</span><span class="p">,</span>
-    <span class="n">detector_layers</span><span class="p">,</span>
-
-    <span class="n">sources</span><span class="p">,</span>
-    <span class="n">spectra</span><span class="p">,</span>
-
-    <span class="n">instruments</span><span class="p">,</span>
-    <span class="n">observations</span><span class="p">,</span>
-<span class="p">]</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># All other classes</span>
+<span class="kn">from</span> <span class="nn">.sources</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PointSource</span> <span class="k">as</span> <span class="n">PointSource</span><span class="p">,</span>
+    <span class="n">PointSources</span> <span class="k">as</span> <span class="n">PointSources</span><span class="p">,</span>
+    <span class="n">BinarySource</span> <span class="k">as</span> <span class="n">BinarySource</span><span class="p">,</span>
+    <span class="n">ResolvedSource</span> <span class="k">as</span> <span class="n">ResolvedSource</span><span class="p">,</span>
+    <span class="n">PointResolvedSource</span> <span class="k">as</span> <span class="n">PointResolvedSource</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.spectra</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Spectrum</span> <span class="k">as</span> <span class="n">Spectrum</span><span class="p">,</span>
+    <span class="n">PolySpectrum</span> <span class="k">as</span> <span class="n">PolySpectrum</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.instruments</span> <span class="kn">import</span> <span class="n">Instrument</span> <span class="k">as</span> <span class="n">Instrument</span>
+<span class="kn">from</span> <span class="nn">.observations</span> <span class="kn">import</span> <span class="n">Dither</span> <span class="k">as</span> <span class="n">Dither</span>
 </pre></div>
-<div id="cell-9" class="clipboard-copy-txt"># Add to __all__
-modules = [
-    wavefronts,
-    optics,
-    optical_layers,
-    propagators,
-    apertures,
-    aberrations,
-
-    images,
-    detectors,
-    detector_layers,
-
-    sources,
-    spectra,
-
-    instruments,
-    observations,
-]</div>
+<div id="cell-9" class="clipboard-copy-txt"># All other classes
+from .sources import (
+    PointSource as PointSource,
+    PointSources as PointSources,
+    BinarySource as BinarySource,
+    ResolvedSource as ResolvedSource,
+    PointResolvedSource as PointResolvedSource,
+)
+from .spectra import (
+    Spectrum as Spectrum,
+    PolySpectrum as PolySpectrum,
+)
+from .instruments import Instrument as Instrument
+from .observations import Dither as Dither</div>
         
         </div>
     </div>
@@ -2256,7 +2309,7 @@ modules = [
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=79023848" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=337047e2" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2276,9 +2329,71 @@ modules = [
                     </div>
                 </clipboard-copy>
             </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Add to __all__</span>
+<span class="n">modules</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">wavefronts</span><span class="p">,</span>
+    <span class="n">optics</span><span class="p">,</span>
+    <span class="n">optical_layers</span><span class="p">,</span>
+    <span class="n">propagators</span><span class="p">,</span>
+    <span class="n">apertures</span><span class="p">,</span>
+    <span class="n">aberrations</span><span class="p">,</span>
+    <span class="n">images</span><span class="p">,</span>
+    <span class="n">detectors</span><span class="p">,</span>
+    <span class="n">detector_layers</span><span class="p">,</span>
+    <span class="n">sources</span><span class="p">,</span>
+    <span class="n">spectra</span><span class="p">,</span>
+    <span class="n">instruments</span><span class="p">,</span>
+    <span class="n">observations</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+<div id="cell-10" class="clipboard-copy-txt"># Add to __all__
+modules = [
+    wavefronts,
+    optics,
+    optical_layers,
+    propagators,
+    apertures,
+    aberrations,
+    images,
+    detectors,
+    detector_layers,
+    sources,
+    spectra,
+    instruments,
+    observations,
+]</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=4c572ba0" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-11">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="n">module</span><span class="o">.</span><span class="n">__all__</span> <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">modules</span><span class="p">]</span>
 </pre></div>
-<div id="cell-10" class="clipboard-copy-txt">__all__ = [module.__all__ for module in modules]</div>
+<div id="cell-11" class="clipboard-copy-txt">__all__ = [module.__all__ for module in modules]</div>
         
         </div>
     </div>
@@ -2333,10 +2448,10 @@ modules = [
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

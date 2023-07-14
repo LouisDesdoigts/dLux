@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -73,11 +73,6 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
-      
-        
-        <a href="#public-classes" class="md-skip">
-          Skip to content
-        </a>
       
     </div>
     <div data-md-component="announce">
@@ -1864,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=73ec77ba" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=c4cc0ab7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1884,9 +1879,21 @@ Licensed under the Apache License, Version 2.0.
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">zodiax</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">import</span> <span class="nn">dLux</span>
 </pre></div>
-<div id="cell-1" class="clipboard-copy-txt">%matplotlib inline</div>
+<div id="cell-1" class="clipboard-copy-txt">from __future__ import annotations
+from abc import abstractmethod
+from typing import Union
+import jax.numpy as np
+from jax import Array
+from zodiax import Base
+import dLux</div>
         
         </div>
     </div>
@@ -1896,7 +1903,7 @@ Licensed under the Apache License, Version 2.0.
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=2fe01e64" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=340f817a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1916,620 +1923,45 @@ Licensed under the Apache License, Version 2.0.
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
-<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">Array</span>
-<span class="kn">from</span> <span class="nn">zodiax</span> <span class="kn">import</span> <span class="n">Base</span>
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="c1"># OpticalLayer</span>
     <span class="c1"># TransmissiveLayer</span>
     <span class="c1"># AberratedLayer</span>
     <span class="c1"># ShapedLayer</span>
-
     <span class="c1"># BaseTransmissiveOptic</span>
     <span class="c1"># BaseOPDOptic</span>
     <span class="c1"># BasePhaseOptic</span>
     <span class="c1"># BaseBasisOptic</span>
-
     <span class="s2">&quot;Optic&quot;</span><span class="p">,</span>
     <span class="s2">&quot;PhaseOptic&quot;</span><span class="p">,</span>
     <span class="s2">&quot;BasisOptic&quot;</span><span class="p">,</span>
     <span class="s2">&quot;PhaseBasisOptic&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Tilt&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Normalise&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Rotate&quot;</span><span class="p">]</span>
-
-
-<span class="k">class</span> <span class="nc">OpticalLayer</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class for optical layers. Primarily used for input type checking.</span>
-
-<span class="sd">    Child classes must implement the __call__ method that takes in the wavefront</span>
-<span class="sd">    as the first parameter</span>
-
-<span class="sd">    Note: I have chosen __call__ over apply as the method name for the layer </span>
-<span class="sd">    to be applied to the wavefront. This is because even though it prevents</span>
-<span class="sd">    the simple interface with optax (not having to wrap in a list), because</span>
-<span class="sd">    wavefront should in general not be able to be an object you take a gradient</span>
-<span class="sd">    with respect to, it is just a latent class to store information throughout</span>
-<span class="sd">    the calculation, plus its use of strings as a way to track parameters can</span>
-<span class="sd">    make interactions with jax difficult.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
-                 <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Applies the layer to the wavefront.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        wavefront : Wavefront</span>
-<span class="sd">            The wavefront to operate on.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        wavefront : Wavefront</span>
-<span class="sd">            The transformed wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-
-<span class="k">class</span> <span class="nc">TransmissiveLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class to hold transmissive layers imbuing them with a normalise </span>
-<span class="sd">    parameter.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
-                 <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        normalise : bool = False</span>
-<span class="sd">            Whether to normalise the wavefront after passing through the</span>
-<span class="sd">            aperture.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">normalise</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">AberratedLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class for aberration layers. Primarily used for input type checking.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-
-<span class="k">class</span> <span class="nc">ShapedLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class used for layers that have a specified output shape.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the &#39;shape&#39; of the layer, more specifically the required </span>
-<span class="sd">        matching shape of the wavefront to be applied to.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        shape : int</span>
-<span class="sd">            The linear shape of the wavefront to be applied to.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-
-<span class="k">class</span> <span class="nc">BasisLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This class primarily exists to allow for the use of the class based basis</span>
-<span class="sd">    used for dynamic aberrated apertures.</span>
-
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    basis: Union[Array, list]</span>
-<span class="sd">        The basis to use. Can be an array of a list of aberrations classes.</span>
-<span class="sd">    coefficients: Array</span>
-<span class="sd">        The Array of coefficients to be applied to each basis vector.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">basis</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span>
-    <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
-                 <span class="n">basis</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        basis: Union[Array, list]</span>
-<span class="sd">            The basis to use. Can be an array of a list of aberrations classes.</span>
-<span class="sd">        coefficients: Array</span>
-<span class="sd">            The Array of coefficients to be applied to each basis vector.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">coefficients</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The number of basis vectors must be equal to &quot;</span>
-                                 <span class="s2">&quot;the number of coefficients.&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
-                  <span class="n">basis</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                  <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Performs an n-dimensional dot-product between the basis and coefficients</span>
-<span class="sd">        arrays.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        basis: Array</span>
-<span class="sd">            The basis to use.</span>
-<span class="sd">        coefficients: Array</span>
-<span class="sd">            The Array of coefficients to be applied to each basis vector.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ndim</span> <span class="o">=</span> <span class="n">coefficients</span><span class="o">.</span><span class="n">ndim</span>
-        <span class="n">axes</span> <span class="o">=</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ndim</span><span class="p">)),</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ndim</span><span class="p">)))</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
-
-
-<span class="c1">######### Optics #########</span>
-<span class="k">class</span> <span class="nc">BaseTransmissiveOptic</span><span class="p">(</span><span class="n">TransmissiveLayer</span><span class="p">,</span> <span class="n">ShapedLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class for transmissive optics. Implements the transmission attribute</span>
-<span class="sd">    and the `applied_shape` method.</span>
-
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    transmission: Array</span>
-<span class="sd">        The Array of transmission values to be applied to the input wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
-                 <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        transmission: Array</span>
-<span class="sd">            The Array of transmission values to be applied to the input</span>
-<span class="sd">            wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">transmission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">transmission</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">transmission</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the &#39;shape&#39; of the layer, more specifically the required </span>
-<span class="sd">        matching shape of the wavefront to be applied to.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        shape : int</span>
-<span class="sd">            The linear shape of the wavefront to be applied to.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span>
-
-
-<span class="k">class</span> <span class="nc">BaseOPDOptic</span><span class="p">(</span><span class="n">AberratedLayer</span><span class="p">,</span> <span class="n">ShapedLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class for OPD optics. Implements the opd attribute.</span>
-
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    opd : Array, metres</span>
-<span class="sd">        The Array of OPD values to be applied to the input wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">opd</span><span class="p">:</span> <span class="n">Array</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">opd</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        opd : Array, metres</span>
-<span class="sd">            The Array of OPD values to be applied to the input wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">opd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">opd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">opd</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">opd</span> <span class="o">=</span> <span class="n">opd</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">BasePhaseOptic</span><span class="p">(</span><span class="n">AberratedLayer</span><span class="p">,</span> <span class="n">ShapedLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class for phase optics. Implements the phase attribute.</span>
-
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    phase : Array, radians</span>
-<span class="sd">        The Array of phase values to be applied to the input wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        phase : Array, radians</span>
-<span class="sd">            The Array of phase values to be applied to the input wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">BaseBasisOptic</span><span class="p">(</span><span class="n">BaseTransmissiveOptic</span><span class="p">,</span> <span class="n">BasisLayer</span><span class="p">,</span> <span class="n">ShapedLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Adds an array of phase values to the input wavefront calculated from the</span>
-<span class="sd">    Optical Path Difference (OPD). The OPDs are calculated from the basis</span>
-<span class="sd">    arrays, and weighted by the coefficients, and converted to phases by the</span>
-<span class="sd">    wavefront methods.</span>
-
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    transmission: Array</span>
-<span class="sd">        The Array of transmission values to be applied to the input wavefront.</span>
-<span class="sd">    basis: Array, metres</span>
-<span class="sd">        Arrays holding the pre-calculated basis vectors.</span>
-<span class="sd">    coefficients: Array</span>
-<span class="sd">        The Array of coefficients to be applied to each basis vector.</span>
-<span class="sd">    normalise: bool</span>
-<span class="sd">        Whether to normalise the wavefront after passing through the</span>
-<span class="sd">        optic.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
-                 <span class="n">basis</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        basis: Array, metres</span>
-<span class="sd">            Arrays holding the pre-calculated basis vectors.</span>
-<span class="sd">        transmission: Array = None</span>
-<span class="sd">            The Array of transmission values to be applied to the input</span>
-<span class="sd">            wavefront.</span>
-<span class="sd">        coefficients: Array = None</span>
-<span class="sd">            The Array of coefficients to be applied to each basis vector.</span>
-<span class="sd">        normalise: bool = False</span>
-<span class="sd">            Whether to normalise the wavefront after passing through the</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">transmission</span><span class="o">=</span><span class="n">transmission</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">basis</span><span class="p">,</span>
-                         <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="n">normalise</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the &#39;shape&#39; of the layer, more specifically the required</span>
-<span class="sd">        matching shape of the wavefront to be applied to.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        shape : int</span>
-<span class="sd">            The linear shape of the wavefront to be applied to.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="s2">&quot;Rotate&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Flip&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Resize&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt">from __future__ import annotations
-from abc import abstractmethod
-import jax.numpy as np
-from jax import Array
-from zodiax import Base
-
-__all__ = [
-
+<div id="cell-2" class="clipboard-copy-txt">__all__ = [
     # OpticalLayer
     # TransmissiveLayer
     # AberratedLayer
     # ShapedLayer
-
     # BaseTransmissiveOptic
     # BaseOPDOptic
     # BasePhaseOptic
     # BaseBasisOptic
-
     "Optic",
     "PhaseOptic",
     "BasisOptic",
     "PhaseBasisOptic",
     "Tilt",
     "Normalise",
-    "Rotate"]
-
-
-class OpticalLayer(Base):
-    """
-    Base class for optical layers. Primarily used for input type checking.
-
-    Child classes must implement the __call__ method that takes in the wavefront
-    as the first parameter
-
-    Note: I have chosen __call__ over apply as the method name for the layer 
-    to be applied to the wavefront. This is because even though it prevents
-    the simple interface with optax (not having to wrap in a list), because
-    wavefront should in general not be able to be an object you take a gradient
-    with respect to, it is just a latent class to store information throughout
-    the calculation, plus its use of strings as a way to track parameters can
-    make interactions with jax difficult.
-    """
-
-    @abstractmethod
-    def __call__(self: OpticalLayer,
-                 wavefront: Wavefront) -> Wavefront:  # pragma: no cover
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
-
-
-class TransmissiveLayer(OpticalLayer):
-    """
-    Base class to hold transmissive layers imbuing them with a normalise 
-    parameter.
-    """
-    normalise: bool
-
-    def __init__(self: OpticalLayer,
-                 normalise: bool = False,
-                 **kwargs):
-        """
-        Parameters
-        ----------
-        normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
-        """
-        self.normalise = bool(normalise)
-        super().__init__(**kwargs)
-
-
-class AberratedLayer(OpticalLayer):
-    """
-    Base class for aberration layers. Primarily used for input type checking.
-    """
-
-
-class ShapedLayer(OpticalLayer):
-    """
-    Base class used for layers that have a specified output shape.
-    """
-
-    @abstractmethod
-    def applied_shape(self: OpticalLayer) -> int:
-        """
-        Returns the 'shape' of the layer, more specifically the required 
-        matching shape of the wavefront to be applied to.
-
-        Returns
-        -------
-        shape : int
-            The linear shape of the wavefront to be applied to.
-        """
-
-
-class BasisLayer(OpticalLayer):
-    """
-    This class primarily exists to allow for the use of the class based basis
-    used for dynamic aberrated apertures.
-
-    Attributes
-    ----------
-    basis: Union[Array, list]
-        The basis to use. Can be an array of a list of aberrations classes.
-    coefficients: Array
-        The Array of coefficients to be applied to each basis vector.
-    """
-    basis: Union[Array, list]
-    coefficients: Array
-
-    def __init__(self: OpticalLayer,
-                 basis: Array = None,
-                 coefficients: Array = None,
-                 **kwargs) -> OpticalLayer:
-        """
-        Parameters
-        ----------
-        basis: Union[Array, list]
-            The basis to use. Can be an array of a list of aberrations classes.
-        coefficients: Array
-            The Array of coefficients to be applied to each basis vector.
-        """
-        super().__init__(**kwargs)
-
-        self.basis = np.asarray(basis, dtype=float)
-        if coefficients is None:
-            self.coefficients = np.zeros(self.basis.shape[:-2])
-        else:
-            self.coefficients = np.asarray(coefficients, dtype=float)
-            if self.basis.shape[:-2] != self.coefficients.shape:
-                raise ValueError("The number of basis vectors must be equal to "
-                                 "the number of coefficients.")
-
-    def calculate(self: OpticalLayer,
-                  basis: Array,
-                  coefficients: Array) -> Array:
-        """
-        Performs an n-dimensional dot-product between the basis and coefficients
-        arrays.
-
-        Parameters
-        ----------
-        basis: Array
-            The basis to use.
-        coefficients: Array
-            The Array of coefficients to be applied to each basis vector.
-        """
-        ndim = coefficients.ndim
-        axes = (tuple(range(ndim)), tuple(range(ndim)))
-        return np.tensordot(basis, coefficients, axes=axes)
-
-
-######### Optics #########
-class BaseTransmissiveOptic(TransmissiveLayer, ShapedLayer):
-    """
-    Base class for transmissive optics. Implements the transmission attribute
-    and the `applied_shape` method.
-
-    Attributes
-    ----------
-    transmission: Array
-        The Array of transmission values to be applied to the input wavefront.
-    """
-    transmission: Array
-
-    def __init__(self: OpticalLayer,
-                 transmission: Array,
-                 **kwargs) -> OpticalLayer:
-        """
-        Parameters
-        ----------
-        transmission: Array
-            The Array of transmission values to be applied to the input
-            wavefront.
-        """
-        if transmission is not None:
-            transmission = np.asarray(transmission, dtype=float)
-        self.transmission = transmission
-        super().__init__(**kwargs)
-
-    @property
-    def applied_shape(self: OpticalLayer) -> int:
-        """
-        Returns the 'shape' of the layer, more specifically the required 
-        matching shape of the wavefront to be applied to.
-
-        Returns
-        -------
-        shape : int
-            The linear shape of the wavefront to be applied to.
-        """
-        return self.transmission.shape
-
-
-class BaseOPDOptic(AberratedLayer, ShapedLayer):
-    """
-    Base class for OPD optics. Implements the opd attribute.
-
-    Attributes
-    ----------
-    opd : Array, metres
-        The Array of OPD values to be applied to the input wavefront.
-    """
-    opd: Array
-
-    def __init__(self: OpticalLayer, opd: Array, **kwargs) -> OpticalLayer:
-        """
-        Parameters
-        ----------
-        opd : Array, metres
-            The Array of OPD values to be applied to the input wavefront.
-        """
-        if opd is not None:
-            opd = np.asarray(opd, dtype=float)
-        self.opd = opd
-        super().__init__(**kwargs)
-
-
-class BasePhaseOptic(AberratedLayer, ShapedLayer):
-    """
-    Base class for phase optics. Implements the phase attribute.
-
-    Attributes
-    ----------
-    phase : Array, radians
-        The Array of phase values to be applied to the input wavefront.
-    """
-    phase: Array
-
-    def __init__(self: OpticalLayer, phase: Array, **kwargs) -> OpticalLayer:
-        """
-        Parameters
-        ----------
-        phase : Array, radians
-            The Array of phase values to be applied to the input wavefront.
-        """
-        if phase is not None:
-            phase = np.asarray(phase, dtype=float)
-        self.phase = phase
-        super().__init__(**kwargs)
-
-
-class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
-    """
-    Adds an array of phase values to the input wavefront calculated from the
-    Optical Path Difference (OPD). The OPDs are calculated from the basis
-    arrays, and weighted by the coefficients, and converted to phases by the
-    wavefront methods.
-
-    Attributes
-    ----------
-    transmission: Array
-        The Array of transmission values to be applied to the input wavefront.
-    basis: Array, metres
-        Arrays holding the pre-calculated basis vectors.
-    coefficients: Array
-        The Array of coefficients to be applied to each basis vector.
-    normalise: bool
-        Whether to normalise the wavefront after passing through the
-        optic.
-    """
-
-    def __init__(self: OpticalLayer,
-                 basis: Array,
-                 transmission: Array = None,
-                 coefficients: Array = None,
-                 normalise: bool = False) -> OpticalLayer:
-        """
-        Parameters
-        ----------
-        basis: Array, metres
-            Arrays holding the pre-calculated basis vectors.
-        transmission: Array = None
-            The Array of transmission values to be applied to the input
-            wavefront.
-        coefficients: Array = None
-            The Array of coefficients to be applied to each basis vector.
-        normalise: bool = False
-            Whether to normalise the wavefront after passing through the
-        """
-        super().__init__(transmission=transmission, basis=basis,
-                         coefficients=coefficients, normalise=normalise)
-
-    @property
-    def applied_shape(self: OpticalLayer) -> int:
-        """
-        Returns the 'shape' of the layer, more specifically the required
-        matching shape of the wavefront to be applied to.
-
-        Returns
-        -------
-        shape : int
-            The linear shape of the wavefront to be applied to.
-        """
-        return self.basis.shape[-2:]
-</div>
+    "Rotate",
+    "Flip",
+    "Resize",
+]</div>
         
         </div>
     </div>
@@ -2538,20 +1970,8 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
 </div>
 
 </div>
-</div>
-<div id="cell-id=c50d6799" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="public-classes">Public Classes<a class="anchor-link" href="#public-classes">&#182;</a></h2><p>#####################</p>
-
-</div>
-</div>
-</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5fb145e8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b63593d6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2571,7 +1991,864 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">Optic</span><span class="p">(</span><span class="n">BaseTransmissiveOptic</span><span class="p">,</span> <span class="n">BaseOPDOptic</span><span class="p">):</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">Wavefront</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">wavefronts</span><span class="o">.</span><span class="n">Wavefront</span>
+</pre></div>
+<div id="cell-3" class="clipboard-copy-txt">Wavefront = lambda: dLux.wavefronts.Wavefront</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e9f9ea52" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-4">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">OpticalLayer</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for optical layers. Primarily used for input type checking.</span>
+
+<span class="sd">    Child classes must implement the __call__ method that takes in the</span>
+<span class="sd">    wavefront as the first parameter.</span>
+
+<span class="sd">    Note: I have chosen __call__ over apply as the method name for the layer</span>
+<span class="sd">    to be applied to the wavefront. This is because even though it prevents</span>
+<span class="sd">    the simple interface with Optax (not having to wrap in a list), because</span>
+<span class="sd">    wavefront should in general not be able to be an object you take a gradient</span>
+<span class="sd">    with respect to, it is just a latent class to store information throughout</span>
+<span class="sd">    the calculation, plus its use of strings as a way to track parameters can</span>
+<span class="sd">    make interactions with jax difficult.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies the layer to the wavefront.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The wavefront to operate on.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The transformed wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div>
+<div id="cell-4" class="clipboard-copy-txt">class OpticalLayer(Base):
+    """
+    Base class for optical layers. Primarily used for input type checking.
+
+    Child classes must implement the __call__ method that takes in the
+    wavefront as the first parameter.
+
+    Note: I have chosen __call__ over apply as the method name for the layer
+    to be applied to the wavefront. This is because even though it prevents
+    the simple interface with Optax (not having to wrap in a list), because
+    wavefront should in general not be able to be an object you take a gradient
+    with respect to, it is just a latent class to store information throughout
+    the calculation, plus its use of strings as a way to track parameters can
+    make interactions with jax difficult.
+    """
+
+    @abstractmethod
+    def __call__(
+        self: OpticalLayer, wavefront: Wavefront
+    ) -> Wavefront:  # pragma: no cover
+        """
+        Applies the layer to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b50183da" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-5">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TransmissiveLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class to hold transmissive layers imbuing them with a normalise</span>
+<span class="sd">    parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        normalise : bool = False</span>
+<span class="sd">            Whether to normalise the wavefront after passing through the</span>
+<span class="sd">            aperture.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">normalise</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+<div id="cell-5" class="clipboard-copy-txt">class TransmissiveLayer(OpticalLayer):
+    """
+    Base class to hold transmissive layers imbuing them with a normalise
+    parameter.
+    """
+
+    normalise: bool
+
+    def __init__(self: OpticalLayer, normalise: bool = False, **kwargs):
+        """
+        Parameters
+        ----------
+        normalise : bool = False
+            Whether to normalise the wavefront after passing through the
+            aperture.
+        """
+        self.normalise = bool(normalise)
+        super().__init__(**kwargs)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=02879afd" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-6">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">AberratedLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for aberration layers. Primarily used for input type checking.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+<div id="cell-6" class="clipboard-copy-txt">class AberratedLayer(OpticalLayer):
+    """
+    Base class for aberration layers. Primarily used for input type checking.
+    """</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=df933b45" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-7">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">ShapedLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class used for layers that have a specified output shape.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the &#39;shape&#39; of the layer, more specifically the required</span>
+<span class="sd">        matching shape of the wavefront to be applied to.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        shape : int</span>
+<span class="sd">            The linear shape of the wavefront to be applied to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div>
+<div id="cell-7" class="clipboard-copy-txt">class ShapedLayer(OpticalLayer):
+    """
+    Base class used for layers that have a specified output shape.
+    """
+
+    @abstractmethod
+    def applied_shape(self: OpticalLayer) -> int:
+        """
+        Returns the 'shape' of the layer, more specifically the required
+        matching shape of the wavefront to be applied to.
+
+        Returns
+        -------
+        shape : int
+            The linear shape of the wavefront to be applied to.
+        """</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=7d2e0868" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-8">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">BasisLayer</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class primarily exists to allow for the use of the class based basis</span>
+<span class="sd">    used for dynamic aberrated apertures.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    basis: Union[Array, list]</span>
+<span class="sd">        The basis to use. Can be an array of a list of aberrations classes.</span>
+<span class="sd">    coefficients: Array</span>
+<span class="sd">        The Array of coefficients to be applied to each basis vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">basis</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span>
+    <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
+        <span class="n">basis</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        basis: Union[Array, list]</span>
+<span class="sd">            The basis to use. Can be an array of a list of aberrations classes.</span>
+<span class="sd">        coefficients: Array</span>
+<span class="sd">            The Array of coefficients to be applied to each basis vector.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">coefficients</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;The number of basis vectors must be equal to &quot;</span>
+                    <span class="s2">&quot;the number of coefficients.&quot;</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">basis</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs an n-dimensional dot-product between the basis and</span>
+<span class="sd">        coefficients arrays.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        basis: Array</span>
+<span class="sd">            The basis to use.</span>
+<span class="sd">        coefficients: Array</span>
+<span class="sd">            The Array of coefficients to be applied to each basis vector.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ndim</span> <span class="o">=</span> <span class="n">coefficients</span><span class="o">.</span><span class="n">ndim</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ndim</span><span class="p">)),</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ndim</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+</pre></div>
+<div id="cell-8" class="clipboard-copy-txt">class BasisLayer(OpticalLayer):
+    """
+    This class primarily exists to allow for the use of the class based basis
+    used for dynamic aberrated apertures.
+
+    Attributes
+    ----------
+    basis: Union[Array, list]
+        The basis to use. Can be an array of a list of aberrations classes.
+    coefficients: Array
+        The Array of coefficients to be applied to each basis vector.
+    """
+
+    basis: Union[Array, list]
+    coefficients: Array
+
+    def __init__(
+        self: OpticalLayer,
+        basis: Array = None,
+        coefficients: Array = None,
+        **kwargs,
+    ) -> OpticalLayer:
+        """
+        Parameters
+        ----------
+        basis: Union[Array, list]
+            The basis to use. Can be an array of a list of aberrations classes.
+        coefficients: Array
+            The Array of coefficients to be applied to each basis vector.
+        """
+        super().__init__(**kwargs)
+
+        self.basis = np.asarray(basis, dtype=float)
+        if coefficients is None:
+            self.coefficients = np.zeros(self.basis.shape[:-2])
+        else:
+            self.coefficients = np.asarray(coefficients, dtype=float)
+            if self.basis.shape[:-2] != self.coefficients.shape:
+                raise ValueError(
+                    "The number of basis vectors must be equal to "
+                    "the number of coefficients."
+                )
+
+    def calculate(
+        self: OpticalLayer, basis: Array, coefficients: Array
+    ) -> Array:
+        """
+        Performs an n-dimensional dot-product between the basis and
+        coefficients arrays.
+
+        Parameters
+        ----------
+        basis: Array
+            The basis to use.
+        coefficients: Array
+            The Array of coefficients to be applied to each basis vector.
+        """
+        ndim = coefficients.ndim
+        axes = (tuple(range(ndim)), tuple(range(ndim)))
+        return np.tensordot(basis, coefficients, axes=axes)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=f28f3f7a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-9">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">BaseTransmissiveOptic</span><span class="p">(</span><span class="n">TransmissiveLayer</span><span class="p">,</span> <span class="n">ShapedLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for transmissive optics. Implements the transmission attribute</span>
+<span class="sd">    and the `applied_shape` method.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    transmission: Array</span>
+<span class="sd">        The Array of transmission values to be applied to the input wavefront.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        transmission: Array</span>
+<span class="sd">            The Array of transmission values to be applied to the input</span>
+<span class="sd">            wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">transmission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">transmission</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">transmission</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the &#39;shape&#39; of the layer, more specifically the required</span>
+<span class="sd">        matching shape of the wavefront to be applied to.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        shape : int</span>
+<span class="sd">            The linear shape of the wavefront to be applied to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+<div id="cell-9" class="clipboard-copy-txt">class BaseTransmissiveOptic(TransmissiveLayer, ShapedLayer):
+    """
+    Base class for transmissive optics. Implements the transmission attribute
+    and the `applied_shape` method.
+
+    Attributes
+    ----------
+    transmission: Array
+        The Array of transmission values to be applied to the input wavefront.
+    """
+
+    transmission: Array
+
+    def __init__(
+        self: OpticalLayer, transmission: Array, **kwargs
+    ) -> OpticalLayer:
+        """
+        Parameters
+        ----------
+        transmission: Array
+            The Array of transmission values to be applied to the input
+            wavefront.
+        """
+        if transmission is not None:
+            transmission = np.asarray(transmission, dtype=float)
+        self.transmission = transmission
+        super().__init__(**kwargs)
+
+    @property
+    def applied_shape(self: OpticalLayer) -> int:
+        """
+        Returns the 'shape' of the layer, more specifically the required
+        matching shape of the wavefront to be applied to.
+
+        Returns
+        -------
+        shape : int
+            The linear shape of the wavefront to be applied to.
+        """
+        return self.transmission.shape</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=91211ad6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-10">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">BaseOPDOptic</span><span class="p">(</span><span class="n">AberratedLayer</span><span class="p">,</span> <span class="n">ShapedLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for OPD optics. Implements the opd attribute.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    opd : Array, metres</span>
+<span class="sd">        The Array of OPD values to be applied to the input wavefront.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">opd</span><span class="p">:</span> <span class="n">Array</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">opd</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        opd : Array, metres</span>
+<span class="sd">            The Array of OPD values to be applied to the input wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">opd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">opd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">opd</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opd</span> <span class="o">=</span> <span class="n">opd</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+<div id="cell-10" class="clipboard-copy-txt">class BaseOPDOptic(AberratedLayer, ShapedLayer):
+    """
+    Base class for OPD optics. Implements the opd attribute.
+
+    Attributes
+    ----------
+    opd : Array, metres
+        The Array of OPD values to be applied to the input wavefront.
+    """
+
+    opd: Array
+
+    def __init__(self: OpticalLayer, opd: Array, **kwargs) -> OpticalLayer:
+        """
+        Parameters
+        ----------
+        opd : Array, metres
+            The Array of OPD values to be applied to the input wavefront.
+        """
+        if opd is not None:
+            opd = np.asarray(opd, dtype=float)
+        self.opd = opd
+        super().__init__(**kwargs)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=675927df" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-11">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">BasePhaseOptic</span><span class="p">(</span><span class="n">AberratedLayer</span><span class="p">,</span> <span class="n">ShapedLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for phase optics. Implements the phase attribute.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    phase : Array, radians</span>
+<span class="sd">        The Array of phase values to be applied to the input wavefront.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        phase : Array, radians</span>
+<span class="sd">            The Array of phase values to be applied to the input wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+<div id="cell-11" class="clipboard-copy-txt">class BasePhaseOptic(AberratedLayer, ShapedLayer):
+    """
+    Base class for phase optics. Implements the phase attribute.
+
+    Attributes
+    ----------
+    phase : Array, radians
+        The Array of phase values to be applied to the input wavefront.
+    """
+
+    phase: Array
+
+    def __init__(self: OpticalLayer, phase: Array, **kwargs) -> OpticalLayer:
+        """
+        Parameters
+        ----------
+        phase : Array, radians
+            The Array of phase values to be applied to the input wavefront.
+        """
+        if phase is not None:
+            phase = np.asarray(phase, dtype=float)
+        self.phase = phase
+        super().__init__(**kwargs)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=dce32ec7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-12">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">BaseBasisOptic</span><span class="p">(</span><span class="n">BaseTransmissiveOptic</span><span class="p">,</span> <span class="n">BasisLayer</span><span class="p">,</span> <span class="n">ShapedLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds an array of phase values to the input wavefront calculated from the</span>
+<span class="sd">    Optical Path Difference (OPD). The OPDs are calculated from the basis</span>
+<span class="sd">    arrays, and weighted by the coefficients, and converted to phases by the</span>
+<span class="sd">    wavefront methods.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    transmission: Array</span>
+<span class="sd">        The Array of transmission values to be applied to the input wavefront.</span>
+<span class="sd">    basis: Array, metres</span>
+<span class="sd">        Arrays holding the pre-calculated basis vectors.</span>
+<span class="sd">    coefficients: Array</span>
+<span class="sd">        The Array of coefficients to be applied to each basis vector.</span>
+<span class="sd">    normalise: bool</span>
+<span class="sd">        Whether to normalise the wavefront after passing through the</span>
+<span class="sd">        optic.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
+        <span class="n">basis</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">coefficients</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        basis: Array, metres</span>
+<span class="sd">            Arrays holding the pre-calculated basis vectors.</span>
+<span class="sd">        transmission: Array = None</span>
+<span class="sd">            The Array of transmission values to be applied to the input</span>
+<span class="sd">            wavefront.</span>
+<span class="sd">        coefficients: Array = None</span>
+<span class="sd">            The Array of coefficients to be applied to each basis vector.</span>
+<span class="sd">        normalise: bool = False</span>
+<span class="sd">            Whether to normalise the wavefront after passing through the</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">transmission</span><span class="o">=</span><span class="n">transmission</span><span class="p">,</span>
+            <span class="n">basis</span><span class="o">=</span><span class="n">basis</span><span class="p">,</span>
+            <span class="n">coefficients</span><span class="o">=</span><span class="n">coefficients</span><span class="p">,</span>
+            <span class="n">normalise</span><span class="o">=</span><span class="n">normalise</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">applied_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the &#39;shape&#39; of the layer, more specifically the required</span>
+<span class="sd">        matching shape of the wavefront to be applied to.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        shape : int</span>
+<span class="sd">            The linear shape of the wavefront to be applied to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+</pre></div>
+<div id="cell-12" class="clipboard-copy-txt">class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
+    """
+    Adds an array of phase values to the input wavefront calculated from the
+    Optical Path Difference (OPD). The OPDs are calculated from the basis
+    arrays, and weighted by the coefficients, and converted to phases by the
+    wavefront methods.
+
+    Attributes
+    ----------
+    transmission: Array
+        The Array of transmission values to be applied to the input wavefront.
+    basis: Array, metres
+        Arrays holding the pre-calculated basis vectors.
+    coefficients: Array
+        The Array of coefficients to be applied to each basis vector.
+    normalise: bool
+        Whether to normalise the wavefront after passing through the
+        optic.
+    """
+
+    def __init__(
+        self: OpticalLayer,
+        basis: Array,
+        transmission: Array = None,
+        coefficients: Array = None,
+        normalise: bool = False,
+    ) -> OpticalLayer:
+        """
+        Parameters
+        ----------
+        basis: Array, metres
+            Arrays holding the pre-calculated basis vectors.
+        transmission: Array = None
+            The Array of transmission values to be applied to the input
+            wavefront.
+        coefficients: Array = None
+            The Array of coefficients to be applied to each basis vector.
+        normalise: bool = False
+            Whether to normalise the wavefront after passing through the
+        """
+        super().__init__(
+            transmission=transmission,
+            basis=basis,
+            coefficients=coefficients,
+            normalise=normalise,
+        )
+
+    @property
+    def applied_shape(self: OpticalLayer) -> int:
+        """
+        Returns the 'shape' of the layer, more specifically the required
+        matching shape of the wavefront to be applied to.
+
+        Returns
+        -------
+        shape : int
+            The linear shape of the wavefront to be applied to.
+        """
+        return self.basis.shape[-2:]</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=429abcb1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-13">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1">##################</span>
+<span class="c1"># Public Classes #</span>
+<span class="c1">##################</span>
+<span class="k">class</span> <span class="nc">Optic</span><span class="p">(</span><span class="n">BaseTransmissiveOptic</span><span class="p">,</span> <span class="n">BaseOPDOptic</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Optics class that holds both a transmission and OPD array.</span>
 
@@ -2586,10 +2863,12 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
 <span class="sd">        optic.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
-                 <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">opd</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
+        <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">opd</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2602,13 +2881,15 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
 <span class="sd">            Whether to normalise the wavefront after passing through the</span>
 <span class="sd">            optic.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">transmission</span><span class="o">=</span><span class="n">transmission</span><span class="p">,</span> <span class="n">opd</span><span class="o">=</span><span class="n">opd</span><span class="p">,</span>
-                         <span class="n">normalise</span><span class="o">=</span><span class="n">normalise</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">transmission</span><span class="o">=</span><span class="n">transmission</span><span class="p">,</span> <span class="n">opd</span><span class="o">=</span><span class="n">opd</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="n">normalise</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">opd</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;opd and transmission must have the same &quot;</span>
-                                 <span class="s2">&quot;shape.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;opd and transmission must have the same &quot;</span> <span class="s2">&quot;shape.&quot;</span>
+                <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2629,9 +2910,102 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">wavefront</span>
+</pre></div>
+<div id="cell-13" class="clipboard-copy-txt">##################
+# Public Classes #
+##################
+class Optic(BaseTransmissiveOptic, BaseOPDOptic):
+    """
+    Optics class that holds both a transmission and OPD array.
 
+    Attributes
+    ----------
+    transmission: Array
+        The Array of transmission values to be applied to the input wavefront.
+    opd : Array, metres
+        The Array of OPD values to be applied to the input wavefront.
+    normalise: bool
+        Whether to normalise the wavefront after passing through the
+        optic.
+    """
 
-<span class="k">class</span> <span class="nc">BasisOptic</span><span class="p">(</span><span class="n">BaseBasisOptic</span><span class="p">):</span>
+    def __init__(
+        self: OpticalLayer,
+        transmission: Array = None,
+        opd: Array = None,
+        normalise: bool = False,
+    ):
+        """
+        Parameters
+        ----------
+        transmission: Array = None
+            The Array of transmission values to be applied to the input
+            wavefront.
+        opd : Array, metres = None
+            The Array of OPD values to be applied to the input wavefront.
+        normalise: bool = False
+            Whether to normalise the wavefront after passing through the
+            optic.
+        """
+        super().__init__(
+            transmission=transmission, opd=opd, normalise=normalise
+        )
+
+        if self.opd is not None and self.transmission is not None:
+            if opd.shape != self.transmission.shape:
+                raise ValueError(
+                    "opd and transmission must have the same " "shape."
+                )
+
+    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the layer to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
+        wavefront *= self.transmission
+        wavefront += self.opd
+        if self.normalise:
+            wavefront = wavefront.normalise()
+        return wavefront</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a31d96b9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-14">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">BasisOptic</span><span class="p">(</span><span class="n">BaseBasisOptic</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds an array of phase values to the input wavefront calculated from the</span>
 <span class="sd">    Optical Path Difference (OPD). The OPDs are calculated from the basis</span>
@@ -2679,9 +3053,85 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">wavefront</span>
+</pre></div>
+<div id="cell-14" class="clipboard-copy-txt">class BasisOptic(BaseBasisOptic):
+    """
+    Adds an array of phase values to the input wavefront calculated from the
+    Optical Path Difference (OPD). The OPDs are calculated from the basis
+    arrays, and weighted by the coefficients, and converted to phases by the
+    wavefront methods.
 
+    Attributes
+    ----------
+    transmission: Array
+        The Array of transmission values to be applied to the input wavefront.
+    basis: Array, metres
+        Arrays holding the pre-calculated basis vectors.
+    coefficients: Array
+        The Array of coefficients to be applied to each basis vector.
+    """
 
-<span class="k">class</span> <span class="nc">PhaseOptic</span><span class="p">(</span><span class="n">BaseTransmissiveOptic</span><span class="p">,</span> <span class="n">BasePhaseOptic</span><span class="p">):</span>
+    @property
+    def opd(self: OpticalLayer) -> Array:
+        """
+        Calculates the total opd from the basis vectors and coefficients.
+
+        Returns
+        -------
+        opd : Array, metres
+            The total opd.
+        """
+        return self.calculate(self.basis, self.coefficients)
+
+    def __call__(self: OpticalLayer, wavefront: Wavefront()) -> Wavefront():
+        """
+        Applies the layer to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
+        wavefront *= self.transmission
+        wavefront += self.opd
+        if self.normalise:
+            wavefront = wavefront.normalise()
+        return wavefront</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=5bd9e13a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-15">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">PhaseOptic</span><span class="p">(</span><span class="n">BaseTransmissiveOptic</span><span class="p">,</span> <span class="n">BasePhaseOptic</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Optics class that holds both a transmission and phase array.</span>
 
@@ -2696,10 +3146,12 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
 <span class="sd">        optic.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
-                 <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
+        <span class="n">transmission</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">phase</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">normalise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2712,13 +3164,15 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
 <span class="sd">            Whether to normalise the wavefront after passing through the</span>
 <span class="sd">            optic.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">transmission</span><span class="o">=</span><span class="n">transmission</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="n">phase</span><span class="p">,</span>
-                         <span class="n">normalise</span><span class="o">=</span><span class="n">normalise</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">transmission</span><span class="o">=</span><span class="n">transmission</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="n">phase</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="n">normalise</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">phase</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmission</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;phase and transmission must have the same &quot;</span>
-                                 <span class="s2">&quot;shape.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;phase and transmission must have the same &quot;</span> <span class="s2">&quot;shape.&quot;</span>
+                <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2739,9 +3193,99 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">wavefront</span>
+</pre></div>
+<div id="cell-15" class="clipboard-copy-txt">class PhaseOptic(BaseTransmissiveOptic, BasePhaseOptic):
+    """
+    Optics class that holds both a transmission and phase array.
 
+    Attributes
+    ----------
+    transmission: Array
+        The Array of transmission values to be applied to the input wavefront.
+    phase : Array, radians
+        The Array of phase values to be applied to the input wavefront.
+    normalise: bool
+        Whether to normalise the wavefront after passing through the
+        optic.
+    """
 
-<span class="k">class</span> <span class="nc">PhaseBasisOptic</span><span class="p">(</span><span class="n">BaseBasisOptic</span><span class="p">):</span>
+    def __init__(
+        self: OpticalLayer,
+        transmission: Array = None,
+        phase: Array = None,
+        normalise: bool = False,
+    ) -> OpticalLayer:
+        """
+        Parameters
+        ----------
+        transmission: Array = None
+            The Array of transmission values to be applied to the input
+            wavefront.
+        phase : Array, radians = None
+            The Array of phase values to be applied to the input wavefront.
+        normalise: bool = False
+            Whether to normalise the wavefront after passing through the
+            optic.
+        """
+        super().__init__(
+            transmission=transmission, phase=phase, normalise=normalise
+        )
+
+        if self.phase is not None and self.transmission is not None:
+            if phase.shape != self.transmission.shape:
+                raise ValueError(
+                    "phase and transmission must have the same " "shape."
+                )
+
+    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the layer to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
+        wavefront *= self.transmission
+        wavefront = wavefront.add_phase(self.phase)
+        if self.normalise:
+            wavefront = wavefront.normalise()
+        return wavefront</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=02705c47" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-16">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">PhaseBasisOptic</span><span class="p">(</span><span class="n">BaseBasisOptic</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds an array of phase values to the input wavefront calculated from the</span>
 <span class="sd">    Optical Path Difference (OPD). The OPDs are calculated from the basis</span>
@@ -2789,306 +3333,8 @@ class BaseBasisOptic(BaseTransmissiveOptic, BasisLayer, ShapedLayer):
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">wavefront</span>
-
-
-<span class="k">class</span> <span class="nc">Tilt</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Tilts the wavefront by the input angles.</span>
-
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    angles : Array, radians</span>
-<span class="sd">        The (x, y) angles by which to tilt the wavefront.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constructor for the TiltWavefront class.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        angles : Array, radians</span>
-<span class="sd">            The (x, y) angles by which to tilt the wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;angles must have have (2,)&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Applies the layer to the wavefront.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        wavefront : Wavefront</span>
-<span class="sd">            The wavefront to operate on.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        wavefront : Wavefront</span>
-<span class="sd">            The transformed wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">tilt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">Normalise</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalises the wavefront.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Applies the layer to the wavefront.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        wavefront : Wavefront</span>
-<span class="sd">            The wavefront to operate on.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        wavefront : Wavefront</span>
-<span class="sd">            The transformed wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
-
-
-<span class="k">class</span> <span class="nc">Rotate</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Applies a rotation to the wavefront using interpolation methods.</span>
-
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    angle : Array, radians</span>
-<span class="sd">        The angle by which to rotate the wavefront in the clockwise direction.</span>
-<span class="sd">    order : int = 1</span>
-<span class="sd">        The order of the interpolation to use. Only applies if fourier is</span>
-<span class="sd">        False. Must be 0, 1, or 3.</span>
-<span class="sd">    complex : bool = False</span>
-<span class="sd">        Should the rotation be performed on the &#39;complex&#39; (real, imaginary),</span>
-<span class="sd">        as opposed to the default &#39;phasor&#39; (amplitude, phase) arrays.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span>
-    <span class="n">order</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
-                 <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                 <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constructor for the Rotate class.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        angle: float, radians</span>
-<span class="sd">            The angle by which to rotate the wavefront in the clockwise </span>
-<span class="sd">            direction.</span>
-<span class="sd">        order : int = 1</span>
-<span class="sd">            The order of the interpolation to use. Must be 0, or 1.</span>
-<span class="sd">        complex : bool = False</span>
-<span class="sd">            Should the rotation be performed on the &#39;complex&#39; (real, imaginary),</span>
-<span class="sd">            as opposed to the default &#39;phasor&#39; (amplitude, phase) arrays.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">complex</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">complex</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Order must be 0, 1&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;angle must be a zero-dimensional, has &quot;</span>
-                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2"> dimensions.&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Applies the layer to the wavefront.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        wavefront : Wavefront</span>
-<span class="sd">            The wavefront to operate on.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        wavefront : Wavefront</span>
-<span class="sd">            The transformed wavefront.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt">class Optic(BaseTransmissiveOptic, BaseOPDOptic):
-    """
-    Optics class that holds both a transmission and OPD array.
-
-    Attributes
-    ----------
-    transmission: Array
-        The Array of transmission values to be applied to the input wavefront.
-    opd : Array, metres
-        The Array of OPD values to be applied to the input wavefront.
-    normalise: bool
-        Whether to normalise the wavefront after passing through the
-        optic.
-    """
-
-    def __init__(self: OpticalLayer,
-                 transmission: Array = None,
-                 opd: Array = None,
-                 normalise: bool = False):
-        """
-        Parameters
-        ----------
-        transmission: Array = None
-            The Array of transmission values to be applied to the input
-            wavefront.
-        opd : Array, metres = None
-            The Array of OPD values to be applied to the input wavefront.
-        normalise: bool = False
-            Whether to normalise the wavefront after passing through the
-            optic.
-        """
-        super().__init__(transmission=transmission, opd=opd,
-                         normalise=normalise)
-
-        if self.opd is not None and self.transmission is not None:
-            if opd.shape != self.transmission.shape:
-                raise ValueError("opd and transmission must have the same "
-                                 "shape.")
-
-    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
-        wavefront *= self.transmission
-        wavefront += self.opd
-        if self.normalise:
-            wavefront = wavefront.normalise()
-        return wavefront
-
-
-class BasisOptic(BaseBasisOptic):
-    """
-    Adds an array of phase values to the input wavefront calculated from the
-    Optical Path Difference (OPD). The OPDs are calculated from the basis
-    arrays, and weighted by the coefficients, and converted to phases by the
-    wavefront methods.
-
-    Attributes
-    ----------
-    transmission: Array
-        The Array of transmission values to be applied to the input wavefront.
-    basis: Array, metres
-        Arrays holding the pre-calculated basis vectors.
-    coefficients: Array
-        The Array of coefficients to be applied to each basis vector.
-    """
-
-    @property
-    def opd(self: OpticalLayer) -> Array:
-        """
-        Calculates the total opd from the basis vectors and coefficients.
-
-        Returns
-        -------
-        opd : Array, metres
-            The total opd.
-        """
-        return self.calculate(self.basis, self.coefficients)
-
-    def __call__(self: OpticalLayer, wavefront: Wavefront()) -> Wavefront():
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
-        wavefront *= self.transmission
-        wavefront += self.opd
-        if self.normalise:
-            wavefront = wavefront.normalise()
-        return wavefront
-
-
-class PhaseOptic(BaseTransmissiveOptic, BasePhaseOptic):
-    """
-    Optics class that holds both a transmission and phase array.
-
-    Attributes
-    ----------
-    transmission: Array
-        The Array of transmission values to be applied to the input wavefront.
-    phase : Array, radians
-        The Array of phase values to be applied to the input wavefront.
-    normalise: bool
-        Whether to normalise the wavefront after passing through the
-        optic.
-    """
-
-    def __init__(self: OpticalLayer,
-                 transmission: Array = None,
-                 phase: Array = None,
-                 normalise: bool = False) -> OpticalLayer:
-        """
-        Parameters
-        ----------
-        transmission: Array = None
-            The Array of transmission values to be applied to the input
-            wavefront.
-        phase : Array, radians = None
-            The Array of phase values to be applied to the input wavefront.
-        normalise: bool = False
-            Whether to normalise the wavefront after passing through the
-            optic.
-        """
-        super().__init__(transmission=transmission, phase=phase,
-                         normalise=normalise)
-
-        if self.phase is not None and self.transmission is not None:
-            if phase.shape != self.transmission.shape:
-                raise ValueError("phase and transmission must have the same "
-                                 "shape.")
-
-    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
-        """
-        Applies the layer to the wavefront.
-
-        Parameters
-        ----------
-        wavefront : Wavefront
-            The wavefront to operate on.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The transformed wavefront.
-        """
-        wavefront *= self.transmission
-        wavefront = wavefront.add_phase(self.phase)
-        if self.normalise:
-            wavefront = wavefront.normalise()
-        return wavefront
-
-
-class PhaseBasisOptic(BaseBasisOptic):
+<div id="cell-16" class="clipboard-copy-txt">class PhaseBasisOptic(BaseBasisOptic):
     """
     Adds an array of phase values to the input wavefront calculated from the
     Optical Path Difference (OPD). The OPDs are calculated from the basis
@@ -3135,10 +3381,80 @@ class PhaseBasisOptic(BaseBasisOptic):
         wavefront = wavefront.add_phase(self.phase)
         if self.normalise:
             wavefront = wavefront.normalise()
-        return wavefront
+        return wavefront</div>
+        
+        </div>
+    </div>
 
+</div>
+</div>
 
-class Tilt(OpticalLayer):
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3794be3b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-17">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">Tilt</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tilts the wavefront by the input angles.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    angles : Array, radians</span>
+<span class="sd">        The (x, y) angles by which to tilt the wavefront.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalLayer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the TiltWavefront class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        angles : Array, radians</span>
+<span class="sd">            The (x, y) angles by which to tilt the wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;angles must have have (2,)&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies the layer to the wavefront.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The wavefront to operate on.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The transformed wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">tilt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span>
+</pre></div>
+<div id="cell-17" class="clipboard-copy-txt">class Tilt(OpticalLayer):
     """
     Tilts the wavefront by the input angles.
 
@@ -3147,6 +3463,7 @@ class Tilt(OpticalLayer):
     angles : Array, radians
         The (x, y) angles by which to tilt the wavefront.
     """
+
     angles: Array
 
     def __init__(self: OpticalLayer, angles: Array) -> OpticalLayer:
@@ -3178,10 +3495,56 @@ class Tilt(OpticalLayer):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        return wavefront.tilt(self.angles)
+        return wavefront.tilt(self.angles)</div>
+        
+        </div>
+    </div>
 
+</div>
+</div>
 
-class Normalise(OpticalLayer):
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=6e53df48" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-18">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">Normalise</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalises the wavefront.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies the layer to the wavefront.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The wavefront to operate on.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The transformed wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
+</pre></div>
+<div id="cell-18" class="clipboard-copy-txt">class Normalise(OpticalLayer):
     """Normalises the wavefront."""
 
     def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
@@ -3198,10 +3561,107 @@ class Normalise(OpticalLayer):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        return wavefront.normalise()
+        return wavefront.normalise()</div>
+        
+        </div>
+    </div>
 
+</div>
+</div>
 
-class Rotate(OpticalLayer):
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=f6cd60d9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-19">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">Rotate</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies a rotation to the wavefront using interpolation methods.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    angle : Array, radians</span>
+<span class="sd">        The angle by which to rotate the wavefront in the clockwise direction.</span>
+<span class="sd">    order : int = 1</span>
+<span class="sd">        The order of the interpolation to use. Only applies if fourier is</span>
+<span class="sd">        False. Must be 0, 1, or 3.</span>
+<span class="sd">    complex : bool = False</span>
+<span class="sd">        Should the rotation be performed on the &#39;complex&#39; (real, imaginary),</span>
+<span class="sd">        as opposed to the default &#39;phasor&#39; (amplitude, phase) arrays.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span>
+        <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nb">complex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the Rotate class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        angle: float, radians</span>
+<span class="sd">            The angle by which to rotate the wavefront in the clockwise</span>
+<span class="sd">            direction.</span>
+<span class="sd">        order : int = 1</span>
+<span class="sd">            The order of the interpolation to use. Must be 0, or 1.</span>
+<span class="sd">        complex : bool = False</span>
+<span class="sd">            Should the rotation be performed on the &#39;complex&#39; (real,</span>
+<span class="sd">            imaginary), as opposed to the default &#39;phasor&#39; (amplitude, phase)</span>
+<span class="sd">            arrays.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">complex</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">complex</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Order must be 0, 1&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;angle must be a zero-dimensional, has &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2"> dimensions.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies the layer to the wavefront.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The wavefront to operate on.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The transformed wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
+</pre></div>
+<div id="cell-19" class="clipboard-copy-txt">class Rotate(OpticalLayer):
     """
     Applies a rotation to the wavefront using interpolation methods.
 
@@ -3216,27 +3676,31 @@ class Rotate(OpticalLayer):
         Should the rotation be performed on the 'complex' (real, imaginary),
         as opposed to the default 'phasor' (amplitude, phase) arrays.
     """
+
     angle: Array
     order: int
     complex: bool
 
-    def __init__(self: OpticalLayer,
-                 angle: Array,
-                 order: int = 1,
-                 complex: bool = False):
+    def __init__(
+        self: OpticalLayer,
+        angle: Array,
+        order: int = 1,
+        complex: bool = False,
+    ):
         """
         Constructor for the Rotate class.
 
         Parameters
         ----------
         angle: float, radians
-            The angle by which to rotate the wavefront in the clockwise 
+            The angle by which to rotate the wavefront in the clockwise
             direction.
         order : int = 1
             The order of the interpolation to use. Must be 0, or 1.
         complex : bool = False
-            Should the rotation be performed on the 'complex' (real, imaginary),
-            as opposed to the default 'phasor' (amplitude, phase) arrays.
+            Should the rotation be performed on the 'complex' (real,
+            imaginary), as opposed to the default 'phasor' (amplitude, phase)
+            arrays.
         """
         super().__init__()
         self.angle = np.asarray(angle, dtype=float)
@@ -3246,8 +3710,10 @@ class Rotate(OpticalLayer):
         if self.order not in (0, 1):
             raise ValueError("Order must be 0, 1")
         if self.angle.ndim != 0:
-            raise ValueError(f"angle must be a zero-dimensional, has "
-                             f"{self.angle.ndim} dimensions.")
+            raise ValueError(
+                f"angle must be a zero-dimensional, has "
+                f"{self.angle.ndim} dimensions."
+            )
 
     def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
@@ -3264,6 +3730,268 @@ class Rotate(OpticalLayer):
             The transformed wavefront.
         """
         return wavefront.rotate(self.angle, self.order, self.complex)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=4339176e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-20">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">Flip</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flips the wavefront about the input axes. Can be either an int, or a tuple</span>
+<span class="sd">    of ints. This class uses the &#39;ij&#39; indexing convention, ie axis 0 is the</span>
+<span class="sd">    y-axis, and axis 1 is the x-axis.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    axes : Union[tuple, int]</span>
+<span class="sd">        The axes to flip the wavefront about. This class uses the &#39;ij&#39; indexing</span>
+<span class="sd">        convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the Flip class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        axes : Union[tuple[int], int]</span>
+<span class="sd">            The axes to flip the wavefront about. This class uses the &#39;ij&#39;</span>
+<span class="sd">            indexing convention, ie axis 0 is the y-axis, and axis 1 is the</span>
+<span class="sd">            x-axis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">axes</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All axes must be integers.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;axes must be integers.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Flips the wavefront about the input axes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The wavefront to flip on.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The flipped wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
+</pre></div>
+<div id="cell-20" class="clipboard-copy-txt">class Flip(OpticalLayer):
+    """
+    Flips the wavefront about the input axes. Can be either an int, or a tuple
+    of ints. This class uses the 'ij' indexing convention, ie axis 0 is the
+    y-axis, and axis 1 is the x-axis.
+
+    Attributes
+    ----------
+    axes : Union[tuple, int]
+        The axes to flip the wavefront about. This class uses the 'ij' indexing
+        convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.
+    """
+
+    axes: Union[tuple[int], int]
+
+    def __init__(self: OpticalLayer, axes: Union[tuple[int], int]):
+        """
+        Constructor for the Flip class.
+
+        Parameters
+        ----------
+        axes : Union[tuple[int], int]
+            The axes to flip the wavefront about. This class uses the 'ij'
+            indexing convention, ie axis 0 is the y-axis, and axis 1 is the
+            x-axis.
+        """
+        super().__init__()
+        self.axes = axes
+
+        if isinstance(self.axes, tuple):
+            for axes in self.axes:
+                if not isinstance(axes, int):
+                    raise ValueError("All axes must be integers.")
+        elif not isinstance(self.axes, int):
+            raise ValueError("axes must be integers.")
+
+    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Flips the wavefront about the input axes.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to flip on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The flipped wavefront.
+        """
+        return wavefront.flip(self.axes)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=5a135f29" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-21">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">Resize</span><span class="p">(</span><span class="n">OpticalLayer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Resizes the wavefront by either padding or cropping. If the Wavefront is</span>
+<span class="sd">    larger than the desired size, then the wavefront is cropped. If the</span>
+<span class="sd">    Wavefront is smaller than the desired size, then the wavefront is padded</span>
+<span class="sd">    with zeros.</span>
+
+<span class="sd">    Note this class only supports padding and cropping of even sizes to even</span>
+<span class="sd">    sizes, and odd sizes to odd sizes.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    npixels : tuple</span>
+<span class="sd">        The desired output size of the wavefront.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for the Resize class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        npixels : tuple</span>
+<span class="sd">            The desired output size of the wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">npixels</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies the layer to the wavefront.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The wavefront to resize.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        wavefront : Wavefront</span>
+<span class="sd">            The resized wavefront.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">npixels</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">crop_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">npixels</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">pad_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">wavefront</span>
+</pre></div>
+<div id="cell-21" class="clipboard-copy-txt">class Resize(OpticalLayer):
+    """
+    Resizes the wavefront by either padding or cropping. If the Wavefront is
+    larger than the desired size, then the wavefront is cropped. If the
+    Wavefront is smaller than the desired size, then the wavefront is padded
+    with zeros.
+
+    Note this class only supports padding and cropping of even sizes to even
+    sizes, and odd sizes to odd sizes.
+
+    Attributes
+    ----------
+    npixels : tuple
+        The desired output size of the wavefront.
+    """
+
+    npixels: int
+
+    def __init__(self: OpticalLayer, npixels: int):
+        """
+        Constructor for the Resize class.
+
+        Parameters
+        ----------
+        npixels : tuple
+            The desired output size of the wavefront.
+        """
+        super().__init__()
+        self.npixels = int(npixels)
+
+    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the layer to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to resize.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The resized wavefront.
+        """
+        if wavefront.npixels > self.npixels:
+            return wavefront.crop_to(self.npixels)
+        elif wavefront.npixels < self.npixels:
+            return wavefront.pad_to(self.npixels)
+        else:
+            return wavefront</div>
         
         </div>
     </div>
@@ -3318,10 +4046,10 @@ class Rotate(OpticalLayer):
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

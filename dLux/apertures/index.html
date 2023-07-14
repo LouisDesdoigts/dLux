@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -75,7 +75,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#concrete-aperture-classes" class="md-skip">
+        <a href="#_1" class="md-skip">
           Skip to content
         </a>
       
@@ -1864,7 +1864,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=6f442e19" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=1ed36e59" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1896,7 +1896,7 @@ Licensed under the Apache License, Version 2.0.
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=e26b3511" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=9f638054" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1917,13 +1917,17 @@ Licensed under the Apache License, Version 2.0.
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span><span class="p">,</span> <span class="n">lax</span><span class="p">,</span> <span class="n">vmap</span><span class="p">,</span> <span class="n">Array</span>
-<span class="kn">from</span> <span class="nn">jax.tree_util</span> <span class="kn">import</span> <span class="n">tree_map</span><span class="p">,</span> <span class="n">tree_flatten</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
 <span class="kn">from</span> <span class="nn">equinox</span> <span class="kn">import</span> <span class="nb">filter</span>
-<span class="kn">import</span> <span class="nn">dLux.utils</span> <span class="k">as</span> <span class="nn">dlu</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">Array</span><span class="p">,</span> <span class="n">lax</span><span class="p">,</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span><span class="p">,</span> <span class="n">vmap</span>
+<span class="kn">from</span> <span class="nn">jax.tree_util</span> <span class="kn">import</span> <span class="n">tree_flatten</span><span class="p">,</span> <span class="n">tree_map</span>
+
 <span class="kn">import</span> <span class="nn">dLux</span>
+<span class="kn">import</span> <span class="nn">dLux.utils</span> <span class="k">as</span> <span class="nn">dlu</span>
+
 
 <span class="n">Wavefront</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">wavefronts</span><span class="o">.</span><span class="n">Wavefront</span>
 <span class="n">Optic</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">optical_layers</span><span class="o">.</span><span class="n">Optic</span>
@@ -1931,6 +1935,7 @@ Licensed under the Apache License, Version 2.0.
 <span class="n">TransmissiveLayer</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">optical_layers</span><span class="o">.</span><span class="n">TransmissiveLayer</span>
 <span class="n">BasisLayer</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">optical_layers</span><span class="o">.</span><span class="n">BasisLayer</span>
 <span class="n">ZernikeBasis</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">dLux</span><span class="o">.</span><span class="n">aberrations</span><span class="o">.</span><span class="n">ZernikeBasis</span>
+
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;CircularAperture&quot;</span><span class="p">,</span>
@@ -1997,7 +2002,9 @@ Licensed under the Apache License, Version 2.0.
 <span class="sd">            The array representing the transmission of the aperture.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">transmission</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">diameter</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the array representing the aperture on a set of coordinates</span>
 <span class="sd">        with the specified number of pixels and diameter.</span>
@@ -2014,7 +2021,9 @@ Licensed under the Apache License, Version 2.0.
 <span class="sd">        transmission : Array</span>
 <span class="sd">            The array representing the transmission of the aperture.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transmission</span><span class="p">(</span><span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">diameter</span> <span class="o">/</span> <span class="n">npixels</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transmission</span><span class="p">(</span>
+            <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">diameter</span> <span class="o">/</span> <span class="n">npixels</span><span class="p">)</span>
+        <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">BaseDynamicAperture</span><span class="p">(</span><span class="n">ApertureLayer</span><span class="p">):</span>
@@ -2022,8 +2031,8 @@ Licensed under the Apache License, Version 2.0.
 <span class="sd">    Base class instantiating a series of methods designed to generate</span>
 <span class="sd">    apertures differentiably at run-time. This class primarily implements the</span>
 <span class="sd">    coordinate transformations that can be applied to each aperture in order to</span>
-<span class="sd">    have fully control over the aperture shape, and apply global transformations</span>
-<span class="sd">    to the apertures.</span>
+<span class="sd">    have fully control over the aperture shape, and apply global</span>
+<span class="sd">    transformations to the apertures.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -2107,7 +2116,9 @@ Licensed under the Apache License, Version 2.0.
 
         <span class="n">is_trans</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centre</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,),</span> <span class="nb">float</span><span class="p">))</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
         <span class="n">coordinates</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
-            <span class="n">is_trans</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">translate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span><span class="p">),</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">coordinates</span>
+            <span class="n">is_trans</span><span class="p">,</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="n">translate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span><span class="p">),</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="n">coordinates</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">compress</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">compress</span><span class="p">):</span>
@@ -2126,7 +2137,9 @@ Licensed under the Apache License, Version 2.0.
 
         <span class="n">is_shear</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shear</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,),</span> <span class="nb">float</span><span class="p">))</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
         <span class="n">coordinates</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
-            <span class="n">is_shear</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">shear</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shear</span><span class="p">),</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">coordinates</span>
+            <span class="n">is_shear</span><span class="p">,</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="n">shear</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shear</span><span class="p">),</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="n">coordinates</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">rotation</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
@@ -2137,7 +2150,9 @@ Licensed under the Apache License, Version 2.0.
 
         <span class="n">is_rot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">!=</span> <span class="mf">0.0</span>
         <span class="n">coordinates</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
-            <span class="n">is_rot</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">rotate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">),</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">coordinates</span>
+            <span class="n">is_rot</span><span class="p">,</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="n">rotate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">),</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="n">coordinates</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">coordinates</span>
@@ -2195,8 +2210,8 @@ Licensed under the Apache License, Version 2.0.
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    occulting: bool</span>
-<span class="sd">        Is the aperture occulting or transmissive. False results in a transmissive</span>
-<span class="sd">        aperture, and True results in an occulting aperture.</span>
+<span class="sd">        Is the aperture occulting or transmissive. False results in a</span>
+<span class="sd">        transmissive aperture, and True results in an occulting aperture.</span>
 <span class="sd">    softening: Array, pixels</span>
 <span class="sd">        The approximate pixel width of the soft boundary applied to the</span>
 <span class="sd">        aperture. Hard edges can be achieved by setting the softening to 0.</span>
@@ -2311,8 +2326,8 @@ Licensed under the Apache License, Version 2.0.
 
     <span class="k">def</span> <span class="nf">_soften</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">distances</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts the distances from an edge into a soft-edged transmission array</span>
-<span class="sd">        using a tanh function.</span>
+<span class="sd">        Converts the distances from an edge into a soft-edged transmission</span>
+<span class="sd">        array using a tanh function.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2356,10 +2371,12 @@ Licensed under the Apache License, Version 2.0.
             <span class="n">aperture</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">aperture</span>
         <span class="k">return</span> <span class="n">aperture</span>
 
-    <span class="k">def</span> <span class="nf">_normalised_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_normalised_coordinates</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Shift a set of coordinates to be centered on the aperture and scaled such</span>
-<span class="sd">        that the radial distance is 1 to the edge of the aperture.</span>
+<span class="sd">        Shift a set of coordinates to be centered on the aperture and scaled</span>
+<span class="sd">        such that the radial distance is 1 to the edge of the aperture.</span>
 
 <span class="sd">        ### Here</span>
 
@@ -2377,13 +2394,17 @@ Licensed under the Apache License, Version 2.0.
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extent</span><span class="p">()</span>
 </pre></div>
 <div id="cell-2" class="clipboard-copy-txt">from __future__ import annotations
-from jax import numpy as np, lax, vmap, Array
-from jax.tree_util import tree_map, tree_flatten
-from typing import Any
+
 from abc import abstractmethod
+from typing import Any
+
 from equinox import filter
-import dLux.utils as dlu
+from jax import Array, lax, numpy as np, vmap
+from jax.tree_util import tree_flatten, tree_map
+
 import dLux
+import dLux.utils as dlu
+
 
 Wavefront = lambda: dLux.wavefronts.Wavefront
 Optic = lambda: dLux.optical_layers.Optic
@@ -2391,6 +2412,7 @@ BasisOptic = lambda: dLux.optical_layers.BasisOptic
 TransmissiveLayer = lambda: dLux.optical_layers.TransmissiveLayer
 BasisLayer = lambda: dLux.optical_layers.BasisLayer
 ZernikeBasis = lambda: dLux.aberrations.ZernikeBasis
+
 
 __all__ = [
     "CircularAperture",
@@ -2457,7 +2479,9 @@ class ApertureLayer(TransmissiveLayer()):
             The array representing the transmission of the aperture.
         """
 
-    def transmission(self: ApertureLayer, npixels: int, diameter: float) -> Array:
+    def transmission(
+        self: ApertureLayer, npixels: int, diameter: float
+    ) -> Array:
         """
         Compute the array representing the aperture on a set of coordinates
         with the specified number of pixels and diameter.
@@ -2474,7 +2498,9 @@ class ApertureLayer(TransmissiveLayer()):
         transmission : Array
             The array representing the transmission of the aperture.
         """
-        return self._transmission(dlu.pixel_coords(npixels, diameter / npixels))
+        return self._transmission(
+            dlu.pixel_coords(npixels, diameter / npixels)
+        )
 
 
 class BaseDynamicAperture(ApertureLayer):
@@ -2482,8 +2508,8 @@ class BaseDynamicAperture(ApertureLayer):
     Base class instantiating a series of methods designed to generate
     apertures differentiably at run-time. This class primarily implements the
     coordinate transformations that can be applied to each aperture in order to
-    have fully control over the aperture shape, and apply global transformations
-    to the apertures.
+    have fully control over the aperture shape, and apply global
+    transformations to the apertures.
 
     Attributes
     ----------
@@ -2567,7 +2593,9 @@ class BaseDynamicAperture(ApertureLayer):
 
         is_trans = (self.centre != np.zeros((2,), float)).any()
         coordinates = lax.cond(
-            is_trans, lambda: translate(coordinates, self.centre), lambda: coordinates
+            is_trans,
+            lambda: translate(coordinates, self.centre),
+            lambda: coordinates,
         )
 
         def compress(coords, compress):
@@ -2586,7 +2614,9 @@ class BaseDynamicAperture(ApertureLayer):
 
         is_shear = (self.shear != np.zeros((2,), float)).any()
         coordinates = lax.cond(
-            is_shear, lambda: shear(coordinates, self.shear), lambda: coordinates
+            is_shear,
+            lambda: shear(coordinates, self.shear),
+            lambda: coordinates,
         )
 
         def rotate(coordinates: Array, rotation: Array) -> Array:
@@ -2597,7 +2627,9 @@ class BaseDynamicAperture(ApertureLayer):
 
         is_rot = self.rotation != 0.0
         coordinates = lax.cond(
-            is_rot, lambda: rotate(coordinates, self.rotation), lambda: coordinates
+            is_rot,
+            lambda: rotate(coordinates, self.rotation),
+            lambda: coordinates,
         )
 
         return coordinates
@@ -2655,8 +2687,8 @@ class DynamicAperture(BaseDynamicAperture):
     Attributes
     ----------
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -2771,8 +2803,8 @@ class DynamicAperture(BaseDynamicAperture):
 
     def _soften(self: ApertureLayer, distances: Array) -> Array:
         """
-        Converts the distances from an edge into a soft-edged transmission array
-        using a tanh function.
+        Converts the distances from an edge into a soft-edged transmission
+        array using a tanh function.
 
         Parameters
         ----------
@@ -2816,10 +2848,12 @@ class DynamicAperture(BaseDynamicAperture):
             aperture = 1.0 - aperture
         return aperture
 
-    def _normalised_coordinates(self: ApertureLayer, coordinates: Array) -> Array:
+    def _normalised_coordinates(
+        self: ApertureLayer, coordinates: Array
+    ) -> Array:
         """
-        Shift a set of coordinates to be centered on the aperture and scaled such
-        that the radial distance is 1 to the edge of the aperture.
+        Shift a set of coordinates to be centered on the aperture and scaled
+        such that the radial distance is 1 to the edge of the aperture.
 
         ### Here
 
@@ -2845,19 +2879,20 @@ class DynamicAperture(BaseDynamicAperture):
 
 </div>
 </div>
-<div id="cell-id=faa81bfb" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div id="cell-id=55b43740" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="concrete-aperture-classes">Concrete Aperture Classes<a class="anchor-link" href="#concrete-aperture-classes">&#182;</a></h2><p>################################</p>
+<p>Concrete Aperture Classes #
+############################</p>
 
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=abf07507" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=9e2b5b94" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2892,8 +2927,8 @@ class DynamicAperture(BaseDynamicAperture):
 <span class="sd">    compression: Array</span>
 <span class="sd">        The (x, y) compression of the aperture.</span>
 <span class="sd">    occulting: bool</span>
-<span class="sd">        Is the aperture occulting or transmissive. False results in a transmissive</span>
-<span class="sd">        aperture, and True results in an occulting aperture.</span>
+<span class="sd">        Is the aperture occulting or transmissive. False results in a</span>
+<span class="sd">        transmissive aperture, and True results in an occulting aperture.</span>
 <span class="sd">    softening: Array, pixels</span>
 <span class="sd">        The approximate pixel width of the soft boundary applied to the</span>
 <span class="sd">        aperture. Hard edges can be achieved by setting the softening to 0.</span>
@@ -2963,7 +2998,6 @@ class DynamicAperture(BaseDynamicAperture):
 <span class="sd">        aperture: Array</span>
 <span class="sd">            The soft-edged aperture shape.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">scale</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_soften</span><span class="p">(</span><span class="o">-</span><span class="n">coordinates</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span>
 
@@ -3017,8 +3051,8 @@ class DynamicAperture(BaseDynamicAperture):
 <span class="sd">    rotation: Array, radians</span>
 <span class="sd">        The clockwise rotation of the aperture.</span>
 <span class="sd">    occulting: bool</span>
-<span class="sd">        Is the aperture occulting or transmissive. False results in a transmissive</span>
-<span class="sd">        aperture, and True results in an occulting aperture.</span>
+<span class="sd">        Is the aperture occulting or transmissive. False results in a</span>
+<span class="sd">        transmissive aperture, and True results in an occulting aperture.</span>
 <span class="sd">    softening: Array, pixels</span>
 <span class="sd">        The approximate pixel width of the soft boundary applied to the</span>
 <span class="sd">        aperture. Hard edges can be achieved by setting the softening to 0.</span>
@@ -3157,8 +3191,8 @@ class DynamicAperture(BaseDynamicAperture):
 <span class="sd">    rotation: Array, radians</span>
 <span class="sd">        The clockwise rotation of the aperture.</span>
 <span class="sd">    occulting: bool</span>
-<span class="sd">        Is the aperture occulting or transmissive. False results in a transmissive</span>
-<span class="sd">        aperture, and True results in an occulting aperture.</span>
+<span class="sd">        Is the aperture occulting or transmissive. False results in a</span>
+<span class="sd">        transmissive aperture, and True results in an occulting aperture.</span>
 <span class="sd">    softening: Array, pixels</span>
 <span class="sd">        The approximate pixel width of the soft boundary applied to the</span>
 <span class="sd">        aperture. Hard edges can be achieved by setting the softening to 0.</span>
@@ -3210,12 +3244,17 @@ class DynamicAperture(BaseDynamicAperture):
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_perp_dists_from_lines</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xs</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">ys</span><span class="p">:</span> <span class="n">Array</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span>
+        <span class="n">m</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">x1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">y1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">xs</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">ys</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the perpendicular distance of the Cartesian (x, y)</span>
-<span class="sd">        coordinates from a line. The line is parameterised by its gradient m and</span>
-<span class="sd">        a point (x1, y1) that lies on the line.</span>
+<span class="sd">        coordinates from a line. The line is parameterised by its gradient m</span>
+<span class="sd">        and a point (x1, y1) that lies on the line.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -3283,7 +3322,9 @@ class DynamicAperture(BaseDynamicAperture):
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># NOTE: see class docs.</span>
         <span class="n">bc_orig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">]])</span>
-        <span class="n">dist_from_orig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perp_dists_from_lines</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">bc_orig</span><span class="p">,</span> <span class="n">bc_orig</span><span class="p">)</span>
+        <span class="n">dist_from_orig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perp_dists_from_lines</span><span class="p">(</span>
+            <span class="n">ms</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">bc_orig</span><span class="p">,</span> <span class="n">bc_orig</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">dist_from_orig</span><span class="p">)</span>
 
 
@@ -3307,8 +3348,8 @@ class DynamicAperture(BaseDynamicAperture):
 <span class="sd">    rotation: Array, radians</span>
 <span class="sd">        The clockwise rotation of the aperture.</span>
 <span class="sd">    occulting: bool</span>
-<span class="sd">        Is the aperture occulting or transmissive. False results in a transmissive</span>
-<span class="sd">        aperture, and True results in an occulting aperture.</span>
+<span class="sd">        Is the aperture occulting or transmissive. False results in a</span>
+<span class="sd">        transmissive aperture, and True results in an occulting aperture.</span>
 <span class="sd">    softening: Array, pixels</span>
 <span class="sd">        The approximate pixel width of the soft boundary applied to the</span>
 <span class="sd">        aperture. Hard edges can be achieved by setting the softening to 0.</span>
@@ -3368,7 +3409,9 @@ class DynamicAperture(BaseDynamicAperture):
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;vertices must have shape (n, 2).&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_grads_from_many_points</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">xs</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ys</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_grads_from_many_points</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">xs</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ys</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given a set of points, calculate the gradient of the line that connects</span>
 <span class="sd">        those points. This function assumes that the points are provided in the</span>
@@ -3512,8 +3555,8 @@ class DynamicAperture(BaseDynamicAperture):
 <span class="sd">    rotation: Array, radians</span>
 <span class="sd">        The clockwise rotation of the aperture.</span>
 <span class="sd">    occulting: bool</span>
-<span class="sd">        Is the aperture occulting or transmissive. False results in a transmissive</span>
-<span class="sd">        aperture, and True results in an occulting aperture.</span>
+<span class="sd">        Is the aperture occulting or transmissive. False results in a</span>
+<span class="sd">        transmissive aperture, and True results in an occulting aperture.</span>
 <span class="sd">    softening: Array, pixels</span>
 <span class="sd">        The approximate pixel width of the soft boundary applied to the</span>
 <span class="sd">        aperture. Hard edges can be achieved by setting the softening to 0.</span>
@@ -3608,11 +3651,11 @@ class DynamicAperture(BaseDynamicAperture):
         <span class="n">x</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="n">neg_pi_to_pi_phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="c1"># neg_pi_to_pi_phi = np.arctan2(y, x)</span>
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsides</span>
 
         <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsides</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>  <span class="c1"># Dummy index</span>
-        <span class="n">bounds</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">i</span> <span class="o">*</span> <span class="n">alpha</span>
+        <span class="c1"># bounds = 2.0 * i * alpha</span>
 
         <span class="n">ms</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">i</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)</span>
         <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmax</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">i</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span>
@@ -3640,11 +3683,11 @@ class DynamicAperture(BaseDynamicAperture):
         <span class="n">x</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="n">neg_pi_to_pi_phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="c1"># neg_pi_to_pi_phi = np.arctan2(y, x)</span>
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsides</span>
 
         <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsides</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>  <span class="c1"># Dummy index</span>
-        <span class="n">bounds</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">i</span> <span class="o">*</span> <span class="n">alpha</span>
+        <span class="c1"># bounds = 2.0 * i * alpha</span>
 
         <span class="n">ms</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">i</span> <span class="o">*</span> <span class="n">alpha</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)</span>
         <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmax</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">i</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span>
@@ -3656,9 +3699,9 @@ class DynamicAperture(BaseDynamicAperture):
         <span class="k">return</span> <span class="n">dist</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 
-<span class="c1">###################</span>
-<span class="c1">### Aberrations ###</span>
-<span class="c1">###################</span>
+<span class="c1">###############</span>
+<span class="c1"># Aberrations #</span>
+<span class="c1">###############</span>
 <span class="k">class</span> <span class="nc">AberratedAperture</span><span class="p">(</span><span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">BasisLayer</span><span class="p">()):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class for generating apertures with aberrations. This class generates the</span>
@@ -3782,7 +3825,9 @@ class DynamicAperture(BaseDynamicAperture):
         <span class="n">coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">_normalised_coordinates</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="p">,</span> <span class="n">RegPolyAperture</span><span class="p">):</span>
-            <span class="n">ikes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">calculate_basis</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">nsides</span><span class="p">)</span>
+            <span class="n">ikes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">calculate_basis</span><span class="p">(</span>
+                <span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">aperture</span><span class="o">.</span><span class="n">nsides</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ikes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">calculate_basis</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
 
@@ -3796,8 +3841,8 @@ class DynamicAperture(BaseDynamicAperture):
 
     <span class="k">def</span> <span class="nf">_opd</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Compute the array representing the opd of the optical aberrations on the</span>
-<span class="sd">        provided coordinates.</span>
+<span class="sd">        Compute the array representing the opd of the optical aberrations on</span>
+<span class="sd">        the provided coordinates.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -3811,7 +3856,9 @@ class DynamicAperture(BaseDynamicAperture):
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basis</span><span class="p">(</span><span class="n">coordinates</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_orthonormalise</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">aperture</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">zernikes</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_orthonormalise</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">aperture</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">zernikes</span><span class="p">:</span> <span class="n">Array</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Orthonomalises the zernike polynomials on the aperture.</span>
 
@@ -3882,9 +3929,9 @@ class DynamicAperture(BaseDynamicAperture):
         <span class="p">)</span>
 
 
-<span class="c1">###############</span>
-<span class="c1">### Spiders ###</span>
-<span class="c1">###############</span>
+<span class="c1">###########</span>
+<span class="c1"># Spiders #</span>
+<span class="c1">###########</span>
 <span class="k">class</span> <span class="nc">Spider</span><span class="p">(</span><span class="n">DynamicAperture</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An abstract class for generating aperture spiders struts.</span>
@@ -3963,9 +4010,13 @@ class DynamicAperture(BaseDynamicAperture):
         <span class="n">gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
         <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">gradient</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">gradient</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">theta</span> <span class="o">&gt;</span> <span class="n">angle</span><span class="p">,</span> <span class="n">theta</span> <span class="o">-</span> <span class="n">angle</span><span class="p">,</span> <span class="n">theta</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">angle</span><span class="p">)</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">theta</span> <span class="o">&gt;</span> <span class="n">angle</span><span class="p">,</span> <span class="n">theta</span> <span class="o">-</span> <span class="n">angle</span><span class="p">,</span> <span class="n">theta</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">angle</span>
+        <span class="p">)</span>
         <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">theta</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">theta</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
-        <span class="n">strut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">theta</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">theta</span> <span class="o">&lt;</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">dist</span><span class="p">)</span>
+        <span class="n">strut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">theta</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">theta</span> <span class="o">&lt;</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">dist</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">strut</span>
 
     <span class="k">def</span> <span class="nf">_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
@@ -4026,8 +4077,7 @@ class DynamicAperture(BaseDynamicAperture):
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        nstruts: int</span>
-<span class="sd">            The number of struts to equally space around the circle. This is not</span>
-<span class="sd">            a differentiable parameter.</span>
+<span class="sd">            The number of struts to equally space around the circle.</span>
 <span class="sd">        strut_width: Array, metres</span>
 <span class="sd">            The width of each strut.</span>
 <span class="sd">        centre: Array, metres = np.array([0., 0.])</span>
@@ -4129,8 +4179,8 @@ class DynamicAperture(BaseDynamicAperture):
     compression: Array
         The (x, y) compression of the aperture.
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -4200,7 +4250,6 @@ class DynamicAperture(BaseDynamicAperture):
         aperture: Array
             The soft-edged aperture shape.
         """
-        scale = coordinates[0, 1] - coordinates[0, 0]
         coordinates = np.hypot(coordinates[0], coordinates[1])
         return self._soften(-coordinates + self.radius)
 
@@ -4254,8 +4303,8 @@ class RectangularAperture(DynamicAperture):
     rotation: Array, radians
         The clockwise rotation of the aperture.
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -4394,8 +4443,8 @@ class PolyAperture(DynamicAperture):
     rotation: Array, radians
         The clockwise rotation of the aperture.
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -4447,12 +4496,17 @@ class PolyAperture(DynamicAperture):
         )
 
     def _perp_dists_from_lines(
-        self: ApertureLayer, m: float, x1: float, y1: float, xs: Array, ys: Array
+        self: ApertureLayer,
+        m: float,
+        x1: float,
+        y1: float,
+        xs: Array,
+        ys: Array,
     ) -> Array:
         """
         Calculates the perpendicular distance of the Cartesian (x, y)
-        coordinates from a line. The line is parameterised by its gradient m and
-        a point (x1, y1) that lies on the line.
+        coordinates from a line. The line is parameterised by its gradient m
+        and a point (x1, y1) that lies on the line.
 
         Parameters
         ----------
@@ -4520,7 +4574,9 @@ class PolyAperture(DynamicAperture):
         """
         # NOTE: see class docs.
         bc_orig = np.array([[0.0]])
-        dist_from_orig = self._perp_dists_from_lines(ms, xs, ys, bc_orig, bc_orig)
+        dist_from_orig = self._perp_dists_from_lines(
+            ms, xs, ys, bc_orig, bc_orig
+        )
         return np.sign(dist_from_orig)
 
 
@@ -4544,8 +4600,8 @@ class IrregPolyAperture(PolyAperture):
     rotation: Array, radians
         The clockwise rotation of the aperture.
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -4605,7 +4661,9 @@ class IrregPolyAperture(PolyAperture):
         if self.vertices.ndim != 2 or self.vertices.shape[1] != 2:
             raise ValueError("vertices must have shape (n, 2).")
 
-    def _grads_from_many_points(self: ApertureLayer, xs: float, ys: float) -> float:
+    def _grads_from_many_points(
+        self: ApertureLayer, xs: float, ys: float
+    ) -> float:
         """
         Given a set of points, calculate the gradient of the line that connects
         those points. This function assumes that the points are provided in the
@@ -4749,8 +4807,8 @@ class RegPolyAperture(PolyAperture):
     rotation: Array, radians
         The clockwise rotation of the aperture.
     occulting: bool
-        Is the aperture occulting or transmissive. False results in a transmissive
-        aperture, and True results in an occulting aperture.
+        Is the aperture occulting or transmissive. False results in a
+        transmissive aperture, and True results in an occulting aperture.
     softening: Array, pixels
         The approximate pixel width of the soft boundary applied to the
         aperture. Hard edges can be achieved by setting the softening to 0.
@@ -4845,11 +4903,11 @@ class RegPolyAperture(PolyAperture):
         x = coordinates[0]
         y = coordinates[1]
 
-        neg_pi_to_pi_phi = np.arctan2(y, x)
+        # neg_pi_to_pi_phi = np.arctan2(y, x)
         alpha = np.pi / self.nsides
 
         i = np.arange(self.nsides)[:, None, None]  # Dummy index
-        bounds = 2.0 * i * alpha
+        # bounds = 2.0 * i * alpha
 
         ms = -1 / np.tan(2.0 * i * alpha + alpha)
         xs = self.rmax * np.cos(2.0 * i * alpha)
@@ -4877,11 +4935,11 @@ class RegPolyAperture(PolyAperture):
         x = coordinates[0]
         y = coordinates[1]
 
-        neg_pi_to_pi_phi = np.arctan2(y, x)
+        # neg_pi_to_pi_phi = np.arctan2(y, x)
         alpha = np.pi / self.nsides
 
         i = np.arange(self.nsides)[:, None, None]  # Dummy index
-        bounds = 2.0 * i * alpha
+        # bounds = 2.0 * i * alpha
 
         ms = -1 / np.tan(2.0 * i * alpha + alpha)
         xs = self.rmax * np.cos(2.0 * i * alpha)
@@ -4893,9 +4951,9 @@ class RegPolyAperture(PolyAperture):
         return dist.prod(axis=0)
 
 
-###################
-### Aberrations ###
-###################
+###############
+# Aberrations #
+###############
 class AberratedAperture(ApertureLayer, BasisLayer()):
     """
     A class for generating apertures with aberrations. This class generates the
@@ -5019,7 +5077,9 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
         coordinates = self.aperture._normalised_coordinates(coordinates)
 
         if isinstance(self.aperture, RegPolyAperture):
-            ikes = self.basis.calculate_basis(coordinates, self.aperture.nsides)
+            ikes = self.basis.calculate_basis(
+                coordinates, self.aperture.nsides
+            )
         else:
             ikes = self.basis.calculate_basis(coordinates)
 
@@ -5033,8 +5093,8 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
 
     def _opd(self: ApertureLayer, coordinates: Array) -> Array:
         """
-        Compute the array representing the opd of the optical aberrations on the
-        provided coordinates.
+        Compute the array representing the opd of the optical aberrations on
+        the provided coordinates.
 
         Parameters
         ----------
@@ -5048,7 +5108,9 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
         """
         return self.calculate(self._basis(coordinates), self.coefficients)
 
-    def _orthonormalise(self: ApertureLayer, aperture: Array, zernikes: Array) -> Array:
+    def _orthonormalise(
+        self: ApertureLayer, aperture: Array, zernikes: Array
+    ) -> Array:
         """
         Orthonomalises the zernike polynomials on the aperture.
 
@@ -5119,9 +5181,9 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
         )
 
 
-###############
-### Spiders ###
-###############
+###########
+# Spiders #
+###########
 class Spider(DynamicAperture):
     """
     An abstract class for generating aperture spiders struts.
@@ -5200,9 +5262,13 @@ class Spider(DynamicAperture):
         gradient = np.tan(angle)
         dist = np.abs(y - gradient * x) / np.sqrt(1 + gradient**2)
         theta = np.arctan2(y, x) + np.pi
-        theta = np.where(theta > angle, theta - angle, theta + 2 * np.pi - angle)
+        theta = np.where(
+            theta > angle, theta - angle, theta + 2 * np.pi - angle
+        )
         theta = np.where(theta > 2 * np.pi, theta - 2 * np.pi, theta)
-        strut = np.where((theta > np.pi / 2.0) & (theta < 3.0 * np.pi / 2.0), 1.0, dist)
+        strut = np.where(
+            (theta > np.pi / 2.0) & (theta < 3.0 * np.pi / 2.0), 1.0, dist
+        )
         return strut
 
     def _extent(self: ApertureLayer) -> Array:
@@ -5263,8 +5329,7 @@ class UniformSpider(Spider):
         Parameters
         ----------
         nstruts: int
-            The number of struts to equally space around the circle. This is not
-            a differentiable parameter.
+            The number of struts to equally space around the circle.
         strut_width: Array, metres
             The width of each strut.
         centre: Array, metres = np.array([0., 0.])
@@ -5360,19 +5425,20 @@ class UniformSpider(Spider):
 
 </div>
 </div>
-<div id="cell-id=e6928b3d" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div id="cell-id=8c234b76" class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="composite-apertures">Composite Apertures<a class="anchor-link" href="#composite-apertures">&#182;</a></h2><p>##########################</p>
+<p>Composite Apertures #
+######################</p>
 
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=8b51b650" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=5cb789a7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -5445,7 +5511,9 @@ class UniformSpider(Spider):
 <span class="sd">            Whether to normalise the wavefront after passing through the</span>
 <span class="sd">            aperture.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">apertures</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">apertures</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ApertureLayer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apertures</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span>
+            <span class="n">apertures</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ApertureLayer</span>
+        <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">,</span>
             <span class="n">shear</span><span class="o">=</span><span class="n">shear</span><span class="p">,</span>
@@ -5470,8 +5538,13 @@ class UniformSpider(Spider):
 <span class="sd">            The array of all the individual apertures.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-        <span class="n">get_transmission</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ap</span><span class="p">:</span> <span class="n">ap</span><span class="o">.</span><span class="n">_transmission</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-        <span class="n">transmissions</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">ap</span><span class="p">)</span> <span class="k">for</span> <span class="n">ap</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">apertures</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+        <span class="k">def</span> <span class="nf">get_transmission</span><span class="p">(</span><span class="n">ap</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ap</span><span class="o">.</span><span class="n">_transmission</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+
+        <span class="n">transmissions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">get_transmission</span><span class="p">(</span><span class="n">ap</span><span class="p">)</span> <span class="k">for</span> <span class="n">ap</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">apertures</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">]</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">transmissions</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_aberrated_apertures</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
@@ -5497,7 +5570,9 @@ class UniformSpider(Spider):
 
         <span class="c1"># Get aberrated apertures</span>
         <span class="c1"># TODO: use partition</span>
-        <span class="n">filter_map</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span><span class="n">is_aberrated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">apertures</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_aberrated</span><span class="p">)</span>
+        <span class="n">filter_map</span> <span class="o">=</span> <span class="n">tree_map</span><span class="p">(</span>
+            <span class="n">is_aberrated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">apertures</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_aberrated</span>
+        <span class="p">)</span>
         <span class="n">aberrated</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apertures</span><span class="p">,</span> <span class="n">filter_map</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tree_flatten</span><span class="p">(</span><span class="n">aberrated</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_aberrated</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -5534,8 +5609,8 @@ class UniformSpider(Spider):
 
     <span class="k">def</span> <span class="nf">_opd</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Compute the array representing the opd of the optical aberrations on the</span>
-<span class="sd">        provided coordinates.</span>
+<span class="sd">        Compute the array representing the opd of the optical aberrations on</span>
+<span class="sd">        the provided coordinates.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -5571,7 +5646,9 @@ class UniformSpider(Spider):
         <span class="k">else</span><span class="p">:</span>
             <span class="n">opd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opd</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
             <span class="n">phase</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">phase</span> <span class="o">+</span> <span class="n">opd</span> <span class="o">*</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">wavenumber</span>
-            <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">amplitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">])</span>
+            <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">amplitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">]</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">:</span>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
@@ -5596,7 +5673,9 @@ class UniformSpider(Spider):
 <span class="sd">        aperture: ApertureLayer</span>
 <span class="sd">            The BasisOptic version of this aperture.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">(</span><span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">diameter</span> <span class="o">/</span> <span class="n">npixels</span><span class="p">))</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">(</span>
+            <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">diameter</span> <span class="o">/</span> <span class="n">npixels</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">transmission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transmission</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_aberrated_apertures</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -5632,8 +5711,9 @@ class UniformSpider(Spider):
 
 <span class="k">class</span> <span class="nc">CompoundAperture</span><span class="p">(</span><span class="n">CompositeAperture</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A  class used to combine multiple apertures into a single coherent aperture.</span>
-<span class="sd">    An example would be an aperture with spiders holding a secondary mirror.</span>
+<span class="sd">    A  class used to combine multiple apertures into a single coherent</span>
+<span class="sd">    aperture. An example would be an aperture with spiders holding a secondary</span>
+<span class="sd">    mirror.</span>
 
 <span class="sd">    This class is distinct from the MultiAperture class in that the</span>
 <span class="sd">    sub-apertures are combined by multiplying their respective transmissions</span>
@@ -5704,7 +5784,8 @@ class UniformSpider(Spider):
                 <span class="n">naberrated</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">naberrated</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s2">&quot;CompoundAperture can only have a single &quot;</span> <span class="s2">&quot;AberratedAperture.&quot;</span>
+                    <span class="s2">&quot;CompoundAperture can only have a single &quot;</span>
+                    <span class="s2">&quot;AberratedAperture.&quot;</span>
                 <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ApertureLayer</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
@@ -5727,8 +5808,8 @@ class UniformSpider(Spider):
 
 <span class="k">class</span> <span class="nc">MultiAperture</span><span class="p">(</span><span class="n">CompositeAperture</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A  class used to combine multiple apertures into a single coherent aperture.</span>
-<span class="sd">    An example would be an aperture mask.</span>
+<span class="sd">    A  class used to combine multiple apertures into a single coherent</span>
+<span class="sd">    aperture. An example would be an aperture mask.</span>
 
 <span class="sd">    This class is distinct from the CompoundAperture class in that the</span>
 <span class="sd">    sub-apertures are combined by adding their respective transmissions</span>
@@ -5770,9 +5851,9 @@ class UniformSpider(Spider):
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stacked_apertures</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 
-<span class="c1">###############</span>
-<span class="c1">### Factory ###</span>
-<span class="c1">###############</span>
+<span class="c1">###########</span>
+<span class="c1"># Factory #</span>
+<span class="c1">###########</span>
 <span class="k">def</span> <span class="nf">ApertureFactory</span><span class="p">(</span>
     <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">radial_orders</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -5799,12 +5880,12 @@ class UniformSpider(Spider):
 <span class="sd">    the `aperture_ratio` parameter, with secondary mirror obscurations and</span>
 <span class="sd">    struts being scaled relative to the aperture diameter.</span>
 
-<span class="sd">    Let&#39;s look at an example of how to construct a simple circular aperture with</span>
-<span class="sd">    a secondary mirror obscuration held by 4 struts. For this example lets take</span>
-<span class="sd">    a 2m diameter aperture, with a 20cm secondary mirror held by 3 struts with</span>
-<span class="sd">    a width of 2cm. In this example the secondary mirror is 10% of the primary</span>
-<span class="sd">    aperture diameter and the struts are 1% of the primary aperture diameter,</span>
-<span class="sd">    giving us values of 0.1 and 0.01 for the `secondary_ratio` and</span>
+<span class="sd">    Let&#39;s look at an example of how to construct a simple circular aperture</span>
+<span class="sd">    with a secondary mirror obscuration held by 4 struts. For this example lets</span>
+<span class="sd">    take a 2m diameter aperture, with a 20cm secondary mirror held by 3 struts</span>
+<span class="sd">    with a width of 2cm. In this example the secondary mirror is 10% of the</span>
+<span class="sd">    primary aperture diameter and the struts are 1% of the primary aperture</span>
+<span class="sd">    diameter, giving us values of 0.1 and 0.01 for the `secondary_ratio` and</span>
 <span class="sd">    `strut_ratio` parameters. Let calculate this for a 512x512 array with the</span>
 <span class="sd">    aperture spanning the full array.</span>
 
@@ -5917,7 +5998,9 @@ class UniformSpider(Spider):
     <span class="k">if</span> <span class="n">nsides</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">ap</span> <span class="o">=</span> <span class="n">CircularAperture</span><span class="p">(</span><span class="n">aperture_ratio</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">softening</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">ap</span> <span class="o">=</span> <span class="n">RegPolyAperture</span><span class="p">(</span><span class="n">nsides</span><span class="p">,</span> <span class="n">aperture_ratio</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">softening</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="n">rotation</span><span class="p">)</span>
+        <span class="n">ap</span> <span class="o">=</span> <span class="n">RegPolyAperture</span><span class="p">(</span>
+            <span class="n">nsides</span><span class="p">,</span> <span class="n">aperture_ratio</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">softening</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="n">rotation</span>
+        <span class="p">)</span>
 
     <span class="c1"># Aberrations</span>
     <span class="k">if</span> <span class="n">radial_orders</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -5946,7 +6029,9 @@ class UniformSpider(Spider):
         <span class="c1"># Circular</span>
         <span class="k">if</span> <span class="n">secondary_nsides</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">apertures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">CircularAperture</span><span class="p">(</span><span class="n">secondary_rel</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">softening</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">occulting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">CircularAperture</span><span class="p">(</span>
+                    <span class="n">secondary_rel</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">softening</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">occulting</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
             <span class="p">)</span>
         <span class="c1"># Polygonal</span>
         <span class="k">else</span><span class="p">:</span>
@@ -5967,7 +6052,9 @@ class UniformSpider(Spider):
         <span class="n">strut_rel</span> <span class="o">=</span> <span class="n">aperture_ratio</span> <span class="o">*</span> <span class="n">strut_ratio</span>
         <span class="n">full_rotation</span> <span class="o">=</span> <span class="n">strut_rotation</span> <span class="o">+</span> <span class="n">rotation</span>
         <span class="n">apertures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">UniformSpider</span><span class="p">(</span><span class="n">nstruts</span><span class="p">,</span> <span class="n">strut_rel</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="n">full_rotation</span><span class="p">,</span> <span class="n">softening</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">UniformSpider</span><span class="p">(</span>
+                <span class="n">nstruts</span><span class="p">,</span> <span class="n">strut_rel</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="n">full_rotation</span><span class="p">,</span> <span class="n">softening</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
         <span class="p">)</span>
 
     <span class="c1"># Construct CompoundAperture</span>
@@ -6029,7 +6116,9 @@ class UniformSpider(Spider):
             Whether to normalise the wavefront after passing through the
             aperture.
         """
-        self.apertures = dlu.list_to_dictionary(apertures, False, ApertureLayer)
+        self.apertures = dlu.list_to_dictionary(
+            apertures, False, ApertureLayer
+        )
         super().__init__(
             centre=centre,
             shear=shear,
@@ -6054,8 +6143,13 @@ class UniformSpider(Spider):
             The array of all the individual apertures.
         """
         coordinates = self._coordinates(coordinates)
-        get_transmission = lambda ap: ap._transmission(coordinates)
-        transmissions = [get_transmission(ap) for ap in self.apertures.values()]
+
+        def get_transmission(ap):
+            return ap._transmission(coordinates)
+
+        transmissions = [
+            get_transmission(ap) for ap in self.apertures.values()
+        ]
         return np.array(transmissions)
 
     def _aberrated_apertures(self: ApertureLayer) -> list:
@@ -6081,7 +6175,9 @@ class UniformSpider(Spider):
 
         # Get aberrated apertures
         # TODO: use partition
-        filter_map = tree_map(is_aberrated, self.apertures, is_leaf=is_aberrated)
+        filter_map = tree_map(
+            is_aberrated, self.apertures, is_leaf=is_aberrated
+        )
         aberrated = filter(self.apertures, filter_map)
         return tree_flatten(aberrated, is_leaf=is_aberrated)[0]
 
@@ -6118,8 +6214,8 @@ class UniformSpider(Spider):
 
     def _opd(self: ApertureLayer, coordinates: Array) -> Array:
         """
-        Compute the array representing the opd of the optical aberrations on the
-        provided coordinates.
+        Compute the array representing the opd of the optical aberrations on
+        the provided coordinates.
 
         Parameters
         ----------
@@ -6155,7 +6251,9 @@ class UniformSpider(Spider):
         else:
             opd = self._opd(coordinates)
             phase = wavefront.phase + opd * wavefront.wavenumber
-            wavefront = wavefront.set(["amplitude", "phase"], [amplitude, phase])
+            wavefront = wavefront.set(
+                ["amplitude", "phase"], [amplitude, phase]
+            )
 
         if self.normalise:
             wavefront = wavefront.normalise()
@@ -6180,7 +6278,9 @@ class UniformSpider(Spider):
         aperture: ApertureLayer
             The BasisOptic version of this aperture.
         """
-        coordinates = self._coordinates(dlu.pixel_coords(npixels, diameter / npixels))
+        coordinates = self._coordinates(
+            dlu.pixel_coords(npixels, diameter / npixels)
+        )
         transmission = self._transmission(coordinates)
 
         if len(self._aberrated_apertures()) == 0:
@@ -6216,8 +6316,9 @@ class UniformSpider(Spider):
 
 class CompoundAperture(CompositeAperture):
     """
-    A  class used to combine multiple apertures into a single coherent aperture.
-    An example would be an aperture with spiders holding a secondary mirror.
+    A  class used to combine multiple apertures into a single coherent
+    aperture. An example would be an aperture with spiders holding a secondary
+    mirror.
 
     This class is distinct from the MultiAperture class in that the
     sub-apertures are combined by multiplying their respective transmissions
@@ -6288,7 +6389,8 @@ class CompoundAperture(CompositeAperture):
                 naberrated += 1
             if naberrated > 1:
                 raise TypeError(
-                    "CompoundAperture can only have a single " "AberratedAperture."
+                    "CompoundAperture can only have a single "
+                    "AberratedAperture."
                 )
 
     def _transmission(self: ApertureLayer, coordinates: Array) -> Array:
@@ -6311,8 +6413,8 @@ class CompoundAperture(CompositeAperture):
 
 class MultiAperture(CompositeAperture):
     """
-    A  class used to combine multiple apertures into a single coherent aperture.
-    An example would be an aperture mask.
+    A  class used to combine multiple apertures into a single coherent
+    aperture. An example would be an aperture mask.
 
     This class is distinct from the CompoundAperture class in that the
     sub-apertures are combined by adding their respective transmissions
@@ -6354,9 +6456,9 @@ class MultiAperture(CompositeAperture):
         return self._stacked_apertures(coordinates).sum(axis=0)
 
 
-###############
-### Factory ###
-###############
+###########
+# Factory #
+###########
 def ApertureFactory(
     npixels: int,
     radial_orders: Array = None,
@@ -6383,12 +6485,12 @@ def ApertureFactory(
     the `aperture_ratio` parameter, with secondary mirror obscurations and
     struts being scaled relative to the aperture diameter.
 
-    Let's look at an example of how to construct a simple circular aperture with
-    a secondary mirror obscuration held by 4 struts. For this example lets take
-    a 2m diameter aperture, with a 20cm secondary mirror held by 3 struts with
-    a width of 2cm. In this example the secondary mirror is 10% of the primary
-    aperture diameter and the struts are 1% of the primary aperture diameter,
-    giving us values of 0.1 and 0.01 for the `secondary_ratio` and
+    Let's look at an example of how to construct a simple circular aperture
+    with a secondary mirror obscuration held by 4 struts. For this example lets
+    take a 2m diameter aperture, with a 20cm secondary mirror held by 3 struts
+    with a width of 2cm. In this example the secondary mirror is 10% of the
+    primary aperture diameter and the struts are 1% of the primary aperture
+    diameter, giving us values of 0.1 and 0.01 for the `secondary_ratio` and
     `strut_ratio` parameters. Let calculate this for a 512x512 array with the
     aperture spanning the full array.
 
@@ -6501,7 +6603,9 @@ def ApertureFactory(
     if nsides == 0:
         ap = CircularAperture(aperture_ratio / 2, softening=0)
     else:
-        ap = RegPolyAperture(nsides, aperture_ratio / 2, softening=0, rotation=rotation)
+        ap = RegPolyAperture(
+            nsides, aperture_ratio / 2, softening=0, rotation=rotation
+        )
 
     # Aberrations
     if radial_orders is not None:
@@ -6530,7 +6634,9 @@ def ApertureFactory(
         # Circular
         if secondary_nsides == 0:
             apertures.append(
-                CircularAperture(secondary_rel / 2, softening=0, occulting=True)
+                CircularAperture(
+                    secondary_rel / 2, softening=0, occulting=True
+                )
             )
         # Polygonal
         else:
@@ -6551,7 +6657,9 @@ def ApertureFactory(
         strut_rel = aperture_ratio * strut_ratio
         full_rotation = strut_rotation + rotation
         apertures.append(
-            UniformSpider(nstruts, strut_rel, rotation=full_rotation, softening=0)
+            UniformSpider(
+                nstruts, strut_rel, rotation=full_rotation, softening=0
+            )
         )
 
     # Construct CompoundAperture
@@ -6613,10 +6721,10 @@ def ApertureFactory(
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

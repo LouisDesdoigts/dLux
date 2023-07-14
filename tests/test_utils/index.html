@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=a554b1bb" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3fc02f98" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1886,7 +1886,6 @@ Licensed under the Apache License, Version 2.0.
     <span class="n">coordinates</span><span class="p">,</span>
     <span class="n">helpers</span><span class="p">,</span>
     <span class="n">interpolation</span><span class="p">,</span>
-    <span class="n">math</span><span class="p">,</span>
     <span class="n">optics</span><span class="p">,</span>
     <span class="n">units</span><span class="p">,</span>
 <span class="p">)</span>
@@ -1898,7 +1897,6 @@ from dLux.utils import (
     coordinates,
     helpers,
     interpolation,
-    math,
     optics,
     units,
 )</div>
@@ -1911,7 +1909,7 @@ from dLux.utils import (
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=fdcdb3d2" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b725e765" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1943,7 +1941,7 @@ from dLux.utils import (
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=bf6ac0b6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e1e8fe15" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1966,16 +1964,10 @@ from dLux.utils import (
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">coordinates.py</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="k">def</span> <span class="nf">test_polar_to_cart</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the polar_to_cart function.&quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="p">(</span><span class="n">coordinates</span><span class="o">.</span><span class="n">polar_to_cart</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </pre></div>
 <div id="cell-3" class="clipboard-copy-txt">"""
 coordinates.py
-"""
-def test_polar_to_cart():
-    """Tests the polar_to_cart function."""
-    assert (coordinates.polar_to_cart([1, 0]) == np.array([1, 0])).all()</div>
+"""</div>
         
         </div>
     </div>
@@ -1985,7 +1977,7 @@ def test_polar_to_cart():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=a752c3d6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=5feab8be" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2005,13 +1997,13 @@ def test_polar_to_cart():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_cart_to_polar</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the cart_to_polar function.&quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="p">(</span><span class="n">coordinates</span><span class="o">.</span><span class="n">cart_to_polar</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_polar_to_cart</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the polar_to_cart function.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">coordinates</span><span class="o">.</span><span class="n">polar_to_cart</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt">def test_cart_to_polar():
-    """Tests the cart_to_polar function."""
-    assert (coordinates.cart_to_polar([1, 0]) == np.array([1, 0])).all()</div>
+<div id="cell-4" class="clipboard-copy-txt">def test_polar_to_cart():
+    """Tests the polar_to_cart function."""
+    assert (coordinates.polar_to_cart([1, 0]) == np.array([1, 0])).all()</div>
         
         </div>
     </div>
@@ -2021,7 +2013,7 @@ def test_polar_to_cart():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=e2452389" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=38dab1ca" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2041,69 +2033,13 @@ def test_polar_to_cart():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_pixel_coordinates</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the pixel_coordinates function.&quot;&quot;&quot;</span>
-
-    <span class="c1"># 1d tests</span>
-    <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
-
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
-        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Not an offset&#39;</span><span class="p">)</span>
-
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
-        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="s1">&#39;not a pixel scale&#39;</span><span class="p">)</span>
-
-    <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-
-    <span class="c1"># 2d tests</span>
-    <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">polar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
-        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;Not an offset&#39;</span><span class="p">)</span>
-    
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
-        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="s1">&#39;not a pixel scale&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-
-    <span class="c1"># Others</span>
-    <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">,</span> 
-        <span class="n">polar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ab&#39;</span><span class="p">)</span>
-    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">polar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_cart_to_polar</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the cart_to_polar function.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">coordinates</span><span class="o">.</span><span class="n">cart_to_polar</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </pre></div>
-<div id="cell-5" class="clipboard-copy-txt">def test_pixel_coordinates():
-    """Tests the pixel_coordinates function."""
-
-    # 1d tests
-    coordinates.pixel_coordinates(16, 1, 0.)
-
-    with pytest.raises(TypeError):
-        coordinates.pixel_coordinates(16, 1, 'Not an offset')
-
-    with pytest.raises(TypeError):
-        coordinates.pixel_coordinates(16, 'not a pixel scale')
-
-    coordinates.pixel_coordinates((16, 16), (1, 1), (0, 0))
-
-    # 2d tests
-    coordinates.pixel_coordinates((16, 16), (1, 1), (0, 0))
-    coordinates.pixel_coordinates((16, 16), (1, 1), (0, 0), polar=True)
-
-    with pytest.raises(TypeError):
-        coordinates.pixel_coordinates((16, 16), (1, 1), 'Not an offset')
-    
-    with pytest.raises(TypeError):
-        coordinates.pixel_coordinates((16, 16), 'not a pixel scale', (0, 0))
-
-    # Others
-    coordinates.pixel_coordinates((16, 16), (1, 1), (0, 0), indexing='ij', 
-        polar=True)
-    with pytest.raises(ValueError):
-        coordinates.pixel_coordinates(16, 1, 0., indexing='ab')
-    with pytest.raises(ValueError):
-        coordinates.pixel_coordinates(16, 1, 0., polar=True)</div>
+<div id="cell-5" class="clipboard-copy-txt">def test_cart_to_polar():
+    """Tests the cart_to_polar function."""
+    assert (coordinates.cart_to_polar([1, 0]) == np.array([1, 0])).all()</div>
         
         </div>
     </div>
@@ -2113,7 +2049,7 @@ def test_polar_to_cart():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=3262571b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=38083190" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2133,29 +2069,71 @@ def test_polar_to_cart():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">helpers.py</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="k">def</span> <span class="nf">test_list_to_dict</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the list_to_dict function.&quot;&quot;&quot;</span>
-    <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)]</span>
-    <span class="n">helpers</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_pixel_coordinates</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the pixel_coordinates function.&quot;&quot;&quot;</span>
 
+    <span class="c1"># 1d tests</span>
+    <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Not an offset&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;not a pixel scale&quot;</span><span class="p">)</span>
+
+    <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="c1"># 2d tests</span>
+    <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">polar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;Not an offset&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="s2">&quot;not a pixel scale&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="c1"># Others</span>
+    <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span>
+        <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">,</span> <span class="n">polar</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
     <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;name with spaces&quot;</span><span class="p">)]</span>
-        <span class="n">helpers</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ab&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">coordinates</span><span class="o">.</span><span class="n">pixel_coordinates</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">polar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
-<div id="cell-6" class="clipboard-copy-txt">"""
-helpers.py
-"""
-def test_list_to_dict():
-    """Tests the list_to_dict function."""
-    inputs = [1, 2, (3, "name")]
-    helpers.list_to_dictionary(inputs, ordered=True)
+<div id="cell-6" class="clipboard-copy-txt">def test_pixel_coordinates():
+    """Tests the pixel_coordinates function."""
 
+    # 1d tests
+    coordinates.pixel_coordinates(16, 1, 0.0)
+
+    with pytest.raises(TypeError):
+        coordinates.pixel_coordinates(16, 1, "Not an offset")
+
+    with pytest.raises(TypeError):
+        coordinates.pixel_coordinates(16, "not a pixel scale")
+
+    coordinates.pixel_coordinates((16, 16), (1, 1), (0, 0))
+
+    # 2d tests
+    coordinates.pixel_coordinates((16, 16), (1, 1), (0, 0))
+    coordinates.pixel_coordinates((16, 16), (1, 1), (0, 0), polar=True)
+
+    with pytest.raises(TypeError):
+        coordinates.pixel_coordinates((16, 16), (1, 1), "Not an offset")
+
+    with pytest.raises(TypeError):
+        coordinates.pixel_coordinates((16, 16), "not a pixel scale", (0, 0))
+
+    # Others
+    coordinates.pixel_coordinates(
+        (16, 16), (1, 1), (0, 0), indexing="ij", polar=True
+    )
     with pytest.raises(ValueError):
-        inputs = [1, 2, (3, "name with spaces")]
-        helpers.list_to_dictionary(inputs, ordered=True)</div>
+        coordinates.pixel_coordinates(16, 1, 0.0, indexing="ab")
+    with pytest.raises(ValueError):
+        coordinates.pixel_coordinates(16, 1, 0.0, polar=True)</div>
         
         </div>
     </div>
@@ -2165,7 +2143,7 @@ def test_list_to_dict():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=66f190aa" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=968dbf68" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2186,18 +2164,12 @@ def test_list_to_dict():
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">optics.py</span>
+<span class="sd">helpers.py</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="k">def</span> <span class="nf">test_phase_to_opd</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the phase_to_opd function.&quot;&quot;&quot;</span>
-    <span class="n">optics</span><span class="o">.</span><span class="n">phase_to_opd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
 </pre></div>
 <div id="cell-7" class="clipboard-copy-txt">"""
-optics.py
-"""
-def test_phase_to_opd():
-    """Tests the phase_to_opd function."""
-    optics.phase_to_opd(1, 1e-6)</div>
+helpers.py
+"""</div>
         
         </div>
     </div>
@@ -2207,7 +2179,7 @@ def test_phase_to_opd():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=e062c4cc" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=ebe13fb4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2227,13 +2199,23 @@ def test_phase_to_opd():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_opd_to_phase</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the opd_to_phase function.&quot;&quot;&quot;</span>
-    <span class="n">optics</span><span class="o">.</span><span class="n">opd_to_phase</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_list_to_dict</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the list_to_dict function.&quot;&quot;&quot;</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)]</span>
+    <span class="n">helpers</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;name with spaces&quot;</span><span class="p">)]</span>
+        <span class="n">helpers</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
-<div id="cell-8" class="clipboard-copy-txt">def test_opd_to_phase():
-    """Tests the opd_to_phase function."""
-    optics.opd_to_phase(1, 1e-6)</div>
+<div id="cell-8" class="clipboard-copy-txt">def test_list_to_dict():
+    """Tests the list_to_dict function."""
+    inputs = [1, 2, (3, "name")]
+    helpers.list_to_dictionary(inputs, ordered=True)
+
+    with pytest.raises(ValueError):
+        inputs = [1, 2, (3, "name with spaces")]
+        helpers.list_to_dictionary(inputs, ordered=True)</div>
         
         </div>
     </div>
@@ -2243,7 +2225,7 @@ def test_phase_to_opd():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=261e17b9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=6e53710a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2263,13 +2245,13 @@ def test_phase_to_opd():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_get_fringe_size</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the get_fringe_size function.&quot;&quot;&quot;</span>
-    <span class="n">optics</span><span class="o">.</span><span class="n">get_fringe_size</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">optics.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
 </pre></div>
-<div id="cell-9" class="clipboard-copy-txt">def test_get_fringe_size():
-    """Tests the get_fringe_size function."""
-    optics.get_fringe_size(1e-6, 1)</div>
+<div id="cell-9" class="clipboard-copy-txt">"""
+optics.py
+"""</div>
         
         </div>
     </div>
@@ -2279,7 +2261,7 @@ def test_phase_to_opd():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=092fbf74" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=76cc13c5" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2299,15 +2281,13 @@ def test_phase_to_opd():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_get_pixels_per_fringe</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the get_pixels_per_fringe function.&quot;&quot;&quot;</span>
-    <span class="n">optics</span><span class="o">.</span><span class="n">get_pixels_per_fringe</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">optics</span><span class="o">.</span><span class="n">get_pixels_per_fringe</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_phase_to_opd</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the phase_to_opd function.&quot;&quot;&quot;</span>
+    <span class="n">optics</span><span class="o">.</span><span class="n">phase_to_opd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
 </pre></div>
-<div id="cell-10" class="clipboard-copy-txt">def test_get_pixels_per_fringe():
-    """Tests the get_pixels_per_fringe function."""
-    optics.get_pixels_per_fringe(1e-6, 1, 1)
-    optics.get_pixels_per_fringe(1e-6, 1, 1, 1)</div>
+<div id="cell-10" class="clipboard-copy-txt">def test_phase_to_opd():
+    """Tests the phase_to_opd function."""
+    optics.phase_to_opd(1, 1e-6)</div>
         
         </div>
     </div>
@@ -2317,7 +2297,7 @@ def test_phase_to_opd():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=a4d42dd3" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=cfa9d8f5" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2337,15 +2317,13 @@ def test_phase_to_opd():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_get_pixel_scale</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the get_pixel_scale function.&quot;&quot;&quot;</span>
-    <span class="n">optics</span><span class="o">.</span><span class="n">get_pixel_scale</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">optics</span><span class="o">.</span><span class="n">get_pixel_scale</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_opd_to_phase</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the opd_to_phase function.&quot;&quot;&quot;</span>
+    <span class="n">optics</span><span class="o">.</span><span class="n">opd_to_phase</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
 </pre></div>
-<div id="cell-11" class="clipboard-copy-txt">def test_get_pixel_scale():
-    """Tests the get_pixel_scale function."""
-    optics.get_pixel_scale(1e-6, 1, 1)
-    optics.get_pixel_scale(1e-6, 1, 1, 1)</div>
+<div id="cell-11" class="clipboard-copy-txt">def test_opd_to_phase():
+    """Tests the opd_to_phase function."""
+    optics.opd_to_phase(1, 1e-6)</div>
         
         </div>
     </div>
@@ -2355,7 +2333,7 @@ def test_phase_to_opd():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=00987a75" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=029e6a6f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2375,15 +2353,13 @@ def test_phase_to_opd():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_get_airy_pixel_scale</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the get_airy_pixel_scale function.&quot;&quot;&quot;</span>
-    <span class="n">optics</span><span class="o">.</span><span class="n">get_airy_pixel_scale</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">optics</span><span class="o">.</span><span class="n">get_airy_pixel_scale</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_get_fringe_size</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the get_fringe_size function.&quot;&quot;&quot;</span>
+    <span class="n">optics</span><span class="o">.</span><span class="n">get_fringe_size</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-12" class="clipboard-copy-txt">def test_get_airy_pixel_scale():
-    """Tests the get_airy_pixel_scale function."""
-    optics.get_airy_pixel_scale(1e-6, 1, 1)
-    optics.get_airy_pixel_scale(1e-6, 1, 1, 1)</div>
+<div id="cell-12" class="clipboard-copy-txt">def test_get_fringe_size():
+    """Tests the get_fringe_size function."""
+    optics.get_fringe_size(1e-6, 1)</div>
         
         </div>
     </div>
@@ -2393,7 +2369,7 @@ def test_phase_to_opd():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=0bbd019e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=900e132f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2413,19 +2389,15 @@ def test_phase_to_opd():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">units.py</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="k">def</span> <span class="nf">test_rad_to_deg</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the rad_to_deg function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">rad_to_deg</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_get_pixels_per_fringe</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the get_pixels_per_fringe function.&quot;&quot;&quot;</span>
+    <span class="n">optics</span><span class="o">.</span><span class="n">get_pixels_per_fringe</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">optics</span><span class="o">.</span><span class="n">get_pixels_per_fringe</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-13" class="clipboard-copy-txt">"""
-units.py
-"""
-def test_rad_to_deg():
-    """Tests the rad_to_deg function."""
-    units.rad_to_deg(1)</div>
+<div id="cell-13" class="clipboard-copy-txt">def test_get_pixels_per_fringe():
+    """Tests the get_pixels_per_fringe function."""
+    optics.get_pixels_per_fringe(1e-6, 1, 1)
+    optics.get_pixels_per_fringe(1e-6, 1, 1, 1)</div>
         
         </div>
     </div>
@@ -2435,7 +2407,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=538e237e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=357b0a0f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2455,13 +2427,15 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_rad_to_arcmin</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the rad_to_arcmin function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">rad_to_arcmin</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_get_pixel_scale</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the get_pixel_scale function.&quot;&quot;&quot;</span>
+    <span class="n">optics</span><span class="o">.</span><span class="n">get_pixel_scale</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">optics</span><span class="o">.</span><span class="n">get_pixel_scale</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-14" class="clipboard-copy-txt">def test_rad_to_arcmin():
-    """Tests the rad_to_arcmin function."""
-    units.rad_to_arcmin(1)</div>
+<div id="cell-14" class="clipboard-copy-txt">def test_get_pixel_scale():
+    """Tests the get_pixel_scale function."""
+    optics.get_pixel_scale(1e-6, 1, 1)
+    optics.get_pixel_scale(1e-6, 1, 1, 1)</div>
         
         </div>
     </div>
@@ -2471,7 +2445,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=2c8b2778" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=afbc9ca0" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2491,13 +2465,15 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_rad_to_arcsec</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the rad_to_arcsec function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">rad_to_arcsec</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_get_airy_pixel_scale</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the get_airy_pixel_scale function.&quot;&quot;&quot;</span>
+    <span class="n">optics</span><span class="o">.</span><span class="n">get_airy_pixel_scale</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">optics</span><span class="o">.</span><span class="n">get_airy_pixel_scale</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-15" class="clipboard-copy-txt">def test_rad_to_arcsec():
-    """Tests the rad_to_arcsec function."""
-    units.rad_to_arcsec(1)</div>
+<div id="cell-15" class="clipboard-copy-txt">def test_get_airy_pixel_scale():
+    """Tests the get_airy_pixel_scale function."""
+    optics.get_airy_pixel_scale(1e-6, 1, 1)
+    optics.get_airy_pixel_scale(1e-6, 1, 1, 1)</div>
         
         </div>
     </div>
@@ -2507,7 +2483,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b7a90204" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=c7f7e5ab" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2527,13 +2503,13 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_deg_to_rad</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the deg_to_rad function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">deg_to_rad</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">units.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
 </pre></div>
-<div id="cell-16" class="clipboard-copy-txt">def test_deg_to_rad():
-    """Tests the deg_to_rad function."""
-    units.deg_to_rad(1)</div>
+<div id="cell-16" class="clipboard-copy-txt">"""
+units.py
+"""</div>
         
         </div>
     </div>
@@ -2543,7 +2519,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=14a158df" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=65122bd9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2563,13 +2539,13 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_deg_to_arcsec</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the deg_to_arcsec function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">deg_to_arcsec</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_rad_to_deg</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the rad_to_deg function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">rad_to_deg</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-17" class="clipboard-copy-txt">def test_deg_to_arcsec():
-    """Tests the deg_to_arcsec function."""
-    units.deg_to_arcsec(1)</div>
+<div id="cell-17" class="clipboard-copy-txt">def test_rad_to_deg():
+    """Tests the rad_to_deg function."""
+    units.rad_to_deg(1)</div>
         
         </div>
     </div>
@@ -2579,7 +2555,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5e9e36ef" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=6798ebc8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2599,13 +2575,13 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_deg_to_arcmin</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the deg_to_arcmin function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">deg_to_arcmin</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_rad_to_arcmin</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the rad_to_arcmin function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">rad_to_arcmin</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-18" class="clipboard-copy-txt">def test_deg_to_arcmin():
-    """Tests the deg_to_arcmin function."""
-    units.deg_to_arcmin(1)</div>
+<div id="cell-18" class="clipboard-copy-txt">def test_rad_to_arcmin():
+    """Tests the rad_to_arcmin function."""
+    units.rad_to_arcmin(1)</div>
         
         </div>
     </div>
@@ -2615,7 +2591,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c38c8a60" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=0a5395f0" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2635,13 +2611,13 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcmin_to_rad</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcmin_to_rad function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">arcmin_to_rad</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_rad_to_arcsec</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the rad_to_arcsec function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">rad_to_arcsec</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-19" class="clipboard-copy-txt">def test_arcmin_to_rad():
-    """Tests the arcmin_to_rad function."""
-    units.arcmin_to_rad(1)</div>
+<div id="cell-19" class="clipboard-copy-txt">def test_rad_to_arcsec():
+    """Tests the rad_to_arcsec function."""
+    units.rad_to_arcsec(1)</div>
         
         </div>
     </div>
@@ -2651,7 +2627,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=0caa47da" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=568a6e1d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2671,13 +2647,13 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcmin_to_deg</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcmin_to_deg function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">arcmin_to_deg</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_deg_to_rad</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the deg_to_rad function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">deg_to_rad</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-20" class="clipboard-copy-txt">def test_arcmin_to_deg():
-    """Tests the arcmin_to_deg function."""
-    units.arcmin_to_deg(1)</div>
+<div id="cell-20" class="clipboard-copy-txt">def test_deg_to_rad():
+    """Tests the deg_to_rad function."""
+    units.deg_to_rad(1)</div>
         
         </div>
     </div>
@@ -2687,7 +2663,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=66053784" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=8cb0a780" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2707,13 +2683,13 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcmin_to_arcsec</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcmin_to_arcsec function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">arcmin_to_arcsec</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_deg_to_arcsec</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the deg_to_arcsec function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">deg_to_arcsec</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-21" class="clipboard-copy-txt">def test_arcmin_to_arcsec():
-    """Tests the arcmin_to_arcsec function."""
-    units.arcmin_to_arcsec(1)</div>
+<div id="cell-21" class="clipboard-copy-txt">def test_deg_to_arcsec():
+    """Tests the deg_to_arcsec function."""
+    units.deg_to_arcsec(1)</div>
         
         </div>
     </div>
@@ -2723,7 +2699,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=08b9a78b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d070a646" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2743,13 +2719,13 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcsec_to_rad</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcsec_to_rad function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">arcsec_to_rad</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_deg_to_arcmin</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the deg_to_arcmin function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">deg_to_arcmin</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-22" class="clipboard-copy-txt">def test_arcsec_to_rad():
-    """Tests the arcsec_to_rad function."""
-    units.arcsec_to_rad(1)</div>
+<div id="cell-22" class="clipboard-copy-txt">def test_deg_to_arcmin():
+    """Tests the deg_to_arcmin function."""
+    units.deg_to_arcmin(1)</div>
         
         </div>
     </div>
@@ -2759,7 +2735,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=df8c3ae7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=76d6cac7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2779,13 +2755,13 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcsec_to_deg</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcsec_to_deg function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">arcsec_to_deg</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcmin_to_rad</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcmin_to_rad function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">arcmin_to_rad</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-23" class="clipboard-copy-txt">def test_arcsec_to_deg():
-    """Tests the arcsec_to_deg function."""
-    units.arcsec_to_deg(1)</div>
+<div id="cell-23" class="clipboard-copy-txt">def test_arcmin_to_rad():
+    """Tests the arcmin_to_rad function."""
+    units.arcmin_to_rad(1)</div>
         
         </div>
     </div>
@@ -2795,7 +2771,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=7aacf8b4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=9af3d0d5" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2815,13 +2791,13 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcsec_to_arcmin</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcsec_to_arcmin function.&quot;&quot;&quot;</span>
-    <span class="n">units</span><span class="o">.</span><span class="n">arcsec_to_arcmin</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcmin_to_deg</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcmin_to_deg function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">arcmin_to_deg</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-24" class="clipboard-copy-txt">def test_arcsec_to_arcmin():
-    """Tests the arcsec_to_arcmin function."""
-    units.arcsec_to_arcmin(1)</div>
+<div id="cell-24" class="clipboard-copy-txt">def test_arcmin_to_deg():
+    """Tests the arcmin_to_deg function."""
+    units.arcmin_to_deg(1)</div>
         
         </div>
     </div>
@@ -2831,7 +2807,7 @@ def test_rad_to_deg():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=ef506d2a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=963cad9e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2851,19 +2827,13 @@ def test_rad_to_deg():
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">interpolation.py</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="k">def</span> <span class="nf">test_scale_array</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the scale_array function.&quot;&quot;&quot;</span>
-    <span class="n">interpolation</span><span class="o">.</span><span class="n">scale_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)),</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcmin_to_arcsec</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcmin_to_arcsec function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">arcmin_to_arcsec</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-25" class="clipboard-copy-txt">"""
-interpolation.py
-"""
-def test_scale_array():
-    """Tests the scale_array function."""
-    interpolation.scale_array(np.ones((16, 16)), 8, 1)</div>
+<div id="cell-25" class="clipboard-copy-txt">def test_arcmin_to_arcsec():
+    """Tests the arcmin_to_arcsec function."""
+    units.arcmin_to_arcsec(1)</div>
         
         </div>
     </div>
@@ -2873,7 +2843,7 @@ def test_scale_array():
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=932f1a1c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d6c10942" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2893,19 +2863,199 @@ def test_scale_array():
                     </div>
                 </clipboard-copy>
             </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcsec_to_rad</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcsec_to_rad function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">arcsec_to_rad</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+<div id="cell-26" class="clipboard-copy-txt">def test_arcsec_to_rad():
+    """Tests the arcsec_to_rad function."""
+    units.arcsec_to_rad(1)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=8c614e03" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-27">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcsec_to_deg</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcsec_to_deg function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">arcsec_to_deg</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+<div id="cell-27" class="clipboard-copy-txt">def test_arcsec_to_deg():
+    """Tests the arcsec_to_deg function."""
+    units.arcsec_to_deg(1)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=bba9e1a8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-28">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_arcsec_to_arcmin</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the arcsec_to_arcmin function.&quot;&quot;&quot;</span>
+    <span class="n">units</span><span class="o">.</span><span class="n">arcsec_to_arcmin</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+<div id="cell-28" class="clipboard-copy-txt">def test_arcsec_to_arcmin():
+    """Tests the arcsec_to_arcmin function."""
+    units.arcsec_to_arcmin(1)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=42d95080" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-29">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">interpolation.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+<div id="cell-29" class="clipboard-copy-txt">"""
+interpolation.py
+"""</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=886f9d46" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-30">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_scale_array</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the scale_array function.&quot;&quot;&quot;</span>
+    <span class="n">interpolation</span><span class="o">.</span><span class="n">scale_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)),</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+<div id="cell-30" class="clipboard-copy-txt">def test_scale_array():
+    """Tests the scale_array function."""
+    interpolation.scale_array(np.ones((16, 16)), 8, 1)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=667467c9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-31">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">def</span> <span class="nf">test_downsample</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the downsample function.&quot;&quot;&quot;</span>
     <span class="n">interpolation</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)),</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">interpolation</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)),</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">)</span>
+    <span class="n">interpolation</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)),</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
-        <span class="n">interpolation</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)),</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;other&#39;</span><span class="p">)</span>
+        <span class="n">interpolation</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)),</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;other&quot;</span><span class="p">)</span>
 </pre></div>
-<div id="cell-26" class="clipboard-copy-txt">def test_downsample():
+<div id="cell-31" class="clipboard-copy-txt">def test_downsample():
     """Tests the downsample function."""
     interpolation.downsample(np.ones((16, 16)), 2)
-    interpolation.downsample(np.ones((16, 16)), 2, 'sum')
+    interpolation.downsample(np.ones((16, 16)), 2, "sum")
     with pytest.raises(ValueError):
-        interpolation.downsample(np.ones((16, 16)), 2, 'other')</div>
+        interpolation.downsample(np.ones((16, 16)), 2, "other")</div>
         
         </div>
     </div>
@@ -2960,10 +3110,10 @@ def test_scale_array():
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

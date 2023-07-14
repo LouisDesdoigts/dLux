@@ -21,7 +21,7 @@
         <link rel="next" href="../apertures/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -897,7 +897,7 @@ defined in Cartesian units (ie metres/pixel).</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>Array, metres/pixel or radians/pixel</code>
+                <code><span title="jax.Array">Array</span>, metres / pixel or radians / pixel</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -935,13 +935,7 @@ else it is taken to be in metres/pixel.</p>
 
         <details class="quote">
           <summary>Source code in <code>dLux/propagators.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
@@ -1005,7 +999,18 @@ else it is taken to be in metres/pixel.</p>
 <span class="normal">162</span>
 <span class="normal">163</span>
 <span class="normal">164</span>
-<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MFT</span><span class="p">(</span><span class="n">Propagator</span><span class="p">):</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MFT</span><span class="p">(</span><span class="n">Propagator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Propagator class designed to propagate a wavefront to a plane that is</span>
 <span class="sd">    defined in Cartesian units (ie metres/pixel).</span>
@@ -1023,14 +1028,17 @@ else it is taken to be in metres/pixel.</p>
 <span class="sd">    inverse : bool</span>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
-                 <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+        <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for VariableSampling propagators.</span>
 
@@ -1054,7 +1062,7 @@ else it is taken to be in metres/pixel.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">npixels</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;pixel_scale must be a scalar.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;pixel_scale must be a scalar.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1071,11 +1079,13 @@ else it is taken to be in metres/pixel.</p>
 <span class="sd">            The transformed wavefront.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">IMFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                                  <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">IMFT</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                                 <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span>
+            <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
 
@@ -1119,7 +1129,7 @@ else it is taken to be in metres/pixel.</p>
         <tr>
           <td><code>wavefront</code></td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                <code><span title="dLux.propagators.Wavefront">Wavefront</span></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1144,7 +1154,7 @@ else it is taken to be in metres/pixel.</p>
     <tbody>
         <tr>
 <td><code>wavefront</code></td>          <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                <code><span title="dLux.propagators.Wavefront">Wavefront</span></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1157,16 +1167,7 @@ else it is taken to be in metres/pixel.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/propagators.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
@@ -1176,7 +1177,18 @@ else it is taken to be in metres/pixel.</p>
 <span class="normal">162</span>
 <span class="normal">163</span>
 <span class="normal">164</span>
-<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies the layer to the wavefront.</span>
 
@@ -1191,11 +1203,13 @@ else it is taken to be in metres/pixel.</p>
 <span class="sd">        The transformed wavefront.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">IMFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                              <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">IMFT</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                             <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">MFT</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -1244,7 +1258,7 @@ else it is taken to be in metres/pixel.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>Array, metres/pixel or radians/pixel</code>
+                <code><span title="jax.Array">Array</span>, metres / pixel or radians / pixel</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1291,14 +1305,7 @@ is taken to be in metres/pixel.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/propagators.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span>
 <span class="normal">126</span>
@@ -1319,11 +1326,22 @@ is taken to be in metres/pixel.</p>
 <span class="normal">141</span>
 <span class="normal">142</span>
 <span class="normal">143</span>
-<span class="normal">144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
-             <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-             <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-             <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+    <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor for VariableSampling propagators.</span>
 
@@ -1347,7 +1365,7 @@ is taken to be in metres/pixel.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">npixels</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;pixel_scale must be a scalar.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;pixel_scale must be a scalar.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -1433,11 +1451,7 @@ Fast Fourier Transform.</p>
 
         <details class="quote">
           <summary>Source code in <code>dLux/propagators.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span>
@@ -1476,7 +1490,13 @@ Fast Fourier Transform.</p>
 <span class="normal">89</span>
 <span class="normal">90</span>
 <span class="normal">91</span>
-<span class="normal">92</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FFT</span><span class="p">(</span><span class="n">Propagator</span><span class="p">):</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span>
+<span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FFT</span><span class="p">(</span><span class="n">Propagator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Propagator class designed to propagate a wavefront to a plane using a</span>
 <span class="sd">    Fast Fourier Transform.</span>
@@ -1492,13 +1512,15 @@ Fast Fourier Transform.</p>
 <span class="sd">    inverse : bool</span>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">pad</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span>         <span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> 
-        <span class="n">focal_length</span> <span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">pad</span>          <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">inverse</span>      <span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Propagator</span><span class="p">:</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+        <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pad</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Propagator</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pad</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span>
 
@@ -1563,7 +1585,7 @@ Fast Fourier Transform.</p>
         <tr>
           <td><code>wavefront</code></td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                <code><span title="dLux.propagators.Wavefront">Wavefront</span></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1588,7 +1610,7 @@ Fast Fourier Transform.</p>
     <tbody>
         <tr>
 <td><code>wavefront</code></td>          <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                <code><span title="dLux.propagators.Wavefront">Wavefront</span></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1601,13 +1623,7 @@ Fast Fourier Transform.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/propagators.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">81</span>
 <span class="normal">82</span>
 <span class="normal">83</span>
 <span class="normal">84</span>
@@ -1618,7 +1634,13 @@ Fast Fourier Transform.</p>
 <span class="normal">89</span>
 <span class="normal">90</span>
 <span class="normal">91</span>
-<span class="normal">92</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span>
+<span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies the layer to the wavefront.</span>
 
@@ -1696,7 +1718,7 @@ sampling in that plane.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>Array, metres/pixel or radians/pixel</code>
+                <code><span title="jax.Array">Array</span>, metres / <span title="dLux.propagators.ShiftedMFT.pixel">pixel</span> or radians / <span title="dLux.propagators.ShiftedMFT.pixel">pixel</span></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1737,7 +1759,7 @@ else it is taken to be in metres/pixel.</p>
             <div class="doc-md-description">
               <p>If True the shift value is assumed to be in units of pixels, else the
 physical units of the output plane (ie radians if focal_length is None,
-else metres). </p>
+else metres).</p>
             </div>
           </td>
         </tr>
@@ -1758,18 +1780,7 @@ else metres). </p>
 
         <details class="quote">
           <summary>Source code in <code>dLux/propagators.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">179</span>
 <span class="normal">180</span>
 <span class="normal">181</span>
 <span class="normal">182</span>
@@ -1844,7 +1855,35 @@ else metres). </p>
 <span class="normal">251</span>
 <span class="normal">252</span>
 <span class="normal">253</span>
-<span class="normal">254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ShiftedMFT</span><span class="p">(</span><span class="n">MFT</span><span class="p">):</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ShiftedMFT</span><span class="p">(</span><span class="n">MFT</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Propagator class designed to propagate a wavefront to a plane that is</span>
 <span class="sd">    defined in Cartesian units (ie metres/pixel), with a variable output</span>
@@ -1865,20 +1904,23 @@ else metres). </p>
 <span class="sd">    pixel : bool</span>
 <span class="sd">        If True the shift value is assumed to be in units of pixels, else the</span>
 <span class="sd">        physical units of the output plane (ie radians if focal_length is None,</span>
-<span class="sd">        else metres). </span>
+<span class="sd">        else metres).</span>
 <span class="sd">    inverse : bool</span>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
-                 <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+        <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for VariableSampling propagators.</span>
 
@@ -1893,23 +1935,27 @@ else metres). </p>
 <span class="sd">            The (x, y) shift to apply to the wavefront in the output plane.</span>
 <span class="sd">        focal_length : Array = None, metres</span>
 <span class="sd">            The effective focal_length of the lens/mirror this propagator</span>
-<span class="sd">            represents. If None, the pixel_scale is taken to be in </span>
+<span class="sd">            represents. If None, the pixel_scale is taken to be in</span>
 <span class="sd">            radians/pixel, else it is taken to be in metres/pixel.</span>
 <span class="sd">        pixel : bool = False</span>
 <span class="sd">            If True the shift value is assumed to be in units of pixels, else</span>
 <span class="sd">            the physical units of the output plane (ie radians if focal_length</span>
-<span class="sd">            is None, else metres). </span>
+<span class="sd">            is None, else metres).</span>
 <span class="sd">        inverse : bool = False</span>
 <span class="sd">            Should the propagation be performed in the inverse direction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span>
-                         <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span>
+            <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span>
+            <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span>
+            <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pixel</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;shift must be an array of shape (2,).&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;shift must be an array of shape (2,).&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1926,11 +1972,21 @@ else metres). </p>
 <span class="sd">            The transformed wavefront.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_IMFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                                          <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_IMFT</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_MFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_MFT</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">,</span>
+            <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
 
@@ -1974,7 +2030,7 @@ else metres). </p>
         <tr>
           <td><code>wavefront</code></td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                <code><span title="dLux.propagators.Wavefront">Wavefront</span></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1999,7 +2055,7 @@ else metres). </p>
     <tbody>
         <tr>
 <td><code>wavefront</code></td>          <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                <code><span title="dLux.propagators.Wavefront">Wavefront</span></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2012,26 +2068,36 @@ else metres). </p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/propagators.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies the layer to the wavefront.</span>
 
@@ -2046,11 +2112,21 @@ else metres). </p>
 <span class="sd">        The transformed wavefront.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_IMFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                                      <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_IMFT</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_MFT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_MFT</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">,</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -2099,7 +2175,7 @@ else metres). </p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>Array, metres/pixel or radians/pixel</code>
+                <code><span title="jax.Array">Array</span>, metres / <span title="dLux.propagators.ShiftedMFT.pixel">pixel</span> or radians / <span title="dLux.propagators.ShiftedMFT.pixel">pixel</span></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2133,7 +2209,7 @@ per pixel for Cartesian or Angular Wavefront respectively.</p>
           <td>
             <div class="doc-md-description">
               <p>The effective focal_length of the lens/mirror this propagator
-represents. If None, the pixel_scale is taken to be in 
+represents. If None, the pixel_scale is taken to be in
 radians/pixel, else it is taken to be in metres/pixel.</p>
             </div>
           </td>
@@ -2176,19 +2252,7 @@ is None, else metres).</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/propagators.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
 <span class="normal">211</span>
@@ -2213,13 +2277,33 @@ is None, else metres).</p>
 <span class="normal">230</span>
 <span class="normal">231</span>
 <span class="normal">232</span>
-<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
-             <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-             <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-             <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-             <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+    <span class="n">npixels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor for VariableSampling propagators.</span>
 
@@ -2234,23 +2318,27 @@ is None, else metres).</p>
 <span class="sd">        The (x, y) shift to apply to the wavefront in the output plane.</span>
 <span class="sd">    focal_length : Array = None, metres</span>
 <span class="sd">        The effective focal_length of the lens/mirror this propagator</span>
-<span class="sd">        represents. If None, the pixel_scale is taken to be in </span>
+<span class="sd">        represents. If None, the pixel_scale is taken to be in</span>
 <span class="sd">        radians/pixel, else it is taken to be in metres/pixel.</span>
 <span class="sd">    pixel : bool = False</span>
 <span class="sd">        If True the shift value is assumed to be in units of pixels, else</span>
 <span class="sd">        the physical units of the output plane (ie radians if focal_length</span>
-<span class="sd">        is None, else metres). </span>
+<span class="sd">        is None, else metres).</span>
 <span class="sd">    inverse : bool = False</span>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span>
-                     <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span>
+        <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span>
+        <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span>
+        <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pixel</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;shift must be an array of shape (2,).&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;shift must be an array of shape (2,).&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -2313,7 +2401,7 @@ metres/pixel in the output plane.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>Array, metres/pixel</code>
+                <code><span title="jax.Array">Array</span>, metres / pixel</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2384,35 +2472,7 @@ interprets the shift value in pixel units.</p>
 
         <details class="quote">
           <summary>Source code in <code>dLux/propagators.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">285</span>
 <span class="normal">286</span>
 <span class="normal">287</span>
 <span class="normal">288</span>
@@ -2468,7 +2528,51 @@ interprets the shift value in pixel units.</p>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
-<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FarFieldFresnel</span><span class="p">(</span><span class="n">ShiftedMFT</span><span class="p">):</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FarFieldFresnel</span><span class="p">(</span><span class="n">ShiftedMFT</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A propagator class to for Far-Field fresnel propagations. This classes</span>
 <span class="sd">    implements algorithms that use quadratic phase factors to better represent</span>
@@ -2495,16 +2599,19 @@ interprets the shift value in pixel units.</p>
 <span class="sd">    inverse : bool</span>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">focal_shift</span><span class="p">:</span> <span class="n">Array</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
-                 <span class="n">npixels</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">focal_shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-                 <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+        <span class="n">npixels</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">focal_shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+        <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the CartesianFresnel propagator</span>
 
@@ -2527,15 +2634,22 @@ interprets the shift value in pixel units.</p>
 <span class="sd">            Should the propagation be performed in the inverse direction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">inverse</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Inverse propagation not implemented &#39;</span>
-                                      <span class="s1">&#39;for CartesianFresnel.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Inverse propagation not implemented &quot;</span> <span class="s2">&quot;for CartesianFresnel.&quot;</span>
+            <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">focal_shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;focal_shift must be a scalar.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;focal_shift must be a scalar.&quot;</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">pixel</span><span class="o">=</span><span class="n">pixel</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span>
-                         <span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span>
+            <span class="n">pixel</span><span class="o">=</span><span class="n">pixel</span><span class="p">,</span>
+            <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span>
+            <span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span>
+            <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span>
+            <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2551,8 +2665,14 @@ interprets the shift value in pixel units.</p>
 <span class="sd">        wavefront : Wavefront</span>
 <span class="sd">            The transformed wavefront.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_fresnel_prop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                                              <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_fresnel_prop</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">,</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
 
@@ -2596,7 +2716,7 @@ interprets the shift value in pixel units.</p>
         <tr>
           <td><code>wavefront</code></td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                <code><span title="dLux.propagators.Wavefront">Wavefront</span></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2621,7 +2741,7 @@ interprets the shift value in pixel units.</p>
     <tbody>
         <tr>
 <td><code>wavefront</code></td>          <td>
-                <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="../wavefronts/#dLux.wavefronts.Wavefront">Wavefront</a></code>
+                <code><span title="dLux.propagators.Wavefront">Wavefront</span></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2634,22 +2754,28 @@ interprets the shift value in pixel units.</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/propagators.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span> <span class="n">wavefront</span><span class="p">:</span> <span class="n">Wavefront</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Wavefront</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies the layer to the wavefront.</span>
 
@@ -2663,8 +2789,14 @@ interprets the shift value in pixel units.</p>
 <span class="sd">    wavefront : Wavefront</span>
 <span class="sd">        The transformed wavefront.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_fresnel_prop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
-                                          <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">shifted_fresnel_prop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pixel</span><span class="p">,</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -2713,7 +2845,7 @@ interprets the shift value in pixel units.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>Array, metres/pixel</code>
+                <code><span title="jax.Array">Array</span>, metres / pixel</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2763,7 +2895,7 @@ interprets the shift value in pixel units.</p>
             </div>
           </td>
           <td>
-                <code>np.zeros(2)</code>
+                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.zeros">zeros</span>(2)</code>
           </td>
         </tr>
         <tr>
@@ -2800,36 +2932,7 @@ physical units of the output plane (ie pixels or metres, radians).</p>
 
       <details class="quote">
         <summary>Source code in <code>dLux/propagators.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">315</span>
 <span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span>
@@ -2838,14 +2941,54 @@ physical units of the output plane (ie pixels or metres, radians).</p>
 <span class="normal">321</span>
 <span class="normal">322</span>
 <span class="normal">323</span>
-<span class="normal">324</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
-             <span class="n">npixels</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-             <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-             <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-             <span class="n">focal_shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-             <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-             <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-             <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">:</span> <span class="n">Propagator</span><span class="p">,</span>
+    <span class="n">npixels</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">pixel_scale</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">focal_length</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">focal_shift</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">shift</span><span class="p">:</span> <span class="n">Array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+    <span class="n">pixel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor for the CartesianFresnel propagator</span>
 
@@ -2868,15 +3011,22 @@ physical units of the output plane (ie pixels or metres, radians).</p>
 <span class="sd">        Should the propagation be performed in the inverse direction.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">inverse</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Inverse propagation not implemented &#39;</span>
-                                  <span class="s1">&#39;for CartesianFresnel.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Inverse propagation not implemented &quot;</span> <span class="s2">&quot;for CartesianFresnel.&quot;</span>
+        <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">focal_shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">focal_shift</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;focal_shift must be a scalar.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;focal_shift must be a scalar.&quot;</span><span class="p">)</span>
 
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">pixel</span><span class="o">=</span><span class="n">pixel</span><span class="p">,</span> <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span>
-                     <span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span> <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span>
+        <span class="n">pixel</span><span class="o">=</span><span class="n">pixel</span><span class="p">,</span>
+        <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span>
+        <span class="n">pixel_scale</span><span class="o">=</span><span class="n">pixel_scale</span><span class="p">,</span>
+        <span class="n">npixels</span><span class="o">=</span><span class="n">npixels</span><span class="p">,</span>
+        <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">,</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -2936,10 +3086,10 @@ physical units of the output plane (ie pixels or metres, radians).</p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../../javascripts/mathjax.js"></script>

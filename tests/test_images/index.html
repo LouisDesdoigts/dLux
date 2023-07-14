@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=9e560eed" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=9b7f64f4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1880,14 +1880,10 @@ Licensed under the Apache License, Version 2.0.
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span><span class="p">,</span> <span class="n">Array</span>
-<span class="kn">import</span> <span class="nn">pytest</span>
-<span class="kn">import</span> <span class="nn">dLux</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span>
 </pre></div>
 <div id="cell-1" class="clipboard-copy-txt">import jax.numpy as np
-from jax import config, Array
-import pytest
-import dLux</div>
+from jax import config</div>
         
         </div>
     </div>
@@ -1897,7 +1893,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=090ab670" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=48577447" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1929,7 +1925,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=83db0fd0" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=f975e52c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1949,7 +1945,7 @@ import dLux</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestImage</span><span class="p">():</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestImage</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the Image class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">test_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_image</span><span class="p">):</span>
@@ -1959,15 +1955,15 @@ import dLux</div>
     <span class="k">def</span> <span class="nf">test_npixels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_image</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the npixels property.&quot;&quot;&quot;</span>
         <span class="n">create_image</span><span class="p">()</span><span class="o">.</span><span class="n">npixels</span>
-    
+
     <span class="k">def</span> <span class="nf">test_downsample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_image</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the downsample method.&quot;&quot;&quot;</span>
         <span class="n">create_image</span><span class="p">()</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-    
+
     <span class="k">def</span> <span class="nf">test_convolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_image</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the convolve method.&quot;&quot;&quot;</span>
         <span class="n">create_image</span><span class="p">()</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
-    
+
     <span class="k">def</span> <span class="nf">test_rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_image</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the rotate method.&quot;&quot;&quot;</span>
         <span class="n">create_image</span><span class="p">()</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1980,7 +1976,7 @@ import dLux</div>
         <span class="n">im</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">im</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt">class TestImage():
+<div id="cell-3" class="clipboard-copy-txt">class TestImage:
     """Test the Image class."""
 
     def test_constructor(self, create_image):
@@ -1990,15 +1986,15 @@ import dLux</div>
     def test_npixels(self, create_image):
         """Tests the npixels property."""
         create_image().npixels
-    
+
     def test_downsample(self, create_image):
         """Tests the downsample method."""
         create_image().downsample(2)
-    
+
     def test_convolve(self, create_image):
         """Tests the convolve method."""
         create_image().convolve(np.ones((2, 2)))
-    
+
     def test_rotate(self, create_image):
         """Tests the rotate method."""
         create_image().rotate(np.pi, order=1)
@@ -2064,10 +2060,10 @@ import dLux</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

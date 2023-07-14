@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=85b2a7ed" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3cdee77e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1879,17 +1879,11 @@ Licensed under the Apache License, Version 2.0.
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pytest</span>
-<span class="kn">import</span> <span class="nn">dLux</span>
-<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span><span class="p">,</span> <span class="n">Array</span>
-<span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_debug_nans&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">config</span>
 </pre></div>
-<div id="cell-1" class="clipboard-copy-txt">import jax.numpy as np
-import pytest
-import dLux
-from jax import config, Array
-config.update("jax_debug_nans", True)</div>
+<div id="cell-1" class="clipboard-copy-txt">import pytest
+from jax import config</div>
         
         </div>
     </div>
@@ -1899,7 +1893,7 @@ config.update("jax_debug_nans", True)</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b6cee5c4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=46105fe7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1919,6 +1913,38 @@ config.update("jax_debug_nans", True)</div>
                     </div>
                 </clipboard-copy>
             </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_debug_nans&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<div id="cell-2" class="clipboard-copy-txt">config.update("jax_debug_nans", True)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=554906fe" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-3">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">TestInstrument</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the Instrument class.&quot;&quot;&quot;</span>
 
@@ -1928,11 +1954,11 @@ config.update("jax_debug_nans", True)</div>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
             <span class="n">create_instrument</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Not a source&quot;</span><span class="p">])</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
-            <span class="n">create_instrument</span><span class="p">(</span><span class="n">optics</span><span class="o">=</span><span class="s1">&#39;Not an optics&#39;</span><span class="p">)</span>
+            <span class="n">create_instrument</span><span class="p">(</span><span class="n">optics</span><span class="o">=</span><span class="s2">&quot;Not an optics&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
-            <span class="n">create_instrument</span><span class="p">(</span><span class="n">observation</span><span class="o">=</span><span class="s1">&#39;Not an observation&#39;</span><span class="p">)</span>
+            <span class="n">create_instrument</span><span class="p">(</span><span class="n">observation</span><span class="o">=</span><span class="s2">&quot;Not an observation&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
-            <span class="n">create_instrument</span><span class="p">(</span><span class="n">detector</span><span class="o">=</span><span class="s1">&#39;Not a detector&#39;</span><span class="p">)</span>
+            <span class="n">create_instrument</span><span class="p">(</span><span class="n">detector</span><span class="o">=</span><span class="s2">&quot;Not a detector&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">test_observe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_instrument</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the normalise method.&quot;&quot;&quot;</span>
@@ -1941,11 +1967,11 @@ config.update("jax_debug_nans", True)</div>
     <span class="k">def</span> <span class="nf">test_normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_instrument</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the normalise method.&quot;&quot;&quot;</span>
         <span class="n">create_instrument</span><span class="p">()</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
-    
+
     <span class="k">def</span> <span class="nf">test_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_instrument</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the model method.&quot;&quot;&quot;</span>
         <span class="n">create_instrument</span><span class="p">()</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
-    
+
     <span class="k">def</span> <span class="nf">test_getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_instrument</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests the __getattr__ method.&quot;&quot;&quot;</span>
         <span class="n">create_instrument</span><span class="p">()</span><span class="o">.</span><span class="n">diameter</span>
@@ -1954,7 +1980,7 @@ config.update("jax_debug_nans", True)</div>
         <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">):</span>
             <span class="n">create_instrument</span><span class="p">()</span><span class="o">.</span><span class="n">nonexistent_attribute</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt">class TestInstrument(object):
+<div id="cell-3" class="clipboard-copy-txt">class TestInstrument(object):
     """Tests the Instrument class."""
 
     def test_constructor(self, create_instrument):
@@ -1963,11 +1989,11 @@ config.update("jax_debug_nans", True)</div>
         with pytest.raises(TypeError):
             create_instrument(sources=["Not a source"])
         with pytest.raises(TypeError):
-            create_instrument(optics='Not an optics')
+            create_instrument(optics="Not an optics")
         with pytest.raises(TypeError):
-            create_instrument(observation='Not an observation')
+            create_instrument(observation="Not an observation")
         with pytest.raises(TypeError):
-            create_instrument(detector='Not a detector')
+            create_instrument(detector="Not a detector")
 
     def test_observe(self, create_instrument):
         """Tests the normalise method."""
@@ -1976,11 +2002,11 @@ config.update("jax_debug_nans", True)</div>
     def test_normalise(self, create_instrument):
         """Tests the normalise method."""
         create_instrument().normalise()
-    
+
     def test_model(self, create_instrument):
         """Tests the model method."""
         create_instrument().model()
-    
+
     def test_getattr(self, create_instrument):
         """Tests the __getattr__ method."""
         create_instrument().diameter
@@ -2042,10 +2068,10 @@ config.update("jax_debug_nans", True)</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

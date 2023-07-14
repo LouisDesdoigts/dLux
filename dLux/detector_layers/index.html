@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=3e2dd874" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=73c5203c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1903,7 +1903,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=f6efa323" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=8400e6f4" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1923,11 +1923,23 @@ import dLux</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ApplyPixelResponse&quot;</span><span class="p">,</span> <span class="s2">&quot;ApplyJitter&quot;</span><span class="p">,</span> <span class="s2">&quot;ApplySaturation&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;AddConstant&quot;</span><span class="p">,</span> <span class="s2">&quot;IntegerDownsample&quot;</span><span class="p">,</span> <span class="s2">&quot;Rotate&quot;</span><span class="p">]</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;ApplyPixelResponse&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ApplyJitter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ApplySaturation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AddConstant&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;IntegerDownsample&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RotateDetector&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt">__all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
-           "AddConstant", "IntegerDownsample", "Rotate"]</div>
+<div id="cell-2" class="clipboard-copy-txt">__all__ = [
+    "ApplyPixelResponse",
+    "ApplyJitter",
+    "ApplySaturation",
+    "AddConstant",
+    "IntegerDownsample",
+    "RotateDetector",
+]</div>
         
         </div>
     </div>
@@ -1937,7 +1949,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=a3b272b1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b9c21ded" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1969,7 +1981,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=02fbb626" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a4cbc694" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2002,8 +2014,9 @@ import dLux</div>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span>
-                 <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Image</span><span class="p">()</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Image</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applies the layer to the Image.</span>
 
@@ -2031,8 +2044,9 @@ import dLux</div>
         super().__init__()
 
     @abstractmethod
-    def __call__(self: DetectorLayer,
-                 image: Image()) -> Image:  # pragma: no cover
+    def __call__(
+        self: DetectorLayer, image: Image()
+    ) -> Image:  # pragma: no cover
         """
         Applies the layer to the Image.
 
@@ -2055,7 +2069,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=7e9d8d1f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e8eedc09" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2084,18 +2098,19 @@ import dLux</div>
 <span class="sd">    pixel_response : Array</span>
 <span class="sd">        The pixel_response to apply to the input image.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">pixel_response</span><span class="p">:</span> <span class="n">Array</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span>
-                 <span class="n">pixel_response</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">pixel_response</span><span class="p">:</span> <span class="n">Array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the ApplyPixelResponse class.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        pixel_response : Array</span>
-<span class="sd">            The pixel_response to apply to the input image. Must be a 2-dimensional</span>
-<span class="sd">            array equal to size of the image at time of application.</span>
+<span class="sd">            The pixel_response to apply to the input image. Must be a</span>
+<span class="sd">            2-dimensional array equal to size of the image at time of</span>
+<span class="sd">            application.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pixel_response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pixel_response</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -2127,18 +2142,19 @@ import dLux</div>
     pixel_response : Array
         The pixel_response to apply to the input image.
     """
+
     pixel_response: Array
 
-    def __init__(self: DetectorLayer,
-                 pixel_response: Array):
+    def __init__(self: DetectorLayer, pixel_response: Array):
         """
         Constructor for the ApplyPixelResponse class.
 
         Parameters
         ----------
         pixel_response : Array
-            The pixel_response to apply to the input image. Must be a 2-dimensional
-            array equal to size of the image at time of application.
+            The pixel_response to apply to the input image. Must be a
+            2-dimensional array equal to size of the image at time of
+            application.
         """
         super().__init__()
         self.pixel_response = np.asarray(pixel_response, dtype=float)
@@ -2169,7 +2185,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=410ccc4c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=528b66d9" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2201,12 +2217,11 @@ import dLux</div>
 <span class="sd">    kernel_size : int</span>
 <span class="sd">        The size of the convolution kernel to use.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">sigma</span><span class="p">:</span> <span class="n">Array</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span>
-                 <span class="n">sigma</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the ApplyJitter class.</span>
 
@@ -2267,12 +2282,11 @@ import dLux</div>
     kernel_size : int
         The size of the convolution kernel to use.
     """
+
     kernel_size: int
     sigma: Array
 
-    def __init__(self: DetectorLayer,
-                 sigma: Array,
-                 kernel_size: int = 10):
+    def __init__(self: DetectorLayer, sigma: Array, kernel_size: int = 10):
         """
         Constructor for the ApplyJitter class.
 
@@ -2329,7 +2343,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=c085b3d6" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=bc6296e1" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2359,6 +2373,7 @@ import dLux</div>
 <span class="sd">    saturation : Array</span>
 <span class="sd">        The value at which the saturation is applied.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">saturation</span><span class="p">:</span> <span class="n">Array</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">saturation</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
@@ -2389,7 +2404,7 @@ import dLux</div>
 <span class="sd">        image : Image</span>
 <span class="sd">            The transformed image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saturation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saturation</span><span class="p">)</span>
 </pre></div>
 <div id="cell-7" class="clipboard-copy-txt">class ApplySaturation(DetectorLayer):
     """
@@ -2401,6 +2416,7 @@ import dLux</div>
     saturation : Array
         The value at which the saturation is applied.
     """
+
     saturation: Array
 
     def __init__(self: DetectorLayer, saturation: Array) -> DetectorLayer:
@@ -2431,7 +2447,7 @@ import dLux</div>
         image : Image
             The transformed image.
         """
-        return image.min('image', self.saturation)</div>
+        return image.min("image", self.saturation)</div>
         
         </div>
     </div>
@@ -2441,7 +2457,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=2da1d0ec" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=a62fc1fc" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2471,6 +2487,7 @@ import dLux</div>
 <span class="sd">    value : Array</span>
 <span class="sd">        The value to add to the image.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">value</span><span class="p">:</span> <span class="n">Array</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
@@ -2513,6 +2530,7 @@ import dLux</div>
     value : Array
         The value to add to the image.
     """
+
     value: Array
 
     def __init__(self: DetectorLayer, value: Array) -> DetectorLayer:
@@ -2553,7 +2571,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=e18f7cbc" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=605d4995" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2584,6 +2602,7 @@ import dLux</div>
 <span class="sd">    kernel_size : int</span>
 <span class="sd">        The size of the downsampling kernel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DetectorLayer</span><span class="p">:</span>
@@ -2625,6 +2644,7 @@ import dLux</div>
     kernel_size : int
         The size of the downsampling kernel.
     """
+
     kernel_size: int
 
     def __init__(self: DetectorLayer, kernel_size: int) -> DetectorLayer:
@@ -2663,7 +2683,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=159cffdd" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3d473f01" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2683,7 +2703,7 @@ import dLux</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">Rotate</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">RotateDetector</span><span class="p">(</span><span class="n">DetectorLayer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies a rotation to the image using interpolation methods.</span>
 
@@ -2694,14 +2714,13 @@ import dLux</div>
 <span class="sd">    order : int</span>
 <span class="sd">        The order of the interpolation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span>
     <span class="n">order</span><span class="p">:</span> <span class="nb">int</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span>
-                 <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                 <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">DetectorLayer</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constructor for the Rotate class.</span>
+<span class="sd">        Constructor for the RotateDetector class.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2730,7 +2749,7 @@ import dLux</div>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
 </pre></div>
-<div id="cell-10" class="clipboard-copy-txt">class Rotate(DetectorLayer):
+<div id="cell-10" class="clipboard-copy-txt">class RotateDetector(DetectorLayer):
     """
     Applies a rotation to the image using interpolation methods.
 
@@ -2741,14 +2760,13 @@ import dLux</div>
     order : int
         The order of the interpolation.
     """
+
     angle: Array
     order: int
 
-    def __init__(self: DetectorLayer,
-                 angle: Array,
-                 order: int = 1):
+    def __init__(self: DetectorLayer, angle: Array, order: int = 1):
         """
-        Constructor for the Rotate class.
+        Constructor for the RotateDetector class.
 
         Parameters
         ----------
@@ -2830,10 +2848,10 @@ import dLux</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

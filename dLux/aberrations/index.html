@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=b53d17ab" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=b6824e7d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1901,7 +1901,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=168662ee" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=3948b2db" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1921,9 +1921,9 @@ import dLux.utils as dlu</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Zernike&#39;</span><span class="p">,</span> <span class="s1">&#39;ZernikeBasis&#39;</span><span class="p">]</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Zernike&quot;</span><span class="p">,</span> <span class="s2">&quot;ZernikeBasis&quot;</span><span class="p">]</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt">__all__ = ['Zernike', 'ZernikeBasis']</div>
+<div id="cell-2" class="clipboard-copy-txt">__all__ = ["Zernike", "ZernikeBasis"]</div>
         
         </div>
     </div>
@@ -1933,7 +1933,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=5e996f9c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=65cd7953" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1955,110 +1955,96 @@ import dLux.utils as dlu</div>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">zernike_names</span> <span class="o">=</span> <span class="p">{</span>
     <span class="c1"># 0th Radial</span>
-    <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;Piston&#39;</span><span class="p">,</span>
-
+    <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Piston&quot;</span><span class="p">,</span>
     <span class="c1"># 1st Radial</span>
-    <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;Tilt X&#39;</span><span class="p">,</span>
-    <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;Tilt Y&#39;</span><span class="p">,</span>
-
+    <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Tilt X&quot;</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;Tilt Y&quot;</span><span class="p">,</span>
     <span class="c1"># Second Radial</span>
-    <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;Defocus&#39;</span><span class="p">,</span>
-    <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;Astig X&#39;</span><span class="p">,</span>
-    <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;Astig Y&#39;</span><span class="p">,</span>
-
+    <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;Defocus&quot;</span><span class="p">,</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="s2">&quot;Astig X&quot;</span><span class="p">,</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="s2">&quot;Astig Y&quot;</span><span class="p">,</span>
     <span class="c1"># Third Radial</span>
-    <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;Coma X&#39;</span><span class="p">,</span>
-    <span class="mi">8</span><span class="p">:</span> <span class="s1">&#39;Coma Y&#39;</span><span class="p">,</span>
-    <span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;Trefoil X&#39;</span><span class="p">,</span>
-    <span class="mi">10</span><span class="p">:</span> <span class="s1">&#39;Trefoil Y&#39;</span><span class="p">,</span>
-
+    <span class="mi">7</span><span class="p">:</span> <span class="s2">&quot;Coma X&quot;</span><span class="p">,</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="s2">&quot;Coma Y&quot;</span><span class="p">,</span>
+    <span class="mi">9</span><span class="p">:</span> <span class="s2">&quot;Trefoil X&quot;</span><span class="p">,</span>
+    <span class="mi">10</span><span class="p">:</span> <span class="s2">&quot;Trefoil Y&quot;</span><span class="p">,</span>
     <span class="c1"># Fourth Radial</span>
-    <span class="mi">11</span><span class="p">:</span> <span class="s1">&#39;Spherical&#39;</span><span class="p">,</span>
-    <span class="mi">12</span><span class="p">:</span> <span class="s1">&#39;2nd Astig X&#39;</span><span class="p">,</span>
-    <span class="mi">13</span><span class="p">:</span> <span class="s1">&#39;2nd Astig Y&#39;</span><span class="p">,</span>
-    <span class="mi">14</span><span class="p">:</span> <span class="s1">&#39;Quadrafoil X&#39;</span><span class="p">,</span>
-    <span class="mi">15</span><span class="p">:</span> <span class="s1">&#39;Quadrafoil Y&#39;</span><span class="p">,</span>
-
+    <span class="mi">11</span><span class="p">:</span> <span class="s2">&quot;Spherical&quot;</span><span class="p">,</span>
+    <span class="mi">12</span><span class="p">:</span> <span class="s2">&quot;2nd Astig X&quot;</span><span class="p">,</span>
+    <span class="mi">13</span><span class="p">:</span> <span class="s2">&quot;2nd Astig Y&quot;</span><span class="p">,</span>
+    <span class="mi">14</span><span class="p">:</span> <span class="s2">&quot;Quadrafoil X&quot;</span><span class="p">,</span>
+    <span class="mi">15</span><span class="p">:</span> <span class="s2">&quot;Quadrafoil Y&quot;</span><span class="p">,</span>
     <span class="c1"># Fifth Radial</span>
-    <span class="mi">16</span><span class="p">:</span> <span class="s1">&#39;2nd Coma X&#39;</span><span class="p">,</span>
-    <span class="mi">17</span><span class="p">:</span> <span class="s1">&#39;2nd Coma Y&#39;</span><span class="p">,</span>
-    <span class="mi">18</span><span class="p">:</span> <span class="s1">&#39;2nd Trefoil X&#39;</span><span class="p">,</span>
-    <span class="mi">19</span><span class="p">:</span> <span class="s1">&#39;2nd Trefoil Y&#39;</span><span class="p">,</span>
-    <span class="mi">20</span><span class="p">:</span> <span class="s1">&#39;Pentafoil X&#39;</span><span class="p">,</span>
-    <span class="mi">21</span><span class="p">:</span> <span class="s1">&#39;Pentafoil Y&#39;</span><span class="p">,</span>
-
+    <span class="mi">16</span><span class="p">:</span> <span class="s2">&quot;2nd Coma X&quot;</span><span class="p">,</span>
+    <span class="mi">17</span><span class="p">:</span> <span class="s2">&quot;2nd Coma Y&quot;</span><span class="p">,</span>
+    <span class="mi">18</span><span class="p">:</span> <span class="s2">&quot;2nd Trefoil X&quot;</span><span class="p">,</span>
+    <span class="mi">19</span><span class="p">:</span> <span class="s2">&quot;2nd Trefoil Y&quot;</span><span class="p">,</span>
+    <span class="mi">20</span><span class="p">:</span> <span class="s2">&quot;Pentafoil X&quot;</span><span class="p">,</span>
+    <span class="mi">21</span><span class="p">:</span> <span class="s2">&quot;Pentafoil Y&quot;</span><span class="p">,</span>
     <span class="c1"># Sixth Radial</span>
-    <span class="mi">22</span><span class="p">:</span> <span class="s1">&#39;2nd Spherical&#39;</span><span class="p">,</span>
-    <span class="mi">23</span><span class="p">:</span> <span class="s1">&#39;3rd Coma X&#39;</span><span class="p">,</span>
-    <span class="mi">24</span><span class="p">:</span> <span class="s1">&#39;3rd Coma Y&#39;</span><span class="p">,</span>
-    <span class="mi">25</span><span class="p">:</span> <span class="s1">&#39;3rd Astig X&#39;</span><span class="p">,</span>
-    <span class="mi">26</span><span class="p">:</span> <span class="s1">&#39;3rd Astig Y&#39;</span><span class="p">,</span>
-    <span class="mi">27</span><span class="p">:</span> <span class="s1">&#39;Hexafoil X&#39;</span><span class="p">,</span>
-    <span class="mi">28</span><span class="p">:</span> <span class="s1">&#39;Hexafoil Y&#39;</span><span class="p">,</span>
-
+    <span class="mi">22</span><span class="p">:</span> <span class="s2">&quot;2nd Spherical&quot;</span><span class="p">,</span>
+    <span class="mi">23</span><span class="p">:</span> <span class="s2">&quot;3rd Coma X&quot;</span><span class="p">,</span>
+    <span class="mi">24</span><span class="p">:</span> <span class="s2">&quot;3rd Coma Y&quot;</span><span class="p">,</span>
+    <span class="mi">25</span><span class="p">:</span> <span class="s2">&quot;3rd Astig X&quot;</span><span class="p">,</span>
+    <span class="mi">26</span><span class="p">:</span> <span class="s2">&quot;3rd Astig Y&quot;</span><span class="p">,</span>
+    <span class="mi">27</span><span class="p">:</span> <span class="s2">&quot;Hexafoil X&quot;</span><span class="p">,</span>
+    <span class="mi">28</span><span class="p">:</span> <span class="s2">&quot;Hexafoil Y&quot;</span><span class="p">,</span>
     <span class="c1"># Seventh Radial</span>
-    <span class="mi">29</span><span class="p">:</span> <span class="s1">&#39;4th Coma X&#39;</span><span class="p">,</span>
-    <span class="mi">30</span><span class="p">:</span> <span class="s1">&#39;4th Coma Y&#39;</span><span class="p">,</span>
-    <span class="mi">31</span><span class="p">:</span> <span class="s1">&#39;4th Astig X&#39;</span><span class="p">,</span>
-    <span class="mi">32</span><span class="p">:</span> <span class="s1">&#39;4th Astig Y&#39;</span><span class="p">,</span>
-    <span class="mi">33</span><span class="p">:</span> <span class="s1">&#39;3rd Trefoil X&#39;</span><span class="p">,</span>
-    <span class="mi">34</span><span class="p">:</span> <span class="s1">&#39;3rd Trefoil Y&#39;</span><span class="p">,</span>
-    <span class="mi">35</span><span class="p">:</span> <span class="s1">&#39;Heptafoil X&#39;</span><span class="p">,</span>
-    <span class="mi">36</span><span class="p">:</span> <span class="s1">&#39;Heptafoil Y&#39;</span><span class="p">,</span>
+    <span class="mi">29</span><span class="p">:</span> <span class="s2">&quot;4th Coma X&quot;</span><span class="p">,</span>
+    <span class="mi">30</span><span class="p">:</span> <span class="s2">&quot;4th Coma Y&quot;</span><span class="p">,</span>
+    <span class="mi">31</span><span class="p">:</span> <span class="s2">&quot;4th Astig X&quot;</span><span class="p">,</span>
+    <span class="mi">32</span><span class="p">:</span> <span class="s2">&quot;4th Astig Y&quot;</span><span class="p">,</span>
+    <span class="mi">33</span><span class="p">:</span> <span class="s2">&quot;3rd Trefoil X&quot;</span><span class="p">,</span>
+    <span class="mi">34</span><span class="p">:</span> <span class="s2">&quot;3rd Trefoil Y&quot;</span><span class="p">,</span>
+    <span class="mi">35</span><span class="p">:</span> <span class="s2">&quot;Heptafoil X&quot;</span><span class="p">,</span>
+    <span class="mi">36</span><span class="p">:</span> <span class="s2">&quot;Heptafoil Y&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 </pre></div>
 <div id="cell-3" class="clipboard-copy-txt">zernike_names = {
     # 0th Radial
-    1: 'Piston',
-
+    1: "Piston",
     # 1st Radial
-    2: 'Tilt X',
-    3: 'Tilt Y',
-
+    2: "Tilt X",
+    3: "Tilt Y",
     # Second Radial
-    4: 'Defocus',
-    5: 'Astig X',
-    6: 'Astig Y',
-
+    4: "Defocus",
+    5: "Astig X",
+    6: "Astig Y",
     # Third Radial
-    7: 'Coma X',
-    8: 'Coma Y',
-    9: 'Trefoil X',
-    10: 'Trefoil Y',
-
+    7: "Coma X",
+    8: "Coma Y",
+    9: "Trefoil X",
+    10: "Trefoil Y",
     # Fourth Radial
-    11: 'Spherical',
-    12: '2nd Astig X',
-    13: '2nd Astig Y',
-    14: 'Quadrafoil X',
-    15: 'Quadrafoil Y',
-
+    11: "Spherical",
+    12: "2nd Astig X",
+    13: "2nd Astig Y",
+    14: "Quadrafoil X",
+    15: "Quadrafoil Y",
     # Fifth Radial
-    16: '2nd Coma X',
-    17: '2nd Coma Y',
-    18: '2nd Trefoil X',
-    19: '2nd Trefoil Y',
-    20: 'Pentafoil X',
-    21: 'Pentafoil Y',
-
+    16: "2nd Coma X",
+    17: "2nd Coma Y",
+    18: "2nd Trefoil X",
+    19: "2nd Trefoil Y",
+    20: "Pentafoil X",
+    21: "Pentafoil Y",
     # Sixth Radial
-    22: '2nd Spherical',
-    23: '3rd Coma X',
-    24: '3rd Coma Y',
-    25: '3rd Astig X',
-    26: '3rd Astig Y',
-    27: 'Hexafoil X',
-    28: 'Hexafoil Y',
-
+    22: "2nd Spherical",
+    23: "3rd Coma X",
+    24: "3rd Coma Y",
+    25: "3rd Astig X",
+    26: "3rd Astig Y",
+    27: "Hexafoil X",
+    28: "Hexafoil Y",
     # Seventh Radial
-    29: '4th Coma X',
-    30: '4th Coma Y',
-    31: '4th Astig X',
-    32: '4th Astig Y',
-    33: '3rd Trefoil X',
-    34: '3rd Trefoil Y',
-    35: 'Heptafoil X',
-    36: 'Heptafoil Y',
+    29: "4th Coma X",
+    30: "4th Coma Y",
+    31: "4th Astig X",
+    32: "4th Astig Y",
+    33: "3rd Trefoil X",
+    34: "3rd Trefoil Y",
+    35: "Heptafoil X",
+    36: "Heptafoil Y",
 }</div>
         
         </div>
@@ -2069,7 +2055,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=aae532b0" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=106231a2" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2105,7 +2091,7 @@ import dLux.utils as dlu</div>
 
 <span class="sd">    7, 8, 9, 10 -&gt; (3, -3), (3, -1), (3, 1), (3, 3)</span>
 
-<span class="sd">    </span>
+
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    j : int</span>
@@ -2117,12 +2103,13 @@ import dLux.utils as dlu</div>
 <span class="sd">    name : str</span>
 <span class="sd">        The name of the Zernike polynomial.</span>
 <span class="sd">    _k : Array</span>
-<span class="sd">        The array of powers using the radial calculation. This is a </span>
+<span class="sd">        The array of powers using the radial calculation. This is a</span>
 <span class="sd">        pre-calculated parameter and should not be changed.</span>
 <span class="sd">    _c : Array</span>
 <span class="sd">        The array of normalisation coefficients used in the radial calculation.</span>
 <span class="sd">        This is a pre-calculated parameter and should not be changed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">j</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">n</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">m</span><span class="p">:</span> <span class="nb">int</span>
@@ -2140,15 +2127,18 @@ import dLux.utils as dlu</div>
 <span class="sd">            The Zernike (noll) index.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The Zernike index must be greater than 0.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The Zernike index must be greater than 0.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noll_indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">zernike_names</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">&lt;=</span> <span class="mi">36</span> \
-            <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;Zernike </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">zernike_names</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">j</span> <span class="o">&lt;=</span> <span class="mi">36</span>
+            <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;Zernike </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">j</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># Calculate values</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="n">sign</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
         <span class="n">_fact_1</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">))</span>
         <span class="n">_fact_2</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
         <span class="n">_fact_3</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
@@ -2173,7 +2163,7 @@ import dLux.utils as dlu</div>
         <span class="n">smallest_j_in_row</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">number_of_shifts</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">smallest_j_in_row</span> <span class="o">+</span> <span class="o">~</span><span class="p">(</span><span class="n">n</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
         <span class="n">sign_of_shift</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">j</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="o">~</span><span class="p">(</span><span class="n">j</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
-        <span class="n">base_case</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">base_case</span> <span class="o">=</span> <span class="n">n</span> <span class="o">&amp;</span> <span class="mi">1</span>
         <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="n">sign_of_shift</span> <span class="o">*</span> <span class="p">(</span><span class="n">base_case</span> <span class="o">+</span> <span class="n">number_of_shifts</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 
@@ -2185,14 +2175,15 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        rho : Array</span>
 <span class="sd">            The radial coordinate of the Zernike polynomial.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        radial : Array</span>
 <span class="sd">            The radial component of the Zernike polynomial.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">rads</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">rho</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">],</span>
-                       <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">rads</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span>
+            <span class="n">rho</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">],</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">*</span> <span class="n">rads</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_calculate_azimuthal</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
@@ -2229,7 +2220,7 @@ import dLux.utils as dlu</div>
 <span class="sd">        ----------</span>
 <span class="sd">        coordinates : Array</span>
 <span class="sd">            The Cartesian coordinates to calculate the Zernike polynomial upon.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        zernike : Array</span>
@@ -2238,13 +2229,16 @@ import dLux.utils as dlu</div>
         <span class="n">polar_coordinates</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">cart_to_polar</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
         <span class="n">rho</span> <span class="o">=</span> <span class="n">polar_coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">theta</span> <span class="o">=</span> <span class="n">polar_coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">aperture</span> <span class="o">=</span> <span class="n">rho</span> <span class="o">&lt;=</span> <span class="mf">1.</span>
-        <span class="k">return</span> <span class="n">aperture</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_radial</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span> <span class="o">*</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_azimuthal</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">aperture</span> <span class="o">=</span> <span class="n">rho</span> <span class="o">&lt;=</span> <span class="mf">1.0</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">aperture</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_radial</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_azimuthal</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">calculate_polike</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span>
-                         <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                         <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">calculate_polike</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the Zernike polynomial on an n-sided aperture.</span>
 
@@ -2264,18 +2258,16 @@ import dLux.utils as dlu</div>
 <span class="sd">            The Zernike polynomial on an n-sided aperture.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">nsides</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;nsides must be &gt;= 3, not </span><span class="si">{</span><span class="n">nsides</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nsides must be &gt;= 3, not </span><span class="si">{</span><span class="n">nsides</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
         <span class="n">theta</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">cart_to_polar</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">nsides</span>
         <span class="n">phi</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">alpha</span>
-        <span class="n">wedge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">phi</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">))</span>
+        <span class="n">wedge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">phi</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">))</span>
         <span class="n">u_alpha</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">-</span> <span class="n">wedge</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span>
         <span class="n">r_alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">u_alpha</span><span class="p">)</span>
         <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">r_alpha</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_zernike</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">/</span> <span class="n">r_alpha</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span>
-                  <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                  <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Zernike</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the Zernike polynomial.</span>
 
@@ -2316,7 +2308,7 @@ import dLux.utils as dlu</div>
 
     7, 8, 9, 10 -> (3, -3), (3, -1), (3, 1), (3, 3)
 
-    
+
     Attributes
     ----------
     j : int
@@ -2328,12 +2320,13 @@ import dLux.utils as dlu</div>
     name : str
         The name of the Zernike polynomial.
     _k : Array
-        The array of powers using the radial calculation. This is a 
+        The array of powers using the radial calculation. This is a
         pre-calculated parameter and should not be changed.
     _c : Array
         The array of normalisation coefficients used in the radial calculation.
         This is a pre-calculated parameter and should not be changed.
     """
+
     j: int
     n: int
     m: int
@@ -2351,15 +2344,18 @@ import dLux.utils as dlu</div>
             The Zernike (noll) index.
         """
         if int(j) < 1:
-            raise ValueError('The Zernike index must be greater than 0.')
+            raise ValueError("The Zernike index must be greater than 0.")
         self.j = int(j)
         self.n, self.m = self._noll_indices(self.j)
-        self.name = zernike_names[int(self.j)] if self.j >= 1 and self.j <= 36 \
-            else f'Zernike {int(self.j)}'
+        self.name = (
+            zernike_names[int(self.j)]
+            if self.j >= 1 and self.j <= 36
+            else f"Zernike {int(self.j)}"
+        )
 
         # Calculate values
         self._k = np.arange(((self.n - self.m) // 2) + 1, dtype=float)
-        sign = lax.pow(-1., self._k)
+        sign = lax.pow(-1.0, self._k)
         _fact_1 = dlu.factorial(np.abs(self.n - self._k))
         _fact_2 = dlu.factorial(self._k)
         _fact_3 = dlu.factorial(((self.n + self.m) // 2) - self._k)
@@ -2384,7 +2380,7 @@ import dLux.utils as dlu</div>
         smallest_j_in_row = n * (n + 1) / 2 + 1
         number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
         sign_of_shift = -(j & 1) + ~(j & 1) + 2
-        base_case = (n & 1)
+        base_case = n & 1
         m = (sign_of_shift * (base_case + number_of_shifts * 2)).astype(int)
         return int(n), int(m)
 
@@ -2396,14 +2392,15 @@ import dLux.utils as dlu</div>
         ----------
         rho : Array
             The radial coordinate of the Zernike polynomial.
-        
+
         Returns
         -------
         radial : Array
             The radial component of the Zernike polynomial.
         """
-        rads = lax.pow(rho[:, :, None],
-                       (np.abs(self.n) - 2 * self._k)[None, None, :])
+        rads = lax.pow(
+            rho[:, :, None], (np.abs(self.n) - 2 * self._k)[None, None, :]
+        )
         return (self._c * rads).sum(axis=2)
 
     def _calculate_azimuthal(self: Zernike, theta: Array) -> Array:
@@ -2440,7 +2437,7 @@ import dLux.utils as dlu</div>
         ----------
         coordinates : Array
             The Cartesian coordinates to calculate the Zernike polynomial upon.
-        
+
         Returns
         -------
         zernike : Array
@@ -2449,13 +2446,16 @@ import dLux.utils as dlu</div>
         polar_coordinates = dlu.cart_to_polar(coordinates)
         rho = polar_coordinates[0]
         theta = polar_coordinates[1]
-        aperture = rho <= 1.
-        return aperture * self._calculate_radial(rho) * \
-            self._calculate_azimuthal(theta)
+        aperture = rho <= 1.0
+        return (
+            aperture
+            * self._calculate_radial(rho)
+            * self._calculate_azimuthal(theta)
+        )
 
-    def calculate_polike(self: Zernike,
-                         coordinates: Array,
-                         nsides: int) -> Array:
+    def calculate_polike(
+        self: Zernike, coordinates: Array, nsides: int
+    ) -> Array:
         """
         Calculates the Zernike polynomial on an n-sided aperture.
 
@@ -2475,18 +2475,16 @@ import dLux.utils as dlu</div>
             The Zernike polynomial on an n-sided aperture.
         """
         if nsides < 3:
-            raise ValueError(f'nsides must be >= 3, not {nsides}.')
+            raise ValueError(f"nsides must be >= 3, not {nsides}.")
         theta = dlu.cart_to_polar(coordinates)[1]
         alpha = np.pi / nsides
         phi = theta + alpha
-        wedge = np.floor((phi + alpha) / (2. * alpha))
+        wedge = np.floor((phi + alpha) / (2.0 * alpha))
         u_alpha = phi - wedge * (2 * alpha)
         r_alpha = np.cos(alpha) / np.cos(u_alpha)
         return 1 / r_alpha * self.calculate_zernike(coordinates / r_alpha)
 
-    def calculate(self: Zernike,
-                  coordinates: Array,
-                  nsides: int = 0) -> Array:
+    def calculate(self: Zernike, coordinates: Array, nsides: int = 0) -> Array:
         """
         Calculates the Zernike polynomial.
 
@@ -2519,7 +2517,7 @@ import dLux.utils as dlu</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=2c59bbc7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=94446cf7" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2547,13 +2545,13 @@ import dLux.utils as dlu</div>
 <span class="sd">    The &#39;jth&#39; zernike polynomial is defined [here](https://oeis.org/A176988).</span>
 <span class="sd">    The basic translation between the noll index and the pair of numbers is</span>
 <span class="sd">    shown below:</span>
-<span class="sd">    </span>
+
 <span class="sd">    1 -&gt; (0, 0)</span>
-<span class="sd">    </span>
+
 <span class="sd">    2, 3 -&gt; (1, -1), (1, 1)</span>
-<span class="sd">    </span>
+
 <span class="sd">    4, 5, 6 -&gt; (2, -2), (2, 0), (2, 2)</span>
-<span class="sd">    </span>
+
 <span class="sd">    7, 8, 9, 10 -&gt; (3, -3), (3, -1), (3, 1), (3, 3)</span>
 
 <span class="sd">    Attributes</span>
@@ -2561,6 +2559,7 @@ import dLux.utils as dlu</div>
 <span class="sd">    noll_indices : list[Zernike]</span>
 <span class="sd">        The list of Zernike polynomial classes to calculate.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">noll_indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Zernike</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span> <span class="n">js</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
@@ -2574,9 +2573,9 @@ import dLux.utils as dlu</div>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">Zernike</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">js</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">calculate_basis</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span>
-                        <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
-                        <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">calculate_basis</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">ZernikeBasis</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">nsides</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the full Zernike polynomial basis.</span>
 
@@ -2598,8 +2597,9 @@ import dLux.utils as dlu</div>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">leaf_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">leaf</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">leaf</span><span class="p">,</span> <span class="n">Zernike</span><span class="p">)</span>
         <span class="n">calculate_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">nsides</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">jtu</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">calculate_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span><span class="p">,</span>
-                                     <span class="n">is_leaf</span><span class="o">=</span><span class="n">leaf_fn</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">jtu</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">calculate_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">leaf_fn</span><span class="p">)</span>
+        <span class="p">)</span>
 </pre></div>
 <div id="cell-5" class="clipboard-copy-txt">class ZernikeBasis(Base):
     """
@@ -2609,13 +2609,13 @@ import dLux.utils as dlu</div>
     The 'jth' zernike polynomial is defined [here](https://oeis.org/A176988).
     The basic translation between the noll index and the pair of numbers is
     shown below:
-    
+
     1 -> (0, 0)
-    
+
     2, 3 -> (1, -1), (1, 1)
-    
+
     4, 5, 6 -> (2, -2), (2, 0), (2, 2)
-    
+
     7, 8, 9, 10 -> (3, -3), (3, -1), (3, 1), (3, 3)
 
     Attributes
@@ -2623,6 +2623,7 @@ import dLux.utils as dlu</div>
     noll_indices : list[Zernike]
         The list of Zernike polynomial classes to calculate.
     """
+
     noll_indices: list[Zernike]
 
     def __init__(self: ZernikeBasis, js: list[int]):
@@ -2636,9 +2637,9 @@ import dLux.utils as dlu</div>
         """
         self.noll_indices = [Zernike(j) for j in js]
 
-    def calculate_basis(self: ZernikeBasis,
-                        coordinates: Array,
-                        nsides: int = 0) -> Array:
+    def calculate_basis(
+        self: ZernikeBasis, coordinates: Array, nsides: int = 0
+    ) -> Array:
         """
         Calculates the full Zernike polynomial basis.
 
@@ -2660,8 +2661,9 @@ import dLux.utils as dlu</div>
         """
         leaf_fn = lambda leaf: isinstance(leaf, Zernike)
         calculate_fn = lambda z: z.calculate(coordinates, nsides)
-        return np.array(jtu.tree_map(calculate_fn, self.noll_indices,
-                                     is_leaf=leaf_fn))</div>
+        return np.array(
+            jtu.tree_map(calculate_fn, self.noll_indices, is_leaf=leaf_fn)
+        )</div>
         
         </div>
     </div>
@@ -2716,10 +2718,10 @@ import dLux.utils as dlu</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>

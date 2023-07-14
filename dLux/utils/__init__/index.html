@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=0acba31f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d5866a98" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1891,7 +1891,7 @@ Licensed under the Apache License, Version 2.0.
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=d620a4dd" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=8d9603c3" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1912,20 +1912,10 @@ Licensed under the Apache License, Version 2.0.
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Import as modules</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">coordinates</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">helpers</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">interpolation</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">units</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">optics</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">math</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">interpolation</span><span class="p">,</span> <span class="n">math</span><span class="p">,</span> <span class="n">optics</span><span class="p">,</span> <span class="n">units</span>
 </pre></div>
 <div id="cell-2" class="clipboard-copy-txt"># Import as modules
-from . import coordinates
-from . import helpers
-from . import interpolation
-from . import units
-from . import optics
-from . import math</div>
+from . import coordinates, helpers, interpolation, math, optics, units</div>
         
         </div>
     </div>
@@ -1935,7 +1925,7 @@ from . import math</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=0896686b" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=28a04b90" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1956,20 +1946,90 @@ from . import math</div>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Dont import all functions from modules</span>
-<span class="kn">from</span> <span class="nn">.coordinates</span>     <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.helpers</span>         <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.interpolation</span>   <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.units</span>           <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.optics</span>          <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.math</span>            <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.coordinates</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">cart_to_polar</span> <span class="k">as</span> <span class="n">cart_to_polar</span><span class="p">,</span>
+    <span class="n">polar_to_cart</span> <span class="k">as</span> <span class="n">polar_to_cart</span><span class="p">,</span>
+    <span class="n">pixel_coords</span> <span class="k">as</span> <span class="n">pixel_coords</span><span class="p">,</span>
+    <span class="n">pixel_coordinates</span> <span class="k">as</span> <span class="n">pixel_coordinates</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.helpers</span> <span class="kn">import</span> <span class="n">list_to_dictionary</span> <span class="k">as</span> <span class="n">list_to_dictionary</span>
+<span class="kn">from</span> <span class="nn">.interpolation</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">scale_array</span> <span class="k">as</span> <span class="n">scale_array</span><span class="p">,</span>
+    <span class="n">downsample</span> <span class="k">as</span> <span class="n">downsample</span><span class="p">,</span>
+    <span class="n">generate_coordinates</span> <span class="k">as</span> <span class="n">generate_coordinates</span><span class="p">,</span>
+    <span class="n">scale</span> <span class="k">as</span> <span class="n">scale</span><span class="p">,</span>
+    <span class="n">rotate</span> <span class="k">as</span> <span class="n">rotate</span><span class="p">,</span>
+    <span class="n">fourier_rotate</span> <span class="k">as</span> <span class="n">fourier_rotate</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.math</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">factorial</span> <span class="k">as</span> <span class="n">factorial</span><span class="p">,</span>
+    <span class="n">triangular_number</span> <span class="k">as</span> <span class="n">triangular_number</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.optics</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">opd_to_phase</span> <span class="k">as</span> <span class="n">opd_to_phase</span><span class="p">,</span>
+    <span class="n">phase_to_opd</span> <span class="k">as</span> <span class="n">phase_to_opd</span><span class="p">,</span>
+    <span class="n">get_fringe_size</span> <span class="k">as</span> <span class="n">get_fringe_size</span><span class="p">,</span>
+    <span class="n">get_pixels_per_fringe</span> <span class="k">as</span> <span class="n">get_pixels_per_fringe</span><span class="p">,</span>
+    <span class="n">get_pixel_scale</span> <span class="k">as</span> <span class="n">get_pixel_scale</span><span class="p">,</span>
+    <span class="n">get_airy_pixel_scale</span> <span class="k">as</span> <span class="n">get_airy_pixel_scale</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.units</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">rad_to_arcsec</span> <span class="k">as</span> <span class="n">rad_to_arcsec</span><span class="p">,</span>
+    <span class="n">rad_to_deg</span> <span class="k">as</span> <span class="n">rad_to_deg</span><span class="p">,</span>
+    <span class="n">rad_to_arcmin</span> <span class="k">as</span> <span class="n">rad_to_arcmin</span><span class="p">,</span>
+    <span class="n">deg_to_rad</span> <span class="k">as</span> <span class="n">deg_to_rad</span><span class="p">,</span>
+    <span class="n">deg_to_arcmin</span> <span class="k">as</span> <span class="n">deg_to_arcmin</span><span class="p">,</span>
+    <span class="n">deg_to_arcsec</span> <span class="k">as</span> <span class="n">deg_to_arcsec</span><span class="p">,</span>
+    <span class="n">arcmin_to_rad</span> <span class="k">as</span> <span class="n">arcmin_to_rad</span><span class="p">,</span>
+    <span class="n">arcmin_to_deg</span> <span class="k">as</span> <span class="n">arcmin_to_deg</span><span class="p">,</span>
+    <span class="n">arcmin_to_arcsec</span> <span class="k">as</span> <span class="n">arcmin_to_arcsec</span><span class="p">,</span>
+    <span class="n">arcsec_to_rad</span> <span class="k">as</span> <span class="n">arcsec_to_rad</span><span class="p">,</span>
+    <span class="n">arcsec_to_deg</span> <span class="k">as</span> <span class="n">arcsec_to_deg</span><span class="p">,</span>
+    <span class="n">arcsec_to_arcmin</span> <span class="k">as</span> <span class="n">arcsec_to_arcmin</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 <div id="cell-3" class="clipboard-copy-txt"># Dont import all functions from modules
-from .coordinates     import *
-from .helpers         import *
-from .interpolation   import *
-from .units           import *
-from .optics          import *
-from .math            import *</div>
+from .coordinates import (
+    cart_to_polar as cart_to_polar,
+    polar_to_cart as polar_to_cart,
+    pixel_coords as pixel_coords,
+    pixel_coordinates as pixel_coordinates,
+)
+from .helpers import list_to_dictionary as list_to_dictionary
+from .interpolation import (
+    scale_array as scale_array,
+    downsample as downsample,
+    generate_coordinates as generate_coordinates,
+    scale as scale,
+    rotate as rotate,
+    fourier_rotate as fourier_rotate,
+)
+from .math import (
+    factorial as factorial,
+    triangular_number as triangular_number,
+)
+from .optics import (
+    opd_to_phase as opd_to_phase,
+    phase_to_opd as phase_to_opd,
+    get_fringe_size as get_fringe_size,
+    get_pixels_per_fringe as get_pixels_per_fringe,
+    get_pixel_scale as get_pixel_scale,
+    get_airy_pixel_scale as get_airy_pixel_scale,
+)
+from .units import (
+    rad_to_arcsec as rad_to_arcsec,
+    rad_to_deg as rad_to_deg,
+    rad_to_arcmin as rad_to_arcmin,
+    deg_to_rad as deg_to_rad,
+    deg_to_arcmin as deg_to_arcmin,
+    deg_to_arcsec as deg_to_arcsec,
+    arcmin_to_rad as arcmin_to_rad,
+    arcmin_to_deg as arcmin_to_deg,
+    arcmin_to_arcsec as arcmin_to_arcsec,
+    arcsec_to_rad as arcsec_to_rad,
+    arcsec_to_deg as arcsec_to_deg,
+    arcsec_to_arcmin as arcsec_to_arcmin,
+)</div>
         
         </div>
     </div>
@@ -1979,7 +2039,7 @@ from .math            import *</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=82f27b1a" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=ada3e903" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2027,7 +2087,7 @@ modules = [
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=1f31c21c" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=e67cc4a8" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2104,10 +2164,10 @@ modules = [
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../../javascripts/mathjax.js"></script>

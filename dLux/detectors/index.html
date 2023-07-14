@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.16">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
@@ -1859,7 +1859,7 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
     <!-- End of mathjax configuration --><div class="jupyter-wrapper"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=f837e580" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=72c67fff" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1882,7 +1882,6 @@ Licensed under the Apache License, Version 2.0.
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">Array</span>
 <span class="kn">from</span> <span class="nn">zodiax</span> <span class="kn">import</span> <span class="n">Base</span>
 <span class="kn">import</span> <span class="nn">dLux.utils</span> <span class="k">as</span> <span class="nn">dlu</span>
@@ -1891,7 +1890,6 @@ Licensed under the Apache License, Version 2.0.
 <div id="cell-1" class="clipboard-copy-txt">from __future__ import annotations
 from abc import abstractmethod
 from collections import OrderedDict
-import jax.numpy as np
 from jax import Array
 from zodiax import Base
 import dLux.utils as dlu
@@ -1905,7 +1903,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=a4bae340" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=720d622f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1937,7 +1935,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=a3d7483e" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=ed55a60d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1969,7 +1967,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=3e5ca82f" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=d626f73d" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1990,13 +1988,11 @@ import dLux</div>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="k">class</span> <span class="nc">BaseDetector</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
-
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
         <span class="k">pass</span>
 </pre></div>
 <div id="cell-4" class="clipboard-copy-txt">class BaseDetector(Base):
-
     @abstractmethod
     def model(self, image):  # pragma: no cover
         pass</div>
@@ -2009,7 +2005,7 @@ import dLux</div>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div id="cell-id=6f2c7c41" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div id="cell-id=02cb0624" class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2040,9 +2036,10 @@ import dLux</div>
 <span class="sd">        A collections.OrderedDict of &#39;layers&#39; that define the transformations</span>
 <span class="sd">        and operations upon some input psf as it interacts with the detector.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">layers</span><span class="p">:</span> <span class="n">OrderedDict</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseDetector</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for the Detector class.</span>
 
@@ -2055,13 +2052,13 @@ import dLux</div>
 <span class="sd">            A list of ∂Lux &#39;layers&#39; that define the transformations and</span>
 <span class="sd">            operations upon some input wavefront through an optical system.</span>
 <span class="sd">            The entries can either be dLux DetectorLayers, or tuples of the</span>
-<span class="sd">            form (DetectorLayer, key), with the key being used as the dictionary</span>
-<span class="sd">            key for the layer.</span>
+<span class="sd">            form (DetectorLayer, key), with the key being used as the</span>
+<span class="sd">            dictionary key for the layer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">DetectorLayer</span><span class="p">())</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseDetector</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Magic method designed to allow accessing of the various items within</span>
 <span class="sd">        the layers dictionary of this class via the &#39;class.attribute&#39; method.</span>
@@ -2074,15 +2071,17 @@ import dLux</div>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        item : object</span>
-<span class="sd">            The item corresponding to the supplied key in the layers dictionary.</span>
+<span class="sd">            The item corresponding to the supplied key in the layers</span>
+<span class="sd">            dictionary.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span>
-                                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">key</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39; object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+            <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Detector</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">BaseDetector</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Applied the stored detector layers to the input image.</span>
 
@@ -2111,9 +2110,10 @@ import dLux</div>
         A collections.OrderedDict of 'layers' that define the transformations
         and operations upon some input psf as it interacts with the detector.
     """
+
     layers: OrderedDict
 
-    def __init__(self: Detector, layers: list):
+    def __init__(self: BaseDetector, layers: list):
         """
         Constructor for the Detector class.
 
@@ -2126,13 +2126,13 @@ import dLux</div>
             A list of ∂Lux 'layers' that define the transformations and
             operations upon some input wavefront through an optical system.
             The entries can either be dLux DetectorLayers, or tuples of the
-            form (DetectorLayer, key), with the key being used as the dictionary
-            key for the layer.
+            form (DetectorLayer, key), with the key being used as the
+            dictionary key for the layer.
         """
         self.layers = dlu.list_to_dictionary(layers, True, DetectorLayer())
         super().__init__()
 
-    def __getattr__(self: Detector, key: str) -> object:
+    def __getattr__(self: BaseDetector, key: str) -> object:
         """
         Magic method designed to allow accessing of the various items within
         the layers dictionary of this class via the 'class.attribute' method.
@@ -2145,15 +2145,17 @@ import dLux</div>
         Returns
         -------
         item : object
-            The item corresponding to the supplied key in the layers dictionary.
+            The item corresponding to the supplied key in the layers
+            dictionary.
         """
         if key in self.layers.keys():
             return self.layers[key]
         else:
-            raise AttributeError("'{}' object has no attribute '{}'"
-                                 .format(type(self), key))
+            raise AttributeError(
+                "'{}' object has no attribute '{}'".format(type(self), key)
+            )
 
-    def model(self: Detector, image: Array) -> Array:
+    def model(self: BaseDetector, image: Array) -> Array:
         """
         Applied the stored detector layers to the input image.
 
@@ -2224,10 +2226,10 @@ import dLux</div>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
         
           <script src="../../javascripts/mathjax.js"></script>
