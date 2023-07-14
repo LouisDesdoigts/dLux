@@ -35,11 +35,11 @@ Requires: Python 3.8+, Jax 0.4.3+, Zodiax 0.4+
 
 Installation: ```pip install dLux```
 
-If you want to run the tutorials, you can install the 'extra' dependencies: ```pip install 'dLux[extras]'```
+If you want to run the tutorials locally, you can install the 'extra' dependencies like so: ```pip install 'dLux[extras]'```
 
 ## Collaboration & Development
 
-We are always looking to collaborate and further develop this software! We have focused on flexibility and ease of development, so if you have a project you want to use ∂Lux for, but it currently does not have the required capabilities, have general questions, thoughts or ideas, don't hesitate to [email me](louis.desdoigts@sydney.edu.au) or contact me on [twitter](https://twitter.com/gradientrider)!
+We are always looking to collaborate and further develop this software! We have focused on flexibility and ease of development, so if you have a project you want to use ∂Lux for, but it currently does not have the required capabilities, have general questions, thoughts or ideas, don't hesitate to [email me](louis.desdoigts@sydney.edu.au) or contact me on [twitter](https://twitter.com/gradientrider)! More details about contributing can be found in our [contributing guide](CONTRIBUTING.md).
 
 ## Publications
 
