@@ -1,12 +1,12 @@
 import jax.numpy as np
-from jax import config, Array
+from jax import config
 import pytest
 import dLux
 
 config.update("jax_debug_nans", True)
 
 
-class TestWavefront():
+class TestWavefront:
     """Test the Wavefront class."""
 
     def test_constructor(self, create_wavefront):
@@ -17,7 +17,7 @@ class TestWavefront():
         # Test 1d array
         with pytest.raises(ValueError):
             create_wavefront(wavelength=[1e3])
-        
+
         with pytest.raises(ValueError):
             create_wavefront(diameter=np.ones(2))
 
@@ -44,7 +44,7 @@ class TestWavefront():
     def test_phasor(self, create_wavefront):
         """Tests the phasor property."""
         wf = create_wavefront()
-        assert (wf.phasor == wf.amplitude * np.exp(1j*wf.phase)).all()
+        assert (wf.phasor == wf.amplitude * np.exp(1j * wf.phase)).all()
 
     def test_psf(self, create_wavefront):
         """Tests the psf property."""
@@ -55,7 +55,7 @@ class TestWavefront():
         """Tests the coordinates property."""
         wf = create_wavefront()
         wf.coordinates
-    
+
     def test_add_phase(self, create_wavefront):
         """Tests the add_phase method."""
         wf = create_wavefront()
@@ -85,7 +85,7 @@ class TestWavefront():
         """Tests the normalise method."""
         wf = create_wavefront()
         new_wf = wf.normalise()
-        assert np.sum(new_wf.amplitude**2) == 1.
+        assert np.sum(new_wf.amplitude**2) == 1.0
 
     def test_flip(self, create_wavefront):
         """Tests the flip method."""
@@ -98,13 +98,13 @@ class TestWavefront():
         """Tests the interpolate method."""
         k = 2
         wf = create_wavefront()
-        wf = wf.scale_to(wf.npixels//k, k * wf.pixel_scale)
-        wf = wf.scale_to(wf.npixels//k, k * wf.pixel_scale, complex=True)
+        wf = wf.scale_to(wf.npixels // k, k * wf.pixel_scale)
+        wf = wf.scale_to(wf.npixels // k, k * wf.pixel_scale, complex=True)
 
     def test_rotate(self, create_wavefront):
         """Tests the rotate method."""
         wf = create_wavefront()
-        wf = dLux.CircularAperture(1.)(wf)
+        wf = dLux.CircularAperture(1.0)(wf)
         flipped_amplitude = np.flip(wf.amplitude, axis=(-1, -2))
         flipped_phase = np.flip(wf.phase, axis=(-1, -2))
 
@@ -116,13 +116,15 @@ class TestWavefront():
 
         assert np.allclose(new_wf.amplitude, flipped_amplitude, atol=1e-5)
         # Add small remainer to fix 0-pi instability
-        assert np.allclose((new_wf.phase+1e-6)%np.pi, flipped_phase, atol=1e-5)
+        assert np.allclose(
+            (new_wf.phase + 1e-6) % np.pi, flipped_phase, atol=1e-5
+        )
 
     def test_pad_to(self, create_wavefront):
         """Tests the pad_to method."""
         even_wf = create_wavefront(npixels=16)
         odd_wf = create_wavefront(npixels=15)
-        
+
         # Smaller value
         with pytest.raises(ValueError):
             even_wf.pad_to(14)
@@ -160,15 +162,15 @@ class TestWavefront():
         """Tests the magic methods."""
         wf = create_wavefront()
         wf += create_optic()
-        
+
         wf *= None
         wf *= wf.phasor
 
         with pytest.raises(TypeError):
             create_wavefront() + "a string"
-        
+
         with pytest.raises(TypeError):
-            create_wavefront() * 'a string'
+            create_wavefront() * "a string"
 
     def test_FFT(self, create_wavefront):
         """Tests the FFT method."""
@@ -176,32 +178,35 @@ class TestWavefront():
 
         with pytest.raises(ValueError):
             wf = wf.set("units", "Angular")
-            wf.FFT(focal_length=1.)
+            wf.FFT(focal_length=1.0)
 
         with pytest.raises(ValueError):
             wf.IFFT()
-        
+
         with pytest.raises(ValueError):
             wf = wf.set("plane", "Focal")
             wf.FFT()
-    
+
     def test_MFT(self, create_wavefront):
         """Tests the MFT method."""
         wf = create_wavefront()
 
         with pytest.raises(ValueError):
             wf = wf.set("units", "Angular")
-            wf.MFT(16, 1/16, focal_length=1.)
+            wf.MFT(16, 1 / 16, focal_length=1.0)
 
         with pytest.raises(ValueError):
-            wf.IMFT(16, 1/16, )
-        
+            wf.IMFT(
+                16,
+                1 / 16,
+            )
+
         with pytest.raises(ValueError):
             wf = wf.set("plane", "Focal")
-            wf.MFT(16, 1/16)
+            wf.MFT(16, 1 / 16)
 
 
-class TestFresnelWavefront():
+class TestFresnelWavefront:
     """Test the FresnelWavefront class."""
 
     def test_constructor(self, create_wavefront):
@@ -212,15 +217,15 @@ class TestFresnelWavefront():
         # Test 1d array
         with pytest.raises(ValueError):
             create_wavefront(wavelength=[1e3])
-        
+
         with pytest.raises(ValueError):
             create_wavefront(diameter=np.ones(2))
 
     def test_fresnel_prop(self, create_fresnel_wavefront):
         """Tests the fresnel_prop method."""
         wf = create_fresnel_wavefront()
-        wf.fresnel_prop(16, 1/16, 1e2, 1e-2)
+        wf.fresnel_prop(16, 1 / 16, 1e2, 1e-2)
 
         with pytest.raises(ValueError):
-            wf = wf.set('plane', 'not Pupil')
-            wf.fresnel_prop(16, 1/16, 1e2, 1e-2)
+            wf = wf.set("plane", "not Pupil")
+            wf.fresnel_prop(16, 1 / 16, 1e2, 1e-2)

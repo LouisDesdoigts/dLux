@@ -6,8 +6,14 @@ from jax.scipy.stats import norm
 from zodiax import Base
 import dLux
 
-__all__ = ["ApplyPixelResponse", "ApplyJitter", "ApplySaturation",
-           "AddConstant", "IntegerDownsample", "Rotate"]
+__all__ = [
+    "ApplyPixelResponse",
+    "ApplyJitter",
+    "ApplySaturation",
+    "AddConstant",
+    "IntegerDownsample",
+    "RotateDetector",
+]
 
 Image = lambda: dLux.images.Image
 
@@ -25,8 +31,9 @@ class DetectorLayer(Base):
         super().__init__()
 
     @abstractmethod
-    def __call__(self: DetectorLayer,
-                 image: Image()) -> Image:  # pragma: no cover
+    def __call__(
+        self: DetectorLayer, image: Image()
+    ) -> Image:  # pragma: no cover
         """
         Applies the layer to the Image.
 
@@ -51,18 +58,19 @@ class ApplyPixelResponse(DetectorLayer):
     pixel_response : Array
         The pixel_response to apply to the input image.
     """
+
     pixel_response: Array
 
-    def __init__(self: DetectorLayer,
-                 pixel_response: Array):
+    def __init__(self: DetectorLayer, pixel_response: Array):
         """
         Constructor for the ApplyPixelResponse class.
 
         Parameters
         ----------
         pixel_response : Array
-            The pixel_response to apply to the input image. Must be a 2-dimensional
-            array equal to size of the image at time of application.
+            The pixel_response to apply to the input image. Must be a
+            2-dimensional array equal to size of the image at time of
+            application.
         """
         super().__init__()
         self.pixel_response = np.asarray(pixel_response, dtype=float)
@@ -98,12 +106,11 @@ class ApplyJitter(DetectorLayer):
     kernel_size : int
         The size of the convolution kernel to use.
     """
+
     kernel_size: int
     sigma: Array
 
-    def __init__(self: DetectorLayer,
-                 sigma: Array,
-                 kernel_size: int = 10):
+    def __init__(self: DetectorLayer, sigma: Array, kernel_size: int = 10):
         """
         Constructor for the ApplyJitter class.
 
@@ -163,6 +170,7 @@ class ApplySaturation(DetectorLayer):
     saturation : Array
         The value at which the saturation is applied.
     """
+
     saturation: Array
 
     def __init__(self: DetectorLayer, saturation: Array) -> DetectorLayer:
@@ -193,7 +201,7 @@ class ApplySaturation(DetectorLayer):
         image : Image
             The transformed image.
         """
-        return image.min('image', self.saturation)
+        return image.min("image", self.saturation)
 
 
 class AddConstant(DetectorLayer):
@@ -206,6 +214,7 @@ class AddConstant(DetectorLayer):
     value : Array
         The value to add to the image.
     """
+
     value: Array
 
     def __init__(self: DetectorLayer, value: Array) -> DetectorLayer:
@@ -250,6 +259,7 @@ class IntegerDownsample(DetectorLayer):
     kernel_size : int
         The size of the downsampling kernel.
     """
+
     kernel_size: int
 
     def __init__(self: DetectorLayer, kernel_size: int) -> DetectorLayer:
@@ -281,7 +291,7 @@ class IntegerDownsample(DetectorLayer):
         return image.downsample(self.kernel_size)
 
 
-class Rotate(DetectorLayer):
+class RotateDetector(DetectorLayer):
     """
     Applies a rotation to the image using interpolation methods.
 
@@ -292,14 +302,13 @@ class Rotate(DetectorLayer):
     order : int
         The order of the interpolation.
     """
+
     angle: Array
     order: int
 
-    def __init__(self: DetectorLayer,
-                 angle: Array,
-                 order: int = 1):
+    def __init__(self: DetectorLayer, angle: Array, order: int = 1):
         """
-        Constructor for the Rotate class.
+        Constructor for the RotateDetector class.
 
         Parameters
         ----------

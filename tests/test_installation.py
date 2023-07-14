@@ -1,13 +1,10 @@
-import pytest
 import sys
 import os
 
 platform: str = sys.platform
 not_lin_err: str = """
-    The installation test is designed to run on
-    a linux machine. In particular, this test
-    is designed to be run by github actions.
-    If you are using windows dispare.
+    The installation test is designed to run on a linux machine. In particular,
+    this test is designed to be run by github actions.
 """
 
 if platform not in ["linux", "linux2"]:
@@ -15,7 +12,7 @@ if platform not in ["linux", "linux2"]:
 
 
 def test_install_dLux():
-    install_ok: int = os.system("pip install --quiet .")
+    install_ok = os.system("pip install --quiet .")
 
     assert install_ok == 0
 
@@ -25,7 +22,6 @@ def test_install_dLux():
 
 def test_import_dLux():
     import dLux
+
+    dLux.optics
     assert True
-    
-
-

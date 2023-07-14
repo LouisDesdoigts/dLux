@@ -16,10 +16,10 @@ class BaseSpectrum(Base):
     wavelengths : Array, metres
         The array of wavelengths at which the spectrum is defined.
     """
+
     wavelengths: Array
 
-    def __init__(self: Spectrum,
-                 wavelengths: Array):
+    def __init__(self: Spectrum, wavelengths: Array):
         """
         Constructor for the Spectrum class.
 
@@ -51,11 +51,10 @@ class Spectrum(BaseSpectrum):
     weights : Array
         The relative weights of each wavelength.
     """
+
     weights: Array
 
-    def __init__(self: Spectrum,
-                 wavelengths: Array,
-                 weights: Array = None):
+    def __init__(self: Spectrum, wavelengths: Array, weights: Array = None):
         """
         Constructor for the Spectrum class.
 
@@ -80,12 +79,14 @@ class Spectrum(BaseSpectrum):
 
         if self.weights.ndim == 1:
             if self.wavelengths.shape != self.weights.shape:
-                raise ValueError("wavelengths and weights must have the same "
-                                 "shape.")
+                raise ValueError(
+                    "wavelengths and weights must have the same " "shape."
+                )
         else:
             if self.wavelengths.shape != self.weights.shape[-1:]:
-                raise ValueError("wavelengths and weights must have the same "
-                                 "shape.")
+                raise ValueError(
+                    "wavelengths and weights must have the same " "shape."
+                )
 
     def normalise(self: Spectrum) -> Spectrum:
         """
@@ -101,7 +102,7 @@ class Spectrum(BaseSpectrum):
             weight_sum = self.weights.sum(-1)[:, None]
         else:
             weight_sum = self.weights.sum()
-        return self.divide('weights', weight_sum)
+        return self.divide("weights", weight_sum)
 
 
 class PolySpectrum(BaseSpectrum):
@@ -119,11 +120,10 @@ class PolySpectrum(BaseSpectrum):
     coefficients : Array
         The array of polynomial coefficient values.
     """
+
     coefficients: Array
 
-    def __init__(self: Spectrum,
-                 wavelengths: Array,
-                 coefficients: Array):
+    def __init__(self: Spectrum, wavelengths: Array, coefficients: Array):
         """
         Constructor for the PolySpectrum class.
 
@@ -141,8 +141,12 @@ class PolySpectrum(BaseSpectrum):
             raise ValueError("Coefficients must be a 1d array.")
 
     def _eval_weight(self, wavelength):
-        return np.array([self.coefficients[i] * wavelength ** i
-                         for i in range(len(self.coefficients))]).sum()
+        return np.array(
+            [
+                self.coefficients[i] * wavelength**i
+                for i in range(len(self.coefficients))
+            ]
+        ).sum()
 
     @property
     def weights(self: Spectrum) -> Array:
@@ -162,7 +166,7 @@ class PolySpectrum(BaseSpectrum):
     def normalise(self: Spectrum) -> Spectrum:
         """
         Calculated weights are automatically normalised, but could be
-        calculated from the shift term (ie b in y = mx + b) 
+        calculated from the shift term (ie b in y = mx + b)
 
         Returns
         --------

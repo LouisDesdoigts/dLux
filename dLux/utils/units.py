@@ -2,10 +2,19 @@ import jax.numpy as np
 from jax import Array
 
 __all__ = [
-    "rad_to_arcsec", "rad_to_deg", "rad_to_arcmin",
-    "deg_to_rad", "deg_to_arcmin", "deg_to_arcsec",
-    "arcmin_to_rad", "arcmin_to_deg", "arcmin_to_arcsec",
-    "arcsec_to_rad", "arcsec_to_deg", "arcsec_to_arcmin"]
+    "rad_to_arcsec",
+    "rad_to_deg",
+    "rad_to_arcmin",
+    "deg_to_rad",
+    "deg_to_arcmin",
+    "deg_to_arcsec",
+    "arcmin_to_rad",
+    "arcmin_to_deg",
+    "arcmin_to_arcsec",
+    "arcsec_to_rad",
+    "arcsec_to_deg",
+    "arcsec_to_arcmin",
+]
 
 
 # Radians to:
@@ -172,7 +181,8 @@ def arcmin_to_arcsec(values: Array) -> Array:
     Parameters
     ----------
     values : Array, arcminutes
-        The input values in units of arcminutes to be converted into arcseconds.
+        The input values in units of arcminutes to be converted into
+        arcseconds.
 
     Returns
     -------
@@ -230,7 +240,8 @@ def arcsec_to_arcmin(values: Array) -> Array:
     Parameters
     ----------
     values : Array, arcseconds
-        The input values in units of arcseconds to be converted into arcminutes.
+        The input values in units of arcseconds to be converted into
+        arcminutes.
 
     Returns
     -------

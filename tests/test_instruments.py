@@ -1,7 +1,6 @@
-import jax.numpy as np
 import pytest
-import dLux
-from jax import config, Array
+from jax import config
+
 config.update("jax_debug_nans", True)
 
 
@@ -14,11 +13,11 @@ class TestInstrument(object):
         with pytest.raises(TypeError):
             create_instrument(sources=["Not a source"])
         with pytest.raises(TypeError):
-            create_instrument(optics='Not an optics')
+            create_instrument(optics="Not an optics")
         with pytest.raises(TypeError):
-            create_instrument(observation='Not an observation')
+            create_instrument(observation="Not an observation")
         with pytest.raises(TypeError):
-            create_instrument(detector='Not a detector')
+            create_instrument(detector="Not a detector")
 
     def test_observe(self, create_instrument):
         """Tests the normalise method."""
@@ -27,11 +26,11 @@ class TestInstrument(object):
     def test_normalise(self, create_instrument):
         """Tests the normalise method."""
         create_instrument().normalise()
-    
+
     def test_model(self, create_instrument):
         """Tests the model method."""
         create_instrument().model()
-    
+
     def test_getattr(self, create_instrument):
         """Tests the __getattr__ method."""
         create_instrument().diameter

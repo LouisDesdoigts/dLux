@@ -1,5 +1,3 @@
-
-
 class Filter(Base):
     """
     NOTE: This class is under development.
@@ -15,15 +13,17 @@ class Filter(Base):
     filter_name : str
         A string identifier that can be used to initialise specific filters.
     """
-    wavelengths  : Array
-    throughput   : Array
-    filter_name  : str
 
+    wavelengths: Array
+    throughput: Array
+    filter_name: str
 
-    def __init__(self        : Filter,
-                 wavelengths : Array = None,
-                 throughput  : Array = None,
-                 filter_name : str   = None) -> Filter:
+    def __init__(
+        self: Filter,
+        wavelengths: Array = None,
+        throughput: Array = None,
+        filter_name: str = None,
+    ) -> Filter:
         """
         Constructor for the Filter class. All inputs are optional and defaults
         to uniform unitary throughput. If filter_name is specified then
@@ -36,8 +36,8 @@ class Filter(Base):
         throughput : Array = None
             The throughput of the filter at the corresponding wavelength.
         filter_name : str = None
-            A string identifier that can be used to initialise specific filters.
-            Currently no pre-built filters are implemented.
+            A string identifier that can be used to initialise specific
+            filters. Currently no pre-built filters are implemented.
         """
         # Take the filter name as the priority input
         if filter_name is not None:
@@ -47,41 +47,50 @@ class Filter(Base):
 
             # Check that wavelengths and throughput are not specified
             if wavelengths is not None or throughput is not None:
-                raise ValueError("If filter_name is specified, wavelengths "
-                "and throughput can not be specified.")
+                raise ValueError(
+                    "If filter_name is specified, wavelengths "
+                    "and throughput can not be specified."
+                )
 
         # Check that both wavelengths and throughput are specified
-        elif (wavelengths is     None and throughput is not None) or \
-             (wavelengths is not None and throughput is     None):
-            raise ValueError("If either wavelengths or throughput is "
-            "specified, then both must be specified.")
+        elif (wavelengths is None and throughput is not None) or (
+            wavelengths is not None and throughput is None
+        ):
+            raise ValueError(
+                "If either wavelengths or throughput is "
+                "specified, then both must be specified."
+            )
 
         # Neither is specified
         elif wavelengths is None and throughput is None:
-            self.wavelengths = np.array([0., np.inf])
-            self.throughput  = np.array([1., 1.])
-            self.filter_name = 'Unitary'
+            self.wavelengths = np.array([0.0, np.inf])
+            self.throughput = np.array([1.0, 1.0])
+            self.filter_name = "Unitary"
 
         # Both wavelengths and throughputs are specified
         else:
             self.wavelengths = np.asarray(wavelengths, dtype=float)
-            self.throughput  = np.asarray(throughput,  dtype=float)
-            self.filter_name = 'Custom'
+            self.throughput = np.asarray(throughput, dtype=float)
+            self.filter_name = "Custom"
 
             # Check bounds
-            assert self.wavelengths.ndim == 1 and self.throughput.ndim == 1, \
-            "Both wavelengths and throughput must be 1 dimensional."
-            assert self.wavelengths.shape == self.throughput.shape, \
-            ("wavelengths and throughput must have the same length.")
-            assert np.min(self.wavelengths) >= 0, \
-            ("wavelengths can not be less than 0.")
-            assert (self.throughput >= 0).all() and \
-            (self.throughput <= 1).all(), ("throughput must be between 0-1.")
-            assert np.min(wavelengths) < np.max(wavelengths), \
-            ("wavelengths must be in-order from small to large.")
+            assert (
+                self.wavelengths.ndim == 1 and self.throughput.ndim == 1
+            ), "Both wavelengths and throughput must be 1 dimensional."
+            assert (
+                self.wavelengths.shape == self.throughput.shape
+            ), "wavelengths and throughput must have the same length."
+            assert (
+                np.min(self.wavelengths) >= 0
+            ), "wavelengths can not be less than 0."
+            assert (self.throughput >= 0).all() and (
+                self.throughput <= 1
+            ).all(), "throughput must be between 0-1."
+            assert np.min(wavelengths) < np.max(
+                wavelengths
+            ), "wavelengths must be in-order from small to large."
 
-
-    def get_throughput(self : Filter, sample_wavelenghts : Array) -> Array:
+    def get_throughput(self: Filter, sample_wavelengths: Array) -> Array:
         """
         Gets the average throughput of the bandpass defined the differences
         between each sample wavelength, i.e. if sample wavelengths are:
@@ -103,13 +112,13 @@ class Filter(Base):
             The average throughput for each bandpass defined by
             sample_wavelengths.
         """
-        mids = (sample_wavelenghts[1:] + sample_wavelenghts[:-1]) / 2
-        diffs = np.diff(sample_wavelenghts)
+        mids = (sample_wavelengths[1:] + sample_wavelengths[:-1]) / 2
+        diffs = np.diff(sample_wavelengths)
 
-        start = np.array([sample_wavelenghts[0] - diffs[0]/2])
-        end = np.array([sample_wavelenghts[-1] + diffs[-1]/2])
-        min_val = np.array([self.wavelengths.min()])
-        max_val = np.array([self.wavelengths.max()])
+        start = np.array([sample_wavelengths[0] - diffs[0] / 2])
+        end = np.array([sample_wavelengths[-1] + diffs[-1] / 2])
+        # min_val = np.array([self.wavelengths.min()])
+        # max_val = np.array([self.wavelengths.max()])
         bounds = np.concatenate([start, mids, end])
 
         # Translate input wavelengths to indexes
@@ -117,32 +126,36 @@ class Filter(Base):
         max_wavelength = self.wavelengths.max()
         num_wavelength = len(self.wavelengths)
         wavelength_range = max_wavelength - min_wavelength
-        bnd_indxs = num_wavelength * (bounds - min_wavelength)/wavelength_range
+        bnd_indxs = (
+            num_wavelength * (bounds - min_wavelength) / wavelength_range
+        )
         bnd_indxs = np.clip(bnd_indxs, a_min=0, a_max=len(self.wavelengths))
         bnd_inds = np.round(bnd_indxs, decimals=0).astype(int)
 
         def nan_div(y, x):
             x_new = np.where(x == 0, 1, x)
-            return np.where(x == 0, 0., y/x_new)
+            return np.where(x == 0, 0.0, y / x_new)
 
         def get_tp(start, end, weights, indexes):
-            size = (end - start)
-            val = np.where((indexes <= start) | (indexes >= end), \
-                           0., weights).sum()
+            size = end - start
+            val = np.where(
+                (indexes <= start) | (indexes >= end), 0.0, weights
+            ).sum()
             return nan_div(val, size)
 
         starts = bnd_inds[:-1]
-        ends   = bnd_inds[1:]
+        ends = bnd_inds[1:]
         # dwavelength = self.wavelengths[1] - self.wavelengths[0]
         indexes = np.arange(len(self.wavelengths))
 
         # weights = self.throughput/self.throughput.sum()
         weights = self.throughput
-        out = vmap(get_tp, in_axes=(0, 0, None, None))(starts, ends, weights, indexes)
+        out = vmap(get_tp, in_axes=(0, 0, None, None))(
+            starts, ends, weights, indexes
+        )
         return out
 
-
-    def model(self : Filter, optics : Optics, **kwargs):
+    def model(self: Filter, optics: Optics, **kwargs):
         """
         A base level modelling function designed to robustly handle the
         different combinations of inputs. Models the sources through the
@@ -174,9 +187,9 @@ class Filter(Base):
         Returns
         -------
         image : Array, Pytree
-            The image of the scene modelled through the optics with detector and
-            filter effects applied if they are supplied. Returns either as a
-            single array (if return_tree is false), or a pytree like object
-            with matching tree strucutre as the input scene/sources/source.
+            The image of the scene modelled through the optics with detector
+            and filter effects applied if they are supplied. Returns either as
+            a single array (if return_tree is false), or a pytree like object
+            with matching tree structure as the input scene/sources/source.
         """
         return model(optics, filter=self, **kwargs)
