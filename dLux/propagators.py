@@ -259,6 +259,9 @@ class ShiftedMFT(MFT):
         self.shift = np.asarray(shift, float)
         self.pixel = bool(pixel)
 
+        if shift.shape != (2,):
+            raise TypeError(f"Shift must be a 2D array, got {shift.shape}.")
+
     def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
