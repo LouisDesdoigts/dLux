@@ -824,7 +824,9 @@ class LayeredOptics(SimpleOptics):
             return wavefront
         return wavefront.psf
 
-    def insert_layer(self, layer, index):
+    def insert_layer(
+        self: BaseOptics, layer: Union[OpticalLayer, tuple], index: int
+    ) -> BaseOptics:
         """
         Inserts a layer into the layers dictionary at the given index using the
         list.insert method. Note this method may require the names of some
@@ -832,8 +834,10 @@ class LayeredOptics(SimpleOptics):
 
         Parameters
         ----------
-        layer : OpticalLayer
-            The layer to insert into the layers dictionary.
+        layer : Union[OpticalLayer, tuple]
+            The layer to insert into the layers dictionary. Can either be a
+            single OpticalLayer, or you can specify the layers key by passing
+            in a tuple of (OpticalLayer, key).
         index : int
             The index to insert the layer at.
         """
@@ -842,15 +846,15 @@ class LayeredOptics(SimpleOptics):
         new_layers = dlu.list_to_dictionary(layers_list, True, OpticalLayer())
         return self.set("layers", new_layers)
 
-    def remove_layer(self, key):
+    def remove_layer(self: OpticalLayer, key: str) -> BaseOptics:
         """
-        Removes a layer from the layers dictionary at the given index using the
-        list.pop method.
+        Removes a layer from the layers dictionary indexed at 'key' using the
+        dict.pop(key) method.
 
         Parameters
         ----------
-        index : int
-            The index to remove the layer from.
+        key : str
+            The key of the layer to remove.
         """
         self.layers.pop(key)
         return self
