@@ -1,6 +1,7 @@
 from __future__ import annotations
 import jax.numpy as np
 from jax import Array
+import dLux.utils as dlu
 import dLux
 
 
@@ -109,6 +110,10 @@ class MFT(Propagator):
         The pixel scale in the output plane, measured in metres per pixel.
     oversample : float
         The amount of oversampling in the output plane.
+    unit : str
+        The output unit of the propagation. If inverse is False or focal_length
+        is not None it is automatically set to 'meters', otherwise it can be
+        either 'arcseconds' or 'radians'.
     focal_length : float, metres
         The effective focal length of the lens/mirror this propagator
         represents. If None, the pixel_scale is taken to be in radians/pixel,
@@ -120,12 +125,14 @@ class MFT(Propagator):
     npixels: int
     oversample: float
     pixel_scale: float
+    unit: str
 
     def __init__(
         self: Propagator,
         npixels: int,
         pixel_scale: float,
         oversample: float = 1.0,
+        unit: str = "radians",
         focal_length: float = None,
         inverse: bool = False,
     ):
@@ -141,6 +148,10 @@ class MFT(Propagator):
             if focal_length is None, else metres per pixel.
         oversample : float = 1.
             The amount of oversampling in the output plane.
+        unit : str = 'radians'
+            The output unit of the propagation. If inverse is False or
+            focal_length is not None it is automatically set to 'meters',
+            otherwise it can be either 'arcseconds' or 'radians'.
         focal_length : float = None, metres
             The focal_length of the lens/mirror this propagator represents.
             If None, the pixel_scale is taken to be in radians/pixel, else it
@@ -150,6 +161,14 @@ class MFT(Propagator):
         """
         super().__init__(focal_length=focal_length, inverse=inverse)
 
+        if self.inverse or self.focal_length is not None:
+            self.unit = "meters"
+        elif unit not in ["arcseconds", "radians"]:
+            raise ValueError(
+                f"Unit must be one of 'arcseconds' or 'radians', got {unit}."
+            )
+
+        self.unit = unit
         self.oversample = float(oversample)
         self.pixel_scale = float(pixel_scale)
         self.npixels = int(npixels)
@@ -175,9 +194,12 @@ class MFT(Propagator):
                 focal_length=self.focal_length,
             )
         else:
+            pixel_scale = self.pixel_scale / self.oversample
+            if self.unit == "arcseconds":
+                pixel_scale = dlu.arcsec_to_rad(pixel_scale)
             return wavefront.MFT(
                 self.npixels,
-                self.pixel_scale / self.oversample,
+                pixel_scale,
                 focal_length=self.focal_length,
             )
 
@@ -196,6 +218,10 @@ class ShiftedMFT(MFT):
         The pixel scale in the output plane, measured in metres per pixel.
     oversample : float
         The amount of oversampling in the output plane.
+    unit : str
+        The output unit of the propagation. If inverse is False or focal_length
+        is not None it is automatically set to 'meters', otherwise it can be
+        either 'arcseconds' or 'radians'.
     focal_length : float, metres
         The effective focal length of the lens/mirror this propagator
         represents. If None, the pixel_scale is taken to be in radians/pixel,
@@ -219,6 +245,7 @@ class ShiftedMFT(MFT):
         pixel_scale: float,
         shift: Array,
         oversample: float = 1.0,
+        unit: str = "radians",
         focal_length: float = None,
         pixel: bool = False,
         inverse: bool = False,
@@ -237,6 +264,10 @@ class ShiftedMFT(MFT):
             The (x, y) shift to apply to the wavefront in the output plane.
         oversample : float = 1.
             The amount of oversampling in the output plane.
+        unit : str = 'radians'
+            The output unit of the propagation. If inverse is False or
+            focal_length is not None it is automatically set to 'meters',
+            otherwise it can be either 'arcseconds' or 'radians'.
         focal_length : float = None, metres
             The effective focal_length of the lens/mirror this propagator
             represents. If None, the pixel_scale is taken to be in
@@ -254,6 +285,7 @@ class ShiftedMFT(MFT):
             oversample=oversample,
             focal_length=focal_length,
             inverse=inverse,
+            unit=unit,
         )
 
         self.shift = np.asarray(shift, float)
@@ -285,9 +317,13 @@ class ShiftedMFT(MFT):
                 self.pixel,
             )
         else:
+            pixel_scale = self.pixel_scale / self.oversample
+            if self.unit == "arcseconds":
+                pixel_scale = dlu.arcsec_to_rad(pixel_scale)
+
             return wavefront.shifted_MFT(
                 self.npixels,
-                self.pixel_scale / self.oversample,
+                pixel_scale,
                 self.shift,
                 self.focal_length,
                 self.pixel,
@@ -314,6 +350,10 @@ class FarFieldFresnel(ShiftedMFT):
         The shift in the propagation distance of the wavefront.
     oversample : float
         The amount of oversampling in the output plane.
+    unit : str
+        The output unit of the propagation. If inverse is False or focal_length
+        is not None it is automatically set to 'meters', otherwise it can be
+        either 'arcseconds' or 'radians'.
     shift : Array
         The (x, y) shift to apply to the wavefront in the output plane.
     pixel : bool
@@ -333,6 +373,7 @@ class FarFieldFresnel(ShiftedMFT):
         focal_length: float,
         focal_shift: float,
         oversample: float = 1.0,
+        unit: str = "radians",
         shift: Array = np.zeros(2),
         pixel: bool = False,
         inverse: bool = False,
@@ -352,6 +393,10 @@ class FarFieldFresnel(ShiftedMFT):
             The shift in the propagation distance of the wavefront.
         oversample : float = 1.
             The amount of oversampling in the output plane.
+        unit : str = 'radians'
+            The output unit of the propagation. If inverse is False or
+            focal_length is not None it is automatically set to 'meters',
+            otherwise it can be either 'arcseconds' or 'radians'.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
         pixel : bool = False
@@ -375,6 +420,7 @@ class FarFieldFresnel(ShiftedMFT):
             oversample=oversample,
             npixels=npixels,
             inverse=inverse,
+            unit=unit,
         )
 
     def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
@@ -391,9 +437,12 @@ class FarFieldFresnel(ShiftedMFT):
         wavefront : Wavefront
             The transformed wavefront.
         """
+        pixel_scale = self.pixel_scale / self.oversample
+        if self.unit == "arcseconds":
+            pixel_scale = dlu.arcsec_to_rad(pixel_scale)
         return wavefront.shifted_fresnel_prop(
             self.npixels,
-            self.pixel_scale / self.oversample,
+            pixel_scale,
             self.shift,
             self.focal_length,
             self.focal_shift,
