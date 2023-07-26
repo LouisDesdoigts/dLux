@@ -21,7 +21,7 @@
         <link rel="next" href="../optical_layers/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -877,12 +877,14 @@
 
 <a id="dLux.optics.AngularOptics"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optics.NonPropagatorOptics">NonPropagatorOptics</span></code>, <code><span title="dLux.optics.AperturedOptics">AperturedOptics</span></code>, <code><span title="dLux.optics.SimpleOptics">SimpleOptics</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optics.NonPropagatorOptics">NonPropagatorOptics</span></code>, <code><span title="dLux.optics.AperturedOptics">AperturedOptics</span></code>, <code><span title="dLux.optics.SimpleOptics">SimpleOptics</span></code></p>
 
   
       <p>A simple optical system that propagates a wavefront to an image plane
 with <code>psf_pixel_scale</code> in units of arcseconds.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -908,7 +910,7 @@ with <code>psf_pixel_scale</code> in units of arcseconds.</p>
         <tr>
           <td><code>diameter</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -975,10 +977,9 @@ If an Array it is treated as a transmissive mask.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optics.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">364</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optics.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">364</span>
 <span class="normal">365</span>
 <span class="normal">366</span>
 <span class="normal">367</span>
@@ -1184,11 +1185,12 @@ If an Array it is treated as a transmissive mask.</p>
             <span class="k">return</span> <span class="n">wf</span>
         <span class="k">return</span> <span class="n">wf</span><span class="o">.</span><span class="n">psf</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1210,6 +1212,8 @@ If an Array it is treated as a transmissive mask.</p>
 
   <div class="doc doc-contents ">
   
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1239,7 +1243,7 @@ If an Array it is treated as a transmissive mask.</p>
         <tr>
           <td><code>diameter</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1281,7 +1285,7 @@ If an Array it is treated as a transmissive mask.</p>
         <tr>
           <td><code>psf_pixel_scale</code></td>
           <td>
-                <code>float, arcseconds</code>
+                <code>(float, arcseconds)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1324,9 +1328,9 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">388</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
 <span class="normal">391</span>
@@ -1402,10 +1406,11 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
         <span class="n">psf_oversample</span><span class="o">=</span><span class="n">psf_oversample</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1421,6 +1426,8 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
   
       <p>Propagates a monochromatic point source through the optical layers.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -1435,7 +1442,7 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1459,7 +1466,7 @@ value is (0, 0), on axis.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.zeros">zeros</span>(2)</code>
+                <code><span title="jax">np</span>.<span title="jax.zeros">zeros</span>(2)</code>
           </td>
         </tr>
         <tr>
@@ -1478,6 +1485,8 @@ value is (0, 0), on axis.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -1513,9 +1522,9 @@ return_wf is True.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">427</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">427</span>
 <span class="normal">428</span>
 <span class="normal">429</span>
 <span class="normal">430</span>
@@ -1595,7 +1604,7 @@ return_wf is True.</p>
         <span class="k">return</span> <span class="n">wf</span>
     <span class="k">return</span> <span class="n">wf</span><span class="o">.</span><span class="n">psf</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1679,12 +1688,14 @@ propagate a point source through it.</p>
 
 <a id="dLux.optics.CartesianOptics"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optics.NonPropagatorOptics">NonPropagatorOptics</span></code>, <code><span title="dLux.optics.AperturedOptics">AperturedOptics</span></code>, <code><span title="dLux.optics.SimpleOptics">SimpleOptics</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optics.NonPropagatorOptics">NonPropagatorOptics</span></code>, <code><span title="dLux.optics.AperturedOptics">AperturedOptics</span></code>, <code><span title="dLux.optics.SimpleOptics">SimpleOptics</span></code></p>
 
   
       <p>A simple optical system that propagates a wavefront to an image plane
 with <code>psf_pixel_scale</code> in units of microns.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1710,7 +1721,7 @@ with <code>psf_pixel_scale</code> in units of microns.</p>
         <tr>
           <td><code>diameter</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1721,7 +1732,7 @@ with <code>psf_pixel_scale</code> in units of microns.</p>
         <tr>
           <td><code>focal_length</code></td>
           <td>
-                <code>float, metres</code>
+                <code>(float, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1755,7 +1766,7 @@ If an Array it is treated as a transmissive mask.</p>
         <tr>
           <td><code>psf_pixel_scale</code></td>
           <td>
-                <code>float, microns</code>
+                <code>(float, microns)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1788,10 +1799,9 @@ If an Array it is treated as a transmissive mask.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optics.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">469</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optics.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">469</span>
 <span class="normal">470</span>
 <span class="normal">471</span>
 <span class="normal">472</span>
@@ -2017,11 +2027,12 @@ If an Array it is treated as a transmissive mask.</p>
             <span class="k">return</span> <span class="n">wf</span>
         <span class="k">return</span> <span class="n">wf</span><span class="o">.</span><span class="n">psf</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2043,6 +2054,8 @@ If an Array it is treated as a transmissive mask.</p>
 
   <div class="doc doc-contents ">
   
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2072,7 +2085,7 @@ If an Array it is treated as a transmissive mask.</p>
         <tr>
           <td><code>diameter</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2100,7 +2113,7 @@ If an Array it is treated as a transmissive mask.</p>
         <tr>
           <td><code>focal_length</code></td>
           <td>
-                <code>float, metres</code>
+                <code>(float, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2128,7 +2141,7 @@ If an Array it is treated as a transmissive mask.</p>
         <tr>
           <td><code>psf_pixel_scale</code></td>
           <td>
-                <code>float, microns</code>
+                <code>(float, microns)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2171,9 +2184,9 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">497</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">497</span>
 <span class="normal">498</span>
 <span class="normal">499</span>
 <span class="normal">500</span>
@@ -2259,10 +2272,11 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
         <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2278,6 +2292,8 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
   
       <p>Propagates a monochromatic point source through the optical layers.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -2292,7 +2308,7 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2316,7 +2332,7 @@ value is (0, 0), on axis.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.zeros">zeros</span>(2)</code>
+                <code><span title="jax">np</span>.<span title="jax.zeros">zeros</span>(2)</code>
           </td>
         </tr>
         <tr>
@@ -2335,6 +2351,8 @@ value is (0, 0), on axis.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -2370,9 +2388,9 @@ return_wf is True.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">541</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">541</span>
 <span class="normal">542</span>
 <span class="normal">543</span>
 <span class="normal">544</span>
@@ -2454,7 +2472,7 @@ return_wf is True.</p>
         <span class="k">return</span> <span class="n">wf</span>
     <span class="k">return</span> <span class="n">wf</span><span class="o">.</span><span class="n">psf</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2522,13 +2540,15 @@ return_wf is True.</p>
 
 <a id="dLux.optics.FlexibleOptics"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optics.AperturedOptics">AperturedOptics</span></code>, <code><span title="dLux.optics.SimpleOptics">SimpleOptics</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optics.AperturedOptics">AperturedOptics</span></code>, <code><span title="dLux.optics.SimpleOptics">SimpleOptics</span></code></p>
 
   
       <p>A simple optical system that propagates a wavefront to an image plane
 using the user-supplied propagator. This allows for propagation of fresnel
 wavefronts.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -2554,7 +2574,7 @@ wavefronts.</p>
         <tr>
           <td><code>diameter</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2599,10 +2619,9 @@ If an Array it is treated as a transmissive mask.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optics.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">584</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optics.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">584</span>
 <span class="normal">585</span>
 <span class="normal">586</span>
 <span class="normal">587</span>
@@ -2864,7 +2883,7 @@ If an Array it is treated as a transmissive mask.</p>
             <span class="k">return</span> <span class="n">wf</span>
         <span class="k">return</span> <span class="n">wf</span><span class="o">.</span><span class="n">psf</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -2899,6 +2918,7 @@ If an Array it is treated as a transmissive mask.</p>
 
 
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -2911,6 +2931,8 @@ If an Array it is treated as a transmissive mask.</p>
 
   <div class="doc doc-contents ">
   
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2940,7 +2962,7 @@ If an Array it is treated as a transmissive mask.</p>
         <tr>
           <td><code>diameter</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2998,9 +3020,9 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">607</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">607</span>
 <span class="normal">608</span>
 <span class="normal">609</span>
 <span class="normal">610</span>
@@ -3072,10 +3094,11 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
         <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -3091,6 +3114,8 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
   
       <p>Propagates a monochromatic point source through the optical layers.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -3105,7 +3130,7 @@ OpticalLayer. If an Array it is treated as a transmissive mask.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3129,7 +3154,7 @@ value is (0, 0), on axis.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.zeros">zeros</span>(2)</code>
+                <code><span title="jax">np</span>.<span title="jax.zeros">zeros</span>(2)</code>
           </td>
         </tr>
         <tr>
@@ -3148,6 +3173,8 @@ value is (0, 0), on axis.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -3183,9 +3210,9 @@ return_wf is True.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">679</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">679</span>
 <span class="normal">680</span>
 <span class="normal">681</span>
 <span class="normal">682</span>
@@ -3257,7 +3284,7 @@ return_wf is True.</p>
         <span class="k">return</span> <span class="n">wf</span>
     <span class="k">return</span> <span class="n">wf</span><span class="o">.</span><span class="n">psf</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -3328,12 +3355,14 @@ return_wf is True.</p>
 
 <a id="dLux.optics.LayeredOptics"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optics.SimpleOptics">SimpleOptics</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optics.SimpleOptics">SimpleOptics</span></code></p>
 
   
       <p>A fully flexible optical system that allows for the arbitrary chaining of
 dLux OpticalLayers.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -3382,10 +3411,9 @@ and operations upon some input wavefront through an optical system.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optics.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">717</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optics.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">717</span>
 <span class="normal">718</span>
 <span class="normal">719</span>
 <span class="normal">720</span>
@@ -3493,7 +3521,42 @@ and operations upon some input wavefront through an optical system.</p>
 <span class="normal">822</span>
 <span class="normal">823</span>
 <span class="normal">824</span>
-<span class="normal">825</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">LayeredOptics</span><span class="p">(</span><span class="n">SimpleOptics</span><span class="p">):</span>
+<span class="normal">825</span>
+<span class="normal">826</span>
+<span class="normal">827</span>
+<span class="normal">828</span>
+<span class="normal">829</span>
+<span class="normal">830</span>
+<span class="normal">831</span>
+<span class="normal">832</span>
+<span class="normal">833</span>
+<span class="normal">834</span>
+<span class="normal">835</span>
+<span class="normal">836</span>
+<span class="normal">837</span>
+<span class="normal">838</span>
+<span class="normal">839</span>
+<span class="normal">840</span>
+<span class="normal">841</span>
+<span class="normal">842</span>
+<span class="normal">843</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span>
+<span class="normal">849</span>
+<span class="normal">850</span>
+<span class="normal">851</span>
+<span class="normal">852</span>
+<span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">LayeredOptics</span><span class="p">(</span><span class="n">SimpleOptics</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A fully flexible optical system that allows for the arbitrary chaining of</span>
 <span class="sd">    dLux OpticalLayers.</span>
@@ -3602,8 +3665,43 @@ and operations upon some input wavefront through an optical system.</p>
         <span class="k">if</span> <span class="n">return_wf</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">wavefront</span>
         <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">psf</span>
+
+    <span class="k">def</span> <span class="nf">insert_layer</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">OpticalLayer</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">],</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseOptics</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inserts a layer into the layers dictionary at the given index using the</span>
+<span class="sd">        list.insert method. Note this method may require the names of some</span>
+<span class="sd">        parameters to be</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        layer : Union[OpticalLayer, tuple]</span>
+<span class="sd">            The layer to insert into the layers dictionary. Can either be a</span>
+<span class="sd">            single OpticalLayer, or you can specify the layers key by passing</span>
+<span class="sd">            in a tuple of (OpticalLayer, key).</span>
+<span class="sd">        index : int</span>
+<span class="sd">            The index to insert the layer at.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">layers_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="n">layers_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+        <span class="n">new_layers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">layers_list</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;layers&quot;</span><span class="p">,</span> <span class="n">new_layers</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseOptics</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes a layer from the layers dictionary indexed at &#39;key&#39; using the</span>
+<span class="sd">        dict.pop(key) method.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key : str</span>
+<span class="sd">            The key of the layer to remove.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -3638,6 +3736,7 @@ and operations upon some input wavefront through an optical system.</p>
 
 
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -3652,6 +3751,8 @@ and operations upon some input wavefront through an optical system.</p>
   
       <p>Magic method designed to allow accessing of the various items within
 the layers dictionary of this class via the 'class.attribute' method.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3681,6 +3782,8 @@ the layers dictionary of this class via the 'class.attribute' method.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3704,9 +3807,9 @@ dictionary.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">759</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">759</span>
 <span class="normal">760</span>
 <span class="normal">761</span>
 <span class="normal">762</span>
@@ -3744,10 +3847,11 @@ dictionary.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -3762,6 +3866,8 @@ dictionary.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the Optics class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3825,9 +3931,9 @@ key for the layer.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">735</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">735</span>
 <span class="normal">736</span>
 <span class="normal">737</span>
 <span class="normal">738</span>
@@ -3873,10 +3979,123 @@ key for the layer.</p>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wf_npixels</span><span class="o">=</span><span class="n">wf_npixels</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.optics.LayeredOptics.insert_layer" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">insert_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></code>
+
+<a href="#dLux.optics.LayeredOptics.insert_layer" class="headerlink" title="Permanent link">¤</a></h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Inserts a layer into the layers dictionary at the given index using the
+list.insert method. Note this method may require the names of some
+parameters to be</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>layer</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[<span title="dLux.optics.OpticalLayer">OpticalLayer</span>, tuple]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The layer to insert into the layers dictionary. Can either be a
+single OpticalLayer, or you can specify the layers key by passing
+in a tuple of (OpticalLayer, key).</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>index</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The index to insert the layer at.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">827</span>
+<span class="normal">828</span>
+<span class="normal">829</span>
+<span class="normal">830</span>
+<span class="normal">831</span>
+<span class="normal">832</span>
+<span class="normal">833</span>
+<span class="normal">834</span>
+<span class="normal">835</span>
+<span class="normal">836</span>
+<span class="normal">837</span>
+<span class="normal">838</span>
+<span class="normal">839</span>
+<span class="normal">840</span>
+<span class="normal">841</span>
+<span class="normal">842</span>
+<span class="normal">843</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">insert_layer</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">:</span> <span class="n">BaseOptics</span><span class="p">,</span> <span class="n">layer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">OpticalLayer</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">],</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseOptics</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inserts a layer into the layers dictionary at the given index using the</span>
+<span class="sd">    list.insert method. Note this method may require the names of some</span>
+<span class="sd">    parameters to be</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    layer : Union[OpticalLayer, tuple]</span>
+<span class="sd">        The layer to insert into the layers dictionary. Can either be a</span>
+<span class="sd">        single OpticalLayer, or you can specify the layers key by passing</span>
+<span class="sd">        in a tuple of (OpticalLayer, key).</span>
+<span class="sd">    index : int</span>
+<span class="sd">        The index to insert the layer at.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">layers_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="n">layers_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+    <span class="n">new_layers</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">list_to_dictionary</span><span class="p">(</span><span class="n">layers_list</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">OpticalLayer</span><span class="p">())</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;layers&quot;</span><span class="p">,</span> <span class="n">new_layers</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -3892,6 +4111,8 @@ key for the layer.</p>
   
       <p>Propagates a monochromatic point source through the optical layers.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -3906,7 +4127,7 @@ key for the layer.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3930,7 +4151,7 @@ value is (0, 0), on axis.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.zeros">zeros</span>(2)</code>
+                <code><span title="jax">np</span>.<span title="jax.zeros">zeros</span>(2)</code>
           </td>
         </tr>
         <tr>
@@ -3949,6 +4170,8 @@ value is (0, 0), on axis.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -3984,9 +4207,9 @@ return_wf is True.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">790</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">790</span>
 <span class="normal">791</span>
 <span class="normal">792</span>
 <span class="normal">793</span>
@@ -4058,7 +4281,84 @@ return_wf is True.</p>
         <span class="k">return</span> <span class="n">wavefront</span>
     <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">psf</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="dLux.optics.LayeredOptics.remove_layer" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">remove_layer</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></code>
+
+<a href="#dLux.optics.LayeredOptics.remove_layer" class="headerlink" title="Permanent link">¤</a></h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Removes a layer from the layers dictionary indexed at 'key' using the
+dict.pop(key) method.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>key</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key of the layer to remove.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>dLux/optics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">849</span>
+<span class="normal">850</span>
+<span class="normal">851</span>
+<span class="normal">852</span>
+<span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">OpticalLayer</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseOptics</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes a layer from the layers dictionary indexed at &#39;key&#39; using the</span>
+<span class="sd">    dict.pop(key) method.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    key : str</span>
+<span class="sd">        The key of the layer to remove.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div></td></tr></table></div>
+          </details>
   </div>
 
 </div>
@@ -4073,7 +4373,9 @@ return_wf is True.</p>
 <h2 class="doc doc-heading" data-role="attr" id="dLux.optics.LayeredOptics.true_pixel_scale"><a class="headerlink" href="#dLux.optics.LayeredOptics.true_pixel_scale" title="Permanent link">¤</a></h2>
 <h2 class="doc doc-heading" data-role="function" id="dLux.optics.LayeredOptics.__getattr__"><a class="headerlink" href="#dLux.optics.LayeredOptics.__getattr__" title="Permanent link">¤</a></h2>
 <h2 class="doc doc-heading" data-role="function" id="dLux.optics.LayeredOptics.__init__"><a class="headerlink" href="#dLux.optics.LayeredOptics.__init__" title="Permanent link">¤</a></h2>
+<h2 class="doc doc-heading" data-role="function" id="dLux.optics.LayeredOptics.insert_layer"><a class="headerlink" href="#dLux.optics.LayeredOptics.insert_layer" title="Permanent link">¤</a></h2>
 <h2 class="doc doc-heading" data-role="function" id="dLux.optics.LayeredOptics.propagate_mono"><a class="headerlink" href="#dLux.optics.LayeredOptics.propagate_mono" title="Permanent link">¤</a></h2>
+<h2 class="doc doc-heading" data-role="function" id="dLux.optics.LayeredOptics.remove_layer"><a class="headerlink" href="#dLux.optics.LayeredOptics.remove_layer" title="Permanent link">¤</a></h2>
 </div>
 </details>
 <p>Let's have a look at how we can use this class to model a simple optical system.</p>

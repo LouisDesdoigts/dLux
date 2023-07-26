@@ -21,7 +21,7 @@
         <link rel="next" href="../interpolation/">
       
       <link rel="icon" href="../../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -853,6 +853,7 @@
 <summary>Polar to Cartesian API</summary>
 <div class="mkdocstrings">
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -861,6 +862,8 @@
   
       <p>Converts the input (r, phi) polar coordinates into (x, y) Cartesian
 coordinates.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -891,6 +894,8 @@ coordinates.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -914,9 +919,9 @@ coordinates.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/utils/coordinates.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/utils/coordinates.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span>
@@ -954,7 +959,7 @@ coordinates.</p>
     <span class="n">r</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">coordinates</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">r</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)])</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div><h2 data-role="function" id="dLux.utils.coordinates.polar_to_cart"><a class="headerlink" href="#dLux.utils.coordinates.polar_to_cart" title="Permanent link">¤</a></h2>
@@ -966,6 +971,7 @@ coordinates.</p>
 <summary>Cartesian to Polar API</summary>
 <div class="mkdocstrings">
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -974,6 +980,8 @@ coordinates.</p>
   
       <p>Converts the input (x, y) Cartesian coordinates into (r, phi) polar
 coordinates.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1004,6 +1012,8 @@ coordinates.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1027,9 +1037,9 @@ coordinates.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/utils/coordinates.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/utils/coordinates.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
@@ -1067,7 +1077,7 @@ coordinates.</p>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">coordinates</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)])</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div><h2 data-role="function" id="dLux.utils.coordinates.cart_to_polar"><a class="headerlink" href="#dLux.utils.coordinates.cart_to_polar" title="Permanent link">¤</a></h2>
@@ -1080,6 +1090,7 @@ coordinates.</p>
 <summary>Pixel Coords API</summary>
 <div class="mkdocstrings">
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -1091,6 +1102,8 @@ assuming an equal size and pixel scale in all dimensions. All
 coordinates are output in units of metres. This function is essentially a
 reduced version of the full <code>pixel_coordinates</code> function that gives
 flexibility to have different dimension sizes and scales.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1163,6 +1176,8 @@ Cartesian coordinates. ndims must be 2 if polar is True.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1185,9 +1200,9 @@ Cartesian coordinates. ndims must be 2 if polar is True.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/utils/coordinates.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">58</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/utils/coordinates.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">58</span>
 <span class="normal">59</span>
 <span class="normal">60</span>
 <span class="normal">61</span>
@@ -1253,7 +1268,7 @@ Cartesian coordinates. ndims must be 2 if polar is True.</p>
     <span class="n">pixel_scale</span> <span class="o">=</span> <span class="p">(</span><span class="n">pixel_scale</span><span class="p">,)</span> <span class="o">*</span> <span class="n">ndims</span>
     <span class="k">return</span> <span class="n">pixel_coordinates</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">polar</span><span class="o">=</span><span class="n">polar</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div><h2 data-role="function" id="dLux.utils.coordinates.pixel_coords"><a class="headerlink" href="#dLux.utils.coordinates.pixel_coords" title="Permanent link">¤</a></h2>
@@ -1264,6 +1279,7 @@ Cartesian coordinates. ndims must be 2 if polar is True.</p>
 <details class="info">
 <summary>Pixel Coordinates API</summary>
 <div class="mkdocstrings">
+
 
 <div class="doc doc-object doc-function">
 
@@ -1281,6 +1297,8 @@ and N, the outputs are of shape (N, M) for ‘xy’ indexing and (M, N) for
 are of shape (N, M, P) for ‘xy’ indexing and (M, N, P) for ‘ij’ indexing.
 If the output is in polar coordinates, indexing is set to 'xy' and the
 input must be 2d.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1373,6 +1391,8 @@ more details.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1395,9 +1415,9 @@ more details.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/utils/coordinates.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/utils/coordinates.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
 <span class="normal"> 94</span>
 <span class="normal"> 95</span>
 <span class="normal"> 96</span>
@@ -1561,7 +1581,7 @@ more details.</p>
     <span class="c1"># Squeeze for empty axis removal with 1d</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div><h2 data-role="function" id="dLux.utils.coordinates.pixel_coordinates"><a class="headerlink" href="#dLux.utils.coordinates.pixel_coordinates" title="Permanent link">¤</a></h2>

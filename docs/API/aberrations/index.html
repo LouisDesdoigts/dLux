@@ -21,7 +21,7 @@
         <link rel="next" href="../spectra/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -864,8 +864,8 @@
 
 <a id="dLux.aberrations.ZernikeBasis"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="zodiax.Base">Base</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="zodiax.Base">Base</span></code></p>
 
   
       <p>A class to calculate a set of Zernike polynomials on a dynamic set of
@@ -877,6 +877,8 @@ shown below:</p>
 <p>2, 3 -&gt; (1, -1), (1, 1)</p>
 <p>4, 5, 6 -&gt; (2, -2), (2, 0), (2, 2)</p>
 <p>7, 8, 9, 10 -&gt; (3, -3), (3, -1), (3, 1), (3, 3)</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -902,10 +904,9 @@ shown below:</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/aberrations.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">276</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/aberrations.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">276</span>
 <span class="normal">277</span>
 <span class="normal">278</span>
 <span class="normal">279</span>
@@ -1031,11 +1032,12 @@ shown below:</p>
             <span class="n">jtu</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">calculate_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">leaf_fn</span><span class="p">)</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1058,6 +1060,8 @@ shown below:</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the DynamicZernike class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1087,9 +1091,9 @@ shown below:</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">301</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/aberrations.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">301</span>
 <span class="normal">302</span>
 <span class="normal">303</span>
 <span class="normal">304</span>
@@ -1109,10 +1113,11 @@ shown below:</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">Zernike</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">js</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1129,6 +1134,8 @@ shown below:</p>
       <p>Calculates the full Zernike polynomial basis.</p>
 <p>Note: The zernike polynomial is defined on the coordinates up to a
 radial value of 1.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1173,6 +1180,8 @@ calculated on a circular aperture.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1195,9 +1204,9 @@ calculated on a circular aperture.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/aberrations.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
 <span class="normal">313</span>
 <span class="normal">314</span>
 <span class="normal">315</span>
@@ -1251,7 +1260,7 @@ calculated on a circular aperture.</p>
         <span class="n">jtu</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">calculate_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noll_indices</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">leaf_fn</span><span class="p">)</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1276,8 +1285,8 @@ calculated on a circular aperture.</p>
 
 <a id="dLux.aberrations.Zernike"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="zodiax.Base">Base</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="zodiax.Base">Base</span></code></p>
 
   
       <p>A class to generate Zernike polynomials dynamically.</p>
@@ -1288,6 +1297,8 @@ shown below:</p>
 <p>2, 3 -&gt; (1, -1), (1, 1)</p>
 <p>4, 5, 6 -&gt; (2, -2), (2, 0), (2, 2)</p>
 <p>7, 8, 9, 10 -&gt; (3, -3), (3, -1), (3, 1), (3, 3)</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1370,10 +1381,9 @@ This is a pre-calculated parameter and should not be changed.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/aberrations.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 58</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/aberrations.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 58</span>
 <span class="normal"> 59</span>
 <span class="normal"> 60</span>
 <span class="normal"> 61</span>
@@ -1805,11 +1815,12 @@ This is a pre-calculated parameter and should not be changed.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_polike</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">nsides</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1832,6 +1843,8 @@ This is a pre-calculated parameter and should not be changed.</p>
   <div class="doc doc-contents ">
   
       <p>Construct for the Zernike class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1861,9 +1874,9 @@ This is a pre-calculated parameter and should not be changed.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">100</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/aberrations.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
@@ -1917,10 +1930,11 @@ This is a pre-calculated parameter and should not be changed.</p>
     <span class="n">_fact_4</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">factorial</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">_fact_1</span> <span class="o">/</span> <span class="n">_fact_2</span> <span class="o">/</span> <span class="n">_fact_3</span> <span class="o">/</span> <span class="n">_fact_4</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1937,6 +1951,8 @@ This is a pre-calculated parameter and should not be changed.</p>
       <p>Calculates the Zernike polynomial.</p>
 <p>Note: The zernike polynomial is defined on the coordinates up to a
 radial value of 1.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1981,6 +1997,8 @@ is calculated on a circular aperture.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2003,9 +2021,9 @@ is calculated on a circular aperture.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">250</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/aberrations.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span>
 <span class="normal">253</span>
@@ -2053,10 +2071,11 @@ is calculated on a circular aperture.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_polike</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">nsides</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2073,6 +2092,8 @@ is calculated on a circular aperture.</p>
       <p>Calculates the Zernike polynomial on an n-sided aperture.</p>
 <p>Note: The zernike polynomial is defined on the coordinates up to a
 radial value of 1.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2116,6 +2137,8 @@ radial value of 1.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2138,9 +2161,9 @@ radial value of 1.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/aberrations.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
@@ -2200,10 +2223,11 @@ radial value of 1.</p>
     <span class="n">r_alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">u_alpha</span><span class="p">)</span>
     <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">r_alpha</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_zernike</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">/</span> <span class="n">r_alpha</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2220,6 +2244,8 @@ radial value of 1.</p>
       <p>Calculates the Zernike polynomial.</p>
 <p>Note: The zernike polynomial is defined on the coordinates up to a
 radial value of 1.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2249,6 +2275,8 @@ radial value of 1.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2271,9 +2299,9 @@ radial value of 1.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/aberrations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">192</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/aberrations.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">192</span>
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
@@ -2325,7 +2353,7 @@ radial value of 1.</p>
         <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_azimuthal</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>

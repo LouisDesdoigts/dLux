@@ -21,7 +21,7 @@
         <link rel="next" href="../images/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -870,11 +870,13 @@
 
 <a id="dLux.sources.PointSource"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.sources.Source">Source</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.sources.Source">Source</span></code></p>
 
   
       <p>Concrete Class for unresolved point source objects.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -889,7 +891,7 @@
         <tr>
           <td><code>position</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -900,7 +902,7 @@
         <tr>
           <td><code>flux</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, photons</code>
+                <code>(<span title="jax.Array">Array</span>, photons)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -922,10 +924,9 @@
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/sources.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/sources.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
 <span class="normal">295</span>
 <span class="normal">296</span>
 <span class="normal">297</span>
@@ -951,7 +952,7 @@
 <span class="sd">        The spectrum of this object, represented by a Spectrum object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   </div>
 
@@ -967,11 +968,13 @@
 
 <a id="dLux.sources.PointSources"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.sources.Source">Source</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.sources.Source">Source</span></code></p>
 
   
       <p>Concrete Class for multiple unresolved point source objects.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -986,7 +989,7 @@
         <tr>
           <td><code>position</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -997,7 +1000,7 @@
         <tr>
           <td><code>flux</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, photons</code>
+                <code>(<span title="jax.Array">Array</span>, photons)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1020,10 +1023,9 @@ Every source in this class will have an identical spectrum.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/sources.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">309</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/sources.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">309</span>
 <span class="normal">310</span>
 <span class="normal">311</span>
 <span class="normal">312</span>
@@ -1179,11 +1181,12 @@ Every source in this class will have an identical spectrum.</p>
         <span class="n">propagator</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">propagator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1207,6 +1210,8 @@ Every source in this class will have an identical spectrum.</p>
   
       <p>Constructor for the PointSources class.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -1221,7 +1226,7 @@ Every source in this class will have an identical spectrum.</p>
         <tr>
           <td><code>position</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1229,7 +1234,7 @@ Every source in this class will have an identical spectrum.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.zeros">zeros</span>(2)</code>
+                <code><span title="jax">np</span>.<span title="jax.zeros">zeros</span>(2)</code>
           </td>
         </tr>
         <tr>
@@ -1278,9 +1283,9 @@ Every source in this class will have an identical spectrum.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/sources.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">324</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/sources.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">324</span>
 <span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span>
@@ -1368,10 +1373,11 @@ Every source in this class will have an identical spectrum.</p>
                 <span class="s2">&quot;Length of flux must be equal to length of &quot;</span> <span class="s2">&quot;position.&quot;</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1386,6 +1392,8 @@ Every source in this class will have an identical spectrum.</p>
   <div class="doc doc-contents ">
   
       <p>Method to model the psf of the point source through the optics.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1415,6 +1423,8 @@ Every source in this class will have an identical spectrum.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1437,9 +1447,9 @@ Every source in this class will have an identical spectrum.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/sources.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">369</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/sources.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">369</span>
 <span class="normal">370</span>
 <span class="normal">371</span>
 <span class="normal">372</span>
@@ -1475,7 +1485,7 @@ Every source in this class will have an identical spectrum.</p>
     <span class="n">propagator</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">propagator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1500,11 +1510,13 @@ Every source in this class will have an identical spectrum.</p>
 
 <a id="dLux.sources.BinarySource"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.sources.RelativePositionSource">RelativePositionSource</span></code>, <code><span title="dLux.sources.RelativeFluxSource">RelativeFluxSource</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.sources.RelativePositionSource">RelativePositionSource</span></code>, <code><span title="dLux.sources.RelativeFluxSource">RelativeFluxSource</span></code></p>
 
   
       <p>A parameterised binary source.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1519,7 +1531,7 @@ Every source in this class will have an identical spectrum.</p>
         <tr>
           <td><code>position</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1530,7 +1542,7 @@ Every source in this class will have an identical spectrum.</p>
         <tr>
           <td><code>flux</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, photons</code>
+                <code>(<span title="jax.Array">Array</span>, photons)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1541,7 +1553,7 @@ Every source in this class will have an identical spectrum.</p>
         <tr>
           <td><code>separation</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1552,7 +1564,7 @@ Every source in this class will have an identical spectrum.</p>
         <tr>
           <td><code>position_angle</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1586,10 +1598,9 @@ the vertical axis.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/sources.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">484</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/sources.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">484</span>
 <span class="normal">485</span>
 <span class="normal">486</span>
 <span class="normal">487</span>
@@ -1757,11 +1768,12 @@ the vertical axis.</p>
         <span class="n">propagator</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">propagator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1783,6 +1795,8 @@ the vertical axis.</p>
 
   <div class="doc doc-contents ">
   
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1806,7 +1820,7 @@ the vertical axis.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.array">array</span>([0.0, 0.0])</code>
+                <code><span title="jax">np</span>.<span title="jax.array">array</span>([0.0, 0.0])</code>
           </td>
         </tr>
         <tr>
@@ -1820,7 +1834,7 @@ the vertical axis.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.array">array</span>(1.0)</code>
+                <code><span title="jax">np</span>.<span title="jax.array">array</span>(1.0)</code>
           </td>
         </tr>
         <tr>
@@ -1849,7 +1863,7 @@ the vertical axis.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.pi">pi</span> / 2</code>
+                <code><span title="jax">np</span>.<span title="jax.pi">pi</span> / 2</code>
           </td>
         </tr>
         <tr>
@@ -1863,7 +1877,7 @@ the vertical axis.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.array">array</span>(1.0)</code>
+                <code><span title="jax">np</span>.<span title="jax.array">array</span>(1.0)</code>
           </td>
         </tr>
         <tr>
@@ -1897,9 +1911,9 @@ the vertical axis.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/sources.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">505</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/sources.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">505</span>
 <span class="normal">506</span>
 <span class="normal">507</span>
 <span class="normal">508</span>
@@ -1987,10 +2001,11 @@ the vertical axis.</p>
         <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2005,6 +2020,8 @@ the vertical axis.</p>
   <div class="doc doc-contents ">
   
       <p>Method to model the psf of the point source through the optics.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2034,6 +2051,8 @@ the vertical axis.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2056,9 +2075,9 @@ the vertical axis.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/sources.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">550</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/sources.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">550</span>
 <span class="normal">551</span>
 <span class="normal">552</span>
 <span class="normal">553</span>
@@ -2094,7 +2113,7 @@ the vertical axis.</p>
     <span class="n">propagator</span> <span class="o">=</span> <span class="n">vmap</span><span class="p">(</span><span class="n">optics</span><span class="o">.</span><span class="n">propagate</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">propagator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2119,12 +2138,14 @@ the vertical axis.</p>
 
 <a id="dLux.sources.ResolvedSource"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.sources.Source">Source</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.sources.Source">Source</span></code></p>
 
   
       <p>A class for modelling resolved sources that parametrise their resolved
 component using an array of intensities.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -2139,7 +2160,7 @@ component using an array of intensities.</p>
         <tr>
           <td><code>position</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2150,7 +2171,7 @@ component using an array of intensities.</p>
         <tr>
           <td><code>flux</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, photons</code>
+                <code>(<span title="jax.Array">Array</span>, photons)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2183,10 +2204,9 @@ component using an array of intensities.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/sources.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">389</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/sources.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">389</span>
 <span class="normal">390</span>
 <span class="normal">391</span>
 <span class="normal">392</span>
@@ -2372,11 +2392,12 @@ component using an array of intensities.</p>
         <span class="n">convolved</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">psf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">*</span> <span class="n">convolved</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2391,7 +2412,7 @@ component using an array of intensities.</p>
 
 
 <h2 id="dLux.sources.ResolvedSource.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">flux</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="n">distribution</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">flux</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="n">distribution</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#dLux.sources.ResolvedSource.__init__" class="headerlink" title="Permanent link">¤</a></h2>
 
@@ -2399,6 +2420,8 @@ component using an array of intensities.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the ResolvedSource class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2422,7 +2445,7 @@ component using an array of intensities.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.zeros">zeros</span>(2)</code>
+                <code><span title="jax">np</span>.<span title="jax.zeros">zeros</span>(2)</code>
           </td>
         </tr>
         <tr>
@@ -2436,7 +2459,7 @@ component using an array of intensities.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.array">array</span>(1.0)</code>
+                <code><span title="jax">np</span>.<span title="jax.array">array</span>(1.0)</code>
           </td>
         </tr>
         <tr>
@@ -2450,7 +2473,7 @@ component using an array of intensities.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.ones">ones</span>(3, 3)</code>
+                <code><span title="jax">np</span>.<span title="jax.ones">ones</span>((3, 3))</code>
           </td>
         </tr>
         <tr>
@@ -2484,9 +2507,9 @@ component using an array of intensities.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/sources.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">408</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/sources.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">408</span>
 <span class="normal">409</span>
 <span class="normal">410</span>
 <span class="normal">411</span>
@@ -2562,10 +2585,11 @@ component using an array of intensities.</p>
         <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2581,6 +2605,8 @@ component using an array of intensities.</p>
   
       <p>Method to model the psf of the source through the optics. Implements a
 basic convolution with the psf and source distribution.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2610,6 +2636,8 @@ basic convolution with the psf and source distribution.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2632,9 +2660,9 @@ basic convolution with the psf and source distribution.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/sources.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">462</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/sources.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">462</span>
 <span class="normal">463</span>
 <span class="normal">464</span>
 <span class="normal">465</span>
@@ -2674,10 +2702,11 @@ basic convolution with the psf and source distribution.</p>
     <span class="n">convolved</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">psf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">*</span> <span class="n">convolved</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2693,6 +2722,8 @@ basic convolution with the psf and source distribution.</p>
   
       <p>Method for returning a new source object with a normalised total
 spectrum and source distribution.</p>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -2716,9 +2747,9 @@ spectrum and source distribution.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/sources.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">447</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/sources.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">447</span>
 <span class="normal">448</span>
 <span class="normal">449</span>
 <span class="normal">450</span>
@@ -2746,7 +2777,7 @@ spectrum and source distribution.</p>
     <span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution_floor</span> <span class="o">/</span> <span class="n">distribution_floor</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">&quot;spectrum&quot;</span><span class="p">,</span> <span class="s2">&quot;distribution&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">distribution</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2772,8 +2803,8 @@ spectrum and source distribution.</p>
 
 <a id="dLux.sources.PointResolvedSource"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.sources.RelativeFluxSource">RelativeFluxSource</span></code>, <code><a class="autorefs autorefs-internal" title="dLux.sources.ResolvedSource" href="#dLux.sources.ResolvedSource">ResolvedSource</a></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.sources.RelativeFluxSource">RelativeFluxSource</span></code>, <code><a class="autorefs autorefs-internal" title="dLux.sources.ResolvedSource" href="#dLux.sources.ResolvedSource">ResolvedSource</a></code></p>
 
   
       <p>A class for modelling a point source and a resolved source that is defined
@@ -2783,6 +2814,8 @@ spectra but have their fluxes defined by flux (the mean flux) and the flux
 ratio (contrast) between the point source and resolved distribution. The
 resolved component is defined by an array (ie this class inherits from
 ResolvedSource).</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -2797,7 +2830,7 @@ ResolvedSource).</p>
         <tr>
           <td><code>position</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2808,7 +2841,7 @@ ResolvedSource).</p>
         <tr>
           <td><code>flux</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, photons</code>
+                <code>(<span title="jax.Array">Array</span>, photons)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2853,10 +2886,9 @@ source.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/sources.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">570</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/sources.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">570</span>
 <span class="normal">571</span>
 <span class="normal">572</span>
 <span class="normal">573</span>
@@ -3022,11 +3054,12 @@ source.</p>
         <span class="n">convolved</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">psf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">psf</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">convolved</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -3041,13 +3074,15 @@ source.</p>
 
 
 <h2 id="dLux.sources.PointResolvedSource.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">flux</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="n">distribution</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">contrast</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="n">spectrum</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">wavelengths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">flux</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="n">distribution</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span> <span class="n">contrast</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="n">spectrum</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#dLux.sources.PointResolvedSource.__init__" class="headerlink" title="Permanent link">¤</a></h2>
 
 
   <div class="doc doc-contents ">
   
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3071,7 +3106,7 @@ source.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.zeros">zeros</span>(2)</code>
+                <code><span title="jax">np</span>.<span title="jax.zeros">zeros</span>(2)</code>
           </td>
         </tr>
         <tr>
@@ -3085,7 +3120,7 @@ source.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.array">array</span>(1.0)</code>
+                <code><span title="jax">np</span>.<span title="jax.array">array</span>(1.0)</code>
           </td>
         </tr>
         <tr>
@@ -3099,7 +3134,7 @@ source.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.ones">ones</span>(3, 3)</code>
+                <code><span title="jax">np</span>.<span title="jax.ones">ones</span>((3, 3))</code>
           </td>
         </tr>
         <tr>
@@ -3114,7 +3149,7 @@ source.</p>
             </div>
           </td>
           <td>
-                <code><span title="jax.numpy">np</span>.<span title="jax.numpy.array">array</span>(1.0)</code>
+                <code><span title="jax">np</span>.<span title="jax.array">array</span>(1.0)</code>
           </td>
         </tr>
         <tr>
@@ -3148,9 +3183,9 @@ source.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/sources.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">595</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/sources.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">595</span>
 <span class="normal">596</span>
 <span class="normal">597</span>
 <span class="normal">598</span>
@@ -3222,10 +3257,11 @@ source.</p>
         <span class="n">contrast</span><span class="o">=</span><span class="n">contrast</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -3242,6 +3278,8 @@ source.</p>
       <p>Method to model the psf of the source through the optics. Implements a
 basic convolution with the psf and source distribution, while also
 modelling the single point source psf.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3271,6 +3309,8 @@ modelling the single point source psf.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3293,9 +3333,9 @@ modelling the single point source psf.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/sources.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">632</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/sources.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">632</span>
 <span class="normal">633</span>
 <span class="normal">634</span>
 <span class="normal">635</span>
@@ -3337,7 +3377,7 @@ modelling the single point source psf.</p>
     <span class="n">convolved</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">psf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">psf</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">convolved</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>

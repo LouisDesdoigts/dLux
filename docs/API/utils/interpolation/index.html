@@ -21,7 +21,7 @@
         <link rel="next" href="../helpers/">
       
       <link rel="icon" href="../../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -853,6 +853,7 @@
 <summary>Scale Array API</summary>
 <div class="mkdocstrings">
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -860,6 +861,8 @@
   <div class="doc doc-contents first">
   
       <p>Scales some input array to size_out using interpolation.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -917,6 +920,8 @@
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -939,9 +944,9 @@
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">17</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
@@ -983,7 +988,7 @@
     <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">map_coordinates</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ys</span><span class="p">,</span> <span class="n">xs</span><span class="p">]),</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div><h2 data-role="function" id="dLux.utils.interpolation.scale_array"><a class="headerlink" href="#dLux.utils.interpolation.scale_array" title="Permanent link">¤</a></h2>
@@ -995,6 +1000,7 @@
 <summary>Downsample API</summary>
 <div class="mkdocstrings">
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -1002,6 +1008,8 @@
   <div class="doc doc-contents first">
   
       <p>Downsamples the input array by n.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1059,6 +1067,8 @@
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1081,9 +1091,9 @@
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">40</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
@@ -1155,7 +1165,7 @@
     <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">size_out</span><span class="p">,</span> <span class="n">size_out</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
     <span class="k">return</span> <span class="n">array</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div><h2 data-role="function" id="dLux.utils.interpolation.downsample"><a class="headerlink" href="#dLux.utils.interpolation.downsample" title="Permanent link">¤</a></h2>
@@ -1167,6 +1177,7 @@
 <summary>Scale API</summary>
 <div class="mkdocstrings">
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -1176,6 +1187,8 @@
       <p>Paraxially interpolates a wavefront field (either in amplitude and phase,
 or real and imaginary) based on the sampling ratio, and npixels_out.</p>
 <h2 id="dLux.utils.interpolation.scale--todo-check-if-a-half-pixel-offset-is-produced">TODO: Check if a half-pixel offset is produced<a class="headerlink" href="#dLux.utils.interpolation.scale--todo-check-if-a-half-pixel-offset-is-produced" title="Permanent link">¤</a></h2>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1249,6 +1262,8 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1271,9 +1286,9 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">120</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
 <span class="normal">123</span>
@@ -1333,7 +1348,7 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
     <span class="n">coordinates</span> <span class="o">=</span> <span class="n">generate_coordinates</span><span class="p">(</span><span class="n">npixels_in</span><span class="p">,</span> <span class="n">npixels</span><span class="p">,</span> <span class="n">ratio</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">map_coordinates</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div><h2 data-role="function" id="dLux.utils.interpolation.scale"><a class="headerlink" href="#dLux.utils.interpolation.scale" title="Permanent link">¤</a></h2>
@@ -1346,6 +1361,7 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
 <summary>Rotate API</summary>
 <div class="mkdocstrings">
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -1353,6 +1369,8 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
   <div class="doc doc-contents first">
   
       <p>Rotates an array by the angle, using linear interpolation.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1382,7 +1400,7 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
         <tr>
           <td><code>angle</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1410,6 +1428,8 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1432,9 +1452,9 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">152</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/utils/interpolation.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
@@ -1500,7 +1520,7 @@ smaller? i.e. input scale/output scale. &lt;- get this right.</p>
     <span class="c1"># Interpolate</span>
     <span class="k">return</span> <span class="n">map_coordinates</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">coordinates_rotated</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div><h2 data-role="function" id="dLux.utils.interpolation.rotate"><a class="headerlink" href="#dLux.utils.interpolation.rotate" title="Permanent link">¤</a></h2>
