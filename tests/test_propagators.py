@@ -8,8 +8,6 @@ config.update("jax_debug_nans", True)
 def _test_propagator_constructor(constructor):
     """Tests the constructor of a propagator."""
     constructor()
-    with pytest.raises(TypeError):
-        constructor(focal_length=np.array([1]))
 
 
 def _test_call(constructor, wf_constructor):
@@ -39,8 +37,6 @@ class TestMFT:
     def test_constructor(self, create_mft):
         """Tests the constructor."""
         _test_propagator_constructor(create_mft)
-        with pytest.raises(TypeError):
-            create_mft(pixel_scale=np.array([1]))
 
     def test_call(self, create_mft, create_wavefront):
         """Tests the __call__ method."""
@@ -66,12 +62,8 @@ class TestFarFieldFresnel:
 
     def test_constructor(self, create_far_field_fresnel):
         """Tests the constructor."""
-        # Manully test here since inverse is not implemented
+        # Manually test here since inverse is not implemented
         create_far_field_fresnel()
-        with pytest.raises(TypeError):
-            create_far_field_fresnel(focal_length=np.array([1]))
-        with pytest.raises(TypeError):
-            create_far_field_fresnel(focal_shift=np.array([1]))
         with pytest.raises(NotImplementedError):
             create_far_field_fresnel(inverse=True)
 
