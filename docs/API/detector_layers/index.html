@@ -21,7 +21,7 @@
         <link rel="next" href="../detectors/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -869,11 +869,13 @@
 
 <a id="dLux.detector_layers.ApplyPixelResponse"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
 
   
       <p>Applies a pixel response array to the input image, via a multiplication.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -899,10 +901,9 @@
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">52</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">52</span>
 <span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
@@ -988,11 +989,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">image</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_response</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1015,6 +1017,8 @@
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the Image.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1044,6 +1048,8 @@
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1066,9 +1072,9 @@
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">80</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">80</span>
 <span class="normal">81</span>
 <span class="normal">82</span>
 <span class="normal">83</span>
@@ -1098,10 +1104,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">image</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_response</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1116,6 +1123,8 @@
   <div class="doc doc-contents ">
   
       <p>Constructor for the ApplyPixelResponse class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1147,9 +1156,9 @@ application.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">64</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
 <span class="normal">67</span>
@@ -1179,7 +1188,7 @@ application.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_response</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;pixel_response must be a 2 dimensional array.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1206,12 +1215,14 @@ application.</p>
 
 <a id="dLux.detector_layers.ApplyJitter"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
 
   
       <p>Convolves the image with a Gaussian kernel parameterised by the standard
 deviation (sigma).</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1226,7 +1237,7 @@ deviation (sigma).</p>
         <tr>
           <td><code>sigma</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, pixels</code>
+                <code>(<span title="jax.Array">Array</span>, pixels)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1248,10 +1259,9 @@ deviation (sigma).</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 97</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 97</span>
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
 <span class="normal">100</span>
@@ -1379,11 +1389,12 @@ deviation (sigma).</p>
         <span class="n">kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_kernel</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1406,6 +1417,8 @@ deviation (sigma).</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the Image.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1435,6 +1448,8 @@ deviation (sigma).</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1457,9 +1472,9 @@ deviation (sigma).</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">145</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">145</span>
 <span class="normal">146</span>
 <span class="normal">147</span>
 <span class="normal">148</span>
@@ -1491,10 +1506,11 @@ deviation (sigma).</p>
     <span class="n">kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_kernel</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">pixel_scale</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1510,6 +1526,8 @@ deviation (sigma).</p>
   
       <p>Constructor for the ApplyJitter class.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -1524,7 +1542,7 @@ deviation (sigma).</p>
         <tr>
           <td><code>sigma</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, pixels</code>
+                <code>(<span title="jax.Array">Array</span>, pixels)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1552,9 +1570,9 @@ deviation (sigma).</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
@@ -1586,10 +1604,11 @@ deviation (sigma).</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sigma must be a scalar array.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1604,6 +1623,8 @@ deviation (sigma).</p>
   <div class="doc doc-contents ">
   
       <p>Generates the normalised Gaussian kernel.</p>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -1627,9 +1648,9 @@ deviation (sigma).</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">130</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
@@ -1657,7 +1678,7 @@ deviation (sigma).</p>
     <span class="n">kernel</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">kernel</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1685,12 +1706,14 @@ deviation (sigma).</p>
 
 <a id="dLux.detector_layers.ApplySaturation"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
 
   
       <p>Applies a simple saturation model to the input image, by clipping any
 values above saturation, to saturation.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1716,10 +1739,9 @@ values above saturation, to saturation.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">163</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">163</span>
 <span class="normal">164</span>
 <span class="normal">165</span>
 <span class="normal">166</span>
@@ -1803,11 +1825,12 @@ values above saturation, to saturation.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saturation</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1830,6 +1853,8 @@ values above saturation, to saturation.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the Image.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1859,6 +1884,8 @@ values above saturation, to saturation.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1881,9 +1908,9 @@ values above saturation, to saturation.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
 <span class="normal">193</span>
@@ -1913,10 +1940,11 @@ values above saturation, to saturation.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saturation</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1931,6 +1959,8 @@ values above saturation, to saturation.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the ApplySaturation class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1960,9 +1990,9 @@ values above saturation, to saturation.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">176</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">176</span>
 <span class="normal">177</span>
 <span class="normal">178</span>
 <span class="normal">179</span>
@@ -1988,7 +2018,7 @@ values above saturation, to saturation.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saturation</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;saturation must be a scalar array.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2015,12 +2045,14 @@ values above saturation, to saturation.</p>
 
 <a id="dLux.detector_layers.AddConstant"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
 
   
       <p>Add a constant to the output image. This is typically used to model the
 mean value of the detector noise.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -2046,10 +2078,9 @@ mean value of the detector noise.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
@@ -2133,11 +2164,12 @@ mean value of the detector noise.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">image</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2160,6 +2192,8 @@ mean value of the detector noise.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the Image.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2189,6 +2223,8 @@ mean value of the detector noise.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2211,9 +2247,9 @@ mean value of the detector noise.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">234</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">234</span>
 <span class="normal">235</span>
 <span class="normal">236</span>
 <span class="normal">237</span>
@@ -2243,10 +2279,11 @@ mean value of the detector noise.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">image</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2261,6 +2298,8 @@ mean value of the detector noise.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the AddConstant class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2290,9 +2329,9 @@ mean value of the detector noise.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">220</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span>
@@ -2318,7 +2357,7 @@ mean value of the detector noise.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;value must be a scalar array.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2345,13 +2384,15 @@ mean value of the detector noise.</p>
 
 <a id="dLux.detector_layers.IntegerDownsample"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
 
   
       <p>Downsamples an input image by an integer number of pixels via a sum.
 The number of pixels in the input image must be integer divisible by the
 kernel_size.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -2377,10 +2418,9 @@ kernel_size.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">251</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">251</span>
 <span class="normal">252</span>
 <span class="normal">253</span>
 <span class="normal">254</span>
@@ -2462,11 +2502,12 @@ kernel_size.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2489,6 +2530,8 @@ kernel_size.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the Image.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2518,6 +2561,8 @@ kernel_size.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2540,9 +2585,9 @@ kernel_size.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">277</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">277</span>
 <span class="normal">278</span>
 <span class="normal">279</span>
 <span class="normal">280</span>
@@ -2572,10 +2617,11 @@ kernel_size.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2590,6 +2636,8 @@ kernel_size.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the IntegerDownsample class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2619,9 +2667,9 @@ kernel_size.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">265</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">265</span>
 <span class="normal">266</span>
 <span class="normal">267</span>
 <span class="normal">268</span>
@@ -2643,7 +2691,7 @@ kernel_size.</p>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kernel_size</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2670,11 +2718,13 @@ kernel_size.</p>
 
 <a id="dLux.detector_layers.RotateDetector"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.detector_layers.DetectorLayer">DetectorLayer</span></code></p>
 
   
       <p>Applies a rotation to the image using interpolation methods.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2690,7 +2740,7 @@ kernel_size.</p>
         <tr>
           <td><code>angle</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2718,10 +2768,9 @@ kernel_size.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
 <span class="normal">295</span>
 <span class="normal">296</span>
 <span class="normal">297</span>
@@ -2811,11 +2860,12 @@ kernel_size.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2838,6 +2888,8 @@ kernel_size.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the Image.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2867,6 +2919,8 @@ kernel_size.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2889,9 +2943,9 @@ kernel_size.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">324</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">324</span>
 <span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span>
@@ -2921,10 +2975,11 @@ kernel_size.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2939,6 +2994,8 @@ kernel_size.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the RotateDetector class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2968,9 +3025,9 @@ kernel_size.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/detector_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">309</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/detector_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">309</span>
 <span class="normal">310</span>
 <span class="normal">311</span>
 <span class="normal">312</span>
@@ -2998,7 +3055,7 @@ kernel_size.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;angle must be a scalar array.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>

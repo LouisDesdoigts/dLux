@@ -21,7 +21,7 @@
         <link rel="next" href="../optics/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -868,14 +868,16 @@
 
 <a id="dLux.wavefronts.Wavefront"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="zodiax.Base">Base</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="zodiax.Base">Base</span></code></p>
 
   
       <p>A class representing some wavefront, designed to track the various
 parameters such as wavelength, pixel_scale, amplitude and phase, as well as
 two helper parameters, plane and units.</p>
 <p>All wavefronts currently only support square amplitude and phase arrays.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -890,7 +892,7 @@ two helper parameters, plane and units.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code>float, metres</code>
+                <code>(float, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -901,7 +903,7 @@ two helper parameters, plane and units.</p>
         <tr>
           <td><code>amplitude</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, power</code>
+                <code>(<span title="jax.Array">Array</span>, power)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -912,7 +914,7 @@ two helper parameters, plane and units.</p>
         <tr>
           <td><code>phase</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -923,7 +925,7 @@ two helper parameters, plane and units.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>float, metres / pixel or radians / pixel</code>
+                <code>(float, metres / pixel or radians / pixel)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -959,10 +961,9 @@ depending on if 'unit' is 'Cartesian' or 'Angular'.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  17</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  17</span>
 <span class="normal">  18</span>
 <span class="normal">  19</span>
 <span class="normal">  20</span>
@@ -3202,7 +3203,7 @@ depending on if 'unit' is 'Cartesian' or 'Angular'.</p>
             <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">],</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -3231,6 +3232,8 @@ depending on if 'unit' is 'Cartesian' or 'Angular'.</p>
   <div class="doc doc-contents ">
   
       <p>Returns the physical positions of the wavefront pixels in metres.</p>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -3277,6 +3280,8 @@ wavefront.</p>
       <p>Returns the current wavefront diameter calculated using the pixel scale
 and number of pixels.</p>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3288,7 +3293,7 @@ and number of pixels.</p>
     <tbody>
         <tr>
 <td><code>diameter</code></td>          <td>
-                <code><span title="jax.Array">Array</span>, metres or radians</code>
+                <code>(<span title="jax.Array">Array</span>, metres or radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3323,6 +3328,8 @@ and number of pixels.</p>
 <h3 id="dLux.wavefronts.Wavefront.fringe_size--todo-possibly-output-in-unit-based-on-units-attribute">TODO Possibly output in unit based on units attribute<a class="headerlink" href="#dLux.wavefronts.Wavefront.fringe_size--todo-possibly-output-in-unit-based-on-units-attribute" title="Permanent link">¤</a></h3>
 <h3 id="dLux.wavefronts.Wavefront.fringe_size--todo-make-methods-use-this">TODO make methods use this<a class="headerlink" href="#dLux.wavefronts.Wavefront.fringe_size--todo-make-methods-use-this" title="Permanent link">¤</a></h3>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3334,7 +3341,7 @@ and number of pixels.</p>
     <tbody>
         <tr>
 <td><code>fringe_size</code></td>          <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3365,6 +3372,8 @@ and number of pixels.</p>
   <div class="doc doc-contents ">
   
       <p>Returns the imaginary component of the <code>Wavefront</code>.</p>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -3410,6 +3419,8 @@ and number of pixels.</p>
       <p>Returns the side length of the arrays currently representing the
 wavefront. Taken from the last axis of the amplitude array.</p>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3452,6 +3463,8 @@ wavefront. Taken from the last axis of the amplitude array.</p>
   <div class="doc doc-contents ">
   
       <p>The electric field phasor described by this Wavefront in complex form.</p>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -3497,6 +3510,8 @@ wavefront. Taken from the last axis of the amplitude array.</p>
       <p>Calculates the Point Spread Function (PSF), i.e. the squared modulus
 of the complex wavefront.</p>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3539,6 +3554,8 @@ of the complex wavefront.</p>
   <div class="doc doc-contents ">
   
       <p>Returns the real component of the <code>Wavefront</code>.</p>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -3583,6 +3600,8 @@ of the complex wavefront.</p>
   
       <p>Returns the wavenumber of the wavefront (2 * pi / wavelength).</p>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3594,7 +3613,7 @@ of the complex wavefront.</p>
     <tbody>
         <tr>
 <td><code>wavenumber</code></td>          <td>
-                <code><span title="jax.Array">Array</span>, 1 / meters</code>
+                <code>(<span title="jax.Array">Array</span>, 1 / meters)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3607,6 +3626,7 @@ of the complex wavefront.</p>
   </div>
 
 </div>
+
 
 
 
@@ -3623,6 +3643,8 @@ of the complex wavefront.</p>
   <div class="doc doc-contents ">
   
       <p>Propagates the wavefront by performing a Fast Fourier Transform.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3669,6 +3691,8 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3691,9 +3715,9 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">716</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">716</span>
 <span class="normal">717</span>
 <span class="normal">718</span>
 <span class="normal">719</span>
@@ -3765,10 +3789,11 @@ treated as an 'angular' propagation, else it is treated as a
         <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -3784,6 +3809,8 @@ treated as an 'angular' propagation, else it is treated as a
   
       <p>Propagates the wavefront by performing an Inverse Fast Fourier
 Transform.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3830,6 +3857,8 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3852,9 +3881,9 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">753</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">753</span>
 <span class="normal">754</span>
 <span class="normal">755</span>
 <span class="normal">756</span>
@@ -3932,10 +3961,11 @@ treated as an 'angular' propagation, else it is treated as a
         <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -3951,6 +3981,8 @@ treated as an 'angular' propagation, else it is treated as a
   
       <p>Propagates the wavefront by performing a, inverse 2-sided Matrix
 Fourier Transform. TODO: Add link to Soumer et al. 2007(?).</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4010,6 +4042,8 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -4032,9 +4066,9 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1011</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1011</span>
 <span class="normal">1012</span>
 <span class="normal">1013</span>
 <span class="normal">1014</span>
@@ -4106,10 +4140,11 @@ treated as an 'angular' propagation, else it is treated as a
         <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -4125,6 +4160,8 @@ treated as an 'angular' propagation, else it is treated as a
   
       <p>Propagates the wavefront by performing a 2-sided Matrix Fourier
 Transform. TODO: Add link to Soumer et al. 2007(?).</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4184,6 +4221,8 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -4206,9 +4245,9 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 974</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 974</span>
 <span class="normal"> 975</span>
 <span class="normal"> 976</span>
 <span class="normal"> 977</span>
@@ -4280,10 +4319,11 @@ treated as an 'angular' propagation, else it is treated as a
         <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -4302,6 +4342,8 @@ layer types and arrays. If the input 'other' in an array it is treated
 as an array of OPD values and is added to the wavefront. If it is an
 Aberration, the wavefront is passed to the layer and the output
 wavefront is returned.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4331,6 +4373,8 @@ wavefront is returned.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -4353,9 +4397,9 @@ wavefront is returned.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">202</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">202</span>
 <span class="normal">203</span>
 <span class="normal">204</span>
 <span class="normal">205</span>
@@ -4427,10 +4471,11 @@ wavefront is returned.</p>
             <span class="sa">f</span><span class="s2">&quot;Wavefront. Got: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -4449,6 +4494,8 @@ layer types and arrays. If the input 'other' in an array it is treated
 as an array of OPD values and is added to the wavefront. If it is an
 Aberration, the wavefront is passed to the layer and the output
 wavefront is returned.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4478,6 +4525,8 @@ wavefront is returned.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -4500,9 +4549,9 @@ wavefront is returned.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">239</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">239</span>
 <span class="normal">240</span>
 <span class="normal">241</span>
 <span class="normal">242</span>
@@ -4540,10 +4589,11 @@ wavefront is returned.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -4562,6 +4612,8 @@ layer types and arrays. If the input 'other' in an array it is treated
 as an array of transmission values and is multiplied by the wavefront
 amplitude. If it is an Aperture, Aberration, or Propagator, the
 wavefront is passed to the layer and the output wavefront is returned.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4591,6 +4643,8 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -4613,9 +4667,9 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">305</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">305</span>
 <span class="normal">306</span>
 <span class="normal">307</span>
 <span class="normal">308</span>
@@ -4653,10 +4707,11 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -4671,6 +4726,8 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4700,7 +4757,7 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
         <tr>
           <td><code>diameter</code></td>
           <td>
-                <code>float, metres</code>
+                <code>(float, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -4714,7 +4771,7 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code>float, metres</code>
+                <code>(float, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -4728,9 +4785,9 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">51</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
 <span class="normal">54</span>
@@ -4788,10 +4845,11 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">plane</span> <span class="o">=</span> <span class="s2">&quot;Pupil&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;Cartesian&quot;</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -4810,6 +4868,8 @@ layer types and arrays. If the input 'other' in an array it is treated
 as an array of transmission values and is multiplied by the wavefront
 amplitude. If it is an Aperture, Aberration, or Propagator, the
 wavefront is passed to the layer and the output wavefront is returned.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4839,6 +4899,8 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -4861,9 +4923,9 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">259</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">259</span>
 <span class="normal">260</span>
 <span class="normal">261</span>
 <span class="normal">262</span>
@@ -4953,10 +5015,11 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
             <span class="sa">f</span><span class="s2">&quot;OpticalLayer. Got: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -4973,6 +5036,8 @@ wavefront is passed to the layer and the output wavefront is returned.</p>
       <p>Applies the wavelength-dependent phase based on the supplied optical
 path difference.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -4987,7 +5052,7 @@ path difference.</p>
         <tr>
           <td><code>path_difference</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -5001,6 +5066,8 @@ or each pixel individually.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -5025,9 +5092,9 @@ path_difference</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">328</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">328</span>
 <span class="normal">329</span>
 <span class="normal">330</span>
 <span class="normal">331</span>
@@ -5065,10 +5132,11 @@ path_difference</p>
     <span class="n">phase_difference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavenumber</span> <span class="o">*</span> <span class="n">path_difference</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;phase&quot;</span><span class="p">,</span> <span class="n">phase_difference</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -5084,6 +5152,8 @@ path_difference</p>
   
       <p>Applies input array to the phase of the wavefront.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -5098,7 +5168,7 @@ path_difference</p>
         <tr>
           <td><code>phase</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -5111,6 +5181,8 @@ path_difference</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -5134,9 +5206,9 @@ path_difference</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">348</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">348</span>
 <span class="normal">349</span>
 <span class="normal">350</span>
 <span class="normal">351</span>
@@ -5176,10 +5248,11 @@ path_difference</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;phase&quot;</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -5196,6 +5269,8 @@ path_difference</p>
       <p>Paraxially crops the <code>Wavefront</code> to the size determined by npixels.
 Note this only supports padding arrays of even dimension to even
 dimension, and odd dimension to odd dimension, i.e. 4 -&gt; 2 or 5 -&gt; 3.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -5225,6 +5300,8 @@ dimension, and odd dimension to odd dimension, i.e. 4 -&gt; 2 or 5 -&gt; 3.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -5247,9 +5324,9 @@ dimension, and odd dimension to odd dimension, i.e. 4 -&gt; 2 or 5 -&gt; 3.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">587</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">587</span>
 <span class="normal">588</span>
 <span class="normal">589</span>
 <span class="normal">590</span>
@@ -5327,10 +5404,11 @@ dimension, and odd dimension to odd dimension, i.e. 4 -&gt; 2 or 5 -&gt; 3.</p>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">amplitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -5346,6 +5424,8 @@ dimension, and odd dimension to odd dimension, i.e. 4 -&gt; 2 or 5 -&gt; 3.</p>
   
       <p>Flips the amplitude and phase of the wavefront along the specified
 axes.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -5375,6 +5455,8 @@ axes.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -5397,9 +5479,9 @@ axes.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">441</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">441</span>
 <span class="normal">442</span>
 <span class="normal">443</span>
 <span class="normal">444</span>
@@ -5437,10 +5519,11 @@ axes.</p>
     <span class="n">amplitude</span><span class="p">,</span> <span class="n">phase</span> <span class="o">=</span> <span class="n">flipper</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">amplitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -5455,6 +5538,8 @@ axes.</p>
   <div class="doc doc-contents ">
   
       <p>Normalises the total power of the wavefront to 1.</p>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -5478,9 +5563,9 @@ axes.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">392</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">392</span>
 <span class="normal">393</span>
 <span class="normal">394</span>
 <span class="normal">395</span>
@@ -5500,10 +5585,11 @@ axes.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amplitude</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -5521,6 +5607,8 @@ axes.</p>
 npixels. Note this only supports padding arrays of even dimension
 to even dimension, and odd dimension to odd dimension, i.e. 2 -&gt; 4 or
 3 -&gt; 5.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -5550,6 +5638,8 @@ to even dimension, and odd dimension to odd dimension, i.e. 2 -&gt; 4 or
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -5572,9 +5662,9 @@ to even dimension, and odd dimension to odd dimension, i.e. 2 -&gt; 4 or
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">546</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">546</span>
 <span class="normal">547</span>
 <span class="normal">548</span>
 <span class="normal">549</span>
@@ -5654,10 +5744,11 @@ to even dimension, and odd dimension to odd dimension, i.e. 2 -&gt; 4 or
     <span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">amplitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -5676,6 +5767,8 @@ angle parameter, using interpolation. The transformation is done
 on the amplitude and phase arrays, but can be done on the real and
 imaginary components by passing <code>complex=True</code>.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -5690,7 +5783,7 @@ imaginary components by passing <code>complex=True</code>.</p>
         <tr>
           <td><code>angle</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -5734,6 +5827,8 @@ wavefront as opposed to the amplitude and phase representation.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -5756,9 +5851,9 @@ wavefront as opposed to the amplitude and phase representation.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">504</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">504</span>
 <span class="normal">505</span>
 <span class="normal">506</span>
 <span class="normal">507</span>
@@ -5834,10 +5929,11 @@ wavefront as opposed to the amplitude and phase representation.</p>
     <span class="c1"># Return new wavefront</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -5855,6 +5951,8 @@ wavefront as opposed to the amplitude and phase representation.</p>
 pixel_scale_out and npixels parameters. The transformation is done
 on the amplitude and phase arrays, but can be done on the real and
 imaginary components by passing <code>complex=True</code>.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -5914,6 +6012,8 @@ wavefront as opposed to the amplitude and phase representation.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -5937,9 +6037,9 @@ npixels and pixel_scale_out, with the updated pixel_scale.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">461</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">461</span>
 <span class="normal">462</span>
 <span class="normal">463</span>
 <span class="normal">464</span>
@@ -6023,10 +6123,11 @@ npixels and pixel_scale_out, with the updated pixel_scale.</p>
     <span class="c1"># Return new wavefront</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span> <span class="s2">&quot;phase&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -6043,6 +6144,8 @@ npixels and pixel_scale_out, with the updated pixel_scale.</p>
       <p>Propagates the wavefront by performing a, Inverse 2-sided Matrix
 Fourier Transform with a shift in the center of the output plane.
 TODO: Add link to Soumer et al. 2007(?),</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -6130,6 +6233,8 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -6152,9 +6257,9 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1092</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1092</span>
 <span class="normal">1093</span>
 <span class="normal">1094</span>
 <span class="normal">1095</span>
@@ -6244,10 +6349,11 @@ treated as an 'angular' propagation, else it is treated as a
         <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -6264,6 +6370,8 @@ treated as an 'angular' propagation, else it is treated as a
       <p>Propagates the wavefront by performing a 2-sided Matrix Fourier
 Transform with a shift in the center of the output plane.
 TODO: Add link to Soumer et al. 2007(?),</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -6351,6 +6459,8 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -6373,9 +6483,9 @@ treated as an 'angular' propagation, else it is treated as a
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1048</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1048</span>
 <span class="normal">1049</span>
 <span class="normal">1050</span>
 <span class="normal">1051</span>
@@ -6461,10 +6571,11 @@ treated as an 'angular' propagation, else it is treated as a
         <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">phasor</span><span class="p">),</span> <span class="n">pixel_scale</span><span class="p">,</span> <span class="n">plane</span><span class="p">,</span> <span class="n">units</span><span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -6481,6 +6592,8 @@ treated as an 'angular' propagation, else it is treated as a
       <p>Tilts the wavefront by the angles in the (x, y) by modifying the
 phase arrays.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -6495,7 +6608,7 @@ phase arrays.</p>
         <tr>
           <td><code>angles</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -6508,6 +6621,8 @@ phase arrays.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -6531,9 +6646,9 @@ phase arrays.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">372</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">372</span>
 <span class="normal">373</span>
 <span class="normal">374</span>
 <span class="normal">375</span>
@@ -6571,7 +6686,7 @@ phase arrays.</p>
     <span class="n">opd</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">angles</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_opd</span><span class="p">(</span><span class="n">opd</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -6693,12 +6808,14 @@ methods are:</p>
 
 <a id="dLux.wavefronts.FresnelWavefront"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><a class="autorefs autorefs-internal" title="dLux.wavefronts.Wavefront" href="#dLux.wavefronts.Wavefront">Wavefront</a></code></p>
 
   
       <p>A class to represent a wavefront that can be propagated to a Far Field
 Fresnel plane.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -6714,7 +6831,7 @@ Fresnel plane.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code>float, metres</code>
+                <code>(float, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -6728,7 +6845,7 @@ Fresnel plane.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>float, metres / pixel</code>
+                <code>(float, metres / pixel)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -6742,7 +6859,7 @@ Fresnel plane.</p>
         <tr>
           <td><code>amplitude</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, power</code>
+                <code>(<span title="jax.Array">Array</span>, power)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -6756,7 +6873,7 @@ Fresnel plane.</p>
         <tr>
           <td><code>phase</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -6798,10 +6915,9 @@ Fresnel plane.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1139</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1139</span>
 <span class="normal">1140</span>
 <span class="normal">1141</span>
 <span class="normal">1142</span>
@@ -7547,11 +7663,12 @@ Fresnel plane.</p>
             <span class="p">],</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -7574,6 +7691,8 @@ Fresnel plane.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -7603,7 +7722,7 @@ Fresnel plane.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code>float, metres / pixel</code>
+                <code>(float, metres / pixel)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -7617,7 +7736,7 @@ Fresnel plane.</p>
         <tr>
           <td><code>wavelength</code></td>
           <td>
-                <code>float, metres</code>
+                <code>(float, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -7631,9 +7750,9 @@ Fresnel plane.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1160</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1160</span>
 <span class="normal">1161</span>
 <span class="normal">1162</span>
 <span class="normal">1163</span>
@@ -7673,10 +7792,11 @@ Fresnel plane.</p>
         <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -7692,6 +7812,8 @@ Fresnel plane.</p>
   
       <p>Propagates the wavefront from the input plane to the output plane using
 a Fresnel Transform using a Matrix Fourier Transform.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -7721,7 +7843,7 @@ a Fresnel Transform using a Matrix Fourier Transform.</p>
         <tr>
           <td><code>pixel_scale</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres / pixel</code>
+                <code>(<span title="jax.Array">Array</span>, metres / pixel)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -7735,7 +7857,7 @@ a Fresnel Transform using a Matrix Fourier Transform.</p>
         <tr>
           <td><code>focal_length</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -7749,7 +7871,7 @@ a Fresnel Transform using a Matrix Fourier Transform.</p>
         <tr>
           <td><code>focal_shift</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -7762,6 +7884,8 @@ a Fresnel Transform using a Matrix Fourier Transform.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -7785,9 +7909,9 @@ a Fresnel Transform using a Matrix Fourier Transform.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1404</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1404</span>
 <span class="normal">1405</span>
 <span class="normal">1406</span>
 <span class="normal">1407</span>
@@ -7903,10 +8027,11 @@ a Fresnel Transform using a Matrix Fourier Transform.</p>
         <span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -7922,6 +8047,8 @@ a Fresnel Transform using a Matrix Fourier Transform.</p>
   
       <p>A convenience function for calculating quadratic phase factors.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -7936,7 +8063,7 @@ a Fresnel Transform using a Matrix Fourier Transform.</p>
         <tr>
           <td><code>x_coordinates</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -7951,7 +8078,7 @@ in the plane of propagation and the initial plane.</p>
         <tr>
           <td><code>y_coordinates</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -7966,7 +8093,7 @@ in the plane of propagation and the initial plane.</p>
         <tr>
           <td><code>distance</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -7979,6 +8106,8 @@ in the plane of propagation and the initial plane.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -8002,9 +8131,9 @@ in the plane of propagation and the initial plane.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1218</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1218</span>
 <span class="normal">1219</span>
 <span class="normal">1220</span>
 <span class="normal">1221</span>
@@ -8058,10 +8187,11 @@ in the plane of propagation and the initial plane.</p>
     <span class="n">r_coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">x_coordinates</span><span class="p">,</span> <span class="n">y_coordinates</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">0.5</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavenumber</span> <span class="o">*</span> <span class="n">r_coordinates</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">distance</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -8080,9 +8210,9 @@ a Fresnel Transform using a Matrix Fourier Transform with a shift in
 the center of the output plane.
 TODO: Add link to Soumer et al. 2007(?),</p>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1463</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1463</span>
 <span class="normal">1464</span>
 <span class="normal">1465</span>
 <span class="normal">1466</span>
@@ -8180,10 +8310,11 @@ TODO: Add link to Soumer et al. 2007(?),</p>
         <span class="p">],</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -8200,6 +8331,8 @@ TODO: Add link to Soumer et al. 2007(?),</p>
       <p>The Optical Transfer Function defining the phase evolution of the
 wavefront when propagating to a non-conjugate plane.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -8214,7 +8347,7 @@ wavefront when propagating to a non-conjugate plane.</p>
         <tr>
           <td><code>distance</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -8227,6 +8360,8 @@ wavefront when propagating to a non-conjugate plane.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -8250,9 +8385,9 @@ wavefront when propagating to a non-conjugate plane.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/wavefronts.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1246</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/wavefronts.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1246</span>
 <span class="normal">1247</span>
 <span class="normal">1248</span>
 <span class="normal">1249</span>
@@ -8284,7 +8419,7 @@ wavefront when propagating to a non-conjugate plane.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">1.0</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavenumber</span> <span class="o">*</span> <span class="n">distance</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>

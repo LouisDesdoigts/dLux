@@ -21,7 +21,7 @@
         <link rel="next" href="../utils/optics/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -873,25 +873,24 @@
 
 
 <h2 id="dLux.observations.BaseObservation" class="doc doc-heading">
-        <code>BaseObservation</code>
+          <code>BaseObservation</code>
 
 
 <a href="#dLux.observations.BaseObservation" class="headerlink" title="Permanent link">¤</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="zodiax.Base">Base</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="zodiax.Base">Base</span></code></p>
 
   
       <p>Abstract base class for observations. All observations should inherit from
 this class and must implement an <code>.model()</code> method that only takes in a
 single instance of <code>dLux.Instrument</code>.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/observations.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/observations.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
@@ -919,11 +918,12 @@ single instance of <code>dLux.Instrument</code>.</p>
 <span class="sd">        Abstract method for the observation function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -951,9 +951,9 @@ single instance of <code>dLux.Instrument</code>.</p>
   
       <p>Abstract method for the observation function.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/observations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">22</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/observations.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span>
 <span class="normal">25</span>
@@ -967,7 +967,7 @@ single instance of <code>dLux.Instrument</code>.</p>
 <span class="sd">    Abstract method for the observation function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -985,19 +985,21 @@ single instance of <code>dLux.Instrument</code>.</p>
 
 
 <h2 id="dLux.observations.Dither" class="doc doc-heading">
-        <code>Dither</code>
+          <code>Dither</code>
 
 
 <a href="#dLux.observations.Dither" class="headerlink" title="Permanent link">¤</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><a class="autorefs autorefs-internal" title="dLux.observations.BaseObservation" href="#dLux.observations.BaseObservation">BaseObservation</a></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><a class="autorefs autorefs-internal" title="dLux.observations.BaseObservation" href="#dLux.observations.BaseObservation">BaseObservation</a></code></p>
 
   
       <p>Observation class designed to apply a series of dithers to the instrument
 and return the corresponding PSFs.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1012,7 +1014,7 @@ and return the corresponding PSFs.</p>
         <tr>
           <td><code>dithers</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1025,10 +1027,9 @@ and the second dimension is the (x, y) dither in radians.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/observations.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 31</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/observations.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 31</span>
 <span class="normal"> 32</span>
 <span class="normal"> 33</span>
 <span class="normal"> 34</span>
@@ -1196,11 +1197,12 @@ and the second dimension is the (x, y) dither in radians.</p>
         <span class="p">)</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">vmap</span><span class="p">(</span><span class="n">dith_fn</span><span class="p">,</span> <span class="mi">0</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1224,6 +1226,8 @@ and the second dimension is the (x, y) dither in radians.</p>
   
       <p>Constructor for the Dither class.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -1238,7 +1242,7 @@ and the second dimension is the (x, y) dither in radians.</p>
         <tr>
           <td><code>dithers</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1254,9 +1258,9 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/observations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/observations.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
@@ -1286,10 +1290,11 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dithers must be an array of shape (ndithers, 2)&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1304,6 +1309,8 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
   <div class="doc doc-contents ">
   
       <p>Dithers the position of the source objects by dither.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1333,7 +1340,7 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
         <tr>
           <td><code>dither</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1346,6 +1353,8 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -1369,9 +1378,9 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/observations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/observations.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span>
@@ -1435,10 +1444,11 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
         <span class="k">lambda</span> <span class="n">instrument</span><span class="p">:</span> <span class="n">instrument</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> <span class="n">dithered_sources</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1454,6 +1464,8 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
   
       <p>Applies a series of dithers to the instrument sources and calls the
 .model() method after applying each dither.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1483,6 +1495,8 @@ dithers and the second dimension is the (x, y) dither in radians.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1506,9 +1520,9 @@ positions.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/observations.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 95</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/observations.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 95</span>
 <span class="normal"> 96</span>
 <span class="normal"> 97</span>
 <span class="normal"> 98</span>
@@ -1548,7 +1562,7 @@ positions.</p>
     <span class="p">)</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">vmap</span><span class="p">(</span><span class="n">dith_fn</span><span class="p">,</span> <span class="mi">0</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">dithers</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>

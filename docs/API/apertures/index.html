@@ -21,7 +21,7 @@
         <link rel="next" href="../aberrations/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -870,11 +870,13 @@
 
 <a id="dLux.apertures.CircularAperture"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.apertures.DynamicAperture">DynamicAperture</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.apertures.DynamicAperture">DynamicAperture</span></code></p>
 
   
       <p>A circular aperture parameterised by its radius.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -889,7 +891,7 @@
         <tr>
           <td><code>radius</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -900,7 +902,7 @@
         <tr>
           <td><code>centre</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -945,7 +947,7 @@ transmissive aperture, and True results in an occulting aperture.</p>
         <tr>
           <td><code>softening</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, pixels</code>
+                <code>(<span title="jax.Array">Array</span>, pixels)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -968,10 +970,9 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/apertures.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">482</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/apertures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">482</span>
 <span class="normal">483</span>
 <span class="normal">484</span>
 <span class="normal">485</span>
@@ -1207,11 +1208,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1234,6 +1236,8 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the CircularAperture class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1350,9 +1354,9 @@ aperture.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/apertures.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">508</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/apertures.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">508</span>
 <span class="normal">509</span>
 <span class="normal">510</span>
 <span class="normal">511</span>
@@ -1442,7 +1446,7 @@ aperture.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">():</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;radius must have shape ().&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1466,11 +1470,13 @@ aperture.</p>
 
 <a id="dLux.apertures.RectangularAperture"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.apertures.DynamicAperture">DynamicAperture</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.apertures.DynamicAperture">DynamicAperture</span></code></p>
 
   
       <p>A rectangular aperture parameterised by it height and width.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1485,7 +1491,7 @@ aperture.</p>
         <tr>
           <td><code>height</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1496,7 +1502,7 @@ aperture.</p>
         <tr>
           <td><code>width</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1507,7 +1513,7 @@ aperture.</p>
         <tr>
           <td><code>centre</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1540,7 +1546,7 @@ aperture.</p>
         <tr>
           <td><code>rotation</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1563,7 +1569,7 @@ transmissive aperture, and True results in an occulting aperture.</p>
         <tr>
           <td><code>softening</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, pixels</code>
+                <code>(<span title="jax.Array">Array</span>, pixels)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1586,10 +1592,9 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/apertures.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">602</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/apertures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">602</span>
 <span class="normal">603</span>
 <span class="normal">604</span>
 <span class="normal">605</span>
@@ -1861,11 +1866,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1888,6 +1894,8 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the RectangularAperture class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2032,9 +2040,9 @@ aperture.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/apertures.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">633</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/apertures.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">633</span>
 <span class="normal">634</span>
 <span class="normal">635</span>
 <span class="normal">636</span>
@@ -2146,7 +2154,7 @@ aperture.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">():</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;width must have shape ().&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2170,12 +2178,14 @@ aperture.</p>
 
 <a id="dLux.apertures.RegPolyAperture"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.apertures.PolyAperture">PolyAperture</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.apertures.PolyAperture">PolyAperture</span></code></p>
 
   
       <p>A regular polygonal aperture defined by its number of sides and the maximum
 radius to the vertices from its center.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -2201,7 +2211,7 @@ radius to the vertices from its center.</p>
         <tr>
           <td><code>rmax</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2212,7 +2222,7 @@ radius to the vertices from its center.</p>
         <tr>
           <td><code>centre</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2245,7 +2255,7 @@ radius to the vertices from its center.</p>
         <tr>
           <td><code>rotation</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2268,7 +2278,7 @@ transmissive aperture, and True results in an occulting aperture.</p>
         <tr>
           <td><code>softening</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, pixels</code>
+                <code>(<span title="jax.Array">Array</span>, pixels)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2291,10 +2301,9 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/apertures.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1105</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/apertures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1105</span>
 <span class="normal">1106</span>
 <span class="normal">1107</span>
 <span class="normal">1108</span>
@@ -2618,11 +2627,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
         <span class="n">dist</span> <span class="o">=</span> <span class="p">(</span><span class="n">inside</span> <span class="o">*</span> <span class="n">dists</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
         <span class="k">return</span> <span class="n">dist</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2645,6 +2655,8 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the RegPolyAperture class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2789,9 +2801,9 @@ aperture.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/apertures.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1137</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/apertures.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1137</span>
 <span class="normal">1138</span>
 <span class="normal">1139</span>
 <span class="normal">1140</span>
@@ -2897,7 +2909,7 @@ aperture.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmax</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">():</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rmax must have shape ().&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2921,13 +2933,15 @@ aperture.</p>
 
 <a id="dLux.apertures.IrregPolyAperture"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.apertures.PolyAperture">PolyAperture</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.apertures.PolyAperture">PolyAperture</span></code></p>
 
   
       <p>An arbitrary aperture parameterised by a set of vertices.</p>
 <p>TODO: Check if the vertices need to be defined in a specific way, based on
 the methods this looks like the case (ie, ordered).</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -2942,7 +2956,7 @@ the methods this looks like the case (ie, ordered).</p>
         <tr>
           <td><code>vertices</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2953,7 +2967,7 @@ the methods this looks like the case (ie, ordered).</p>
         <tr>
           <td><code>centre</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2986,7 +3000,7 @@ the methods this looks like the case (ie, ordered).</p>
         <tr>
           <td><code>rotation</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3009,7 +3023,7 @@ transmissive aperture, and True results in an occulting aperture.</p>
         <tr>
           <td><code>softening</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, pixels</code>
+                <code>(<span title="jax.Array">Array</span>, pixels)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3032,10 +3046,9 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/apertures.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 898</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/apertures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 898</span>
 <span class="normal"> 899</span>
 <span class="normal"> 900</span>
 <span class="normal"> 901</span>
@@ -3445,11 +3458,12 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">edges</span><span class="p">)</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -3472,6 +3486,8 @@ aperture. Hard edges can be achieved by setting the softening to 0.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the IrregularPolygonalAperture class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3602,9 +3618,9 @@ aperture.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/apertures.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">929</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/apertures.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">929</span>
 <span class="normal">930</span>
 <span class="normal">931</span>
 <span class="normal">932</span>
@@ -3702,7 +3718,7 @@ aperture.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;vertices must have shape (n, 2).&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -3726,13 +3742,15 @@ aperture.</p>
 
 <a id="dLux.apertures.AberratedAperture"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.apertures.ApertureLayer">ApertureLayer</span></code>, <code><span title="dLux.apertures.BasisLayer">BasisLayer</span>()</code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.apertures.ApertureLayer">ApertureLayer</span></code>, <code><span title="dLux.apertures.BasisLayer">BasisLayer</span>()</code></p>
 
   
       <p>A class for generating apertures with aberrations. This class generates the
 basis vectors of the aberrations at run time, allowing for the aperture and
 aberrations to be recovered simultaneously.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -3792,10 +3810,9 @@ polynomials that are represented will depend on the aperture shape.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/apertures.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1272</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/apertures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1272</span>
 <span class="normal">1273</span>
 <span class="normal">1274</span>
 <span class="normal">1275</span>
@@ -4245,11 +4262,12 @@ polynomials that are represented will depend on the aperture shape.</p>
             <span class="n">normalise</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">,</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -4272,6 +4290,8 @@ polynomials that are represented will depend on the aperture shape.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4301,6 +4321,8 @@ polynomials that are represented will depend on the aperture shape.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -4323,9 +4345,9 @@ polynomials that are represented will depend on the aperture shape.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/apertures.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1354</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/apertures.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1354</span>
 <span class="normal">1355</span>
 <span class="normal">1356</span>
 <span class="normal">1357</span>
@@ -4369,10 +4391,11 @@ polynomials that are represented will depend on the aperture shape.</p>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -4386,6 +4409,8 @@ polynomials that are represented will depend on the aperture shape.</p>
 
   <div class="doc doc-contents ">
   
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4448,9 +4473,9 @@ is provided, then the coefficients are set to zero.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/apertures.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1293</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/apertures.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1293</span>
 <span class="normal">1294</span>
 <span class="normal">1295</span>
 <span class="normal">1296</span>
@@ -4536,10 +4561,11 @@ is provided, then the coefficients are set to zero.</p>
         <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">noll_inds</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coefficients</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -4555,6 +4581,8 @@ is provided, then the coefficients are set to zero.</p>
   
       <p>Returns the static version of the input aperture calculated on the
 coordinates defined by npixels and diameter.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4584,7 +4612,7 @@ coordinates defined by npixels and diameter.</p>
         <tr>
           <td><code>diameter</code></td>
           <td>
-                <code>float, metres</code>
+                <code>(float, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -4597,6 +4625,8 @@ coordinates defined by npixels and diameter.</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -4620,9 +4650,9 @@ coordinates defined by npixels and diameter.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/apertures.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1468</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/apertures.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1468</span>
 <span class="normal">1469</span>
 <span class="normal">1470</span>
 <span class="normal">1471</span>
@@ -4680,7 +4710,7 @@ coordinates defined by npixels and diameter.</p>
         <span class="n">normalise</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -4706,8 +4736,8 @@ coordinates defined by npixels and diameter.</p>
 
 <a id="dLux.apertures.CompoundAperture"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.apertures.CompositeAperture">CompositeAperture</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.apertures.CompositeAperture">CompositeAperture</span></code></p>
 
   
       <p>A  class used to combine multiple apertures into a single coherent
@@ -4719,6 +4749,8 @@ together, i.e. the sub-apertures are overlapping.</p>
 <p>This class should not contain a MultiAperture, but MultiApertures can
 contain CompoundApertures.</p>
 <p>A single aberrated aperture can be placed into the set of apertures.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -4744,7 +4776,7 @@ contain CompoundApertures.</p>
         <tr>
           <td><code>centre</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -4777,7 +4809,7 @@ contain CompoundApertures.</p>
         <tr>
           <td><code>rotation</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -4799,10 +4831,9 @@ contain CompoundApertures.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/apertures.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1989</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/apertures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1989</span>
 <span class="normal">1990</span>
 <span class="normal">1991</span>
 <span class="normal">1992</span>
@@ -4992,11 +5023,12 @@ contain CompoundApertures.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stacked_apertures</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -5019,6 +5051,8 @@ contain CompoundApertures.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the CompoundAperture class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -5119,9 +5153,9 @@ aperture.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/apertures.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2020</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/apertures.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2020</span>
 <span class="normal">2021</span>
 <span class="normal">2022</span>
 <span class="normal">2023</span>
@@ -5215,7 +5249,7 @@ aperture.</p>
                 <span class="s2">&quot;AberratedAperture.&quot;</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -5239,8 +5273,8 @@ aperture.</p>
 
 <a id="dLux.apertures.MultiAperture"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.apertures.CompositeAperture">CompositeAperture</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.apertures.CompositeAperture">CompositeAperture</span></code></p>
 
   
       <p>A  class used to combine multiple apertures into a single coherent
@@ -5249,6 +5283,8 @@ aperture. An example would be an aperture mask.</p>
 sub-apertures are combined by adding their respective transmissions
 together, i.e. the sub-apertures are not overlapping.</p>
 <p>This class can contain multiple CompoundApertures.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -5274,7 +5310,7 @@ together, i.e. the sub-apertures are not overlapping.</p>
         <tr>
           <td><code>centre</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -5307,7 +5343,7 @@ together, i.e. the sub-apertures are not overlapping.</p>
         <tr>
           <td><code>rotation</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -5329,10 +5365,9 @@ together, i.e. the sub-apertures are not overlapping.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/apertures.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2086</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/apertures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2086</span>
 <span class="normal">2087</span>
 <span class="normal">2088</span>
 <span class="normal">2089</span>
@@ -5418,7 +5453,7 @@ together, i.e. the sub-apertures are not overlapping.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stacked_apertures</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -5444,6 +5479,7 @@ together, i.e. the sub-apertures are not overlapping.</p>
 <details class="info">
 <summary>Aperture Factory API</summary>
 <div class="mkdocstrings">
+
 
 <div class="doc doc-object doc-function">
 
@@ -5545,9 +5581,9 @@ static : bool = True
 <p>aperture : StaticAperture
     Returns an appropriately constructed StaticAperture.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/apertures.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2134</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/apertures.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2134</span>
 <span class="normal">2135</span>
 <span class="normal">2136</span>
 <span class="normal">2137</span>
@@ -5963,7 +5999,7 @@ static : bool = True
         <span class="k">return</span> <span class="n">full_aperture</span><span class="o">.</span><span class="n">make_static</span><span class="p">(</span><span class="n">npixels</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">full_aperture</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div><h2 data-role="function" id="dLux.apertures.ApertureFactory"><a class="headerlink" href="#dLux.apertures.ApertureFactory" title="Permanent link">¤</a></h2>

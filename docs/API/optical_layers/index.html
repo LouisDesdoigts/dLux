@@ -21,7 +21,7 @@
         <link rel="next" href="../propagators/">
       
       <link rel="icon" href="../../../material/telescope">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -871,11 +871,13 @@
 
 <a id="dLux.optical_layers.Optic"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optical_layers.BaseTransmissiveOptic">BaseTransmissiveOptic</span></code>, <code><span title="dLux.optical_layers.BaseOPDOptic">BaseOPDOptic</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optical_layers.BaseTransmissiveOptic">BaseTransmissiveOptic</span></code>, <code><span title="dLux.optical_layers.BaseOPDOptic">BaseOPDOptic</span></code></p>
 
   
       <p>Optics class that holds both a transmission and OPD array.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -901,7 +903,7 @@
         <tr>
           <td><code>opd</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -924,10 +926,9 @@ optic.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">331</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
 <span class="normal">334</span>
@@ -1051,11 +1052,12 @@ optic.</p>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1078,6 +1080,8 @@ optic.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1107,6 +1111,8 @@ optic.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1129,9 +1135,9 @@ optic.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">374</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">374</span>
 <span class="normal">375</span>
 <span class="normal">376</span>
 <span class="normal">377</span>
@@ -1169,10 +1175,11 @@ optic.</p>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1186,6 +1193,8 @@ optic.</p>
 
   <div class="doc doc-contents ">
   
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1245,9 +1254,9 @@ optic.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">346</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
 <span class="normal">349</span>
@@ -1301,7 +1310,7 @@ optic.</p>
                 <span class="s2">&quot;opd and transmission must have the same &quot;</span> <span class="s2">&quot;shape.&quot;</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1326,11 +1335,13 @@ optic.</p>
 
 <a id="dLux.optical_layers.PhaseOptic"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optical_layers.BaseTransmissiveOptic">BaseTransmissiveOptic</span></code>, <code><span title="dLux.optical_layers.BasePhaseOptic">BasePhaseOptic</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optical_layers.BaseTransmissiveOptic">BaseTransmissiveOptic</span></code>, <code><span title="dLux.optical_layers.BasePhaseOptic">BasePhaseOptic</span></code></p>
 
   
       <p>Optics class that holds both a transmission and phase array.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1356,7 +1367,7 @@ optic.</p>
         <tr>
           <td><code>phase</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1379,10 +1390,9 @@ optic.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">445</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">445</span>
 <span class="normal">446</span>
 <span class="normal">447</span>
 <span class="normal">448</span>
@@ -1506,11 +1516,12 @@ optic.</p>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1533,6 +1544,8 @@ optic.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1562,6 +1575,8 @@ optic.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1584,9 +1599,9 @@ optic.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">488</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">488</span>
 <span class="normal">489</span>
 <span class="normal">490</span>
 <span class="normal">491</span>
@@ -1624,10 +1639,11 @@ optic.</p>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -1641,6 +1657,8 @@ optic.</p>
 
   <div class="doc doc-contents ">
   
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1700,9 +1718,9 @@ optic.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">460</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">460</span>
 <span class="normal">461</span>
 <span class="normal">462</span>
 <span class="normal">463</span>
@@ -1756,7 +1774,7 @@ optic.</p>
                 <span class="s2">&quot;phase and transmission must have the same &quot;</span> <span class="s2">&quot;shape.&quot;</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1782,14 +1800,16 @@ optic.</p>
 
 <a id="dLux.optical_layers.BasisOptic"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optical_layers.BaseBasisOptic">BaseBasisOptic</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optical_layers.BaseBasisOptic">BaseBasisOptic</span></code></p>
 
   
       <p>Adds an array of phase values to the input wavefront calculated from the
 Optical Path Difference (OPD). The OPDs are calculated from the basis
 arrays, and weighted by the coefficients, and converted to phases by the
 wavefront methods.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1815,7 +1835,7 @@ wavefront methods.</p>
         <tr>
           <td><code>basis</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1837,10 +1857,9 @@ wavefront methods.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">395</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">395</span>
 <span class="normal">396</span>
 <span class="normal">397</span>
 <span class="normal">398</span>
@@ -1936,7 +1955,7 @@ wavefront methods.</p>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -1966,6 +1985,8 @@ wavefront methods.</p>
   
       <p>Calculates the total opd from the basis vectors and coefficients.</p>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -1977,7 +1998,7 @@ wavefront methods.</p>
     <tbody>
         <tr>
 <td><code>opd</code></td>          <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1990,6 +2011,7 @@ wavefront methods.</p>
   </div>
 
 </div>
+
 
 
 
@@ -2006,6 +2028,8 @@ wavefront methods.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2035,6 +2059,8 @@ wavefront methods.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2057,9 +2083,9 @@ wavefront methods.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">424</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">424</span>
 <span class="normal">425</span>
 <span class="normal">426</span>
 <span class="normal">427</span>
@@ -2097,7 +2123,7 @@ wavefront methods.</p>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2122,14 +2148,16 @@ wavefront methods.</p>
 
 <a id="dLux.optical_layers.PhaseBasisOptic"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optical_layers.BaseBasisOptic">BaseBasisOptic</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optical_layers.BaseBasisOptic">BaseBasisOptic</span></code></p>
 
   
       <p>Adds an array of phase values to the input wavefront calculated from the
 Optical Path Difference (OPD). The OPDs are calculated from the basis
 arrays, and weighted by the coefficients, and converted to phases by the
 wavefront methods.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -2155,7 +2183,7 @@ wavefront methods.</p>
         <tr>
           <td><code>basis</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, metres</code>
+                <code>(<span title="jax.Array">Array</span>, metres)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2177,10 +2205,9 @@ wavefront methods.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">509</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">509</span>
 <span class="normal">510</span>
 <span class="normal">511</span>
 <span class="normal">512</span>
@@ -2276,7 +2303,7 @@ wavefront methods.</p>
             <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -2306,6 +2333,8 @@ wavefront methods.</p>
   
       <p>Calculates the total phase from the basis vectors and coefficients.</p>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2317,7 +2346,7 @@ wavefront methods.</p>
     <tbody>
         <tr>
 <td><code>phase</code></td>          <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2330,6 +2359,7 @@ wavefront methods.</p>
   </div>
 
 </div>
+
 
 
 
@@ -2346,6 +2376,8 @@ wavefront methods.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2375,6 +2407,8 @@ wavefront methods.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2397,9 +2431,9 @@ wavefront methods.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">538</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">538</span>
 <span class="normal">539</span>
 <span class="normal">540</span>
 <span class="normal">541</span>
@@ -2437,7 +2471,7 @@ wavefront methods.</p>
         <span class="n">wavefront</span> <span class="o">=</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2463,11 +2497,13 @@ wavefront methods.</p>
 
 <a id="dLux.optical_layers.Tilt"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optical_layers.OpticalLayer">OpticalLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optical_layers.OpticalLayer">OpticalLayer</span></code></p>
 
   
       <p>Tilts the wavefront by the input angles.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -2482,7 +2518,7 @@ wavefront methods.</p>
         <tr>
           <td><code>angles</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2493,10 +2529,9 @@ wavefront methods.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">559</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">559</span>
 <span class="normal">560</span>
 <span class="normal">561</span>
 <span class="normal">562</span>
@@ -2580,11 +2615,12 @@ wavefront methods.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">tilt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2607,6 +2643,8 @@ wavefront methods.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2636,6 +2674,8 @@ wavefront methods.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2658,9 +2698,9 @@ wavefront methods.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">586</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">586</span>
 <span class="normal">587</span>
 <span class="normal">588</span>
 <span class="normal">589</span>
@@ -2690,10 +2730,11 @@ wavefront methods.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">tilt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -2709,6 +2750,8 @@ wavefront methods.</p>
   
       <p>Constructor for the TiltWavefront class.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -2723,7 +2766,7 @@ wavefront methods.</p>
         <tr>
           <td><code>angles</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2737,9 +2780,9 @@ wavefront methods.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">571</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">571</span>
 <span class="normal">572</span>
 <span class="normal">573</span>
 <span class="normal">574</span>
@@ -2767,7 +2810,7 @@ wavefront methods.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;angles must have have (2,)&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2793,16 +2836,15 @@ wavefront methods.</p>
 
 <a id="dLux.optical_layers.Normalise"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optical_layers.OpticalLayer">OpticalLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optical_layers.OpticalLayer">OpticalLayer</span></code></p>
 
   
       <p>Normalises the wavefront.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">603</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">603</span>
 <span class="normal">604</span>
 <span class="normal">605</span>
 <span class="normal">606</span>
@@ -2838,11 +2880,12 @@ wavefront methods.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2865,6 +2908,8 @@ wavefront methods.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -2894,6 +2939,8 @@ wavefront methods.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2916,9 +2963,9 @@ wavefront methods.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">606</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">606</span>
 <span class="normal">607</span>
 <span class="normal">608</span>
 <span class="normal">609</span>
@@ -2948,7 +2995,7 @@ wavefront methods.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2973,11 +3020,13 @@ wavefront methods.</p>
 
 <a id="dLux.optical_layers.Rotate"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optical_layers.OpticalLayer">OpticalLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optical_layers.OpticalLayer">OpticalLayer</span></code></p>
 
   
       <p>Applies a rotation to the wavefront using interpolation methods.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -2992,7 +3041,7 @@ wavefront methods.</p>
         <tr>
           <td><code>angle</code></td>
           <td>
-                <code><span title="jax.Array">Array</span>, radians</code>
+                <code>(<span title="jax.Array">Array</span>, radians)</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -3027,10 +3076,9 @@ as opposed to the default 'phasor' (amplitude, phase) arrays.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">623</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">623</span>
 <span class="normal">624</span>
 <span class="normal">625</span>
 <span class="normal">626</span>
@@ -3168,11 +3216,12 @@ as opposed to the default 'phasor' (amplitude, phase) arrays.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -3195,6 +3244,8 @@ as opposed to the default 'phasor' (amplitude, phase) arrays.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3224,6 +3275,8 @@ as opposed to the default 'phasor' (amplitude, phase) arrays.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3246,9 +3299,9 @@ as opposed to the default 'phasor' (amplitude, phase) arrays.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">677</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">677</span>
 <span class="normal">678</span>
 <span class="normal">679</span>
 <span class="normal">680</span>
@@ -3278,10 +3331,11 @@ as opposed to the default 'phasor' (amplitude, phase) arrays.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -3296,6 +3350,8 @@ as opposed to the default 'phasor' (amplitude, phase) arrays.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the Rotate class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3356,9 +3412,9 @@ arrays.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">643</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">643</span>
 <span class="normal">644</span>
 <span class="normal">645</span>
 <span class="normal">646</span>
@@ -3424,7 +3480,7 @@ arrays.</p>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2"> dimensions.&quot;</span>
         <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -3450,13 +3506,15 @@ arrays.</p>
 
 <a id="dLux.optical_layers.Flip"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optical_layers.OpticalLayer">OpticalLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optical_layers.OpticalLayer">OpticalLayer</span></code></p>
 
   
       <p>Flips the wavefront about the input axes. Can be either an int, or a tuple
 of ints. This class uses the 'ij' indexing convention, ie axis 0 is the
 y-axis, and axis 1 is the x-axis.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -3483,10 +3541,9 @@ convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">694</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">694</span>
 <span class="normal">695</span>
 <span class="normal">696</span>
 <span class="normal">697</span>
@@ -3588,11 +3645,12 @@ convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -3615,6 +3673,8 @@ convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.</p>
   <div class="doc doc-contents ">
   
       <p>Flips the wavefront about the input axes.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3644,6 +3704,8 @@ convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -3666,9 +3728,9 @@ convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">730</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">730</span>
 <span class="normal">731</span>
 <span class="normal">732</span>
 <span class="normal">733</span>
@@ -3698,10 +3760,11 @@ convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">wavefront</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -3716,6 +3779,8 @@ convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the Flip class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3747,9 +3812,9 @@ x-axis.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">709</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">709</span>
 <span class="normal">710</span>
 <span class="normal">711</span>
 <span class="normal">712</span>
@@ -3789,7 +3854,7 @@ x-axis.</p>
     <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;axes must be integers.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -3815,8 +3880,8 @@ x-axis.</p>
 
 <a id="dLux.optical_layers.Resize"></a>
   <div class="doc doc-contents first">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="dLux.optical_layers.OpticalLayer">OpticalLayer</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="dLux.optical_layers.OpticalLayer">OpticalLayer</span></code></p>
 
   
       <p>Resizes the wavefront by either padding or cropping. If the Wavefront is
@@ -3825,6 +3890,8 @@ Wavefront is smaller than the desired size, then the wavefront is padded
 with zeros.</p>
 <p>Note this class only supports padding and cropping of even sizes to even
 sizes, and odd sizes to odd sizes.</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -3850,10 +3917,9 @@ sizes, and odd sizes to odd sizes.</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">747</span>
+            <details class="quote">
+              <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">747</span>
 <span class="normal">748</span>
 <span class="normal">749</span>
 <span class="normal">750</span>
@@ -3953,11 +4019,12 @@ sizes, and odd sizes to odd sizes.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -3980,6 +4047,8 @@ sizes, and odd sizes to odd sizes.</p>
   <div class="doc doc-contents ">
   
       <p>Applies the layer to the wavefront.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4009,6 +4078,8 @@ sizes, and odd sizes to odd sizes.</p>
     </tbody>
   </table>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -4031,9 +4102,9 @@ sizes, and odd sizes to odd sizes.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">777</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">777</span>
 <span class="normal">778</span>
 <span class="normal">779</span>
 <span class="normal">780</span>
@@ -4073,10 +4144,11 @@ sizes, and odd sizes to odd sizes.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wavefront</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
@@ -4091,6 +4163,8 @@ sizes, and odd sizes to odd sizes.</p>
   <div class="doc doc-contents ">
   
       <p>Constructor for the Resize class.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -4120,9 +4194,9 @@ sizes, and odd sizes to odd sizes.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>dLux/optical_layers.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">765</span>
+          <details class="quote">
+            <summary>Source code in <code>dLux/optical_layers.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">765</span>
 <span class="normal">766</span>
 <span class="normal">767</span>
 <span class="normal">768</span>
@@ -4144,7 +4218,7 @@ sizes, and odd sizes to odd sizes.</p>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">npixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">npixels</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
