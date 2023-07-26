@@ -23,3 +23,11 @@ class TestLayeredDetector:
         create_layered_detector().AddConstant
         with pytest.raises(AttributeError):
             create_layered_detector().nonexistent_attribute
+
+    def test_insert_layer(self, create_layered_detector, create_jitter):
+        """Tests the insert_layer method"""
+        create_layered_detector().insert_layer(create_jitter(), 0)
+
+    def test_remove_layer(self, create_layered_detector):
+        """Tests the remove_layer method"""
+        create_layered_detector().remove_layer("AddConstant")

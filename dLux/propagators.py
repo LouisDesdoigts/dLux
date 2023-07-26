@@ -17,7 +17,7 @@ class Propagator(dLux.optical_layers.OpticalLayer):
 
     Attributes
     ----------
-    focal_length : Array, metres
+    focal_length : float, metres
         The effective focal length of the lens/mirror this propagator
         represents. If None, the output pixel_scales are taken to be
         radians/pixel, else they are taken to be in metres/pixel.
@@ -25,11 +25,11 @@ class Propagator(dLux.optical_layers.OpticalLayer):
         Should the propagation be performed in the inverse direction.
     """
 
-    focal_length: Array
+    focal_length: float
     inverse: bool
 
     def __init__(
-        self: Propagator, focal_length: Array = None, inverse: bool = False
+        self: Propagator, focal_length: float = None, inverse: bool = False
     ):
         """
         Constructor for the Propagator.
@@ -42,9 +42,7 @@ class Propagator(dLux.optical_layers.OpticalLayer):
         super().__init__()
 
         if focal_length is not None:
-            focal_length = np.asarray(focal_length, dtype=float)
-            if focal_length.ndim != 0:
-                raise TypeError("focal_length must be a scalar.")
+            focal_length = float(focal_length)
 
         self.focal_length = focal_length
         self.inverse = bool(inverse)
@@ -59,7 +57,7 @@ class FFT(Propagator):
 
     Attributes
     ----------
-    focal_length : Array, metres
+    focal_length : float, metres
         The focal_length of the lens/mirror this propagator represents.
     pad : int
         The amount of padding to apply to the wavefront before propagating.
@@ -71,7 +69,7 @@ class FFT(Propagator):
 
     def __init__(
         self: Propagator,
-        focal_length: Array = None,
+        focal_length: float = None,
         pad: int = 2,
         inverse: bool = False,
     ) -> Propagator:
@@ -107,9 +105,11 @@ class MFT(Propagator):
     ----------
     npixels : int
         The number of pixels in the output plane.
-    pixel_scale : Array, metres/pixel or radians/pixel
+    pixel_scale : float, metres/pixel or radians/pixel
         The pixel scale in the output plane, measured in metres per pixel.
-    focal_length : Array, metres
+    oversample : float
+        The amount of oversampling in the output plane.
+    focal_length : float, metres
         The effective focal length of the lens/mirror this propagator
         represents. If None, the pixel_scale is taken to be in radians/pixel,
         else it is taken to be in metres/pixel.
@@ -118,13 +118,15 @@ class MFT(Propagator):
     """
 
     npixels: int
-    pixel_scale: Array
+    oversample: float
+    pixel_scale: float
 
     def __init__(
         self: Propagator,
         npixels: int,
-        pixel_scale: Array,
-        focal_length: Array = None,
+        pixel_scale: float,
+        oversample: float = 1.0,
+        focal_length: float = None,
         inverse: bool = False,
     ):
         """
@@ -134,10 +136,12 @@ class MFT(Propagator):
         ----------
         npixels : int
             The number of pixels in the output plane.
-        pixel_scale : Array, metres/pixel or radians/pixel
+        pixel_scale : float, metres/pixel or radians/pixel
             The pixel scale in the output plane, measured in radians per pixel
-            if focal_length is None, else metres per pixel
-        focal_length : Array = None, metres
+            if focal_length is None, else metres per pixel.
+        oversample : float = 1.
+            The amount of oversampling in the output plane.
+        focal_length : float = None, metres
             The focal_length of the lens/mirror this propagator represents.
             If None, the pixel_scale is taken to be in radians/pixel, else it
             is taken to be in metres/pixel.
@@ -146,11 +150,9 @@ class MFT(Propagator):
         """
         super().__init__(focal_length=focal_length, inverse=inverse)
 
-        self.pixel_scale = np.asarray(pixel_scale, dtype=float)
+        self.oversample = float(oversample)
+        self.pixel_scale = float(pixel_scale)
         self.npixels = int(npixels)
-
-        if self.pixel_scale.ndim != 0:
-            raise TypeError("pixel_scale must be a scalar.")
 
     def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
@@ -168,11 +170,15 @@ class MFT(Propagator):
         """
         if self.inverse:
             return wavefront.IMFT(
-                self.npixels, self.pixel_scale, focal_length=self.focal_length
+                self.npixels,
+                self.pixel_scale / self.oversample,
+                focal_length=self.focal_length,
             )
         else:
             return wavefront.MFT(
-                self.npixels, self.pixel_scale, focal_length=self.focal_length
+                self.npixels,
+                self.pixel_scale / self.oversample,
+                focal_length=self.focal_length,
             )
 
 
@@ -186,9 +192,11 @@ class ShiftedMFT(MFT):
     ----------
     npixels : int
         The number of pixels in the output plane.
-    pixel_scale : Array, metres/pixel or radians/pixel
+    pixel_scale : float, metres/pixel or radians/pixel
         The pixel scale in the output plane, measured in metres per pixel.
-    focal_length : Array, metres
+    oversample : float
+        The amount of oversampling in the output plane.
+    focal_length : float, metres
         The effective focal length of the lens/mirror this propagator
         represents. If None, the pixel_scale is taken to be in radians/pixel,
         else it is taken to be in metres/pixel.
@@ -208,9 +216,10 @@ class ShiftedMFT(MFT):
     def __init__(
         self: Propagator,
         npixels: int,
-        pixel_scale: Array,
+        pixel_scale: float,
         shift: Array,
-        focal_length: Array = None,
+        oversample: float = 1.0,
+        focal_length: float = None,
         pixel: bool = False,
         inverse: bool = False,
     ):
@@ -221,12 +230,14 @@ class ShiftedMFT(MFT):
         ----------
         npixels : int
             The number of pixels in the output plane.
-        pixel_scale : Array, metres/pixel or radians/pixel
+        pixel_scale : float, metres/pixel or radians/pixel
             The pixel scale in the output plane, measured in metres or radians
             per pixel for Cartesian or Angular Wavefront respectively.
         shift : Array
             The (x, y) shift to apply to the wavefront in the output plane.
-        focal_length : Array = None, metres
+        oversample : float = 1.
+            The amount of oversampling in the output plane.
+        focal_length : float = None, metres
             The effective focal_length of the lens/mirror this propagator
             represents. If None, the pixel_scale is taken to be in
             radians/pixel, else it is taken to be in metres/pixel.
@@ -240,15 +251,16 @@ class ShiftedMFT(MFT):
         super().__init__(
             pixel_scale=pixel_scale,
             npixels=npixels,
+            oversample=oversample,
             focal_length=focal_length,
             inverse=inverse,
         )
 
-        self.shift = np.asarray(shift, dtype=float)
+        self.shift = np.asarray(shift, float)
         self.pixel = bool(pixel)
 
-        if self.shift.shape != (2,):
-            raise TypeError("shift must be an array of shape (2,).")
+        if shift.shape != (2,):
+            raise TypeError(f"Shift must be a 2D array, got {shift.shape}.")
 
     def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
@@ -267,7 +279,7 @@ class ShiftedMFT(MFT):
         if self.inverse:
             return wavefront.shifted_IMFT(
                 self.npixels,
-                self.pixel_scale,
+                self.pixel_scale / self.oversample,
                 self.shift,
                 self.focal_length,
                 self.pixel,
@@ -275,7 +287,7 @@ class ShiftedMFT(MFT):
         else:
             return wavefront.shifted_MFT(
                 self.npixels,
-                self.pixel_scale,
+                self.pixel_scale / self.oversample,
                 self.shift,
                 self.focal_length,
                 self.pixel,
@@ -294,12 +306,14 @@ class FarFieldFresnel(ShiftedMFT):
     ----------
     npixels : int
         The number of pixels in the output plane.
-    pixel_scale : Array, metres/pixel
+    pixel_scale : float, metres/pixel
         The pixel scale in the output plane, measured in metres per pixel.
-    focal_length : Array, metres
+    focal_length : float, metres
         The focal_length of the lens/mirror this propagator represents.
-    focal_shift : Array, metres
+    focal_shift : float, metres
         The shift in the propagation distance of the wavefront.
+    oversample : float
+        The amount of oversampling in the output plane.
     shift : Array
         The (x, y) shift to apply to the wavefront in the output plane.
     pixel : bool
@@ -310,14 +324,15 @@ class FarFieldFresnel(ShiftedMFT):
         Should the propagation be performed in the inverse direction.
     """
 
-    focal_shift: Array
+    focal_shift: float
 
     def __init__(
         self: Propagator,
-        npixels: Array,
-        pixel_scale: Array,
-        focal_length: Array,
-        focal_shift: Array,
+        npixels: int,
+        pixel_scale: float,
+        focal_length: float,
+        focal_shift: float,
+        oversample: float = 1.0,
         shift: Array = np.zeros(2),
         pixel: bool = False,
         inverse: bool = False,
@@ -329,12 +344,14 @@ class FarFieldFresnel(ShiftedMFT):
         ----------
         npixels : int
             The number of pixels in the output plane.
-        pixel_scale : Array, metres/pixel
+        pixel_scale : float, metres/pixel
             The pixel scale in the output plane, measured in metres per pixel.
-        focal_length : Array, metres
+        focal_length : float, metres
             The focal_length of the lens/mirror this propagator represents.
-        focal_shift : Array, metres
+        focal_shift : float, metres
             The shift in the propagation distance of the wavefront.
+        oversample : float = 1.
+            The amount of oversampling in the output plane.
         shift : Array = np.array([0., 0.])
             The (x, y) shift to apply to the wavefront in the output plane.
         pixel : bool = False
@@ -348,15 +365,14 @@ class FarFieldFresnel(ShiftedMFT):
                 "Inverse propagation not implemented " "for CartesianFresnel."
             )
 
-        self.focal_shift = np.asarray(focal_shift, dtype=float)
-        if self.focal_shift.ndim != 0:
-            raise TypeError("focal_shift must be a scalar.")
+        self.focal_shift = float(focal_shift)
 
         super().__init__(
             shift=shift,
             pixel=pixel,
             focal_length=focal_length,
             pixel_scale=pixel_scale,
+            oversample=oversample,
             npixels=npixels,
             inverse=inverse,
         )
@@ -377,7 +393,7 @@ class FarFieldFresnel(ShiftedMFT):
         """
         return wavefront.shifted_fresnel_prop(
             self.npixels,
-            self.pixel_scale,
+            self.pixel_scale / self.oversample,
             self.shift,
             self.focal_length,
             self.focal_shift,

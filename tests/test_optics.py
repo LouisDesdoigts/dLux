@@ -182,3 +182,11 @@ class TestLayeredOptics:
     def test_true_pixel_scale(self, create_layered_optics):
         """Tests the true_pixel_scale property"""
         _test_true_pixel_scale(create_layered_optics())
+
+    def test_insert_layer(self, create_layered_optics, create_normalise):
+        """Tests the insert_layer method"""
+        create_layered_optics().insert_layer(create_normalise(), 0)
+
+    def test_remove_layer(self, create_layered_optics):
+        """Tests the remove_layer method"""
+        create_layered_optics().remove_layer("MFT")

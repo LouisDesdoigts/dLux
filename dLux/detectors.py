@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import abstractmethod
 from collections import OrderedDict
+from typing import Union
 from jax import Array
 from zodiax import Base
 import dLux.utils as dlu
@@ -90,3 +91,38 @@ class LayeredDetector(BaseDetector):
         for key, layer in self.layers.items():
             image = layer(image)
         return image.image
+
+    def insert_layer(
+        self: BaseDetector, layer: Union[DetectorLayer, tuple], index: int
+    ) -> BaseDetector:
+        """
+        Inserts a layer into the layers dictionary at the given index using the
+        list.insert method. Note this method may require the names of some
+        parameters to be
+
+        Parameters
+        ----------
+        layer : Union[DetectorLayer, tuple]
+            The layer to insert into the layers dictionary. Can either be a
+            single DetectorLayer, or you can specify the layers key by passing
+            in a tuple of (DetectorLayer, key).
+        index : int
+            The index to insert the layer at.
+        """
+        layers_list = list(zip(self.layers.values(), self.layers.keys()))
+        layers_list.insert(index, layer)
+        new_layers = dlu.list_to_dictionary(layers_list, True, DetectorLayer())
+        return self.set("layers", new_layers)
+
+    def remove_layer(self: BaseDetector, key: str) -> BaseDetector:
+        """
+        Removes a layer from the layers dictionary indexed at 'key' using the
+        dict.pop(key) method.
+
+        Parameters
+        ----------
+        key : str
+            The key of the layer to remove.
+        """
+        self.layers.pop(key)
+        return self
