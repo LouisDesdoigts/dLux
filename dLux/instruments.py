@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import Any
 from abc import abstractmethod
 import jax.numpy as np
-from jax import Array
+from jax import Array, vmap
 from jax.tree_util import tree_map, tree_flatten
+from equinox import tree_at
 from zodiax import Base
 from typing import Union
 import dLux.utils as dlu
@@ -15,8 +15,7 @@ __all__ = ["Instrument"]
 Optics = lambda: dLux.optics.BaseOptics
 Detector = lambda: dLux.detectors.BaseDetector
 Source = lambda: dLux.sources.BaseSource
-Observation = lambda: dLux.observations.BaseObservation
-Image = lambda: dLux.images.Image
+PSF = lambda: dLux.psfs.PSF
 
 
 class BaseInstrument(Base):
@@ -48,23 +47,17 @@ class Instrument(Base):
     detector : Detector
         A Detector object that is used to model the various
         instrumental effects on a psf.
-    observation : Observation
-        An class that inherits from Observation. This is to allow flexibility
-        in the different kind of observations, i.e. applying dithers, switching
-        filters, etc.
     """
 
     optics: Optics()
     sources: dict
     detector: Detector()
-    observation: Observation()
 
     def __init__(
         self: Instrument,
         optics: Optics(),
         sources: Union[list, Source()],
         detector: Detector() = None,
-        observation: Observation = None,
     ):
         """
         Constructor for the Instrument class.
@@ -77,10 +70,6 @@ class Instrument(Base):
             Either a list of sources or an individual Source object.
         detector : Detector = None
             A pre-configured Detector object.
-        observation : Observation = None
-            An class that inherits from Observation. This is to allow
-            flexibility in the different kind of observations, i.e. applying
-            dithers, switching filters, etc.
         """
         # Optics
         if not isinstance(optics, Optics()):
@@ -99,26 +88,6 @@ class Instrument(Base):
                 f"Got type {type(detector)}"
             )
         self.detector = detector
-
-        # Observation
-        if (
-            not isinstance(observation, Observation())
-            and observation is not None
-        ):
-            raise TypeError("observation must be an Observation object.")
-        self.observation = observation
-
-    def observe(self: Instrument) -> Any:
-        """
-        Calls the `observe` method of the stored observation class, passing in
-        any extra keyword arguments.
-
-        Returns
-        -------
-         : Any
-            The output of the stored observation class.
-        """
-        return self.observation.model(self)
 
     def __getattr__(self: Instrument, key: str) -> object:
         """
@@ -174,15 +143,112 @@ class Instrument(Base):
 
         Returns
         -------
-        image : Array, dict
-            The image of the scene modelled through the optics with detector
+        psf : Array, dict
+            The psf of the scene modelled through the optics with detector
             and filter effects applied if they are supplied. Returns either as
             a single array (if return_tree is false), or a dict of the output
             for each source.
         """
         psf = self.optics.model(list(self.sources.values()))
-        image = Image()(psf, self.optics.true_pixel_scale)
-        image = (
-            self.detector.model(image) if self.detector is not None else psf
+        psf = PSF()(psf, self.optics.true_pixel_scale)
+        psf = self.detector.model(psf) if self.detector is not None else psf
+        return np.array(tree_flatten(psf)[0]).sum(0)
+
+
+# TODO: Test and re-write the Dither class
+class Dither(Instrument):
+    """
+    Instrument class designed to apply a series of dithers to the instrument
+    and return the corresponding PSFs.
+
+    Attributes
+    ----------
+    dithers : Array, (radians)
+        The array of dithers to apply to the source positions. The shape of the
+        array should be (ndithers, 2) where ndithers is the number of dithers
+        and the second dimension is the (x, y) dither in radians.
+    """
+
+    dithers: Array
+
+    def __init__(
+        self: Instrument,
+        dithers: Array,
+        optics: Optics(),
+        sources: Union[list, Source()],
+        detector: Detector() = None,
+    ):
+        """
+        Constructor for the Dither class.
+
+        Parameters
+        ----------
+        dithers : Array, radians
+            The array of dithers to apply to the source positions. The shape of
+            the array should be (ndithers, 2) where ndithers is the number of
+            dithers and the second dimension is the (x, y) dither in radians.
+        optics : Optics
+            A pre-configured Optics object.
+        sources : Union[list, Source]
+            Either a list of sources or an individual Source object.
+        detector : Detector = None
+            A pre-configured Detector object.
+        """
+        self.dithers = np.asarray(dithers, float)
+        if self.dithers.ndim != 2 or self.dithers.shape[1] != 2:
+            raise ValueError("dithers must be an array of shape (ndithers, 2)")
+        super().__init__(optics=optics, sources=sources, detector=detector)
+
+    def dither_position(
+        self: Instrument, instrument: Instrument, dither: Array
+    ) -> Instrument:
+        """
+        Dithers the position of the source objects by dither.
+
+        Parameters
+        ----------
+        instrument : Instrument
+            The instrument to dither.
+        dither : Array, radians
+            The (x, y) dither to apply to the source positions.
+
+        Returns
+        -------
+        instrument : Instrument
+            The instrument with the sources dithered.
+        """
+        # Define the dither function
+        dither_fn = lambda source: source.add("position", dither)
+
+        # Map the dithers across the sources
+        dithered_sources = tree_map(
+            dither_fn,
+            instrument.sources,
+            is_leaf=lambda leaf: isinstance(leaf, dLux.sources.Source),
         )
-        return np.array(tree_flatten(image)[0]).sum(0)
+
+        # Apply updates
+        return tree_at(
+            lambda instrument: instrument.sources, instrument, dithered_sources
+        )
+
+    def model(self: Dither, instrument: Instrument, *args, **kwargs) -> Array:
+        """
+        Applies a series of dithers to the instrument sources and calls the
+        .model() method after applying each dither.
+
+        Parameters
+        ----------
+        instrument : Instrument
+            The array of dithers to apply to the source positions.
+
+        Returns
+        -------
+        psfs : Array
+            The psfs generated after applying the dithers to the source
+            positions.
+        """
+        dith_fn = lambda dither: self.dither_position(
+            instrument, dither
+        ).model(*args, **kwargs)
+        return vmap(dith_fn, 0)(self.dithers)
