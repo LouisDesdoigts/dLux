@@ -32,7 +32,7 @@ class BaseSource(Base):
         pass
 
     @abstractmethod
-    def model(self, optics, detector=None):  # pragma: no cover
+    def model(self, optics):  # pragma: no cover
         pass
 
 
@@ -152,7 +152,9 @@ class Source(BaseSource):
         norm_spectrum = self.spectrum.normalise()
         return self.set("spectrum", norm_spectrum)
 
-    def model(self: Source, optics: Optics) -> Array:
+    def model(
+        self: Source, optics: Optics, get_pixel_scale: bool = False
+    ) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -160,17 +162,22 @@ class Source(BaseSource):
         ----------
         optics : Optics
             The optics through which to model the source objects.
-        detector : Detector = None
-            The detector object that is observing the psf.
+        get_pixel_scale : bool = False, radians
+            Whether to also return the psf pixel scale.
 
         Returns
         -------
         psf : Array
             The PSF of the source modelled through the optics.
+        pixel_scale : Array, radians
+            The pixel scale of the psf. Only returned if
+            `get_pixel_scale == True`.
         """
         self = self.normalise()
         weights = self.weights * self.flux
-        return optics.propagate(self.wavelengths, self.position, weights)
+        return optics.propagate(
+            self.wavelengths, self.position, weights, get_pixel_scale
+        )
 
 
 class RelativeFluxSource(Source):
@@ -366,7 +373,9 @@ class PointSources(Source):
                     "Length of flux must be equal to length of " "position."
                 )
 
-    def model(self: Source, optics: Optics) -> Array:
+    def model(
+        self: Source, optics: Optics, get_pixel_scale: bool = False
+    ) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -374,16 +383,27 @@ class PointSources(Source):
         ----------
         optics : Optics
             The optics through which to model the source objects.
+        get_pixel_scale : bool = False, radians
+            Whether to also return the psf pixel scale.
 
         Returns
         -------
         psf : Array
             The PSF of the source modelled through the optics.
+        pixel_scale : Array, radians
+            The pixel scale of the psf. Only returned if
+            `get_pixel_scale == True`.
         """
         self = self.normalise()
         weights = self.weights[None, :] * self.flux[:, None]
         propagator = vmap(optics.propagate, in_axes=(None, 0, 0))
-        return propagator(self.wavelengths, self.position, weights).sum(0)
+        if get_pixel_scale:
+            psfs, pixel_scales = propagator(
+                self.wavelengths, self.position, weights, get_pixel_scale
+            )
+            return psfs.sum(0), pixel_scales.mean(0)
+        else:
+            return propagator(self.wavelengths, self.position, weights).sum(0)
 
 
 class ResolvedSource(Source):
@@ -459,26 +479,42 @@ class ResolvedSource(Source):
         distribution = distribution_floor / distribution_floor.sum()
         return self.set(["spectrum", "distribution"], [spectrum, distribution])
 
-    def model(self: Source, optics: Optics) -> Array:
+    def model(
+        self: Source, optics: Optics, get_pixel_scale: bool = False
+    ) -> Array:
         """
-        Method to model the psf of the source through the optics. Implements a
-        basic convolution with the psf and source distribution.
+        Method to model the psf of the point source through the optics.
 
         Parameters
         ----------
         optics : Optics
             The optics through which to model the source objects.
+        get_pixel_scale : bool = False, radians
+            Whether to also return the psf pixel scale.
 
         Returns
         -------
         psf : Array
-            The psf of the source modelled through the optics.
+            The PSF of the source modelled through the optics.
+        pixel_scale : Array, radians
+            The pixel scale of the psf. Only returned if
+            `get_pixel_scale == True`.
         """
         # Normalise and get parameters
         self = self.normalise()
-        psf = optics.propagate(self.wavelengths, self.position, self.weights)
+        if get_pixel_scale:
+            psf, pixel_scale = optics.propagate(
+                self.wavelengths, self.position, self.weights, get_pixel_scale
+            )
+        else:
+            psf = optics.propagate(
+                self.wavelengths, self.position, self.weights
+            )
         convolved = convolve(psf, self.distribution, mode="same")
-        return self.flux * convolved
+        if get_pixel_scale:
+            return self.flux * convolved, pixel_scale
+        else:
+            return self.flux * convolved
 
 
 class BinarySource(RelativePositionSource, RelativeFluxSource):
@@ -547,7 +583,9 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
             weights=weights,
         )
 
-    def model(self: Source, optics: Optics) -> Array:
+    def model(
+        self: Source, optics: Optics, get_pixel_scale: bool = False
+    ) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -555,16 +593,28 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         ----------
         optics : Optics
             The optics through which to model the source objects.
+        get_pixel_scale : bool = False, radians
+            Whether to also return the psf pixel scale.
 
         Returns
         -------
         psf : Array
             The PSF of the source modelled through the optics.
+        pixel_scale : Array, radians
+            The pixel scale of the psf. Only returned if
+            `get_pixel_scale == True`.
         """
         self = self.normalise()
         weights = self.weights * self.fluxes[:, None]
         propagator = vmap(optics.propagate, in_axes=(None, 0, 0))
-        return propagator(self.wavelengths, self.positions, weights).sum(0)
+        if get_pixel_scale:
+            psfs, pixel_scales = propagator(
+                self.wavelengths, self.positions, weights, get_pixel_scale
+            )
+            return psfs.sum(0), pixel_scales.mean(0)
+        else:
+            psfs = propagator(self.wavelengths, self.positions, weights)
+            return psfs.sum(0)
 
 
 class PointResolvedSource(RelativeFluxSource, ResolvedSource):
@@ -629,24 +679,43 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
             contrast=contrast,
         )
 
-    def model(self: Source, optics: Optics) -> Array:
+    def model(
+        self: Source, optics: Optics, get_pixel_scale: bool = False
+    ) -> Array:
         """
-        Method to model the psf of the source through the optics. Implements a
-        basic convolution with the psf and source distribution, while also
-        modelling the single point source psf.
+        Method to model the psf of the point source through the optics.
 
         Parameters
         ----------
         optics : Optics
             The optics through which to model the source objects.
+        get_pixel_scale : bool = False, radians
+            Whether to also return the psf pixel scale.
 
         Returns
         -------
         psf : Array
-            The psf of the source modelled through the optics.
+            The PSF of the source modelled through the optics.
+        pixel_scale : Array, radians
+            The pixel scale of the psf. Only returned if
+            `get_pixel_scale == True`.
         """
         # Normalise and get parameters
         self = self.normalise()
-        psf = optics.propagate(self.wavelengths, self.position, self.weights)
+
+        if get_pixel_scale:
+            psf, pixel_scale = optics.propagate(
+                self.wavelengths, self.position, self.weights, get_pixel_scale
+            )
+        else:
+            psf = optics.propagate(
+                self.wavelengths, self.position, self.weights
+            )
         convolved = convolve(psf, self.distribution, mode="same")
-        return self.fluxes[0] * psf + self.fluxes[1] * convolved
+        if get_pixel_scale:
+            return (
+                self.fluxes[0] * psf + self.fluxes[1] * convolved,
+                pixel_scale,
+            )
+        else:
+            return self.fluxes[0] * psf + self.fluxes[1] * convolved

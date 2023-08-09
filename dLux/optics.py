@@ -1,5 +1,4 @@
 from __future__ import annotations
-from abc import abstractmethod
 from typing import Any
 from collections import OrderedDict
 import jax.numpy as np
@@ -21,6 +20,7 @@ OpticalLayer = lambda: dLux.optical_layers.OpticalLayer
 Propagator = lambda: dLux.propagators.Propagator
 Source = lambda: dLux.sources.BaseSource
 Wavefront = lambda: dLux.wavefronts.Wavefront
+PSF = lambda: dLux.psfs.PSF
 
 
 ###################
@@ -67,35 +67,34 @@ class BaseOptics(Base):
                 f"{self.__class__.__name__} has no attribute " f"{key}."
             )
 
-    @abstractmethod
     def propagate_mono(
-        self: BaseOptics,
+        self: AngularOptics,
         wavelength: Array,
         offset: Array = np.zeros(2),
-        return_wf: bool = False,
+        get_pixel_scale: bool = False,
     ) -> Array:  # pragma: no cover
         """
-        Propagates a monochromatic point source through the optics.
+        Propagates a monochromatic point source through the optical layers.
 
         Parameters
         ----------
         wavelength : Array, metres
             The wavelength of the wavefront to propagate through the optical
             layers.
-        offset : Array, radians, = np.zeros(2)
+        offset : Array, radians = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
-        return_wf : bool, = False
-            If True, the wavefront object after propagation is returned.
+        get_pixel_scale : bool = False
+            If True, the pixel_scale after propagation is also returned.
 
         Returns
         -------
         psf : Array
             The monochromatic point spread function after being propagated
             though the optical layers.
-        wavefront : Wavefront
+        pixel_scale : float, radians
             The wavefront object after propagation. Only returned if
-            return_wf is True.
+            get_pixel_scale is True.
         """
 
     def propagate(
@@ -103,6 +102,7 @@ class BaseOptics(Base):
         wavelengths: Array,
         offset: Array = np.zeros(2),
         weights: Array = None,
+        get_pixel_scale: bool = False,
     ) -> Array:
         """
         Propagates a Polychromatic point source through the optics.
@@ -117,12 +117,22 @@ class BaseOptics(Base):
         weights : Array, = None
             The weights of each wavelength. If None, all wavelengths are
             weighted equally.
+        get_pixel_scale : bool = False
+            If True, the pixel_scale after propagation is also returned. Note
+            since it is possible to have different pixel scales for each
+            wavelength, the returned pixel_scale is the mean of all the
+            pixel scales. In future a run-time check could be added, but for
+            now it is up to the user to ensure that all pixel scales are
+            equal.
 
         Returns
         -------
         psf : Array
             The chromatic point spread function after being propagated
-            though the optical layers.
+            though the optical layers. Only returned if return_object is False.
+        pixel_scale : float, radians
+            The wavefront object after propagation. Only returned if
+            get_pixel_scale is True.
         """
         wavelengths = np.atleast_1d(wavelengths)
         if weights is None:
@@ -148,12 +158,27 @@ class BaseOptics(Base):
 
         # Calculate
         propagator = vmap(self.propagate_mono, in_axes=(0, None))
-        psfs = propagator(wavelengths, offset)
+        if get_pixel_scale:
+            psfs, pixel_scale = propagator(
+                wavelengths, offset, get_pixel_scale=True
+            )
+        else:
+            psfs = propagator(wavelengths, offset)
+
+        # Apply weights
         if weights is not None:
             psfs *= weights[:, None, None]
-        return psfs.sum(0)
+        psf = psfs.sum(0)
 
-    def model(self: BaseOptics, sources: Union[list, Source]) -> Array:
+        if get_pixel_scale:
+            return psf, np.array(pixel_scale).mean()
+        return psf
+
+    def model(
+        self: BaseOptics,
+        sources: Union[list, Source],
+        get_pixel_scale: bool = False,
+    ) -> Array:
         """
         Models the input sources through the optics. The sources input can be
         a single Source object, or a list of Source objects.
@@ -162,6 +187,8 @@ class BaseOptics(Base):
         ----------
         sources : Union[list, Source]
             The sources to model.
+        get_pixel_scale : bool = False
+            If True, the pixel_scale after propagation is also returned.
 
         Returns
         -------
@@ -178,7 +205,15 @@ class BaseOptics(Base):
                     f"object. Got type: {type(sources)})"
                 )
 
-        return np.array([source.model(self) for source in sources]).sum(0)
+        if get_pixel_scale:
+            psfs, pixel_scales = np.array(
+                [source.model(self, get_pixel_scale) for source in sources]
+            )
+            return psfs.sum(0), pixel_scales.mean()
+        else:
+            return np.array(
+                [source.model(self, get_pixel_scale) for source in sources]
+            ).sum(0)
 
 
 class SimpleOptics(BaseOptics):
@@ -278,13 +313,6 @@ class NonPropagatorOptics(BaseOptics):
         self.psf_oversample = float(psf_oversample)
         self.psf_pixel_scale = float(psf_pixel_scale)
         super().__init__(**kwargs)
-
-    @property
-    def true_pixel_scale(self):
-        """
-        Returns the true pixel scale of the PSF.
-        """
-        return dlu.arcsec_to_rad(self.psf_pixel_scale / self.psf_oversample)
 
 
 class AperturedOptics(BaseOptics):
@@ -428,7 +456,7 @@ class AngularOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
         self: AngularOptics,
         wavelength: Array,
         offset: Array = np.zeros(2),
-        return_wf: bool = False,
+        get_pixel_scale: bool = False,
     ) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
@@ -438,20 +466,20 @@ class AngularOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
         wavelength : Array, metres
             The wavelength of the wavefront to propagate through the optical
             layers.
-        offset : Array, radians, = np.zeros(2)
+        offset : Array, radians = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
-        return_wf : bool, = False
-            If True, the wavefront object after propagation is returned.
+        get_pixel_scale : bool = False
+            If True, the pixel_scale after propagation is also returned.
 
         Returns
         -------
         psf : Array
             The monochromatic point spread function after being propagated
             though the optical layers.
-        wavefront : Wavefront
+        pixel_scale : float, radians
             The wavefront object after propagation. Only returned if
-            return_wf is True.
+            get_pixel_scale is True.
         """
         wf = self._apply_aperture(wavelength, offset)
 
@@ -461,8 +489,8 @@ class AngularOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
         wf = wf.MFT(self.psf_npixels, pixel_scale_radians)
 
         # Return PSF or Wavefront
-        if return_wf:
-            return wf
+        if get_pixel_scale:
+            return wf.psf, pixel_scale_radians
         return wf.psf
 
 
@@ -542,7 +570,7 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
         self: CartesianOptics,
         wavelength: Array,
         offset: Array = np.zeros(2),
-        return_wf: bool = False,
+        get_pixel_scale: bool = False,
     ) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
@@ -555,17 +583,17 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
         offset : Array, radians, = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
-        return_wf : bool, = False
-            If True, the wavefront object after propagation is returned.
+        get_pixel_scale : bool = False
+            If True, the pixel_scale after propagation is also returned.
 
         Returns
         -------
         psf : Array
             The monochromatic point spread function after being propagated
             though the optical layers.
-        wavefront : Wavefront
+        pixel_scale : float, radians
             The wavefront object after propagation. Only returned if
-            return_wf is True.
+            get_pixel_scale is True.
         """
         wf = self._apply_aperture(wavelength, offset)
 
@@ -576,8 +604,8 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
         )
 
         # Return PSF or Wavefront
-        if return_wf:
-            return wf
+        if get_pixel_scale:
+            return wf.psf, pixel_scale
         return wf.psf
 
 
@@ -641,13 +669,6 @@ class FlexibleOptics(AperturedOptics, SimpleOptics):
             mask=mask,
         )
 
-    @property
-    def true_pixel_scale(self):
-        """
-        Returns the true pixel scale of the PSF.
-        """
-        return self.propagator.pixel_scale
-
     def _construct_wavefront(
         self: BaseOptics, wavelength: Array, offset: Array = np.zeros(2)
     ) -> Array:
@@ -680,7 +701,7 @@ class FlexibleOptics(AperturedOptics, SimpleOptics):
         self: BaseOptics,
         wavelength: Array,
         offset: Array = np.zeros(2),
-        return_wf: bool = False,
+        get_pixel_scale: bool = False,
     ) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
@@ -693,24 +714,24 @@ class FlexibleOptics(AperturedOptics, SimpleOptics):
         offset : Array, radians, = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
-        return_wf : bool, = False
-            If True, the wavefront object after propagation is returned.
+        get_pixel_scale : bool = False
+            If True, the pixel_scale after propagation is also returned.
 
         Returns
         -------
         psf : Array
             The monochromatic point spread function after being propagated
             though the optical layers.
-        wavefront : Wavefront
+        pixel_scale : float, radians
             The wavefront object after propagation. Only returned if
-            return_wf is True.
+            get_pixel_scale is True.
         """
         wf = self._apply_aperture(wavelength, offset)
         wf = self.propagator(wf)
 
         # Return PSF or Wavefront
-        if return_wf:
-            return wf
+        if get_pixel_scale:
+            return wf.psf, self.propagator.pixel_scale
         return wf.psf
 
 
@@ -776,22 +797,11 @@ class LayeredOptics(SimpleOptics):
             return self.layers[key]
         super().__getattr__(key)
 
-    @property
-    def true_pixel_scale(self):
-        """
-        Returns the true pixel scale of the PSF.
-        """
-        # Note: This is a bit inefficient, but should work
-        for layer in self.layers.values():
-            if isinstance(layer, Propagator()):
-                propagator = layer
-        return propagator.pixel_scale
-
     def propagate_mono(
         self: BaseOptics,
         wavelength: Array,
         offset: Array = np.zeros(2),
-        return_wf: bool = False,
+        get_pixel_scale: bool = False,
     ) -> Array:
         """
         Propagates a monochromatic point source through the optical layers.
@@ -804,24 +814,25 @@ class LayeredOptics(SimpleOptics):
         offset : Array, radians, = np.zeros(2)
             The (x, y) offset from the optical axis of the source. Default
             value is (0, 0), on axis.
-        return_wf : bool, = False
-            If True, the wavefront object after propagation is returned.
+        get_pixel_scale : bool = False
+            If True, the pixel_scale after propagation is also returned.
 
         Returns
         -------
         psf : Array
             The monochromatic point spread function after being propagated
             though the optical layers.
-        wavefront : Wavefront
+        pixel_scale : float, radians
             The wavefront object after propagation. Only returned if
-            return_wf is True.
+            get_pixel_scale is True.
         """
         wavefront = self._construct_wavefront(wavelength, offset)
         for layer in list(self.layers.values()):
             wavefront *= layer
 
-        if return_wf:
-            return wavefront
+        # Return PSF or Wavefront
+        if get_pixel_scale:
+            return wavefront.psf, wavefront.pixel_scale
         return wavefront.psf
 
     def insert_layer(

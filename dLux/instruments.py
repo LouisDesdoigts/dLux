@@ -41,7 +41,7 @@ class Instrument(Base):
     ----------
     optics : Optics
         A Optics object that defines some optical configuration.
-    sources : dict
+    source : Source
         A dictionary of the various source objects that the instrument is
         observing.
     detector : Detector
@@ -50,13 +50,13 @@ class Instrument(Base):
     """
 
     optics: Optics()
-    sources: dict
+    source: Source()
     detector: Detector()
 
     def __init__(
         self: Instrument,
         optics: Optics(),
-        sources: Union[list, Source()],
+        source: Source(),
         detector: Detector() = None,
     ):
         """
@@ -66,8 +66,8 @@ class Instrument(Base):
         ----------
         optics : Optics
             A pre-configured Optics object.
-        sources : Union[list, Source]
-            Either a list of sources or an individual Source object.
+        source : Union[list, Source]
+            Either a Scene, list of Sources, or an individual Source object.
         detector : Detector = None
             A pre-configured Detector object.
         """
@@ -77,9 +77,9 @@ class Instrument(Base):
         self.optics = optics
 
         # Sources
-        if isinstance(sources, (Source(), tuple)):
-            sources = [sources]
-        self.sources = dlu.list_to_dictionary(sources, False, Source())
+        if isinstance(source, (Source(), tuple)):
+            source = [source]
+        self.source = dlu.list_to_dictionary(source, False, Source())
 
         # Detector
         if not isinstance(detector, Detector()) and detector is not None:
@@ -112,11 +112,6 @@ class Instrument(Base):
         for attribute in self.__dict__.values():
             if hasattr(attribute, key):
                 return getattr(attribute, key)
-        if key in self.sources.keys():
-            return self.sources[key]
-        for source in self.sources.values():
-            if hasattr(source, key):
-                return getattr(source, key)
         raise AttributeError(
             f"{self.__class__.__name__} has no attribute " f"{key}."
         )
@@ -149,8 +144,10 @@ class Instrument(Base):
             a single array (if return_tree is false), or a dict of the output
             for each source.
         """
-        psf = self.optics.model(list(self.sources.values()))
-        psf = PSF()(psf, self.optics.true_pixel_scale)
+        psf, pixel_scale = self.optics.model(
+            list(self.sources.values()), get_pixel_scale=True
+        )
+        psf = PSF()(psf, pixel_scale)
         psf = self.detector.model(psf) if self.detector is not None else psf
         return np.array(tree_flatten(psf)[0]).sum(0)
 
