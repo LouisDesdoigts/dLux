@@ -15,7 +15,7 @@ __all__ = [
     "RotateDetector",
 ]
 
-Image = lambda: dLux.images.Image
+PSF = lambda: dLux.psfs.PSF
 
 
 class DetectorLayer(Base):
@@ -31,32 +31,30 @@ class DetectorLayer(Base):
         super().__init__()
 
     @abstractmethod
-    def __call__(
-        self: DetectorLayer, image: Image()
-    ) -> Image:  # pragma: no cover
+    def __call__(self: DetectorLayer, psf: PSF()) -> PSF:  # pragma: no cover
         """
-        Applies the layer to the Image.
+        Applies the layer to the PSF.
 
         Parameters
         ----------
-        image : Image
-            The image to operate on.
+        psf : PSF
+            The psf to operate on.
 
         Returns
         -------
-        image : Image
-            The transformed image.
+        psf : PSF
+            The transformed psf.
         """
 
 
 class ApplyPixelResponse(DetectorLayer):
     """
-    Applies a pixel response array to the input image, via a multiplication.
+    Applies a pixel response array to the input psf, via a multiplication.
 
     Attributes
     ----------
     pixel_response : Array
-        The pixel_response to apply to the input image.
+        The pixel_response to apply to the input psf.
     """
 
     pixel_response: Array
@@ -68,8 +66,8 @@ class ApplyPixelResponse(DetectorLayer):
         Parameters
         ----------
         pixel_response : Array
-            The pixel_response to apply to the input image. Must be a
-            2-dimensional array equal to size of the image at time of
+            The pixel_response to apply to the input psf. Must be a
+            2-dimensional array equal to size of the psf at time of
             application.
         """
         super().__init__()
@@ -77,26 +75,26 @@ class ApplyPixelResponse(DetectorLayer):
         if self.pixel_response.ndim != 2:
             raise ValueError("pixel_response must be a 2 dimensional array.")
 
-    def __call__(self: DetectorLayer, image: Image()) -> Image:
+    def __call__(self: DetectorLayer, psf: PSF()) -> PSF:
         """
-        Applies the layer to the Image.
+        Applies the layer to the PSF.
 
         Parameters
         ----------
-        image : Image
-            The image to operate on.
+        psf : PSF
+            The psf to operate on.
 
         Returns
         -------
-        image : Image
-            The transformed image.
+        psf : PSF
+            The transformed psf.
         """
-        return image * self.pixel_response
+        return psf * self.pixel_response
 
 
 class ApplyJitter(DetectorLayer):
     """
-    Convolves the image with a Gaussian kernel parameterised by the standard
+    Convolves the psf with a Gaussian kernel parameterised by the standard
     deviation (sigma).
 
     Attributes
@@ -142,27 +140,27 @@ class ApplyJitter(DetectorLayer):
         kernel = norm.pdf(x, scale=sigma) * norm.pdf(x[:, None], scale=sigma)
         return kernel / np.sum(kernel)
 
-    def __call__(self: DetectorLayer, image: Image()) -> Image():
+    def __call__(self: DetectorLayer, psf: PSF()) -> PSF():
         """
-        Applies the layer to the Image.
+        Applies the layer to the PSF.
 
         Parameters
         ----------
-        image : Image
-            The image to operate on.
+        psf : PSF
+            The psf to operate on.
 
         Returns
         -------
-        image : Image
-            The transformed image.
+        psf : PSF
+            The transformed psf.
         """
-        kernel = self.generate_kernel(image.pixel_scale)
-        return image.convolve(kernel)
+        kernel = self.generate_kernel(psf.pixel_scale)
+        return psf.convolve(kernel)
 
 
 class ApplySaturation(DetectorLayer):
     """
-    Applies a simple saturation model to the input image, by clipping any
+    Applies a simple saturation model to the input psf, by clipping any
     values above saturation, to saturation.
 
     Attributes
@@ -187,32 +185,32 @@ class ApplySaturation(DetectorLayer):
         if self.saturation.ndim != 0:
             raise ValueError("saturation must be a scalar array.")
 
-    def __call__(self: DetectorLayer, image: Image()) -> Image():
+    def __call__(self: DetectorLayer, psf: PSF()) -> PSF():
         """
-        Applies the layer to the Image.
+        Applies the layer to the PSF.
 
         Parameters
         ----------
-        image : Image
-            The image to operate on.
+        psf : PSF
+            The psf to operate on.
 
         Returns
         -------
-        image : Image
-            The transformed image.
+        psf : PSF
+            The transformed psf.
         """
-        return image.min("image", self.saturation)
+        return psf.min("data", self.saturation)
 
 
 class AddConstant(DetectorLayer):
     """
-    Add a constant to the output image. This is typically used to model the
+    Add a constant to the output psf. This is typically used to model the
     mean value of the detector noise.
 
     Attributes
     ----------
     value : Array
-        The value to add to the image.
+        The value to add to the psf.
     """
 
     value: Array
@@ -224,34 +222,34 @@ class AddConstant(DetectorLayer):
         Parameters
         ----------
         value : Array
-            The value to add to the image.
+            The value to add to the psf.
         """
         super().__init__()
         self.value = np.asarray(value, dtype=float)
         if self.value.ndim != 0:
             raise ValueError("value must be a scalar array.")
 
-    def __call__(self: DetectorLayer, image: Image()) -> Image():
+    def __call__(self: DetectorLayer, psf: PSF()) -> PSF():
         """
-        Applies the layer to the Image.
+        Applies the layer to the PSF.
 
         Parameters
         ----------
-        image : Image
-            The image to operate on.
+        psf : PSF
+            The psf to operate on.
 
         Returns
         -------
-        image : Image
-            The transformed image.
+        psf : PSF
+            The transformed psf.
         """
-        return image + self.value
+        return psf + self.value
 
 
 class IntegerDownsample(DetectorLayer):
     """
-    Downsamples an input image by an integer number of pixels via a sum.
-    The number of pixels in the input image must be integer divisible by the
+    Downsamples an input psf by an integer number of pixels via a sum.
+    The number of pixels in the input psf must be integer divisible by the
     kernel_size.
 
     Attributes
@@ -274,31 +272,31 @@ class IntegerDownsample(DetectorLayer):
         super().__init__()
         self.kernel_size = int(kernel_size)
 
-    def __call__(self, image):
+    def __call__(self, psf):
         """
-        Applies the layer to the Image.
+        Applies the layer to the PSF.
 
         Parameters
         ----------
-        image : Image
-            The image to operate on.
+        psf : PSF
+            The psf to operate on.
 
         Returns
         -------
-        image : Image
-            The transformed image.
+        psf : PSF
+            The transformed psf.
         """
-        return image.downsample(self.kernel_size)
+        return psf.downsample(self.kernel_size)
 
 
 class RotateDetector(DetectorLayer):
     """
-    Applies a rotation to the image using interpolation methods.
+    Applies a rotation to the psf using interpolation methods.
 
     Parameters
     ----------
     angle : Array, radians
-        The angle by which to rotate the image in the clockwise direction.
+        The angle by which to rotate the psf in the clockwise direction.
     order : int
         The order of the interpolation.
     """
@@ -313,7 +311,7 @@ class RotateDetector(DetectorLayer):
         Parameters
         ----------
         angle: float, radians
-            The angle by which to rotate the image in the clockwise direction.
+            The angle by which to rotate the psf in the clockwise direction.
         """
         super().__init__()
         self.angle = np.asarray(angle, dtype=float)
@@ -321,18 +319,18 @@ class RotateDetector(DetectorLayer):
         if self.angle.ndim != 0:
             raise ValueError("angle must be a scalar array.")
 
-    def __call__(self: DetectorLayer, image: Image()) -> Image():
+    def __call__(self: DetectorLayer, psf: PSF()) -> PSF():
         """
-        Applies the layer to the Image.
+        Applies the layer to the PSF.
 
         Parameters
         ----------
-        image : Image
-            The image to operate on.
+        psf : PSF
+            The psf to operate on.
 
         Returns
         -------
-        image : Image
-            The transformed image.
+        psf : PSF
+            The transformed psf.
         """
-        return image.rotate(self.angle, self.order)
+        return psf.rotate(self.angle, self.order)

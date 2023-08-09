@@ -19,7 +19,8 @@ from . import detector_layers
 
 # All other classes
 from . import instruments
-from . import observations
+
+# from . import observations
 from . import sources
 from . import spectra
 
@@ -31,7 +32,7 @@ from . import utils as utils
 # Wavefronts and Optics
 from .wavefronts import (
     Wavefront as Wavefront,
-    FresnelWavefront as FresnelWavefront,
+    # FresnelWavefront as FresnelWavefront,
 )
 from .optics import (
     AngularOptics as AngularOptics,
@@ -73,7 +74,7 @@ from .aberrations import (
 )
 
 # Images and Detectors
-from .images import Image as Image
+from .psfs import PSF as PSF
 from .detectors import LayeredDetector as LayeredDetector
 from .detector_layers import (
     ApplyPixelResponse as ApplyPixelResponse,
@@ -96,8 +97,9 @@ from .spectra import (
     Spectrum as Spectrum,
     PolySpectrum as PolySpectrum,
 )
-from .instruments import Instrument as Instrument
-from .observations import Dither as Dither
+from .instruments import Instrument as Instrument, Dither as Dither
+
+# from .observations import Dither as Dither
 
 
 # Add to __all__
@@ -114,7 +116,7 @@ modules = [
     sources,
     spectra,
     instruments,
-    observations,
+    # observations,
 ]
 
 __all__ = [module.__all__ for module in modules]

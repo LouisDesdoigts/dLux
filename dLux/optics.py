@@ -157,13 +157,11 @@ class BaseOptics(Base):
             )
 
         # Calculate
-        propagator = vmap(self.propagate_mono, in_axes=(0, None))
+        propagator = vmap(self.propagate_mono, in_axes=(0, None, None))
         if get_pixel_scale:
-            psfs, pixel_scale = propagator(
-                wavelengths, offset, get_pixel_scale=True
-            )
+            psfs, pixel_scale = propagator(wavelengths, offset, True)
         else:
-            psfs = propagator(wavelengths, offset)
+            psfs = propagator(wavelengths, offset, False)
 
         # Apply weights
         if weights is not None:
@@ -468,7 +466,7 @@ class AngularOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
         # Propagate
         pixel_scale = self.psf_pixel_scale / self.psf_oversample
         pixel_scale_radians = dlu.arcsec_to_rad(pixel_scale)
-        wf = wf.MFT(self.psf_npixels, pixel_scale_radians)
+        wf = wf.propagate(self.psf_npixels, pixel_scale_radians)
 
         # Return PSF or Wavefront
         if get_pixel_scale:
@@ -581,7 +579,7 @@ class CartesianOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
 
         # Propagate
         pixel_scale = 1e-6 * self.psf_pixel_scale / self.psf_oversample
-        wf = wf.MFT(
+        wf = wf.propagate(
             self.psf_npixels, pixel_scale, focal_length=self.focal_length
         )
 

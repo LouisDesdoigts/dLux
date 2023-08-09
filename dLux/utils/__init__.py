@@ -1,9 +1,18 @@
 name = "utils"
 
 # Import as modules
-from . import coordinates, helpers, interpolation, math, optics, units
+from . import (
+    propagation,
+    coordinates,
+    helpers,
+    interpolation,
+    math,
+    optics,
+    units,
+)
 
 # Dont import all functions from modules
+from .propagation import FFT as FFT, MFT as MFT, fresnel_MFT as fresnel_MFT
 from .coordinates import (
     cart_to_polar as cart_to_polar,
     polar_to_cart as polar_to_cart,
@@ -49,6 +58,7 @@ from .units import (
 
 # Add to __all__
 modules = [
+    propagation,
     coordinates,
     helpers,
     interpolation,

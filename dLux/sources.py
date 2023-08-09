@@ -61,6 +61,35 @@ class Scene(BaseSource):
         sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
         return self.set("sources", sources)
 
+    def __getattr__(self: Source, key: str) -> Any:
+        """
+        Magic method designed to allow accessing of the various items within
+        the sub-dictionaries of this class via the 'class.attribute' method.
+        It is recommended that each dictionary key in the optical layers,
+        detector layers, and scene sources are unique to prevent unexpected
+        behaviour. In the case they there are identical keys across the
+        dictionaries This method prioritises searching for keys in the optical
+        layers, then detector layers, and then the scene sources.
+
+        Parameters
+        ----------
+        key : str
+            The key of the item to be searched for in the sub-dictionaries.
+
+        Returns
+        -------
+        item : object
+            The item corresponding to the supplied key in the sub-dictionaries.
+        """
+        if key in self.sources.keys():
+            return self.sources[key]
+        for attribute in self.__dict__.values():
+            if hasattr(attribute, key):
+                return getattr(attribute, key)
+        raise AttributeError(
+            f"{self.__class__.__name__} has no attribute " f"{key}."
+        )
+
     def model(
         self: Scene, optics: Optics, get_pixel_scale: bool = False
     ) -> Array:
@@ -456,14 +485,16 @@ class PointSources(Source):
         """
         self = self.normalise()
         weights = self.weights[None, :] * self.flux[:, None]
-        propagator = vmap(optics.propagate, in_axes=(None, 0, 0))
+        propagator = vmap(optics.propagate, in_axes=(None, 0, 0, None))
         if get_pixel_scale:
             psfs, pixel_scales = propagator(
-                self.wavelengths, self.position, weights, get_pixel_scale
+                self.wavelengths, self.position, weights, True
             )
             return psfs.sum(0), pixel_scales.mean(0)
         else:
-            return propagator(self.wavelengths, self.position, weights).sum(0)
+            return propagator(
+                self.wavelengths, self.position, weights, False
+            ).sum(0)
 
 
 class ResolvedSource(Source):
@@ -666,14 +697,14 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         """
         self = self.normalise()
         weights = self.weights * self.fluxes[:, None]
-        propagator = vmap(optics.propagate, in_axes=(None, 0, 0))
+        propagator = vmap(optics.propagate, in_axes=(None, 0, 0, None))
         if get_pixel_scale:
             psfs, pixel_scales = propagator(
-                self.wavelengths, self.positions, weights, get_pixel_scale
+                self.wavelengths, self.positions, weights, True
             )
             return psfs.sum(0), pixel_scales.mean(0)
         else:
-            psfs = propagator(self.wavelengths, self.positions, weights)
+            psfs = propagator(self.wavelengths, self.positions, weights, False)
             return psfs.sum(0)
 
 

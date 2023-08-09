@@ -63,8 +63,8 @@ class Wavefront(Base):
         wavelength : float, metres
             The wavelength of the `Wavefront`.
         """
-        self.wavelength = float(wavelength)
-        self.pixel_scale = float(diameter / npixels)
+        self.wavelength = np.asarray(wavelength, float)
+        self.pixel_scale = np.asarray(diameter / npixels, float)
         self.amplitude = (
             np.ones((npixels, npixels), dtype=float) / npixels**2
         )
@@ -784,7 +784,6 @@ class Wavefront(Base):
         units = "Cartesian"
 
         # Calculate
-        plane, units = self._fresnel_output()
         phasor = dlu.fresnel_MFT(
             self.phasor,
             self.wavelength,

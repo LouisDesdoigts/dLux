@@ -160,7 +160,6 @@ def MFT(
     npixels_out: int,
     pixel_scale_out: Array,
     focal_length: Array = None,
-    focal_shift: Array = 0.0,
     shift: Array = np.zeros(2),
     pixel: bool = True,
     inverse: bool = False,
@@ -202,7 +201,7 @@ def MFT(
         pixel_scale_out,
         s,
         focal_length,
-        focal_shift,
+        0.0,
         inverse,
     )
 

@@ -2,13 +2,11 @@ from __future__ import annotations
 from abc import abstractmethod
 import jax.numpy as np
 from jax import Array, vmap
-from jax.tree_util import tree_map, tree_flatten
-from equinox import tree_at
 from zodiax import Base
 from typing import Union
 import dLux
 
-__all__ = ["Instrument"]
+__all__ = ["Instrument", "Dither"]
 
 # Alias classes for simplified type-checking
 Optics = lambda: dLux.optics.BaseOptics
@@ -133,7 +131,7 @@ class Instrument(Base):
     def model(self: Instrument) -> Union[Array, dict]:
         """
         A base level modelling function designed to robustly handle the
-        different combinations of inputs. Models the sources through the
+        different combinations of inputs. Models the  through the
         instrument optics and detector.
 
         Returns
@@ -144,10 +142,17 @@ class Instrument(Base):
             a single array (if return_tree is false), or a dict of the output
             for each source.
         """
-        psf, pixel_scale = self.optics.model(self.sources, True)
+        psf, pixel_scale = self.optics.model(self.source, True)
         psf = PSF()(psf, pixel_scale)
-        psf = self.detector.model(psf) if self.detector is not None else psf
-        return np.array(tree_flatten(psf)[0]).sum(0)
+        psf = (
+            self.detector.model(psf) if self.detector is not None else psf.data
+        )
+        return psf
+        # print(psf)
+        # flat = tree_flatten(psf)[0]
+        # for f in flat:
+        #     print(f.shape)
+        # return np.array(tree_flatten(psf)[0]).sum(0)
 
 
 # TODO: Test and re-write the Dither class
@@ -170,7 +175,7 @@ class Dither(Instrument):
         self: Instrument,
         dithers: Array,
         optics: Optics(),
-        sources: Union[list, Source()],
+        source: Union[list, Source()],
         detector: Detector() = None,
     ):
         """
@@ -184,7 +189,7 @@ class Dither(Instrument):
             dithers and the second dimension is the (x, y) dither in radians.
         optics : Optics
             A pre-configured Optics object.
-        sources : Union[list, Source]
+        sourcs : Union[list, Source]
             Either a list of sources or an individual Source object.
         detector : Detector = None
             A pre-configured Detector object.
@@ -192,42 +197,9 @@ class Dither(Instrument):
         self.dithers = np.asarray(dithers, float)
         if self.dithers.ndim != 2 or self.dithers.shape[1] != 2:
             raise ValueError("dithers must be an array of shape (ndithers, 2)")
-        super().__init__(optics=optics, sources=sources, detector=detector)
+        super().__init__(optics=optics, source=source, detector=detector)
 
-    def dither_position(
-        self: Instrument, instrument: Instrument, dither: Array
-    ) -> Instrument:
-        """
-        Dithers the position of the source objects by dither.
-
-        Parameters
-        ----------
-        instrument : Instrument
-            The instrument to dither.
-        dither : Array, radians
-            The (x, y) dither to apply to the source positions.
-
-        Returns
-        -------
-        instrument : Instrument
-            The instrument with the sources dithered.
-        """
-        # Define the dither function
-        dither_fn = lambda source: source.add("position", dither)
-
-        # Map the dithers across the sources
-        dithered_sources = tree_map(
-            dither_fn,
-            instrument.sources,
-            is_leaf=lambda leaf: isinstance(leaf, dLux.sources.Source),
-        )
-
-        # Apply updates
-        return tree_at(
-            lambda instrument: instrument.sources, instrument, dithered_sources
-        )
-
-    def model(self: Dither, instrument: Instrument, *args, **kwargs) -> Array:
+    def model(self: Instrument) -> Array:
         """
         Applies a series of dithers to the instrument sources and calls the
         .model() method after applying each dither.
@@ -243,7 +215,9 @@ class Dither(Instrument):
             The psfs generated after applying the dithers to the source
             positions.
         """
-        dith_fn = lambda dither: self.dither_position(
-            instrument, dither
-        ).model(*args, **kwargs)
-        return vmap(dith_fn, 0)(self.dithers)
+
+        def dither_and_model(dither, instrument):
+            instrument = instrument.add("source.position", dither)
+            return super(type(instrument), instrument).model()
+
+        return vmap(dither_and_model, (0, None))(self.dithers, self)

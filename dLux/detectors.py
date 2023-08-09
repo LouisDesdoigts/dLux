@@ -14,7 +14,7 @@ DetectorLayer = lambda: dLux.detector_layers.DetectorLayer
 
 class BaseDetector(Base):
     @abstractmethod
-    def model(self, image):  # pragma: no cover
+    def model(self, psf):  # pragma: no cover
         pass
 
 
@@ -74,23 +74,23 @@ class LayeredDetector(BaseDetector):
                 "'{}' object has no attribute '{}'".format(type(self), key)
             )
 
-    def model(self: BaseDetector, image: Array) -> Array:
+    def model(self: BaseDetector, psf: Array) -> Array:
         """
-        Applied the stored detector layers to the input image.
+        Applied the stored detector layers to the input psf.
 
         Parameters
         ----------
-        image : Array
+        psf : Array
             The input psf to be transformed.
 
         Returns
         -------
-        image : Array
-            The output 'image' after being transformed by the detector layers.
+        psf : Array
+            The output 'psf' after being transformed by the detector layers.
         """
         for key, layer in self.layers.items():
-            image = layer(image)
-        return image.image
+            psf = layer(psf)
+        return psf.data
 
     def insert_layer(
         self: BaseDetector, layer: Union[DetectorLayer, tuple], index: int
