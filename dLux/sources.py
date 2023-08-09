@@ -3,12 +3,15 @@ from typing import Any
 import jax.numpy as np
 from jax.scipy.signal import convolve
 from jax import vmap, Array
+from jax.tree_util import tree_map
 from zodiax import Base
 from abc import abstractmethod
 import dLux
+import dLux.utils as dlu
 
 
 __all__ = [
+    "Scene",
     "PointSource",
     "PointSources",
     "BinarySource",
@@ -34,6 +37,63 @@ class BaseSource(Base):
     @abstractmethod
     def model(self, optics):  # pragma: no cover
         pass
+
+
+class Scene(BaseSource):
+    sources: dict
+
+    def __init__(self, sources: list[Source]):
+        if isinstance(sources, (Source(), tuple)):
+            source = [sources]
+        self.sources = dlu.list_to_dictionary(source, False, Source())
+
+    def normalise(self: Scene) -> Scene:
+        """
+        Method for returning a new scene with normalised source objects.
+
+        Returns
+        -------
+        scene : Scene
+            The normalised scene object.
+        """
+        is_source = lambda leaf: isinstance(leaf, Source())
+        norm_fn = lambda source: source.normalise()
+        sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
+        return self.set("sources", sources)
+
+    def model(
+        self: Scene, optics: Optics, get_pixel_scale: bool = False
+    ) -> Array:
+        """
+        Method for returning the model of the scene.
+
+        Parameters
+        ----------
+        optics : Optics
+            The optics object to be used to model the scene.
+        get_pixel_scale : bool = False
+            Whether to return the pixel scale of the scene.
+
+        Returns
+        -------
+        psf : Array
+            The psf of the scene.
+        pixel_scale : Array
+            The pixel scale of the scene. Only returned if get_pixel_scale is
+            True.
+        """
+        self = self.normalise
+        sources = list(self.source.values())
+
+        if get_pixel_scale:
+            psfs, pixel_scales = np.array(
+                [source.model(self, True) for source in sources]
+            )
+            return psfs.sum(0), pixel_scales.mean()
+        else:
+            return np.array(
+                [source.model(self, False) for source in sources]
+            ).sum(0)
 
 
 class Source(BaseSource):

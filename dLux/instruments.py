@@ -6,7 +6,6 @@ from jax.tree_util import tree_map, tree_flatten
 from equinox import tree_at
 from zodiax import Base
 from typing import Union
-import dLux.utils as dlu
 import dLux
 
 __all__ = ["Instrument"]
@@ -56,7 +55,7 @@ class Instrument(Base):
     def __init__(
         self: Instrument,
         optics: Optics(),
-        source: Source(),
+        source: Union[list, Source()],
         detector: Detector() = None,
     ):
         """
@@ -77,9 +76,13 @@ class Instrument(Base):
         self.optics = optics
 
         # Sources
-        if isinstance(source, (Source(), tuple)):
-            source = [source]
-        self.source = dlu.list_to_dictionary(source, False, Source())
+        if isinstance(source, Source()):
+            self.source = source
+        elif isinstance(source, tuple):
+            # If its a (source, key) tuple, we ignore the key
+            self.source = source[0]
+        else:
+            self.source = dLux.sources.Scene(source)
 
         # Detector
         if not isinstance(detector, Detector()) and detector is not None:
@@ -125,10 +128,7 @@ class Instrument(Base):
         instrument : Instrument
             The normalised instrument object.
         """
-        is_source = lambda leaf: isinstance(leaf, Source())
-        norm_fn = lambda source: source.normalise()
-        sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
-        return self.set("sources", sources)
+        return self.set("source", self.source.normalise())
 
     def model(self: Instrument) -> Union[Array, dict]:
         """
@@ -144,9 +144,7 @@ class Instrument(Base):
             a single array (if return_tree is false), or a dict of the output
             for each source.
         """
-        psf, pixel_scale = self.optics.model(
-            list(self.sources.values()), get_pixel_scale=True
-        )
+        psf, pixel_scale = self.optics.model(self.sources, True)
         psf = PSF()(psf, pixel_scale)
         psf = self.detector.model(psf) if self.detector is not None else psf
         return np.array(tree_flatten(psf)[0]).sum(0)

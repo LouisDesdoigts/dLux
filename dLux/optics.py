@@ -176,7 +176,7 @@ class BaseOptics(Base):
 
     def model(
         self: BaseOptics,
-        sources: Union[list, Source],
+        source: Source,
         get_pixel_scale: bool = False,
     ) -> Array:
         """
@@ -185,8 +185,8 @@ class BaseOptics(Base):
 
         Parameters
         ----------
-        sources : Union[list, Source]
-            The sources to model.
+        source : Source
+            The Source or Scene to model.
         get_pixel_scale : bool = False
             If True, the pixel_scale after propagation is also returned.
 
@@ -195,25 +195,7 @@ class BaseOptics(Base):
         psf : Array
             The sum of the individual sources modelled through the optics.
         """
-        if not isinstance(sources, list):
-            sources = [sources]
-
-        for source in sources:
-            if not isinstance(source, Source()):
-                raise TypeError(
-                    "All input sources must be a Source "
-                    f"object. Got type: {type(sources)})"
-                )
-
-        if get_pixel_scale:
-            psfs, pixel_scales = np.array(
-                [source.model(self, get_pixel_scale) for source in sources]
-            )
-            return psfs.sum(0), pixel_scales.mean()
-        else:
-            return np.array(
-                [source.model(self, get_pixel_scale) for source in sources]
-            ).sum(0)
+        return source.model(self, get_pixel_scale)
 
 
 class SimpleOptics(BaseOptics):
