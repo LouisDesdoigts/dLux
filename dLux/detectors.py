@@ -48,7 +48,7 @@ class LayeredDetector(BaseDetector):
             form (DetectorLayer, key), with the key being used as the
             dictionary key for the layer.
         """
-        self.layers = dlu.list_to_dictionary(layers, True, DetectorLayer())
+        self.layers = dlu.list2dictionary(layers, True, DetectorLayer())
         super().__init__()
 
     def __getattr__(self: BaseDetector, key: str) -> object:
@@ -111,7 +111,7 @@ class LayeredDetector(BaseDetector):
         """
         layers_list = list(zip(self.layers.values(), self.layers.keys()))
         layers_list.insert(index, layer)
-        new_layers = dlu.list_to_dictionary(layers_list, True, DetectorLayer())
+        new_layers = dlu.list2dictionary(layers_list, True, DetectorLayer())
         return self.set("layers", new_layers)
 
     def remove_layer(self: BaseDetector, key: str) -> BaseDetector:

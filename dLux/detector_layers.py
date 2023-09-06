@@ -12,7 +12,6 @@ __all__ = [
     "ApplySaturation",
     "AddConstant",
     "IntegerDownsample",
-    "RotateDetector",
 ]
 
 PSF = lambda: dLux.psfs.PSF
@@ -287,50 +286,3 @@ class IntegerDownsample(DetectorLayer):
             The transformed psf.
         """
         return psf.downsample(self.kernel_size)
-
-
-class RotateDetector(DetectorLayer):
-    """
-    Applies a rotation to the psf using interpolation methods.
-
-    Parameters
-    ----------
-    angle : Array, radians
-        The angle by which to rotate the psf in the clockwise direction.
-    order : int
-        The order of the interpolation.
-    """
-
-    angle: Array
-    order: int
-
-    def __init__(self: DetectorLayer, angle: Array, order: int = 1):
-        """
-        Constructor for the RotateDetector class.
-
-        Parameters
-        ----------
-        angle: float, radians
-            The angle by which to rotate the psf in the clockwise direction.
-        """
-        super().__init__()
-        self.angle = np.asarray(angle, dtype=float)
-        self.order = int(order)
-        if self.angle.ndim != 0:
-            raise ValueError("angle must be a scalar array.")
-
-    def __call__(self: DetectorLayer, psf: PSF()) -> PSF():
-        """
-        Applies the layer to the PSF.
-
-        Parameters
-        ----------
-        psf : PSF
-            The psf to operate on.
-
-        Returns
-        -------
-        psf : PSF
-            The transformed psf.
-        """
-        return psf.rotate(self.angle, self.order)

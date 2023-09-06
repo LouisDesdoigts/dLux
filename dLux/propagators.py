@@ -168,18 +168,18 @@ class MFT(Propagator):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        if self.inverse:
-            return wavefront.IMFT(
-                self.npixels,
-                self.pixel_scale / self.oversample,
-                focal_length=self.focal_length,
-            )
-        else:
-            return wavefront.MFT(
-                self.npixels,
-                self.pixel_scale / self.oversample,
-                focal_length=self.focal_length,
-            )
+        # if self.inverse:
+        return wavefront.propagate(
+            self.npixels,
+            self.pixel_scale / self.oversample,
+            focal_length=self.focal_length,
+        )
+        # else:
+        # return wavefront.propagate(
+        #     self.npixels,
+        #     self.pixel_scale / self.oversample,
+        #     focal_length=self.focal_length,
+        # )
 
 
 class ShiftedMFT(MFT):

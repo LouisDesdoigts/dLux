@@ -465,7 +465,7 @@ class AngularOptics(NonPropagatorOptics, AperturedOptics, SimpleOptics):
 
         # Propagate
         pixel_scale = self.psf_pixel_scale / self.psf_oversample
-        pixel_scale_radians = dlu.arcsec_to_rad(pixel_scale)
+        pixel_scale_radians = dlu.arcsec2rad(pixel_scale)
         wf = wf.propagate(self.psf_npixels, pixel_scale_radians)
 
         # Return PSF or Wavefront
@@ -755,7 +755,7 @@ class LayeredOptics(SimpleOptics):
             key for the layer.
         """
         super().__init__(wf_npixels=wf_npixels, diameter=diameter)
-        self.layers = dlu.list_to_dictionary(layers, True, OpticalLayer())
+        self.layers = dlu.list2dictionary(layers, True, OpticalLayer())
 
     def __getattr__(self: BaseOptics, key: str) -> object:
         """
@@ -834,7 +834,7 @@ class LayeredOptics(SimpleOptics):
         """
         layers_list = list(zip(self.layers.values(), self.layers.keys()))
         layers_list.insert(index, layer)
-        new_layers = dlu.list_to_dictionary(layers_list, True, OpticalLayer())
+        new_layers = dlu.list2dictionary(layers_list, True, OpticalLayer())
         return self.set("layers", new_layers)
 
     def remove_layer(self: OpticalLayer, key: str) -> BaseOptics:

@@ -127,47 +127,19 @@ class Scene(BaseSource):
 
 class Source(BaseSource):
     """
-    Base class for source objects. The idea of these source classes is to allow
-    an arbitrary parametrisation of the underlying astrophysical objects. Each
-    source object requires a normalise(), format_inputs(), and model() methods,
-    along with the regular getter and setter methods.
-
-    The normalise() method should return a new instance of the class with all
-    the appropriate attributes normalised (ie spectral weights, resolved source
-    distribution).
-
-    The format_inputs() method should return the relevant wavelengths, weights,
-    positions etc., that are correctly formatted to be used by the model()
-    method. This should primarily interface with the spectrum object, and
-    should call the normalise() method.
-
-    The model() method should return a single psf of the source. This is done
-    inside the source object so that each class can be arbitrarily
-    parameterised as required. This method should call the format_inputs()
-    method.
-
-    A series of parametrisations have been provided to model a series of
-    different astrophysical objects.
+    Base source class that implements the spectra attribute.
 
     Attributes
     ----------
-    position : Array, radians
-        The (x, y) on-sky position of this object.
-    flux : Array, photons
-        The flux of the object.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     """
 
-    position: Array
-    flux: Array
     spectrum: Spectrum
 
     def __init__(
         self: Source,
         wavelengths: Array,
-        position: Array = np.zeros(2),
-        flux: Array = np.array(1.0),
         weights: Array = None,
         spectrum: Spectrum = None,
     ):
@@ -179,27 +151,12 @@ class Source(BaseSource):
         wavelengths : Array, metres
             The array of wavelengths at which the spectrum is defined. Defaults
             to a PointSource with a flat spectrum.
-        position : Array, radians = None
-            The (x, y) on-sky position of this object.
-        flux : Array, photons = None
-            The flux of the object.
         weights : Array = None
             The spectral weights of the object.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
             if provided it will overwrite the inputs wavelengths and weights.
-
         """
-        # Position and Flux
-        self.position = np.asarray(position, dtype=float)
-        self.flux = np.asarray(flux, dtype=float)
-
-        if self.position.shape != (2,):
-            raise ValueError("position must be a 1d array of shape (2,).")
-
-        if self.flux.shape != ():
-            raise ValueError("flux must be a scalar, i.e. shape == ().")
-
         # Spectrum
         if spectrum is not None:
             if not isinstance(spectrum, dLux.spectra.Spectrum):
@@ -241,6 +198,62 @@ class Source(BaseSource):
         norm_spectrum = self.spectrum.normalise()
         return self.set("spectrum", norm_spectrum)
 
+
+class PointSource(Source):
+    """
+    Concrete Class for unresolved point source objects.
+
+    Attributes
+    ----------
+    position : Array, radians
+        The (x, y) on-sky position of this object.
+    flux : Array, photons
+        The flux of the object.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a Spectrum object.
+    """
+
+    position: Array
+    flux: float
+
+    def __init__(
+        self: Source,
+        wavelengths: Array,
+        position: Array = np.zeros(2),
+        flux: Array = np.array(1.0),
+        weights: Array = None,
+        spectrum: Spectrum = None,
+    ):
+        """
+        Constructor for the Source class.
+
+        Parameters
+        ----------
+        wavelengths : Array, metres
+            The array of wavelengths at which the spectrum is defined. Defaults
+            to a PointSource with a flat spectrum.
+        position : Array, radians = None
+            The (x, y) on-sky position of this object.
+        flux : Array, photons = None
+            The flux of the object.
+        weights : Array = None
+            The spectral weights of the object.
+        spectrum : Spectrum = None
+            The spectrum of this object, represented by a Spectrum object.
+            If provided it will overwrite the inputs wavelengths and weights.
+
+        """
+        # Position and Flux
+        self.position = np.asarray(position, dtype=float)
+        self.flux = float(flux)
+
+        if self.position.shape != (2,):
+            raise ValueError("position must be a 1d array of shape (2,).")
+
+        super().__init__(
+            wavelengths=wavelengths, weights=weights, spectrum=spectrum
+        )
+
     def model(
         self: Source, optics: Optics, get_pixel_scale: bool = False
     ) -> Array:
@@ -269,142 +282,9 @@ class Source(BaseSource):
         )
 
 
-class RelativeFluxSource(Source):
-    """
-    Abstract class that extend the methods of Source to allow for binary-object
-    sources to be parameterised by their relative flux. Classes that inherit
-    from this class must instantiate a contrast attribute.
-
-    Attributes
-    ----------
-    position : Array, radians
-        The (x, y) on-sky position of this object.
-    flux : Array, photons
-        The flux of the object.
-    contrast : Array
-        The contrast ratio between the two sources.
-    spectrum : Spectrum
-        The spectrum of this object, represented by a Spectrum object.
-    """
-
-    contrast: Array
-
-    def __init__(self: Source, contrast: Array, **kwargs):
-        """
-        Constructor for the RelativeFluxSource class.
-
-        Parameters
-        ----------
-        contrast : Array
-            The contrast ratio between the two sources.
-        """
-        super().__init__(**kwargs)
-        self.contrast = np.asarray(contrast, dtype=float)
-
-        if self.contrast.shape != ():
-            raise ValueError("contrast must have shape ().")
-
-    @property
-    def fluxes(self: Source) -> Array:
-        """
-        Getter method for the fluxes. This parametrises the source such that
-        flux refers to the mean_flux and contrast is defined as the ratio of
-        the flux of the first entry divided by the second entry.
-
-        Returns
-        -------
-        flux : Array, photons
-            The flux (flux1, flux2) of the binary object.
-        """
-        flux_A = 2 * self.contrast * self.flux / (1 + self.contrast)
-        flux_B = 2 * self.flux / (1 + self.contrast)
-        return np.array([flux_A, flux_B])
-
-
-class RelativePositionSource(Source):
-    """
-    Abstract class that extend the methods of Source to allow for binary-object
-    sources to be parameterised by their relative position. Classes that
-    inherit from this class must instantiate a separation attribute.
-
-    Attributes
-    ----------
-    position : Array, radians
-        The (x, y) on-sky position of this object.
-    flux : Array, photons
-        The flux of the object.
-    separation : Array, radians
-        The separation of the two sources in radians.
-    position_angle : Array, radians
-        The field angle between the two sources measure from the positive
-        x-axis.
-    spectrum : Spectrum
-        The spectrum of this object, represented by a Spectrum object.
-    """
-
-    separation: Array
-    position_angle: Array
-
-    def __init__(
-        self: Source, separation: Array, position_angle: Array, **kwargs
-    ):
-        """
-        Constructor for the RelativePositionSource class.
-
-        Parameters
-        ----------
-        separation : Array, radians
-            The separation of the two sources in radians.
-        position_angle : Array, radians
-            The field angle between the two sources measure from the positive
-            x-axis.
-        """
-        super().__init__(**kwargs)
-        self.separation = np.asarray(separation, dtype=float)
-        self.position_angle = np.asarray(position_angle, dtype=float)
-
-        if self.separation.shape != ():
-            raise ValueError("separation must have shape ().")
-
-        if self.position_angle.shape != ():
-            raise ValueError("position_angle must have shape ().")
-
-    @property
-    def positions(self: Source) -> Array:
-        """
-        Getter method for the position.
-
-        Returns
-        -------
-        position : Array, radians
-            The ((x, y), (x, y)) on-sky position of this object.
-        """
-        r, phi = self.separation / 2, self.position_angle
-        sep_vec = np.array([r * np.sin(phi), r * np.cos(phi)])
-        return np.array([self.position + sep_vec, self.position - sep_vec])
-
-
-####################
-# Concrete Classes #
-####################
-class PointSource(Source):
-    """
-    Concrete Class for unresolved point source objects.
-
-    Attributes
-    ----------
-    position : Array, radians
-        The (x, y) on-sky position of this object.
-    flux : Array, photons
-        The flux of the object.
-    spectrum : Spectrum
-        The spectrum of this object, represented by a Spectrum object.
-    """
-
-
 class PointSources(Source):
     """
-    Concrete Class for multiple unresolved point source objects.
+    Class for multiple unresolved point source objects.
 
     Attributes
     ----------
@@ -414,13 +294,15 @@ class PointSources(Source):
         The fluxes of the sources.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
-        Every source in this class will have an identical spectrum.
     """
+
+    position: Array
+    flux: Array
 
     def __init__(
         self: Source,
         wavelengths: Array,
-        position: Array = np.zeros(2),
+        position: Array = np.zeros((1, 2)),
         flux: Array = None,
         weights: Array = None,
         spectrum: Spectrum = None,
@@ -430,15 +312,15 @@ class PointSources(Source):
 
         Parameters
         ----------
+        wavelengths : Array, metres = None
+            The array of wavelengths at which the spectrum is defined.
         position : Array, radians
             The ((x0, y0), (x1, y1), ...) on-sky positions of these sources.
         flux : Array, photons = None
             The fluxes of the sources.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-            Every source in this class will have an identical spectrum.
-        wavelengths : Array, metres = None
-            The array of wavelengths at which the spectrum is defined.
+            If provided it will overwrite the inputs wavelengths and weights.
         """
         super().__init__(
             spectrum=spectrum, wavelengths=wavelengths, weights=weights
@@ -459,7 +341,7 @@ class PointSources(Source):
 
             if len(self.flux) != len(self.position):
                 raise ValueError(
-                    "Length of flux must be equal to length of " "position."
+                    "Length of flux must be equal to length of " "positions."
                 )
 
     def model(
@@ -497,7 +379,7 @@ class PointSources(Source):
             ).sum(0)
 
 
-class ResolvedSource(Source):
+class ResolvedSource(PointSource):
     """
     A class for modelling resolved sources that parametrise their resolved
     component using an array of intensities.
@@ -530,6 +412,8 @@ class ResolvedSource(Source):
 
         Parameters
         ----------
+        wavelengths : Array, metres
+            The array of wavelengths at which the spectrum is defined.
         position : Array, radians = np.array([0., 0.])
             The (x, y) on-sky position of this object.
         flux : Array, photons = np.array(1.)
@@ -538,8 +422,6 @@ class ResolvedSource(Source):
             The array of intensities representing the resolved source.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-        wavelengths : Array, metres = None
-            The array of wavelengths at which the spectrum is defined.
         """
         distribution = np.asarray(distribution, dtype=float)
         self.distribution = distribution / distribution.sum()
@@ -608,15 +490,15 @@ class ResolvedSource(Source):
             return self.flux * convolved
 
 
-class BinarySource(RelativePositionSource, RelativeFluxSource):
+class BinarySource(Source):
     """
     A parameterised binary source.
 
     Attributes
     ----------
     position : Array, radians
-        The (x, y) on-sky position of this object.
-    flux : Array, photons
+        The mean (x, y) on-sky position of this object.
+    mean_flux : Array, photons
         The mean flux of the sources.
     separation : Array, radians
         The separation of the two sources in radians.
@@ -629,30 +511,36 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         The spectrum of this object, represented by a CombinedSpectrum object.
     """
 
+    position: Array
+    mean_flux: float
+    separation: float
+    position_angle: float
+    contrast: float
+
     def __init__(
         self: Source,
         wavelengths: Array = None,
-        position: Array = np.array([0.0, 0.0]),
-        flux: Array = np.array(1.0),
-        separation: Array = None,
-        position_angle: Array = np.pi / 2,
-        contrast: Array = np.array(1.0),
+        position: Array = np.zeros(2),
+        mean_flux: float = 1.0,
+        separation: float = None,
+        position_angle: float = np.pi / 2,
+        contrast: Array = 1.0,
         spectrum: Spectrum = None,
         weights: Array = None,
     ):
         """
         Parameters
         ----------
-        position : Array, radians = np.array([0., 0.])
-            The (x, y) on-sky position of this object.
-        flux : Array, photons = np.array(1.)
+        position : Array, radians = np.zeros(2)
+            The mean (x, y) on-sky position of this object.
+        mean_flux : float, photons = 1.
             The mean flux of the sources.
-        separation : Array, radians = None
+        separation : float, radians = None
             The separation of the two sources in radians.
-        position_angle : Array, radians = np.pi/2
+        position_angle : float, radians = np.pi/2
             The position angle between the two sources measured clockwise from
             the vertical axis.
-        contrast : Array = np.array(1.)
+        contrast : float = np.array(1.)
             The contrast ratio between the two sources.
         spectrum : CombinedSpectrum = None
             The spectrum of this object, represented by a CombinedSpectrum.
@@ -663,13 +551,20 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
         if weights is None:
             weights = np.ones((2, len(wavelengths)))
 
+        # Position and Flux
+        self.position = np.asarray(position, dtype=float)
+        self.mean_flux = float(mean_flux)
+
+        if self.position.shape != (2,):
+            raise ValueError("position must be a 1d array of shape (2,).")
+
+        # Binary values
+        self.separation = float(separation)
+        self.position_angle = float(position_angle)
+        self.contrast = float(contrast)
+
         super().__init__(
             wavelengths=wavelengths,
-            position=position,
-            flux=flux,
-            separation=separation,
-            position_angle=position_angle,
-            contrast=contrast,
             spectrum=spectrum,
             weights=weights,
         )
@@ -695,25 +590,31 @@ class BinarySource(RelativePositionSource, RelativeFluxSource):
             The pixel scale of the psf. Only returned if
             `get_pixel_scale == True`.
         """
+
+        positions = dlu.positions_from_sep(
+            self.position, self.separation, self.position_angle
+        )
+        flux = dlu.flux_from_contrast(self.mean_flux, self.contrast)
+
         self = self.normalise()
-        weights = self.weights * self.fluxes[:, None]
+        weights = self.weights * flux[:, None]
         propagator = vmap(optics.propagate, in_axes=(None, 0, 0, None))
         if get_pixel_scale:
             psfs, pixel_scales = propagator(
-                self.wavelengths, self.positions, weights, True
+                self.wavelengths, positions, weights, True
             )
             return psfs.sum(0), pixel_scales.mean(0)
         else:
-            psfs = propagator(self.wavelengths, self.positions, weights, False)
+            psfs = propagator(self.wavelengths, positions, weights, False)
             return psfs.sum(0)
 
 
-class PointResolvedSource(RelativeFluxSource, ResolvedSource):
+class PointResolvedSource(ResolvedSource):
     """
     A class for modelling a point source and a resolved source that is defined
     relative to the point source. An example would be an unresolved star with
     a resolved dust shell or debris disk. These two objects share the same
-    spectra but have their fluxes defined by flux (the mean flux) and the flux
+    spectra but have their flux defined by flux (the mean flux) and the flux
     ratio (contrast) between the point source and resolved distribution. The
     resolved component is defined by an array (ie this class inherits from
     ResolvedSource).
@@ -732,6 +633,8 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     """
+
+    contrast: float
 
     def __init__(
         self: Source,
@@ -793,20 +696,20 @@ class PointResolvedSource(RelativeFluxSource, ResolvedSource):
         """
         # Normalise and get parameters
         self = self.normalise()
+        flux = dlu.flux_from_contrast(self.flux, self.contrast)
+        weights = self.weights * flux[:, None]
 
         if get_pixel_scale:
             psf, pixel_scale = optics.propagate(
-                self.wavelengths, self.position, self.weights, get_pixel_scale
+                self.wavelengths, self.position, weights, get_pixel_scale
             )
         else:
-            psf = optics.propagate(
-                self.wavelengths, self.position, self.weights
-            )
+            psf = optics.propagate(self.wavelengths, self.position, weights)
         convolved = convolve(psf, self.distribution, mode="same")
         if get_pixel_scale:
             return (
-                self.fluxes[0] * psf + self.fluxes[1] * convolved,
+                self.flux[0] * psf + self.flux[1] * convolved,
                 pixel_scale,
             )
         else:
-            return self.fluxes[0] * psf + self.fluxes[1] * convolved
+            return self.flux[0] * psf + self.flux[1] * convolved

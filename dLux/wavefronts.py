@@ -536,88 +536,25 @@ class Wavefront(Base):
         # Return new wavefront
         return self.set(["amplitude", "phase"], [field[0], field[1]])
 
-    ########################
-    # Padding and Cropping #
-    ########################
-    def pad_to(self: Wavefront, npixels: int) -> Wavefront:
+    def resize(self: Wavefront, npixels: int) -> Wavefront:
         """
-        Paraxially zero-pads the `Wavefront` to the size determined by
-        npixels. Note this only supports padding arrays of even dimension
-        to even dimension, and odd dimension to odd dimension, i.e. 2 -> 4 or
-        3 -> 5.
+        Paraxially resizes the `Wavefront` to the size determined by
+        npixels. To ensure that no output arrays are non-paraxial even shaped
+        arrays can only be resized to even shapes, and odd shaped arrays can
+        only be resized to odd shapes. i.e. 4 -> 2 or 5 -> 3.
 
         Parameters
         ----------
         npixels : int
-            The size of the array to pad to the wavefront to.
+            The size to output the array.
 
         Returns
         -------
         wavefront : Wavefront
-            The new `Wavefront` zero-padded to the size npixels.
+            The resized wavefront.
         """
-        npixels_in = self.npixels
-        if npixels_in % 2 != npixels % 2:
-            raise ValueError("Only supports even -> even or odd -> odd input.")
-        if npixels < npixels_in:
-            raise ValueError(
-                "npixels must be larger than the current array "
-                "size: {}".format(npixels_in)
-            )
-
-        new_centre = npixels // 2
-        centre = npixels_in // 2
-        remainder = npixels_in % 2
-        padded = np.zeros([npixels, npixels])
-
-        amplitude = padded.at[
-            new_centre - centre : centre + new_centre + remainder,
-            new_centre - centre : centre + new_centre + remainder,
-        ].set(self.amplitude)
-        phase = padded.at[
-            new_centre - centre : centre + new_centre + remainder,
-            new_centre - centre : centre + new_centre + remainder,
-        ].set(self.phase)
-        return self.set(["amplitude", "phase"], [amplitude, phase])
-
-    def crop_to(self: Wavefront, npixels: int) -> Wavefront:
-        """
-        Paraxially crops the `Wavefront` to the size determined by npixels.
-        Note this only supports padding arrays of even dimension to even
-        dimension, and odd dimension to odd dimension, i.e. 4 -> 2 or 5 -> 3.
-
-        Parameters
-        ----------
-        npixels : int
-            The size of the array to crop to the wavefront to.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new `Wavefront` cropped to the size npixels.
-        """
-        npixels_in = self.npixels
-
-        if npixels_in % 2 != npixels % 2:
-            raise ValueError("Only supports even -> even or odd -> odd input.")
-        if npixels > npixels_in:
-            raise ValueError(
-                "npixels must be smaller than the current array "
-                "size: {}".format(npixels_in)
-            )
-
-        new_centre = npixels_in // 2
-        centre = npixels // 2
-
-        amplitude = self.amplitude[
-            new_centre - centre : new_centre + centre,
-            new_centre - centre : new_centre + centre,
-        ]
-        phase = self.phase[
-            new_centre - centre : new_centre + centre,
-            new_centre - centre : new_centre + centre,
-        ]
-
+        field = self._to_field()
+        amplitude, phase = vmap(dlu.resize, (0, None))(field, npixels)
         return self.set(["amplitude", "phase"], [amplitude, phase])
 
     #########################
@@ -1016,7 +953,7 @@ class BroadbandWavefront(Wavefront):
         pixel_scale: Array
             The pixel scale of the array after the interpolation.
         complex : bool = False
-            Whether to rotate the real and imaginary representation of the
+            Whether to interpolate the real and imaginary representation of the
             wavefront as opposed to the amplitude and phase representation.
 
         Returns

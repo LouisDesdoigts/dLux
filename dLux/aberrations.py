@@ -1,7 +1,7 @@
 from __future__ import annotations
 from zodiax import Base
 import jax.numpy as np
-from jax import lax, Array
+from jax import Array
 import jax.tree_util as jtu
 import dLux.utils as dlu
 
@@ -82,20 +82,20 @@ class Zernike(Base):
         The azimuthal order of the Zernike polynomial.
     name : str
         The name of the Zernike polynomial.
-    _k : Array
-        The array of powers using the radial calculation. This is a
-        pre-calculated parameter and should not be changed.
     _c : Array
         The array of normalisation coefficients used in the radial calculation.
         This is a pre-calculated parameter and should not be changed.
+    _k : Array
+        The array of powers using the radial calculation. This is a
+        pre-calculated parameter and should not be changed.
     """
 
     j: int
     n: int
     m: int
     name: str
-    _k: Array
     _c: Array
+    _k: Array
 
     def __init__(self: Zernike, j: int):
         """
@@ -109,143 +109,9 @@ class Zernike(Base):
         if int(j) < 1:
             raise ValueError("The Zernike index must be greater than 0.")
         self.j = int(j)
-        self.n, self.m = self._noll_indices(self.j)
-        self.name = (
-            zernike_names[int(self.j)]
-            if self.j >= 1 and self.j <= 36
-            else f"Zernike {int(self.j)}"
-        )
-
-        # Calculate values
-        self._k = np.arange(((self.n - self.m) // 2) + 1, dtype=float)
-        sign = lax.pow(-1.0, self._k)
-        _fact_1 = dlu.factorial(np.abs(self.n - self._k))
-        _fact_2 = dlu.factorial(self._k)
-        _fact_3 = dlu.factorial(((self.n + self.m) // 2) - self._k)
-        _fact_4 = dlu.factorial(((self.n - self.m) // 2) - self._k)
-        self._c = sign * _fact_1 / _fact_2 / _fact_3 / _fact_4
-
-    def _noll_indices(self: Zernike, j: int) -> tuple[int]:
-        """
-        Calculate the radial and azimuthal orders of the Zernike polynomial.
-
-        Parameters
-        ----------
-        j : int
-            The Zernike (noll) index.
-
-        Returns
-        -------
-        n, m : tuple[int]
-            The radial and azimuthal orders of the Zernike polynomial.
-        """
-        n = (np.ceil(-1 / 2 + np.sqrt(1 + 8 * j) / 2) - 1).astype(int)
-        smallest_j_in_row = n * (n + 1) / 2 + 1
-        number_of_shifts = (j - smallest_j_in_row + ~(n & 1) + 2) // 2
-        sign_of_shift = -(j & 1) + ~(j & 1) + 2
-        base_case = n & 1
-        m = (sign_of_shift * (base_case + number_of_shifts * 2)).astype(int)
-        return int(n), int(m)
-
-    def _calculate_radial(self: Zernike, rho: Array) -> Array:
-        """
-        Calculates the radial component of the Zernike polynomial.
-
-        Parameters
-        ----------
-        rho : Array
-            The radial coordinate of the Zernike polynomial.
-
-        Returns
-        -------
-        radial : Array
-            The radial component of the Zernike polynomial.
-        """
-        rads = lax.pow(
-            rho[:, :, None], (np.abs(self.n) - 2 * self._k)[None, None, :]
-        )
-        return (self._c * rads).sum(axis=2)
-
-    def _calculate_azimuthal(self: Zernike, theta: Array) -> Array:
-        """
-        Calculates the azimuthal component of the Zernike polynomial.
-
-        Parameters
-        ----------
-        theta : Array
-            The azimuthal coordinate of the Zernike polynomial.
-
-        Returns
-        -------
-        azimuthal : Array
-            The azimuthal component of the Zernike polynomial.
-        """
-        norm_coeff = np.sqrt(self.n + 1)
-        if self.m != 0:
-            norm_coeff *= 1 + (np.sqrt(2) - 1)
-
-        if self.m >= 0:
-            return norm_coeff * np.cos(np.abs(self.m) * theta)
-        else:
-            return norm_coeff * np.sin(np.abs(self.m) * theta)
-
-    def calculate_zernike(self: Zernike, coordinates: Array) -> Array:
-        """
-        Calculates the Zernike polynomial.
-
-        Note: The zernike polynomial is defined on the coordinates up to a
-        radial value of 1.
-
-        Parameters
-        ----------
-        coordinates : Array
-            The Cartesian coordinates to calculate the Zernike polynomial upon.
-
-        Returns
-        -------
-        zernike : Array
-            The Zernike polynomial.
-        """
-        polar_coordinates = dlu.cart_to_polar(coordinates)
-        rho = polar_coordinates[0]
-        theta = polar_coordinates[1]
-        aperture = rho <= 1.0
-        return (
-            aperture
-            * self._calculate_radial(rho)
-            * self._calculate_azimuthal(theta)
-        )
-
-    def calculate_polike(
-        self: Zernike, coordinates: Array, nsides: int
-    ) -> Array:
-        """
-        Calculates the Zernike polynomial on an n-sided aperture.
-
-        Note: The zernike polynomial is defined on the coordinates up to a
-        radial value of 1.
-
-        Parameters
-        ----------
-        coordinates : Array
-            The Cartesian coordinates to calculate the Zernike polynomial upon.
-        nsides : int
-            The number of sides of the aperture.
-
-        Returns
-        -------
-        polike : Array
-            The Zernike polynomial on an n-sided aperture.
-        """
-        if nsides < 3:
-            raise ValueError(f"nsides must be >= 3, not {nsides}.")
-        theta = dlu.cart_to_polar(coordinates)[1]
-        alpha = np.pi / nsides
-        phi = theta + alpha
-        wedge = np.floor((phi + alpha) / (2.0 * alpha))
-        u_alpha = phi - wedge * (2 * alpha)
-        r_alpha = np.cos(alpha) / np.cos(u_alpha)
-        return 1 / r_alpha * self.calculate_zernike(coordinates / r_alpha)
+        self.name = dlu.zernike_name(j)
+        self.n, self.m = dlu.noll_indices(j)
+        self._c, self._k = dlu.zernike_factors(j)
 
     def calculate(self: Zernike, coordinates: Array, nsides: int = 0) -> Array:
         """
@@ -268,9 +134,13 @@ class Zernike(Base):
             The Zernike polynomial.
         """
         if nsides == 0:
-            return self.calculate_zernike(coordinates)
+            return dlu.zernike_fast(
+                self.n, self.m, self._c, self._k, coordinates
+            )
         else:
-            return self.calculate_polike(coordinates, nsides)
+            return dlu.polike_fast(
+                nsides, self.n, self.m, self._c, self._k, coordinates
+            )
 
 
 class ZernikeBasis(Base):

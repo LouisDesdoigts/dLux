@@ -105,6 +105,39 @@ class PSF(Base):
         """
         return self.set("data", dlu.rotate(self.data, angle, order=order))
 
+    def resize(self: PSF, npixels: int) -> PSF:
+        """
+        Resizes the psf to a given size. This is done using interpolation
+        methods.
+
+        Parameters
+        ----------
+        npixels : int
+            The size to resize the psf to.
+
+        Returns
+        -------
+        psf : PSF
+            The resized psf.
+        """
+        return self.set("data", dlu.resize(self.data, npixels))
+
+    def flip(self: PSF, axis: tuple) -> PSF:
+        """
+        Flips the psf along the specified axes.
+
+        Parameters
+        ----------
+        axis : tuple
+            The axes along which to flip the PSF.
+
+        Returns
+        -------
+        psf : PSF
+            The new flipped PSF.
+        """
+        return self.set("data", np.flip(self.data, axis))
+
     def __mul__(self: PSF, other: Array) -> PSF:
         """
         Magic method for the multiplication operator. This allows for the

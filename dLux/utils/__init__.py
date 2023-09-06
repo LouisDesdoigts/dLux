@@ -9,50 +9,70 @@ from . import (
     math,
     optics,
     units,
+    array,
+    polynomial,
+    source,
 )
 
 # Dont import all functions from modules
 from .propagation import FFT as FFT, MFT as MFT, fresnel_MFT as fresnel_MFT
 from .coordinates import (
-    cart_to_polar as cart_to_polar,
-    polar_to_cart as polar_to_cart,
+    cart2polar as cart2polar,
+    polar2cart as polar2cart,
     pixel_coords as pixel_coords,
     pixel_coordinates as pixel_coordinates,
 )
-from .helpers import list_to_dictionary as list_to_dictionary
+from .helpers import list2dictionary as list2dictionary
 from .interpolation import (
     scale_array as scale_array,
-    downsample as downsample,
     generate_coordinates as generate_coordinates,
     scale as scale,
     rotate as rotate,
-    fourier_rotate as fourier_rotate,
 )
 from .math import (
     factorial as factorial,
     triangular_number as triangular_number,
+    eval_basis as eval_basis,
 )
 from .optics import (
-    opd_to_phase as opd_to_phase,
-    phase_to_opd as phase_to_opd,
-    get_fringe_size as get_fringe_size,
-    get_pixels_per_fringe as get_pixels_per_fringe,
-    get_pixel_scale as get_pixel_scale,
-    get_airy_pixel_scale as get_airy_pixel_scale,
+    opd2phase as opd2phase,
+    phase2opd as phase2opd,
+    fringe_size as fringe_size,
 )
 from .units import (
-    rad_to_arcsec as rad_to_arcsec,
-    rad_to_deg as rad_to_deg,
-    rad_to_arcmin as rad_to_arcmin,
-    deg_to_rad as deg_to_rad,
-    deg_to_arcmin as deg_to_arcmin,
-    deg_to_arcsec as deg_to_arcsec,
-    arcmin_to_rad as arcmin_to_rad,
-    arcmin_to_deg as arcmin_to_deg,
-    arcmin_to_arcsec as arcmin_to_arcsec,
-    arcsec_to_rad as arcsec_to_rad,
-    arcsec_to_deg as arcsec_to_deg,
-    arcsec_to_arcmin as arcsec_to_arcmin,
+    rad2arcsec as rad2arcsec,
+    rad2deg as rad2deg,
+    rad2arcmin as rad2arcmin,
+    deg2rad as deg2rad,
+    deg2arcmin as deg2arcmin,
+    deg2arcsec as deg2arcsec,
+    arcmin2rad as arcmin2rad,
+    arcmin2deg as arcmin2deg,
+    arcmin2arcsec as arcmin2arcsec,
+    arcsec2rad as arcsec2rad,
+    arcsec2deg as arcsec2deg,
+    arcsec2arcmin as arcsec2arcmin,
+)
+from .source import (
+    fluxes_from_contrast as fluxes_from_contrast,
+    positions_from_sep as positions_from_sep,
+)
+from .array import (
+    pad_to as pad_to,
+    crop_to as crop_to,
+    resize as resize,
+    downsample as downsample,
+)
+from .polynomial import (
+    zernike_name as zernike_name,
+    noll_indices as noll_indices,
+    zernike_factors as zernike_factors,
+    eval_radial as eval_radial,
+    eval_azimuthal as eval_azimuthal,
+    zernike as zernike,
+    zernike_fast as zernike_fast,
+    polike as polike,
+    polike_fast as polike_fast,
 )
 
 
@@ -65,6 +85,9 @@ modules = [
     units,
     optics,
     math,
+    array,
+    polynomial,
+    source,
 ]
 
 __all__ = [module.__all__ for module in modules]

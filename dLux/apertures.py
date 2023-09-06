@@ -14,7 +14,7 @@ import dLux.utils as dlu
 Wavefront = lambda: dLux.wavefronts.Wavefront
 Optic = lambda: dLux.optical_layers.Optic
 BasisOptic = lambda: dLux.optical_layers.BasisOptic
-TransmissiveLayer = lambda: dLux.optical_layers.TransmissiveLayer
+OpticalLayer = lambda: dLux.optical_layers.OpticalLayer
 BasisLayer = lambda: dLux.optical_layers.BasisLayer
 ZernikeBasis = lambda: dLux.aberrations.ZernikeBasis
 
@@ -32,7 +32,8 @@ __all__ = [
 ]
 
 
-class ApertureLayer(TransmissiveLayer()):
+# class ApertureLayer(TransmissiveLayer()):
+class ApertureLayer(OpticalLayer()):
     """
     The abstract base class that all aperture layers inherit from. This
     instantiates the TransmissiveLayer class, initialising the normalisation
@@ -43,6 +44,21 @@ class ApertureLayer(TransmissiveLayer()):
     normalise : bool = False
         Whether to normalise the wavefront after passing through the aperture.
     """
+
+    normalise: bool
+
+    def __init__(self: OpticalLayer(), normalise: bool = False, **kwargs):
+        """
+        Constructor for the ApertureLayer class.
+
+        Parameters
+        ----------
+        normalise : bool = False
+            Whether to normalise the wavefront after passing through the
+            aperture.
+        """
+        self.normalise = bool(normalise)
+        super().__init__(**kwargs)
 
     @abstractmethod
     def make_static(
@@ -1295,6 +1311,7 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
         aperture: ApertureLayer,
         noll_inds: Array,
         coefficients: Array = None,
+        as_phase: bool = False,
     ) -> ApertureLayer:
         """
         Parameters
@@ -1324,7 +1341,7 @@ class AberratedAperture(ApertureLayer, BasisLayer()):
         if aperture.occulting:
             raise ValueError("AberratedApertures can not be occulting.")
 
-        super().__init__(normalise=aperture.normalise)
+        super().__init__(normalise=aperture.normalise, as_phase=as_phase)
 
         # Set Aperture
         self.aperture = aperture
@@ -1788,9 +1805,7 @@ class CompositeAperture(BaseDynamicAperture):
             Whether to normalise the wavefront after passing through the
             aperture.
         """
-        self.apertures = dlu.list_to_dictionary(
-            apertures, False, ApertureLayer
-        )
+        self.apertures = dlu.list2dictionary(apertures, False, ApertureLayer)
         super().__init__(
             centre=centre,
             shear=shear,
@@ -1877,8 +1892,8 @@ class CompositeAperture(BaseDynamicAperture):
         basis = [ap._basis(coordinates) for ap in aberrated_apertures]
         return np.squeeze(np.array(basis))
 
-    # This is actually a duplicate from BasisLayer - class structure could be
-    # optimised
+    # This is actually a duplicate from BasisLayer - class structure
+    # could be optimised
     def calculate(self, basis, coefficients):
         ndim = coefficients.ndim
         axes = (tuple(range(ndim)), tuple(range(ndim)))
@@ -2291,7 +2306,7 @@ def ApertureFactory(
             start = dlu.triangular_number(order)
             stop = dlu.triangular_number(order + 1)
             noll_indices.append(np.arange(start, stop) + 1)
-        noll_indices = np.concatenate(noll_indices)
+        noll_indices = np.concatenate(noll_indices).astype(int)
 
     if noll_indices is None:
         apertures.append(ap)

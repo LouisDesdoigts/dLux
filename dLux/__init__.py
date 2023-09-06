@@ -8,6 +8,8 @@ __version__ = importlib.metadata.version("dLux")
 from . import wavefronts
 from . import optics
 from . import optical_layers
+from . import detector_layers
+from . import unified_layers
 from . import propagators
 from . import apertures
 from . import aberrations
@@ -15,7 +17,8 @@ from . import aberrations
 # Images and Detectors
 from . import images
 from . import detectors
-from . import detector_layers
+
+# from . import detector_layers
 
 # All other classes
 from . import instruments
@@ -32,7 +35,6 @@ from . import utils as utils
 # Wavefronts and Optics
 from .wavefronts import (
     Wavefront as Wavefront,
-    # FresnelWavefront as FresnelWavefront,
 )
 from .optics import (
     AngularOptics as AngularOptics,
@@ -42,11 +44,11 @@ from .optics import (
 )
 from .optical_layers import (
     Optic as Optic,
-    PhaseOptic as PhaseOptic,
     BasisOptic as BasisOptic,
-    PhaseBasisOptic as PhaseBasisOptic,
     Tilt as Tilt,
     Normalise as Normalise,
+)
+from .unified_layers import (
     Rotate as Rotate,
     Flip as Flip,
     Resize as Resize,
@@ -82,7 +84,6 @@ from .detector_layers import (
     ApplySaturation as ApplySaturation,
     AddConstant as AddConstant,
     IntegerDownsample as IntegerDownsample,
-    RotateDetector as RotateDetector,
 )
 
 # All other classes
@@ -107,6 +108,7 @@ modules = [
     wavefronts,
     optics,
     optical_layers,
+    unified_layers,
     propagators,
     apertures,
     aberrations,

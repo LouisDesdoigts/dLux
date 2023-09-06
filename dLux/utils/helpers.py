@@ -1,9 +1,9 @@
 from collections import OrderedDict
 
-__all__ = ["list_to_dictionary"]
+__all__ = ["list2dictionary"]
 
 
-def list_to_dictionary(
+def list2dictionary(
     list_in: list, ordered: bool, allowed_types: tuple = ()
 ) -> dict:
     """
