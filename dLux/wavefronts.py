@@ -183,8 +183,6 @@ class Wavefront(Base):
         Returns the size of the fringes in angular units.
 
         # TODO Units check
-        # TODO Possibly output in unit based on units attribute
-        # TODO make methods use this
         Returns
         -------
         fringe_size : Array, radians
@@ -487,8 +485,8 @@ class Wavefront(Base):
         field = self._to_field(complex=complex)
 
         # Scale the field
-        scaler = vmap(dlu.scale, (0, None, None))
-        field = scaler(field, npixels, pixel_scale / self.pixel_scale)
+        scale_fn = vmap(dlu.scale, (0, None, None))
+        field = scale_fn(field, npixels, pixel_scale / self.pixel_scale)
 
         # Cast back to (amplitude, phase) if needed
         if complex:
@@ -560,11 +558,31 @@ class Wavefront(Base):
     #########################
     # Propagation Functions #
     #########################
+    def _prep_prop(self, focal_length: float):
+        # Determine propagation direction, output plane and output units
+        if self.plane == "Pupil":
+            inverse = False
+            plane = "Focal"
+            if focal_length is None:
+                units = "Angular"
+            else:
+                units = "Cartesian"
+                if self.units == "Angular":
+                    raise ValueError(
+                        "focal_length can not be specific when"
+                        "propagating from a Focal plane with angular units."
+                    )
+        else:
+            inverse = True
+            plane = "Pupil"
+            units = "Cartesian"
+
+        return inverse, plane, units
+
     def propagate_FFT(
         self: Wavefront,
         focal_length: float = None,
         pad: int = 2,
-        inverse: bool = False,
     ) -> Wavefront:
         """
         Propagates the wavefront by performing a Fast Fourier Transform.
@@ -584,23 +602,7 @@ class Wavefront(Base):
         wavefront : Wavefront
             The propagated wavefront.
         """
-        # Determine propagation direction, output plane and output units
-        if self.plane == "Pupil":
-            inverse = False
-            plane = "Focal"
-            if focal_length is None:
-                units = "Angular"
-            else:
-                units = "Cartesian"
-                if self.units == "Angular":
-                    raise ValueError(
-                        "focal_length can not be specific when"
-                        "propagating from a Focal plane with angular units."
-                    )
-        else:
-            inverse = True
-            plane = "Pupil"
-            units = "Cartesian"
+        inverse, plane, units = self._prep_prop(focal_length)
 
         # Calculate
         phasor, pixel_scale = dlu.FFT(
@@ -617,6 +619,10 @@ class Wavefront(Base):
             ["amplitude", "phase", "pixel_scale", "plane", "units"],
             [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units],
         )
+
+    # TODO: Class method this?
+    def _MFT(self, phasor, wavelength, pixel_scale, *args):
+        return dlu.MFT(phasor, wavelength, pixel_scale, *args)
 
     def propagate(
         self: Wavefront,
@@ -643,35 +649,18 @@ class Wavefront(Base):
         pixel : bool = True
             Whether the shift is in pixels or the units of pixel_scale.
         """
-        # Determine propagation direction, output plane and output units
-        if self.plane == "Pupil":
-            inverse = False
-            plane = "Focal"
-            if focal_length is None:
-                units = "Angular"
-            else:
-                units = "Cartesian"
-                if self.units == "Angular":
-                    raise ValueError(
-                        "focal_length can not be specific when"
-                        "propagating from a Focal plane with angular units."
-                    )
-        else:
-            inverse = True
-            plane = "Pupil"
-            units = "Cartesian"
+        inverse, plane, units = self._prep_prop(focal_length)
+
+        # Enforce array so output can be vectorised by vmap
+        pixel_scale = np.asarray(pixel_scale, float)
 
         # Calculate
-        phasor = dlu.MFT(
-            self.phasor,
-            self.wavelength,
-            self.pixel_scale,
-            npixels,
-            pixel_scale,
-            focal_length,
-            shift,
-            pixel,
-            inverse,
+        # Using a self._MFT here allows for broadband wavefronts to define
+        # vectorised propagation fn over phasors, wavels, px_scales, etc.
+        # It also makes the code muuuuch nicer to read
+        args = (npixels, pixel_scale, focal_length, shift, pixel, inverse)
+        phasor = self._MFT(
+            self.phasor, self.wavelength, self.pixel_scale, *args
         )
 
         # Update
@@ -679,6 +668,10 @@ class Wavefront(Base):
             ["amplitude", "phase", "pixel_scale", "plane", "units"],
             [np.abs(phasor), np.angle(phasor), pixel_scale, plane, units],
         )
+
+    # # TODO: Class method this?
+    # def _fresnel(self, phasor, wavelength, pixel_scale, focal_shift, *args):
+    #     return dlu.fresnel_MFT(phasor, wavelength, pixel_scale, *args)
 
     def propagate_fresnel(
         self: Wavefront,

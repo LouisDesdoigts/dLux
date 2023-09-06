@@ -7,7 +7,7 @@ from jax import vmap, Array
 __all__ = ["Spectrum", "PolySpectrum"]
 
 
-class BaseSpectrum(Base):
+class SimpleSpectrum(Base):
     """
     Abstract base class for arbitrary spectral parametrisations.
 
@@ -39,7 +39,7 @@ class BaseSpectrum(Base):
         """
 
 
-class Spectrum(BaseSpectrum):
+class Spectrum(SimpleSpectrum):
     """
     A Spectrum class that internally parametrises the spectrum via arrays (i.e.
     wavelengths and weights)
@@ -105,7 +105,7 @@ class Spectrum(BaseSpectrum):
         return self.divide("weights", weight_sum)
 
 
-class PolySpectrum(BaseSpectrum):
+class PolySpectrum(SimpleSpectrum):
     """
     Implements a generic polynomial spectrum. This is likely not needed and
     will probably just be turned into LinearSpectrum in the future.

@@ -6,7 +6,7 @@ __version__ = importlib.metadata.version("dLux")
 # Import as modules
 # Wavefronts and Optics
 from . import wavefronts
-from . import optics
+from . import optical_systems
 from . import optical_layers
 from . import detector_layers
 from . import unified_layers
@@ -36,7 +36,7 @@ from . import utils as utils
 from .wavefronts import (
     Wavefront as Wavefront,
 )
-from .optics import (
+from .optical_systems import (
     AngularOptics as AngularOptics,
     CartesianOptics as CartesianOptics,
     FlexibleOptics as FlexibleOptics,
@@ -106,7 +106,7 @@ from .instruments import Instrument as Instrument, Dither as Dither
 # Add to __all__
 modules = [
     wavefronts,
-    optics,
+    optical_systems,
     optical_layers,
     unified_layers,
     propagators,

@@ -1,8 +1,6 @@
 from __future__ import annotations
-from abc import abstractmethod
-import jax.numpy as np
 from jax import Array, vmap
-from zodiax import Base
+import jax.numpy as np
 from typing import Union
 import dLux
 
@@ -15,19 +13,7 @@ Source = lambda: dLux.sources.BaseSource
 PSF = lambda: dLux.psfs.PSF
 
 
-class BaseInstrument(Base):
-    """
-    The Base Instrument class that all instrument classes inherit from. Can be
-    used to create your own instrument classes that will integrate seamlessly
-    with the rest of dLux.
-    """
-
-    @abstractmethod
-    def model(self):  # pragma: no cover
-        pass
-
-
-class Instrument(Base):
+class Instrument(dLux.base.BaseInstrument):
     """
     A high level class designed to model the behaviour of a telescope. It
     stores a series different ∂Lux objects, and primarily passes the relevant
@@ -116,17 +102,6 @@ class Instrument(Base):
         raise AttributeError(
             f"{self.__class__.__name__} has no attribute " f"{key}."
         )
-
-    def normalise(self: Instrument) -> Instrument:
-        """
-        Method for returning a new instrument with normalised source objects.
-
-        Returns
-        -------
-        instrument : Instrument
-            The normalised instrument object.
-        """
-        return self.set("source", self.source.normalise())
 
     def model(self: Instrument) -> Union[Array, dict]:
         """

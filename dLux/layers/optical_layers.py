@@ -3,7 +3,6 @@ from abc import abstractmethod
 from typing import Union
 import jax.numpy as np
 from jax import Array
-from zodiax import Base
 import dLux
 import dLux.utils as dlu
 
@@ -19,7 +18,7 @@ __all__ = [
 Wavefront = lambda: dLux.wavefronts.Wavefront
 
 
-class OpticalLayer(Base):
+class OpticalLayer(dLux.base.BaseOpticalLayer):
     """
     Base class for optical layers. Primarily used for input type checking.
 
@@ -94,11 +93,11 @@ class TransmissiveLayer(OpticalLayer):
         super().__init__(**kwargs)
 
 
+# class AberratedLayer(OpticalLayer):
+#     """Base class for aberration layers. Primarily used for type checking."""
+
+
 class AberratedLayer(OpticalLayer):
-    """Base class for aberration layers. Primarily used for type checking."""
-
-
-class StaticAberratedLayer(AberratedLayer):
     """
     Base class for aberration layers. Implements the opd and phase attributes.
 
@@ -144,7 +143,7 @@ class StaticAberratedLayer(AberratedLayer):
         super().__init__(**kwargs)
 
 
-class BasisLayer(AberratedLayer):
+class BasisLayer(OpticalLayer):
     """
     This class primarily exists to allow for the use of the class based basis
     used for dynamic aberrated apertures.
@@ -206,7 +205,7 @@ class BasisLayer(AberratedLayer):
 ##################
 # Public Classes #
 ##################
-class Optic(TransmissiveLayer, StaticAberratedLayer):
+class Optic(TransmissiveLayer, AberratedLayer):
     """
     Optics class that holds both a transmission and OPD array.
 

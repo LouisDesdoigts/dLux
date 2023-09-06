@@ -9,8 +9,8 @@ from . import (
     math,
     optics,
     units,
-    array,
-    polynomial,
+    array_ops,
+    zernikes,
     source,
 )
 
@@ -57,13 +57,13 @@ from .source import (
     fluxes_from_contrast as fluxes_from_contrast,
     positions_from_sep as positions_from_sep,
 )
-from .array import (
+from .array_ops import (
     pad_to as pad_to,
     crop_to as crop_to,
     resize as resize,
     downsample as downsample,
 )
-from .polynomial import (
+from .zernikes import (
     zernike_name as zernike_name,
     noll_indices as noll_indices,
     zernike_factors as zernike_factors,
@@ -85,8 +85,8 @@ modules = [
     units,
     optics,
     math,
-    array,
-    polynomial,
+    array_ops,
+    zernikes,
     source,
 ]
 

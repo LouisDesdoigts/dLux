@@ -1,9 +1,7 @@
 from __future__ import annotations
-from abc import abstractmethod
 from collections import OrderedDict
 from typing import Union
 from jax import Array
-from zodiax import Base
 import dLux.utils as dlu
 import dLux
 
@@ -12,13 +10,13 @@ __all__ = ["LayeredDetector"]
 DetectorLayer = lambda: dLux.detector_layers.DetectorLayer
 
 
-class BaseDetector(Base):
-    @abstractmethod
-    def model(self, psf):  # pragma: no cover
-        pass
+# class BaseDetector(Base):
+#     @abstractmethod
+#     def model(self, psf):  # pragma: no cover
+#         pass
 
 
-class LayeredDetector(BaseDetector):
+class LayeredDetector(dLux.base.BaseDetector):
     """
     A high level class designed to model the behaviour of some detectors
     response to some psf.
@@ -32,7 +30,7 @@ class LayeredDetector(BaseDetector):
 
     layers: OrderedDict
 
-    def __init__(self: BaseDetector, layers: list):
+    def __init__(self: LayeredDetector, layers: list):
         """
         Constructor for the Detector class.
 
@@ -51,7 +49,7 @@ class LayeredDetector(BaseDetector):
         self.layers = dlu.list2dictionary(layers, True, DetectorLayer())
         super().__init__()
 
-    def __getattr__(self: BaseDetector, key: str) -> object:
+    def __getattr__(self: LayeredDetector, key: str) -> object:
         """
         Magic method designed to allow accessing of the various items within
         the layers dictionary of this class via the 'class.attribute' method.
@@ -74,7 +72,7 @@ class LayeredDetector(BaseDetector):
                 "'{}' object has no attribute '{}'".format(type(self), key)
             )
 
-    def model(self: BaseDetector, psf: Array) -> Array:
+    def model(self: LayeredDetector, psf: Array) -> Array:
         """
         Applied the stored detector layers to the input psf.
 
@@ -93,8 +91,8 @@ class LayeredDetector(BaseDetector):
         return psf.data
 
     def insert_layer(
-        self: BaseDetector, layer: Union[DetectorLayer, tuple], index: int
-    ) -> BaseDetector:
+        self: LayeredDetector, layer: Union[DetectorLayer, tuple], index: int
+    ) -> LayeredDetector:
         """
         Inserts a layer into the layers dictionary at the given index using the
         list.insert method. Note this method may require the names of some
@@ -114,7 +112,7 @@ class LayeredDetector(BaseDetector):
         new_layers = dlu.list2dictionary(layers_list, True, DetectorLayer())
         return self.set("layers", new_layers)
 
-    def remove_layer(self: BaseDetector, key: str) -> BaseDetector:
+    def remove_layer(self: LayeredDetector, key: str) -> LayeredDetector:
         """
         Removes a layer from the layers dictionary indexed at 'key' using the
         dict.pop(key) method.

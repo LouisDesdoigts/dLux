@@ -3,7 +3,6 @@ from abc import abstractmethod
 import jax.numpy as np
 from jax import Array
 from jax.scipy.stats import norm
-from zodiax import Base
 import dLux
 
 __all__ = [
@@ -17,7 +16,7 @@ __all__ = [
 PSF = lambda: dLux.psfs.PSF
 
 
-class DetectorLayer(Base):
+class DetectorLayer(dLux.base.Base):
     """
     A base Detector layer class to help with type checking throughout the rest
     of the software.

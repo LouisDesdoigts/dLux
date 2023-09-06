@@ -4,8 +4,7 @@ import jax.numpy as np
 from jax.scipy.signal import convolve
 from jax import vmap, Array
 from jax.tree_util import tree_map
-from zodiax import Base
-from abc import abstractmethod
+from zodiax import filter_vmap
 import dLux
 import dLux.utils as dlu
 
@@ -19,27 +18,11 @@ __all__ = [
     "PointResolvedSource",
 ]
 
-
 Spectrum = lambda: dLux.spectra.Spectrum
 Optics = lambda: dLux.optics.BaseOptics
 
 
-###################
-# Private Classes #
-###################
-class BaseSource(Base):
-    # TODO: Add this to allow custom sources
-
-    @abstractmethod
-    def normalise(self):  # pragma: no cover
-        pass
-
-    @abstractmethod
-    def model(self, optics):  # pragma: no cover
-        pass
-
-
-class Scene(BaseSource):
+class Scene(dLux.base.BaseSource):
     sources: dict
 
     def __init__(self, sources: list[Source]):
@@ -125,7 +108,7 @@ class Scene(BaseSource):
             ).sum(0)
 
 
-class Source(BaseSource):
+class Source(dLux.base.BaseSource):
     """
     Base source class that implements the spectra attribute.
 
@@ -254,9 +237,7 @@ class PointSource(Source):
             wavelengths=wavelengths, weights=weights, spectrum=spectrum
         )
 
-    def model(
-        self: Source, optics: Optics, get_pixel_scale: bool = False
-    ) -> Array:
+    def model(self: Source, optics: Optics, return_wf: bool = False) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -278,7 +259,7 @@ class PointSource(Source):
         self = self.normalise()
         weights = self.weights * self.flux
         return optics.propagate(
-            self.wavelengths, self.position, weights, get_pixel_scale
+            self.wavelengths, self.position, weights, return_wf=return_wf
         )
 
 
@@ -344,9 +325,7 @@ class PointSources(Source):
                     "Length of flux must be equal to length of " "positions."
                 )
 
-    def model(
-        self: Source, optics: Optics, get_pixel_scale: bool = False
-    ) -> Array:
+    def model(self: Source, optics: Optics, return_wf: bool = False) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -367,16 +346,15 @@ class PointSources(Source):
         """
         self = self.normalise()
         weights = self.weights[None, :] * self.flux[:, None]
-        propagator = vmap(optics.propagate, in_axes=(None, 0, 0, None))
-        if get_pixel_scale:
-            psfs, pixel_scales = propagator(
-                self.wavelengths, self.position, weights, True
-            )
-            return psfs.sum(0), pixel_scales.mean(0)
+        prop_fn = lambda position, weight: optics.propagate(
+            self.wavelengths, position, weight, return_wf=True
+        )
+        wfs = filter_vmap(prop_fn)(self.position, weights)
+
+        if return_wf:
+            return wfs
         else:
-            return propagator(
-                self.wavelengths, self.position, weights, False
-            ).sum(0)
+            return wfs.psf.sum((0, 1))
 
 
 class ResolvedSource(PointSource):
@@ -452,9 +430,7 @@ class ResolvedSource(PointSource):
         distribution = distribution_floor / distribution_floor.sum()
         return self.set(["spectrum", "distribution"], [spectrum, distribution])
 
-    def model(
-        self: Source, optics: Optics, get_pixel_scale: bool = False
-    ) -> Array:
+    def model(self: Source, optics: Optics, return_wf: bool = False) -> Array:
         """
         Method to model the psf of the point source through the optics.
 
@@ -463,31 +439,32 @@ class ResolvedSource(PointSource):
         optics : Optics
             The optics through which to model the source objects.
         get_pixel_scale : bool = False, radians
-            Whether to also return the psf pixel scale.
 
         Returns
         -------
         psf : Array
             The PSF of the source modelled through the optics.
         pixel_scale : Array, radians
-            The pixel scale of the psf. Only returned if
-            `get_pixel_scale == True`.
+
         """
+        # For purposes of return_wf - divergent branches of calculation may
+        # be required to prevent convolving with each monochromatic psf as
+        # opposed to the combined psf.
+        # This hints at the need to also have a get_psf method that returns
+        # the psf_class specifically
+
         # Normalise and get parameters
         self = self.normalise()
-        if get_pixel_scale:
-            psf, pixel_scale = optics.propagate(
-                self.wavelengths, self.position, self.weights, get_pixel_scale
-            )
+        weights = self.weights * self.flux
+        wf = optics.propagate(
+            self.wavelengths, self.position, weights, return_wf=True
+        )
+
+        if return_wf:
+            conv_fn = lambda psf: convolve(psf, self.distribution, mode="same")
+            return wf.set("amplitude", vmap(conv_fn)(wf.psf) ** 0.5)
         else:
-            psf = optics.propagate(
-                self.wavelengths, self.position, self.weights
-            )
-        convolved = convolve(psf, self.distribution, mode="same")
-        if get_pixel_scale:
-            return self.flux * convolved, pixel_scale
-        else:
-            return self.flux * convolved
+            return convolve(wf.psf.sum(0), self.distribution, mode="same")
 
 
 class BinarySource(Source):
@@ -570,7 +547,9 @@ class BinarySource(Source):
         )
 
     def model(
-        self: Source, optics: Optics, get_pixel_scale: bool = False
+        self: Source,
+        optics: Optics,
+        return_wf: bool = False,
     ) -> Array:
         """
         Method to model the psf of the point source through the optics.
@@ -587,26 +566,25 @@ class BinarySource(Source):
         psf : Array
             The PSF of the source modelled through the optics.
         pixel_scale : Array, radians
-            The pixel scale of the psf. Only returned if
-            `get_pixel_scale == True`.
+
         """
+        self = self.normalise()
 
         positions = dlu.positions_from_sep(
             self.position, self.separation, self.position_angle
         )
         flux = dlu.flux_from_contrast(self.mean_flux, self.contrast)
-
-        self = self.normalise()
         weights = self.weights * flux[:, None]
-        propagator = vmap(optics.propagate, in_axes=(None, 0, 0, None))
-        if get_pixel_scale:
-            psfs, pixel_scales = propagator(
-                self.wavelengths, positions, weights, True
-            )
-            return psfs.sum(0), pixel_scales.mean(0)
+
+        prop_fn = lambda position, weight: optics.propagate(
+            self.wavelengths, position, weight, return_wf=True
+        )
+        wfs = filter_vmap(prop_fn)(positions, weights)
+
+        if return_wf:
+            return wfs
         else:
-            psfs = propagator(self.wavelengths, positions, weights, False)
-            return psfs.sum(0)
+            return wfs.psf.sum((0, 1))
 
 
 class PointResolvedSource(ResolvedSource):

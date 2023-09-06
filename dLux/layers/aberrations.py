@@ -7,53 +7,6 @@ import dLux.utils as dlu
 
 __all__ = ["Zernike", "ZernikeBasis"]
 
-zernike_names = {
-    # 0th Radial
-    1: "Piston",
-    # 1st Radial
-    2: "Tilt X",
-    3: "Tilt Y",
-    # Second Radial
-    4: "Defocus",
-    5: "Astig X",
-    6: "Astig Y",
-    # Third Radial
-    7: "Coma X",
-    8: "Coma Y",
-    9: "Trefoil X",
-    10: "Trefoil Y",
-    # Fourth Radial
-    11: "Spherical",
-    12: "2nd Astig X",
-    13: "2nd Astig Y",
-    14: "Quadrafoil X",
-    15: "Quadrafoil Y",
-    # Fifth Radial
-    16: "2nd Coma X",
-    17: "2nd Coma Y",
-    18: "2nd Trefoil X",
-    19: "2nd Trefoil Y",
-    20: "Pentafoil X",
-    21: "Pentafoil Y",
-    # Sixth Radial
-    22: "2nd Spherical",
-    23: "3rd Coma X",
-    24: "3rd Coma Y",
-    25: "3rd Astig X",
-    26: "3rd Astig Y",
-    27: "Hexafoil X",
-    28: "Hexafoil Y",
-    # Seventh Radial
-    29: "4th Coma X",
-    30: "4th Coma Y",
-    31: "4th Astig X",
-    32: "4th Astig Y",
-    33: "3rd Trefoil X",
-    34: "3rd Trefoil Y",
-    35: "Heptafoil X",
-    36: "Heptafoil Y",
-}
-
 
 class Zernike(Base):
     """
