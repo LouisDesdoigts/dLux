@@ -154,9 +154,9 @@ def calc_nfringes(
 
 
 def MFT(
-    phasor,
-    wavelength,
-    pixel_scale_in,
+    phasor: Array,
+    wavelength: float,
+    pixel_scale_in: float,
     npixels_out: int,
     pixel_scale_out: Array,
     focal_length: Array = None,
