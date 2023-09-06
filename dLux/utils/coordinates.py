@@ -4,15 +4,15 @@ from jax.tree_util import tree_map
 from typing import Union
 
 __all__ = [
-    "cart_to_polar",
-    "polar_to_cart",
+    "cart2polar",
+    "polar2cart",
     "pixel_coords",
     "pixel_coordinates",
 ]
 
 
 # Coordinate conversions #
-def cart_to_polar(coordinates: Array) -> Array:
+def cart2polar(coordinates: Array) -> Array:
     """
     Converts the input (x, y) Cartesian coordinates into (r, phi) polar
     coordinates.
@@ -33,7 +33,7 @@ def cart_to_polar(coordinates: Array) -> Array:
     return np.array([np.hypot(x, y), np.arctan2(y, x)])
 
 
-def polar_to_cart(coordinates: Array) -> Array:
+def polar2cart(coordinates: Array) -> Array:
     """
     Converts the input (r, phi) polar coordinates into (x, y) Cartesian
     coordinates.
@@ -168,7 +168,7 @@ def pixel_coordinates(
             raise ValueError(
                 "polar coordinates are only defined for 2D arrays."
             )
-        return cart_to_polar(positions)
+        return cart2polar(positions)
 
     # Squeeze for empty axis removal with 1d
     return np.squeeze(positions)
