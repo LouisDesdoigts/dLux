@@ -2,27 +2,25 @@ import jax.numpy as np
 from jax import Array
 
 __all__ = [
-    "rad_to_arcsec",
-    "rad_to_deg",
-    "rad_to_arcmin",
-    "deg_to_rad",
-    "deg_to_arcmin",
-    "deg_to_arcsec",
-    "arcmin_to_rad",
-    "arcmin_to_deg",
-    "arcmin_to_arcsec",
-    "arcsec_to_rad",
-    "arcsec_to_deg",
-    "arcsec_to_arcmin",
+    "rad2arcsec",
+    "rad2deg",
+    "rad2arcmin",
+    "deg2rad",
+    "deg2arcmin",
+    "deg2arcsec",
+    "arcmin2rad",
+    "arcmin2deg",
+    "arcmin2arcsec",
+    "arcsec2rad",
+    "arcsec2deg",
+    "arcsec2arcmin",
 ]
 
 
 # Radians to:
-def rad_to_arcsec(values: Array) -> Array:
+def rad2arcsec(values: Array) -> Array:
     """
     Converts the inputs values from radians to arcseconds.
-
-    Can also be imported as r2s.
 
     Parameters
     ----------
@@ -37,11 +35,9 @@ def rad_to_arcsec(values: Array) -> Array:
     return values * 3600 * 180 / np.pi
 
 
-def rad_to_deg(values: Array) -> Array:
+def rad2deg(values: Array) -> Array:
     """
     Converts the inputs values from radians to degrees.
-
-    Can also be imported as r2d.
 
     Parameters
     ----------
@@ -56,11 +52,9 @@ def rad_to_deg(values: Array) -> Array:
     return values * 180 / np.pi
 
 
-def rad_to_arcmin(values: Array) -> Array:
+def rad2arcmin(values: Array) -> Array:
     """
     Converts the inputs values from radians to arcminutes.
-
-    Can also be imported as r2m.
 
     Parameters
     ----------
@@ -76,11 +70,9 @@ def rad_to_arcmin(values: Array) -> Array:
 
 
 # Degrees to:
-def deg_to_rad(values: Array) -> Array:
+def deg2rad(values: Array) -> Array:
     """
     Converts the inputs values from degrees to radians.
-
-    Can also be imported as d2r.
 
     Parameters
     ----------
@@ -95,11 +87,9 @@ def deg_to_rad(values: Array) -> Array:
     return values * np.pi / 180
 
 
-def deg_to_arcmin(values: Array) -> Array:
+def deg2arcmin(values: Array) -> Array:
     """
     Converts the inputs values from degrees to arcminutes.
-
-    Can also be imported as d2m.
 
     Parameters
     ----------
@@ -114,11 +104,9 @@ def deg_to_arcmin(values: Array) -> Array:
     return values * 60
 
 
-def deg_to_arcsec(values: Array) -> Array:
+def deg2arcsec(values: Array) -> Array:
     """
     Converts the inputs values from degrees to arcseconds.
-
-    Can also be imported as d2s.
 
     Parameters
     ----------
@@ -134,11 +122,9 @@ def deg_to_arcsec(values: Array) -> Array:
 
 
 # Arcminutes to:
-def arcmin_to_rad(values: Array) -> Array:
+def arcmin2rad(values: Array) -> Array:
     """
     Converts the inputs values from arcminutes to radians.
-
-    Can also be imported as m2r.
 
     Parameters
     ----------
@@ -153,11 +139,9 @@ def arcmin_to_rad(values: Array) -> Array:
     return values * np.pi / (60 * 180)
 
 
-def arcmin_to_deg(values: Array) -> Array:
+def arcmin2deg(values: Array) -> Array:
     """
     Converts the inputs values from arcminutes to degrees.
-
-    Can also be imported as m2d.
 
     Parameters
     ----------
@@ -172,11 +156,9 @@ def arcmin_to_deg(values: Array) -> Array:
     return values / 60
 
 
-def arcmin_to_arcsec(values: Array) -> Array:
+def arcmin2arcsec(values: Array) -> Array:
     """
     Converts the inputs values from arcminutes to arcseconds.
-
-    Can also be imported as m2s.
 
     Parameters
     ----------
@@ -193,11 +175,9 @@ def arcmin_to_arcsec(values: Array) -> Array:
 
 
 # Arcseconds to:
-def arcsec_to_rad(values: Array) -> Array:
+def arcsec2rad(values: Array) -> Array:
     """
     Converts the inputs values from arcseconds to radians.
-
-    Can also be imported as s2r.
 
     Parameters
     ----------
@@ -212,11 +192,9 @@ def arcsec_to_rad(values: Array) -> Array:
     return values * np.pi / (3600 * 180)
 
 
-def arcsec_to_deg(values: Array) -> Array:
+def arcsec2deg(values: Array) -> Array:
     """
     Converts the inputs values from arcseconds to degrees.
-
-    Can also be imported as s2d.
 
     Parameters
     ----------
@@ -231,11 +209,9 @@ def arcsec_to_deg(values: Array) -> Array:
     return values / 3600
 
 
-def arcsec_to_arcmin(values: Array) -> Array:
+def arcsec2arcmin(values: Array) -> Array:
     """
     Converts the inputs values from arcseconds to arcminutes.
-
-    Can also be imported as s2m.
 
     Parameters
     ----------
