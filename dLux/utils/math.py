@@ -1,6 +1,7 @@
-from jax import lax
+from jax import lax, Array
+import jax.numpy as np
 
-__all__ = ["factorial", "triangular_number"]
+__all__ = ["factorial", "triangular_number", "eval_basis"]
 
 
 # TODO: Use lax.cond to make n == 0 a safe case
@@ -37,3 +38,19 @@ def triangular_number(n: int) -> int:
         The nth triangular number.
     """
     return n * (n + 1) / 2
+
+
+def eval_basis(basis: Array, coefficients: Array) -> Array:
+    """
+    Performs an n-dimensional dot-product between the basis and coefficients
+    arrays.
+
+    Parameters
+    ----------
+    basis: Array
+        The basis to use.
+    coefficients: Array
+        The Array of coefficients to be applied to each basis vector.
+    """
+    ndim = coefficients.ndim
+    return np.tensordot(basis, coefficients, axes=2 * (tuple(range(ndim)),))
