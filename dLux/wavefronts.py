@@ -190,6 +190,13 @@ class Wavefront(Base):
         """
         return self.wavelength / self.diameter
 
+    @property
+    def ndim(self: Wavefront) -> int:
+        """
+        Returns the number of dimensions of the wavefront.
+        """
+        return self.pixel_scale.ndim
+
     #################
     # Magic Methods #
     #################

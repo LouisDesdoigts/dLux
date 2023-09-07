@@ -2,15 +2,17 @@ from __future__ import annotations
 from jax import Array, vmap
 import jax.numpy as np
 from typing import Union
+import dLux.utils as dlu
 import dLux
 
 __all__ = ["Instrument", "Dither"]
 
 # Alias classes for simplified type-checking
-Optics = lambda: dLux.optics.BaseOptics
-Detector = lambda: dLux.detectors.BaseDetector
-Source = lambda: dLux.sources.BaseSource
+Optics = lambda: dLux.base.BaseOptics
+Detector = lambda: dLux.base.BaseDetector
+Source = lambda: dLux.base.BaseSourceObject
 PSF = lambda: dLux.psfs.PSF
+Wavefront = lambda: dLux.wavefronts.Wavefront
 
 
 class Instrument(dLux.base.BaseInstrument):
@@ -103,7 +105,9 @@ class Instrument(dLux.base.BaseInstrument):
             f"{self.__class__.__name__} has no attribute " f"{key}."
         )
 
-    def model(self: Instrument) -> Union[Array, dict]:
+    def model(
+        self: Instrument, return_psf: bool = False
+    ) -> Union[Array, dict]:
         """
         A base level modelling function designed to robustly handle the
         different combinations of inputs. Models the  through the
@@ -117,17 +121,34 @@ class Instrument(dLux.base.BaseInstrument):
             a single array (if return_tree is false), or a dict of the output
             for each source.
         """
-        psf, pixel_scale = self.optics.model(self.source, True)
-        psf = PSF()(psf, pixel_scale)
-        psf = (
-            self.detector.model(psf) if self.detector is not None else psf.data
-        )
-        return psf
-        # print(psf)
-        # flat = tree_flatten(psf)[0]
-        # for f in flat:
-        #     print(f.shape)
-        # return np.array(tree_flatten(psf)[0]).sum(0)
+        # Model optics: return_psf=True for more efficient source calculations
+        psfs = self.optics.model(self.source, return_psf=True)
+
+        # Check for tree-like output from scene
+        if not isinstance(psfs, PSF()):
+            # Define functions
+            leaf_fn = lambda x: isinstance(x, PSF())
+            get_psfs = lambda psf: psf.data.sum(tuple(range(psf.ndim)))
+            get_pscales = lambda psf: psf.pixel_scale.mean()
+
+            # Get values
+            psf = dlu.map2array(get_psfs, psfs, leaf_fn).sum()
+            pixel_scale = dlu.map2array(get_pscales, psfs, leaf_fn).mean()
+
+        # Array based output
+        else:
+            psf = psfs.data.sum(tuple(range(psfs.ndim)))
+            pixel_scale = psfs.pixel_scale.mean()
+
+        # Pass through detector transformations if it exists
+        psf_obj = PSF()(psf, pixel_scale)
+        if self.detector is not None:
+            return self.detector.model(psf_obj, return_psf=return_psf)
+
+        # Return psf
+        if return_psf:
+            return psf_obj
+        return psf_obj.data
 
 
 # TODO: Test and re-write the Dither class

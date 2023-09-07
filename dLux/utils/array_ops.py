@@ -8,6 +8,8 @@ __all__ = [
     "downsample",
 ]
 
+# TODO: Add convolve?
+
 
 def pad_to(array: Array, npixels: int) -> Array:
     """

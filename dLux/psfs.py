@@ -51,6 +51,13 @@ class PSF(Base):
         """
         return self.data.shape[-1]
 
+    @property
+    def ndim(self: PSF) -> int:
+        """
+        Returns the number of dimensions of the psf.
+        """
+        return self.pixel_scale.ndim
+
     def downsample(self: PSF, n: int) -> PSF:
         """
         Downsamples the psf by a factor of n. This is done by summing the

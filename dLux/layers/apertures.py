@@ -14,9 +14,11 @@ import dLux.utils as dlu
 Wavefront = lambda: dLux.wavefronts.Wavefront
 Optic = lambda: dLux.optical_layers.Optic
 BasisOptic = lambda: dLux.optical_layers.BasisOptic
-OpticalLayer = lambda: dLux.optical_layers.OpticalLayer
+# OpticalLayer = lambda: dLux.optical_layers.OpticalLayer
 BasisLayer = lambda: dLux.optical_layers.BasisLayer
 ZernikeBasis = lambda: dLux.aberrations.ZernikeBasis
+
+from . import optical_layers
 
 
 __all__ = [
@@ -33,7 +35,7 @@ __all__ = [
 
 
 # class ApertureLayer(TransmissiveLayer()):
-class ApertureLayer(OpticalLayer()):
+class ApertureLayer(optical_layers.OpticalLayer):
     """
     The abstract base class that all aperture layers inherit from. This
     instantiates the TransmissiveLayer class, initialising the normalisation
@@ -47,7 +49,9 @@ class ApertureLayer(OpticalLayer()):
 
     normalise: bool
 
-    def __init__(self: OpticalLayer(), normalise: bool = False, **kwargs):
+    def __init__(
+        self: optical_layers.OpticalLayer, normalise: bool = False, **kwargs
+    ):
         """
         Constructor for the ApertureLayer class.
 
@@ -1285,7 +1289,7 @@ class RegPolyAperture(PolyAperture):
 ###############
 # Aberrations #
 ###############
-class AberratedAperture(ApertureLayer, BasisLayer()):
+class AberratedAperture(ApertureLayer, optical_layers.BasisLayer):
     """
     A class for generating apertures with aberrations. This class generates the
     basis vectors of the aberrations at run time, allowing for the aperture and

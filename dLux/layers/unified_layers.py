@@ -8,13 +8,16 @@ __all__ = [
     "Resize",
 ]
 
-OpticalLayer = lambda: dLux.optical_layers.OpticalLayer
-DetectorLayer = lambda: dLux.detector_layers.DetectorLayer
+# OpticalLayer = lambda: dLux.layers.optical_layers.OpticalLayer
+# DetectorLayer = lambda: dLux.layers.detector_layers.DetectorLayer
 Wavefront = lambda: dLux.wavefronts.Wavefront
 PSF = lambda: dLux.psfs.PSF
 
+from . import optical_layers
+from . import detector_layers
 
-class UnifiedLayer(OpticalLayer(), DetectorLayer()):
+
+class UnifiedLayer(optical_layers.OpticalLayer, detector_layers.DetectorLayer):
     """
     Base class for unified layers that can be applied to either wavefronts or
     PSFs.

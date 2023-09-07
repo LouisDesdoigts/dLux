@@ -9,8 +9,11 @@ __all__ = ["MFT", "FFT", "ShiftedMFT", "FarFieldFresnel"]
 
 Wavefront = dLux.wavefronts.Wavefront
 
+from . import optical_layers
 
-class Propagator(dLux.optical_layers.OpticalLayer):
+
+# class Propagator(dLux.layers.optical_layers.OpticalLayer):
+class Propagator(optical_layers.OpticalLayer):
     """
     An abstract class to store the various properties of the propagation of
     some wavefront.

@@ -8,7 +8,7 @@ import dLux
 __all__ = ["LayeredDetector"]
 
 DetectorLayer = lambda: dLux.detector_layers.DetectorLayer
-
+PSF = lambda: dLux.psfs.PSF
 
 # class BaseDetector(Base):
 #     @abstractmethod
@@ -72,13 +72,15 @@ class LayeredDetector(dLux.base.BaseDetector):
                 "'{}' object has no attribute '{}'".format(type(self), key)
             )
 
-    def model(self: LayeredDetector, psf: Array) -> Array:
+    def model(
+        self: LayeredDetector, psf: PSF(), return_psf: bool = False
+    ) -> Array:
         """
         Applied the stored detector layers to the input psf.
 
         Parameters
         ----------
-        psf : Array
+        PSF : Array
             The input psf to be transformed.
 
         Returns
@@ -88,6 +90,8 @@ class LayeredDetector(dLux.base.BaseDetector):
         """
         for key, layer in self.layers.items():
             psf = layer(psf)
+        if return_psf:
+            return psf
         return psf.data
 
     def insert_layer(

@@ -3,11 +3,17 @@ from jax import Array
 from zodiax import Base
 from abc import abstractmethod
 
-
-class BaseDetector(Base):
-    @abstractmethod
-    def model(self, psf):  # pragma: no cover
-        pass
+__all__ = [
+    "BaseInstrument",
+    "BaseSpectrum",
+    "BaseSourceObject",
+    "BaseWavefront",
+    "BaseOpticalLayer",
+    "BaseOptics",
+    "BasePSF",
+    "BaseDetectorLayer",
+    "BaseDetector",
+]
 
 
 class BaseInstrument(Base):
@@ -16,7 +22,13 @@ class BaseInstrument(Base):
         pass
 
 
-class BaseSource(Base):
+class BaseSpectrum(Base):
+    @abstractmethod
+    def normalise(self: BaseSpectrum) -> BaseSpectrum:  # pragma: no cover
+        pass
+
+
+class BaseSourceObject(Base):
     # TODO: Add this to allow custom sources
 
     @abstractmethod
@@ -25,6 +37,16 @@ class BaseSource(Base):
 
     @abstractmethod
     def model(self, optics):  # pragma: no cover
+        pass
+
+
+class BaseWavefront(Base):
+    pass
+
+
+class BaseOpticalLayer(Base):
+    @abstractmethod
+    def __call__(self: BaseOpticalLayer, wavefront):  # pragma: no cover
         pass
 
 
@@ -51,16 +73,14 @@ class BaseOptics(Base):
     @abstractmethod
     def model(
         self: BaseOptics,
-        source: BaseSource,
+        source: BaseSourceObject,
         return_wf: bool = False,
     ) -> Array:
         pass
 
 
-class BaseOpticalLayer(Base):
-    @abstractmethod
-    def __call__(self: BaseOpticalLayer, wavefront):  # pragma: no cover
-        pass
+class BasePSF(Base):
+    pass
 
 
 class BaseDetectorLayer(Base):
@@ -69,7 +89,7 @@ class BaseDetectorLayer(Base):
         pass
 
 
-class BaseSpectrum(Base):
+class BaseDetector(Base):
     @abstractmethod
-    def normalise(self: BaseSpectrum) -> BaseSpectrum:  # pragma: no cover
+    def model(self, psf):  # pragma: no cover
         pass

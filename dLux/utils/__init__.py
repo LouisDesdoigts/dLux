@@ -22,7 +22,7 @@ from .coordinates import (
     pixel_coords as pixel_coords,
     pixel_coordinates as pixel_coordinates,
 )
-from .helpers import list2dictionary as list2dictionary
+from .helpers import list2dictionary as list2dictionary, map2array as map2array
 from .interpolation import (
     scale_array as scale_array,
     generate_coordinates as generate_coordinates,

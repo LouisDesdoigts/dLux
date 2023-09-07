@@ -1,6 +1,9 @@
 from collections import OrderedDict
+from typing import Any, Callable
+from jax import tree_map, tree_flatten
+import jax.numpy as np
 
-__all__ = ["list2dictionary"]
+__all__ = ["list2dictionary", "map2array"]
 
 
 def list2dictionary(
@@ -70,3 +73,14 @@ def list2dictionary(
             item = list_in[i]
         dict_out[names[i]] = item
     return dict_out
+
+
+def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None):
+    """
+    Maps a function across a pytree, flattening it and turning it into an
+    array.
+    """
+    if leaf_fn is not None:
+        return np.array(tree_flatten(tree_map(fn, tree, is_leaf=leaf_fn))[0])
+    else:
+        return np.array(tree_flatten(tree_map(fn, tree))[0])

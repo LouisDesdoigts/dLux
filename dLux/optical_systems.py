@@ -101,6 +101,7 @@ class SimpleOptics(dLux.base.BaseOptics):
         offset: Array = np.zeros(2),
         weights: Array = None,
         return_wf: bool = False,
+        return_psf: bool = False,
     ) -> Array:
         """
         Propagates a Polychromatic point source through the optics.
@@ -126,6 +127,12 @@ class SimpleOptics(dLux.base.BaseOptics):
         pixel_scale : float, radians
 
         """
+        if return_wf and return_psf:
+            raise ValueError(
+                "return_wf and return_psf cannot both be True. "
+                "Please choose one."
+            )
+
         wavelengths = np.atleast_1d(wavelengths)
         if weights is None:
             weights = np.ones_like(wavelengths) / len(wavelengths)
@@ -154,15 +161,18 @@ class SimpleOptics(dLux.base.BaseOptics):
         ).multiply("amplitude", weight)
         wf = filter_vmap(prop_fn)(wavelengths, weights)
 
-        # Return PSF or Wavefront
+        # Return PSF, Wavefront, or array psf
         if return_wf:
             return wf
+        if return_psf:
+            return PSF()(wf.psf.sum(0), wf.pixel_scale.mean())
         return wf.psf.sum(0)
 
     def model(
         self: SimpleOptics,
         source: Source,
         return_wf: bool = False,
+        return_psf: bool = False,
     ) -> Array:
         """
         Models the input sources through the optics. The sources input can be
@@ -180,7 +190,7 @@ class SimpleOptics(dLux.base.BaseOptics):
             The sum of the individual sources modelled through the optics.
 
         """
-        return source.model(self, return_wf)
+        return source.model(self, return_wf, return_psf)
 
 
 class RegularOptics(SimpleOptics):
