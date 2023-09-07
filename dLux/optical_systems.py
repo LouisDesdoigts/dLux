@@ -155,10 +155,11 @@ class SimpleOptics(dLux.base.BaseOptics):
                 f"shape {offset.shape}."
             )
 
-        # Calculate
+        # Calculate - note we multiply by sqrt(weight) to account for the
+        # fact that the PSF is the square of the amplitude
         prop_fn = lambda wavelength, weight: self.propagate_mono(
             wavelength, offset, return_wf=True
-        ).multiply("amplitude", weight)
+        ).multiply("amplitude", weight**0.5)
         wf = filter_vmap(prop_fn)(wavelengths, weights)
 
         # Return PSF, Wavefront, or array psf
