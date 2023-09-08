@@ -1,9 +1,23 @@
 from collections import OrderedDict
 from typing import Any, Callable
-from jax import tree_map, tree_flatten
 import jax.numpy as np
+from jax import tree_flatten, tree_map
 
-__all__ = ["list2dictionary", "map2array"]
+__all__ = ["map2array", "list2dictionary", "insert_layer", "remove_layer"]
+
+
+def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None):
+    """
+    Maps a function across a pytree, flattening it and turning it into an
+    array.
+    """
+    if leaf_fn is not None:
+        return np.array(tree_flatten(tree_map(fn, tree, is_leaf=leaf_fn))[0])
+    else:
+        return np.array(tree_flatten(tree_map(fn, tree))[0])
+
+
+# TODO: Map to list to handle different output shapes?
 
 
 def list2dictionary(
@@ -32,7 +46,8 @@ def list2dictionary(
     for item in list_in:
         # Check for specified names
         if isinstance(item, tuple):
-            item, name = item
+            # item, name = item
+            name, item = item
         else:
             name = item.__class__.__name__
 
@@ -68,19 +83,20 @@ def list2dictionary(
 
         # Add to dict
         if isinstance(list_in[i], tuple):
-            item = list_in[i][0]
+            # item = list_in[i][0]
+            item = list_in[i][1]
         else:
             item = list_in[i]
         dict_out[names[i]] = item
     return dict_out
 
 
-def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None):
-    """
-    Maps a function across a pytree, flattening it and turning it into an
-    array.
-    """
-    if leaf_fn is not None:
-        return np.array(tree_flatten(tree_map(fn, tree, is_leaf=leaf_fn))[0])
-    else:
-        return np.array(tree_flatten(tree_map(fn, tree))[0])
+def insert_layer(layers: OrderedDict, layer, index: int, type):
+    layers_list = list(zip(layers.values(), layers.keys()))
+    layers_list.insert(index, layer)
+    return list2dictionary(layers_list, True, type)
+
+
+def remove_layer(layers: OrderedDict, key: str):
+    layers.pop(key)
+    return layers

@@ -33,7 +33,6 @@ from .wavefronts import (
 from .optical_systems import (
     AngularOptics as AngularOptics,
     CartesianOptics as CartesianOptics,
-    FlexibleOptics as FlexibleOptics,
     LayeredOptics as LayeredOptics,
 )
 
@@ -65,37 +64,37 @@ from .spectra import (
 )
 from .instruments import Instrument as Instrument, Dither as Dither
 
-from .layers import (
-    Optic as Optic,
-    BasisOptic as BasisOptic,
-    Tilt as Tilt,
-    Normalise as Normalise,
-    Rotate as Rotate,
-    Flip as Flip,
-    Resize as Resize,
-    MFT as MFT,
-    FFT as FFT,
-    ShiftedMFT as ShiftedMFT,
-    FarFieldFresnel as FarFieldFresnel,
-    CircularAperture as CircularAperture,
-    SquareAperture as SquareAperture,
-    RectangularAperture as RectangularAperture,
-    RegPolyAperture as RegPolyAperture,
-    Spider as Spider,
-    # IrregPolyAperture as IrregPolyAperture,
-    AberratedAperture as AberratedAperture,
-    # UniformSpider as UniformSpider,
-    CompoundAperture as CompoundAperture,
-    MultiAperture as MultiAperture,
-    ApertureFactory as ApertureFactory,
-    Zernike as Zernike,
-    ZernikeBasis as ZernikeBasis,
-    ApplyPixelResponse as ApplyPixelResponse,
-    ApplyJitter as ApplyJitter,
-    ApplySaturation as ApplySaturation,
-    AddConstant as AddConstant,
-    IntegerDownsample as IntegerDownsample,
-)
+# from .layers import (
+#     Optic as Optic,
+#     BasisOptic as BasisOptic,
+#     Tilt as Tilt,
+#     Normalise as Normalise,
+#     Rotate as Rotate,
+#     Flip as Flip,
+#     Resize as Resize,
+#     MFT as MFT,
+#     FFT as FFT,
+#     ShiftedMFT as ShiftedMFT,
+#     FarFieldFresnel as FarFieldFresnel,
+#     CircularAperture as CircularAperture,
+#     SquareAperture as SquareAperture,
+#     RectangularAperture as RectangularAperture,
+#     RegPolyAperture as RegPolyAperture,
+#     Spider as Spider,
+#     # IrregPolyAperture as IrregPolyAperture,
+#     AberratedAperture as AberratedAperture,
+#     # UniformSpider as UniformSpider,
+#     CompoundAperture as CompoundAperture,
+#     MultiAperture as MultiAperture,
+#     ApertureFactory as ApertureFactory,
+#     Zernike as Zernike,
+#     ZernikeBasis as ZernikeBasis,
+#     ApplyPixelResponse as ApplyPixelResponse,
+#     ApplyJitter as ApplyJitter,
+#     ApplySaturation as ApplySaturation,
+#     AddConstant as AddConstant,
+#     IntegerDownsample as IntegerDownsample,
+# )
 
 # Add to __all__
 modules = [

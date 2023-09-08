@@ -7,10 +7,8 @@ __all__ = [
     "BaseInstrument",
     "BaseSpectrum",
     "BaseSourceObject",
-    "BaseWavefront",
     "BaseOpticalLayer",
     "BaseOptics",
-    "BasePSF",
     "BaseDetectorLayer",
     "BaseDetector",
 ]
@@ -24,7 +22,7 @@ class BaseInstrument(Base):
 
 class BaseSpectrum(Base):
     @abstractmethod
-    def normalise(self: BaseSpectrum) -> BaseSpectrum:  # pragma: no cover
+    def normalise(self):  # pragma: no cover
         pass
 
 
@@ -38,10 +36,6 @@ class BaseSourceObject(Base):
     @abstractmethod
     def model(self, optics):  # pragma: no cover
         pass
-
-
-class BaseWavefront(Base):
-    pass
 
 
 class BaseOpticalLayer(Base):
@@ -77,10 +71,6 @@ class BaseOptics(Base):
         return_wf: bool = False,
     ) -> Array:
         pass
-
-
-class BasePSF(Base):
-    pass
 
 
 class BaseDetectorLayer(Base):

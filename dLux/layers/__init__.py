@@ -15,17 +15,22 @@ from . import unified_layers
 
 # Import core functions from modules
 from .optical_layers import (
-    Optic as Optic,
-    BasisOptic as BasisOptic,
+    TransmissiveLayer as TransmissiveLayer,
+    AberratedLayer as AberratedLayer,
+    BasisLayer as BasisLayer,
     Tilt as Tilt,
     Normalise as Normalise,
+)
+from .optics import (
+    Optic as Optic,
+    BasisOptic as BasisOptic,
 )
 from .detector_layers import (
     ApplyPixelResponse as ApplyPixelResponse,
     ApplyJitter as ApplyJitter,
     ApplySaturation as ApplySaturation,
     AddConstant as AddConstant,
-    IntegerDownsample as IntegerDownsample,
+    Downsample as Downsample,
 )
 from .unified_layers import (
     Rotate as Rotate,

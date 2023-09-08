@@ -10,7 +10,7 @@ __all__ = [
     "ApplyJitter",
     "ApplySaturation",
     "AddConstant",
-    "IntegerDownsample",
+    "Downsample",
 ]
 
 PSF = lambda: dLux.psfs.PSF
@@ -244,7 +244,7 @@ class AddConstant(DetectorLayer):
         return psf + self.value
 
 
-class IntegerDownsample(DetectorLayer):
+class Downsample(DetectorLayer):
     """
     Downsamples an input psf by an integer number of pixels via a sum.
     The number of pixels in the input psf must be integer divisible by the
@@ -260,7 +260,7 @@ class IntegerDownsample(DetectorLayer):
 
     def __init__(self: DetectorLayer, kernel_size: int) -> DetectorLayer:
         """
-        Constructor for the IntegerDownsample class.
+        Constructor for the Downsample class.
 
         Parameters
         ----------

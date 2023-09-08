@@ -3,14 +3,14 @@ from jax import lax, vmap
 import dLux.utils as dlu
 
 __all__ = [
+    "combine",
+    "soften",
     "circle",
-    "annulus",
     "square",
     "rectangle",
     "reg_polygon",
     "spider",
     "soft_circle",
-    "soft_annulus",
     "soft_square",
     "soft_rectangle",
     "soft_reg_polygon",
@@ -18,39 +18,126 @@ __all__ = [
 ]
 
 
-################################
-### General helper functions ###
-################################
-def gen_coords(npix, diameter, shifts):
-    """Generates a set of pixel coordinates"""
-    return dlu.nd_coords(
-        (npix,) * 2, (diameter / npix,) * 2, offsets=tuple(shifts)
-    )
+def combine(arrays, oversample=1):
+    array = np.array(arrays)
+    if oversample == 1:
+        return array.prod(0)
+    return dlu.downsample(array.prod(0), oversample)
 
 
-def shift_and_scale(arr):
+def shift_and_scale(array):
     """Shifts and scales the array to be between 0 and 1"""
-    return (arr - np.min(arr)) / (np.max(arr) - np.min(arr))
+    return (array - array.min()) / (array.max() - array.min())
+
+
+def soften(distances, clip_dist, invert=False):
+    # TODO: Possibly clip from -clip_dist:0 to ensure zernikes have full
+    # pupil support
+    if invert:
+        distances *= -1
+    return shift_and_scale(np.clip(distances, -clip_dist, clip_dist))
+
+
+#####################
+def circle(coords, diam, invert=False):
+    """Calcs an downsampled circle to gain soft edges"""
+    if invert:
+        return circ_distance(coords, diam) > 0
+    return circ_distance(coords, diam) < 0
+
+
+def square(coords, width, invert=False):
+    """Calcs an downsampled square to gain soft edges"""
+    if invert:
+        return square_distance(width, coords) > 0
+    return square_distance(width, coords) < 0
+
+
+def rectangle(coords, width, height, invert=False):
+    """Calcs an downsampled rectangle to gain soft edges"""
+    if invert:
+        return rectangle_distance(coords, width, height) > 0
+    return rectangle_distance(coords, width, height) < 0
+
+
+def reg_polygon(coords, rmax, nsides, invert=False):
+    """Calcs an downsampled regular polygon to gain soft edges"""
+    if invert:
+        return reg_polygon_distance(coords, nsides, rmax) > 0
+    return reg_polygon_distance(coords, nsides, rmax) < 0
+
+
+def spider(coords, width, angles):
+    """Calcs an downsampled spider to gain soft edges"""
+    angles = np.array(angles) if not isinstance(angles, np.ndarray) else angles
+    calc_fn = vmap(lambda angle: spider_distance(coords, width, angle) < 0)
+    return ~lax.reduce(calc_fn(angles), np.array(False), lax.bitwise_or, (0,))
+
+
+# def irreg_polygon(
+# npix, diam, vertices, oversample=1, invert=False, shift=np.zeros(2)):
+#     """Calcs an downsampled irregular polygon to gain soft edges"""
+#     pass
+
+
+################
+### Softened ###
+################
+def soft_circle(coords, radius, clip_dist=0.1, invert=False):
+    """Dynamically calculates a soft circle differentiably"""
+    distances = -circ_distance(coords, radius)
+    return soften(distances, clip_dist, invert)
+
+
+def soft_square(coords, width, clip_dist=0.1, invert=False):
+    """Dynamically calculates a soft square differentiably"""
+    distances = -square_distance(coords, width)
+    return soften(distances, clip_dist, invert)
+
+
+def soft_rectangle(coords, width, height, clip_dist=0.1, invert=False):
+    """Dynamically calculates a soft rectangle differentiably"""
+    distances = -rectangle_distance(coords, width, height)
+    return soften(distances, clip_dist, invert)
+
+
+def soft_reg_polygon(coords, radius, nsides, clip_dist=0.1, invert=False):
+    """Dynamically calculates a soft regular polygon differentiably"""
+    distances = -reg_polygon_distance(coords, nsides, radius)
+    return soften(distances, clip_dist, invert)
+
+
+def soft_spider(coords, width, angles, clip_dist=0.1, invert=False):
+    """Dynamically calculates a soft regular polygon differentiably"""
+    angles = np.array(angles) if not isinstance(angles, np.ndarray) else angles
+    spider_fn = vmap(lambda angle: spider_distance(coords, width, angle))
+    spiders = -spider_fn(angles).min(axis=0)
+    return soften(spiders, clip_dist, invert)
+
+
+# def soft_irreg_polygon(radius, coords, clip_dist=0.1, invert=False):
+#     """Dynamically calculates a soft irregular polygon differentiably"""
+#     pass
 
 
 ##########################
 ### Distance functions ###
 ##########################
-def circ_distance(radius, coords):
+def circ_distance(coords, radius):
     return dlu.cart2polar(coords)[0] - radius
 
 
-def square_distance(width, coords):
+def square_distance(coords, width):
     return np.max(np.abs(coords), axis=0) - width / 2
 
 
-def rectangle_distance(width, height, coords):
+def rectangle_distance(coords, width, height):
     dist_from_vert = np.abs(coords[0]) - width / 2
     dist_from_horz = np.abs(coords[1]) - height / 2
     return np.maximum(dist_from_vert, dist_from_horz)
 
 
-def spider_distance(width, angle, coords):
+def spider_distance(coords, width, angle):
     """Calcs an downsampled spider to gain soft edges"""
     coords = dlu.rotate_coords(coords, dlu.deg2rad(angle))
     dist_from_vert = np.abs(coords[0]) - width / 2
@@ -100,166 +187,6 @@ def reg_polygon_edges(n, radius, test=False):
     return calc_m(ivals, jvals), calc_xy(ivals, jvals)
 
 
-def reg_polygon_distance(nsides, radius, coords):
+def reg_polygon_distance(coords, nsides, radius):
     m, xy = reg_polygon_edges(nsides, radius)
     return vmap(line_distance, (None, 0, 0))(coords, m, xy).max(0)
-
-
-###############
-### Aliased ###
-###############
-def alias(shape, oversample, invert=False):
-    if invert:
-        shape = np.logical_not(shape)
-    return dlu.downsample(shape, oversample, mean=True)
-
-
-def circle(
-    npix, diameter, radius, oversample=1, invert=False, shift=np.zeros(2)
-):
-    """Calcs an downsampled circle to gain soft edges"""
-    coords = gen_coords(npix * oversample, diameter, shift)
-    circ = circ_distance(radius, coords) < 0
-    return alias(circ, oversample, invert=invert)
-
-
-def annulus(
-    npix,
-    diameter,
-    inner_radius,
-    outer_radius,
-    oversample=1,
-    invert=False,
-    shift=np.zeros(2),
-):
-    """Calcs an downsampled annulus to gain soft edges"""
-    coords = gen_coords(npix * oversample, diameter, shift)
-    outer = circ_distance(outer_radius, coords) < 0
-    inner = circ_distance(inner_radius, coords) < 0
-    annulus = np.logical_and(outer, np.logical_not(inner))
-    return alias(annulus, oversample, invert=invert)
-
-
-def square(
-    npix,
-    diameter,
-    width,
-    rotation=0,
-    oversample=1,
-    invert=False,
-    shift=np.zeros(2),
-):
-    """Calcs an downsampled square to gain soft edges"""
-    coords = gen_coords(npix * oversample, diameter, shift)
-    coords = dlu.rotate_coords(coords, dlu.deg2rad(rotation))
-    square = square_distance(width, coords) < 0
-    return alias(square, oversample, invert=invert)
-
-
-def rectangle(
-    npix,
-    diameter,
-    width,
-    height,
-    rotation=0,
-    oversample=1,
-    invert=False,
-    shift=np.zeros(2),
-):
-    """Calcs an downsampled rectangle to gain soft edges"""
-    coords = gen_coords(npix * oversample, diameter, shift)
-    coords = dlu.rotate_coords(coords, dlu.deg2rad(rotation))
-    rectangle = rectangle_distance(width, height, coords) < 0
-    return alias(rectangle, oversample, invert=invert)
-
-
-def reg_polygon(
-    npix,
-    diameter,
-    radius,
-    nsides,
-    rotation=0.0,
-    oversample=1,
-    invert=False,
-    shift=np.zeros(2),
-):
-    """Calcs an downsampled regular polygon to gain soft edges"""
-    coords = dlu.gen_coords(npix * oversample, diameter, shift)
-    coords = dlu.rotate_coords(coords, dlu.deg2rad(rotation))
-    poly = reg_polygon_distance(nsides, radius, coords) < 0
-    return alias(poly, oversample, invert=invert)
-
-
-def spider(npix, diameter, width, angles, oversample=1, shift=np.zeros(2)):
-    """Calcs an downsampled spider to gain soft edges"""
-    angles = np.array(angles) if not isinstance(angles, np.ndarray) else angles
-    coords = gen_coords(npix * oversample, diameter, shift)
-    spider_fn = vmap(lambda angle: spider_distance(width, angle, coords) < 0)
-    spiders = lax.reduce(
-        spider_fn(angles), np.array(False), lax.bitwise_or, (0,)
-    )
-    return alias(spiders, oversample)
-
-
-# def irreg_polygon(
-# npix, diameter, vertices, oversample=1, invert=False, shift=np.zeros(2)):
-#     """Calcs an downsampled irregular polygon to gain soft edges"""
-#     pass
-
-
-################
-### Softened ###
-################
-def soften(distances, clip_dist, invert=False):
-    # TODO: Possibly clip from -clip_dist:0 to ensure zernikes have full
-    # pupil support
-    if invert:
-        distances *= -1
-    return shift_and_scale(np.clip(distances, -clip_dist, clip_dist))
-
-
-def soft_circle(radius, coords, clip_dist=0.1, invert=False):
-    """Dynamically calculates a soft circle differentiably"""
-    distances = -circ_distance(radius, coords)
-    return soften(distances, clip_dist, invert)
-
-
-def soft_annulus(
-    inner_radius, outer_radius, coords, clip_dist=0.1, invert=False
-):
-    """Dynamically calculates a soft annulus differentiably"""
-    outer_distances = -circ_distance(outer_radius, coords)
-    inner_distances = circ_distance(inner_radius, coords)
-    distances = np.minimum(outer_distances, inner_distances)
-    return soften(distances, clip_dist, invert)
-
-
-def soft_square(width, coords, clip_dist=0.1, invert=False):
-    """Dynamically calculates a soft square differentiably"""
-    distances = -square_distance(width, coords)
-    return soften(distances, clip_dist, invert)
-
-
-def soft_rectangle(width, height, coords, clip_dist=0.1, invert=False):
-    """Dynamically calculates a soft rectangle differentiably"""
-    distances = -rectangle_distance(width, height, coords)
-    return soften(distances, clip_dist, invert)
-
-
-def soft_reg_polygon(radius, nsides, coords, clip_dist=0.1, invert=False):
-    """Dynamically calculates a soft regular polygon differentiably"""
-    distances = -reg_polygon_distance(nsides, radius, coords)
-    return soften(distances, clip_dist, invert)
-
-
-def soft_spider(width, angles, coords, clip_dist=0.1, invert=False):
-    """Dynamically calculates a soft regular polygon differentiably"""
-    angles = np.array(angles) if not isinstance(angles, np.ndarray) else angles
-    spider_fn = vmap(lambda angle: spider_distance(width, angle, coords))
-    spiders = -spider_fn(angles).min(axis=0)
-    return soften(spiders, clip_dist, invert)
-
-
-# def soft_irreg_polygon(radius, coords, clip_dist=0.1, invert=False):
-#     """Dynamically calculates a soft irregular polygon differentiably"""
-#     pass

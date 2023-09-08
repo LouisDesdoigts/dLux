@@ -27,9 +27,14 @@ from .coordinates import (
     shear_coords as shear_coords,
     rotate_coords as rotate_coords,
 )
-from .helpers import list2dictionary as list2dictionary, map2array as map2array
+from .helpers import (
+    map2array as map2array,
+    list2dictionary as list2dictionary,
+    insert_layer as insert_layer,
+    remove_layer as remove_layer,
+)
 from .interpolation import (
-    scale_array as scale_array,
+    # scale_array as scale_array,
     generate_coordinates as generate_coordinates,
     scale as scale,
     rotate as rotate,
@@ -82,21 +87,14 @@ from .zernikes import (
 )
 
 from .geometry import (
-    gen_coords as gen_coords,
-    shift_and_scale as shift_and_scale,
-    circ_distance as circ_distance,
-    square_distance as square_distance,
-    rectangle_distance as rectangle_distance,
-    reg_polygon_distance as reg_polygon_distance,
-    spider_distance as spider_distance,
+    combine as combine,
+    soften as soften,
     circle as circle,
-    annulus as annulus,
     square as square,
     rectangle as rectangle,
     reg_polygon as reg_polygon,
     spider as spider,
     soft_circle as soft_circle,
-    soft_annulus as soft_annulus,
     soft_square as soft_square,
     soft_rectangle as soft_rectangle,
     soft_reg_polygon as soft_reg_polygon,

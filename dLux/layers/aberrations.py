@@ -96,6 +96,7 @@ class Zernike(Base):
             )
 
 
+# TODO: Rename noll_indices to basis_fns??
 class ZernikeBasis(Base):
     """
     A class to calculate a set of Zernike polynomials on a dynamic set of

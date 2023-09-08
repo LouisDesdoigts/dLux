@@ -187,7 +187,12 @@ def eval_azimuthal(theta: Array, n: int, m: int) -> Array:
     return norm_coeff * trig_fn(np.abs(m) * theta)
 
 
-def zernike(j: int, coordinates: Array) -> Array:
+def scale_coords(coords, rmax):
+    """Scales coordinates to the unit circle"""
+    return coords / rmax
+
+
+def zernike(j: int, coordinates: Array, diameter=2) -> Array:
     """
     Calculates the Zernike polynomial.
 
@@ -207,6 +212,7 @@ def zernike(j: int, coordinates: Array) -> Array:
     zernike : Array
         The Zernike polynomial.
     """
+    coordinates = scale_coords(coordinates, diameter / 2)
     polar_coordinates = dlu.cart2polar(coordinates)
     rho = polar_coordinates[0]
     theta = polar_coordinates[1]
@@ -249,7 +255,7 @@ def zernike_fast(
     return aperture * eval_radial(rho, n, c, k) * eval_azimuthal(theta, n, m)
 
 
-def polike(nsides: int, j: int, coordinates: Array) -> Array:
+def polike(nsides: int, j: int, coordinates: Array, diameter=2) -> Array:
     """
     Calculates the Zernike polynomial on an n-sided aperture.
 
@@ -273,6 +279,7 @@ def polike(nsides: int, j: int, coordinates: Array) -> Array:
     """
     if nsides < 3:
         raise ValueError(f"nsides must be >= 3, not {nsides}.")
+    coordinates = scale_coords(coordinates, diameter / 2)
     theta = dlu.cart2polar(coordinates)[1]
     alpha = np.pi / nsides
     phi = theta + alpha
@@ -312,9 +319,9 @@ def polike_fast(
     """
     if nsides < 3:
         raise ValueError(f"nsides must be >= 3, not {nsides}.")
-    theta = dlu.cart2polar(coordinates)[1]
+    # theta =
     alpha = np.pi / nsides
-    phi = theta + alpha
+    phi = dlu.cart2polar(coordinates)[1] + alpha
     wedge = np.floor((phi + alpha) / (2.0 * alpha))
     u_alpha = phi - wedge * (2 * alpha)
     r_alpha = np.cos(alpha) / np.cos(u_alpha)

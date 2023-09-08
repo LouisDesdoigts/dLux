@@ -106,10 +106,9 @@ class LayeredDetector(dLux.base.BaseDetector):
         index : int
             The index to insert the layer at.
         """
-        layers_list = list(zip(self.layers.values(), self.layers.keys()))
-        layers_list.insert(index, layer)
-        new_layers = dlu.list2dictionary(layers_list, True, DetectorLayer())
-        return self.set("layers", new_layers)
+        return self.set(
+            "layers", dlu.insert_layer(layer, index, DetectorLayer())
+        )
 
     def remove_layer(self: LayeredDetector, key: str) -> LayeredDetector:
         """
@@ -121,5 +120,4 @@ class LayeredDetector(dLux.base.BaseDetector):
         key : str
             The key of the layer to remove.
         """
-        self.layers.pop(key)
-        return self
+        return self.set("layers", dlu.remove_layer(key))

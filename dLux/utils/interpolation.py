@@ -5,36 +5,38 @@ import dLux.utils as dlu
 
 # TODO: Resolve scale and scale_array
 __all__ = [
-    "scale_array",
+    # "scale_array",
     "generate_coordinates",
     "scale",
     "rotate",
 ]
 
 
-def scale_array(array: Array, size_out: int, order: int) -> Array:
-    """
-    Scales some input array to size_out using interpolation.
+# # TODO: Rename scale
+# def scale_array(array: Array, size_out: int, order: int) -> Array:
+#     """
+#     Scales some input array to size_out using interpolation.
 
-    Parameters
-    ----------
-    array : Array
-        The array to scale.
-    size_out : int
-        The output size of the mask
-    order : int
-        The interpolation order. Supports 0 and 1.
+#     Parameters
+#     ----------
+#     array : Array
+#         The array to scale.
+#     size_out : int
+#         The output size of the mask
+#     order : int
+#         The interpolation order. Supports 0 and 1.
 
-    Returns
-    -------
-    array : Array
-        The array scaled to size_out
-    """
-    xs = np.linspace(0, array.shape[0], size_out)
-    xs, ys = np.meshgrid(xs, xs)
-    return map_coordinates(array, np.array([ys, xs]), order=order)
+#     Returns
+#     -------
+#     array : Array
+#         The array scaled to size_out
+#     """
+#     xs = np.linspace(0, array.shape[0], size_out)
+#     xs, ys = np.meshgrid(xs, xs)
+#     return map_coordinates(array, np.array([ys, xs]), order=order)
 
 
+# TODO: Remove and use utils.pixel_coordinates with shift
 def generate_coordinates(
     npixels_in: int,
     npixels_out: int,
@@ -104,7 +106,7 @@ def scale(array: Array, npixels: int, ratio: float, order: int = 1) -> Array:
     """
     # Get coords arrays
     npixels_in = array.shape[-1]
-    # TODO: Update with utils.pixel_coordinates
+    # TODO: Update with array_coordinates
     coordinates = generate_coordinates(npixels_in, npixels, ratio)
     return map_coordinates(array, coordinates, order=order)
 
