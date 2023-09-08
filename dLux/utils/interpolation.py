@@ -137,7 +137,7 @@ def rotate(array: Array, angle: Array, order: int = 1) -> Array:
     # Get coordinates
     npixels = array.shape[0]
     centre = (npixels - 1) / 2
-    coordinates = dlu.pixel_coordinates((npixels, npixels), indexing="ij")
+    coordinates = dlu.nd_coords((npixels, npixels), indexing="ij")
     coordinates_rotated = _rotate(coordinates, angle) + centre
 
     # Interpolate

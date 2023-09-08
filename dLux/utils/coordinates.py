@@ -7,8 +7,32 @@ __all__ = [
     "cart2polar",
     "polar2cart",
     "pixel_coords",
-    "pixel_coordinates",
+    "nd_coords",
+    "translate_coords",
+    "compress_coords",
+    "shear_coords",
+    "rotate_coords",
 ]
+
+
+def translate_coords(coords, centre):
+    return coords - centre[:, None, None]
+
+
+def compress_coords(coords, compress):
+    return coords * compress[:, None, None]
+
+
+def shear_coords(coords, shear):
+    trans_coords = np.transpose(coords, (0, 2, 1))
+    return coords + trans_coords * shear[:, None, None]
+
+
+def rotate_coords(coords, rotation):
+    x, y = coords
+    new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
+    new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
+    return np.array([new_x, new_y])
 
 
 # Coordinate conversions #
@@ -57,8 +81,7 @@ def polar2cart(coordinates: Array) -> Array:
 # Positions Calculations #
 def pixel_coords(
     npixels: int,
-    pixel_scale: float = 1,
-    ndims: int = 2,
+    diameter: float,
     polar=False,
 ) -> Array:
     """
@@ -72,10 +95,8 @@ def pixel_coords(
     ----------
     npixels : int
         The number of pixels in all dimensions.
-    pixel_scale : float = 1
-        The pixel scale in all dimensions.
-    ndims : int = 2
-        The number of output dimensions.
+    diameter : float
+        The diameter of the coordinates array to generate.
     polar : bool = False
         If True, the output is in polar coordinates. If False, the output is in
         Cartesian coordinates. ndims must be 2 if polar is True.
@@ -85,16 +106,16 @@ def pixel_coords(
     coordinates : Array
         The array of pixel center coordinates.
     """
-    npixels = (npixels,) * ndims
-    pixel_scale = (pixel_scale,) * ndims
-    return pixel_coordinates(npixels, pixel_scale, polar=polar)
+    coords = nd_coords((npixels,) * 2, (diameter / npixels,) * 2)
+    if polar:
+        return cart2polar(coords)
+    return coords
 
 
-def pixel_coordinates(
+def nd_coords(
     npixels: Union[int, tuple],
     pixel_scales: Union[tuple, float] = 1.0,
     offsets: Union[tuple, float] = 0.0,
-    polar: bool = False,
     indexing: str = "xy",
 ) -> Array:
     """
@@ -115,7 +136,7 @@ def pixel_coordinates(
     npixels : Union[int, tuple]
         The number of pixels in each dimension.
     pixel_scales : Union[tuple, float] = 1.
-        The pixel scales in each dimension. If a tuple, the length
+        The pixel_scales of each dimension. If a tuple, the length
         of the tuple must match the number of dimensions. If a float, the same
         scale is applied to all dimensions. If None, the scale is set to 1.
     offsets : Union[tuple, float] = 0.
@@ -123,9 +144,6 @@ def pixel_coordinates(
         length of the tuple must match the number of dimensions. If a float,
         the same offset is applied to all dimensions. If None, the offset is
         set to 0.
-    polar : bool = False
-        If True, the output is in polar coordinates. If False, the output is in
-        Cartesian coordinates. Default is False.
     indexing : str = 'xy'
         The indexing of the output. Default is 'xy'. See numpy.meshgrid for
         more details.
@@ -138,9 +156,7 @@ def pixel_coordinates(
     if indexing not in ["xy", "ij"]:
         raise ValueError("indexing must be either 'xy' or 'ij'.")
 
-    if polar and indexing == "ij":
-        indexing = "xy"
-
+    # Promote npixels to tuple to handle 1d case
     if not isinstance(npixels, tuple):
         npixels = (npixels,)
 
@@ -153,22 +169,20 @@ def pixel_coordinates(
         offsets = (offsets,) * len(npixels)
 
     def pixel_fn(n, offset, scale):
+        # TODO: calculate the start and end points first and then use linspace
+        # so that ops are done on floats not arrays
+        # scale = diam / n
         pix = np.arange(n) - (n - 1) / 2.0
         pix *= scale
         pix -= offset
         return pix
 
-    pixels = tree_map(pixel_fn, npixels, offsets, pixel_scales)
+    # Generate the linear edges of each axes
+    # TODO: tree_flatten()[0] to avoid squeeze?
+    lin_pixels = tree_map(pixel_fn, npixels, offsets, pixel_scales)
 
     # output (x, y) for 2d, else in order
-    positions = np.array(np.meshgrid(*pixels, indexing=indexing))
+    positions = np.array(np.meshgrid(*lin_pixels, indexing=indexing))
 
-    if polar:
-        if len(npixels) != 2:
-            raise ValueError(
-                "polar coordinates are only defined for 2D arrays."
-            )
-        return cart2polar(positions)
-
-    # Squeeze for empty axis removal with 1d
+    # Squeeze for empty axis removal in 1d case
     return np.squeeze(positions)

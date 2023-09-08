@@ -96,14 +96,14 @@ def transfer_matrix(
 
     # Input coordinates
     scale_in = 1.0 / npixels_in
-    in_vec = dlu.pixel_coordinates(npixels_in, scale_in, shift * scale_in)
+    in_vec = dlu.nd_coords(npixels_in, scale_in, shift * scale_in)
 
     # Output coordinates
     scale_out = pixel_scale_out / fringe_size
     if focal_length is not None:
         # scale_out /= focal_length
         scale_out /= focal_length + focal_shift
-    out_vec = dlu.pixel_coordinates(npixels_out, scale_out, shift * scale_out)
+    out_vec = dlu.nd_coords(npixels_out, scale_out, shift * scale_out)
 
     # Generate transfer matrix
     matrix = 2j * np.pi * np.outer(in_vec, out_vec)
@@ -291,8 +291,8 @@ def fresnel_phase_factors(
     """
     # Calculate parameters
     prop_dist = focal_length + focal_shift
-    input_positions = dlu.pixel_coords(npixels_in, pixel_scale_in)
-    output_positions = dlu.pixel_coords(npixels_out, pixel_scale_out)
+    input_positions = dlu.nd_coords(npixels_in, pixel_scale_in)
+    output_positions = dlu.nd_coords(npixels_out, pixel_scale_out)
 
     # Calculate factors
     first_factor = quadratic_phase(

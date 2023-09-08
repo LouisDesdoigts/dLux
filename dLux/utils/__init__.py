@@ -12,6 +12,7 @@ from . import (
     array_ops,
     zernikes,
     source,
+    geometry,
 )
 
 # Dont import all functions from modules
@@ -20,7 +21,11 @@ from .coordinates import (
     cart2polar as cart2polar,
     polar2cart as polar2cart,
     pixel_coords as pixel_coords,
-    pixel_coordinates as pixel_coordinates,
+    nd_coords as nd_coords,
+    translate_coords as translate_coords,
+    compress_coords as compress_coords,
+    shear_coords as shear_coords,
+    rotate_coords as rotate_coords,
 )
 from .helpers import list2dictionary as list2dictionary, map2array as map2array
 from .interpolation import (
@@ -33,6 +38,7 @@ from .math import (
     factorial as factorial,
     triangular_number as triangular_number,
     eval_basis as eval_basis,
+    nandiv as nandiv,
 )
 from .optics import (
     opd2phase as opd2phase,
@@ -75,6 +81,28 @@ from .zernikes import (
     polike_fast as polike_fast,
 )
 
+from .geometry import (
+    gen_coords as gen_coords,
+    shift_and_scale as shift_and_scale,
+    circ_distance as circ_distance,
+    square_distance as square_distance,
+    rectangle_distance as rectangle_distance,
+    reg_polygon_distance as reg_polygon_distance,
+    spider_distance as spider_distance,
+    circle as circle,
+    annulus as annulus,
+    square as square,
+    rectangle as rectangle,
+    reg_polygon as reg_polygon,
+    spider as spider,
+    soft_circle as soft_circle,
+    soft_annulus as soft_annulus,
+    soft_square as soft_square,
+    soft_rectangle as soft_rectangle,
+    soft_reg_polygon as soft_reg_polygon,
+    soft_spider as soft_spider,
+)
+
 
 # Add to __all__
 modules = [
@@ -88,6 +116,7 @@ modules = [
     array_ops,
     zernikes,
     source,
+    geometry,
 ]
 
 __all__ = [module.__all__ for module in modules]

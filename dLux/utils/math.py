@@ -1,7 +1,7 @@
 from jax import lax, Array
 import jax.numpy as np
 
-__all__ = ["factorial", "triangular_number", "eval_basis"]
+__all__ = ["factorial", "triangular_number", "eval_basis", "nandiv"]
 
 
 # TODO: Use lax.cond to make n == 0 a safe case
@@ -54,3 +54,7 @@ def eval_basis(basis: Array, coefficients: Array) -> Array:
     """
     ndim = coefficients.ndim
     return np.tensordot(basis, coefficients, axes=2 * (tuple(range(ndim)),))
+
+
+def nandiv(a, b, fill=np.inf):
+    return np.where(b == 0, fill, a / b)
