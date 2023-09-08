@@ -10,11 +10,6 @@ __all__ = ["LayeredDetector"]
 DetectorLayer = lambda: dLux.detector_layers.DetectorLayer
 PSF = lambda: dLux.psfs.PSF
 
-# class BaseDetector(Base):
-#     @abstractmethod
-#     def model(self, psf):  # pragma: no cover
-#         pass
-
 
 class LayeredDetector(dLux.base.BaseDetector):
     """

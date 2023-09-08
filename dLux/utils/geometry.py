@@ -3,13 +3,6 @@ from jax import lax, vmap
 import dLux.utils as dlu
 
 __all__ = [
-    "gen_coords",
-    "shift_and_scale",
-    "circ_distance",
-    "square_distance",
-    "rectangle_distance",
-    "reg_polygon_distance",
-    "spider_distance",
     "circle",
     "annulus",
     "square",
@@ -217,54 +210,56 @@ def spider(npix, diameter, width, angles, oversample=1, shift=np.zeros(2)):
 ################
 ### Softened ###
 ################
-def soften(distances, clip_distance, invert=False):
+def soften(distances, clip_dist, invert=False):
+    # TODO: Possibly clip from -clip_dist:0 to ensure zernikes have full
+    # pupil support
     if invert:
         distances *= -1
-    return shift_and_scale(np.clip(distances, -clip_distance, clip_distance))
+    return shift_and_scale(np.clip(distances, -clip_dist, clip_dist))
 
 
-def soft_circle(radius, coords, clip_distance=0.1, invert=False):
+def soft_circle(radius, coords, clip_dist=0.1, invert=False):
     """Dynamically calculates a soft circle differentiably"""
     distances = -circ_distance(radius, coords)
-    return soften(distances, clip_distance, invert)
+    return soften(distances, clip_dist, invert)
 
 
 def soft_annulus(
-    inner_radius, outer_radius, coords, clip_distance=0.1, invert=False
+    inner_radius, outer_radius, coords, clip_dist=0.1, invert=False
 ):
     """Dynamically calculates a soft annulus differentiably"""
     outer_distances = -circ_distance(outer_radius, coords)
     inner_distances = circ_distance(inner_radius, coords)
     distances = np.minimum(outer_distances, inner_distances)
-    return soften(distances, clip_distance, invert)
+    return soften(distances, clip_dist, invert)
 
 
-def soft_square(width, coords, clip_distance=0.1, invert=False):
+def soft_square(width, coords, clip_dist=0.1, invert=False):
     """Dynamically calculates a soft square differentiably"""
     distances = -square_distance(width, coords)
-    return soften(distances, clip_distance, invert)
+    return soften(distances, clip_dist, invert)
 
 
-def soft_rectangle(width, height, coords, clip_distance=0.1, invert=False):
+def soft_rectangle(width, height, coords, clip_dist=0.1, invert=False):
     """Dynamically calculates a soft rectangle differentiably"""
     distances = -rectangle_distance(width, height, coords)
-    return soften(distances, clip_distance, invert)
+    return soften(distances, clip_dist, invert)
 
 
-def soft_reg_polygon(radius, nsides, coords, clip_distance=0.1, invert=False):
+def soft_reg_polygon(radius, nsides, coords, clip_dist=0.1, invert=False):
     """Dynamically calculates a soft regular polygon differentiably"""
     distances = -reg_polygon_distance(nsides, radius, coords)
-    return soften(distances, clip_distance, invert)
+    return soften(distances, clip_dist, invert)
 
 
-def soft_spider(width, angles, coords, clip_distance=0.1):
+def soft_spider(width, angles, coords, clip_dist=0.1, invert=False):
     """Dynamically calculates a soft regular polygon differentiably"""
     angles = np.array(angles) if not isinstance(angles, np.ndarray) else angles
     spider_fn = vmap(lambda angle: spider_distance(width, angle, coords))
     spiders = -spider_fn(angles).min(axis=0)
-    return soften(spiders, clip_distance)
+    return soften(spiders, clip_dist, invert)
 
 
-# def soft_irreg_polygon(radius, coords, clip_distance=0.1, invert=False):
+# def soft_irreg_polygon(radius, coords, clip_dist=0.1, invert=False):
 #     """Dynamically calculates a soft irregular polygon differentiably"""
 #     pass

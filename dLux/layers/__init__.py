@@ -40,11 +40,12 @@ from .propagators import (
 )
 from .apertures import (
     CircularAperture as CircularAperture,
+    SquareAperture as SquareAperture,
     RectangularAperture as RectangularAperture,
     RegPolyAperture as RegPolyAperture,
-    IrregPolyAperture as IrregPolyAperture,
+    # IrregPolyAperture as IrregPolyAperture,
+    Spider as Spider,
     AberratedAperture as AberratedAperture,
-    UniformSpider as UniformSpider,
     CompoundAperture as CompoundAperture,
     MultiAperture as MultiAperture,
     ApertureFactory as ApertureFactory,
