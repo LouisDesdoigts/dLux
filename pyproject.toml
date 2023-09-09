@@ -4,7 +4,7 @@ version = "0.13.2"
 description = "Differentiable Optical Models as Parameterised Neural Networks in Jax using Zodiax."
 readme = "README.md"
 requires-python =">=3.8"
-license = {file = "LICENSE"}
+license = {file = "LICENSE.md"}
 authors = [
   {name = "Louis Desdoigts", email = "louis.desdoigts@sydney.edu.au"},
 ]
@@ -19,6 +19,9 @@ classifiers=[
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["dLux"]
 
 [project.optional-dependencies]
 extras = ["matplotlib", "jupyter", "jupyterlab", "tqdm", "chainconsumer", "numpyro", "dLuxToliman", "scikit-learn"]
