@@ -1,21 +1,28 @@
 from __future__ import annotations
+from abc import abstractmethod
+from zodiax import Base
 from jax import Array, vmap
 import jax.numpy as np
 from typing import Union
 import dLux.utils as dlu
-import dLux
 
-__all__ = ["Instrument", "Dither"]
-
-# Alias classes for simplified type-checking
-Optics = lambda: dLux.base.BaseOptics
-Detector = lambda: dLux.base.BaseDetector
-Source = lambda: dLux.base.BaseSourceObject
-PSF = lambda: dLux.psfs.PSF
-Wavefront = lambda: dLux.wavefronts.Wavefront
+from .optical_systems import BaseOpticalSystem as OpticalSystem
+from .detectors import BaseDetector as Detector
+from .sources import BaseSource as Source, Scene
+from .containers.psfs import PSF
 
 
-class Instrument(dLux.base.BaseInstrument):
+__all__ = ["Instrument", "Telescope", "Dither"]
+
+
+class Instrument(Base):
+    @abstractmethod
+    def model(self):  # pragma: no cover
+        pass
+
+
+# TODO: re-name to Telescope
+class Telescope(Instrument):
     """
     A high level class designed to model the behaviour of a telescope. It
     stores a series different ∂Lux objects, and primarily passes the relevant
@@ -34,18 +41,18 @@ class Instrument(dLux.base.BaseInstrument):
         instrumental effects on a psf.
     """
 
-    optics: Optics()
-    source: Source()
-    detector: Detector()
+    optics: OpticalSystem
+    source: Source
+    detector: Detector
 
     def __init__(
-        self: Instrument,
-        optics: Optics(),
-        source: Union[list, Source()],
-        detector: Detector() = None,
+        self: Telescope,
+        optics: OpticalSystem,
+        source: Union[list, Source],
+        detector: Detector = None,
     ):
         """
-        Constructor for the Instrument class.
+        Constructor for the Telescope class.
 
         Parameters
         ----------
@@ -57,28 +64,28 @@ class Instrument(dLux.base.BaseInstrument):
             A pre-configured Detector object.
         """
         # Optics
-        if not isinstance(optics, Optics()):
+        if not isinstance(optics, OpticalSystem):
             raise TypeError("optics must be an Optics object.")
         self.optics = optics
 
         # Sources
-        if isinstance(source, Source()):
+        if isinstance(source, Source):
             self.source = source
         elif isinstance(source, tuple):
-            # If its a (source, key) tuple, we ignore the key
-            self.source = source[0]
+            # If its a (key, source) tuple, we ignore the key
+            self.source = source[1]
         else:
-            self.source = dLux.sources.Scene(source)
+            self.source = Scene(source)
 
         # Detector
-        if not isinstance(detector, Detector()) and detector is not None:
+        if not isinstance(detector, Detector) and detector is not None:
             raise TypeError(
                 "detector must be an Detector object. "
                 f"Got type {type(detector)}"
             )
         self.detector = detector
 
-    def __getattr__(self: Instrument, key: str) -> object:
+    def __getattr__(self: Telescope, key: str) -> object:
         """
         Magic method designed to allow accessing of the various items within
         the sub-dictionaries of this class via the 'class.attribute' method.
@@ -105,9 +112,7 @@ class Instrument(dLux.base.BaseInstrument):
             f"{self.__class__.__name__} has no attribute " f"{key}."
         )
 
-    def model(
-        self: Instrument, return_psf: bool = False
-    ) -> Union[Array, dict]:
+    def model(self: Telescope, return_psf: bool = False) -> Union[Array, dict]:
         """
         A base level modelling function designed to robustly handle the
         different combinations of inputs. Models the  through the
@@ -125,9 +130,9 @@ class Instrument(dLux.base.BaseInstrument):
         psfs = self.optics.model(self.source, return_psf=True)
 
         # Check for tree-like output from scene
-        if not isinstance(psfs, PSF()):
+        if not isinstance(psfs, PSF):
             # Define functions
-            leaf_fn = lambda x: isinstance(x, PSF())
+            leaf_fn = lambda x: isinstance(x, PSF)
             get_psfs = lambda psf: psf.data.sum(tuple(range(psf.ndim)))
             get_pscales = lambda psf: psf.pixel_scale.mean()
 
@@ -141,7 +146,7 @@ class Instrument(dLux.base.BaseInstrument):
             pixel_scale = psfs.pixel_scale.mean()
 
         # Pass through detector transformations if it exists
-        psf_obj = PSF()(psf, pixel_scale)
+        psf_obj = PSF(psf, pixel_scale)
         if self.detector is not None:
             return self.detector.model(psf_obj, return_psf=return_psf)
 
@@ -152,9 +157,9 @@ class Instrument(dLux.base.BaseInstrument):
 
 
 # TODO: Test and re-write the Dither class
-class Dither(Instrument):
+class Dither(Telescope):
     """
-    Instrument class designed to apply a series of dithers to the instrument
+    Telescope class designed to apply a series of dithers to the instrument
     and return the corresponding PSFs.
 
     Attributes
@@ -168,11 +173,11 @@ class Dither(Instrument):
     dithers: Array
 
     def __init__(
-        self: Instrument,
+        self: Telescope,
         dithers: Array,
-        optics: Optics(),
-        source: Union[list, Source()],
-        detector: Detector() = None,
+        optics: OpticalSystem,
+        source: Union[list, Source],
+        detector: Detector = None,
     ):
         """
         Constructor for the Dither class.
@@ -195,14 +200,14 @@ class Dither(Instrument):
             raise ValueError("dithers must be an array of shape (ndithers, 2)")
         super().__init__(optics=optics, source=source, detector=detector)
 
-    def model(self: Instrument) -> Array:
+    def model(self: Telescope) -> Array:
         """
         Applies a series of dithers to the instrument sources and calls the
         .model() method after applying each dither.
 
         Parameters
         ----------
-        instrument : Instrument
+        instrument : Telescope
             The array of dithers to apply to the source positions.
 
         Returns

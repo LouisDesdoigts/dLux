@@ -1,17 +1,25 @@
 from __future__ import annotations
 from collections import OrderedDict
+from abc import abstractmethod
 from typing import Union
+from zodiax import Base
 from jax import Array
 import dLux.utils as dlu
-import dLux
 
-__all__ = ["LayeredDetector"]
-
-DetectorLayer = lambda: dLux.detector_layers.DetectorLayer
-PSF = lambda: dLux.psfs.PSF
+from .layers.detector_layers import DetectorLayer
+from .containers.psfs import PSF
 
 
-class LayeredDetector(dLux.base.BaseDetector):
+__all__ = ["BaseDetector", "LayeredDetector"]
+
+
+class BaseDetector(Base):
+    @abstractmethod
+    def model(self, psf):  # pragma: no cover
+        pass
+
+
+class LayeredDetector(BaseDetector):
     """
     A high level class designed to model the behaviour of some detectors
     response to some psf.
@@ -41,7 +49,7 @@ class LayeredDetector(dLux.base.BaseDetector):
             form (DetectorLayer, key), with the key being used as the
             dictionary key for the layer.
         """
-        self.layers = dlu.list2dictionary(layers, True, DetectorLayer())
+        self.layers = dlu.list2dictionary(layers, True, DetectorLayer)
         super().__init__()
 
     def __getattr__(self: LayeredDetector, key: str) -> object:
@@ -68,7 +76,7 @@ class LayeredDetector(dLux.base.BaseDetector):
             )
 
     def model(
-        self: LayeredDetector, psf: PSF(), return_psf: bool = False
+        self: LayeredDetector, psf: PSF, return_psf: bool = False
     ) -> Array:
         """
         Applied the stored detector layers to the input psf.
@@ -84,7 +92,7 @@ class LayeredDetector(dLux.base.BaseDetector):
             The output 'psf' after being transformed by the detector layers.
         """
         for key, layer in self.layers.items():
-            psf = layer(psf)
+            psf = layer.apply(psf)
         if return_psf:
             return psf
         return psf.data
@@ -107,7 +115,7 @@ class LayeredDetector(dLux.base.BaseDetector):
             The index to insert the layer at.
         """
         return self.set(
-            "layers", dlu.insert_layer(layer, index, DetectorLayer())
+            "layers", dlu.insert_layer(layer, index, DetectorLayer)
         )
 
     def remove_layer(self: LayeredDetector, key: str) -> LayeredDetector:

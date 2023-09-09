@@ -1,34 +1,60 @@
 from __future__ import annotations
 from typing import Any
 from collections import OrderedDict
+from abc import abstractmethod
 import jax.numpy as np
 from jax import Array
-from zodiax import filter_vmap
+from zodiax import filter_vmap, Base
 from typing import Union
 import dLux.utils as dlu
-import dLux
+
 
 __all__ = [
+    "BaseOpticalSystem",
     "AngularOptics",
     "CartesianOptics",
-    # "FlexibleOptics",
     "LayeredOptics",
 ]
 
-# Alias classes for simplified type-checking
-OpticalLayer = (
-    lambda: dLux.optical_layers.OpticalLayer
-)  # Can be imported from modules?
-Wavefront = lambda: dLux.wavefronts.Wavefront  # Can be imported from modules?
-PSF = lambda: dLux.psfs.PSF  # Can be imported from modules?
-
-Source = lambda: dLux.sources.BaseSource
+from .layers.optical_layers import OpticalLayer
+from .containers.wavefronts import Wavefront
+from .sources import BaseSource as Source
+from .containers.psfs import PSF
 
 
 ###################
 # Private Classes #
 ###################
-class OpticalSystem(dLux.base.BaseOptics):
+class BaseOpticalSystem(Base):
+    @abstractmethod
+    def propagate_mono(
+        self: BaseOpticalSystem,
+        wavelength: Array,
+        offset: Array,
+        return_wf: bool,
+    ) -> Array:  # pragma: no cover
+        pass
+
+    @abstractmethod
+    def propagate(
+        self: BaseOpticalSystem,
+        wavelengths: Array,
+        offset: Array,
+        weights: Array,
+        return_wf: bool,
+    ):
+        pass
+
+    @abstractmethod
+    def model(
+        self: BaseOpticalSystem,
+        # source: BaseSourceObject,
+        return_wf: bool = False,
+    ) -> Array:
+        pass
+
+
+class OpticalSystem(BaseOpticalSystem):
     """
     The Base Optics class that all optics classes inherit from. Can be used to
     create your own optics classes that will integrate seamlessly with the rest
@@ -169,7 +195,7 @@ class OpticalSystem(dLux.base.BaseOptics):
         if return_wf:
             return wf
         if return_psf:
-            return PSF()(wf.psf.sum(0), wf.pixel_scale.mean())
+            return PSF(wf.psf.sum(0), wf.pixel_scale.mean())
         return wf.psf.sum(0)
 
     def model(
@@ -277,7 +303,7 @@ class LayeredOptics(OpticalSystem):
         """
         self.wf_npixels = int(wf_npixels)
         self.diameter = float(diameter)
-        self.layers = dlu.list2dictionary(layers, True, OpticalLayer())
+        self.layers = dlu.list2dictionary(layers, True, OpticalLayer)
 
     def __getattr__(self: OpticalSystem, key: str) -> object:
         """
@@ -330,7 +356,7 @@ class LayeredOptics(OpticalSystem):
 
         """
         # Initialise wavefront
-        wavefront = dLux.Wavefront(self.wf_npixels, self.diameter, wavelength)
+        wavefront = Wavefront(self.wf_npixels, self.diameter, wavelength)
         wavefront = wavefront.tilt(offset)
 
         # Apply layers
@@ -359,9 +385,7 @@ class LayeredOptics(OpticalSystem):
         index : int
             The index to insert the layer at.
         """
-        return self.set(
-            "layers", dlu.insert_layer(layer, index, OpticalLayer())
-        )
+        return self.set("layers", dlu.insert_layer(layer, index, OpticalLayer))
 
     def remove_layer(self: OpticalLayer, key: str) -> OpticalSystem:
         """

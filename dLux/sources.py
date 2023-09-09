@@ -1,15 +1,23 @@
 from __future__ import annotations
 from typing import Any
+from abc import abstractmethod
 import jax.numpy as np
 from jax.scipy.signal import convolve
-from jax import vmap, Array
-from jax.tree_util import tree_map
-from zodiax import filter_vmap
+from jax import vmap, Array, tree_map
+from zodiax import filter_vmap, Base
 import dLux.utils as dlu
+from dLux import spectra
 import dLux
 
 
+from .containers.psfs import PSF
+
+Optics = lambda: dLux.optical_systems.BaseOpticalSystem
+Spectrum = lambda: dLux.spectra.BaseSpectrum
+
+
 __all__ = [
+    "BaseSource",
     "Scene",
     "PointSource",
     "PointSources",
@@ -18,22 +26,27 @@ __all__ = [
     "PointResolvedSource",
 ]
 
-Spectrum = lambda: dLux.spectra.Spectrum
-Optics = lambda: dLux.optics.BaseOptics
-BaseSource = lambda: dLux.base.BaseSourceObject
-PSF = lambda: dLux.psfs.PSF
+
+class BaseSource(Base):
+    # TODO: Add this to allow custom sources
+
+    @abstractmethod
+    def normalise(self):  # pragma: no cover
+        pass
+
+    @abstractmethod
+    def model(self, optics):  # pragma: no cover
+        pass
 
 
-class Scene(BaseSource()):
+class Scene(BaseSource):
     sources: dict
 
     def __init__(self, sources: list[Source]):
         super().__init__()
-        if isinstance(sources, (BaseSource(), tuple)):
+        if isinstance(sources, (BaseSource, tuple)):
             sources = [sources]
-        self.sources = dlu.list2dictionary(
-            sources, False, dLux.base.BaseSourceObject
-        )
+        self.sources = dlu.list2dictionary(sources, False, BaseSource)
 
     def normalise(self: Scene) -> Scene:
         """
@@ -44,7 +57,7 @@ class Scene(BaseSource()):
         scene : Scene
             The normalised scene object.
         """
-        is_source = lambda leaf: isinstance(leaf, BaseSource())
+        is_source = lambda leaf: isinstance(leaf, BaseSource)
         norm_fn = lambda source: source.normalise()
         sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
         return self.set("sources", sources)
@@ -80,7 +93,7 @@ class Scene(BaseSource()):
 
     def model(
         self: Scene,
-        optics: Optics,
+        optics: Optics(),
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array:
@@ -103,7 +116,7 @@ class Scene(BaseSource()):
         self = self.normalise()
 
         # Define leaf_fn and map across sources
-        leaf_fn = lambda leaf: isinstance(leaf, BaseSource())
+        leaf_fn = lambda leaf: isinstance(leaf, BaseSource)
         output = tree_map(
             lambda s: s.model(optics, return_wf, return_psf),
             self.sources,
@@ -117,20 +130,20 @@ class Scene(BaseSource()):
         # Return psf case requires mapping across the psf outputs
         if return_psf:
             # Define mapping function
-            leaf_fn = lambda leaf: isinstance(leaf, PSF())
+            leaf_fn = lambda leaf: isinstance(leaf, PSF)
             get_psfs = lambda psf: psf.data.sum(tuple(range(psf.ndim)))
             get_pscales = lambda psf: psf.pixel_scale.mean()
 
             # Get values and return PSF
             psf = dlu.map2array(get_psfs, output, leaf_fn).sum(0)
             pixel_scale = dlu.map2array(get_pscales, output, leaf_fn).mean()
-            return PSF()(psf, pixel_scale)
+            return PSF(psf, pixel_scale)
 
         # Return array is simple
         return dlu.map2array(lambda x: x, output).sum(0)
 
 
-class Source(dLux.base.BaseSourceObject):
+class Source(BaseSource):
     """
     Base source class that implements the spectra attribute.
 
@@ -140,13 +153,13 @@ class Source(dLux.base.BaseSourceObject):
         The spectrum of this object, represented by a Spectrum object.
     """
 
-    spectrum: Spectrum
+    spectrum: Spectrum()
 
     def __init__(
         self: Source,
         wavelengths: Array,
         weights: Array = None,
-        spectrum: Spectrum = None,
+        spectrum: Spectrum() = None,
     ):
         """
         Constructor for the Source class.
@@ -164,11 +177,11 @@ class Source(dLux.base.BaseSourceObject):
         """
         # Spectrum
         if spectrum is not None:
-            if not isinstance(spectrum, dLux.spectra.Spectrum):
+            if not isinstance(spectrum, spectra.Spectrum):
                 raise ValueError("spectrum must be a dLux Spectrum object.")
             self.spectrum = spectrum
         else:
-            self.spectrum = dLux.spectra.Spectrum(wavelengths, weights)
+            self.spectrum = spectra.Spectrum(wavelengths, weights)
 
     def __getattr__(self: Source, key: str) -> Any:
         """
@@ -227,7 +240,7 @@ class PointSource(Source):
         position: Array = np.zeros(2),
         flux: Array = np.array(1.0),
         weights: Array = None,
-        spectrum: Spectrum = None,
+        spectrum: Spectrum() = None,
     ):
         """
         Constructor for the Source class.
@@ -313,7 +326,7 @@ class PointSources(Source):
         position: Array = np.zeros((1, 2)),
         flux: Array = None,
         weights: Array = None,
-        spectrum: Spectrum = None,
+        spectrum: Spectrum() = None,
     ):
         """
         Constructor for the PointSources class.
@@ -386,7 +399,7 @@ class PointSources(Source):
         if return_wf:
             return wfs
         if return_psf:
-            return PSF()(wfs.psf.sum((0, 1)), wfs.pixel_scale.mean())
+            return PSF(wfs.psf.sum((0, 1)), wfs.pixel_scale.mean())
         else:
             return wfs.psf.sum((0, 1))
 
@@ -417,7 +430,7 @@ class ResolvedSource(PointSource):
         flux: Array = np.array(1.0),
         distribution: Array = np.ones((3, 3)),
         weights: Array = None,
-        spectrum: Spectrum = None,
+        spectrum: Spectrum() = None,
     ):
         """
         Constructor for the ResolvedSource class.
@@ -504,7 +517,7 @@ class ResolvedSource(PointSource):
         # Return psf object
         conv_psf = convolve(wf.psf.sum(0), self.distribution, mode="same")
         if return_psf:
-            return PSF()(conv_psf, wf.pixel_scale.mean())
+            return PSF(conv_psf, wf.pixel_scale.mean())
 
         # Return array psf
         return conv_psf
@@ -545,7 +558,7 @@ class BinarySource(Source):
         separation: float = None,
         position_angle: float = np.pi / 2,
         contrast: Array = 1.0,
-        spectrum: Spectrum = None,
+        spectrum: Spectrum() = None,
         weights: Array = None,
     ):
         """
@@ -632,7 +645,7 @@ class BinarySource(Source):
 
         # Return psf just requires constructing object
         if return_psf:
-            return PSF()(output.data.sum(0), output.pixel_scale.mean())
+            return PSF(output.data.sum(0), output.pixel_scale.mean())
 
         # Return array is simple
         return output.sum(0)
@@ -672,7 +685,7 @@ class PointResolvedSource(ResolvedSource):
         flux: Array = np.array(1.0),
         distribution: Array = np.ones((3, 3)),
         contrast: Array = np.array(1.0),
-        spectrum: Spectrum = None,
+        spectrum: Spectrum() = None,
         weights: Array = None,
     ) -> Source:
         """
@@ -770,7 +783,7 @@ class PointResolvedSource(ResolvedSource):
         conv_psf = convolve(wf.psf.sum(0), self.distribution, mode="same")
         psf = conv_psf + wf.psf.sum(0)
         if return_psf:
-            return PSF()(psf, wf.pixel_scale.mean())
+            return PSF(psf, wf.pixel_scale.mean())
 
         # Return array psf
         return psf

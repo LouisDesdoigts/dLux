@@ -1,23 +1,15 @@
 from __future__ import annotations
 from typing import Union
-import dLux
 
-__all__ = [
-    "Rotate",
-    "Flip",
-    "Resize",
-]
-
-# OpticalLayer = lambda: dLux.layers.optical_layers.OpticalLayer
-# DetectorLayer = lambda: dLux.layers.detector_layers.DetectorLayer
-Wavefront = lambda: dLux.wavefronts.Wavefront
-PSF = lambda: dLux.psfs.PSF
-
-from . import optical_layers
-from . import detector_layers
+__all__ = ["Rotate", "Flip", "Resize"]
 
 
-class UnifiedLayer(optical_layers.OpticalLayer, detector_layers.DetectorLayer):
+from .optical_layers import OpticalLayer
+from .detector_layers import DetectorLayer
+from ..containers import Wavefront, PSF
+
+
+class UnifiedLayer(OpticalLayer, DetectorLayer):
     """
     Base class for unified layers that can be applied to either wavefronts or
     PSFs.
@@ -51,9 +43,9 @@ class Resize(UnifiedLayer):
         super().__init__()
         self.npixels = int(npixels)
 
-    def __call__(
-        self: UnifiedLayer, input: Union[Wavefront(), PSF()]
-    ) -> Union[Wavefront(), PSF()]:
+    def apply(
+        self: UnifiedLayer, input: Union[Wavefront, PSF]
+    ) -> Union[Wavefront, PSF]:
         """
         Resizes the input.
 
@@ -120,9 +112,9 @@ class Rotate(UnifiedLayer):
         if self.order not in (0, 1):
             raise ValueError("Order must be 0, 1")
 
-    def __call__(
-        self: UnifiedLayer, input: Union[Wavefront(), PSF()]
-    ) -> Union[Wavefront(), PSF()]:
+    def apply(
+        self: UnifiedLayer, input: Union[Wavefront, PSF]
+    ) -> Union[Wavefront, PSF]:
         """
         Applies the rotation to the input.
 
@@ -178,9 +170,9 @@ class Flip(UnifiedLayer):
         elif not isinstance(self.axes, int):
             raise ValueError("axes must be integers.")
 
-    def __call__(
-        self: UnifiedLayer, input: Union[Wavefront(), PSF()]
-    ) -> Union[Wavefront(), PSF()]:
+    def apply(
+        self: UnifiedLayer, input: Union[Wavefront, PSF]
+    ) -> Union[Wavefront, PSF]:
         """
         Flips the input about the input axes.
 

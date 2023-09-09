@@ -1,11 +1,15 @@
 from __future__ import annotations
 from abc import abstractmethod
+from zodiax import Base
 import jax.numpy as np
 from jax import Array
 from jax.scipy.stats import norm
-import dLux
+
+
+from ..containers import PSF
 
 __all__ = [
+    "BaseDetectorLayer",
     "ApplyPixelResponse",
     "ApplyJitter",
     "ApplySaturation",
@@ -13,10 +17,14 @@ __all__ = [
     "Downsample",
 ]
 
-PSF = lambda: dLux.psfs.PSF
+
+class BaseDetectorLayer(Base):
+    @abstractmethod
+    def apply(self: BaseDetectorLayer, psf):  # pragma: no cover
+        pass
 
 
-class DetectorLayer(dLux.base.Base):
+class DetectorLayer(BaseDetectorLayer):
     """
     A base Detector layer class to help with type checking throughout the rest
     of the software.
@@ -29,7 +37,7 @@ class DetectorLayer(dLux.base.Base):
         super().__init__()
 
     @abstractmethod
-    def __call__(self: DetectorLayer, psf: PSF()) -> PSF:  # pragma: no cover
+    def apply(self: DetectorLayer, psf: PSF) -> PSF:  # pragma: no cover
         """
         Applies the layer to the PSF.
 
@@ -73,7 +81,7 @@ class ApplyPixelResponse(DetectorLayer):
         if self.pixel_response.ndim != 2:
             raise ValueError("pixel_response must be a 2 dimensional array.")
 
-    def __call__(self: DetectorLayer, psf: PSF()) -> PSF:
+    def apply(self: DetectorLayer, psf: PSF) -> PSF:
         """
         Applies the layer to the PSF.
 
@@ -138,7 +146,7 @@ class ApplyJitter(DetectorLayer):
         kernel = norm.pdf(x, scale=sigma) * norm.pdf(x[:, None], scale=sigma)
         return kernel / np.sum(kernel)
 
-    def __call__(self: DetectorLayer, psf: PSF()) -> PSF():
+    def apply(self: DetectorLayer, psf: PSF) -> PSF:
         """
         Applies the layer to the PSF.
 
@@ -183,7 +191,7 @@ class ApplySaturation(DetectorLayer):
         if self.saturation.ndim != 0:
             raise ValueError("saturation must be a scalar array.")
 
-    def __call__(self: DetectorLayer, psf: PSF()) -> PSF():
+    def apply(self: DetectorLayer, psf: PSF) -> PSF:
         """
         Applies the layer to the PSF.
 
@@ -227,7 +235,7 @@ class AddConstant(DetectorLayer):
         if self.value.ndim != 0:
             raise ValueError("value must be a scalar array.")
 
-    def __call__(self: DetectorLayer, psf: PSF()) -> PSF():
+    def apply(self: DetectorLayer, psf: PSF) -> PSF:
         """
         Applies the layer to the PSF.
 
@@ -270,7 +278,7 @@ class Downsample(DetectorLayer):
         super().__init__()
         self.kernel_size = int(kernel_size)
 
-    def __call__(self, psf):
+    def apply(self, psf):
         """
         Applies the layer to the PSF.
 

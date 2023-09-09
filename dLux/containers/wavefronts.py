@@ -6,12 +6,11 @@ from zodiax import Base
 import dLux.utils as dlu
 import dLux
 
-__all__ = ["Wavefront"]
+# Optical layers require Wavefront to init, so we alias it here to avoid MRO issues
+OpticalLayer = lambda: dLux.layers.optical_layers.OpticalLayer
 
-Aberration = lambda: dLux.optical_layers.AberrationLayer
-Aperture = lambda: dLux.apertures.ApertureLayer
-Propagator = lambda: dLux.propagators.Propagator
-OpticalLayer = lambda: dLux.optical_layers.OpticalLayer
+
+__all__ = ["Wavefront"]
 
 
 class Wavefront(Base):
@@ -224,7 +223,7 @@ class Wavefront(Base):
 
         # Some Optical Layer
         if isinstance(other, OpticalLayer()):
-            return other(self)
+            return other.apply(self)
 
         # Array based inputs - Defaults to OPD
         if isinstance(other, (Array, float, int)):
@@ -281,7 +280,7 @@ class Wavefront(Base):
 
         # Some Optical Layer, apply it
         if isinstance(other, OpticalLayer()):
-            return other(self)
+            return other.apply(self)
 
         # Array based inputs
         if isinstance(other, (Array, float, int)):

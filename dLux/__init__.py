@@ -1,36 +1,42 @@
 import importlib.metadata
 
-
 __version__ = importlib.metadata.version("dLux")
 
-# Import as modules
-# Wavefronts and Optics
-from . import base
-from . import wavefronts
-from . import optical_systems
-from . import layers as layers
-
-# Images and Detectors
-from . import images
-from . import detectors
-
-# All other classes
-from . import instruments
-
-# from . import observations
-from . import sources
-from . import spectra
-
-# Sub Modules
-from . import utils as utils
-
-
-# Import core functions from modules
-# Wavefronts and Optics
-from .wavefronts import (
-    Wavefront as Wavefront,
+from . import (
+    containers,
+    layers,
+    optical_systems,
+    detectors,
+    instruments,
+    sources,
+    spectra,
 )
+
+# Add to __all__
+modules = [
+    optical_systems,
+    detectors,
+    sources,
+    spectra,
+    instruments,
+    layers,
+    containers,
+]
+
+__all__ = [module.__all__ for module in modules]
+
+
+from .detectors import LayeredDetector as LayeredDetector
+from .spectra import Spectrum as Spectrum, PolySpectrum as PolySpectrum
+
+from .instruments import (
+    Instrument as Instrument,
+    Telescope as Telescope,
+    Dither as Dither,
+)
+
 from .optical_systems import (
+    BaseOpticalSystem as BaseOpticalSystem,
     AngularOptics as AngularOptics,
     CartesianOptics as CartesianOptics,
     LayeredOptics as LayeredOptics,
@@ -45,12 +51,8 @@ from .layers import (
     aberrations as aberrations,
 )
 
-# Images and Detectors
-from .psfs import PSF as PSF
-from .detectors import LayeredDetector as LayeredDetector
-
-# All other classes
 from .sources import (
+    BaseSource as BaseSource,
     Scene as Scene,
     PointSource as PointSource,
     PointSources as PointSources,
@@ -58,55 +60,3 @@ from .sources import (
     ResolvedSource as ResolvedSource,
     PointResolvedSource as PointResolvedSource,
 )
-from .spectra import (
-    Spectrum as Spectrum,
-    PolySpectrum as PolySpectrum,
-)
-from .instruments import Instrument as Instrument, Dither as Dither
-
-# from .layers import (
-#     Optic as Optic,
-#     BasisOptic as BasisOptic,
-#     Tilt as Tilt,
-#     Normalise as Normalise,
-#     Rotate as Rotate,
-#     Flip as Flip,
-#     Resize as Resize,
-#     MFT as MFT,
-#     FFT as FFT,
-#     ShiftedMFT as ShiftedMFT,
-#     FarFieldFresnel as FarFieldFresnel,
-#     CircularAperture as CircularAperture,
-#     SquareAperture as SquareAperture,
-#     RectangularAperture as RectangularAperture,
-#     RegPolyAperture as RegPolyAperture,
-#     Spider as Spider,
-#     # IrregPolyAperture as IrregPolyAperture,
-#     AberratedAperture as AberratedAperture,
-#     # UniformSpider as UniformSpider,
-#     CompoundAperture as CompoundAperture,
-#     MultiAperture as MultiAperture,
-#     ApertureFactory as ApertureFactory,
-#     Zernike as Zernike,
-#     ZernikeBasis as ZernikeBasis,
-#     ApplyPixelResponse as ApplyPixelResponse,
-#     ApplyJitter as ApplyJitter,
-#     ApplySaturation as ApplySaturation,
-#     AddConstant as AddConstant,
-#     IntegerDownsample as IntegerDownsample,
-# )
-
-# Add to __all__
-modules = [
-    base,
-    wavefronts,
-    optical_systems,
-    images,
-    detectors,
-    sources,
-    spectra,
-    instruments,
-    layers,
-]
-
-__all__ = [module.__all__ for module in modules]

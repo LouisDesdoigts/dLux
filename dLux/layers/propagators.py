@@ -1,19 +1,16 @@
 from __future__ import annotations
 import jax.numpy as np
 from jax import Array
-import dLux
+
+
+from .optical_layers import OpticalLayer
+from ..containers import Wavefront
 
 
 __all__ = ["MFT", "FFT", "ShiftedMFT", "FarFieldFresnel"]
 
 
-Wavefront = dLux.wavefronts.Wavefront
-
-from . import optical_layers
-
-
-# class Propagator(dLux.layers.optical_layers.OpticalLayer):
-class Propagator(optical_layers.OpticalLayer):
+class Propagator(OpticalLayer):
     """
     An abstract class to store the various properties of the propagation of
     some wavefront.
@@ -79,7 +76,7 @@ class FFT(Propagator):
         super().__init__(focal_length=focal_length, inverse=inverse)
         self.pad = int(pad)
 
-    def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
+    def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -157,7 +154,7 @@ class MFT(Propagator):
         self.pixel_scale = float(pixel_scale)
         self.npixels = int(npixels)
 
-    def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
+    def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -265,7 +262,7 @@ class ShiftedMFT(MFT):
         if shift.shape != (2,):
             raise TypeError(f"Shift must be a 2D array, got {shift.shape}.")
 
-    def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
+    def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -380,7 +377,7 @@ class FarFieldFresnel(ShiftedMFT):
             inverse=inverse,
         )
 
-    def __call__(self: Propagator, wavefront: Wavefront) -> Wavefront:
+    def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 

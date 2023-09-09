@@ -1,5 +1,3 @@
-name = "utils"
-
 # Import as modules
 from . import (
     propagation,
@@ -14,6 +12,23 @@ from . import (
     source,
     geometry,
 )
+
+# Add to __all__
+modules = [
+    propagation,
+    coordinates,
+    helpers,
+    interpolation,
+    units,
+    optics,
+    math,
+    array_ops,
+    zernikes,
+    source,
+    geometry,
+]
+
+__all__ = [module.__all__ for module in modules]
 
 # Dont import all functions from modules
 from .propagation import FFT as FFT, MFT as MFT, fresnel_MFT as fresnel_MFT
@@ -82,8 +97,10 @@ from .zernikes import (
     eval_azimuthal as eval_azimuthal,
     zernike as zernike,
     zernike_fast as zernike_fast,
+    zernike_basis as zernike_basis,
     polike as polike,
     polike_fast as polike_fast,
+    polike_basis as polike_basis,
 )
 
 from .geometry import (
@@ -100,21 +117,3 @@ from .geometry import (
     soft_reg_polygon as soft_reg_polygon,
     soft_spider as soft_spider,
 )
-
-
-# Add to __all__
-modules = [
-    propagation,
-    coordinates,
-    helpers,
-    interpolation,
-    units,
-    optics,
-    math,
-    array_ops,
-    zernikes,
-    source,
-    geometry,
-]
-
-__all__ = [module.__all__ for module in modules]

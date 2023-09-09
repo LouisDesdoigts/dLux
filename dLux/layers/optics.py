@@ -1,6 +1,15 @@
 from __future__ import annotations
 from jax import Array
-from dLux import layers
+
+
+from ..containers import Wavefront
+from .optical_layers import (
+    OpticalLayer,
+    TransmissiveLayer,
+    BasisLayer,
+    AberratedLayer,
+)
+
 
 __all__ = [
     "Optic",
@@ -8,12 +17,7 @@ __all__ = [
 ]
 
 
-# Wavefront = lambda: dLux.wavefronts.Wavefront
-from dLux.wavefronts import Wavefront
-from dLux.layers.optical_layers import OpticalLayer
-
-
-class Optic(layers.TransmissiveLayer, layers.AberratedLayer):
+class Optic(TransmissiveLayer, AberratedLayer):
     """
     Optics class that holds both a transmission and OPD array.
 
@@ -72,7 +76,7 @@ class Optic(layers.TransmissiveLayer, layers.AberratedLayer):
                         f"shapes {self.opd.shape} and {self.phase.shape}."
                     )
 
-    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -94,7 +98,7 @@ class Optic(layers.TransmissiveLayer, layers.AberratedLayer):
         return wavefront
 
 
-class BasisOptic(layers.TransmissiveLayer, layers.BasisLayer):
+class BasisOptic(TransmissiveLayer, BasisLayer):
     """
     Adds an array of phase values to the input wavefront calculated from the
     Optical Path Difference (OPD). The OPDs are calculated from the basis
@@ -121,7 +125,7 @@ class BasisOptic(layers.TransmissiveLayer, layers.BasisLayer):
         self: OpticalLayer,
         transmission,
         basis,
-        coefficients,
+        coefficients=None,
         as_phase=False,
         normalise=False,
     ) -> OpticalLayer:
@@ -150,7 +154,7 @@ class BasisOptic(layers.TransmissiveLayer, layers.BasisLayer):
             normalise=normalise,
         )
 
-    def __call__(self: OpticalLayer, wavefront: Wavefront()) -> Wavefront():
+    def apply(self: OpticalLayer, wavefront: Wavefront()) -> Wavefront():
         """
         Applies the layer to the wavefront.
 

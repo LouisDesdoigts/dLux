@@ -2,12 +2,16 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Union
 import jax.numpy as np
+from zodiax import Base
 from jax import Array
-import dLux
 import dLux.utils as dlu
 
 
+from ..containers.wavefronts import Wavefront
+
+
 __all__ = [
+    "BaseLayer",
     "TransmissiveLayer",
     "AberratedLayer",
     "BasisLayer",
@@ -16,17 +20,20 @@ __all__ = [
 ]
 
 
-Wavefront = lambda: dLux.wavefronts.Wavefront
+class BaseLayer(Base):
+    @abstractmethod
+    def apply(self: BaseLayer, wavefront):  # pragma: no cover
+        pass
 
 
-class OpticalLayer(dLux.base.BaseOpticalLayer):
+class OpticalLayer(BaseLayer):
     """
     Base class for optical layers. Primarily used for input type checking.
 
-    Child classes must implement the __call__ method that takes in the
+    Child classes must implement the apply method that takes in the
     wavefront as the first parameter.
 
-    Note: I have chosen __call__ over apply as the method name for the layer
+    Note: I have chosen apply over apply as the method name for the layer
     to be applied to the wavefront. This is because even though it prevents
     the simple interface with Optax (not having to wrap in a list), because
     wavefront should in general not be able to be an object you take a gradient
@@ -36,7 +43,7 @@ class OpticalLayer(dLux.base.BaseOpticalLayer):
     """
 
     @abstractmethod
-    def __call__(
+    def apply(
         self: OpticalLayer, wavefront: Wavefront
     ) -> Wavefront:  # pragma: no cover
         """
@@ -57,7 +64,6 @@ class OpticalLayer(dLux.base.BaseOpticalLayer):
 ##################
 # Public Classes #
 ##################
-# TODO: Make public (add __call__ method)
 class TransmissiveLayer(OpticalLayer):
     """
     Base class to hold transmissive layers imbuing them with a transmission and
@@ -97,8 +103,26 @@ class TransmissiveLayer(OpticalLayer):
         self.normalise = bool(normalise)
         super().__init__(**kwargs)
 
+    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the layer to the wavefront.
 
-# TODO: Make public (add __call__ method)
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
+        wavefront *= self.transmission
+        if self.normalise:
+            wavefront = wavefront.normalise()
+        return wavefront
+
+
 class AberratedLayer(OpticalLayer):
     """
     Base class for aberration layers. Implements the opd and phase attributes.
@@ -144,8 +168,26 @@ class AberratedLayer(OpticalLayer):
                 )
         super().__init__(**kwargs)
 
+    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the layer to the wavefront.
 
-# TODO: Make public (add __call__ method)
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
+        wavefront += self.opd
+        wavefront = wavefront.add_phase(self.phase)
+        return wavefront
+
+
+# TODO: Make public (add apply method)
 class BasisLayer(OpticalLayer):
     """
     This class primarily exists to allow for the use of the class based basis
@@ -204,6 +246,27 @@ class BasisLayer(OpticalLayer):
         """
         return dlu.eval_basis(self.basis, self.coefficients)
 
+    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+        """
+        Applies the layer to the wavefront.
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            The wavefront to operate on.
+
+        Returns
+        -------
+        wavefront : Wavefront
+            The transformed wavefront.
+        """
+        output = self.eval_basis()
+        if self.as_phase:
+            wavefront = wavefront.add_phase(output)
+        else:
+            wavefront += output
+        return wavefront
+
 
 class Tilt(OpticalLayer):
     """
@@ -232,7 +295,7 @@ class Tilt(OpticalLayer):
         if self.angles.shape != (2,):
             raise ValueError("angles must have have (2,)")
 
-    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 
@@ -252,7 +315,7 @@ class Tilt(OpticalLayer):
 class Normalise(OpticalLayer):
     """Normalises the wavefront to unit intensity."""
 
-    def __call__(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
+    def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """
         Applies the layer to the wavefront.
 

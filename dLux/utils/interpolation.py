@@ -12,30 +12,6 @@ __all__ = [
 ]
 
 
-# # TODO: Rename scale
-# def scale_array(array: Array, size_out: int, order: int) -> Array:
-#     """
-#     Scales some input array to size_out using interpolation.
-
-#     Parameters
-#     ----------
-#     array : Array
-#         The array to scale.
-#     size_out : int
-#         The output size of the mask
-#     order : int
-#         The interpolation order. Supports 0 and 1.
-
-#     Returns
-#     -------
-#     array : Array
-#         The array scaled to size_out
-#     """
-#     xs = np.linspace(0, array.shape[0], size_out)
-#     xs, ys = np.meshgrid(xs, xs)
-#     return map_coordinates(array, np.array([ys, xs]), order=order)
-
-
 # TODO: Remove and use utils.pixel_coordinates with shift
 def generate_coordinates(
     npixels_in: int,

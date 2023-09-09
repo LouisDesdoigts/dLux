@@ -4,10 +4,16 @@ import jax.numpy as np
 from zodiax import Base
 from jax import vmap, Array
 
-__all__ = ["Spectrum", "PolySpectrum"]
+__all__ = ["BaseSpectrum", "Spectrum", "PolySpectrum"]
 
 
-class SimpleSpectrum(Base):
+class BaseSpectrum(Base):
+    @abstractmethod
+    def normalise(self):  # pragma: no cover
+        pass
+
+
+class SimpleSpectrum(BaseSpectrum):
     """
     Abstract base class for arbitrary spectral parametrisations.
 

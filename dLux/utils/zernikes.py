@@ -11,8 +11,10 @@ __all__ = [
     "eval_azimuthal",
     "zernike",
     "zernike_fast",
+    "zernike_basis",
     "polike",
     "polike_fast",
+    "polike_basis",
 ]
 
 zernike_names = {
@@ -255,6 +257,10 @@ def zernike_fast(
     return aperture * eval_radial(rho, n, c, k) * eval_azimuthal(theta, n, m)
 
 
+def zernike_basis(js, coordinates, diameter=2):
+    return np.array([zernike(j, coordinates, diameter) for j in js])
+
+
 def polike(nsides: int, j: int, coordinates: Array, diameter=2) -> Array:
     """
     Calculates the Zernike polynomial on an n-sided aperture.
@@ -326,3 +332,7 @@ def polike_fast(
     u_alpha = phi - wedge * (2 * alpha)
     r_alpha = np.cos(alpha) / np.cos(u_alpha)
     return 1 / r_alpha * zernike_fast(n, m, c, k, coordinates / r_alpha)
+
+
+def polike_basis(nsides, js, coordinates, diameter=2):
+    return np.array([polike(nsides, j, coordinates, diameter) for j in js])
