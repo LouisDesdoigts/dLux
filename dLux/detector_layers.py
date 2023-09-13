@@ -136,10 +136,10 @@ class ApplyJitter(DetectorLayer):
         kernel : Array
             The Gaussian kernel.
         """
-        # Generate distribution
-        sigma = self.sigma * pixel_scale
-        x = np.linspace(-10, 10, self.kernel_size) * pixel_scale
-        kernel = norm.pdf(x, scale=sigma) * norm.pdf(x[:, None], scale=sigma)
+
+        extent = self.kernel_size * pixel_scale
+        x = np.linspace(0, extent, self.kernel_size) - 0.5 * extent
+        kernel = norm.pdf(x, scale=self.sigma) * norm.pdf(x[:, None], scale=self.sigma)
         return kernel / np.sum(kernel)
 
     def __call__(self: DetectorLayer, image: Image()) -> Image():
