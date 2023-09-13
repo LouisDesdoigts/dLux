@@ -139,7 +139,9 @@ class ApplyJitter(DetectorLayer):
 
         extent = self.kernel_size * pixel_scale
         x = np.linspace(0, extent, self.kernel_size) - 0.5 * extent
-        kernel = norm.pdf(x, scale=self.sigma) * norm.pdf(x[:, None], scale=self.sigma)
+        kernel = norm.pdf(x, scale=self.sigma) * norm.pdf(
+            x[:, None], scale=self.sigma
+        )
         return kernel / np.sum(kernel)
 
     def __call__(self: DetectorLayer, image: Image()) -> Image():
