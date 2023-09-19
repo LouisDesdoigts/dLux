@@ -1,33 +1,24 @@
 import jax.numpy as np
 import pytest
-from jax import config
+from dLux import LayeredDetector, PSF
+from dLux.layers import Downsample
 
-config.update("jax_debug_nans", True)
+
+psf = PSF(np.ones((16, 16)), 1 / 16)
 
 
-class TestLayeredDetector:
-    """Tests the LayeredDetector class."""
+def test_layered_detector():
+    det = LayeredDetector([Downsample(4)])
 
-    def test_constructor(self, create_layered_detector):
-        """Tests the constructor."""
-        create_layered_detector()
-        with pytest.raises(TypeError):
-            create_layered_detector(layers=[np.ones(1)])
+    # Test getattr
+    det.Downsample
+    with pytest.raises(AttributeError):
+        det.not_an_attr
 
-    def test_model(self, create_layered_detector, create_image):
-        """Tests the model method."""
-        create_layered_detector().model(create_image())
+    # Test model
+    assert isinstance(det.model(psf), np.ndarray)
+    assert isinstance(det.model(psf, return_psf=True), PSF)
 
-    def test_getattr(self, create_layered_detector):
-        """Tests the __getattr__ method."""
-        create_layered_detector().AddConstant
-        with pytest.raises(AttributeError):
-            create_layered_detector().nonexistent_attribute
-
-    def test_insert_layer(self, create_layered_detector, create_jitter):
-        """Tests the insert_layer method"""
-        create_layered_detector().insert_layer(create_jitter(), 0)
-
-    def test_remove_layer(self, create_layered_detector):
-        """Tests the remove_layer method"""
-        create_layered_detector().remove_layer("AddConstant")
+    # Test insert and remove layer
+    det.insert_layer(Downsample(4), 1)
+    det.remove_layer("Downsample")

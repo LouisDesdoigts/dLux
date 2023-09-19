@@ -1,0 +1,92 @@
+import jax.numpy as np
+import pytest
+from dLux.layers import (
+    MFT,
+    FFT,
+    ShiftedMFT,
+    FarFieldFresnel,
+)
+from dLux import Wavefront
+
+
+wf = Wavefront(16, 1, 1e-6)
+
+
+@pytest.fixture
+def pad():
+    return 2
+
+
+@pytest.fixture
+def npixels():
+    return 8
+
+
+@pytest.fixture
+def pixel_scale():
+    return 1 / 16
+
+
+@pytest.fixture
+def oversample():
+    return 2
+
+
+@pytest.fixture
+def shift():
+    return np.ones(2)
+
+
+@pytest.fixture
+def focal_shift():
+    return 1e-3
+
+
+@pytest.fixture
+def focal_length():
+    return 1.0
+
+
+def _test_apply(layer):
+    assert isinstance(layer.apply(wf), Wavefront)
+
+
+@pytest.mark.parametrize("focal_length", [None, 1e2])
+def test_fft(focal_length, pad):
+    _test_apply(FFT(focal_length, pad))
+
+
+@pytest.mark.parametrize("focal_length", [None, 1e2])
+def test_mft(focal_length, npixels, pixel_scale, oversample):
+    _test_apply(MFT(npixels, pixel_scale, oversample, focal_length))
+
+
+@pytest.mark.parametrize("focal_length", [None, 1e2])
+@pytest.mark.parametrize("pixel", [True, False])
+def test_shifted_mft(
+    focal_length, npixels, pixel_scale, oversample, shift, pixel
+):
+    _test_apply(
+        ShiftedMFT(
+            npixels, pixel_scale, shift, oversample, focal_length, pixel
+        )
+    )
+    with pytest.raises(ValueError):
+        ShiftedMFT(npixels, pixel_scale, [1.0], oversample, focal_length, True)
+
+
+@pytest.mark.parametrize("pixel", [True, False])
+def test_far_field_fresnel(
+    npixels, pixel_scale, focal_length, focal_shift, oversample, shift, pixel
+):
+    _test_apply(
+        FarFieldFresnel(
+            npixels,
+            pixel_scale,
+            focal_length,
+            focal_shift,
+            oversample,
+            shift,
+            pixel,
+        )
+    )

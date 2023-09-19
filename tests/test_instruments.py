@@ -1,40 +1,65 @@
+import jax.numpy as np
 import pytest
-from jax import config
+from dLux import (
+    Telescope,
+    Dither,
+    LayeredOptics,
+    LayeredDetector,
+    PointSource,
+    PSF,
+    Optic,
+    AddConstant,
+)
 
-config.update("jax_debug_nans", True)
+
+@pytest.fixture
+def optics():
+    return LayeredOptics(16, 1.0, [Optic()])
 
 
-class TestInstrument(object):
-    """Tests the Instrument class."""
+@pytest.fixture
+def detector():
+    return LayeredDetector([AddConstant(1)])
 
-    def test_constructor(self, create_instrument):
-        """Tests the constructor."""
-        create_instrument()
-        with pytest.raises(TypeError):
-            create_instrument(sources=["Not a source"])
-        with pytest.raises(TypeError):
-            create_instrument(optics="Not an optics")
-        with pytest.raises(TypeError):
-            create_instrument(observation="Not an observation")
-        with pytest.raises(TypeError):
-            create_instrument(detector="Not a detector")
 
-    def test_observe(self, create_instrument):
-        """Tests the normalise method."""
-        create_instrument().observe()
+@pytest.fixture
+def source():
+    return PointSource([1e-6])
 
-    def test_normalise(self, create_instrument):
-        """Tests the normalise method."""
-        create_instrument().normalise()
 
-    def test_model(self, create_instrument):
-        """Tests the model method."""
-        create_instrument().model()
+def _test_model(inst):
+    assert isinstance(inst.model(), np.ndarray)
+    assert isinstance(inst.model(return_psf=True), PSF)
 
-    def test_getattr(self, create_instrument):
-        """Tests the __getattr__ method."""
-        create_instrument().diameter
-        create_instrument().PointSource
-        create_instrument().flux
-        with pytest.raises(AttributeError):
-            create_instrument().nonexistent_attribute
+
+def test_instrument(optics, detector, source):
+    # All inputs
+    _test_model(Telescope(optics, source, detector))
+
+    # No detector
+    _test_model(Telescope(optics, source))
+
+    # Single source with key
+    _test_model(Telescope(optics, ("source", source)))
+
+    # Multiple sources
+    _test_model(Telescope(optics, [source, source]))
+
+    # Test failures
+    with pytest.raises(TypeError):
+        Telescope(1, source, detector)
+    with pytest.raises(TypeError):
+        Telescope(optics, source, 1)
+
+    # Test getattr
+    inst = Telescope(optics, source, detector)
+    inst.opd
+    with pytest.raises(AttributeError):
+        inst.not_an_attr
+
+
+def test_dither(optics, detector, source):
+    _test_model(Dither(np.zeros((1, 2)), optics, source, detector))
+
+    with pytest.raises(ValueError):
+        Dither(np.zeros((1, 3)), optics, source, detector)
