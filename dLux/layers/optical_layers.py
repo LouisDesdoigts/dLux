@@ -228,16 +228,21 @@ class BasisLayer(OpticalLayer):
         """
         super().__init__(**kwargs)
 
-        self.basis = np.asarray(basis, dtype=float)
-        if coefficients is None:
-            self.coefficients = np.zeros(self.basis.shape[:-2])
-        else:
-            self.coefficients = np.asarray(coefficients, dtype=float)
-            if self.basis.shape[:-2] != self.coefficients.shape:
-                raise ValueError(
-                    "The number of basis vectors must be equal to "
-                    "the number of coefficients."
-                )
+        if basis is not None:
+            basis = np.asarray(basis, dtype=float)
+            if coefficients is None:
+                coefficients = np.zeros(basis.shape[:-2])
+            else:
+                coefficients = np.asarray(coefficients, dtype=float)
+                if basis.shape[:-2] != coefficients.shape:
+                    raise ValueError(
+                        "The number of basis vectors must be equal to "
+                        "the number of coefficients."
+                    )
+
+        self.basis = basis
+        self.coefficients = coefficients
+
         self.as_phase = bool(as_phase)
 
     def eval_basis(self: OpticalLayer) -> Array:
