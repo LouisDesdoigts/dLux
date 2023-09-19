@@ -1,4 +1,6 @@
-import jax.numpy as np
+from jax import numpy as np, config
+
+config.update("jax_debug_nans", True)
 import pytest
 from dLux import (
     LayeredOptics,
@@ -86,6 +88,11 @@ def oversample():
     return 2
 
 
+@pytest.fixture
+def focal_length():
+    return 1.0
+
+
 def test_angular_optics(
     wf_npixels, diameter, layers, psf_npixels, psf_pixel_scale, oversample
 ):
@@ -98,10 +105,22 @@ def test_angular_optics(
 
 
 def test_cartesian_optics(
-    wf_npixels, diameter, layers, psf_npixels, psf_pixel_scale, oversample
+    wf_npixels,
+    diameter,
+    layers,
+    focal_length,
+    psf_npixels,
+    psf_pixel_scale,
+    oversample,
 ):
     optics = CartesianOptics(
-        wf_npixels, diameter, layers, psf_npixels, psf_pixel_scale, oversample
+        wf_npixels,
+        diameter,
+        layers,
+        focal_length,
+        psf_npixels,
+        psf_pixel_scale,
+        oversample,
     )
     _test_model(optics)
     _test_propagate(optics)

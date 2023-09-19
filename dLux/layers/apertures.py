@@ -105,14 +105,16 @@ class BaseDynamicAperture(ApertureLayer):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        # Transform coordinate
-        if self.transformation is not None:
-            coords = self.transformation.apply(wavefront.coordinates)
-        else:
-            coords = wavefront.coordinates
+        # # Transform coordinate
+        # if self.transformation is not None:
+        #     coords = self.transformation.apply(wavefront.coordinates)
+        # else:
+        #     coords =
 
         # Apply aperture
-        wavefront *= self.transmission(coords, wavefront.pixel_scale)
+        wavefront *= self.transmission(
+            wavefront.coordinates, wavefront.pixel_scale
+        )
         if self.normalise:
             return wavefront.normalise()
         return wavefront
@@ -166,6 +168,8 @@ class DynamicAperture(BaseDynamicAperture):
         )
         self.occulting = bool(occulting)
         self.softness = float(softening)
+        if self.softness <= 0:
+            raise ValueError("softening must be greater than 0.")
 
     @abstractmethod  # pragma: no cover
     def extent(self):
@@ -235,7 +239,6 @@ class CircularAperture(DynamicAperture):
         if self.transformation is not None:
             coords = self.transformation.apply(coords)
         clip_val = pixel_scale * self.softness / 2
-        print(coords.shape)
         return dlu.soft_circle(coords, self.radius, clip_val, self.occulting)
 
     @property
@@ -658,16 +661,18 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         wavefront : Wavefront
             The transformed wavefront.
         """
+        # Transmission
+        wavefront *= self.transmission(
+            wavefront.coordinates, wavefront.pixel_scale
+        )
+        if self.normalise:
+            return wavefront.normalise()
+
         # Transform coordinate
         if self.aperture.transformation is not None:
             coords = self.aperture.transformation.apply(wavefront.coordinates)
         else:
             coords = wavefront.coordinates
-
-        # Transmission
-        wavefront *= self.transmission(coords, wavefront.pixel_scale)
-        if self.normalise:
-            return wavefront.normalise()
 
         # Aberrations
         aberrations = self.eval_basis(coords)
@@ -796,17 +801,18 @@ class CompositeAperture(BaseDynamicAperture):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        # Coordinate transforms
+        # Transmission
+        wavefront *= self.transmission(
+            wavefront.coordinates, wavefront.pixel_scale
+        )
+        if self.normalise:
+            return wavefront.normalise()
+
         # Transform coordinate
         if self.transformation is not None:
             coords = self.transformation.apply(wavefront.coordinates)
         else:
             coords = wavefront.coordinates
-
-        # Transmission
-        wavefront *= self.transmission(coords, wavefront.pixel_scale)
-        if self.normalise:
-            return wavefront.normalise()
 
         # Aberrations
         aberrations = self.eval_basis(coords)

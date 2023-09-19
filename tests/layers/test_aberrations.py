@@ -4,6 +4,9 @@ from dLux.layers import (
     Zernike,
     ZernikeBasis,
 )
+from jax import config
+
+config.update("jax_debug_nans", True)
 
 
 @pytest.fixture

@@ -1,5 +1,7 @@
 import pytest
-import jax.numpy as np
+from jax import numpy as np, config
+
+config.update("jax_debug_nans", True)
 from dLux.utils.optics import wavenumber, opd2phase, phase2opd, fringe_size
 
 

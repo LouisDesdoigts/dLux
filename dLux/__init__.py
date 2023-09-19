@@ -28,8 +28,15 @@ modules = [
 __all__ = [module.__all__ for module in modules]
 
 
-from .detectors import LayeredDetector as LayeredDetector
-from .spectra import Spectrum as Spectrum, PolySpectrum as PolySpectrum
+from .detectors import (
+    BaseDetector as BaseDetector,
+    LayeredDetector as LayeredDetector,
+)
+from .spectra import (
+    BaseSpectrum as BaseSpectrum,
+    Spectrum as Spectrum,
+    PolySpectrum as PolySpectrum,
+)
 from .wavefronts import Wavefront as Wavefront
 from .psfs import PSF as PSF
 from .layers.transformations import CoordTransform as CoordTransform
@@ -68,6 +75,7 @@ from .layers import (
 
 # Import core functions from modules
 from .layers.optical_layers import (
+    BaseLayer as BaseLayer,
     TransmissiveLayer as TransmissiveLayer,
     AberratedLayer as AberratedLayer,
     BasisLayer as BasisLayer,

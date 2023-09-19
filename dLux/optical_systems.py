@@ -71,29 +71,6 @@ class OpticalSystem(BaseOpticalSystem):
     method must be implemented by any class that inherits from `OpticalSystem`.
     """
 
-    # def __getattr__(self: OpticalSystem, key: str) -> Any:
-    #     """
-    #     Accessor for attributes of the class to simplify zodiax paths by
-    #     searching for parameters in the attributes of the class.
-
-    #     Parameters
-    #     ----------
-    #     key : str
-    #         The key of the item to be searched for in the class.
-
-    #     Returns
-    #     -------
-    #     item : object
-    #         The item corresponding to the supplied key.
-    #     """
-    #     for attribute in self.__dict__.values():
-    #         if hasattr(attribute, key):
-    #             return getattr(attribute, key)
-    #     else:
-    #         raise AttributeError(
-    #             f"{self.__class__.__name__} has no attribute " f"{key}."
-    #         )
-
     # TODO: Move to base?
     def propagate_mono(
         self: AngularOptics,

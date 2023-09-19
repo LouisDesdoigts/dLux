@@ -1,5 +1,7 @@
 import pytest
-import jax.numpy as np
+from jax import numpy as np, config
+
+config.update("jax_debug_nans", True)
 from jax import random
 from dLux.utils.interpolation import generate_coordinates, scale, rotate
 

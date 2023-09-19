@@ -1,5 +1,7 @@
 import pytest
-import jax.numpy as np
+from jax import numpy as np, config
+
+config.update("jax_debug_nans", True)
 from dLux.utils.coordinates import (
     cart2polar,
     nd_coords,
@@ -91,7 +93,6 @@ def test_polar2cart():
     coordinates = np.array([1, np.pi / 2])
     expected = np.array([0, 1])
     actual = polar2cart(coordinates)
-    print(actual, expected)
     assert np.allclose(actual, expected, rtol=rtol, atol=atol)
 
     # Test case 3

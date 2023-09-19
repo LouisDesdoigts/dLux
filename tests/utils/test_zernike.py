@@ -1,5 +1,7 @@
 import pytest
-import numpy as np
+from jax import numpy as np, config
+
+config.update("jax_debug_nans", True)
 from dLux import utils
 from dLux.utils.zernikes import (
     zernike_name,

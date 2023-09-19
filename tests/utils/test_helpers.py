@@ -1,4 +1,7 @@
 import pytest
+from jax import config
+
+config.update("jax_debug_nans", True)
 from collections import OrderedDict
 from dLux.utils.helpers import (
     map2array,

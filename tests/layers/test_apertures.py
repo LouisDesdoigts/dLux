@@ -1,4 +1,6 @@
-import jax.numpy as np
+from jax import numpy as np, config
+
+config.update("jax_debug_nans", True)
 import pytest
 from dLux.layers import (
     CircularAperture,
@@ -18,12 +20,17 @@ wf = Wavefront(16, 1, 1e-6)
 
 @pytest.fixture
 def rmax():
-    return 1
+    return 0.1
 
 
 @pytest.fixture
 def n_sides():
     return 6
+
+
+@pytest.fixture
+def softening():
+    return 1.0
 
 
 @pytest.fixture
@@ -45,7 +52,6 @@ def _test_nsides(aperture):
 
 # Basic tests
 @pytest.mark.parametrize("occulting", [True, False])
-@pytest.mark.parametrize("softening", [True, False])
 @pytest.mark.parametrize("normalise", [True, False])
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
 def test_circular_aperture(
@@ -60,7 +66,6 @@ def test_circular_aperture(
 
 
 @pytest.mark.parametrize("occulting", [True, False])
-@pytest.mark.parametrize("softening", [True, False])
 @pytest.mark.parametrize("normalise", [True, False])
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
 def test_square_aperture(
@@ -73,7 +78,6 @@ def test_square_aperture(
 
 
 @pytest.mark.parametrize("occulting", [True, False])
-@pytest.mark.parametrize("softening", [True, False])
 @pytest.mark.parametrize("normalise", [True, False])
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
 def test_rectangular_aperture(
@@ -88,14 +92,13 @@ def test_rectangular_aperture(
 
 
 @pytest.mark.parametrize("occulting", [True, False])
-@pytest.mark.parametrize("softening", [True, False])
 @pytest.mark.parametrize("normalise", [True, False])
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
 def test_reg_poly_aperture(
     rmax, n_sides, occulting, softening, normalise, transformation
 ):
     ap = RegPolyAperture(
-        rmax, n_sides, transformation, occulting, softening, normalise
+        n_sides, rmax, transformation, occulting, softening, normalise
     )
     _test_apply(ap)
     _test_extent(ap)
@@ -103,7 +106,6 @@ def test_reg_poly_aperture(
 
 
 @pytest.mark.parametrize("occulting", [True, False])
-@pytest.mark.parametrize("softening", [True, False])
 @pytest.mark.parametrize("normalise", [True, False])
 @pytest.mark.parametrize("transformation", [None, CoordTransform()])
 def test_spider(rmax, angles, occulting, softening, normalise, transformation):
@@ -116,16 +118,16 @@ def test_spider(rmax, angles, occulting, softening, normalise, transformation):
 
 
 # Testing other functionality
-def test_getattr():
-    aperture = CircularAperture(1, CoordTransform(translation=[1.0, 1.0]))
+def test_getattr(rmax):
+    aperture = CircularAperture(rmax, CoordTransform(translation=[1.0, 1.0]))
     assert np.allclose(aperture.translation, np.array([1.0, 1.0]))
     with pytest.raises(AttributeError):
         aperture.not_an_attr
 
 
-def test_non_tf():
+def test_non_tf(rmax):
     with pytest.raises(TypeError):
-        CircularAperture(1, transformation=2)
+        CircularAperture(rmax, transformation=2)
 
 
 # Testing other aperture types separately, as they are more complex
@@ -137,8 +139,8 @@ def noll_indices():
 
 
 @pytest.fixture
-def aperture():
-    return CircularAperture(1)
+def aperture(rmax):
+    return CircularAperture(rmax)
 
 
 @pytest.mark.parametrize("coefficients", [None, np.zeros(4)])
@@ -146,8 +148,8 @@ def aperture():
 @pytest.mark.parametrize(
     "aperture",
     [
-        CircularAperture(1, normalise=True),
-        CircularAperture(1, CoordTransform()),
+        CircularAperture(0.1, normalise=True),
+        CircularAperture(0.1, CoordTransform()),
     ],
 )
 def test_aberrated_aperture(aperture, noll_indices, coefficients, as_phase):
@@ -167,8 +169,8 @@ def test_aberrated_aperture_error(noll_indices, rmax, angles):
 
 
 @pytest.fixture
-def aperture_list(noll_indices):
-    ap = CircularAperture(1)
+def aperture_list(noll_indices, rmax):
+    ap = CircularAperture(rmax)
     return [ap, AberratedAperture(ap, noll_indices)]
 
 

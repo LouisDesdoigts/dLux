@@ -1,12 +1,12 @@
 from __future__ import annotations
 from abc import abstractmethod
-from zodiax import Base
 import jax.numpy as np
 from jax import Array
 from jax.scipy.stats import norm
 
 
 from ..psfs import PSF
+from .optical_layers import BaseLayer
 
 __all__ = [
     "BaseDetectorLayer",
@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-class BaseDetectorLayer(Base):
+class BaseDetectorLayer(BaseLayer):
     @abstractmethod
     def apply(self: BaseDetectorLayer, psf):  # pragma: no cover
         pass
