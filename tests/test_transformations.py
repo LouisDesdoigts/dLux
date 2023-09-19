@@ -2,7 +2,7 @@ from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
 import pytest
-from dLux.layers import CoordTransform
+from dLux import CoordTransform
 
 
 def test_coord_transform():
