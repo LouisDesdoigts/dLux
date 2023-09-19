@@ -79,11 +79,11 @@ jobs:
       - name: test layers propagators
         run: pytest --quiet tests/layers/test_propagators.py
       
-      - name: test layers transfomrations
+      - name: test layers transformations
         run: pytest --quiet tests/layers/test_transformations.py
       
-      - name: test layers united_layers
-        run: pytest --quiet tests/layers/test_united_layers.py
+      - name: test layers unified_layers
+        run: pytest --quiet tests/layers/test_unified_layers.py
       
       - name: test detectors
         run: pytest --quiet tests/test_detectors.py
