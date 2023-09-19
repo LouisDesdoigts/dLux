@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11"]
 
     steps:
       - name: checkout
@@ -25,5 +25,87 @@ jobs:
           pip install --quiet pytest
 
       # ===== Tests =====
-      - name: all tests
-        run: pytest --quiet tests/*
+      - name: tests install
+        run: pytest --quiet tests/test_installation.py
+      
+      - name: test utils array_ops
+        run: pytest --quiet tests/utils/test_array_ops.py
+      
+      - name: test utils coordinates
+        run: pytest --quiet tests/utils/test_coordinates.py
+      
+      - name: test utils geometry
+        run: pytest --quiet tests/utils/test_geometry.py
+      
+      - name: test utils helpers
+        run: pytest --quiet tests/utils/test_helpers.py
+      
+      - name: test utils interpolation
+        run: pytest --quiet tests/utils/test_interpolation.py
+      
+      - name: test utils math
+        run: pytest --quiet tests/utils/test_math.py
+
+      - name: test utils optics
+        run: pytest --quiet tests/utils/test_optics.py
+      
+      - name: test utils propagation
+        run: pytest --quiet tests/utils/test_propagation.py
+      
+      - name: test utils source
+        run: pytest --quiet tests/utils/test_source.py
+      
+      - name: test utils units
+        run: pytest --quiet tests/utils/test_units.py
+      
+      - name: test utils zernike
+        run: pytest --quiet tests/utils/test_zernike.py
+      
+      - name: test layers aberrations
+        run: pytest --quiet tests/layers/test_aberrations.py
+      
+      - name: test layers apertures
+        run: pytest --quiet tests/layers/test_apertures.py
+      
+      - name: test layers detector_layers
+        run: pytest --quiet tests/layers/test_detector_layers.py
+      
+      - name: test layers optical_layers
+        run: pytest --quiet tests/layers/test_optical_layers.py
+      
+      - name: test layers optics
+        run: pytest --quiet tests/layers/test_optics.py
+      
+      - name: test layers propagators
+        run: pytest --quiet tests/layers/test_propagators.py
+      
+      - name: test layers transfomrations
+        run: pytest --quiet tests/layers/test_transformations.py
+      
+      - name: test layers united_layers
+        run: pytest --quiet tests/layers/test_united_layers.py
+      
+      - name: test detectors
+        run: pytest --quiet tests/test_detectors.py
+      
+      - name: test instruments
+        run: pytest --quiet tests/test_instruments.py
+      
+      - name: test optical_systems
+        run: pytest --quiet tests/test_optical_systems.py
+      
+      - name: test psfs
+        run: pytest --quiet tests/test_psfs.py
+      
+      - name: test sources
+        run: pytest --quiet tests/test_sources.py
+      
+      - name: test spectra
+        run: pytest --quiet tests/test_spectra.py
+      
+      - name: test wavefronts
+        run: pytest --quiet tests/test_wavefronts.py
+      
+      
+
+      
