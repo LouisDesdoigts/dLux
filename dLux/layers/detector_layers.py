@@ -6,7 +6,7 @@ from jax import Array
 from jax.scipy.stats import norm
 
 
-from ..containers import PSF
+from ..psfs import PSF
 
 __all__ = [
     "BaseDetectorLayer",
@@ -140,6 +140,7 @@ class ApplyJitter(DetectorLayer):
         kernel : Array
             The Gaussian kernel.
         """
+        # TODO: Move to utils?
         # Generate distribution
         sigma = self.sigma * pixel_scale
         x = np.linspace(-10, 10, self.kernel_size) * pixel_scale

@@ -2,7 +2,7 @@ from __future__ import annotations
 from jax import Array
 
 
-from ..containers import Wavefront
+from ..wavefronts import Wavefront
 from .optical_layers import (
     OpticalLayer,
     TransmissiveLayer,
@@ -67,13 +67,13 @@ class Optic(TransmissiveLayer, AberratedLayer):
                 if self.transmission.shape != self.opd.shape:
                     raise ValueError(
                         "transmission and opd must have the same shape. Got "
-                        f"shapes {self.opd.shape} and {self.phase.shape}."
+                        f"shapes {self.transmission.shape} and {self.opd.shape}."
                     )
             if self.phase is not None:
                 if self.transmission.shape != self.phase.shape:
                     raise ValueError(
                         "transmission and phase must have the same shape. Got "
-                        f"shapes {self.opd.shape} and {self.phase.shape}."
+                        f"shapes {self.transmission.shape} and {self.phase.shape}."
                     )
 
     def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
@@ -123,8 +123,8 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
 
     def __init__(
         self: OpticalLayer,
-        transmission,
         basis,
+        transmission=None,
         coefficients=None,
         as_phase=False,
         normalise=False,

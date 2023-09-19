@@ -499,7 +499,10 @@ class Wavefront(Base):
             field = self._to_amplitude_phase(field)
 
         # Return new wavefront
-        return self.set(["amplitude", "phase"], [field[0], field[1]])
+        return self.set(
+            ["amplitude", "phase", "pixel_scale"],
+            [field[0], field[1], pixel_scale],
+        )
 
     def rotate(
         self: Wavefront, angle: Array, order: int = 1, complex: bool = False
@@ -573,12 +576,12 @@ class Wavefront(Base):
                 units = "Angular"
             else:
                 units = "Cartesian"
-                if self.units == "Angular":
-                    raise ValueError(
-                        "focal_length can not be specific when"
-                        "propagating from a Focal plane with angular units."
-                    )
         else:
+            if focal_length is not None and self.units == "Angular":
+                raise ValueError(
+                    "focal_length can not be specific when"
+                    "propagating from a Focal plane with angular units."
+                )
             inverse = True
             plane = "Pupil"
             units = "Cartesian"
@@ -705,12 +708,6 @@ class Wavefront(Base):
         pixel : bool = True
             Whether the shift is in pixels or the units of pixel_scale.
         """
-        # if self.plane != "Pupil":
-        #     raise ValueError(
-        #         "Can only do an fresnel propagation from a Pupil plane, "
-        #         f"current plane is {self.plane}."
-        #     )
-
         # TODO: Try inverse propagation to see if it works, it probably will
         if self.plane == "Pupil":
             inverse = False
@@ -718,6 +715,13 @@ class Wavefront(Base):
             inverse = True
         plane = "Intermediate"
         units = "Cartesian"
+
+        # We can't fresnel from a focal plane
+        if self.plane != "Pupil":
+            raise ValueError(
+                "Can only do an fresnel propagation from a Pupil plane, "
+                f"current plane is {self.plane}."
+            )
 
         # Calculate
         phasor = dlu.fresnel_MFT(

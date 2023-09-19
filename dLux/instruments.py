@@ -4,12 +4,11 @@ from zodiax import Base
 from jax import Array, vmap
 import jax.numpy as np
 from typing import Union
-import dLux.utils as dlu
 
 from .optical_systems import BaseOpticalSystem as OpticalSystem
 from .detectors import BaseDetector as Detector
 from .sources import BaseSource as Source, Scene
-from .containers.psfs import PSF
+from .psfs import PSF
 
 
 __all__ = ["Instrument", "Telescope", "Dither"]
@@ -21,7 +20,6 @@ class Instrument(Base):
         pass
 
 
-# TODO: re-name to Telescope
 class Telescope(Instrument):
     """
     A high level class designed to model the behaviour of a telescope. It
@@ -129,21 +127,21 @@ class Telescope(Instrument):
         # Model optics: return_psf=True for more efficient source calculations
         psfs = self.optics.model(self.source, return_psf=True)
 
-        # Check for tree-like output from scene
-        if not isinstance(psfs, PSF):
-            # Define functions
-            leaf_fn = lambda x: isinstance(x, PSF)
-            get_psfs = lambda psf: psf.data.sum(tuple(range(psf.ndim)))
-            get_pscales = lambda psf: psf.pixel_scale.mean()
+        # # Check for tree-like output from scene
+        # if not isinstance(psfs, PSF):
+        #     # Define functions
+        #     leaf_fn = lambda x: isinstance(x, PSF)
+        #     get_psfs = lambda psf: psf.data.sum(tuple(range(psf.ndim)))
+        #     get_pscales = lambda psf: psf.pixel_scale.mean()
 
-            # Get values
-            psf = dlu.map2array(get_psfs, psfs, leaf_fn).sum()
-            pixel_scale = dlu.map2array(get_pscales, psfs, leaf_fn).mean()
+        #     # Get values
+        #     psf = dlu.map2array(get_psfs, psfs, leaf_fn).sum()
+        #     pixel_scale = dlu.map2array(get_pscales, psfs, leaf_fn).mean()
 
-        # Array based output
-        else:
-            psf = psfs.data.sum(tuple(range(psfs.ndim)))
-            pixel_scale = psfs.pixel_scale.mean()
+        # # Array based output
+        # else:
+        psf = psfs.data.sum(tuple(range(psfs.ndim)))
+        pixel_scale = psfs.pixel_scale.mean()
 
         # Pass through detector transformations if it exists
         psf_obj = PSF(psf, pixel_scale)
@@ -200,7 +198,7 @@ class Dither(Telescope):
             raise ValueError("dithers must be an array of shape (ndithers, 2)")
         super().__init__(optics=optics, source=source, detector=detector)
 
-    def model(self: Telescope) -> Array:
+    def model(self: Telescope, return_psf=False) -> Array:
         """
         Applies a series of dithers to the instrument sources and calls the
         .model() method after applying each dither.
@@ -219,6 +217,6 @@ class Dither(Telescope):
 
         def dither_and_model(dither, instrument):
             instrument = instrument.add("source.position", dither)
-            return super(type(instrument), instrument).model()
+            return super(type(instrument), instrument).model(return_psf)
 
         return vmap(dither_and_model, (0, None))(self.dithers, self)

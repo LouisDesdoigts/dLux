@@ -291,17 +291,18 @@ def fresnel_phase_factors(
     """
     # Calculate parameters
     prop_dist = focal_length + focal_shift
-    input_positions = dlu.nd_coords(npixels_in, pixel_scale_in)
-    output_positions = dlu.nd_coords(npixels_out, pixel_scale_out)
+    input_positions = dlu.pixel_coords(npixels_in, pixel_scale_in)
+    output_positions = dlu.pixel_coords(npixels_out, pixel_scale_out)
 
-    # Calculate factors
-    first_factor = quadratic_phase(
-        *input_positions, -focal_length
-    ) * quadratic_phase(*input_positions, prop_dist)
+    # Calculate phase factors
+    phase_fn = lambda dist, coords: quadratic_phase(wavelength, dist, coords)
+    first_factor = phase_fn(-focal_length, input_positions) * phase_fn(
+        prop_dist, input_positions
+    )
+    second_factor = np.exp(2j * np.pi * prop_dist / wavelength) * phase_fn(
+        prop_dist, output_positions
+    )
 
-    second_factor = np.exp(
-        2j * np.pi * prop_dist / wavelength
-    ) * quadratic_phase(*output_positions, prop_dist)
     return first_factor, second_factor
 
 
@@ -311,9 +312,9 @@ def fresnel_MFT(
     pixel_scale_in,
     npixels_out: int,
     pixel_scale_out: Array,
-    shift: Array,
     focal_length: Array,
     focal_shift: Array,
+    shift: Array = np.zeros(2),
     pixel: bool = True,
     inverse: bool = False,
 ) -> Array:
@@ -346,10 +347,10 @@ def fresnel_MFT(
         npixels_out,
         pixel_scale_out,
         focal_length,
-        focal_shift,
         shift,
         pixel,
         inverse,
     )
+
     phasor *= second_factor
     return phasor

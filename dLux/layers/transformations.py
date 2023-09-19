@@ -37,10 +37,10 @@ class CoordTransform(Base):
 
     def __init__(
         self: CoordTransform,
-        translation: Array,
-        rotation: float,
-        compression: Array,
-        shear: Array,
+        translation: Array = None,
+        rotation: float = None,
+        compression: Array = None,
+        shear: Array = None,
     ):
         """
         Parameters

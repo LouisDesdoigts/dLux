@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import Any, Callable
 import jax.numpy as np
-from jax import tree_flatten, tree_map
+from jax.tree_util import tree_flatten, tree_map
 
 __all__ = ["map2array", "list2dictionary", "insert_layer", "remove_layer"]
 
@@ -92,7 +92,7 @@ def list2dictionary(
 
 
 def insert_layer(layers: OrderedDict, layer, index: int, type):
-    layers_list = list(zip(layers.values(), layers.keys()))
+    layers_list = list(zip(layers.keys(), layers.values()))
     layers_list.insert(index, layer)
     return list2dictionary(layers_list, True, type)
 

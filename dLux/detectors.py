@@ -7,7 +7,7 @@ from jax import Array
 import dLux.utils as dlu
 
 from .layers.detector_layers import DetectorLayer
-from .containers.psfs import PSF
+from .psfs import PSF
 
 
 __all__ = ["BaseDetector", "LayeredDetector"]
@@ -115,7 +115,8 @@ class LayeredDetector(BaseDetector):
             The index to insert the layer at.
         """
         return self.set(
-            "layers", dlu.insert_layer(layer, index, DetectorLayer)
+            "layers",
+            dlu.insert_layer(self.layers, layer, index, DetectorLayer),
         )
 
     def remove_layer(self: LayeredDetector, key: str) -> LayeredDetector:
@@ -128,4 +129,4 @@ class LayeredDetector(BaseDetector):
         key : str
             The key of the layer to remove.
         """
-        return self.set("layers", dlu.remove_layer(key))
+        return self.set("layers", dlu.remove_layer(self.layers, key))

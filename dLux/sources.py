@@ -10,7 +10,7 @@ from dLux import spectra
 import dLux
 
 
-from .containers.psfs import PSF
+from .psfs import PSF
 
 Optics = lambda: dLux.optical_systems.BaseOpticalSystem
 Spectrum = lambda: dLux.spectra.BaseSpectrum
@@ -84,9 +84,6 @@ class Scene(BaseSource):
         """
         if key in self.sources.keys():
             return self.sources[key]
-        for attribute in self.__dict__.values():
-            if hasattr(attribute, key):
-                return getattr(attribute, key)
         raise AttributeError(
             f"{self.__class__.__name__} has no attribute " f"{key}."
         )
@@ -178,7 +175,7 @@ class Source(BaseSource):
         # Spectrum
         if spectrum is not None:
             if not isinstance(spectrum, spectra.Spectrum):
-                raise ValueError("spectrum must be a dLux Spectrum object.")
+                raise TypeError("spectrum must be a dLux Spectrum object.")
             self.spectrum = spectrum
         else:
             self.spectrum = spectra.Spectrum(wavelengths, weights)
@@ -389,6 +386,11 @@ class PointSources(Source):
             The pixel scale of the psf. Only returned if
             `get_pixel_scale == True`.
         """
+        if return_wf and return_psf:
+            raise ValueError(
+                "return_wf and return_psf cannot both be True. "
+                "Please choose one."
+            )
         self = self.normalise()
         weights = self.weights[None, :] * self.flux[:, None]
         prop_fn = lambda position, weight: optics.propagate(
@@ -499,6 +501,11 @@ class ResolvedSource(PointSource):
         pixel_scale : Array, radians
 
         """
+        if return_wf and return_psf:
+            raise ValueError(
+                "return_wf and return_psf cannot both be True. "
+                "Please choose one."
+            )
         # Normalise and get parameters
         self = self.normalise()
         weights = self.weights * self.flux
@@ -745,6 +752,11 @@ class PointResolvedSource(ResolvedSource):
             The pixel scale of the psf. Only returned if
             `get_pixel_scale == True`.
         """
+        if return_wf and return_psf:
+            raise ValueError(
+                "return_wf and return_psf cannot both be True. "
+                "Please choose one."
+            )
         # Normalise and get parameters
         self = self.normalise()
         flux = dlu.fluxes_from_contrast(self.flux, self.contrast)

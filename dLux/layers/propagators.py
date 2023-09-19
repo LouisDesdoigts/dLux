@@ -4,7 +4,7 @@ from jax import Array
 
 
 from .optical_layers import OpticalLayer
-from ..containers import Wavefront
+from ..wavefronts import Wavefront
 
 
 __all__ = ["MFT", "FFT", "ShiftedMFT", "FarFieldFresnel"]
@@ -21,23 +21,16 @@ class Propagator(OpticalLayer):
         The effective focal length of the lens/mirror this propagator
         represents. If None, the output pixel_scales are taken to be
         radians/pixel, else they are taken to be in metres/pixel.
-    inverse : bool
-        Should the propagation be performed in the inverse direction.
     """
 
     focal_length: float
-    inverse: bool
 
-    def __init__(
-        self: Propagator, focal_length: float = None, inverse: bool = False
-    ):
+    def __init__(self: Propagator, focal_length: float = None):
         """
         Constructor for the Propagator.
 
         Parameters
         ----------
-        inverse : bool = False
-            Should the propagation be performed in the inverse direction.
         """
         super().__init__()
 
@@ -45,7 +38,6 @@ class Propagator(OpticalLayer):
             focal_length = float(focal_length)
 
         self.focal_length = focal_length
-        self.inverse = bool(inverse)
 
 
 class FFT(Propagator):
@@ -61,8 +53,7 @@ class FFT(Propagator):
         The focal_length of the lens/mirror this propagator represents.
     pad : int
         The amount of padding to apply to the wavefront before propagating.
-    inverse : bool
-        Should the propagation be performed in the inverse direction.
+
     """
 
     pad: int
@@ -71,9 +62,8 @@ class FFT(Propagator):
         self: Propagator,
         focal_length: float = None,
         pad: int = 2,
-        inverse: bool = False,
     ) -> Propagator:
-        super().__init__(focal_length=focal_length, inverse=inverse)
+        super().__init__(focal_length=focal_length)
         self.pad = int(pad)
 
     def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
@@ -90,10 +80,7 @@ class FFT(Propagator):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        if self.inverse:
-            return wavefront.IFFT(self.pad, self.focal_length)
-        else:
-            return wavefront.FFT(self.pad, self.focal_length)
+        return wavefront.propagate_FFT(self.focal_length, self.pad)
 
 
 class MFT(Propagator):
@@ -113,8 +100,6 @@ class MFT(Propagator):
         The effective focal length of the lens/mirror this propagator
         represents. If None, the pixel_scale is taken to be in radians/pixel,
         else it is taken to be in metres/pixel.
-    inverse : bool
-        Should the propagation be performed in the inverse direction.
     """
 
     npixels: int
@@ -127,7 +112,6 @@ class MFT(Propagator):
         pixel_scale: float,
         oversample: float = 1.0,
         focal_length: float = None,
-        inverse: bool = False,
     ):
         """
         Constructor for VariableSampling propagators.
@@ -145,10 +129,8 @@ class MFT(Propagator):
             The focal_length of the lens/mirror this propagator represents.
             If None, the pixel_scale is taken to be in radians/pixel, else it
             is taken to be in metres/pixel.
-        inverse : bool = False
-            Should the propagation be performed in the inverse direction.
         """
-        super().__init__(focal_length=focal_length, inverse=inverse)
+        super().__init__(focal_length=focal_length)
 
         self.oversample = float(oversample)
         self.pixel_scale = float(pixel_scale)
@@ -168,18 +150,11 @@ class MFT(Propagator):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        # if self.inverse:
         return wavefront.propagate(
             self.npixels,
             self.pixel_scale / self.oversample,
-            focal_length=self.focal_length,
+            self.focal_length,
         )
-        # else:
-        # return wavefront.propagate(
-        #     self.npixels,
-        #     self.pixel_scale / self.oversample,
-        #     focal_length=self.focal_length,
-        # )
 
 
 class ShiftedMFT(MFT):
@@ -206,8 +181,6 @@ class ShiftedMFT(MFT):
         If True the shift value is assumed to be in units of pixels, else the
         physical units of the output plane (ie radians if focal_length is None,
         else metres).
-    inverse : bool
-        Should the propagation be performed in the inverse direction.
     """
 
     shift: Array
@@ -221,7 +194,6 @@ class ShiftedMFT(MFT):
         oversample: float = 1.0,
         focal_length: float = None,
         pixel: bool = False,
-        inverse: bool = False,
     ):
         """
         Constructor for VariableSampling propagators.
@@ -245,22 +217,21 @@ class ShiftedMFT(MFT):
             If True the shift value is assumed to be in units of pixels, else
             the physical units of the output plane (ie radians if focal_length
             is None, else metres).
-        inverse : bool = False
-            Should the propagation be performed in the inverse direction.
         """
         super().__init__(
             pixel_scale=pixel_scale,
             npixels=npixels,
             oversample=oversample,
             focal_length=focal_length,
-            inverse=inverse,
         )
 
         self.shift = np.asarray(shift, float)
         self.pixel = bool(pixel)
 
-        if shift.shape != (2,):
-            raise TypeError(f"Shift must be a 2D array, got {shift.shape}.")
+        if self.shift.shape != (2,):
+            raise ValueError(
+                f"Shift must be a 2D array, got {self.shift.shape}."
+            )
 
     def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
         """
@@ -276,22 +247,13 @@ class ShiftedMFT(MFT):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        if self.inverse:
-            return wavefront.shifted_IMFT(
-                self.npixels,
-                self.pixel_scale / self.oversample,
-                self.shift,
-                self.focal_length,
-                self.pixel,
-            )
-        else:
-            return wavefront.shifted_MFT(
-                self.npixels,
-                self.pixel_scale / self.oversample,
-                self.shift,
-                self.focal_length,
-                self.pixel,
-            )
+        return wavefront.propagate(
+            self.npixels,
+            self.pixel_scale / self.oversample,
+            self.focal_length,
+            self.shift,
+            self.pixel,
+        )
 
 
 class FarFieldFresnel(ShiftedMFT):
@@ -320,8 +282,6 @@ class FarFieldFresnel(ShiftedMFT):
         Should the shift value be considered in units of pixels, or in the
         physical units of the output plane (ie pixels or metres, radians). True
         interprets the shift value in pixel units.
-    inverse : bool
-        Should the propagation be performed in the inverse direction.
     """
 
     focal_shift: float
@@ -335,7 +295,6 @@ class FarFieldFresnel(ShiftedMFT):
         oversample: float = 1.0,
         shift: Array = np.zeros(2),
         pixel: bool = False,
-        inverse: bool = False,
     ):
         """
         Constructor for the CartesianFresnel propagator
@@ -357,16 +316,8 @@ class FarFieldFresnel(ShiftedMFT):
         pixel : bool = False
             Should the shift value be considered in units of pixel, or in the
             physical units of the output plane (ie pixels or metres, radians).
-        inverse : bool = False
-            Should the propagation be performed in the inverse direction.
         """
-        if inverse:
-            raise NotImplementedError(
-                "Inverse propagation not implemented " "for CartesianFresnel."
-            )
-
         self.focal_shift = float(focal_shift)
-
         super().__init__(
             shift=shift,
             pixel=pixel,
@@ -374,7 +325,6 @@ class FarFieldFresnel(ShiftedMFT):
             pixel_scale=pixel_scale,
             oversample=oversample,
             npixels=npixels,
-            inverse=inverse,
         )
 
     def apply(self: Propagator, wavefront: Wavefront) -> Wavefront:
@@ -391,11 +341,11 @@ class FarFieldFresnel(ShiftedMFT):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        return wavefront.shifted_fresnel_prop(
+        return wavefront.propagate_fresnel(
             self.npixels,
             self.pixel_scale / self.oversample,
-            self.shift,
             self.focal_length,
             self.focal_shift,
+            self.shift,
             self.pixel,
         )

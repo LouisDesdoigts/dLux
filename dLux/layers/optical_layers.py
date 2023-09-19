@@ -7,7 +7,7 @@ from jax import Array
 import dLux.utils as dlu
 
 
-from ..containers.wavefronts import Wavefront
+from ..wavefronts import Wavefront
 
 
 __all__ = [
@@ -187,7 +187,6 @@ class AberratedLayer(OpticalLayer):
         return wavefront
 
 
-# TODO: Make public (add apply method)
 class BasisLayer(OpticalLayer):
     """
     This class primarily exists to allow for the use of the class based basis
@@ -208,6 +207,7 @@ class BasisLayer(OpticalLayer):
     coefficients: Array
     as_phase: bool
 
+    # NOTE: We need the None basis input for aberrated apertures
     def __init__(
         self: OpticalLayer,
         basis: Array = None,

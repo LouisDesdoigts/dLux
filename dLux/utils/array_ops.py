@@ -123,6 +123,16 @@ def downsample(array: Array, n: int, mean=True) -> Array:
     array : Array
         The downsampled array.
     """
+    if array.shape[0] != array.shape[1]:
+        raise ValueError(
+            f"Input array has shape {array.shape}, which is not square"
+        )
+    if array.shape[0] % n != 0:
+        raise ValueError(
+            f"Input array has {array.shape[0]} pixels, which is not divisible "
+            f"by {n}"
+        )
+
     method = np.mean if mean else np.sum
     size_in = array.shape[0]
     size_out = size_in // n

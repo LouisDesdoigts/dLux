@@ -6,7 +6,8 @@ __all__ = ["Rotate", "Flip", "Resize"]
 
 from .optical_layers import OpticalLayer
 from .detector_layers import DetectorLayer
-from ..containers import Wavefront, PSF
+from ..wavefronts import Wavefront
+from ..psfs import PSF
 
 
 class UnifiedLayer(OpticalLayer, DetectorLayer):

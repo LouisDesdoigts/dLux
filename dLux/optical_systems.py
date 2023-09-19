@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Any
 from collections import OrderedDict
 from abc import abstractmethod
 import jax.numpy as np
@@ -17,9 +16,9 @@ __all__ = [
 ]
 
 from .layers.optical_layers import OpticalLayer
-from .containers.wavefronts import Wavefront
+from .wavefronts import Wavefront
 from .sources import BaseSource as Source
-from .containers.psfs import PSF
+from .psfs import PSF
 
 
 ###################
@@ -42,7 +41,7 @@ class BaseOpticalSystem(Base):
         offset: Array,
         weights: Array,
         return_wf: bool,
-    ):
+    ):  # pragma: no cover
         pass
 
     @abstractmethod
@@ -50,7 +49,7 @@ class BaseOpticalSystem(Base):
         self: BaseOpticalSystem,
         # source: BaseSourceObject,
         return_wf: bool = False,
-    ) -> Array:
+    ) -> Array:  # pragma: no cover
         pass
 
 
@@ -72,28 +71,28 @@ class OpticalSystem(BaseOpticalSystem):
     method must be implemented by any class that inherits from `OpticalSystem`.
     """
 
-    def __getattr__(self: OpticalSystem, key: str) -> Any:
-        """
-        Accessor for attributes of the class to simplify zodiax paths by
-        searching for parameters in the attributes of the class.
+    # def __getattr__(self: OpticalSystem, key: str) -> Any:
+    #     """
+    #     Accessor for attributes of the class to simplify zodiax paths by
+    #     searching for parameters in the attributes of the class.
 
-        Parameters
-        ----------
-        key : str
-            The key of the item to be searched for in the class.
+    #     Parameters
+    #     ----------
+    #     key : str
+    #         The key of the item to be searched for in the class.
 
-        Returns
-        -------
-        item : object
-            The item corresponding to the supplied key.
-        """
-        for attribute in self.__dict__.values():
-            if hasattr(attribute, key):
-                return getattr(attribute, key)
-        else:
-            raise AttributeError(
-                f"{self.__class__.__name__} has no attribute " f"{key}."
-            )
+    #     Returns
+    #     -------
+    #     item : object
+    #         The item corresponding to the supplied key.
+    #     """
+    #     for attribute in self.__dict__.values():
+    #         if hasattr(attribute, key):
+    #             return getattr(attribute, key)
+    #     else:
+    #         raise AttributeError(
+    #             f"{self.__class__.__name__} has no attribute " f"{key}."
+    #         )
 
     # TODO: Move to base?
     def propagate_mono(
@@ -326,7 +325,9 @@ class LayeredOptics(OpticalSystem):
         for layer in list(self.layers.values()):
             if hasattr(layer, key):
                 return getattr(layer, key)
-        super().__getattr__(key)
+        raise AttributeError(
+            f"{self.__class__.__name__} has no attribute " f"{key}."
+        )
 
     def propagate_mono(
         self: OpticalSystem,
@@ -385,7 +386,9 @@ class LayeredOptics(OpticalSystem):
         index : int
             The index to insert the layer at.
         """
-        return self.set("layers", dlu.insert_layer(layer, index, OpticalLayer))
+        return self.set(
+            "layers", dlu.insert_layer(self.layers, layer, index, OpticalLayer)
+        )
 
     def remove_layer(self: OpticalLayer, key: str) -> OpticalSystem:
         """
@@ -397,7 +400,7 @@ class LayeredOptics(OpticalSystem):
         key : str
             The key of the layer to remove.
         """
-        return self.set("layers", dlu.remove_layer(key))
+        return self.set("layers", dlu.remove_layer(self.layers, key))
 
 
 class AngularOptics(ParametricOptics, LayeredOptics):

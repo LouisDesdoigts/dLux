@@ -49,8 +49,8 @@ def circle(coords, diam, invert=False):
 def square(coords, width, invert=False):
     """Calcs an downsampled square to gain soft edges"""
     if invert:
-        return square_distance(width, coords) > 0
-    return square_distance(width, coords) < 0
+        return square_distance(coords, width) > 0
+    return square_distance(coords, width) < 0
 
 
 def rectangle(coords, width, height, invert=False):
