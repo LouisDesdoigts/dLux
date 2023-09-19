@@ -11,6 +11,7 @@ from . import (
     spectra,
     wavefronts,
     psfs,
+    transformations,
 )
 
 # Add to __all__
@@ -23,6 +24,7 @@ modules = [
     layers,
     wavefronts,
     psfs,
+    transformations,
 ]
 
 __all__ = [module.__all__ for module in modules]
@@ -39,7 +41,7 @@ from .spectra import (
 )
 from .wavefronts import Wavefront as Wavefront
 from .psfs import PSF as PSF
-from .layers.transformations import CoordTransform as CoordTransform
+from .transformations import CoordTransform as CoordTransform
 
 from .instruments import (
     Instrument as Instrument,
@@ -87,6 +89,7 @@ from .layers.optics import (
     BasisOptic as BasisOptic,
 )
 from .layers.detector_layers import (
+    BaseDetectorLayer as BaseDetectorLayer,
     ApplyPixelResponse as ApplyPixelResponse,
     ApplyJitter as ApplyJitter,
     ApplySaturation as ApplySaturation,

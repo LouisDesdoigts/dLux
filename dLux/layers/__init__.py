@@ -6,7 +6,6 @@ from . import (
     apertures,
     aberrations,
     unified_layers,
-    transformations,
 )
 
 # Add to __all__
@@ -17,12 +16,10 @@ modules = [
     apertures,
     aberrations,
     detector_layers,
-    transformations,
 ]
 
 __all__ = [module.__all__ for module in modules]
 
-from .transformations import CoordTransform as CoordTransform
 
 from .optical_layers import (
     BaseLayer as BaseLayer,

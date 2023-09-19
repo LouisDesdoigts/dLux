@@ -7,7 +7,7 @@ from jax.tree_util import tree_flatten, tree_map
 import dLux.utils as dlu
 
 from ..wavefronts import Wavefront
-from .transformations import CoordTransform
+from ..transformations import CoordTransform
 from .optical_layers import OpticalLayer, BasisLayer
 from .aberrations import ZernikeBasis
 

@@ -49,7 +49,6 @@ from .helpers import (
     remove_layer as remove_layer,
 )
 from .interpolation import (
-    # scale_array as scale_array,
     generate_coordinates as generate_coordinates,
     scale as scale,
     rotate as rotate,
@@ -105,7 +104,6 @@ from .zernikes import (
 
 from .geometry import (
     combine as combine,
-    soften as soften,
     circle as circle,
     square as square,
     rectangle as rectangle,

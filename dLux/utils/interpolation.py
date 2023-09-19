@@ -18,8 +18,7 @@ def generate_coordinates(
     y_shift: Array = np.array(0.0),
 ) -> Array:
     """
-    Generates a new set of paraxial coordinates which can be used for
-    interpolation.
+    Generates a new set of paraxial coordinates which can be used for interpolation.
 
     Parameters
     ----------

@@ -1,87 +1,39 @@
-# Units Utility Functions
+# Units
 
-This module contains functions for converting between different angular units.
+This module contains functions for converting between different units.
 
-## Radians to Degrees
+!!! info "rad2arcsec"
+    ::: dLux.utils.units.rad2arcsec
 
-Converts radians to degrees.
+!!! info "rad2deg"
+    ::: dLux.utils.units.rad2deg
 
-??? info "Radians to Degrees API"
-    ::: dLux.utils.units.rad_to_deg
+!!! info "rad2arcmin"
+    ::: dLux.utils.units.rad2arcmin
 
-## Radians to Arcminutes
+!!! info "deg2rad"
+    ::: dLux.utils.units.deg2rad
 
-Converts radians to arcminutes.
+!!! info "deg2arcmin"
+    ::: dLux.utils.units.deg2arcmin
 
-??? info "Radians to Arcminutes API"
-    ::: dLux.utils.units.rad_to_arcmin
+!!! info "deg2arcsec"
+    ::: dLux.utils.units.deg2arcsec
 
-## Radians to Arcseconds
+!!! info "arcmin2rad"
+    ::: dLux.utils.units.arcmin2rad
 
-Converts radians to arcseconds.
+!!! info "arcmin2deg"
+    ::: dLux.utils.units.arcmin2deg
 
-??? info "Radians to Arcseconds API"
-    ::: dLux.utils.units.rad_to_arcsec
+!!! info "arcmin2arcsec"
+    ::: dLux.utils.units.arcmin2arcsec
 
-## Degrees to Radians
+!!! info "arcsec2rad"
+    ::: dLux.utils.units.arcsec2rad
 
-Converts degrees to radians.
+!!! info "arcsec2deg"
+    ::: dLux.utils.units.arcsec2deg
 
-??? info "Degrees to Radians API"
-    ::: dLux.utils.units.deg_to_rad
-
-## Degrees to Arcminutes
-
-Converts degrees to arcminutes.
-
-??? info "Degrees to Arcminutes API"
-    ::: dLux.utils.units.deg_to_arcmin
-
-## Degrees to Arcseconds
-
-Converts degrees to arcseconds.
-
-??? info "Degrees to Arcseconds API"
-    ::: dLux.utils.units.deg_to_arcsec
-
-## Arcminutes to Radians
-
-Converts arcminutes to radians.
-
-??? info "Arcminutes to Radians API"
-    ::: dLux.utils.units.arcmin_to_rad
-
-## Arcminutes to Degrees
-
-Converts arcminutes to degrees.
-
-??? info "Arcminutes to Degrees API"
-    ::: dLux.utils.units.arcmin_to_deg
-
-## Arcminutes to Arcseconds
-
-Converts arcminutes to arcseconds.
-
-??? info "Arcminutes to Arcseconds API"
-    ::: dLux.utils.units.arcmin_to_arcsec
-
-## Arcseconds to Radians
-
-Converts arcseconds to radians.
-
-??? info "Arcseconds to Radians API"
-    ::: dLux.utils.units.arcsec_to_rad
-
-## Arcseconds to Degrees
-
-Converts arcseconds to degrees.
-
-??? info "Arcseconds to Degrees API"
-    ::: dLux.utils.units.arcsec_to_deg
-
-## Arcseconds to Arcminutes
-
-Converts arcseconds to arcminutes.
-
-??? info "Arcseconds to Arcminutes API"
-    ::: dLux.utils.units.arcsec_to_arcmin
+!!! info "arcsec2arcmin"
+    ::: dLux.utils.units.arcsec2arcmin

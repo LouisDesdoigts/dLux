@@ -4,7 +4,6 @@ import dLux.utils as dlu
 
 __all__ = [
     "combine",
-    "soften",
     "circle",
     "square",
     "rectangle",
