@@ -3,16 +3,13 @@ from jax import Array
 from jax.scipy.ndimage import map_coordinates
 import dLux.utils as dlu
 
-# TODO: Resolve scale and scale_array
 __all__ = [
-    # "scale_array",
     "generate_coordinates",
     "scale",
     "rotate",
 ]
 
 
-# TODO: Remove and use utils.pixel_coordinates with shift
 def generate_coordinates(
     npixels_in: int,
     npixels_out: int,
@@ -57,8 +54,7 @@ def generate_coordinates(
 
 def scale(array: Array, npixels: int, ratio: float, order: int = 1) -> Array:
     """
-    Paraxially interpolates a wavefront field (either in amplitude and phase,
-    or real and imaginary) based on the sampling ratio, and npixels_out.
+    Paraxially interpolates an array based on the sampling ratio, and npixels_out.
 
     # TODO: Check if a half-pixel offset is produced
 
@@ -73,12 +69,12 @@ def scale(array: Array, npixels: int, ratio: float, order: int = 1) -> Array:
         The relative input to output scales, TODO: does 2 make it bigger or
         smaller? i.e. input scale/output scale. <- get this right.
     order : int = 1
-        The interpolation order to use.
+        The interpolation order to use. Can be 0 or 1.
 
     Returns
     -------
-    field : Array
-        The interpolated output amplitude and phase arrays.
+    array : Array
+        The interpolated array.
     """
     # Get coords arrays
     npixels_in = array.shape[-1]
@@ -89,7 +85,7 @@ def scale(array: Array, npixels: int, ratio: float, order: int = 1) -> Array:
 
 def rotate(array: Array, angle: Array, order: int = 1) -> Array:
     """
-    Rotates an array by the angle, using linear interpolation.
+    Rotates an array by the angle, using interpolation.
 
     Parameters
     ----------
@@ -98,7 +94,7 @@ def rotate(array: Array, angle: Array, order: int = 1) -> Array:
     angle : Array, radians
         The angle to rotate the array by.
     order : int = 1
-        The interpolation order to use.
+        The interpolation order to use. Can be 0 or 1.
 
     Returns
     -------
@@ -106,6 +102,7 @@ def rotate(array: Array, angle: Array, order: int = 1) -> Array:
         The rotated array.
     """
 
+    # TODO: Use rotate_coords
     def _rotate(coordinates: Array, rotation: Array) -> Array:
         x, y = coordinates[0], coordinates[1]
         new_x = np.cos(-rotation) * x + np.sin(-rotation) * y

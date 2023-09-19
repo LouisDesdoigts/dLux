@@ -2,14 +2,29 @@ from collections import OrderedDict
 from typing import Any, Callable
 import jax.numpy as np
 from jax.tree_util import tree_flatten, tree_map
+from jax import Array
 
 __all__ = ["map2array", "list2dictionary", "insert_layer", "remove_layer"]
 
 
-def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None):
+def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None) -> Array:
     """
     Maps a function across a pytree, flattening it and turning it into an
     array.
+
+    Parameters
+    ----------
+    fn : Callable
+        The function to be mapped across the pytree.
+    tree : Any
+        The pytree to be mapped across.
+    leaf_fn : Callable = None
+        The function to be used to determine whether a leaf is reached.
+
+    Returns
+    -------
+    array : Array
+        The flattened array of the pytree.
     """
     if leaf_fn is not None:
         return np.array(tree_flatten(tree_map(fn, tree, is_leaf=leaf_fn))[0])
@@ -17,20 +32,22 @@ def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None):
         return np.array(tree_flatten(tree_map(fn, tree))[0])
 
 
-# TODO: Map to list to handle different output shapes?
-
-
 def list2dictionary(
     list_in: list, ordered: bool, allowed_types: tuple = ()
 ) -> dict:
     """
-    Converts some input list of dLux layers and converts them into an
-    OrderedDict with the correct structure, ensuring that all keys are unique.
+    Converts some input list to a dictionary. The input list entries can either be
+    objects, in which case the keys are taken as the class name, else a (key, object)
+    tuple can be used to specify a key.
+
+    If any duplicate keys are found, the key is appended with an index value. ie if two
+    of the list entries have the same key 'layer', they will be assigned 'layer_0' and
+    layer_1' respectively, depending on their input order in the list.
 
     Parameters
     ----------
     list_in : list
-        The list of dLux Layers to be converted into a dictionary.
+        The list of objects to be converted into a dictionary.
     ordered : bool
         Whether to return an ordered or regular dictionary.
     allowed_types : tuple
@@ -91,12 +108,50 @@ def list2dictionary(
     return dict_out
 
 
-def insert_layer(layers: OrderedDict, layer, index: int, type):
+def insert_layer(layers: dict, layer: Any, index: int, type: Any) -> dict:
+    """
+    Inserts a layer into a dictionary of layers at a specified index. This function
+    calls the list2dictionary function to ensure all keys remain unique. Note that this
+    can result in some keys being modified if they are duplicates. The input 'layer'
+    can be a tuple of (key, layer) to specify a key, else the key is taken as the
+    class name of the layer.
+
+    Parameters
+    ----------
+    layers : dict
+        The dictionary of layers to insert the layer into.
+    layer : Any
+        The layer to be inserted.
+    index : int
+        The index at which to insert the layer.
+    type : Any
+        The type of layer to be inserted. Used for type-checking.
+
+    Returns
+    -------
+    layers : dict
+        The updated dictionary of layers.
+    """
     layers_list = list(zip(layers.keys(), layers.values()))
     layers_list.insert(index, layer)
     return list2dictionary(layers_list, True, type)
 
 
-def remove_layer(layers: OrderedDict, key: str):
+def remove_layer(layers: dict, key: str) -> dict:
+    """
+    Removes a layer from a dictionary of layers, specified by its key.
+
+    Parameters
+    ----------
+    layers : dict
+        The dictionary of layers to remove the layer from.
+    key : str
+        The key of the layer to be removed.
+
+    Returns
+    -------
+    layers : dict
+        The updated dictionary of layers.
+    """
     layers.pop(key)
     return layers

@@ -20,7 +20,7 @@ def wavenumber(wavelength: float) -> float:
 
     Returns
     -------
-    wavenumber : Array, radians/metre
+    wavenumber : Array, radians/meter
         The wavenumber of the input wavelength.
     """
     return 2 * np.pi / wavelength
@@ -28,8 +28,8 @@ def wavenumber(wavelength: float) -> float:
 
 def opd2phase(opd: Array, wavelength: float) -> Array:
     """
-    Converts the input Optical Path Difference (opd) in units of metres to
-    phases in units of radians for the given wavelength.
+    Converts the input Optical Path Difference (opd) in units of meters to phases in
+    units of radians for the given wavelength.
 
     Parameters
     ----------
@@ -43,28 +43,26 @@ def opd2phase(opd: Array, wavelength: float) -> Array:
     phase : Array, radians
         The equivalent phase value for the given opd and wavelength.
     """
-    # return 2 * np.pi * opd / wavelength
     return wavenumber(wavelength) * opd
 
 
 def phase2opd(phase: Array, wavelength: float) -> Array:
     """
     Converts the input phase in units of radians to the equivalent Optical Path
-    Difference (opd) in metres for the given wavelength.
+    Difference (OPD) in metres for the given wavelength.
 
     Parameters
     ----------
     phase : Array, radians
-        The phase to be converted into Optical Path Difference (opd)
+        The phase to be converted into OPD
     wavelength : Array, metres
-        The wavelength at which to calculate the phase for.
+        The wavelength at which to calculate the OPD for.
 
     Returns
     -------
     opd : Array, metres
         The equivalent opd value for the given phase and wavelength.
     """
-    # return phase * wavelength / (2 * np.pi)
     return phase / wavenumber(wavelength)
 
 
@@ -72,7 +70,7 @@ def fringe_size(
     wavelength: float, diameter: float, focal_length: float = None
 ) -> Array:
     """
-    Calculates the size of the diffraction fringes.
+    Calculates the linear size of the diffraction fringes.
 
     Parameters
     ----------
@@ -86,8 +84,8 @@ def fringe_size(
 
     Returns
     -------
-    fringe_size : Array, radians
-        The angular fringe size in units of radians.
+    fringe_size : Array, radians, meters
+        The fringe size. Has units of radians of focal length is None, else meters.
     """
     if focal_length is None:
         return wavelength / diameter

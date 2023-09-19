@@ -15,26 +15,29 @@ def FFT(
     inverse: bool = False,
 ) -> Array:
     """
-
-    Field -> Array of [amplitude, phase]
-    Phasor -> Complex array of [amplitude * exp(1j * phase)]
-
-    Propagates the wavefront by performing a Fast Fourier Transform.
+    Calculates the Fast Fourier Transform (FFT) of the input phasor.
 
     Parameters
     ----------
+    phasor : Array[complex]
+        The input phasor.
+    wavelength : float, meters
+        The wavelength of the input phasor.
+    pixel_scale : float, meters/pixel
+        The pixel scale of the input phasor.
+    focal_length : float = None
+        The focal length of the propagation. If None, the output pixel scale has units
+        of radians, else meters.
     pad : int = 2
-        The padding factory to apply to the input wavefront before
-        performing the FFT.
-    focal_length : Array = None
-        The focal length of the propagation. If None, the propagation is
-        treated as an 'angular' propagation, else it is treated as a
-        'Cartesian' propagation.
+        The amount to pad the input array by before propagation. Note this function
+        does not automatically crop the output.
+    inverse : bool = False
+        Is this a forward or inverse FFT.
 
     Returns
     -------
-    wavefront : Wavefront
-        The propagated wavefront.
+    phasor : Array[complex]
+        The propagated phasor.
     """
     npixels = phasor.shape[-1]
 
@@ -58,14 +61,14 @@ def FFT(
 
 
 def transfer_matrix(
-    wavelength,
-    npixels_in: Array,
-    pixel_scale_in,
+    wavelength: float,
+    npixels_in: int,
+    pixel_scale_in: float,
     npixels_out: int,
-    pixel_scale_out: Array,
-    shift: Array = 0.0,
-    focal_length: Array = None,
-    focal_shift: Array = 0.0,
+    pixel_scale_out: float,
+    shift: float = 0.0,
+    focal_length: float = None,
+    focal_shift: float = 0.0,
     inverse: bool = False,
 ) -> Array:
     """
@@ -73,18 +76,25 @@ def transfer_matrix(
 
     Parameters
     ----------
-    npixels : int
+    wavelength : float, meters
+        The wavelength of the input phasor.
+    npixels_in : int
+        The number of pixels in the input plane.
+    pixel_scale_in : float, meters/pixel, radians/pixel
+        The pixel scale of the input plane.
+    npixels_out : int
         The number of pixels in the output plane.
-    pixel_scale : Array
+    pixel_scale_out : float, meters/pixel or radians/pixel
         The pixel scale of the output plane.
-    shift : Array = 0.
-        The shift to apply to the output plane.
-    focal_length : Array = None
-        The focal length of the propagation. If None, the propagation is
-        treated as an 'angular' propagation, else it is treated as a
-        'Cartesian' propagation.
-    inverse : bool = False
-        Is this a forward or inverse MFT.
+    shift : float = 0.0
+        The shift in the center of the output plane.
+    focal_length : float = None
+        The focal length of the propagation. If None, the propagation is angular and
+        pixel_scale_out is taken in as radians/pixel, else meters/pixel.
+    focal_shift: float, meters
+        The shift from focus to propagate to. Used for fresnel propagation.
+    inverse: bool = False
+        Is this a forward or inverse propagation.
 
     Returns
     -------
@@ -113,9 +123,9 @@ def transfer_matrix(
 
 
 def calc_nfringes(
-    wavelength,
+    wavelength: float,
     npixels_in: int,
-    pixel_scale_in,
+    pixel_scale_in: int,
     npixels_out: int,
     pixel_scale_out: float,
     focal_length: float = None,
@@ -126,14 +136,21 @@ def calc_nfringes(
 
     Parameters
     ----------
-    npixels : int
+    wavelength : float, meters
+        The wavelength of the input phasor.
+    npixels_in : int
+        The number of pixels in the input plane.
+    pixel_scale_in : float, meters/pixel, radians/pixel
+        The pixel scale of the input plane.
+    npixels_out : int
         The number of pixels in the output plane.
-    pixel_scale : Array
+    pixel_scale_out : float, meters/pixel or radians/pixel
         The pixel scale of the output plane.
-    focal_length : Array = None
-        The focal length of the propagation. If None, the propagation is
-        treated as an 'angular' propagation, else it is treated as a
-        'Cartesian' propagation.
+    focal_length : float = None
+        The focal length of the propagation. If None, the propagation is angular and
+        pixel_scale_out is taken in as radians/pixel, else meters/pixel.
+    focal_shift: float, meters
+        The shift from focus to propagate to. Used for fresnel propagation.
 
     Returns
     -------
@@ -158,29 +175,38 @@ def MFT(
     wavelength: float,
     pixel_scale_in: float,
     npixels_out: int,
-    pixel_scale_out: Array,
-    focal_length: Array = None,
+    pixel_scale_out: float,
+    focal_length: float = None,
     shift: Array = np.zeros(2),
     pixel: bool = True,
     inverse: bool = False,
 ) -> Array:
     """
-    Performs the actual phasor propagation and normalises the output
+    Propagates a phasor using a Matrix Fourier Transform (MFT), allowing for output
+    pixel scale and a shift to be specified.
+
+    TODO: Add link to Soumer et al. 2007(?), which describes the MFT.
 
     Parameters
     ----------
-    npixels : int
-        The number of pixels in the output wavefront.
-    pixel_scale : Array
-        The pixel scale of the output wavefront.
-    focal_length : Array = None
-        The focal length of the propagation. If None, the propagation is
-        treated as an 'angular' propagation, else it is treated as a
-        'Cartesian' propagation.
+    phasor : Array
+        The input phasor.
+    wavelength : float, meters
+        The wavelength of the input phasor.
+    pixel_scale_in : float, meters/pixel, radians/pixel
+        The pixel scale of the input plane.
+    npixels_out : int
+        The number of pixels in the output plane.
+    pixel_scale_out : float, meters/pixel or radians/pixel
+        The pixel scale of the output plane.
+    focal_length : float = None
+        The focal length of the propagation. If None, the propagation is angular and
+        pixel_scale_out is taken in as radians/pixel, else meters/pixel.
     shift : Array = np.zeros(2)
         The shift in the center of the output plane.
-    inverse : bool = False
-        Is this a forward or inverse MFT.
+    pixel : bool = True
+        Should the shift be taken in units of pixels, or pixel scale.
+
 
     Returns
     -------
@@ -232,23 +258,21 @@ def quadratic_phase(
     coordinates: Array,
 ) -> Array:
     """
-    A convenience function for calculating quadratic phase factors.
+    A function to calculate quadratic phase factors, used for fresnel propagation.
 
     Parameters
     ----------
-    x_coordinates : Array, metres
-        The x coordinates of the pixels. This will be different
-        in the plane of propagation and the initial plane.
-    y_coordinates : Array, metres
-        The y coordinates of the pixels. This will be different
-        in the plane of propagation and the initial plane.
-    distance : Array, metres
-        The distance that is to be propagated.
+    wavelength : float, meters
+        The wavelength of the input phasor.
+    distance : float, meters
+        The 'focal distance' of the quadratic lens.
+    coordinates : Array
+        The coordinates to calculate the phase factors for.
 
     Returns
     -------
-    quadratic_phase : Array
-        A set of phase factors that are useful in optical calculations.
+    phase : Array
+        The phases for a quadratic lens.
     """
     return np.exp(
         1j * np.pi * np.hypot(*coordinates) ** 2 / (distance * wavelength)
@@ -269,25 +293,27 @@ def fresnel_phase_factors(
 
     Parameters
     ----------
-    npixels : int
+    wavelength : float, meters
+        The wavelength of the input phasor.
+    npixels_in : int
+        The number of pixels in the input plane.
+    pixel_scale_in : float, meters/pixel, radians/pixel
+        The pixel scale of the input plane.
+    npixels_out : int
         The number of pixels in the output plane.
-    pixel_scale : Array, metres/pixel
-        The physical dimensions of each square pixel.
-    focal_length : Array, metres
-        The focal length of the lens.
-    focal_shift : Array, metres
-        The distance the focal plane is shifted from the focal length.
+    pixel_scale_out : float, meters/pixel or radians/pixel
+        The pixel scale of the output plane.
+    focal_length : float
+        The focal length of the propagation.
+    focal_shift: float, meters
+        The shift from focus to propagate to.
 
     Returns
     -------
     first_factor : Array
-        The first factor in the Fresnel propagation.
+        The first factor in the fresnel propagation.
     second_factor : Array
-        The second factor in the Fresnel propagation.
-    third_factor : Array
-        The third factor in the Fresnel propagation.
-    fourth_factor : Array
-        The fourth factor in the Fresnel propagation.
+        The second factor in the fresnel propagation.
     """
     # Calculate parameters
     prop_dist = focal_length + focal_shift
@@ -307,25 +333,51 @@ def fresnel_phase_factors(
 
 
 def fresnel_MFT(
-    phasor,
-    wavelength,
-    pixel_scale_in,
+    phasor: Array,
+    wavelength: float,
+    pixel_scale_in: float,
     npixels_out: int,
-    pixel_scale_out: Array,
-    focal_length: Array,
-    focal_shift: Array,
+    pixel_scale_out: float,
+    focal_length: float,
+    focal_shift: float,
     shift: Array = np.zeros(2),
     pixel: bool = True,
     inverse: bool = False,
 ) -> Array:
     """
-    Propagates the wavefront from the input plane to the output plane using
-    a Fresnel Transform using a Matrix Fourier Transform with a shift in
-    the center of the output plane.
-    TODO: Add link to Soumer et al. 2007(?),
+    Propagates the phasor using a Far-Field Fresnel propagation. This allows for psfs
+    to be better modelled a few wavelengths from the focal plane.
 
     NOTE: This does have an 'inverse' parameter, however behaviour is not
     guaranteed to be correct when `inverse=True`.
+
+    Parameters
+    ----------
+    phasor : Array[complex]
+        The input phasor.
+    wavelength : float, meters
+        The wavelength of the input phasor.
+    pixel_scale_in : float, meters/pixel, radians/pixel
+        The pixel scale of the input plane.
+    npixels_out : int
+        The number of pixels in the output plane.
+    pixel_scale_out : float, meters/pixel or radians/pixel
+        The pixel scale of the output plane.
+    focal_length : float
+        The focal length of the propagation.
+    focal_shift: float, meters
+        The shift from focus to propagate to.
+    shift : Array = np.zeros(2)
+        The shift in the center of the output plane.
+    pixel : bool = True
+        Should the shift be taken in units of pixels, or pixel scale.
+    inverse: bool = False
+        Is this a forward or inverse propagation.
+
+    Returns
+    -------
+    phasor : Array[complex]
+        The propagated phasor.
     """
     # Calculate phase factors
     first_factor, second_factor = fresnel_phase_factors(

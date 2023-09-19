@@ -13,13 +13,14 @@ __all__ = [
 
 def pad_to(array: Array, npixels: int) -> Array:
     """
-    Paraxially zero-pads the input array to the size determined by
-    npixels. To ensure that no output arrays are non-paraxial even shaped
-    arrays can only be padded to even shapes, and odd shaped arrays can only
-    be padded to odd shapes. i.e. 2 -> 4 or 3 -> 5.
+    Paraxially zero-pads the input array to the shape (npixels, npixels). Due to the
+    paraxial requirement, the input array must be square and even arrays can only
+    be padded to even shapes, and odd shaped arrays can only be padded to odd shapes.
 
     Parameters
     ----------
+    array : Array
+        The input array to pad.
     npixels : int
         The size to pad to the array to.
 
@@ -46,13 +47,14 @@ def pad_to(array: Array, npixels: int) -> Array:
 
 def crop_to(array: Array, npixels: int) -> Array:
     """
-    Paraxially crops the input array to the size determined by
-    npixels. To ensure that no output arrays are non-paraxial even shaped
-    arrays can only be cropped to even shapes, and odd shaped arrays can only
-    be cropped to odd shapes. i.e. 4 -> 2 or 5 -> 3.
+    Paraxially crops the input array to the shape (npixels, npixels). Due to the
+    paraxial requirement, the input array must be square and even arrays can only
+    be cropped to even shapes, and odd shaped arrays can only be cropped to odd shapes.
 
     Parameters
     ----------
+    array : Array
+        The input array to crop.
     npixels : int
         The size to crop the array to.
 
@@ -80,13 +82,15 @@ def crop_to(array: Array, npixels: int) -> Array:
 
 def resize(array: Array, npixels: int) -> Array:
     """
-    Paraxially resizes the input array to the size determined by
-    npixels. To ensure that no output arrays are non-paraxial even shaped
-    arrays can only be resized to even shapes, and odd shaped arrays can only
-    be resized to odd shapes. i.e. 4 -> 2 or 5 -> 3.
+    Resizes the input array to the shape (npixels, npixels), using either a pad or crop
+    depending on the input array size. Due to the paraxial requirement, the input array
+    must be square and even arrays can only be resized to even shapes, and odd shaped
+    arrays can only be resized to odd shapes.
 
     Parameters
     ----------
+    array : Array
+        The input array to resize.
     npixels : int
         The size to output the array.
 
@@ -105,9 +109,10 @@ def resize(array: Array, npixels: int) -> Array:
         return pad_to(array, npixels)
 
 
-def downsample(array: Array, n: int, mean=True) -> Array:
+def downsample(array: Array, n: int, mean: bool = True) -> Array:
     """
-    Downsamples the input array by n.
+    Downsamples the input array by a factor of n, either by taking the mean or sum
+    of the array.
 
     Parameters
     ----------

@@ -23,9 +23,6 @@ def fluxes_from_contrast(mean_flux: float, contrast: float) -> Array:
     fluxes : Array
         The flux (flux1, flux2) of the binary object.
     """
-    # flux_A = 2 * contrast * mean_flux / (1 + contrast)
-    # flux_B = 2 * mean_flux / (1 + contrast)
-    # return np.array([flux_A, flux_B])
     return 2 * np.array([contrast * mean_flux, mean_flux]) / (1 + contrast)
 
 

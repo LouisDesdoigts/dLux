@@ -15,20 +15,81 @@ __all__ = [
 ]
 
 
-def translate_coords(coords, centre):
-    return coords - centre[:, None, None]
+def translate_coords(coords: Array, translation: Array) -> Array:
+    """
+    Translates the coordinates by to a new centre. Translation must have shape (2,).
+
+    Parameters
+    ----------
+    coords : Array
+        The input coordinates to translate.
+    translation : Array
+        The translation to apply to the coordinates.
+
+    Returns
+    -------
+    coords : Array
+        The translated coordinates.
+    """
+    return coords - translation[:, None, None]
 
 
-def compress_coords(coords, compress):
+def compress_coords(coords: Array, compress: Array) -> Array:
+    """
+    Compresses the coordinates by a given factor. Compress must have shape (2,).
+
+    Parameters
+    ----------
+    coords : Array
+        The input coordinates to compress.
+    compress : Array
+        The compression to apply to the coordinates.
+
+    Returns
+    -------
+    coords : Array
+        The compressed coordinates.
+    """
     return coords * compress[:, None, None]
 
 
-def shear_coords(coords, shear):
+def shear_coords(coords: Array, shear: Array) -> Array:
+    """
+    Shears the coordinates by a given factor. Shear must have shape (2,).
+
+    Parameters
+    ----------
+    coords : Array
+        The input coordinates to shear.
+    shear : Array
+        The shear to apply to the coordinates.
+
+    Returns
+    -------
+    coords : Array
+        The sheared coordinates.
+    """
     trans_coords = np.transpose(coords, (0, 2, 1))
     return coords + trans_coords * shear[:, None, None]
 
 
-def rotate_coords(coords, rotation):
+def rotate_coords(coords: Array, rotation: float) -> Array:
+    """
+    Rotates the coordinates by a given angle.
+
+    Parameters
+    ----------
+    coords : Array
+        The input coordinates to rotate.
+    rotation : float, radians
+        The rotation to apply to the coordinates.
+
+    Returns
+    -------
+    coords : Array
+        The rotated coordinates.
+    """
+
     x, y = coords
     new_x = np.cos(-rotation) * x + np.sin(-rotation) * y
     new_y = -np.sin(-rotation) * x + np.cos(-rotation) * y
@@ -79,27 +140,18 @@ def polar2cart(coordinates: Array) -> Array:
 
 
 # Positions Calculations #
-def pixel_coords(
-    npixels: int,
-    diameter: float,
-    polar=False,
-) -> Array:
+def pixel_coords(npixels: int, diameter: float, polar: bool = False) -> Array:
     """
-    Calculates the coordinates of the pixel centers for the given input,
-    assuming an equal size and pixel scale in all dimensions. All
-    coordinates are output in units of metres. This function is essentially a
-    reduced version of the full `pixel_coordinates` function that gives
-    flexibility to have different dimension sizes and scales.
+    Returns a paraxial set of 2d coordinates for each pixel center.
 
     Parameters
     ----------
     npixels : int
-        The number of pixels in all dimensions.
+        The output size of the coordinates array to generate.
     diameter : float
         The diameter of the coordinates array to generate.
     polar : bool = False
-        If True, the output is in polar coordinates. If False, the output is in
-        Cartesian coordinates. ndims must be 2 if polar is True.
+        Output the coordinates in polar (r, phi) coordinates.
 
     Returns
     -------
@@ -119,8 +171,11 @@ def nd_coords(
     indexing: str = "xy",
 ) -> Array:
     """
-    Calculates the coordinates of the pixel centers for the given input. All
-    coordinates are output in units of metres.
+    Returns a set of nd pixel center coordinates, with an optional offset. Each
+    dimension can have a different number of pixels, pixel scale and offset by passing
+    in tuples of values: `nd_coords((10, 10), (1, 2), (0, 1))`. pixel scale and offset
+    can also be passed in as floats to apply those values to all dimensions, ie:
+    `nd_coords((10, 10), 1, 0)`.
 
     The indexing argument is the same as in numpy.meshgrid., i.e.: Giving the
     string ‘ij’ returns a meshgrid with matrix indexing, while ‘xy’ returns a
@@ -128,8 +183,6 @@ def nd_coords(
     and N, the outputs are of shape (N, M) for ‘xy’ indexing and (M, N) for
     ‘ij’ indexing. In the 3-D case with inputs of length M, N and P, outputs
     are of shape (N, M, P) for ‘xy’ indexing and (M, N, P) for ‘ij’ indexing.
-    If the output is in polar coordinates, indexing is set to 'xy' and the
-    input must be 2d.
 
     Parameters
     ----------
@@ -138,11 +191,11 @@ def nd_coords(
     pixel_scales : Union[tuple, float] = 1.
         The pixel_scales of each dimension. If a tuple, the length
         of the tuple must match the number of dimensions. If a float, the same
-        scale is applied to all dimensions. If None, the scale is set to 1.
+        scale is applied to all dimensions.
     offsets : Union[tuple, float] = 0.
         The offset of the pixel centers in each dimension. If a tuple, the
         length of the tuple must match the number of dimensions. If a float,
-        the same offset is applied to all dimensions. If None, the offset is
+        the same offset is applied to all dimensions.
         set to 0.
     indexing : str = 'xy'
         The indexing of the output. Default is 'xy'. See numpy.meshgrid for
@@ -150,7 +203,7 @@ def nd_coords(
 
     Returns
     -------
-    positions : Array
+    coordinates : Array
         The positions of the pixel centers in the given dimensions.
     """
     if indexing not in ["xy", "ij"]:

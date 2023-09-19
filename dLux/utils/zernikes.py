@@ -67,7 +67,7 @@ zernike_names = {
 
 def zernike_name(j: int) -> str:
     """
-    Gets the name of the Zernike polynomial.
+    Gets the name of the jth Zernike polynomial.
 
     Parameters
     ----------
@@ -107,8 +107,7 @@ def noll_indices(j: int) -> tuple[int]:
 
 def zernike_factors(j: int) -> tuple[Array]:
     """
-    Calculates the normalisation coefficients and powers of the Zernike
-    polynomial.
+    Calculates the normalisation coefficients and powers of the Zernike polynomial.
 
     Parameters
     ----------
@@ -189,18 +188,31 @@ def eval_azimuthal(theta: Array, n: int, m: int) -> Array:
     return norm_coeff * trig_fn(np.abs(m) * theta)
 
 
-def scale_coords(coords, rmax):
-    """Scales coordinates to the unit circle"""
+def scale_coords(coords: Array, rmax: float) -> Array:
+    """
+    Scales coordinates to the unit circle, to calculate polynomials on a subset of the
+    coordinates.
+
+    Parameters
+    ----------
+    coords : Array
+        The coordinates to scale.
+    rmax : float
+        The radius to scale to.
+
+    Returns
+    -------
+    coords : Array
+        The scaled coordinates.
+    """
     return coords / rmax
 
 
-def zernike(j: int, coordinates: Array, diameter=2) -> Array:
+def zernike(j: int, coordinates: Array, diameter: float = 2) -> Array:
     """
-    Calculates the Zernike polynomial.
-
-    Note that this function is not-jittable as is has dynamic array shapes. To
-    use this function in a jittable way, use the zernike_fast function, with
-    the pre-calculated c and k parameters.
+    Calculates the Zernike polynomial. Note that this function is not-jittable as is
+    has dynamic array shapes. To use this function in a jittable way, use the
+    zernike_fast function, with the pre-calculated c and k parameters.
 
     Parameters
     ----------
@@ -208,6 +220,8 @@ def zernike(j: int, coordinates: Array, diameter=2) -> Array:
         The Zernike (noll) index.
     coordinates : Array
         The Cartesian coordinates to calculate the Zernike polynomial upon.
+    diameter : float = 2
+        The diameter of the aperture to calculate the Zernike polynomial upon.
 
     Returns
     -------
@@ -228,9 +242,8 @@ def zernike_fast(
     n: int, m: int, c: Array, k: Array, coordinates: Array
 ) -> Array:
     """
-    Calculates the Zernike polynomial.
-
-    Note this function is jittable as it has no dynamic array shapes.
+    Calculates the Zernike polynomial using the pre-calculated c and k parameters, such
+    that this function is jittable.
 
     Parameters
     ----------
@@ -257,17 +270,36 @@ def zernike_fast(
     return aperture * eval_radial(rho, n, c, k) * eval_azimuthal(theta, n, m)
 
 
-def zernike_basis(js, coordinates, diameter=2):
+def zernike_basis(
+    js: list[int], coordinates: Array, diameter: float = 2
+) -> Array:
+    """
+    Calculates the Zernike polynomial basis. Note that this function is not-jittable.
+
+    Parameters
+    ----------
+    js : list[int]
+        The Zernike (noll) indices.
+    coordinates : Array
+        The Cartesian coordinates to calculate the Zernike polynomial upon.
+    diameter : float = 2
+        The diameter of the aperture to calculate the Zernike polynomial upon.
+
+    Returns
+    -------
+    zernike_basis : Array
+        The Zernike polynomial basis.
+    """
     return np.array([zernike(j, coordinates, diameter) for j in js])
 
 
-def polike(nsides: int, j: int, coordinates: Array, diameter=2) -> Array:
+def polike(
+    nsides: int, j: int, coordinates: Array, diameter: float = 2
+) -> Array:
     """
-    Calculates the Zernike polynomial on an n-sided aperture.
-
-    Note this function is not-jittable as it has dynamic array shapes. To
-    use this function in a jittable way, use the polike_fast function, with
-    the pre-calculated c and k parameters.
+    Calculates the Zernike polynomial on an n-sided aperture. Note that this function
+    is not-jittable as is has dynamic array shapes. To use this function in a jittable
+    way, use the polike_fast function, with the pre-calculated c and k parameters.
 
     Parameters
     ----------
@@ -277,6 +309,8 @@ def polike(nsides: int, j: int, coordinates: Array, diameter=2) -> Array:
         The Zernike (noll) index.
     coordinates : Array
         The Cartesian coordinates to calculate the Zernike polynomial upon.
+    diameter : float = 2
+        The diameter of the aperture to calculate the Zernike polynomial upon.
 
     Returns
     -------
@@ -299,9 +333,8 @@ def polike_fast(
     nsides: int, n: int, m: int, c: Array, k: Array, coordinates: Array
 ) -> Array:
     """
-    Calculates the Zernike polynomial on an n-sided aperture.
-
-    Note this function is jittable as it has no dynamic array shapes.
+    Calculates the Zernike polynomial on an n-sided aperture using the pre-calculated
+    c and k parameters, such that this function is jittable.
 
     Parameters
     ----------
@@ -334,5 +367,27 @@ def polike_fast(
     return 1 / r_alpha * zernike_fast(n, m, c, k, coordinates / r_alpha)
 
 
-def polike_basis(nsides, js, coordinates, diameter=2):
+def polike_basis(
+    nsides: int, js: list[int], coordinates: Array, diameter: float = 2
+):
+    """
+    Calculates the Zernike polynomial basis on an n-sided aperture. Note that this
+    function is not-jittable.
+
+    Parameters
+    ----------
+    nsides : int
+        The number of sides of the aperture.
+    js : list[int]
+        The Zernike (noll) indices.
+    coordinates : Array
+        The Cartesian coordinates to calculate the Zernike polynomial upon.
+    diameter : float = 2
+        The diameter of the aperture to calculate the Zernike polynomial upon.
+
+    Returns
+    -------
+    polike_basis : Array
+        The Zernike polynomial basis on an n-sided aperture.
+    """
     return np.array([polike(nsides, j, coordinates, diameter) for j in js])

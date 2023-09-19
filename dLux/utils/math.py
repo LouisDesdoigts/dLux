@@ -1,5 +1,6 @@
 from jax import lax, Array
 import jax.numpy as np
+from typing import Any
 
 __all__ = ["factorial", "triangular_number", "eval_basis", "nandiv"]
 
@@ -42,8 +43,7 @@ def triangular_number(n: int) -> int:
 
 def eval_basis(basis: Array, coefficients: Array) -> Array:
     """
-    Performs an n-dimensional dot-product between the basis and coefficients
-    arrays.
+    Performs an n-dimensional dot-product between the basis and coefficients arrays.
 
     Parameters
     ----------
@@ -56,5 +56,22 @@ def eval_basis(basis: Array, coefficients: Array) -> Array:
     return np.tensordot(basis, coefficients, axes=2 * (tuple(range(ndim)),))
 
 
-def nandiv(a, b, fill=np.inf):
+def nandiv(a: Array, b: Array, fill: Any = np.inf) -> Array:
+    """
+    Divides two arrays, replacing any NaNs with a fill value.
+
+    Parameters
+    ----------
+    a : Array
+        The numerator.
+    b : Array
+        The denominator.
+    fill : Any = np.inf
+        The value to replace NaNs with.
+
+    Returns
+    -------
+    a / b : Array
+        The result of the division.
+    """
     return np.where(b == 0, fill, a / b)
