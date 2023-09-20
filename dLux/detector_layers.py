@@ -166,8 +166,7 @@ class ApplyJitter(DetectorLayer):
             The covariance matrix.
         """
         # Compute the rotation angle
-        # the -'ve sign is simply so it rotates in a more intuitive direction
-        rot_angle = -np.radians(self.phi)
+        rot_angle = np.radians(self.phi)
 
         # Construct the rotation matrix
         R = np.array(
