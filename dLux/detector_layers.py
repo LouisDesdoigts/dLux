@@ -107,7 +107,7 @@ class ApplyJitter(DetectorLayer):
     r : float, arcseconds
         The magnitude of the jitter.
     shear : float
-        The shear of the jitter. A radially symmetric Gaussian kernel would have a shear value of 0.
+        The shear of the jitter.
     phi : float, degrees
         The angle of the jitter.
     """
@@ -120,7 +120,7 @@ class ApplyJitter(DetectorLayer):
     def __init__(
         self: DetectorLayer,
         r: float,
-        shear: float = 0,
+        shear: float = 1,
         phi: float = 0,
         kernel_size: int = 10,
     ):
@@ -130,15 +130,26 @@ class ApplyJitter(DetectorLayer):
         Parameters
         ----------
         r : float, arcseconds
-            The magnitude of the jitter.
+            The jitter magnitude in arcseconds, defined as the standard deviation
+            of the multivariate Gaussian kernel along the major axis. For a
+            symmetric jitter (shear = 1), r is simply the standard deviation.
         shear : float
-            The shear of the jitter. A radially symmetric Gaussian kernel would have a shear value of 0.
-        phi : float, degrees
-            The angle of the jitter.
+            A measure of how asymmetric the jitter is. Defined as the ratio between
+            the standard deviations of the minor/major axes of the multivariate
+            Gaussian kernel. It must lie on the interval (0, 1]. A shear of 1
+            corresponds to a symmetric jitter, while as shear approaches zero the
+            jitter kernel becomes more linear.
+        phi : float
+            The angle of the jitter in degrees.
         kernel_size : int = 10
             The size of the convolution kernel in pixels to use.
         """
         super().__init__()
+
+        # checking shear is valid
+        if shear > 1 or shear <= 0:
+            raise ValueError("shear must lie on the interval (0, 1]")
+
         self.kernel_size = int(kernel_size)
         self.r = r
         self.shear = shear
@@ -154,10 +165,12 @@ class ApplyJitter(DetectorLayer):
         covariance_matrix : Array
             The covariance matrix.
         """
-        rot_angle = np.radians(self.phi) - np.pi / 4
+        # Compute the rotation angle
+        # the -'ve sign is simply so it rotates in a more intuitive direction
+        rot_angle = -np.radians(self.phi)
 
         # Construct the rotation matrix
-        rotation_matrix = np.array(
+        R = np.array(
             [
                 [np.cos(rot_angle), -np.sin(rot_angle)],
                 [np.sin(rot_angle), np.cos(rot_angle)],
@@ -165,14 +178,15 @@ class ApplyJitter(DetectorLayer):
         )
 
         # Construct the skew matrix
-        skew_matrix = np.array(
-            [[1, self.shear], [self.shear, 1]]
-        )  # Ensure skew_matrix is symmetric
+        base_matrix = np.array(
+            [
+                [self.r**2, 0],
+                [0, (self.r * self.shear) ** 2],
+            ]
+        )
 
         # Compute the covariance matrix
-        covariance_matrix = self.r * np.dot(
-            np.dot(rotation_matrix, skew_matrix), rotation_matrix.T
-        )
+        covariance_matrix = np.dot(np.dot(R, base_matrix), R.T)
 
         return covariance_matrix
 
@@ -182,8 +196,8 @@ class ApplyJitter(DetectorLayer):
 
         Parameters
         ----------
-        pixel_scale : float, arcsec/pixel
-            The pixel scale of the image.
+        pixel_scale : float
+            The pixel scale of the image in arcseconds per pixel.
 
         Returns
         -------
@@ -216,9 +230,7 @@ class ApplyJitter(DetectorLayer):
         image : Image
             The transformed image.
         """
-        kernel = self.generate_kernel(
-            dLux.utils.rad_to_arcsec(image.pixel_scale)
-        )
+        kernel = self.generate_kernel(dLux.utils.rad_to_arcsec(image.pixel_scale))
 
         return image.convolve(kernel)
 
