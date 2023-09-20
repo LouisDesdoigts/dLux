@@ -22,30 +22,18 @@ __all__ = [
 
 class BaseLayer(Base):
     @abstractmethod
-    def apply(self: BaseLayer, wavefront):  # pragma: no cover
+    def apply(self, wavefront):  # pragma: no cover
         pass
 
 
 class OpticalLayer(BaseLayer):
     """
-    Base class for optical layers. Primarily used for input type checking.
-
-    Child classes must implement the apply method that takes in the
-    wavefront as the first parameter.
-
-    Note: I have chosen apply over apply as the method name for the layer
-    to be applied to the wavefront. This is because even though it prevents
-    the simple interface with Optax (not having to wrap in a list), because
-    wavefront should in general not be able to be an object you take a gradient
-    with respect to, it is just a latent class to store information throughout
-    the calculation, plus its use of strings as a way to track parameters can
-    make interactions with jax difficult.
+    The base optical layer class. Optical layer classes operate on `Wavefront` objects
+    though their `apply` method, and are stored by the `OpticalSystem` classes.
     """
 
     @abstractmethod
-    def apply(
-        self: OpticalLayer, wavefront: Wavefront
-    ) -> Wavefront:  # pragma: no cover
+    def apply(self, wavefront) -> Wavefront:  # pragma: no cover
         """
         Applies the layer to the wavefront.
 
@@ -61,21 +49,20 @@ class OpticalLayer(BaseLayer):
         """
 
 
-##################
-# Public Classes #
-##################
 class TransmissiveLayer(OpticalLayer):
     """
     Base class to hold transmissive layers imbuing them with a transmission and
     normalise parameter.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/TransmissiveLayer.png)
 
     Attributes
     ----------
     transmission: Array
         The Array of transmission values to be applied to the input wavefront.
     normalise: bool
-        Whether to normalise the wavefront after passing through the
-        optic.
+        Whether to normalise the wavefront after passing through the optic.
     """
 
     transmission: Array
@@ -91,11 +78,9 @@ class TransmissiveLayer(OpticalLayer):
         Parameters
         ----------
         transmission: Array = None
-            The Array of transmission values to be applied to the input
-            wavefront.
+            The array of transmission values to be applied to the input wavefront.
         normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+            Whether to normalise the wavefront after passing through the optic.
         """
         if transmission is not None:
             transmission = np.asarray(transmission, dtype=float)
@@ -125,7 +110,11 @@ class TransmissiveLayer(OpticalLayer):
 
 class AberratedLayer(OpticalLayer):
     """
-    Base class for aberration layers. Implements the opd and phase attributes.
+    Optical layer for holding static aberrations. Aberrations can be applied as either
+    a phase or OPD, or both.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/AberratedLayer.png)
 
     Attributes
     ----------
@@ -189,18 +178,22 @@ class AberratedLayer(OpticalLayer):
 
 class BasisLayer(OpticalLayer):
     """
-    This class primarily exists to allow for the use of the class based basis
-    used for dynamic aberrated apertures.
+    An OpticalLayer class that holds a set of basis vectors and coefficients, which are
+    dot-producted at run time to produce the output. The basis can be applied as either
+    a phase or OPD, by setting the `as_phase` attribute.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BasisLayer.png)
 
     Attributes
     ----------
     basis: Union[Array, list]
-        The basis to use. Can be an array of a list of aberrations classes.
+        The set of basis vectors. Should in generate be a 3 dimensional array.
     coefficients: Array
-        The Array of coefficients to be applied to each basis vector.
+        The array of coefficients to be applied to each basis vector.
     as_phase: bool = False
-        Whether to apply the basis as a phase or OPD. If True the basis is
-        applied as a phase, else it is applied as an OPD.
+        Whether to apply the basis as a phase or OPD. If True the output is applied as
+        a phase, else it is applied as an OPD.
     """
 
     basis: Union[Array, list]
@@ -214,17 +207,17 @@ class BasisLayer(OpticalLayer):
         coefficients: Array = None,
         as_phase: bool = False,
         **kwargs,
-    ) -> OpticalLayer:
+    ):
         """
         Parameters
         ----------
         basis: Union[Array, list]
-            The basis to use. Can be an array of a list of aberrations classes.
+            The set of basis vectors. Should in generate be a 3 dimensional array.
         coefficients: Array
             The Array of coefficients to be applied to each basis vector.
-        phase: bool = False
-            Whether to apply the basis as a phase phase or OPD. If True the
-            basis is applied as a phase, else it is applied as an OPD.
+        as_phase: bool = False
+            Whether to apply the basis as a phase or OPD. If True the output is applied
+            as a phase, else it is applied as an OPD.
         """
         super().__init__(**kwargs)
 
@@ -242,12 +235,16 @@ class BasisLayer(OpticalLayer):
 
         self.basis = basis
         self.coefficients = coefficients
-
         self.as_phase = bool(as_phase)
 
     def eval_basis(self: OpticalLayer) -> Array:
         """
         Calculates the dot product of the basis vectors and coefficients.
+
+        Returns
+        -------
+        output : Array
+            The output of the dot product between the basis vectors and coefficients.
         """
         return dlu.eval_basis(self.basis, self.coefficients)
 
@@ -275,7 +272,10 @@ class BasisLayer(OpticalLayer):
 
 class Tilt(OpticalLayer):
     """
-    Tilts the wavefront by the input angles.
+    Tilts the wavefront by the input (x, y) angles.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Tilt.png)
 
     Attributes
     ----------
@@ -285,10 +285,8 @@ class Tilt(OpticalLayer):
 
     angles: Array
 
-    def __init__(self: OpticalLayer, angles: Array) -> OpticalLayer:
+    def __init__(self: OpticalLayer, angles: Array):
         """
-        Constructor for the TiltWavefront class.
-
         Parameters
         ----------
         angles : Array, radians
@@ -318,7 +316,12 @@ class Tilt(OpticalLayer):
 
 
 class Normalise(OpticalLayer):
-    """Normalises the wavefront to unit intensity."""
+    """
+    Normalises the wavefront to unit intensity.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Normalise.png)
+    """
 
     def apply(self: OpticalLayer, wavefront: Wavefront) -> Wavefront:
         """

@@ -1,6 +1,7 @@
 # Import as modules
 from . import (
     optical_layers,
+    optics,
     detector_layers,
     propagators,
     apertures,
@@ -11,6 +12,7 @@ from . import (
 # Add to __all__
 modules = [
     optical_layers,
+    optics,
     unified_layers,
     propagators,
     apertures,
@@ -56,12 +58,10 @@ from .apertures import (
     SquareAperture as SquareAperture,
     RectangularAperture as RectangularAperture,
     RegPolyAperture as RegPolyAperture,
-    # IrregPolyAperture as IrregPolyAperture,
     Spider as Spider,
     AberratedAperture as AberratedAperture,
     CompoundAperture as CompoundAperture,
     MultiAperture as MultiAperture,
-    # ApertureFactory as ApertureFactory,
 )
 from .aberrations import (
     Zernike as Zernike,

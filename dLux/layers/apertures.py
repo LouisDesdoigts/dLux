@@ -26,10 +26,11 @@ __all__ = [
 
 class ApertureLayer(OpticalLayer):
     """
+    Base ApertureLayer class, instantiates the normalise attribute.
 
     Attributes
     ----------
-    normalise : bool = False
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
@@ -40,40 +41,43 @@ class ApertureLayer(OpticalLayer):
         Parameters
         ----------
         normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+            Whether to normalise the wavefront after passing through the aperture.
         """
         self.normalise = bool(normalise)
         super().__init__(**kwargs)
 
     @abstractmethod
     def transmission(self, coords, pixel_scale):  # pragma: no cover
-        """Evaluates the aperture transmission on the given coords,
-        applying the aperture transformations to the coords."""
-        pass
+        """
+        Evaluates the aperture transmission on the given coords, applying the aperture
+        transformations to the coords.
+        """
 
 
 class BaseDynamicAperture(ApertureLayer):
     """
+    An abstract base class that implements the coordinate transformation attribute.
 
     Attributes
     ----------
     transformation: CoordTransform
         The object that applies the coordinate transformations to the aperture.
+    normalise : bool
+        Whether to normalise the wavefront after passing through the aperture.
     """
 
     transformation: CoordTransform
 
     def __init__(
         self: ApertureLayer,
-        transformation=None,
+        transformation: CoordTransform = None,
         normalise: bool = False,
-    ) -> ApertureLayer:
+    ):
         """
-        Constructor for the BaseDynamicAperture class.
-
         Parameters
         ----------
+        transformation: CoordTransform
+            The object that applies the coordinate transformations to the aperture.
         normalise : bool = False
             Should the aperture normalise the wavefront after being applied.
         """
@@ -86,7 +90,8 @@ class BaseDynamicAperture(ApertureLayer):
                 )
         self.transformation = transformation
 
-    def __getattr__(self, key):
+    def __getattr__(self: ApertureLayer, key: str) -> Any:
+        """Raises transformation attributes to the ApertureLayer level."""
         if hasattr(self.transformation, key):
             return getattr(self.transformation, key)
         raise AttributeError(f"{key} not in {self.__class__.__name__}")
@@ -105,12 +110,6 @@ class BaseDynamicAperture(ApertureLayer):
         wavefront : Wavefront
             The transformed wavefront.
         """
-        # # Transform coordinate
-        # if self.transformation is not None:
-        #     coords = self.transformation.apply(wavefront.coordinates)
-        # else:
-        #     coords =
-
         # Apply aperture
         wavefront *= self.transmission(
             wavefront.coordinates, wavefront.pixel_scale
@@ -122,17 +121,19 @@ class BaseDynamicAperture(ApertureLayer):
 
 class DynamicAperture(BaseDynamicAperture):
     """
-    An abstract base class that implements the methods required to provide soft
-    edges to the apertures and generate either transmissive or occulting
-    apertures.
+    An abstract base class that implements the methods required to provide dynamic soft
+    edges to the apertures, and the ability to occult the aperture.
 
     Attributes
     ----------
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
         transmissive aperture, and True results in an occulting aperture.
-
-    normalise : bool = False
+    softness: float, pixels
+        The approximate pixel width of the soft boundary applied to the aperture.
+    transformation: CoordTransform
+        The object that applies the coordinate transformations to the aperture.
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
@@ -141,26 +142,23 @@ class DynamicAperture(BaseDynamicAperture):
 
     def __init__(
         self: ApertureLayer,
-        transformation=None,
+        transformation: CoordTransform = None,
         occulting: bool = False,
-        softening: Array = 1.0,
+        softening: float = 1.0,
         normalise: bool = False,
-    ) -> ApertureLayer:
+    ):
         """
-        Constructor for the DynamicAperture class.
-
         Parameters
         ----------
-
+        transformation: CoordTransform
+            The object that applies the coordinate transformations to the aperture.
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
             transmissive aperture, and True results in an occulting aperture.
-        softening: Array, pixels = np.array(1.)
-            The approximate pixel width of the soft boundary applied to the
-            aperture. Hard edges can be achieved by setting the softening to 0.
+        softening: float, pixels = 1.0
+            The approximate pixel width of the soft boundary applied to the aperture.
         normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+            Whether to normalise the wavefront after passing through the aperture.
         """
         super().__init__(
             transformation=transformation,
@@ -181,50 +179,49 @@ class DynamicAperture(BaseDynamicAperture):
 #############################
 class CircularAperture(DynamicAperture):
     """
-    A circular aperture parameterised by its radius.
+    A dynamically generated circular aperture parameterised by its radius. Both jit and
+    grad compatible.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/CircularAperture.png)
 
     Attributes
     ----------
-    radius: Array, metres
+    radius: float, meters
         The radius of the aperture.
-
+    transformation: CoordTransform
+        The object that applies the coordinate transformations to the aperture.
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
-        transmissive aperture, and True results in an occulting aperture.
-    softening: Array, pixels
-        The approximate pixel width of the soft boundary applied to the
-        aperture. Hard edges can be achieved by setting the softening to 0.
-    normalise : bool = False
+    softening: float, pixels
+        The approximate pixel width of the soft boundary applied to the aperture.
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
-    radius: Array
+    radius: float
 
     def __init__(
         self: ApertureLayer,
-        radius,
-        transformation=None,
+        radius: float,
+        transformation: CoordTransform = None,
         occulting: bool = False,
         softening: float = 1.0,
         normalise: bool = False,
-    ) -> Array:
+    ):
         """
-        Constructor for the CircularAperture class.
-
         Parameters
         ----------
-        radius: Array, metres
+        radius: Array, meters
             The radius of the aperture.
 
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
             transmissive aperture, and True results in an occulting aperture.
         softening: Array, pixels = np.array(1.)
-            The approximate pixel width of the soft boundary applied to the
-            aperture. Hard edges can be achieved by setting the softening to 0.
+            The approximate pixel width of the soft boundary applied to the aperture.
         normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+            Whether to normalise the wavefront after passing through the aperture.
         """
         super().__init__(
             transformation=transformation,
@@ -232,70 +229,103 @@ class CircularAperture(DynamicAperture):
             softening=softening,
             normalise=normalise,
         )
-
         self.radius = float(radius)
 
-    def transmission(self, coords, pixel_scale):
+    def transmission(
+        self: ApertureLayer, coords: Array, pixel_scale: float
+    ) -> Array:
+        """
+        Calculates the transmission of the aperture at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the transmission on.
+        pixel_scale : float
+            The pixel scale of the coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            The transmission of the aperture at the given coordinates.
+        """
         if self.transformation is not None:
             coords = self.transformation.apply(coords)
         clip_val = pixel_scale * self.softness / 2
         return dlu.soft_circle(coords, self.radius, clip_val, self.occulting)
 
     @property
-    def extent(self):
+    def extent(self: ApertureLayer) -> float:
+        """
+        Returns the maximum extent of the aperture.
+
+        Returns
+        -------
+        extent : float
+            The maximum extent of the aperture.
+        """
         return self.radius
 
     @property
-    def nsides(self):
+    def nsides(self: ApertureLayer) -> int:
+        """
+        Returns the number of sides of the aperture.
+
+        Returns
+        -------
+        nsides : int
+            The number of sides of the aperture.
+        """
         return 0
 
 
 class SquareAperture(DynamicAperture):
     """
-    A square aperture parameterised by its width.
+    A dynamically generated square aperture parameterised by it side length.
+    Both jit and grad compatible.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/SquareAperture.png)
 
     Attributes
     ----------
-    width: Array, metres
-        The length of the aperture in the x-direction.
-
+    width: float, meters
+        The side length of the aperture.
+    transformation: CoordTransform
+        The object that applies the coordinate transformations to the aperture.
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
         transmissive aperture, and True results in an occulting aperture.
-    softening: Array, pixels
-        The approximate pixel width of the soft boundary applied to the
-        aperture. Hard edges can be achieved by setting the softening to 0.
-    normalise : bool = False
+    softening: float, pixels
+        The approximate pixel width of the soft boundary applied to the aperture.
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
-    width: Array
+    width: float
 
     def __init__(
         self: ApertureLayer,
         width: float,
-        transformation=None,
+        transformation: CoordTransform = None,
         occulting: bool = False,
         softening: float = 1.0,
         normalise: bool = False,
-    ) -> Array:
+    ):
         """
-        Constructor for the SquareAperture class.
-
         Parameters
         ----------
-        width: Array, metres
-            The length of the aperture in the x-direction.
-
+        width: Array, meters
+            The side length of the aperture.
+        transformation: CoordTransform
+            The object that applies the coordinate transformations to the aperture.
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
             transmissive aperture, and True results in an occulting aperture.
-        softening: Array, pixels = np.array(1.)
-            The approximate pixel width of the soft boundary applied to the
-            aperture. Hard edges can be achieved by setting the softening to 0.
+        softening: float, pixels = 1.0
+            The approximate pixel width of the soft boundary applied to the aperture.
         normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+            Whether to normalise the wavefront after passing through the aperture.
         """
         super().__init__(
             transformation=transformation,
@@ -306,73 +336,107 @@ class SquareAperture(DynamicAperture):
 
         self.width = float(width)
 
-    def transmission(self, coords, pixel_scale):
+    def transmission(
+        self: ApertureLayer, coords: Array, pixel_scale: float
+    ) -> Array:
+        """
+        Calculates the transmission of the aperture at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the transmission on.
+        pixel_scale : float
+            The pixel scale of the coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            The transmission of the aperture at the given coordinates.
+        """
         if self.transformation is not None:
             coords = self.transformation.apply(coords)
         clip_val = pixel_scale * self.softness / 2
         return dlu.soft_square(coords, self.width, clip_val, self.occulting)
 
     @property
-    def extent(self):
+    def extent(self: ApertureLayer) -> float:
+        """
+        Returns the maximum extent of the aperture.
+
+        Returns
+        -------
+        extent : float
+            The maximum extent of the aperture.
+        """
         return np.sqrt(2) * self.width
 
     @property
-    def nsides(self):
+    def nsides(self: ApertureLayer) -> int:
+        """
+        Returns the number of sides of the aperture.
+
+        Returns
+        -------
+        nsides : int
+            The number of sides of the aperture.
+        """
         return 4
 
 
 class RectangularAperture(DynamicAperture):
     """
-    A rectangular aperture parameterised by it height and width.
+    A dynamically generated rectangular aperture parameterised by it width and height.
+    Both jit and grad compatible.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/RectangularAperture.png)
 
     Attributes
     ----------
-    height: Array, metres
+    height: float, meters
         The length of the aperture in the y-direction.
-    width: Array, metres
+    width: float, meters
         The length of the aperture in the x-direction.
-
+    transformation: CoordTransform
+        The object that applies the coordinate transformations to the aperture.
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
         transmissive aperture, and True results in an occulting aperture.
-    softening: Array, pixels
-        The approximate pixel width of the soft boundary applied to the
-        aperture. Hard edges can be achieved by setting the softening to 0.
-    normalise : bool = False
+    softening: float, pixels
+        The approximate pixel width of the soft boundary applied to the aperture.
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
-    height: Array
-    width: Array
+    height: float
+    width: float
 
     def __init__(
         self: ApertureLayer,
-        height: Array,
-        width: Array,
-        transformation=None,
+        height: float,
+        width: float,
+        transformation: CoordTransform = None,
         occulting: bool = False,
         softening: float = 1.0,
         normalise: bool = False,
-    ) -> ApertureLayer:
+    ):
         """
-        Constructor for the RectangularAperture class.
-
         Parameters
         ----------
-        height: Array, metres
+        height: Array, meters
             The length of the aperture in the y-direction.
-        width: Array, metres
+        width: Array, meters
             The length of the aperture in the x-direction.
-
+        transformation: CoordTransform
+            The object that applies the coordinate transformations to the aperture.
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
             transmissive aperture, and True results in an occulting aperture.
-        softening: Array, pixels = np.array(1.)
-            The approximate pixel width of the soft boundary applied to the
-            aperture. Hard edges can be achieved by setting the softening to 0.
+        softening: float, pixels = 1.0
+            The approximate pixel width of the soft boundary applied to the aperture.
         normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+            Whether to normalise the wavefront after passing through the aperture.
         """
         self.height = float(height)
         self.width = float(width)
@@ -384,7 +448,24 @@ class RectangularAperture(DynamicAperture):
             normalise=normalise,
         )
 
-    def transmission(self, coords, pixel_scale):
+    def transmission(
+        self: ApertureLayer, coords: Array, pixel_scale: float
+    ) -> Array:
+        """
+        Calculates the transmission of the aperture at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the transmission on.
+        pixel_scale : float
+            The pixel scale of the coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            The transmission of the aperture at the given coordinates.
+        """
         if self.transformation is not None:
             coords = self.transformation.apply(coords)
         clip_val = pixel_scale * self.softness / 2
@@ -393,67 +474,83 @@ class RectangularAperture(DynamicAperture):
         )
 
     @property
-    def extent(self):
+    def extent(self: ApertureLayer) -> float:
+        """
+        Returns the maximum extent of the aperture.
+
+        Returns
+        -------
+        extent : float
+            The maximum extent of the aperture.
+        """
         return np.hypot(self.height / 2.0, self.width / 2.0)
 
     @property
-    def nsides(self):
+    def nsides(self: ApertureLayer) -> int:
+        """
+        Returns the number of sides of the aperture.
+
+        Returns
+        -------
+        nsides : int
+            The number of sides of the aperture.
+        """
         return 4
 
 
 class RegPolyAperture(DynamicAperture):
     """
-    A regular polygonal aperture defined by its number of sides and the maximum
-    radius to the vertices from its center.
+    Creates a dynamically generated regular polygon aperture parameterised by its
+    number of sides and maximum radius. Both jit and grad compatible.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/RegPolyAperture.png)
 
     Attributes
     ----------
     nsides: int
         The number of sides of the aperture.
-    rmax: Array, metres
+    rmax: float, meters
         The maximum radius to the vertices from its center.
-
+    transformation: CoordTransform
+        The object that applies the coordinate transformations to the aperture.
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
         transmissive aperture, and True results in an occulting aperture.
-    softening: Array, pixels
-        The approximate pixel width of the soft boundary applied to the
-        aperture. Hard edges can be achieved by setting the softening to 0.
-    normalise : bool = False
+    softening: float, pixels
+        The approximate pixel width of the soft boundary applied to the aperture.
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
     nsides: int
-    rmax: Array
+    rmax: float
 
     def __init__(
         self: ApertureLayer,
         nsides: int,
-        rmax: Array,
-        transformation=None,
+        rmax: float,
+        transformation: CoordTransform = None,
         occulting: bool = False,
-        softening: Array = 1.0,
+        softening: float = 1.0,
         normalise: bool = False,
-    ) -> ApertureLayer:
+    ):
         """
-        Constructor for the RegPolyAperture class.
-
         Parameters
         ----------
         nsides: int
             The number of sides of the aperture.
-        rmax: Array, metres
+        rmax: float, meters
             The maximum radius to the vertices from its center.
-
+        transformation: CoordTransform
+            The object that applies the coordinate transformations to the aperture.
         occulting: bool = False
             Is the aperture occulting or transmissive. False results in a
             transmissive aperture, and True results in an occulting aperture.
-        softening: Array, pixels = np.array(1.)
-            The approximate pixel width of the soft boundary applied to the
-            aperture. Hard edges can be achieved by setting the softening to 0.
+        softening: float, pixels = 1.0
+            The approximate pixel width of the soft boundary applied to the aperture.
         normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+            Whether to normalise the wavefront after passing through the aperture.
         """
         self.nsides = int(nsides)
         self.rmax = float(rmax)
@@ -465,7 +562,24 @@ class RegPolyAperture(DynamicAperture):
             normalise=normalise,
         )
 
-    def transmission(self, coords, pixel_scale):
+    def transmission(
+        self: ApertureLayer, coords: Array, pixel_scale: float
+    ) -> Array:
+        """
+        Calculates the transmission of the aperture at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the transmission on.
+        pixel_scale : float
+            The pixel scale of the coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            The transmission of the aperture at the given coordinates.
+        """
         if self.transformation is not None:
             coords = self.transformation.apply(coords)
         clip_val = pixel_scale * self.softness / 2
@@ -474,62 +588,71 @@ class RegPolyAperture(DynamicAperture):
         )
 
     @property
-    def extent(self):
+    def extent(self: ApertureLayer) -> float:
+        """
+        Returns the maximum extent of the aperture.
+
+        Returns
+        -------
+        extent : float
+            The maximum extent of the aperture.
+        """
         return self.rmax
 
 
 class Spider(DynamicAperture):
     """
-    A spider aperture defined by its width and number of arms.
+    Creates a dynamically generated spider aperture parameterised by its arm width and
+    number of arms. Both jit and grad compatible.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Spider.png)
 
     Attributes
     ----------
-    width: Array, metres
+    width: float, meters
         The width of the spider.
-    angles: int
-        The number of arms of the spider.
-
+    angles: Array, degrees
+        The angle of each arm of the spider.
+    transformation: CoordTransform
+        The object that applies the coordinate transformations to the aperture.
     occulting: bool
         Is the aperture occulting or transmissive. False results in a
         transmissive aperture, and True results in an occulting aperture.
-    softening: Array, pixels
-        The approximate pixel width of the soft boundary applied to the
-        aperture. Hard edges can be achieved by setting the softening to 0.
-    normalise : bool = False
+    softening: float, pixels
+        The approximate pixel width of the soft boundary applied to the aperture.
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
-    width: Array
-    angles: int
+    width: float
+    angles: Array
 
     def __init__(
         self: ApertureLayer,
         width: float,
         angles: Array,
-        transformation=None,
+        transformation: CoordTransform = None,
         occulting: bool = True,
-        softening: Array = np.array(1.0),
+        softening: float = 1.0,
         normalise: bool = False,
-    ) -> ApertureLayer:
+    ):
         """
-        Constructor for the Spiders class.
-
         Parameters
         ----------
-        width: Array, metres
+        width: float, meters
             The width of the spider.
-        angles: int
-            The number of arms of the spider.
-
-        occulting: bool = False
+        angles: Array, degrees
+            The angle of each arm of the spider.
+        transformation: CoordTransform
+            The object that applies the coordinate transformations to the aperture.
+        occulting: bool = True
             Is the aperture occulting or transmissive. False results in a
             transmissive aperture, and True results in an occulting aperture.
-        softening: Array, pixels = np.array(1.)
-            The approximate pixel width of the soft boundary applied to the
-            aperture. Hard edges can be achieved by setting the softening to 0.
+        softening: float, pixels = 1.0
+            The approximate pixel width of the soft boundary applied to the aperture.
         normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+            Whether to normalise the wavefront after passing through the aperture.
         """
         super().__init__(
             transformation=transformation,
@@ -541,7 +664,24 @@ class Spider(DynamicAperture):
         self.width = float(width)
         self.angles = np.asarray(angles, dtype=float)
 
-    def transmission(self, coords, pixel_scale):
+    def transmission(
+        self: ApertureLayer, coords: Array, pixel_scale: float
+    ) -> Array:
+        """
+        Calculates the transmission of the aperture at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the transmission on.
+        pixel_scale : float
+            The pixel scale of the coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            The transmission of the aperture at the given coordinates.
+        """
         if self.transformation is not None:
             coords = self.transformation.apply(coords)
         clip_val = pixel_scale * self.softness / 2
@@ -550,30 +690,51 @@ class Spider(DynamicAperture):
         )
 
     @property
-    def extent(self):
+    def extent(self: ApertureLayer) -> float:
+        """
+        Returns the maximum extent of the aperture.
+
+        Returns
+        -------
+        extent : float
+            The maximum extent of the aperture.
+        """
         raise TypeError("Spiders do not have an extent.")
 
     @property
-    def nsides(self):
+    def nsides(self: ApertureLayer) -> int:
+        """
+        Returns the number of sides of the aperture.
+
+        Returns
+        -------
+        nsides : int
+            The number of sides of the aperture.
+        """
         raise TypeError("Spiders do not have a number of sides.")
 
 
+# TODO: Should this not have transmission as it is held by its sub-aperture?
 class AberratedAperture(BasisLayer, ApertureLayer):
     """
-    A class for generating apertures with aberrations. This class generates the
-    basis vectors of the aberrations at run time, allowing for the aperture and
-    aberrations to be recovered simultaneously.
+    Creates a dynamically generated Aperture with aberrations. Both jit and grad
+    compatible.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/AberratedAperture.png)
 
     Attributes
     ----------
     aperture: ApertureLayer
         The aperture on which the aberration basis is defined.
     basis: list[Zernike]
-        A list of basis functions that represent the basis. The exact
-        polynomials that are represented will depend on the aperture shape.
+        A list of basis functions that generate the basis vectors.
     coefficients: Array
         The amplitude of each basis vector of the aberrations.
-    normalise: bool = False
+    as_phase : bool
+        Whether to apply the basis as a phase phase or OPD. If True the basis is
+        applied as a phase, else it is applied as an OPD.
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
@@ -585,21 +746,19 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         noll_inds: Array,
         coefficients: Array = None,
         as_phase: bool = False,
-    ) -> ApertureLayer:
+    ):
         """
         Parameters
         ----------
         aperture: ApertureLayer
             The aperture on which the aberration basis is defined.
-        noll_inds: List[int]
-            The noll indices are a scheme for indexing the Zernike
-            polynomials. Normally these polynomials have two
-            indices but the noll indices prevent an order to
-            these pairs. All basis can be indexed using the noll
-            indices based on `n` and `m`.
+        noll_inds: Array
+            The noll indices of the basis functions to use.
         coefficients: Array = None
-            The amplitude of each basis vector of the aberrations. If nothing
-            is provided, then the coefficients are set to zero.
+            The amplitude of each basis vector of the aberrations.
+        as_phase : bool = False
+            Whether to apply the basis as a phase phase or OPD. If True the basis is
+            applied as a phase, else it is applied as an OPD.
         """
         # Ensure aperture is dynamic
         if not isinstance(aperture, DynamicAperture):
@@ -627,23 +786,69 @@ class AberratedAperture(BasisLayer, ApertureLayer):
             coefficients = np.zeros(len(noll_inds))
         self.coefficients = np.asarray(coefficients, dtype=float)
 
-    def calculate(self):
+    def calculate(self: ApertureLayer):
+        """
+        Required abstract method. Raises NotImplementedError as it is invalid here.
+        """
         raise NotImplementedError(
             "Aberrated Apertures can not use the .calculate() method because "
             "they need coords to be generated on. please use "
             ".eval_basis(coords) method instead."
         )
 
-    def transmission(self, coords, pixel_scale):
+    def transmission(
+        self: ApertureLayer, coords: Array, pixel_scale: float
+    ) -> Array:
+        """
+        Calculates the transmission of the aperture at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the transmission on.
+        pixel_scale : float
+            The pixel scale of the coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            The transmission of the aperture at the given coordinates.
+        """
         return self.aperture.transmission(coords, pixel_scale)
 
-    def calc_basis(self, coords):
+    def calc_basis(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Calculates the basis vectors at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the basis vectors on.
+
+        Returns
+        -------
+        basis : Array
+            The basis vectors at the given coordinates.
+        """
         if self.aperture.transformation is not None:
             coords = self.aperture.transformation.apply(coords)
         coords /= self.aperture.extent
         return self.basis.calculate_basis(coords, self.aperture.nsides)
 
-    def eval_basis(self, coords):
+    def eval_basis(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Evaluates the basis vectors at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to evaluate the basis vectors on.
+
+        Returns
+        -------
+        aberrations : Array
+            The aberrations at the given coordinates.
+        """
         basis = self.calc_basis(coords)
         return dlu.eval_basis(basis, self.coefficients)
 
@@ -685,17 +890,16 @@ class AberratedAperture(BasisLayer, ApertureLayer):
 
 class CompositeAperture(BaseDynamicAperture):
     """
-    An abstract class used to combine multiple apertures so that more complex
-    apertures can have global transformations applied to them. Two examples
-    would be a pupil with spiders holding the secondary mirror or an aperture
-    mask.
+    Base class for dynamically generated Apertures that are a combination of various
+    different aperture shapes. Both jit and grad compatible.
 
     Attributes
     ----------
-    apertures: dict(str, Aperture)
+    apertures: dict
        The sub-apertures that make up the full aperture.
-
-    normalise : bool = False
+    transformation: CoordTransform
+        The object that applies the coordinate transformations to the aperture.
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
@@ -704,20 +908,18 @@ class CompositeAperture(BaseDynamicAperture):
     def __init__(
         self: ApertureLayer,
         apertures: list,
-        transformation=None,
+        transformation: CoordTransform = None,
         normalise: bool = False,
-    ) -> ApertureLayer:
+    ):
         """
-        Constructor for the CompositeAperture class.
-
         Parameters
         ----------
-        apertures: dict(str, Aperture)
+        apertures: list[ApertureLayer]
             The sub-apertures that make up the full aperture.
-
+        transformation: CoordTransform
+            The object that applies the coordinate transformations to the aperture.
         normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+            Whether to normalise the wavefront after passing through the aperture.
         """
         self.apertures = dlu.list2dictionary(apertures, False, ApertureLayer)
         super().__init__(
@@ -727,7 +929,7 @@ class CompositeAperture(BaseDynamicAperture):
 
     def __getattr__(self: ApertureLayer, key: str) -> Any:
         """
-        Get the attribute of the aberrated apertures.
+        Raises the contained apertures via their dictionary keys.
 
         Parameters
         ----------
@@ -737,14 +939,23 @@ class CompositeAperture(BaseDynamicAperture):
         Returns
         -------
         attribute: Any
-            The attribute of the aberrated apertures.
+            The aperture found at the given key.
         """
         if key in list(self.apertures.keys()):
             return self.apertures[key]
         else:
             raise AttributeError(f"{key} not in {self.apertures.keys()}")
 
-    def _aberrated_apertures(self: ApertureLayer) -> list:
+    def _aberrated_apertures(self: ApertureLayer) -> list[ApertureLayer]:
+        """
+        Returns the list of aberrated apertures, from the full set of apertures.
+
+        Returns
+        -------
+        apertures : list
+            The list of aberrated apertures.
+        """
+
         # Define leaf fn
         def is_aberrated(leaf):
             if isinstance(leaf, AberratedAperture):
@@ -763,10 +974,31 @@ class CompositeAperture(BaseDynamicAperture):
         return tree_flatten(aberrated, is_leaf=is_aberrated)[0]
 
     @property
-    def coefficients(self):
+    def coefficients(self: ApertureLayer) -> list[Array]:
+        """
+        Returns the coefficients of the aberrated apertures.
+
+        Returns
+        -------
+        coefficients : list[Array]
+            The coefficients of the aberrated apertures.
+        """
         return [ap.coefficients for ap in self._aberrated_apertures()]
 
     def calc_basis(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Calculates the basis vectors at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the basis vectors on.
+
+        Returns
+        -------
+        basis : Array
+            The basis vectors at the given coordinates.
+        """
         aberrated_apertures = self._aberrated_apertures()
         basis_fn = lambda ap: ap.calc_basis(coords)
         leaf_fn = lambda ap: isinstance(ap, AberratedAperture)
@@ -774,14 +1006,42 @@ class CompositeAperture(BaseDynamicAperture):
         return tree_flatten(basii)[0]
 
     def eval_basis(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Evaluates the basis vectors at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to evaluate the basis vectors on.
+
+        Returns
+        -------
+        aberrations : Array
+            The aberrations at the given coordinates.
+        """
         basii = self.calc_basis(coords)
         coeffs = self.coefficients
         eval_fn = lambda basis, coeff: dlu.eval_basis(basis, coeff)
         return np.array(tree_map(eval_fn, basii, coeffs))
 
-    def transmissions(
-        self: ApertureLayer, coords: Array, pixel_scale
+    def transmission(
+        self: ApertureLayer, coords: Array, pixel_scale: float
     ) -> Array:
+        """
+        Calculates the transmission of the aperture at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the transmission on.
+        pixel_scale : float
+            The pixel scale of the coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            The transmission of the aperture at the given coordinates.
+        """
         eval_fn = lambda ap: ap.transmission(coords, pixel_scale)
         leaf_fn = lambda ap: isinstance(ap, ApertureLayer)
         transmissions = tree_map(eval_fn, self.apertures, is_leaf=leaf_fn)
@@ -826,45 +1086,48 @@ class CompositeAperture(BaseDynamicAperture):
 
 class CompoundAperture(CompositeAperture):
     """
-    A  class used to combine multiple apertures into a single coherent
-    aperture. An example would be an aperture with spiders holding a secondary
-    mirror.
+    Dynamically generates an Apertures from a series of overlapping sub-apertures. Both
+    jit and grad compatible.
 
-    This class is distinct from the MultiAperture class in that the
-    sub-apertures are combined by multiplying their respective transmissions
-    together, i.e. the sub-apertures are overlapping.
+    This class combines the aperture via a _multiplication_ of the sub-apertures. An
+    example would be a HST-like aperture with an obscuring secondary mirror and spiders.
 
-    This class should not contain a MultiAperture, but MultiApertures can
+    This class can only contain a _single_ AberratedAperture.
+
+    If you want to combine apertures via an _addition_ of the sub-apertures such as an
+    aperture mask, use the MultiAperture class.
+
+    Note that this class can not contain a MultiAperture, but MultiApertures can
     contain CompoundApertures.
 
-    A single aberrated aperture can be placed into the set of apertures.
+    ??? abstract "UML"
+        ![UML](../../assets/uml/CompoundAperture.png)
 
     Attributes
     ----------
-    apertures: dict(str, Aperture)
+    apertures: dict
         The sub-apertures that make up the full aperture.
-
-    normalise : bool = False
+    transformation: CoordTransform
+        The object that applies the coordinate transformations to the aperture.
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
     def __init__(
         self: ApertureLayer,
         apertures: list,
-        transformation=None,
+        transformation: CoordTransform = None,
         normalise: bool = False,
-    ) -> ApertureLayer:
+    ):
         """
-        Constructor for the CompoundAperture class.
-
         Parameters
         ----------
-        apertures: list[Aperture]
+        apertures: list[ApertureLayer]
             The sub-apertures that make up the full aperture.
-
+        transformation: CoordTransform
+            The object that applies the coordinate transformations to the aperture.
         normalise : bool = False
-            Whether to normalise the wavefront after passing through the
-            aperture.
+            Whether to normalise the wavefront after passing through the aperture.
         """
         super().__init__(
             apertures=apertures,
@@ -883,7 +1146,24 @@ class CompoundAperture(CompositeAperture):
                     "AberratedAperture."
                 )
 
-    def transmission(self: ApertureLayer, coords: Array, pixel_scale) -> Array:
+    def transmission(
+        self: ApertureLayer, coords: Array, pixel_scale: float
+    ) -> Array:
+        """
+        Calculates the transmission of the aperture at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the transmission on.
+        pixel_scale : float
+            The pixel scale of the coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            The transmission of the aperture at the given coordinates.
+        """
         if self.transformation is not None:
             coords = self.transformation.apply(coords)
         return self.transmissions(coords, pixel_scale).prod(0)
@@ -891,28 +1171,64 @@ class CompoundAperture(CompositeAperture):
 
 class MultiAperture(CompositeAperture):
     """
-    A  class used to combine multiple apertures into a single coherent
-    aperture. An example would be an aperture mask.
+    Dynamically generates an Apertures from a series of separated sub-apertures. Both
+    jit and grad compatible.
 
-    This class is distinct from the CompoundAperture class in that the
-    sub-apertures are combined by adding their respective transmissions
-    together, i.e. the sub-apertures are not overlapping.
+    This class combines the aperture via an _addition_ of the sub-apertures. An example
+    would be a aperture mask with multiple holes.
 
-    This class can contain multiple CompoundApertures.
+    This class can only contain a _multiple_ AberratedAperture, or CompoundApertures.
+
+    If you want to combine apertures via a _multiplication_ of the sub-apertures such
+    as HST-like aperture, use the CompoundAperture class.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/MultiAperture.png)
 
     Attributes
     ----------
-    apertures: dict(str, Aperture)
+    apertures: dict
         The sub-apertures that make up the full aperture.
-
-    normalise : bool = False
+    transformation: CoordTransform
+        The object that applies the coordinate transformations to the aperture.
+    normalise : bool
         Whether to normalise the wavefront after passing through the aperture.
     """
 
-    def eval_basis(self, coords):
+    def eval_basis(self: ApertureLayer, coords: Array) -> Array:
+        """
+        Evaluates the basis vectors at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to evaluate the basis vectors on.
+
+        Returns
+        -------
+        aberrations : Array
+            The aberrations at the given coordinates.
+        """
         return super().eval_basis(coords).sum(0)
 
-    def transmission(self: ApertureLayer, coords: Array, pixel_scale) -> Array:
+    def transmission(
+        self: ApertureLayer, coords: Array, pixel_scale: float
+    ) -> Array:
+        """
+        Calculates the transmission of the aperture at the given coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The coordinates to calculate the transmission on.
+        pixel_scale : float
+            The pixel scale of the coordinates.
+
+        Returns
+        -------
+        transmission : Array
+            The transmission of the aperture at the given coordinates.
+        """
         if self.transformation is not None:
             coords = self.transformation.apply(coords)
         return self.transmissions(coords, pixel_scale).sum(0)

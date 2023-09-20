@@ -12,17 +12,18 @@ from ..psfs import PSF
 
 class UnifiedLayer(OpticalLayer, DetectorLayer):
     """
-    Base class for unified layers that can be applied to either wavefronts or
-    PSFs.
+    Base class for unified layers that can be applied to either wavefronts or PSFs.
     """
 
 
 class Resize(UnifiedLayer):
     """
-    Resizes either a wavefront or PSF by either padding or cropping.
+    Resizes either a wavefront or PSF by either padding or cropping. Note this class
+    only supports padding and cropping of even sizes to even sizes, and odd sizes to
+    odd sizes to ensure all operations are paraxial.
 
-    Note this class only supports padding and cropping of even sizes to even
-    sizes, and odd sizes to odd sizes to ensure all operations are paraxial.
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Resize.png)
 
     Attributes
     ----------
@@ -34,8 +35,6 @@ class Resize(UnifiedLayer):
 
     def __init__(self: UnifiedLayer, npixels: int):
         """
-        Constructor for the Resize class.
-
         Parameters
         ----------
         npixels : tuple
@@ -66,19 +65,22 @@ class Resize(UnifiedLayer):
 class Rotate(UnifiedLayer):
     """
     Rotates either a wavefront or PSF by a given angle. This is done using
-    interpolation methods. The 'complex' input only has an effect if the input
-    is a wavefront.
+    interpolation methods. The 'complex' input only has an effect if the input is a
+    wavefront.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Rotate.png)
 
     Attributes
     ----------
-    angle : Array, radians
+    angle : float, radians
         The angle by which to rotate the input in the clockwise direction.
-    order : int = 1
+    order : int
         The order of the interpolation to use. Must be 0 or 1.
-    complex : bool = False
-        Should the rotation be performed on the 'complex' (real, imaginary),
-        as opposed to the default 'phasor' (amplitude, phase) arrays. Only
-        applies if the input is a wavefront.
+    complex : bool
+        Should the rotation be performed on the 'complex' (real, imaginary), as opposed
+        to the default 'phasor' (amplitude, phase) arrays. Only applies if the input is
+        a wavefront.
     """
 
     angle: float
@@ -92,18 +94,16 @@ class Rotate(UnifiedLayer):
         complex: bool = False,
     ):
         """
-        Constructor for the Rotate class.
-
         Parameters
         ----------
-        angle: float, radians
+        angle : float, radians
             The angle by which to rotate the input in the clockwise direction.
         order : int = 1
-            The order of the interpolation to use. Must be 0, or 1.
+            The order of the interpolation to use. Must be 0 or 1.
         complex : bool = False
-            Should the rotation be performed on the 'complex' (real,
-            imaginary), as opposed to the default 'phasor' (amplitude, phase)
-            arrays. Only applies if the input is a wavefront.
+            Should the rotation be performed on the 'complex' (real, imaginary), as
+            opposed to the default 'phasor' (amplitude, phase) arrays. Only applies if
+            the input is a wavefront.
         """
         super().__init__()
         self.angle = float(angle)
@@ -137,29 +137,29 @@ class Rotate(UnifiedLayer):
 
 class Flip(UnifiedLayer):
     """
-    Flips either a wavefront or PSF about the input axes. Can be either an int,
-    or a tuple of ints. This class uses the 'ij' indexing convention, ie axis 0
-    is the y-axis, and axis 1 is the x-axis.
+    Flips either a wavefront or PSF about the input axes. Can be either an int or a
+    tuple of ints. This class uses the 'ij' indexing convention, ie axis 0 is the
+    y-axis, and axis 1 is the x-axis.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Flip.png)
 
     Attributes
     ----------
     axes : Union[tuple, int]
-        The axes to flip the input about. This class uses the 'ij' indexing
-        convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.
+        The axes to flip the input about. This class uses the 'ij' indexing convention,
+        ie axis 0 is the y-axis, and axis 1 is the x-axis.
     """
 
     axes: Union[tuple[int], int]
 
     def __init__(self: UnifiedLayer, axes: Union[tuple[int], int]):
         """
-        Constructor for the Flip class.
-
         Parameters
         ----------
-        axes : Union[tuple[int], int]
-            The axes to flip the input about. This class uses the 'ij'
-            indexing convention, ie axis 0 is the y-axis, and axis 1 is the
-            x-axis.
+        axes : Union[tuple, int]
+            The axes to flip the input about. This class uses the 'ij' indexing
+            convention, ie axis 0 is the y-axis, and axis 1 is the x-axis.
         """
         super().__init__()
         self.axes = axes

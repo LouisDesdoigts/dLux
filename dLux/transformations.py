@@ -18,6 +18,9 @@ class CoordTransform(Base):
         3. Compression
         4. Shear
 
+    ??? abstract "UML"
+        ![UML](../../assets/uml/CoordTransform.png)
+
     Attributes
     ----------
     translation: Array
@@ -82,11 +85,38 @@ class CoordTransform(Base):
         else:
             self.shear = None
 
-    def calculate(self, npix, diam):
-        """Generate the transformed coords from diameter and npix."""
+    def calculate(self: CoordTransform, npix: int, diam: float) -> Array:
+        """
+        Generate the transformed coords from diameter and npix.
+
+        Parameters
+        ----------
+        npix : int
+            The number of pixels in the output array.
+        diam : float
+            The diameter of the output array in metres.
+
+        Returns
+        -------
+        coords : Array
+            The transformed coordinates.
+        """
         return self.apply(dlu.pixel_coords(npix, diam))
 
-    def apply(self, coords):
+    def apply(self: CoordTransform, coords: Array) -> Array:
+        """
+        Apply the transformations to the input coordinates.
+
+        Parameters
+        ----------
+        coords : Array
+            The input coordinates to be transformed.
+
+        Returns
+        -------
+        coords : Array
+            The transformed coordinates.
+        """
         if self.translation is not None:
             coords = dlu.translate_coords(coords, self.translation)
         if self.shear is not None:

@@ -21,41 +21,32 @@ class BaseDetector(Base):
 
 class LayeredDetector(BaseDetector):
     """
-    A high level class designed to model the behaviour of some detectors
-    response to some psf.
+    Applies a series of detector layers to some input psf.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/LayeredDetector.png)
 
     Attributes
     ----------
-    layers: dict
-        A collections.OrderedDict of 'layers' that define the transformations
-        and operations upon some input psf as it interacts with the detector.
+    layers: OrderedDict
+        A series of `DetectorLayer` transformations to apply to the input psf.
     """
 
     layers: OrderedDict
 
     def __init__(self: LayeredDetector, layers: list):
         """
-        Constructor for the Detector class.
-
         Parameters
         ----------
         layers : list
-            An list of dLux detector layer classes that define the instrumental
-            effects for some detector.
-
-            A list of ∂Lux 'layers' that define the transformations and
-            operations upon some input wavefront through an optical system.
-            The entries can either be dLux DetectorLayers, or tuples of the
-            form (DetectorLayer, key), with the key being used as the
-            dictionary key for the layer.
+            A list of DetectorLayer objects to apply to the input psf.
         """
         self.layers = dlu.list2dictionary(layers, True, DetectorLayer)
         super().__init__()
 
     def __getattr__(self: LayeredDetector, key: str) -> object:
         """
-        Magic method designed to allow accessing of the various items within
-        the layers dictionary of this class via the 'class.attribute' method.
+        Raises the individual layers via their keys.
 
         Parameters
         ----------
@@ -79,17 +70,17 @@ class LayeredDetector(BaseDetector):
         self: LayeredDetector, psf: PSF, return_psf: bool = False
     ) -> Array:
         """
-        Applied the stored detector layers to the input psf.
+        Applied the detector layers to the input psf.
 
         Parameters
         ----------
-        PSF : Array
+        psf : PSF
             The input psf to be transformed.
 
         Returns
         -------
-        psf : Array
-            The output 'psf' after being transformed by the detector layers.
+        psf : PSF
+            The output psf after being transformed by the detector layers.
         """
         for key, layer in self.layers.items():
             psf = layer.apply(psf)
@@ -101,18 +92,23 @@ class LayeredDetector(BaseDetector):
         self: LayeredDetector, layer: Union[DetectorLayer, tuple], index: int
     ) -> LayeredDetector:
         """
-        Inserts a layer into the layers dictionary at the given index using the
-        list.insert method. Note this method may require the names of some
-        parameters to be
+        Inserts a layer into the layers dictionary at a specified index. This function
+        calls the list2dictionary function to ensure all keys remain unique. Note that
+        this can result in some keys being modified if they are duplicates. The input
+        'layer' can be a tuple of (key, layer) to specify a key, else the key is taken
+        as the class name of the layer.
 
         Parameters
         ----------
-        layer : Union[DetectorLayer, tuple]
-            The layer to insert into the layers dictionary. Can either be a
-            single DetectorLayer, or you can specify the layers key by passing
-            in a tuple of (DetectorLayer, key).
+        layer : Any
+            The layer to be inserted.
         index : int
-            The index to insert the layer at.
+            The index at which to insert the layer.
+
+        Returns
+        -------
+        detector : LayeredDetector
+            The updated detector.
         """
         return self.set(
             "layers",
@@ -121,12 +117,16 @@ class LayeredDetector(BaseDetector):
 
     def remove_layer(self: LayeredDetector, key: str) -> LayeredDetector:
         """
-        Removes a layer from the layers dictionary indexed at 'key' using the
-        dict.pop(key) method.
+        Removes a layer from the layers dictionary, specified by its key.
 
         Parameters
         ----------
         key : str
-            The key of the layer to remove.
+            The key of the layer to be removed.
+
+        Returns
+        -------
+        detector : LayeredDetector
+            The updated detector.
         """
         return self.set("layers", dlu.remove_layer(self.layers, key))

@@ -19,7 +19,11 @@ __all__ = [
 
 class Optic(TransmissiveLayer, AberratedLayer):
     """
-    Optics class that holds both a transmission and OPD array.
+    A basic 'Optic' class, which optionally applies a transmission, OPD and phase to
+    the input wavefront, with the option for normalise after.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Optic.png)
 
     Attributes
     ----------
@@ -30,8 +34,7 @@ class Optic(TransmissiveLayer, AberratedLayer):
     phase : Array, radians
         The Array of phase values to be applied to the input wavefront.
     normalise: bool
-        Whether to normalise the wavefront after passing through the
-        optic.
+        Whether to normalise the wavefront after passing through the optic.
     """
 
     def __init__(
@@ -45,15 +48,13 @@ class Optic(TransmissiveLayer, AberratedLayer):
         Parameters
         ----------
         transmission: Array = None
-            The Array of transmission values to be applied to the input
-            wavefront.
+            The Array of transmission values to be applied to the input wavefront.
         opd : Array, metres = None
             The Array of OPD values to be applied to the input wavefront.
         phase : Array, radians = None
             The Array of phase values to be applied to the input wavefront.
         normalise: bool = False
-            Whether to normalise the wavefront after passing through the
-            optic.
+            Whether to normalise the wavefront after passing through the optic.
         """
         super().__init__(
             transmission=transmission,
@@ -100,10 +101,12 @@ class Optic(TransmissiveLayer, AberratedLayer):
 
 class BasisOptic(TransmissiveLayer, BasisLayer):
     """
-    Adds an array of phase values to the input wavefront calculated from the
-    Optical Path Difference (OPD). The OPDs are calculated from the basis
-    arrays, and weighted by the coefficients, and converted to phases by the
-    wavefront methods.
+    A basic 'Optic' class, with a aberrations applied through a set of basis vectors
+    coefficients. This can be applied either as an opd or phase, using the `as_phase`
+    attribute. Also optionally applies a transmission and normalisation.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BasisOptic.png)
 
     Attributes
     ----------
@@ -113,12 +116,11 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
         Arrays holding the pre-calculated basis vectors.
     coefficients: Array
         The Array of coefficients to be applied to each basis vector.
-    phase : bool
-        Whether to apply the basis as a phase phase or OPD. If True the basis
-        is applied as a phase, else it is applied as an OPD.
+    as_phase : bool
+        Whether to apply the basis as a phase phase or OPD. If True the basis is
+        applied as a phase, else it is applied as an OPD.
     normalise : bool
-        Whether to normalise the wavefront after passing through the
-        optic.
+        Whether to normalise the wavefront after passing through the optic.
     """
 
     def __init__(
@@ -128,23 +130,21 @@ class BasisOptic(TransmissiveLayer, BasisLayer):
         coefficients=None,
         as_phase=False,
         normalise=False,
-    ) -> OpticalLayer:
+    ):
         """
         Parameters
         ----------
-        transmission: Array
-            The Array of transmission values to be applied to the input
-            wavefront.
         basis: Array, metres
             Arrays holding the pre-calculated basis vectors.
-        coefficients: Array
+        coefficients: Array = None
             The Array of coefficients to be applied to each basis vector.
-        phase : bool
-            Whether to apply the basis as a phase phase or OPD. If True the
-            basis is applied as a phase, else it is applied as an OPD.
-        normalise : bool
-            Whether to normalise the wavefront after passing through the
-            optic.
+        transmission: Array = None
+            The Array of transmission values to be applied to the input wavefront.
+        as_phase : bool = False
+            Whether to apply the basis as a phase phase or OPD. If True the basis is
+            applied as a phase, else it is applied as an OPD.
+        normalise : bool = False
+            Whether to normalise the wavefront after passing through the optic.
         """
         super().__init__(
             transmission=transmission,

@@ -8,22 +8,26 @@ import dLux.utils as dlu
 __all__ = ["Zernike", "ZernikeBasis"]
 
 
+# TODO: Should all the leaves of this class be static?
 class Zernike(Base):
     """
-    A class to generate Zernike polynomials dynamically.
+    A Zernike polynomial that can be generated dynamically in a way that is both jit and
+    grad safe. If you want a _static_ zernike (most use cases), use the zernike
+    functions found in `utils.zernikes` and load the basis into a `BasisOptic` class.
 
-    The 'jth' zernike polynomial is defined [here](https://oeis.org/A176988).
-    The basic translation between the noll index and the pair of numbers is
-    shown below:
+    The 'jth' zernike polynomial is defined [here](https://oeis.org/A176988). The basic
+    translation between the noll index and the pair of numbers is shown below:
 
-    1 -> (0, 0)
+    1 -> (0, 0) : Piston
 
-    2, 3 -> (1, -1), (1, 1)
+    2, 3 -> (1, -1), (1, 1) : Tip, Tilt
 
-    4, 5, 6 -> (2, -2), (2, 0), (2, 2)
+    4, 5, 6 -> (2, -2), (2, 0), (2, 2) : Defocus, Astigmatism
 
-    7, 8, 9, 10 -> (3, -3), (3, -1), (3, 1), (3, 3)
+    7, 8, 9, 10 -> (3, -3), (3, -1), (3, 1), (3, 3) : Coma, Trefoil
 
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Zernike.png)
 
     Attributes
     ----------
@@ -39,8 +43,8 @@ class Zernike(Base):
         The array of normalisation coefficients used in the radial calculation.
         This is a pre-calculated parameter and should not be changed.
     _k : Array
-        The array of powers using the radial calculation. This is a
-        pre-calculated parameter and should not be changed.
+        The array of powers using the radial calculation. This is a pre-calculated
+        parameter and should not be changed.
     """
 
     j: int
@@ -63,23 +67,23 @@ class Zernike(Base):
             raise ValueError("The Zernike index must be greater than 0.")
         self.j = int(j)
         self.name = dlu.zernike_name(j)
-        self.n, self.m = dlu.noll_indices(j)
+        self.n, self.m = dlu.basis(j)
         self._c, self._k = dlu.zernike_factors(j)
 
     def calculate(self: Zernike, coordinates: Array, nsides: int = 0) -> Array:
         """
         Calculates the Zernike polynomial.
 
-        Note: The zernike polynomial is defined on the coordinates up to a
-        radial value of 1.
+        Note: standard zernike polynomials are only defined up to a radial value of 1,
+        so generating one that spans the entire aperture needs a diameter of 2.
 
         Parameters
         ----------
         coordinates : Array
-            The Cartesian coordinates to calculate the Zernike polynomial upon.
+            The Cartesian coordinates to calculate the Zernike upon.
         nsides : int
-            The number of sides of the aperture. If 0, the Zernike polynomial
-            is calculated on a circular aperture.
+            The number of sides of the aperture. If 0, the Zernike is calculated
+            on a circular aperture.
 
         Returns
         -------
@@ -96,31 +100,35 @@ class Zernike(Base):
             )
 
 
-# TODO: Rename noll_indices to basis_fns??
+# TODO: Rename basis to basis_fns??
 class ZernikeBasis(Base):
     """
-    A class to calculate a set of Zernike polynomials on a dynamic set of
-    coordinates.
+    A Basis of Zernike polynomials that can be generated dynamically in a way that is
+    both jit and grad safe. If you want a _static_ zernike (most use cases), use the
+    zernike functions found in `utils.zernikes` and load the basis into a `BasisOptic`
+    class.
 
-    The 'jth' zernike polynomial is defined [here](https://oeis.org/A176988).
-    The basic translation between the noll index and the pair of numbers is
-    shown below:
+    The 'jth' zernike polynomial is defined [here](https://oeis.org/A176988). The basic
+    translation between the noll index and the pair of numbers is shown below:
 
-    1 -> (0, 0)
+    1 -> (0, 0) : Piston
 
-    2, 3 -> (1, -1), (1, 1)
+    2, 3 -> (1, -1), (1, 1) : Tip, Tilt
 
-    4, 5, 6 -> (2, -2), (2, 0), (2, 2)
+    4, 5, 6 -> (2, -2), (2, 0), (2, 2) : Defocus, Astigmatism
 
-    7, 8, 9, 10 -> (3, -3), (3, -1), (3, 1), (3, 3)
+    7, 8, 9, 10 -> (3, -3), (3, -1), (3, 1), (3, 3) : Coma, Trefoil
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ZernikeBasis.png)
 
     Attributes
     ----------
-    noll_indices : list[Zernike]
-        The list of Zernike polynomial classes to calculate.
+    basis : list[Zernike]
+        The list of `Zernike` polynomial classes to calculate.
     """
 
-    noll_indices: list[Zernike]
+    basis: list[Zernike]
 
     def __init__(self: ZernikeBasis, js: list[int]):
         """
@@ -131,7 +139,7 @@ class ZernikeBasis(Base):
         js : list[int]
             The list of Zernike (noll) indices to calculate.
         """
-        self.noll_indices = [Zernike(j) for j in js]
+        self.basis = [Zernike(j) for j in js]
 
     def calculate_basis(
         self: ZernikeBasis, coordinates: Array, nsides: int = 0
@@ -139,24 +147,24 @@ class ZernikeBasis(Base):
         """
         Calculates the full Zernike polynomial basis.
 
-        Note: The zernike polynomial is defined on the coordinates up to a
-        radial value of 1.
+        Note: standard zernike polynomials are only defined up to a radial value of 1,
+        so generating a basis that spans the entire aperture needs a diameter of 2.
 
         Parameters
         ----------
         coordinates : Array
             The Cartesian coordinates to calculate the Zernike basis upon.
         nsides : int
-            The number of sides of the aperture. If 0, the Zernike basis is
-            calculated on a circular aperture.
+            The number of sides of the aperture. If 0, the Zernike basis is calculated
+            on a circular aperture.
 
         Returns
         -------
-        zernike_basis : Array
+        basis : Array
             The Zernike polynomial basis.
         """
         leaf_fn = lambda leaf: isinstance(leaf, Zernike)
         calculate_fn = lambda z: z.calculate(coordinates, nsides)
         return np.array(
-            jtu.tree_map(calculate_fn, self.noll_indices, is_leaf=leaf_fn)
+            jtu.tree_map(calculate_fn, self.basis, is_leaf=leaf_fn)
         )

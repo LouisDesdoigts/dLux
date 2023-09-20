@@ -89,7 +89,6 @@ from .layers.optics import (
     BasisOptic as BasisOptic,
 )
 from .layers.detector_layers import (
-    BaseDetectorLayer as BaseDetectorLayer,
     ApplyPixelResponse as ApplyPixelResponse,
     ApplyJitter as ApplyJitter,
     ApplySaturation as ApplySaturation,

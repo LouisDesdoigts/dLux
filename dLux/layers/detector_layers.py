@@ -9,7 +9,6 @@ from ..psfs import PSF
 from .optical_layers import BaseLayer
 
 __all__ = [
-    "BaseDetectorLayer",
     "ApplyPixelResponse",
     "ApplyJitter",
     "ApplySaturation",
@@ -18,22 +17,13 @@ __all__ = [
 ]
 
 
-class BaseDetectorLayer(BaseLayer):
-    @abstractmethod
-    def apply(self: BaseDetectorLayer, psf):  # pragma: no cover
-        pass
-
-
-class DetectorLayer(BaseDetectorLayer):
+class DetectorLayer(BaseLayer):
     """
-    A base Detector layer class to help with type checking throughout the rest
-    of the software.
+    A base Detector layer class to help with type checking throughout the rest of the
+    software.
     """
 
     def __init__(self: DetectorLayer):
-        """
-        Constructor for the DetectorLayer class.
-        """
         super().__init__()
 
     @abstractmethod
@@ -55,7 +45,12 @@ class DetectorLayer(BaseDetectorLayer):
 
 class ApplyPixelResponse(DetectorLayer):
     """
-    Applies a pixel response array to the input psf, via a multiplication.
+    Applies a pixel response array to the input psf, via a multiplication. This can be
+    used to model variations in the inter and intra-pixel sensitivity variations common
+    to most detectors.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ApplyPixelResponse.png)
 
     Attributes
     ----------
@@ -67,14 +62,11 @@ class ApplyPixelResponse(DetectorLayer):
 
     def __init__(self: DetectorLayer, pixel_response: Array):
         """
-        Constructor for the ApplyPixelResponse class.
-
         Parameters
         ----------
         pixel_response : Array
-            The pixel_response to apply to the input psf. Must be a
-            2-dimensional array equal to size of the psf at time of
-            application.
+            The pixel_response to apply to the input psf. Must be a 2-dimensional array
+            equal to size of the psf at time of application.
         """
         super().__init__()
         self.pixel_response = np.asarray(pixel_response, dtype=float)
@@ -100,38 +92,37 @@ class ApplyPixelResponse(DetectorLayer):
 
 class ApplyJitter(DetectorLayer):
     """
-    Convolves the psf with a Gaussian kernel parameterised by the standard
-    deviation (sigma).
+    Convolves the psf with a radially symmetric Gaussian kernel parameterised by its
+    standard deviation (sigma).
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ApplyJitter.png)
 
     Attributes
     ----------
-    sigma : Array, pixels
+    sigma : float, pixels
         The standard deviation of the Gaussian kernel, in units of pixels.
     kernel_size : int
         The size of the convolution kernel to use.
     """
 
     kernel_size: int
-    sigma: Array
+    sigma: float
 
-    def __init__(self: DetectorLayer, sigma: Array, kernel_size: int = 10):
+    def __init__(self: DetectorLayer, sigma: float, kernel_size: int = 10):
         """
-        Constructor for the ApplyJitter class.
-
         Parameters
         ----------
-        sigma : Array, pixels
+        sigma : float, pixels
             The standard deviation of the Gaussian kernel, in units of pixels.
         kernel_size : int = 10
             The size of the convolution kernel to use.
         """
         super().__init__()
         self.kernel_size = int(kernel_size)
-        self.sigma = np.asarray(sigma, dtype=float)
-        if self.sigma.ndim != 0:
-            raise ValueError("sigma must be a scalar array.")
+        self.sigma = float(sigma)
 
-    def generate_kernel(self: DetectorLayer, pixel_scale: Array) -> Array:
+    def generate_kernel(self: DetectorLayer, pixel_scale: float) -> Array:
         """
         Generates the normalised Gaussian kernel.
 
@@ -167,30 +158,29 @@ class ApplyJitter(DetectorLayer):
 
 class ApplySaturation(DetectorLayer):
     """
-    Applies a simple saturation model to the input psf, by clipping any
-    values above saturation, to saturation.
+    Applies a simple saturation model to the input psf, by clipping any values above
+    the threshold value.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ApplySaturation.png)
 
     Attributes
     ----------
-    saturation : Array
-        The value at which the saturation is applied.
+    threshold : float
+        The threshold at which the saturation is applied.
     """
 
-    saturation: Array
+    threshold: float
 
-    def __init__(self: DetectorLayer, saturation: Array) -> DetectorLayer:
+    def __init__(self: DetectorLayer, threshold: float):
         """
-        Constructor for the ApplySaturation class.
-
         Parameters
         ----------
-        saturation : Array
-            The value at which the saturation is applied.
+        threshold : float
+            The threshold at which the saturation is applied.
         """
         super().__init__()
-        self.saturation = np.asarray(saturation, dtype=float)
-        if self.saturation.ndim != 0:
-            raise ValueError("saturation must be a scalar array.")
+        self.threshold = float(threshold)
 
     def apply(self: DetectorLayer, psf: PSF) -> PSF:
         """
@@ -206,29 +196,30 @@ class ApplySaturation(DetectorLayer):
         psf : PSF
             The transformed psf.
         """
-        return psf.min("data", self.saturation)
+        return psf.min("data", self.threshold)
 
 
 class AddConstant(DetectorLayer):
     """
-    Add a constant to the output psf. This is typically used to model the
-    mean value of the detector noise.
+    Adds a constant to the output psf. This is typically used to model the mean value of
+    the detector noise.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/AddConstant.png)
 
     Attributes
     ----------
-    value : Array
+    value : float
         The value to add to the psf.
     """
 
-    value: Array
+    value: float
 
-    def __init__(self: DetectorLayer, value: Array) -> DetectorLayer:
+    def __init__(self: DetectorLayer, value: float):
         """
-        Constructor for the AddConstant class.
-
         Parameters
         ----------
-        value : Array
+        value : float
             The value to add to the psf.
         """
         super().__init__()
@@ -255,9 +246,12 @@ class AddConstant(DetectorLayer):
 
 class Downsample(DetectorLayer):
     """
-    Downsamples an input psf by an integer number of pixels via a sum.
-    The number of pixels in the input psf must be integer divisible by the
-    kernel_size.
+    Downsamples an input psf by an integer number of pixels via a sum. Typically used
+    to downsample an oversampled psf to the true pixel size. Note kernel_size must be
+    an integer multiple of the input psf size.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Downsample.png)
 
     Attributes
     ----------
@@ -267,10 +261,8 @@ class Downsample(DetectorLayer):
 
     kernel_size: int
 
-    def __init__(self: DetectorLayer, kernel_size: int) -> DetectorLayer:
+    def __init__(self: DetectorLayer, kernel_size: int):
         """
-        Constructor for the Downsample class.
-
         Parameters
         ----------
         kernel_size : int
@@ -279,7 +271,7 @@ class Downsample(DetectorLayer):
         super().__init__()
         self.kernel_size = int(kernel_size)
 
-    def apply(self, psf):
+    def apply(self: DetectorLayer, psf: PSF) -> PSF:
         """
         Applies the layer to the PSF.
 
