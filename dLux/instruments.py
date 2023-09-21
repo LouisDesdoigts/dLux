@@ -22,21 +22,23 @@ class Instrument(Base):
 
 class Telescope(Instrument):
     """
-    A high level class designed to model the behaviour of a telescope. It
-    stores a series different ∂Lux objects, and primarily passes the relevant
-    information between these objects in order to coherently model some
-    telescope observation.
+    Class that represents a telescope instrument, holding an optical system, a source
+    object and (optionally) a detector object, automating the process of modelling
+    all three in conjunction.
+
+    To generate more complex instruments or a set of observations, the `Telescope`
+    class can be inherited and modified to suit the needs of the user.
 
     Attributes
     ----------
-    optics : Optics
-        A Optics object that defines some optical configuration.
+    optics : OpticalSystem
+        An `OpticalSystem` object that defines the optical transformations of the
+        instrument.
     source : Source
-        A dictionary of the various source objects that the instrument is
-        observing.
+        A `Source` or `Scene` to objects to model through the instrument.
     detector : Detector
-        A Detector object that is used to model the various
-        instrumental effects on a psf.
+        A `Detector` object that defines the detector transformations of the
+        instrument.
     """
 
     optics: OpticalSystem
@@ -50,16 +52,19 @@ class Telescope(Instrument):
         detector: Detector = None,
     ):
         """
-        Constructor for the Telescope class.
-
         Parameters
         ----------
-        optics : Optics
-            A pre-configured Optics object.
-        source : Union[list, Source]
-            Either a Scene, list of Sources, or an individual Source object.
+        optics : OpticalSystem
+            An `OpticalSystem` object that defines the optical transformations of the
+            instrument.
+        source : Source
+            A `Source` or `Scene` to objects to model through the instrument. Can be
+            either a single `Source` object, or a list of `Source` objects which is
+            then converted to a `Scene` object. The list entries can also be a tuple of
+            (key, source)  in order to specify a key for the source in the scene.
         detector : Detector = None
-            A pre-configured Detector object.
+            A `Detector` object that defines the detector transformations of the
+            instrument.
         """
         # Optics
         if not isinstance(optics, OpticalSystem):
@@ -85,18 +90,13 @@ class Telescope(Instrument):
 
     def __getattr__(self: Telescope, key: str) -> object:
         """
-        Magic method designed to allow accessing of the various items within
-        the sub-dictionaries of this class via the 'class.attribute' method.
-        It is recommended that each dictionary key in the optical layers,
-        detector layers, and scene sources are unique to prevent unexpected
-        behaviour. In the case they there are identical keys across the
-        dictionaries This method prioritises searching for keys in the optical
-        layers, then detector layers, and then the scene sources.
+        Raises the attributes from the optics, source and detector to the top level of
+        the class.
 
         Parameters
         ----------
         key : str
-            The key of the item to be searched for in the sub-dictionaries.
+            The key of the item to be searched for.
 
         Returns
         -------
@@ -110,36 +110,26 @@ class Telescope(Instrument):
             f"{self.__class__.__name__} has no attribute " f"{key}."
         )
 
-    def model(self: Telescope, return_psf: bool = False) -> Union[Array, dict]:
+    def model(self: Telescope, return_psf: bool = False) -> Array:
         """
-        A base level modelling function designed to robustly handle the
-        different combinations of inputs. Models the  through the
-        instrument optics and detector.
+        Models the source objects through the optical system and detector.
+
+        Parameters
+        ----------
+        return_psf : bool = False
+            Should the PSF object be returned instead of the psf Array?
 
         Returns
         -------
-        psf : Array, dict
-            The psf of the scene modelled through the optics with detector
-            and filter effects applied if they are supplied. Returns either as
-            a single array (if return_tree is false), or a dict of the output
-            for each source.
+        object : Array, PSF
+            if `return_psf` is False, the psf Array is returned.
+            If `return_psf` is True, the PSF object is returned.
+
         """
         # Model optics: return_psf=True for more efficient source calculations
         psfs = self.optics.model(self.source, return_psf=True)
 
-        # # Check for tree-like output from scene
-        # if not isinstance(psfs, PSF):
-        #     # Define functions
-        #     leaf_fn = lambda x: isinstance(x, PSF)
-        #     get_psfs = lambda psf: psf.data.sum(tuple(range(psf.ndim)))
-        #     get_pscales = lambda psf: psf.pixel_scale.mean()
-
-        #     # Get values
-        #     psf = dlu.map2array(get_psfs, psfs, leaf_fn).sum()
-        #     pixel_scale = dlu.map2array(get_pscales, psfs, leaf_fn).mean()
-
-        # # Array based output
-        # else:
+        # Array based output
         psf = psfs.data.sum(tuple(range(psfs.ndim)))
         pixel_scale = psfs.pixel_scale.mean()
 
@@ -154,18 +144,26 @@ class Telescope(Instrument):
         return psf_obj.data
 
 
-# TODO: Test and re-write the Dither class
 class Dither(Telescope):
     """
-    Telescope class designed to apply a series of dithers to the instrument
-    and return the corresponding PSFs.
+    Simple extension of the `Telescope` class that applies a series of dithers to the
+    source positions before modelling the instrument. Serves both as a demonstration
+    of how to extend the `Telescope` class and as a useful tool for modelling
+    dithered observations.
 
     Attributes
     ----------
-    dithers : Array, (radians)
+    optics : OpticalSystem
+        An `OpticalSystem` object that defines the optical transformations of the
+        instrument.
+    source : Source
+        A `Source` or `Scene` to objects to model through the instrument.
+    detector : Detector
+        A `Detector` object that defines the detector transformations of the
+        instrument.
+    dithers : Array, radians
         The array of dithers to apply to the source positions. The shape of the
-        array should be (ndithers, 2) where ndithers is the number of dithers
-        and the second dimension is the (x, y) dither in radians.
+        array should be (ndithers, 2).
     """
 
     dithers: Array
@@ -178,41 +176,43 @@ class Dither(Telescope):
         detector: Detector = None,
     ):
         """
-        Constructor for the Dither class.
-
         Parameters
         ----------
         dithers : Array, radians
-            The array of dithers to apply to the source positions. The shape of
-            the array should be (ndithers, 2) where ndithers is the number of
-            dithers and the second dimension is the (x, y) dither in radians.
-        optics : Optics
-            A pre-configured Optics object.
-        sourcs : Union[list, Source]
-            Either a list of sources or an individual Source object.
+            The array of dithers to apply to the source positions. The shape of the
+            array should be (ndithers, 2).
+        optics : OpticalSystem
+            An `OpticalSystem` object that defines the optical transformations of the
+            instrument.
+        source : Source
+            A `Source` or `Scene` to objects to model through the instrument. Can be
+            either a single `Source` object, or a list of `Source` objects which is
+            then converted to a `Scene` object. The list entries can also be a tuple of
+            (key, source)  in order to specify a key for the source in the scene.
         detector : Detector = None
-            A pre-configured Detector object.
+            A `Detector` object that defines the detector transformations of the
+            instrument.
         """
         self.dithers = np.asarray(dithers, float)
         if self.dithers.ndim != 2 or self.dithers.shape[1] != 2:
             raise ValueError("dithers must be an array of shape (ndithers, 2)")
         super().__init__(optics=optics, source=source, detector=detector)
 
-    def model(self: Telescope, return_psf=False) -> Array:
+    def model(self: Telescope, return_psf: bool = False) -> Array:
         """
-        Applies a series of dithers to the instrument sources and calls the
-        .model() method after applying each dither.
+        Models the source objects through the optical system and detector, while also
+        applying the dithers to the source positions.
 
         Parameters
         ----------
-        instrument : Telescope
-            The array of dithers to apply to the source positions.
+        return_psf : bool = False
+            Should the PSF object be returned instead of the psf Array?
 
         Returns
         -------
-        psfs : Array
-            The psfs generated after applying the dithers to the source
-            positions.
+        object : Array, PSF
+            if `return_psf` is False, the psf Array is returned.
+            If `return_psf` is True, the PSF object is returned.
         """
 
         def dither_and_model(dither, instrument):

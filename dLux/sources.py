@@ -18,18 +18,16 @@ Spectrum = lambda: dLux.spectra.BaseSpectrum
 
 __all__ = [
     "BaseSource",
-    "Scene",
     "PointSource",
     "PointSources",
     "BinarySource",
     "ResolvedSource",
     "PointResolvedSource",
+    "Scene",
 ]
 
 
 class BaseSource(Base):
-    # TODO: Add this to allow custom sources
-
     @abstractmethod
     def normalise(self):  # pragma: no cover
         pass
@@ -37,107 +35,6 @@ class BaseSource(Base):
     @abstractmethod
     def model(self, optics):  # pragma: no cover
         pass
-
-
-class Scene(BaseSource):
-    sources: dict
-
-    def __init__(self, sources: list[Source]):
-        super().__init__()
-        if isinstance(sources, (BaseSource, tuple)):
-            sources = [sources]
-        self.sources = dlu.list2dictionary(sources, False, BaseSource)
-
-    def normalise(self: Scene) -> Scene:
-        """
-        Method for returning a new scene with normalised source objects.
-
-        Returns
-        -------
-        scene : Scene
-            The normalised scene object.
-        """
-        is_source = lambda leaf: isinstance(leaf, BaseSource)
-        norm_fn = lambda source: source.normalise()
-        sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
-        return self.set("sources", sources)
-
-    def __getattr__(self: Source, key: str) -> Any:
-        """
-        Magic method designed to allow accessing of the various items within
-        the sub-dictionaries of this class via the 'class.attribute' method.
-        It is recommended that each dictionary key in the optical layers,
-        detector layers, and scene sources are unique to prevent unexpected
-        behaviour. In the case they there are identical keys across the
-        dictionaries This method prioritises searching for keys in the optical
-        layers, then detector layers, and then the scene sources.
-
-        Parameters
-        ----------
-        key : str
-            The key of the item to be searched for in the sub-dictionaries.
-
-        Returns
-        -------
-        item : object
-            The item corresponding to the supplied key in the sub-dictionaries.
-        """
-        if key in self.sources.keys():
-            return self.sources[key]
-        raise AttributeError(
-            f"{self.__class__.__name__} has no attribute " f"{key}."
-        )
-
-    def model(
-        self: Scene,
-        optics: Optics(),
-        return_wf: bool = False,
-        return_psf: bool = False,
-    ) -> Array:
-        """
-        Method for returning the model of the scene.
-
-        Parameters
-        ----------
-        optics : Optics
-            The optics object to be used to model the scene.
-        get_pixel_scale : bool = False
-
-        Returns
-        -------
-        psf : Array
-            The psf of the scene.
-        pixel_scale : Array
-
-        """
-        self = self.normalise()
-
-        # Define leaf_fn and map across sources
-        leaf_fn = lambda leaf: isinstance(leaf, BaseSource)
-        output = tree_map(
-            lambda s: s.model(optics, return_wf, return_psf),
-            self.sources,
-            is_leaf=leaf_fn,
-        )
-
-        # Return wf case is simple
-        if return_wf:
-            return output
-
-        # Return psf case requires mapping across the psf outputs
-        if return_psf:
-            # Define mapping function
-            leaf_fn = lambda leaf: isinstance(leaf, PSF)
-            get_psfs = lambda psf: psf.data.sum(tuple(range(psf.ndim)))
-            get_pscales = lambda psf: psf.pixel_scale.mean()
-
-            # Get values and return PSF
-            psf = dlu.map2array(get_psfs, output, leaf_fn).sum(0)
-            pixel_scale = dlu.map2array(get_pscales, output, leaf_fn).mean()
-            return PSF(psf, pixel_scale)
-
-        # Return array is simple
-        return dlu.map2array(lambda x: x, output).sum(0)
 
 
 class Source(BaseSource):
@@ -154,23 +51,20 @@ class Source(BaseSource):
 
     def __init__(
         self: Source,
-        wavelengths: Array,
+        wavelengths: Array = None,
         weights: Array = None,
         spectrum: Spectrum() = None,
     ):
         """
-        Constructor for the Source class.
-
         Parameters
         ----------
-        wavelengths : Array, metres
-            The array of wavelengths at which the spectrum is defined. Defaults
-            to a PointSource with a flat spectrum.
+        wavelengths : Array, metres = None
+            The array of wavelengths at which the spectrum is defined. This input is
+            ignored if a Spectrum object is provided.
         weights : Array = None
             The spectral weights of the object.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-            if provided it will overwrite the inputs wavelengths and weights.
         """
         # Spectrum
         if spectrum is not None:
@@ -182,7 +76,7 @@ class Source(BaseSource):
 
     def __getattr__(self: Source, key: str) -> Any:
         """
-        Getter method for the spectrum object.
+        Raises the parameters of the spectrum object to this class.
 
         Parameters
         ----------
@@ -203,7 +97,7 @@ class Source(BaseSource):
 
     def normalise(self: Source) -> Source:
         """
-        Method for returning a new normalised source object.
+        Returns a normalised source object.
 
         Returns
         -------
@@ -216,13 +110,16 @@ class Source(BaseSource):
 
 class PointSource(Source):
     """
-    Concrete Class for unresolved point source objects.
+    A simple point source with a spectrum, position and flux.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/PointSource.png)
 
     Attributes
     ----------
     position : Array, radians
         The (x, y) on-sky position of this object.
-    flux : Array, photons
+    flux : float, photons
         The flux of the object.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
@@ -233,30 +130,24 @@ class PointSource(Source):
 
     def __init__(
         self: Source,
-        wavelengths: Array,
+        wavelengths: Array = None,
         position: Array = np.zeros(2),
-        flux: Array = np.array(1.0),
+        flux: float = 1.0,
         weights: Array = None,
         spectrum: Spectrum() = None,
     ):
         """
-        Constructor for the Source class.
-
         Parameters
         ----------
-        wavelengths : Array, metres
-            The array of wavelengths at which the spectrum is defined. Defaults
-            to a PointSource with a flat spectrum.
-        position : Array, radians = None
+        wavelengths : Array, metres = None
+            The array of wavelengths at which the spectrum is defined. This input is
+            ignored if a Spectrum object is provided.
+        position : Array, radians = np.zeros(2)
             The (x, y) on-sky position of this object.
-        flux : Array, photons = None
+        flux : float, photons = 1.
             The flux of the object.
-        weights : Array = None
-            The spectral weights of the object.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-            If provided it will overwrite the inputs wavelengths and weights.
-
         """
         # Position and Flux
         self.position = np.asarray(position, dtype=float)
@@ -276,22 +167,24 @@ class PointSource(Source):
         return_psf: bool = False,
     ) -> Array:
         """
-        Method to model the psf of the point source through the optics.
+        Models the source object through the provided optics.
 
         Parameters
         ----------
         optics : Optics
-            The optics through which to model the source objects.
-        get_pixel_scale : bool = False, radians
-            Whether to also return the psf pixel scale.
+            The optics through which to model the source object.
+        return_wf : bool = False
+            Should the Wavefront object be returned instead of the psf Array?
+        return_psf : bool = False
+            Should the PSF object be returned instead of the psf Array?
 
         Returns
         -------
-        psf : Array
-            The PSF of the source modelled through the optics.
-        pixel_scale : Array, radians
-            The pixel scale of the psf. Only returned if
-            `get_pixel_scale == True`.
+        object : Array, Wavefront, PSF
+            if `return_wf` is False and `return_psf` is False, returns the psf Array.
+            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+                object.
+            if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         self = self.normalise()
         weights = self.weights * self.flux
@@ -302,12 +195,15 @@ class PointSource(Source):
 
 class PointSources(Source):
     """
-    Class for multiple unresolved point source objects.
+    A set of point sources with the same spectrum, but different positions and fluxes.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/PointSources.png)
 
     Attributes
     ----------
     position : Array, radians
-        The (x, y) on-sky positions of these sources.
+        The ((x0, y0), (x1, y1), ...) on-sky positions of these sources.
     flux : Array, photons
         The fluxes of the sources.
     spectrum : Spectrum
@@ -319,26 +215,25 @@ class PointSources(Source):
 
     def __init__(
         self: Source,
-        wavelengths: Array,
+        wavelengths: Array = None,
         position: Array = np.zeros((1, 2)),
         flux: Array = None,
         weights: Array = None,
         spectrum: Spectrum() = None,
     ):
         """
-        Constructor for the PointSources class.
-
         Parameters
         ----------
-        wavelengths : Array, metres = None
+        wavelengths : Array, metres
             The array of wavelengths at which the spectrum is defined.
-        position : Array, radians
-            The ((x0, y0), (x1, y1), ...) on-sky positions of these sources.
+        position : Array, radians = np.zeros((1, 2))
+            The (x, y) on-sky position of this object.
         flux : Array, photons = None
-            The fluxes of the sources.
+            The flux of the object.
+        weights : Array = None
+            The spectral weights of the object.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-            If provided it will overwrite the inputs wavelengths and weights.
         """
         super().__init__(
             spectrum=spectrum, wavelengths=wavelengths, weights=weights
@@ -369,22 +264,24 @@ class PointSources(Source):
         return_psf: bool = False,
     ) -> Array:
         """
-        Method to model the psf of the point source through the optics.
+        Models the source object through the provided optics.
 
         Parameters
         ----------
         optics : Optics
-            The optics through which to model the source objects.
-        get_pixel_scale : bool = False, radians
-            Whether to also return the psf pixel scale.
+            The optics through which to model the source object.
+        return_wf : bool = False
+            Should the Wavefront object be returned instead of the psf Array?
+        return_psf : bool = False
+            Should the PSF object be returned instead of the psf Array?
 
         Returns
         -------
-        psf : Array
-            The PSF of the source modelled through the optics.
-        pixel_scale : Array, radians
-            The pixel scale of the psf. Only returned if
-            `get_pixel_scale == True`.
+        object : Array, Wavefront, PSF
+            if `return_wf` is False and `return_psf` is False, returns the psf Array.
+            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+                object.
+            if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         if return_wf and return_psf:
             raise ValueError(
@@ -408,45 +305,48 @@ class PointSources(Source):
 
 class ResolvedSource(PointSource):
     """
-    A class for modelling resolved sources that parametrise their resolved
-    component using an array of intensities.
+    A single resolved source with a spectrum, position, flux, and distribution array
+    that represents the resolved component.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/ResolvedSource.png)
 
     Attributes
     ----------
     position : Array, radians
         The (x, y) on-sky position of this object.
-    flux : Array, photons
+    flux : float, photons
         The flux of the object.
-    spectrum : Spectrum
-        The spectrum of this object, represented by a Spectrum object.
     distribution : Array
         The array of intensities representing the resolved source.
+    spectrum : Spectrum
+        The spectrum of this object, represented by a Spectrum object.
     """
 
     distribution: Array
 
     def __init__(
         self: Source,
-        wavelengths: Array,
+        wavelengths: Array = None,
         position: Array = np.zeros(2),
-        flux: Array = np.array(1.0),
+        flux: float = 1.0,
         distribution: Array = np.ones((3, 3)),
         weights: Array = None,
         spectrum: Spectrum() = None,
     ):
         """
-        Constructor for the ResolvedSource class.
-
         Parameters
         ----------
         wavelengths : Array, metres
             The array of wavelengths at which the spectrum is defined.
-        position : Array, radians = np.array([0., 0.])
+        position : Array, radians = np.zeros(2)
             The (x, y) on-sky position of this object.
-        flux : Array, photons = np.array(1.)
+        flux : float, photons = 1.
             The flux of the object.
         distribution : Array = np.ones((3, 3))
             The array of intensities representing the resolved source.
+        weights : Array = None
+            The spectral weights of the object.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
         """
@@ -481,25 +381,29 @@ class ResolvedSource(PointSource):
 
     def model(
         self: Source,
-        optics: Optics,
+        optics: Optics = None,
         return_wf: bool = False,
         return_psf: bool = False,
     ) -> Array:
         """
-        Method to model the psf of the point source through the optics.
+        Models the source object through the provided optics.
 
         Parameters
         ----------
         optics : Optics
-            The optics through which to model the source objects.
-        get_pixel_scale : bool = False, radians
+            The optics through which to model the source object.
+        return_wf : bool = False
+            Should the Wavefront object be returned instead of the psf Array?
+        return_psf : bool = False
+            Should the PSF object be returned instead of the psf Array?
 
         Returns
         -------
-        psf : Array
-            The PSF of the source modelled through the optics.
-        pixel_scale : Array, radians
-
+        object : Array, Wavefront, PSF
+            if `return_wf` is False and `return_psf` is False, returns the psf Array.
+            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+                object.
+            if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         if return_wf and return_psf:
             raise ValueError(
@@ -532,23 +436,27 @@ class ResolvedSource(PointSource):
 
 class BinarySource(Source):
     """
-    A parameterised binary source.
+    A binary source parameterised by the position, flux, separation, position_angle,
+    and contrast between the two sources.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/BinarySource.png)
 
     Attributes
     ----------
     position : Array, radians
         The mean (x, y) on-sky position of this object.
-    mean_flux : Array, photons
+    mean_flux : float, photons
         The mean flux of the sources.
-    separation : Array, radians
+    separation : float, radians
         The separation of the two sources in radians.
-    position_angle : Array, radians
-        The position angle between the two sources measured clockwise from
-        the vertical axis.
-    contrast : Array
+    position_angle : float, radians
+        The position angle between the two sources measured clockwise from the
+        vertical axis.
+    contrast : float
         The contrast ratio between the two sources.
     spectrum : Spectrum
-        The spectrum of this object, represented by a CombinedSpectrum object.
+        The spectrum of this object, represented by a Spectrum object.
     """
 
     position: Array
@@ -564,28 +472,28 @@ class BinarySource(Source):
         mean_flux: float = 1.0,
         separation: float = None,
         position_angle: float = np.pi / 2,
-        contrast: Array = 1.0,
+        contrast: float = 1.0,
         spectrum: Spectrum() = None,
         weights: Array = None,
     ):
         """
         Parameters
         ----------
+        wavelengths : Array, metres = None
+            The array of wavelengths at which the spectrum is defined.
         position : Array, radians = np.zeros(2)
-            The mean (x, y) on-sky position of this object.
+            The (x, y) on-sky position of this object.
         mean_flux : float, photons = 1.
             The mean flux of the sources.
         separation : float, radians = None
             The separation of the two sources in radians.
-        position_angle : float, radians = np.pi/2
-            The position angle between the two sources measured clockwise from
-            the vertical axis.
-        contrast : float = np.array(1.)
+        position_angle : float, radians = np.pi / 2
+            The position angle between the two sources measured clockwise from the
+            vertical axis.
+        contrast : float = 1.
             The contrast ratio between the two sources.
-        spectrum : CombinedSpectrum = None
-            The spectrum of this object, represented by a CombinedSpectrum.
-        wavelengths : Array, metres = None
-            The array of wavelengths at which the spectrum is defined.
+        spectrum : Spectrum = None
+            The spectrum of this object, represented by a Spectrum object.
         """
         wavelengths = np.asarray(wavelengths, dtype=float)
         if weights is None:
@@ -616,21 +524,24 @@ class BinarySource(Source):
         return_psf: bool = False,
     ) -> Array:
         """
-        Method to model the psf of the point source through the optics.
+        Models the source object through the provided optics.
 
         Parameters
         ----------
         optics : Optics
-            The optics through which to model the source objects.
-        get_pixel_scale : bool = False, radians
-            Whether to also return the psf pixel scale.
+            The optics through which to model the source object.
+        return_wf : bool = False
+            Should the Wavefront object be returned instead of the psf Array?
+        return_psf : bool = False
+            Should the PSF object be returned instead of the psf Array?
 
         Returns
         -------
-        psf : Array
-            The PSF of the source modelled through the optics.
-        pixel_scale : Array, radians
-
+        object : Array, Wavefront, PSF
+            if `return_wf` is False and `return_psf` is False, returns the psf Array.
+            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+                object.
+            if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         # Normalise and get input values
         self = self.normalise()
@@ -665,20 +576,22 @@ class PointResolvedSource(ResolvedSource):
     a resolved dust shell or debris disk. These two objects share the same
     spectra but have their flux defined by flux (the mean flux) and the flux
     ratio (contrast) between the point source and resolved distribution. The
-    resolved component is defined by an array (ie this class inherits from
-    ResolvedSource).
+    resolved component is defined by an array of intensities that represent
+    the resolved distribution.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/PointResolvedSource.png)
 
     Attributes
     ----------
     position : Array, radians
         The (x, y) on-sky position of this object.
-    flux : Array, photons
+    flux : float, photons
         The mean flux of the point and resolved source.
     distribution : Array
         The array of intensities representing the resolved source.
-    contrast : Array
-        The contrast ratio between the point source and the resolved
-        source.
+    contrast : float
+        The contrast ratio between the point source and the resolved source.
     spectrum : Spectrum
         The spectrum of this object, represented by a Spectrum object.
     """
@@ -689,28 +602,29 @@ class PointResolvedSource(ResolvedSource):
         self: Source,
         wavelengths: Array = None,
         position: Array = np.zeros(2),
-        flux: Array = np.array(1.0),
+        flux: float = 1.0,
         distribution: Array = np.ones((3, 3)),
-        contrast: Array = np.array(1.0),
-        spectrum: Spectrum() = None,
+        contrast: float = 1.0,
         weights: Array = None,
+        spectrum: Spectrum() = None,
     ) -> Source:
         """
         Parameters
         ----------
-        position : Array, radians = np.array([0., 0.])
+        wavelengths : Array, metres = None
+            The array of wavelengths at which the spectrum is defined.
+        position : Array, radians = np.zeros(2)
             The (x, y) on-sky position of this object.
-        flux : Array, photons = np.array(1.)
+        flux : float, photons = 1.
             The mean flux of the point and resolved source.
         distribution : Array = np.ones((3, 3))
             The array of intensities representing the resolved source.
-        contrast : Array = np.array(1.)
-            The contrast ratio between the point source and the resolved
-            source.
+        contrast : float = 1.
+            The contrast ratio between the point source and the resolved source.
+        weights : Array = None
+            The spectral weights of the object.
         spectrum : Spectrum = None
             The spectrum of this object, represented by a Spectrum object.
-        wavelengths : Array, metres = None
-            The array of wavelengths at which the spectrum is defined.
         """
         wavelengths = np.asarray(wavelengths, dtype=float)
         if weights is None:
@@ -735,22 +649,24 @@ class PointResolvedSource(ResolvedSource):
         return_psf: bool = False,
     ) -> Array:
         """
-        Method to model the psf of the point source through the optics.
+        Models the source object through the provided optics.
 
         Parameters
         ----------
         optics : Optics
-            The optics through which to model the source objects.
-        get_pixel_scale : bool = False, radians
-            Whether to also return the psf pixel scale.
+            The optics through which to model the source object.
+        return_wf : bool = False
+            Should the Wavefront object be returned instead of the psf Array?
+        return_psf : bool = False
+            Should the PSF object be returned instead of the psf Array?
 
         Returns
         -------
-        psf : Array
-            The PSF of the source modelled through the optics.
-        pixel_scale : Array, radians
-            The pixel scale of the psf. Only returned if
-            `get_pixel_scale == True`.
+        object : Array, Wavefront, PSF
+            if `return_wf` is False and `return_psf` is False, returns the psf Array.
+            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+                object.
+            if `return_wf` is False and `return_psf` is True, returns the PSF object.
         """
         if return_wf and return_psf:
             raise ValueError(
@@ -799,3 +715,120 @@ class PointResolvedSource(ResolvedSource):
 
         # Return array psf
         return psf
+
+
+class Scene(BaseSource):
+    """
+    A source object that holds a set of sources that are model simultaneously.
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Scene.png)
+
+    Attributes
+    ----------
+    sources : dict
+        A dictionary of source objects to model simultaneously.
+    """
+
+    sources: dict
+
+    def __init__(self: Scene, sources: list[Source]):
+        """
+        Parameters
+        ----------
+        sources : list[Source]
+            A list of source objects to model simultaneously.
+        """
+        super().__init__()
+        if isinstance(sources, (BaseSource, tuple)):
+            sources = [sources]
+        self.sources = dlu.list2dictionary(sources, False, BaseSource)
+
+    def normalise(self: Scene) -> Scene:
+        """
+        Method for returning a new scene with normalised source objects.
+
+        Returns
+        -------
+        scene : Scene
+            The normalised scene object.
+        """
+        is_source = lambda leaf: isinstance(leaf, BaseSource)
+        norm_fn = lambda source: source.normalise()
+        sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
+        return self.set("sources", sources)
+
+    def __getattr__(self: Source, key: str) -> Any:
+        """
+        Raises the individual sources via their keys.
+
+        Parameters
+        ----------
+        key : str
+            The key of the item to be searched for in the sub-dictionaries.
+
+        Returns
+        -------
+        item : object
+            The item corresponding to the supplied key in the sub-dictionaries.
+        """
+        if key in self.sources.keys():
+            return self.sources[key]
+        raise AttributeError(
+            f"{self.__class__.__name__} has no attribute " f"{key}."
+        )
+
+    def model(
+        self: Scene,
+        optics: Optics(),
+        return_wf: bool = False,
+        return_psf: bool = False,
+    ) -> Array:
+        """
+        Models the source object through the provided optics.
+
+        Parameters
+        ----------
+        optics : Optics
+            The optics through which to model the source object.
+        return_wf : bool = False
+            Should the Wavefront object be returned instead of the psf Array?
+        return_psf : bool = False
+            Should the PSF object be returned instead of the psf Array?
+
+        Returns
+        -------
+        object : Array, Wavefront, PSF
+            if `return_wf` is False and `return_psf` is False, returns the psf Array.
+            if `return_wf` is True and `return_psf` is False, returns the Wavefront
+                object.
+            if `return_wf` is False and `return_psf` is True, returns the PSF object.
+        """
+        self = self.normalise()
+
+        # Define leaf_fn and map across sources
+        leaf_fn = lambda leaf: isinstance(leaf, BaseSource)
+        output = tree_map(
+            lambda s: s.model(optics, return_wf, return_psf),
+            self.sources,
+            is_leaf=leaf_fn,
+        )
+
+        # Return wf case is simple
+        if return_wf:
+            return output
+
+        # Return psf case requires mapping across the psf outputs
+        if return_psf:
+            # Define mapping function
+            leaf_fn = lambda leaf: isinstance(leaf, PSF)
+            get_psfs = lambda psf: psf.data.sum(tuple(range(psf.ndim)))
+            get_pscales = lambda psf: psf.pixel_scale.mean()
+
+            # Get values and return PSF
+            psf = dlu.map2array(get_psfs, output, leaf_fn).sum(0)
+            pixel_scale = dlu.map2array(get_pscales, output, leaf_fn).mean()
+            return PSF(psf, pixel_scale)
+
+        # Return array is simple
+        return dlu.map2array(lambda x: x, output).sum(0)

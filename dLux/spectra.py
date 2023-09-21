@@ -15,7 +15,7 @@ class BaseSpectrum(Base):
 
 class SimpleSpectrum(BaseSpectrum):
     """
-    Abstract base class for arbitrary spectral parametrisations.
+    Base class for arbitrary spectral parametrisations.
 
     Attributes
     ----------
@@ -27,8 +27,6 @@ class SimpleSpectrum(BaseSpectrum):
 
     def __init__(self: Spectrum, wavelengths: Array):
         """
-        Constructor for the Spectrum class.
-
         Parameters
         ----------
         wavelengths : Array, metres
@@ -37,18 +35,14 @@ class SimpleSpectrum(BaseSpectrum):
         self.wavelengths = np.asarray(wavelengths, dtype=float)
         super().__init__()
 
-    @abstractmethod
-    def normalise(self: Spectrum) -> Spectrum:  # pragma: no cover
-        """
-        Abstract method to normalise the spectrum. Must be overwritten by child
-        classes.
-        """
-
 
 class Spectrum(SimpleSpectrum):
     """
-    A Spectrum class that internally parametrises the spectrum via arrays (i.e.
-    wavelengths and weights)
+    A simple spectrum class using wavelengths and weights.
+
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/Spectrum.png)
 
     Attributes
     ----------
@@ -62,15 +56,13 @@ class Spectrum(SimpleSpectrum):
 
     def __init__(self: Spectrum, wavelengths: Array, weights: Array = None):
         """
-        Constructor for the Spectrum class.
-
         Parameters
         ----------
         wavelengths : Array, metres
             The array of wavelengths at which the spectrum is defined.
         weights : Array = None
-            The relative weights of each wavelength. Defaults to uniform
-            spectrum. Weights are automatically normalised to a sum of 1.
+            The relative weights of each wavelength. Defaults to uniform. Input weights
+            are automatically normalised to a sum of 1.
         """
         super().__init__(wavelengths)
         if weights is None:
@@ -96,8 +88,8 @@ class Spectrum(SimpleSpectrum):
 
     def normalise(self: Spectrum) -> Spectrum:
         """
-        Method for returning a new spectrum object with a normalised total
-        spectrum.
+        Returns a normalised spectrum object, where the weights are normalised to a
+        sum of 1.
 
         Returns
         -------
@@ -113,11 +105,12 @@ class Spectrum(SimpleSpectrum):
 
 class PolySpectrum(SimpleSpectrum):
     """
-    Implements a generic polynomial spectrum. This is likely not needed and
-    will probably just be turned into LinearSpectrum in the future.
+    Implements a generic polynomial spectrum, such as a linear spectrum.
 
-    This implements a polynomial as follows:
-    f(x) = c0 + c1*x + c2*x^2 + ... + cn*x^n
+    This implements a polynomial as follows: f(x) = c0 + c1*x + c2*x^2 + ... + cn*x^n
+
+    ??? abstract "UML"
+        ![UML](../../assets/uml/PolySpectrum.png)
 
     Attributes
     ----------
@@ -131,8 +124,6 @@ class PolySpectrum(SimpleSpectrum):
 
     def __init__(self: Spectrum, wavelengths: Array, coefficients: Array):
         """
-        Constructor for the PolySpectrum class.
-
         Parameters
         ----------
         wavelengths : Array, metres
@@ -146,7 +137,20 @@ class PolySpectrum(SimpleSpectrum):
         if self.coefficients.ndim != 1:
             raise ValueError("Coefficients must be a 1d array.")
 
-    def _eval_weight(self, wavelength):
+    def _eval_weight(self: Spectrum, wavelength: Array) -> Array:
+        """
+        Evaluates the polynomial function at the supplied wavelength.
+
+        Parameters
+        ----------
+        wavelength : Array, metres
+            The wavelength at which to evaluate the polynomial function.
+
+        Returns
+        -------
+        weight : Array
+            The relative weight of the supplied wavelength.
+        """
         return np.array(
             [
                 self.coefficients[i] * wavelength**i
@@ -157,9 +161,9 @@ class PolySpectrum(SimpleSpectrum):
     @property
     def weights(self: Spectrum) -> Array:
         """
-        Gets the relative spectral weights by evaluating the polynomial
-        function at the internal wavelengths. This automatically normalises
-        the weights to have unitary amplitude.
+        Gets the relative spectral weights by evaluating the polynomial function at the
+        internal wavelengths. Output weights are automatically normalised to a sum of
+        1.
 
         Returns
         -------
@@ -171,8 +175,8 @@ class PolySpectrum(SimpleSpectrum):
 
     def normalise(self: Spectrum) -> Spectrum:
         """
-        Calculated weights are automatically normalised, but could be
-        calculated from the shift term (ie b in y = mx + b)
+        Calculated weights are automatically normalised, so this method simply returns
+        an unmodified object.
 
         Returns
         --------

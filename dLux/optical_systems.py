@@ -10,9 +10,9 @@ import dLux.utils as dlu
 
 __all__ = [
     "BaseOpticalSystem",
-    "AngularOptics",
-    "CartesianOptics",
-    "LayeredOptics",
+    "AngularOpticalSystem",
+    "CartesianOpticalSystem",
+    "LayeredOpticalSystem",
 ]
 
 from .layers.optical_layers import OpticalLayer
@@ -224,7 +224,7 @@ class OpticalSystem(BaseOpticalSystem):
         return source.model(self, return_wf, return_psf)
 
 
-class ParametricOptics(OpticalSystem):
+class ParametricOpticalSystem(OpticalSystem):
     """
     Implements the attributes required for an optical system with a specific output
     pixel scale and number of pixels.
@@ -271,12 +271,12 @@ class ParametricOptics(OpticalSystem):
 ##################
 # Public Classes #
 ##################
-class LayeredOptics(OpticalSystem):
+class LayeredOpticalSystem(OpticalSystem):
     """
     A flexible optical system that allows for the arbitrary chaining of OpticalLayers.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/LayeredDetector.png)
+        ![UML](../../assets/uml/LayeredOpticalSystem.png)
 
     Attributes
     ----------
@@ -293,7 +293,10 @@ class LayeredOptics(OpticalSystem):
     layers: OrderedDict
 
     def __init__(
-        self: OpticalSystem, wf_npixels: int, diameter: float, layers: list
+        self: OpticalSystem,
+        wf_npixels: int,
+        diameter: float,
+        layers: list[OpticalLayer, tuple],
     ):
         """
         Parameters
@@ -302,8 +305,10 @@ class LayeredOptics(OpticalSystem):
             The size of the initial wavefront to propagate.
         diameter : float
             The diameter of the wavefront to propagate.
-        layers : list
-            A list of `OpticalLayer` transformations to apply to wavefronts.
+        layers : list[OpticalLayer, tuple]
+            A list of `OpticalLayer` transformations to apply to wavefronts. The list
+            entries can be either `OpticalLayer` objects or tuples of (key, layer) to
+            specify a key for the layer in the layers dictionary.
         """
         self.wf_npixels = int(wf_npixels)
         self.diameter = float(diameter)
@@ -413,13 +418,13 @@ class LayeredOptics(OpticalSystem):
         return self.set("layers", dlu.remove_layer(self.layers, key))
 
 
-class AngularOptics(ParametricOptics, LayeredOptics):
+class AngularOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
     """
-    An extension to the LayeredOptics class that propagates a wavefront to an image
-    plane with `psf_pixel_scale` in units of arcseconds.
+    An extension to the LayeredOpticalSystem class that propagates a wavefront to an
+    image plane with `psf_pixel_scale` in units of arcseconds.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/AngularOptics.png)
+        ![UML](../../assets/uml/AngularOpticalSystem.png)
 
     Attributes
     ----------
@@ -442,7 +447,7 @@ class AngularOptics(ParametricOptics, LayeredOptics):
         self: OpticalSystem,
         wf_npixels: int,
         diameter: float,
-        layers: list,
+        layers: list[OpticalLayer, tuple],
         psf_npixels: int,
         psf_pixel_scale: float,
         oversample: int = 1,
@@ -454,8 +459,10 @@ class AngularOptics(ParametricOptics, LayeredOptics):
             The number of pixels representing the wavefront.
         diameter : Array, metres
             The diameter of the initial wavefront to propagate.
-        aperture : Union[Array, OpticalLayer]
-            The aperture of the system. Can be an Array or a OpticalLayer.
+        layers : list[OpticalLayer, tuple]
+            A list of `OpticalLayer` transformations to apply to wavefronts. The list
+            entries can be either `OpticalLayer` objects or tuples of (key, layer) to
+            specify a key for the layer in the layers dictionary.
         psf_npixels : int
             The number of pixels of the final PSF.
         psf_pixel_scale : float, arcseconds
@@ -511,13 +518,13 @@ class AngularOptics(ParametricOptics, LayeredOptics):
         return wf.psf
 
 
-class CartesianOptics(ParametricOptics, LayeredOptics):
+class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
     """
-    An extension to the LayeredOptics class that propagates a wavefront to an image
-    plane with `psf_pixel_scale` in units of microns.
+    An extension to the LayeredOpticalSystem class that propagates a wavefront to an
+    image plane with `psf_pixel_scale` in units of microns.
 
     ??? abstract "UML"
-        ![UML](../../assets/uml/CartesianOptics.png)
+        ![UML](../../assets/uml/CartesianOpticalSystem.png)
 
     Attributes
     ----------
@@ -542,7 +549,7 @@ class CartesianOptics(ParametricOptics, LayeredOptics):
         self: OpticalSystem,
         wf_npixels: int,
         diameter: float,
-        layers: list,
+        layers: list[OpticalLayer, tuple],
         focal_length: float,
         psf_npixels: int,
         psf_pixel_scale: float,
@@ -555,8 +562,10 @@ class CartesianOptics(ParametricOptics, LayeredOptics):
             The number of pixels representing the wavefront.
         diameter : Array, metres
             The diameter of the initial wavefront to propagate.
-        aperture : Union[Array, OpticalLayer]
-            The aperture of the system. Can be an Array or a OpticalLayer.
+        layers : list[OpticalLayer, tuple]
+            A list of `OpticalLayer` transformations to apply to wavefronts. The list
+            entries can be either `OpticalLayer` objects or tuples of (key, layer) to
+            specify a key for the layer in the layers dictionary.
         focal_length : float, metres
             The focal length of the system.
         psf_npixels : int

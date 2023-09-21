@@ -51,9 +51,9 @@ from .instruments import (
 
 from .optical_systems import (
     BaseOpticalSystem as BaseOpticalSystem,
-    AngularOptics as AngularOptics,
-    CartesianOptics as CartesianOptics,
-    LayeredOptics as LayeredOptics,
+    AngularOpticalSystem as AngularOpticalSystem,
+    CartesianOpticalSystem as CartesianOpticalSystem,
+    LayeredOpticalSystem as LayeredOpticalSystem,
 )
 
 from .sources import (

@@ -67,7 +67,7 @@ class Zernike(Base):
             raise ValueError("The Zernike index must be greater than 0.")
         self.j = int(j)
         self.name = dlu.zernike_name(j)
-        self.n, self.m = dlu.basis(j)
+        self.n, self.m = dlu.noll_indices(j)
         self._c, self._k = dlu.zernike_factors(j)
 
     def calculate(self: Zernike, coordinates: Array, nsides: int = 0) -> Array:

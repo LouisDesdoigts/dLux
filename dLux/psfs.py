@@ -11,13 +11,12 @@ __all__ = ["PSF"]
 
 class PSF(Base):
     """
-    A class representing some psf as it is transformed by the detector. It
-    tracks the psf via the `psf` attribute, and the pixel scale via the
-    `pixel_scale` attribute.
+    A simple class that holds the state of some PSF as it it transformed by detector
+    layers.
 
     Attributes
     ----------
-    psf : Array
+    data : Array
         The psf as it is transformed by the detector.
     pixel_scale : Array
         The pixel scale of the psf.
@@ -41,12 +40,11 @@ class PSF(Base):
     @property
     def npixels(self: PSF) -> int:
         """
-        Returns the side length of the arrays currently representing the
-        psf.
+        Returns the side length of the arrays currently representing the psf.
 
         Returns
         -------
-        pixels : int
+        npixels : int
             The number of pixels that represent the `PSF`.
         """
         return self.data.shape[-1]
@@ -54,14 +52,20 @@ class PSF(Base):
     @property
     def ndim(self: PSF) -> int:
         """
-        Returns the number of dimensions of the psf.
+        Returns the number of 'dimensions' of the psf. This is used to track the
+        vectorised version of the psf returned from vmapping.
+
+        Returns
+        -------
+        ndim : int
+            The 'dimensionality' of dimensions of the psf.
         """
         return self.pixel_scale.ndim
 
     def downsample(self: PSF, n: int) -> PSF:
         """
-        Downsamples the psf by a factor of n. This is done by summing the
-        psf pixels in n x n blocks.
+        Downsamples the psf by a factor of n. This is done by summing the psf pixels in
+        n x n blocks.
 
         Parameters
         ----------
@@ -78,8 +82,7 @@ class PSF(Base):
 
     def convolve(self: PSF, other: Array) -> PSF:
         """
-        Convolves the psf with another psf. This is done using the
-        `jax.scipy.signal.convolve` function.
+        Convolves the psf with some input array.
 
         Parameters
         ----------
@@ -95,14 +98,13 @@ class PSF(Base):
 
     def rotate(self: PSF, angle: float, order: int = 1) -> PSF:
         """
-        Rotates the psf by a given angle. This is done using interpolation
-        methods.
+        Rotates the psf by a given angle via interpolation.
 
         Parameters
         ----------
         angle : float
             The angle by which to rotate the psf.
-        order : int
+        order : int = 1
             The order of the interpolation method to use.
 
         Returns
@@ -114,8 +116,7 @@ class PSF(Base):
 
     def resize(self: PSF, npixels: int) -> PSF:
         """
-        Resizes the psf to a given size. This is done using interpolation
-        methods.
+        Resizes the psf via a zero-padding or cropping operation.
 
         Parameters
         ----------
@@ -131,7 +132,8 @@ class PSF(Base):
 
     def flip(self: PSF, axis: tuple) -> PSF:
         """
-        Flips the psf along the specified axes.
+        Flips the psf along the specified axes. Note we use 'ij' indexing, so axis 0 is
+        the y-axis and axis 1 is the x-axis.
 
         Parameters
         ----------
@@ -164,8 +166,8 @@ class PSF(Base):
 
     def __imul__(self: PSF, other: Array) -> PSF:
         """
-        Magic method for the inplace multiplication operator. This allows for
-        the inplace multiplication of the psf by a scalar or another psf.
+        Magic method for the inplace multiplication operator. This allows for the
+        inplace multiplication of the psf by a scalar or another psf.
 
         Parameters
         ----------
@@ -181,8 +183,8 @@ class PSF(Base):
 
     def __add__(self: PSF, other: Array) -> PSF:
         """
-        Magic method for the addition operator. This allows for the addition of
-        the psf by a scalar or another psf.
+        Magic method for the addition operator. This allows for the addition of the psf
+        by a scalar or another psf.
 
         Parameters
         ----------
@@ -198,8 +200,8 @@ class PSF(Base):
 
     def __iadd__(self: PSF, other: Array) -> PSF:
         """
-        Magic method for the inplace addition operator. This allows for the
-        inplace addition of the psf by a scalar or another psf.
+        Magic method for the inplace addition operator. This allows for the inplace
+        addition of the psf by a scalar or another psf.
 
         Parameters
         ----------
@@ -215,8 +217,8 @@ class PSF(Base):
 
     def __sub__(self: PSF, other: Array) -> PSF:
         """
-        Magic method for the subtraction operator. This allows for the
-        subtraction of the psf by a scalar or another psf.
+        Magic method for the subtraction operator. This allows for the subtraction of
+        the psf by a scalar or another psf.
 
         Parameters
         ----------
@@ -232,8 +234,8 @@ class PSF(Base):
 
     def __isub__(self: PSF, other: Array) -> PSF:
         """
-        Magic method for the inplace subtraction operator. This allows for the
-        inplace subtraction of the psf by a scalar or another psf.
+        Magic method for the inplace subtraction operator. This allows for the inplace
+        subtraction of the psf by a scalar or another psf.
 
         Parameters
         ----------
@@ -249,8 +251,8 @@ class PSF(Base):
 
     def __truediv__(self: PSF, other: Array) -> PSF:
         """
-        Magic method for the division operator. This allows for the division of
-        the psf by a scalar or another psf.
+        Magic method for the division operator. This allows for the division of the psf
+        by a scalar or another psf.
 
         Parameters
         ----------
@@ -266,8 +268,8 @@ class PSF(Base):
 
     def __itruediv__(self: PSF, other: Array) -> PSF:
         """
-        Magic method for the inplace division operator. This allows for the
-        inplace division of the psf by a scalar or another psf.
+        Magic method for the inplace division operator. This allows for the inplace
+        division of the psf by a scalar or another psf.
 
         Parameters
         ----------

@@ -1024,7 +1024,7 @@ class CompositeAperture(BaseDynamicAperture):
         eval_fn = lambda basis, coeff: dlu.eval_basis(basis, coeff)
         return np.array(tree_map(eval_fn, basii, coeffs))
 
-    def transmission(
+    def transmissions(
         self: ApertureLayer, coords: Array, pixel_scale: float
     ) -> Array:
         """

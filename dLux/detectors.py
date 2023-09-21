@@ -34,12 +34,14 @@ class LayeredDetector(BaseDetector):
 
     layers: OrderedDict
 
-    def __init__(self: LayeredDetector, layers: list):
+    def __init__(self: LayeredDetector, layers: list[DetectorLayer, tuple]):
         """
         Parameters
         ----------
-        layers : list
-            A list of DetectorLayer objects to apply to the input psf.
+        layers : list[DetectorLayer, tuple]
+            A list of DetectorLayer objects to apply to the input psf. List entries
+            can be tuples of (key, layer) to specify a key, else the key is taken as
+            the class name of the layer.
         """
         self.layers = dlu.list2dictionary(layers, True, DetectorLayer)
         super().__init__()

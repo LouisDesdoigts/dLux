@@ -223,9 +223,7 @@ class AddConstant(DetectorLayer):
             The value to add to the psf.
         """
         super().__init__()
-        self.value = np.asarray(value, dtype=float)
-        if self.value.ndim != 0:
-            raise ValueError("value must be a scalar array.")
+        self.value = float(value)
 
     def apply(self: DetectorLayer, psf: PSF) -> PSF:
         """

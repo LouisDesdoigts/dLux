@@ -358,7 +358,6 @@ def polike_fast(
     """
     if nsides < 3:
         raise ValueError(f"nsides must be >= 3, not {nsides}.")
-    # theta =
     alpha = np.pi / nsides
     phi = dlu.cart2polar(coordinates)[1] + alpha
     wedge = np.floor((phi + alpha) / (2.0 * alpha))
