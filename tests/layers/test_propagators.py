@@ -30,11 +30,6 @@ def pixel_scale():
 
 
 @pytest.fixture
-def oversample():
-    return 2
-
-
-@pytest.fixture
 def shift():
     return np.ones(2)
 
@@ -59,27 +54,21 @@ def test_fft(focal_length, pad):
 
 
 @pytest.mark.parametrize("focal_length", [None, 1e2])
-def test_mft(focal_length, npixels, pixel_scale, oversample):
-    _test_apply(MFT(npixels, pixel_scale, oversample, focal_length))
+def test_mft(focal_length, npixels, pixel_scale):
+    _test_apply(MFT(npixels, pixel_scale, focal_length))
 
 
 @pytest.mark.parametrize("focal_length", [None, 1e2])
 @pytest.mark.parametrize("pixel", [True, False])
-def test_shifted_mft(
-    focal_length, npixels, pixel_scale, oversample, shift, pixel
-):
-    _test_apply(
-        ShiftedMFT(
-            npixels, pixel_scale, shift, oversample, focal_length, pixel
-        )
-    )
+def test_shifted_mft(focal_length, npixels, pixel_scale, shift, pixel):
+    _test_apply(ShiftedMFT(npixels, pixel_scale, shift, focal_length, pixel))
     with pytest.raises(ValueError):
-        ShiftedMFT(npixels, pixel_scale, [1.0], oversample, focal_length, True)
+        ShiftedMFT(npixels, pixel_scale, [1.0], focal_length, True)
 
 
 @pytest.mark.parametrize("pixel", [True, False])
 def test_far_field_fresnel(
-    npixels, pixel_scale, focal_length, focal_shift, oversample, shift, pixel
+    npixels, pixel_scale, focal_length, focal_shift, shift, pixel
 ):
     _test_apply(
         FarFieldFresnel(
@@ -87,7 +76,6 @@ def test_far_field_fresnel(
             pixel_scale,
             focal_length,
             focal_shift,
-            oversample,
             shift,
             pixel,
         )

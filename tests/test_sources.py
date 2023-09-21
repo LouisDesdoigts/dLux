@@ -10,7 +10,7 @@ from dLux import (
     ResolvedSource,
     PointResolvedSource,
     Spectrum,
-    LayeredOptics,
+    LayeredOpticalSystem,
     Wavefront,
     Optic,
     PSF,
@@ -18,7 +18,7 @@ from dLux import (
 
 
 def _test_model(source):
-    optics = LayeredOptics(16, 1.0, [Optic()])
+    optics = LayeredOpticalSystem(16, 1.0, [Optic()])
     assert isinstance(source.model(optics), np.ndarray)
     assert isinstance(source.model(optics, return_wf=True), Wavefront)
     assert isinstance(source.model(optics, return_psf=True), PSF)
@@ -80,7 +80,7 @@ def test_point_resolved_source(wavelengths, spectrum):
 def test_scene():
     scene = Scene(("source", PointSource([1e-6])))
     scene = Scene([PointSource([1e-6]), PointSource([1e-6])])
-    optics = LayeredOptics(16, 1.0, [Optic()])
+    optics = LayeredOpticalSystem(16, 1.0, [Optic()])
 
     # In this case we have an output dictionary of each source
     assert isinstance(scene.model(optics), np.ndarray)

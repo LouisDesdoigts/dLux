@@ -3,9 +3,9 @@ from jax import numpy as np, config
 config.update("jax_debug_nans", True)
 import pytest
 from dLux import (
-    LayeredOptics,
-    AngularOptics,
-    CartesianOptics,
+    LayeredOpticalSystem,
+    AngularOpticalSystem,
+    CartesianOpticalSystem,
     PointSource,
     Wavefront,
     PSF,
@@ -57,7 +57,7 @@ def _test_propagate_mono(optics):
 
 
 def test_layered_optics(wf_npixels, diameter, layers):
-    optics = LayeredOptics(wf_npixels, diameter, layers)
+    optics = LayeredOpticalSystem(wf_npixels, diameter, layers)
     _test_model(optics)
     _test_propagate(optics)
     _test_propagate_mono(optics)
@@ -96,7 +96,7 @@ def focal_length():
 def test_angular_optics(
     wf_npixels, diameter, layers, psf_npixels, psf_pixel_scale, oversample
 ):
-    optics = AngularOptics(
+    optics = AngularOpticalSystem(
         wf_npixels, diameter, layers, psf_npixels, psf_pixel_scale, oversample
     )
     _test_model(optics)
@@ -113,7 +113,7 @@ def test_cartesian_optics(
     psf_pixel_scale,
     oversample,
 ):
-    optics = CartesianOptics(
+    optics = CartesianOpticalSystem(
         wf_npixels,
         diameter,
         layers,

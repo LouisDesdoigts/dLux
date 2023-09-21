@@ -5,7 +5,7 @@ import pytest
 from dLux import (
     Telescope,
     Dither,
-    LayeredOptics,
+    LayeredOpticalSystem,
     LayeredDetector,
     PointSource,
     PSF,
@@ -16,7 +16,7 @@ from dLux import (
 
 @pytest.fixture
 def optics():
-    return LayeredOptics(16, 1.0, [Optic()])
+    return LayeredOpticalSystem(16, 1.0, [Optic()])
 
 
 @pytest.fixture
