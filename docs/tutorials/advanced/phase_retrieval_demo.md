@@ -28,7 +28,7 @@ from tqdm.notebook import tqdm
 plt.rcParams['image.cmap'] = 'inferno'
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["image.origin"] = 'lower'
-plt.rcParams['figure.dpi'] = 120
+plt.rcParams['figure.dpi'] = 72
 ```
 
 We want to construct a basic optical system with a $2.4\, \text{m}$ aperture, along with some Zernike aberrations and a bar mask.
@@ -140,8 +140,8 @@ print("Initial Loss: {}".format(loss))
 ```
 
     Initial Loss: 157710.6875
-    CPU times: user 256 ms, sys: 15.9 ms, total: 272 ms
-    Wall time: 206 ms
+    CPU times: user 270 ms, sys: 19.2 ms, total: 289 ms
+    Wall time: 218 ms
 
 
 Now, we begin the optimisation loop using `optax` with a low learning rate.

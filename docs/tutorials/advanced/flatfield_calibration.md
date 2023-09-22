@@ -34,7 +34,7 @@ from tqdm.notebook import tqdm
 plt.rcParams['image.cmap'] = 'inferno'
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["image.origin"] = 'lower'
-plt.rcParams['figure.dpi'] = 120
+plt.rcParams['figure.dpi'] = 72
 ```
 
 Now we need to construct our model. There are three components that we need:
@@ -213,8 +213,8 @@ print("Initial Loss: {}".format(int(loss)))
 ```
 
     Initial Loss: 1296900864
-    CPU times: user 3.7 s, sys: 133 ms, total: 3.84 s
-    Wall time: 897 ms
+    CPU times: user 3.69 s, sys: 103 ms, total: 3.79 s
+    Wall time: 823 ms
 
 
 Run gradient descent:

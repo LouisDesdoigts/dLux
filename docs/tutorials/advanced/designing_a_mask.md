@@ -28,7 +28,7 @@ from tqdm.notebook import tqdm
 plt.rcParams['image.cmap'] = 'inferno'
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["image.origin"] = 'lower'
-plt.rcParams['figure.dpi'] = 120
+plt.rcParams['figure.dpi'] = 72
 ```
 
 We will first generate an orthonormal basis for the pupil phases, then threshold this to {0, 1} while preserving soft-edges using the Continuous Latent-Image Mask Binarization (CLIMB) algorithm from the Wong et al. paper.
@@ -114,8 +114,8 @@ Visualising the pretty basis vectors:
 
 
 ```python
-nfigs = 60
-ncols = 10
+nfigs = 25
+ncols = 5
 nrows = 1 + nfigs//ncols
 
 plt.figure(figsize=(4*ncols, 4*nrows))
@@ -232,8 +232,8 @@ print("Initial Loss: {}".format(loss))
 ```
 
     Initial Loss: -35.9885139465332
-    CPU times: user 3.57 s, sys: 128 ms, total: 3.7 s
-    Wall time: 2.97 s
+    CPU times: user 3.79 s, sys: 126 ms, total: 3.92 s
+    Wall time: 3.88 s
 
 
 Gradient descent time!

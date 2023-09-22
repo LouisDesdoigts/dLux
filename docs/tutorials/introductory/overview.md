@@ -1,4 +1,4 @@
-# A Basic overview BLAH BLAH
+# A Basic overview
 
 This tutorial is designed to give users a basic introduction to the core parts of dLux. We will cover how to create an optical system and its psf, how to work with dLux objects, and show a basic optimisation workflow.
 
@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['image.cmap'] = 'inferno'
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["image.origin"] = 'lower'
-plt.rcParams['figure.dpi'] = 120
+plt.rcParams['figure.dpi'] = 72
 
 ```
 
@@ -317,11 +317,11 @@ print(f"Jit time: {time_jit.average*1e3:.5} ms")
 print(f"Improvement: {time_regular.average/time_jit.average:.3}x faster")
 ```
 
-    123 ms ± 2.97 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
-    81.4 ms ± 972 µs per loop (mean ± std. dev. of 7 runs, 1 loop each)
-    Regular time: 122.53 ms
-    Jit time: 81.403 ms
-    Improvement: 1.51x faster
+    113 ms ± 2.49 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+    79.8 ms ± 1.33 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    Regular time: 112.59 ms
+    Jit time: 79.843 ms
+    Improvement: 1.41x faster
 
 
 Excellent, now that we have our compile loss function, lets optimise our model!
@@ -409,11 +409,9 @@ axes["F"].imshow(found_opd)
 axes["F"].set_title("Recovered Aberrations")
 
 fig.tight_layout()
-# fig.savefig("assets")
-# plt.show()
 ```
 
-    /var/folders/28/6s47s91d14ldjdrljs4d1hxw0000gn/T/ipykernel_15625/3478373043.py:48: UserWarning: The figure layout has changed to tight
+    /var/folders/28/6s47s91d14ldjdrljs4d1hxw0000gn/T/ipykernel_39605/3478373043.py:48: UserWarning: The figure layout has changed to tight
       fig.tight_layout()
 
 

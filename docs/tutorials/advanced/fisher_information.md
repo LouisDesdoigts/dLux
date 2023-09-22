@@ -39,7 +39,7 @@ plt.rcParams['image.cmap'] = 'inferno'
 plt.rcParams["text.usetex"] = 'true'
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["image.origin"] = 'lower'
-plt.rcParams['figure.dpi'] = 120
+plt.rcParams['figure.dpi'] = 72
 ```
 
 Using models from the `dLuxToliman` package, we need to construct the components of our model:
@@ -124,8 +124,8 @@ print("Initial Loss: {}".format(loss))
 ```
 
     Initial Loss: -196.04754638671875
-    CPU times: user 14.5 s, sys: 497 ms, total: 15 s
-    Wall time: 9.53 s
+    CPU times: user 14.7 s, sys: 506 ms, total: 15.2 s
+    Wall time: 9.75 s
 
 
 Now run gradient descent!
@@ -206,8 +206,8 @@ covs = [zdx.self_covariance_matrix(model, marginal_params, zdx.bayes.poiss_logli
         shape_dict=shape_dict) for model in [models_out[0], models_out[-1]]]
 ```
 
-    CPU times: user 10.9 s, sys: 681 ms, total: 11.6 s
-    Wall time: 5.88 s
+    CPU times: user 11.1 s, sys: 716 ms, total: 11.8 s
+    Wall time: 6.03 s
 
 
 And using [ChainConsumer](https://samreay.github.io/ChainConsumer/) we can easily visualise this covariance:

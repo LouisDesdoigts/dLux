@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['image.cmap'] = 'inferno'
 plt.rcParams["font.family"] = 'serif'
 plt.rcParams["image.origin"] = 'lower'
-plt.rcParams['figure.dpi'] = 120
+plt.rcParams['figure.dpi'] = 72
 ```
 
 Let's construct the source and optics. In this case, we will use the `AlphaCen` source from the [`dLuxToliman`](https://github.com/maxecharles/dLuxToliman) package as it gives separation in arcseconds and flux in log units. This will make our NumPyro sampling functions simpler.
@@ -179,8 +179,8 @@ sampler = npy.infer.MCMC(
       0%|          | 0/4000 [00:00<?, ?it/s]
 
 
-    CPU times: user 4min 23s, sys: 23.9 s, total: 4min 47s
-    Wall time: 54 s
+    CPU times: user 4min 23s, sys: 23.5 s, total: 4min 47s
+    Wall time: 53.5 s
 
 
 Let's examine the summary. Note: here we want to make sure that all the `r_hat` values are $\sim1$.
