@@ -114,8 +114,8 @@ Visualising the pretty basis vectors:
 
 
 ```python
-nfigs = 25
-ncols = 5
+nfigs = 24
+ncols = 8
 nrows = 1 + nfigs//ncols
 
 plt.figure(figsize=(4*ncols, 4*nrows))
@@ -232,8 +232,8 @@ print("Initial Loss: {}".format(loss))
 ```
 
     Initial Loss: -35.9885139465332
-    CPU times: user 3.79 s, sys: 126 ms, total: 3.92 s
-    Wall time: 3.88 s
+    CPU times: user 3.7 s, sys: 104 ms, total: 3.81 s
+    Wall time: 2.84 s
 
 
 Gradient descent time!
