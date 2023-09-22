@@ -4,14 +4,14 @@ This module contains a number of common equations used in optics, such as conver
 
 ---
 
-!!! info "wavenumber"
+???+ info "wavenumber"
     ::: dLux.utils.optics.wavenumber
 
-!!! info "opd2phase"
+???+ info "opd2phase"
     ::: dLux.utils.optics.opd2phase
 
-!!! info "phase2opd"
+???+ info "phase2opd"
     ::: dLux.utils.optics.phase2opd
 
-!!! info "fringe_size"
+???+ info "fringe_size"
     ::: dLux.utils.optics.fringe_size

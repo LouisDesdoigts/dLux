@@ -2,8 +2,8 @@
 
 This module contains basic paraxial interpolation functions.
 
-!!! info "scale"
+???+ info "scale"
     ::: dLux.utils.interpolation.scale
 
-!!! info "rotate"
+???+ info "rotate"
     ::: dLux.utils.interpolation.rotate
