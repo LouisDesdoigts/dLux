@@ -77,7 +77,7 @@ nav:
     - Tutorials:
         - Introductory:
             # - Usage:                    tutorials/introductory/usage.md
-            - A Basic Overview:  tutorials/introductory/simple_optical_system.ipynb
+            - A Basic Overview:  tutorials/introductory/overview.md
             # - A Basic Overview:  docs/tutorials/introductory/simple_optical_system.html
             # - Using the Source objects
             # - Autodiff and XLA acceleration
@@ -91,11 +91,11 @@ nav:
             # - Inference in dLux
         
         - Advanced:
-            - Phase Retrieval:          tutorials/advanced/phase_retrieval_demo.ipynb
-            - Phase Mask Design:        tutorials/advanced/designing_a_mask.ipynb
-            - Pixel Level Calibration:  tutorials/advanced/flatfield_calibration.ipynb
-            - Fisher Information:       tutorials/advanced/fisher_information.ipynb
-            - Parameter Inference:      tutorials/advanced/HMC.ipynb
+            - Phase Retrieval:          tutorials/advanced/phase_retrieval_demo.md
+            - Phase Mask Design:        tutorials/advanced/designing_a_mask.md
+            - Pixel Level Calibration:  tutorials/advanced/flatfield_calibration.md
+            - Fisher Information:       tutorials/advanced/fisher_information.md
+            - Parameter Inference:      tutorials/advanced/HMC.md
 
     - API:
     
