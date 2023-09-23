@@ -76,26 +76,31 @@ nav:
 
     - Tutorials:
         - Introductory:
-            # - Usage:                    tutorials/introductory/usage.md
-            - A Basic Overview:  tutorials/introductory/overview.md
-            # - A Basic Overview:  docs/tutorials/introductory/simple_optical_system.html
-            # - Using the Source objects
-            # - Autodiff and XLA acceleration
-            # - Building an Aperture (static and dynamic)
-            # - Detector classes and PSFs
-            # - Building an complex instrument (with a coronagraph)
-            # - Using the Wavefront class independently
-            # - PSF Modelling with the utils module
+            - A Basic Overview:         tutorials/introductory/overview.md
+            - Optical Systems:          tutorials/introductory/optical_systems.md
+            # - Source objects overview:
+            # - Detectors object overview:
+            # - Building Telescope:
+            # - Building a coronagraph:
+            # - The Wavefront and PSF classes:
+            # - functional psf modelling with the Utils module:
 
-            # - Optimisation in dLux
-            # - Inference in dLux
-        
-        - Advanced:
-            - Phase Retrieval:          tutorials/advanced/phase_retrieval_demo.md
-            - Phase Mask Design:        tutorials/advanced/designing_a_mask.md
-            - Pixel Level Calibration:  tutorials/advanced/flatfield_calibration.md
-            - Fisher Information:       tutorials/advanced/fisher_information.md
-            - Parameter Inference:      tutorials/advanced/HMC.md
+              
+        - How-To's:
+            - Working with dLux objects: tutorials/howtos/dLux_objects.md
+            # - Building an Custom Apertures (static and dynamic):
+            # - Optimisation with dLux (Optimising many parameters, rbitrary loss functions):
+            # - Estimating Uncertainties (Fisher Information):
+            # - Sampling Posteriors (HMC):
+            # - Building your own classes (optical system, source): 
+
+            
+        - Examples:
+            - Phase Retrieval:          tutorials/examples/phase_retrieval_demo.md
+            - Phase Mask Design:        tutorials/examples/designing_a_mask.md
+            - Pixel Level Calibration:  tutorials/examples/flatfield_calibration.md
+            - Fisher Information:       tutorials/examples/fisher_information.md
+            - Parameter Inference:      tutorials/examples/HMC.md
 
     - API:
     

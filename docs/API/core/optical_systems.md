@@ -1,5 +1,8 @@
 # Optical Systems
 
+???+ info "OpticalSystem"
+    ::: dLux.optical_systems.OpticalSystem
+
 ???+ info "AngularOpticalSystem"
     ::: dLux.optical_systems.AngularOpticalSystem
 

@@ -1,13 +1,16 @@
 # Optical Layers
 
-???+ info "MFT"
-    ::: dLux.layers.propagators.MFT
+???+ info "TransmissiveLayer"
+    ::: dLux.layers.optical_layers.TransmissiveLayer
 
-???+ info "FFT"
-    ::: dLux.layers.propagators.FFT
+???+ info "AberratedLayer"
+    ::: dLux.layers.optical_layers.AberratedLayer
 
-???+ info "ShiftedMFT"
-    ::: dLux.layers.propagators.ShiftedMFT
+???+ info "BasisLayer"
+    ::: dLux.layers.optical_layers.BasisLayer
 
-???+ info "FarFieldFresnel"
-    ::: dLux.layers.propagators.FarFieldFresnel
+???+ info "Tilt"
+    ::: dLux.layers.optical_layers.Tilt
+
+???+ info "Normalise"
+    ::: dLux.layers.optical_layers.Normalise

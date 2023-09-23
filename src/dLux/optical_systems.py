@@ -534,6 +534,8 @@ class CartesianOpticalSystem(ParametricOpticalSystem, LayeredOpticalSystem):
         The diameter of the initial wavefront to propagate.
     layers : OrderedDict
         A series of `OpticalLayer` transformations to apply to wavefronts.
+    focal_length : float, metres
+        The focal length of the system.
     psf_npixels : int
         The number of pixels of the final PSF.
     psf_pixel_scale : float, microns
