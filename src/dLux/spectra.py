@@ -61,7 +61,7 @@ class Spectrum(SimpleSpectrum):
         wavelengths : Array, metres
             The array of wavelengths at which the spectrum is defined.
         weights : Array = None
-            The relative weights of each wavelength. Defaults to uniform. Input weights
+            The relative weights of each wavelength. Input weights
             are automatically normalised to a sum of 1.
         """
         super().__init__(wavelengths)

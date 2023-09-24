@@ -78,8 +78,8 @@ nav:
         - Introductory:
             - A Basic Overview:         tutorials/introductory/overview.md
             - Optical Systems:          tutorials/introductory/optical_systems.md
-            # - Source objects overview:
-            # - Detectors object overview:
+            - Sources & Spectra:        tutorials/introductory/sources.md
+            # - Detectors:
             # - Building Telescope:
             # - Building a coronagraph:
             # - The Wavefront and PSF classes:

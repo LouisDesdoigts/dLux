@@ -470,7 +470,7 @@ class BinarySource(Source):
         wavelengths: Array = None,
         position: Array = np.zeros(2),
         mean_flux: float = 1.0,
-        separation: float = None,
+        separation: float = 0.0,
         position_angle: float = np.pi / 2,
         contrast: float = 1.0,
         spectrum: Spectrum() = None,
@@ -485,7 +485,7 @@ class BinarySource(Source):
             The (x, y) on-sky position of this object.
         mean_flux : float, photons = 1.
             The mean flux of the sources.
-        separation : float, radians = None
+        separation : float, radians = 0.
             The separation of the two sources in radians.
         position_angle : float, radians = np.pi / 2
             The position angle between the two sources measured clockwise from the
@@ -708,8 +708,10 @@ class PointResolvedSource(ResolvedSource):
             return combined_wf.multiply("amplitude", weights[:, :, None, None])
 
         # Create singe array psf object
-        conv_psf = convolve(wf.psf.sum(0), self.distribution, mode="same")
-        psf = conv_psf + wf.psf.sum(0)
+        point_psf = (np.expand_dims(weights[0], (1, 2)) * wf.psf).sum(0)
+        resolved_psf = (np.expand_dims(weights[1], (1, 2)) * wf.psf).sum(0)
+        conv_psf = convolve(resolved_psf, self.distribution, mode="same")
+        psf = point_psf + conv_psf
         if return_psf:
             return PSF(psf, wf.pixel_scale.mean())
 

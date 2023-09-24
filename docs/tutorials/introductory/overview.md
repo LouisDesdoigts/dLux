@@ -196,7 +196,7 @@ plt.show()
 
 ## Working with dLux objects
 
-`dLux` is build within `Zodiax`, which gives all classes a simple path-based way to interact with out objects. We will use this to set update the aberrations in our optical system, and then recover the values from the previous example!
+`dLux` is build within `Zodiax`, which gives all classes a simple path-based way to interact with our objects. We will use this to set update the aberrations in our optical system, and then recover the values from the previous example!
 
 There are two ways we can do this, either by setting the `aberrations.coefficients` values to a new array, or multiplying the current value by zero. We will show how to do both of these.
 

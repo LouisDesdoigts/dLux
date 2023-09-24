@@ -19,7 +19,6 @@ plt.rcParams['image.cmap'] = 'inferno'
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["image.origin"] = 'lower'
 plt.rcParams['figure.dpi'] = 72
-
 ```
 
 ## Overview
