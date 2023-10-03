@@ -64,6 +64,10 @@ def test_circular_aperture(
     _test_extent(ap)
     _test_nsides(ap)
 
+    # Small hack here to test softening parameter
+    with pytest.raises(ValueError):
+        CircularAperture(rmax, softening=-1)
+
 
 @pytest.mark.parametrize("occulting", [True, False])
 @pytest.mark.parametrize("normalise", [True, False])

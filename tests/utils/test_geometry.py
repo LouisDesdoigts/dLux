@@ -67,10 +67,7 @@ def angles():
     return [0, 60, 120, 180, 240, 300]
 
 
-@pytest.mark.parametrize(
-    "oversample",
-    [1, 2],
-)
+@pytest.mark.parametrize("oversample", [1, 2])
 def test_combine(oversample):
     n = 6
     arrays = [np.ones((n, n)) for _ in range(3)]
@@ -78,46 +75,31 @@ def test_combine(oversample):
     assert result.shape == (n // oversample, n // oversample)
 
 
-@pytest.mark.parametrize(
-    "invert",
-    [True, False],
-)
+@pytest.mark.parametrize("invert", [True, False])
 def test_soften(distances, clip_dist, invert):
     result = soften(distances, clip_dist, invert)
     assert result.shape == distances.shape
 
 
-@pytest.mark.parametrize(
-    "invert",
-    [True, False],
-)
+@pytest.mark.parametrize("invert", [True, False])
 def test_circle(coords, radius, invert):
     result = circle(coords, radius, invert)
     assert result.shape == (10, 10)
 
 
-@pytest.mark.parametrize(
-    "invert",
-    [True, False],
-)
+@pytest.mark.parametrize("invert", [True, False])
 def test_square(coords, width, invert):
     result = square(coords, width, invert)
     assert result.shape == (10, 10)
 
 
-@pytest.mark.parametrize(
-    "invert",
-    [True, False],
-)
+@pytest.mark.parametrize("invert", [True, False])
 def test_rectangle(coords, width, height, invert):
     result = rectangle(coords, width, height, invert)
     assert result.shape == (10, 10)
 
 
-@pytest.mark.parametrize(
-    "invert",
-    [True, False],
-)
+@pytest.mark.parametrize("invert", [True, False])
 def test_reg_polygon(coords, radius, nsides, invert):
     result = reg_polygon(coords, radius, nsides, invert)
     assert result.shape == (10, 10)
@@ -154,7 +136,7 @@ def test_soft_spider(coords, width, angles, clip_dist):
 
 
 def test_circ_distance(coords, radius):
-    result = circle(coords, radius)
+    result = circle(coords, 2 * radius)
     distances = utils.cart2polar(coords)[0] - radius
     assert np.allclose(result, distances < 0)
 
