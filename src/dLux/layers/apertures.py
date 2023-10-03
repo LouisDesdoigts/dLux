@@ -871,7 +871,7 @@ class AberratedAperture(BasisLayer, ApertureLayer):
             wavefront.coordinates, wavefront.pixel_scale
         )
         if self.normalise:
-            return wavefront.normalise()
+            wavefront = wavefront.normalise()
 
         # Transform coordinate
         if self.aperture.transformation is not None:

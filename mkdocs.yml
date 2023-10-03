@@ -88,8 +88,8 @@ nav:
               
         - How-To's:
             - Working with dLux objects: tutorials/howtos/dLux_objects.md
-            # - Building an Custom Apertures (static and dynamic):
-            # - Optimisation with dLux (Optimising many parameters, rbitrary loss functions):
+            - Building Apertures:        tutorials/howtos/custom_apertures.md
+            # - Optimisation with dLux (Optimising many parameters, arbitrary loss functions):
             # - Estimating Uncertainties (Fisher Information):
             # - Sampling Posteriors (HMC):
             # - Building your own classes (optical system, source): 

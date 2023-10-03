@@ -49,8 +49,6 @@ true_coeffs = 1e-9 * jr.normal(jr.PRNGKey(0), zernike_indexes.shape)
 coords = dlu.pixel_coords(wf_npix, diameter)
 basis = np.array([dlu.zernike(i, coords, diameter) for i in zernike_indexes])
 
-# aperture = dl.ApertureFactory(wf_npix, radial_orders=radial_terms, coefficients=true_coeffs)
-
 layers = [('aperture', dl.layers.BasisOptic(basis, transmission, true_coeffs, normalise=True))]
 
 # Psf properties

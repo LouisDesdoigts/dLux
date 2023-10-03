@@ -140,8 +140,8 @@ print("Initial Loss: {}".format(loss))
 ```
 
     Initial Loss: 157710.6875
-    CPU times: user 270 ms, sys: 19.2 ms, total: 289 ms
-    Wall time: 218 ms
+    CPU times: user 257 ms, sys: 18.3 ms, total: 275 ms
+    Wall time: 203 ms
 
 
 Now, we begin the optimisation loop using `optax` with a low learning rate.
@@ -225,8 +225,3 @@ plt.show()
 ![png](phase_retrieval_demo_files/phase_retrieval_demo_15_0.png)
     
 
-
-
-```python
-
-```

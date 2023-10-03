@@ -66,7 +66,6 @@ true_positions = dlu.arcsec2rad(jr.uniform(jr.PRNGKey(0), (Nstars, 2), minval=-2
 true_fluxes = 1e8 + 1e7*jr.normal(jr.PRNGKey(1), (Nstars,))
 wavels = 1e-9 * np.linspace(545, 645, 3)
 source = dl.PointSources(wavels, true_positions, true_fluxes)
-# source = dl.PointSource(wavelengths=wavels)
 ```
 
 Now we need to introduce the dithers. We can utilise the built-in `Dither` observation class:
@@ -75,15 +74,9 @@ Now we need to introduce the dithers. We can utilise the built-in `Dither` obser
 ```python
 # Observation strategy, define dithers
 det_pixsize = dlu.arcsec2rad(optics.psf_pixel_scale / optics.oversample)
-# det_pixsize = dlu.arcsec2rad(optics.psf_pixel_scale)
 dithers = det_pixsize * np.array([[0, 0], [+1, +1], [+1, -1], [-1, +1], [-1, -1]]) / 5
-# observation = dl.Dither(dithers)
-```
 
-
-```python
 # Combine into instrument and observe!
-# tel = dl.Instrument(optics, source, detector)
 tel = dl.Dither(dithers, optics, source, detector)
 psfs = tel.model()
 ```
@@ -93,17 +86,21 @@ psfs = tel.model()
 # Apply some noise to the PSF Background noise
 data = jr.poisson(jr.PRNGKey(0), psfs)
 
-plt.figure(figsize=(25, 4))
+plt.figure(figsize=(26, 4))
 for i in range(len(psfs)):
     plt.subplot(1, 5, i+1)
-    plt.imshow(data[i])
-    plt.colorbar()
+    plt.title(f"Image: {i+1}")
+    plt.imshow(data[i] * 1e-3)
+    plt.xlabel("x (arcsec)")
+    plt.ylabel("y (arcsec)")
+    plt.colorbar(label='Photons $x10^3$')
+plt.tight_layout()
 plt.show()
 ```
 
 
     
-![png](flatfield_calibration_files/flatfield_calibration_7_0.png)
+![png](flatfield_calibration_files/flatfield_calibration_6_0.png)
     
 
 
@@ -158,14 +155,18 @@ We can see the residuals are not optimal:
 plt.figure(figsize=(25, 4))
 for i in range(len(psfs)):
     plt.subplot(1, 5, i+1)
-    plt.imshow(psfs[i] - data[i])
-    plt.colorbar()
+    plt.title(f"Residual: {i+1}")
+    plt.imshow((psfs[i] - data[i])*1e-3)
+    plt.xlabel("x (arcsec)")
+    plt.ylabel("y (arcsec)")
+    plt.colorbar(label='Photons $x10^3$')
+plt.tight_layout()
 plt.show()
 ```
 
 
     
-![png](flatfield_calibration_files/flatfield_calibration_13_0.png)
+![png](flatfield_calibration_files/flatfield_calibration_12_0.png)
     
 
 
@@ -213,8 +214,8 @@ print("Initial Loss: {}".format(int(loss)))
 ```
 
     Initial Loss: 1296900864
-    CPU times: user 3.69 s, sys: 103 ms, total: 3.79 s
-    Wall time: 823 ms
+    CPU times: user 3.69 s, sys: 125 ms, total: 3.81 s
+    Wall time: 867 ms
 
 
 Run gradient descent:
@@ -300,7 +301,7 @@ plt.show()
 
 
     
-![png](flatfield_calibration_files/flatfield_calibration_26_0.png)
+![png](flatfield_calibration_files/flatfield_calibration_25_0.png)
     
 
 
@@ -362,7 +363,7 @@ plt.show()
 
 
     
-![png](flatfield_calibration_files/flatfield_calibration_28_0.png)
+![png](flatfield_calibration_files/flatfield_calibration_27_0.png)
     
 
 
@@ -462,16 +463,6 @@ plt.show()
 
 
     
-![png](flatfield_calibration_files/flatfield_calibration_30_0.png)
+![png](flatfield_calibration_files/flatfield_calibration_29_0.png)
     
 
-
-
-```python
-
-```
-
-
-```python
-
-```

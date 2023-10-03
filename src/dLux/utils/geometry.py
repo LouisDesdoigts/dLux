@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-def combine(arrays: Array, oversample: int = 1) -> Array:
+def combine(arrays: Array, oversample: int = 1, sum: bool = False) -> Array:
     """
     Combines multiple arrays by multiplying them together, and downsampling the output.
 
@@ -27,11 +27,14 @@ def combine(arrays: Array, oversample: int = 1) -> Array:
         The arrays to be combined. Should have shape (n_arrays, npix, npix).
     oversample : int = 1
         The amount to downsample the output by.
+    sum : bool = False
+        Whether to sum the arrays instead of multiplying them.
     """
+    method = np.sum if sum else np.prod
     array = np.array(arrays)
     if oversample == 1:
-        return array.prod(0)
-    return dlu.downsample(array.prod(0), oversample)
+        return method(array, 0)
+    return dlu.downsample(method(array, 0), oversample)
 
 
 def shift_and_scale(array: Array) -> Array:
@@ -79,7 +82,7 @@ def soften(distances: Array, clip_dist: float, invert: bool = False) -> Array:
 
 
 #####################
-def circle(coords: Array, diam: float, invert: bool = False) -> Array:
+def circle(coords: Array, radius: float, invert: bool = False) -> Array:
     """
     Calculates a soft-edged circle via downsampling. This function is not
     differentiable.
@@ -88,18 +91,19 @@ def circle(coords: Array, diam: float, invert: bool = False) -> Array:
     ----------
     coords : Array
         The coordinates to calculate the circle on.
-    diam : float
-        The diameter of the circle.
+    radius : float
+        The radius of the circle.
     invert : bool = False
         Whether to invert the circle.
 
     Returns
     -------
     circle : Array
-        The circle."""
+        The circle.
+    """
     if invert:
-        return circ_distance(coords, diam) > 0
-    return circ_distance(coords, diam) < 0
+        return (circ_distance(coords, radius) > 0).astype(float)
+    return (circ_distance(coords, radius) < 0).astype(float)
 
 
 def square(coords: Array, width: float, invert: bool = False) -> Array:
@@ -119,10 +123,11 @@ def square(coords: Array, width: float, invert: bool = False) -> Array:
     Returns
     -------
     square : Array
-        The square."""
+        The square.
+    """
     if invert:
-        return square_distance(coords, width) > 0
-    return square_distance(coords, width) < 0
+        return (square_distance(coords, width) > 0).astype(float)
+    return (square_distance(coords, width) < 0).astype(float)
 
 
 def rectangle(
@@ -147,8 +152,8 @@ def rectangle(
         The rectangle.
     """
     if invert:
-        return rectangle_distance(coords, width, height) > 0
-    return rectangle_distance(coords, width, height) < 0
+        return (rectangle_distance(coords, width, height) > 0).astype(float)
+    return (rectangle_distance(coords, width, height) < 0).astype(float)
 
 
 def reg_polygon(
@@ -175,8 +180,8 @@ def reg_polygon(
         The polygon.
     """
     if invert:
-        return reg_polygon_distance(coords, nsides, rmax) > 0
-    return reg_polygon_distance(coords, nsides, rmax) < 0
+        return (reg_polygon_distance(coords, nsides, rmax) > 0).astype(float)
+    return (reg_polygon_distance(coords, nsides, rmax) < 0).astype(float)
 
 
 def spider(coords: Array, width: float, angles: Array) -> Array:
@@ -200,7 +205,9 @@ def spider(coords: Array, width: float, angles: Array) -> Array:
     """
     angles = np.array(angles) if not isinstance(angles, np.ndarray) else angles
     calc_fn = vmap(lambda angle: spider_distance(coords, width, angle) < 0)
-    return ~lax.reduce(calc_fn(angles), np.array(False), lax.bitwise_or, (0,))
+    return (
+        ~lax.reduce(calc_fn(angles), np.array(False), lax.bitwise_or, (0,))
+    ).astype(float)
 
 
 # TODO: This eventually
