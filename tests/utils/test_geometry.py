@@ -136,7 +136,7 @@ def test_soft_spider(coords, width, angles, clip_dist):
 
 
 def test_circ_distance(coords, radius):
-    result = circle(coords, 2 * radius)
+    result = circle(coords, radius)
     distances = utils.cart2polar(coords)[0] - radius
     assert np.allclose(result, distances < 0)
 
