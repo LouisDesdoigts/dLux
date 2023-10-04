@@ -1,10 +1,15 @@
-# Helper Utility Functions
+# Helpers
 
 This module contains the leftover functions that don't fit anywhere else in the `utils` module!
 
-## List to Dictionary
+???+ info "list2dictionary"
+    ::: dLux.utils.helpers.list2dictionary
 
-Converts a list of ∂Lux objects into a regular ordered dictionary. This shouldn't need to be used by the user, but is used internally in many of the constructors.
+???+ info "map2array"
+    ::: dLux.utils.helpers.map2array
 
-??? info "List to Dictionary API"
-    ::: dLux.utils.helpers.list_to_dictionary
+???+ info "insert_layer"
+    ::: dLux.utils.helpers.insert_layer
+
+???+ info "remove_layer"
+    ::: dLux.utils.helpers.remove_layer

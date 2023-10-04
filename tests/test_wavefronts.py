@@ -1,231 +1,184 @@
-import jax.numpy as np
-from jax import config
-import pytest
-import dLux
+from jax import numpy as np, config
 
 config.update("jax_debug_nans", True)
+import pytest
+from dLux import Wavefront, Optic
 
 
+@pytest.fixture
+def wavefront():
+    return Wavefront(npixels=16, diameter=1.0, wavelength=1e-6)
+
+
+# TODO: Test magic
 class TestWavefront:
-    """Test the Wavefront class."""
+    def test_constructor(self, wavefront):
+        assert wavefront.npixels == 16
+        assert wavefront.diameter == 1.0
+        assert wavefront.wavelength == 1e-6
 
-    def test_constructor(self, create_wavefront):
-        """Tests the constructor."""
-        # Test constructor
-        create_wavefront()
+    def test_properties(self, wavefront):
+        assert wavefront.ndim == 0
+        assert wavefront.real.shape == wavefront.amplitude.shape
+        assert wavefront.imaginary.shape == wavefront.amplitude.shape
+        assert wavefront.phasor.shape == wavefront.amplitude.shape
+        assert wavefront.psf.shape == wavefront.amplitude.shape
+        assert wavefront.coordinates.shape == (2, 16, 16)
+        assert np.array(wavefront.wavenumber).shape == ()
+        assert np.array(wavefront.fringe_size).shape == ()
 
-        # Test 1d array
+    def test_methods(self, wavefront):
+        assert isinstance(wavefront.add_opd(0), Wavefront)
+        assert isinstance(wavefront.add_phase(0), Wavefront)
+        assert isinstance(wavefront.tilt(np.zeros(2)), Wavefront)
         with pytest.raises(ValueError):
-            create_wavefront(wavelength=[1e3])
-
-        with pytest.raises(ValueError):
-            create_wavefront(diameter=np.ones(2))
-
-    def test_npixels(self, create_wavefront):
-        """Tests the npixels property."""
-        wf = create_wavefront()
-        assert wf.npixels == wf.amplitude.shape[-1]
-
-    def test_diameter(self, create_wavefront):
-        """Tests the diameter property."""
-        wf = create_wavefront()
-        assert wf.diameter == wf.npixels * wf.pixel_scale
-
-    def test_real(self, create_wavefront):
-        """Tests the real property."""
-        wf = create_wavefront()
-        assert (wf.real == wf.amplitude * np.cos(wf.phase)).all()
-
-    def test_imaginary(self, create_wavefront):
-        """Tests the imaginary property."""
-        wf = create_wavefront()
-        assert (wf.imaginary == wf.amplitude * np.sin(wf.phase)).all()
-
-    def test_phasor(self, create_wavefront):
-        """Tests the phasor property."""
-        wf = create_wavefront()
-        assert (wf.phasor == wf.amplitude * np.exp(1j * wf.phase)).all()
-
-    def test_psf(self, create_wavefront):
-        """Tests the psf property."""
-        wf = create_wavefront()
-        assert (wf.psf == wf.amplitude**2).all()
-
-    def test_coordinates(self, create_wavefront):
-        """Tests the coordinates property."""
-        wf = create_wavefront()
-        wf.coordinates
-
-    def test_add_phase(self, create_wavefront):
-        """Tests the add_phase method."""
-        wf = create_wavefront()
-        wf.add_phase(np.ones(wf.npixels))
-        wf.add_phase(None)
-
-    def test_tilt(self, create_wavefront):
-        """Tests the tilt method."""
-        wf = create_wavefront()
-
-        # Test string inputs
-        with pytest.raises(ValueError):
-            wf.tilt("some string")
-
-        # Test wrong shapes
-        with pytest.raises(ValueError):
-            wf.tilt(np.ones(1))
-
-        # Test wrong shapes
-        with pytest.raises(ValueError):
-            wf.tilt(np.ones(3))
-
-        # Test basic behaviour
-        wf.tilt(np.ones(2))
-
-    def test_normalise(self, create_wavefront):
-        """Tests the normalise method."""
-        wf = create_wavefront()
-        new_wf = wf.normalise()
-        assert np.sum(new_wf.amplitude**2) == 1.0
-
-    def test_flip(self, create_wavefront):
-        """Tests the flip method."""
-        wf = create_wavefront()
-        wf = wf.flip(0)
-        wf = wf.flip(1)
-        wf = wf.flip((0, 1))
-
-    def test_interpolate(self, create_wavefront):
-        """Tests the interpolate method."""
-        k = 2
-        wf = create_wavefront()
-        wf = wf.scale_to(wf.npixels // k, k * wf.pixel_scale)
-        wf = wf.scale_to(wf.npixels // k, k * wf.pixel_scale, complex=True)
-
-    def test_rotate(self, create_wavefront):
-        """Tests the rotate method."""
-        wf = create_wavefront()
-        wf = dLux.CircularAperture(1.0)(wf)
-        flipped_amplitude = np.flip(wf.amplitude, axis=(-1, -2))
-        flipped_phase = np.flip(wf.phase, axis=(-1, -2))
-
-        new_wf = wf.rotate(np.pi, order=1)
-        assert np.allclose(new_wf.amplitude, flipped_amplitude, atol=1e-5)
-        assert np.allclose(new_wf.phase, flipped_phase)
-
-        new_wf = wf.rotate(np.pi, complex=True, order=1)
-
-        assert np.allclose(new_wf.amplitude, flipped_amplitude, atol=1e-5)
-        # Add small remainer to fix 0-pi instability
+            wavefront.tilt(np.zeros(3))
+        assert isinstance(wavefront.normalise(), Wavefront)
+        assert isinstance(wavefront.flip(0), Wavefront)
+        assert wavefront.scale_to(8, 1 / 32).npixels == 8
+        assert np.allclose(wavefront.scale_to(8, 1 / 32).pixel_scale, 1 / 32)
         assert np.allclose(
-            (new_wf.phase + 1e-6) % np.pi, flipped_phase, atol=1e-5
+            wavefront.scale_to(8, 1 / 32, True).pixel_scale, 1 / 32
+        )
+        assert isinstance(wavefront.rotate(np.pi), Wavefront)
+        assert isinstance(wavefront.resize(8), Wavefront)
+
+    def test_magic_add(self, wavefront):
+        # Test Nones
+        wavefront += None
+        assert isinstance(wavefront, Wavefront)
+
+        # Test optical layers
+        wavefront += Optic()
+        assert isinstance(wavefront, Wavefront)
+
+        # Test arrays
+        wavefront += np.ones(1)
+        assert isinstance(wavefront, Wavefront)
+
+        # Test numeric
+        wavefront += 1
+        assert isinstance(wavefront, Wavefront)
+
+        # Test invalid
+        with pytest.raises(TypeError):
+            wavefront += "1"
+
+    def test_magic_mul(self, wavefront):
+        # Test Nones
+        wavefront *= None
+        assert isinstance(wavefront, Wavefront)
+
+        # Test optical layers
+        wavefront *= Optic()
+        assert isinstance(wavefront, Wavefront)
+
+        # Test arrays
+        wavefront *= np.ones(1)
+        assert isinstance(wavefront, Wavefront)
+
+        # Test complex arrays
+        wavefront *= np.ones(1) * np.exp(1j)
+        assert isinstance(wavefront, Wavefront)
+
+        # Test numeric
+        wavefront *= 1
+        assert isinstance(wavefront, Wavefront)
+
+        # Test invalid
+        with pytest.raises(TypeError):
+            wavefront *= "1"
+
+    def _test_propagated(self, wf, plane, units, npix, pscale):
+        assert wf.plane == plane
+        assert wf.units == units
+        assert wf.npixels == npix
+        assert np.allclose(wf.pixel_scale, pscale)
+
+    @pytest.mark.parametrize("pixel", [True, False])
+    def test_propagation(self, wavefront, pixel):
+        npix = 8
+        pscale = 1 / 32
+        focal_length = 1.0
+
+        # No focal length to focal plane
+        focal_wf = wavefront.propagate(npix, pscale, pixel=pixel)
+        self._test_propagated(focal_wf, "Focal", "Angular", npix, pscale)
+
+        # No focal length to pupil plane
+        pupil_wf = focal_wf.propagate(npix, pscale, pixel=pixel)
+        self._test_propagated(pupil_wf, "Pupil", "Cartesian", npix, pscale)
+
+        # From an angular focal plane, specifying fl
+        with pytest.raises(ValueError):
+            focal_wf.propagate(npix, pscale, focal_length, pixel=pixel)
+
+        # Focal length to focal plane
+        focal_wf = wavefront.propagate(npix, pscale, focal_length, pixel=pixel)
+        self._test_propagated(focal_wf, "Focal", "Cartesian", npix, pscale)
+
+        # Focal length to pupil plane
+        pupil_wf = focal_wf.propagate(npix, pscale, focal_length, pixel=pixel)
+        self._test_propagated(pupil_wf, "Pupil", "Cartesian", npix, pscale)
+
+    def test_fft_propagation(self, wavefront):
+        pad = 2
+        focal_length = 1.0
+        npix_out = wavefront.npixels * pad
+        pscale_in = wavefront.pixel_scale
+        pscale_out = wavefront.fringe_size / pad
+
+        # No focal length to focal plane
+        focal_wf = wavefront.propagate_FFT()
+        self._test_propagated(
+            focal_wf, "Focal", "Angular", npix_out, pscale_out
         )
 
-    def test_pad_to(self, create_wavefront):
-        """Tests the pad_to method."""
-        even_wf = create_wavefront(npixels=16)
-        odd_wf = create_wavefront(npixels=15)
+        # No focal length to pupil plane
+        pupil_wf = focal_wf.resize(wavefront.npixels).propagate_FFT()
+        self._test_propagated(
+            pupil_wf, "Pupil", "Cartesian", npix_out, pscale_in
+        )
 
-        # Smaller value
+        # From an angular focal plane, specifying fl
         with pytest.raises(ValueError):
-            even_wf.pad_to(14)
+            focal_wf.propagate_FFT(focal_length)
 
-        # even -> odd
+        # With focal length
+        pscale_in *= focal_length
+
+        # Focal length to focal plane
+        focal_wf = wavefront.propagate_FFT(focal_length)
+        self._test_propagated(
+            focal_wf, "Focal", "Cartesian", npix_out, pscale_out
+        )
+
+        # Focal length to pupil plane
+        pupil_wf = focal_wf.resize(wavefront.npixels).propagate_FFT(
+            focal_length
+        )
+        self._test_propagated(
+            pupil_wf, "Pupil", "Cartesian", npix_out, pscale_in
+        )
+
+    @pytest.mark.parametrize("pixel", [True, False])
+    def test_fresnel_propagation(self, wavefront, pixel):
+        npix = 8
+        pscale = 1 / 32
+        focal_length = 1.0
+        focal_shift = 1e-2
+
+        # Simple test
+        focal_wf = wavefront.propagate_fresnel(
+            npix, pscale, focal_length, focal_shift, pixel=pixel
+        )
+        self._test_propagated(
+            focal_wf, "Intermediate", "Cartesian", npix, pscale
+        )
+
+        # Test error from focal plane
+        focal_wf = wavefront.propagate(npix, pscale, pixel=pixel)
         with pytest.raises(ValueError):
-            even_wf.pad_to(17)
-
-        # odd -> even
-        with pytest.raises(ValueError):
-            odd_wf.pad_to(16)
-
-        assert even_wf.pad_to(20).npixels == 20
-
-    def test_crop_to(self, create_wavefront):
-        """Tests the crop_to method."""
-        even_wf = create_wavefront(npixels=16)
-        odd_wf = create_wavefront(npixels=15)
-
-        # Smaller value
-        with pytest.raises(ValueError):
-            even_wf.crop_to(18)
-
-        # even -> odd
-        with pytest.raises(ValueError):
-            even_wf.crop_to(15)
-
-        # odd -> even
-        with pytest.raises(ValueError):
-            odd_wf.crop_to(14)
-
-        assert even_wf.crop_to(12).npixels == 12
-
-    def test_magic(self, create_wavefront, create_optic):
-        """Tests the magic methods."""
-        wf = create_wavefront()
-        wf += create_optic()
-
-        wf *= None
-        wf *= wf.phasor
-
-        with pytest.raises(TypeError):
-            create_wavefront() + "a string"
-
-        with pytest.raises(TypeError):
-            create_wavefront() * "a string"
-
-    def test_FFT(self, create_wavefront):
-        """Tests the FFT method."""
-        wf = create_wavefront()
-
-        with pytest.raises(ValueError):
-            wf = wf.set("units", "Angular")
-            wf.FFT(focal_length=1.0)
-
-        with pytest.raises(ValueError):
-            wf.IFFT()
-
-        with pytest.raises(ValueError):
-            wf = wf.set("plane", "Focal")
-            wf.FFT()
-
-    def test_MFT(self, create_wavefront):
-        """Tests the MFT method."""
-        wf = create_wavefront()
-
-        with pytest.raises(ValueError):
-            wf = wf.set("units", "Angular")
-            wf.MFT(16, 1 / 16, focal_length=1.0)
-
-        with pytest.raises(ValueError):
-            wf.IMFT(
-                16,
-                1 / 16,
+            focal_wf.propagate_fresnel(
+                npix, pscale, focal_length, focal_shift, pixel=pixel
             )
-
-        with pytest.raises(ValueError):
-            wf = wf.set("plane", "Focal")
-            wf.MFT(16, 1 / 16)
-
-
-class TestFresnelWavefront:
-    """Test the FresnelWavefront class."""
-
-    def test_constructor(self, create_wavefront):
-        """Tests the constructor."""
-        # Test constructor
-        create_wavefront()
-
-        # Test 1d array
-        with pytest.raises(ValueError):
-            create_wavefront(wavelength=[1e3])
-
-        with pytest.raises(ValueError):
-            create_wavefront(diameter=np.ones(2))
-
-    def test_fresnel_prop(self, create_fresnel_wavefront):
-        """Tests the fresnel_prop method."""
-        wf = create_fresnel_wavefront()
-        wf.fresnel_prop(16, 1 / 16, 1e2, 1e-2)
-
-        with pytest.raises(ValueError):
-            wf = wf.set("plane", "not Pupil")
-            wf.fresnel_prop(16, 1 / 16, 1e2, 1e-2)

@@ -23,5 +23,5 @@ def test_install_dLux():
 def test_import_dLux():
     import dLux
 
-    dLux.optics
+    dLux.optical_systems
     assert True

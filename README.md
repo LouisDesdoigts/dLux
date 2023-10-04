@@ -1,4 +1,4 @@
-![alt text](docs/assets/logo.jpg?raw=true)
+![alt text](assets/logo.jpg?raw=true)
 
 # ∂Lux
 
@@ -25,13 +25,13 @@ The ∂Lux framework is built in [Zodiax](https://github.com/LouisDesdoigts/zodi
 >
 > - [Automatic Vectorisation](https://jax.readthedocs.io/en/latest/jax-101/03-vectorization.html): Allows for simple parallelism across hardware and asynchronous execution
 >
-> - [Path-Based Pytree Interface](docs/usage.md): Path based indexing allows for easy interfacing with large and highly nested physical models
+<!-- > - [Path-Based Pytree Interface](usage.md): Path based indexing allows for easy interfacing with large and highly nested physical models -->
 
 For an overview of these capabilities and different optimisation methods in [Zodiax](https://github.com/LouisDesdoigts/zodiax), please go through this [Zodiax Tutorial](https://louisdesdoigts.github.io/zodiax/docs/usage/).
 
 Documentation: [https://louisdesdoigts.github.io/dLux/](https://louisdesdoigts.github.io/dLux/)
 
-Requires: Python 3.8+, Jax 0.4.3+, Zodiax 0.4+
+Requires: Python 3.10+, Jax 0.4.13+, Zodiax 0.4+
 
 Installation: ```pip install dLux```
 
@@ -39,7 +39,7 @@ If you want to run the tutorials locally, you can install the 'extra' dependenci
 
 ## Collaboration & Development
 
-We are always looking to collaborate and further develop this software! We have focused on flexibility and ease of development, so if you have a project you want to use ∂Lux for, but it currently does not have the required capabilities, have general questions, thoughts or ideas, don't hesitate to [email me](louis.desdoigts@sydney.edu.au) or contact me on [twitter](https://twitter.com/gradientrider)! More details about contributing can be found in our [contributing guide](CONTRIBUTING.md).
+We are always looking to collaborate and further develop this software! We have focused on flexibility and ease of development, so if you have a project you want to use ∂Lux for, but it currently does not have the required capabilities, have general questions, thoughts or ideas, don't hesitate to [email me](mailto:louis.desdoigts@sydney.edu.au) or contact me on [twitter](https://twitter.com/gradientrider)! More details about contributing can be found in our [contributing guide](CONTRIBUTING.md).
 
 ## Publications
 

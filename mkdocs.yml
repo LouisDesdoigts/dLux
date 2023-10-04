@@ -1,87 +1,17 @@
-# Great resource: https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#with-section-index-pages
+# Great resources: https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#with-section-index-pages
 # https://squidfunk.github.io/mkdocs-material/reference/buttons/
-
-site_name: dLux
-docs_dir: .
-site_description: Documentation for dLux.
-site_author: Louis Desdoigts
-site_url: https://louisdesdoigts.github.io/dlux/
-repo_url: https://github.com/LouisDesdoigts/dlux
-repo_name: louisdesdoigts/dlux
-edit_uri: "" 
-
-strict: false  # Allow warnings during the build process (change later)
-
-plugins:
-  - mkdocs-jupyter
-  - search
-  - same-dir
-  - autorefs
-  - simple:
-      ignore_folders:
-        - tests
-        - dLux
-  - mkdocstrings:
-      default_handler: python
-      handlers:
-        python:
-          options:
-            docstring_style: "numpy"
-
-markdown_extensions:
-  - admonition
-  - pymdownx.details
-  - pymdownx.superfences
-  - pymdownx.arithmatex:  # Render LaTeX via MathJax
-      generic: true
-  - pymdownx.snippets:  # Include one Markdown file into another
-      base_path: docs
-  - admonition
-  - toc:
-      permalink: "¤"  # Adds a clickable permalink to each section heading
-      toc_depth: 1
-  - def_list
-  - pymdownx.tasklist:
-      custom_checkbox: true
-  - attr_list # Allows images
-  - md_in_html # Allows images
-
-extra_javascript: # Used for MathJax
-  - javascripts/mathjax.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+# https://squidfunk.github.io/mkdocs-material/reference/admonitions/
 
 
 theme:
-  palette:
-    scheme: slate
-  logo: assets/logo.jpg
-  favicon: material/telescope
-  name: material
-  icon:
-    logo: material/telescope
-
-theme:
-  logo: assets/logo.jpg
-  favicon: material/telescope
-  icon:
-    logo: material/telescope
-    # repo: fontawesome/brands/github
-    # logo: fontawesome/regular/moon
-    # logo: octicons/moon-16
   name: material
   features:
-    # - navigation.sections
-    - navigation.expand
+    - navigation.sections
     - navigation.path
     - navigation.indexes 
     - navigation.top
     - content.code.copy
-    # - navigation.tabs # Adds tabs for High Level settings
-    # - navigation.tabs.sticky
-    - toc.integrate  # Table of contents is integrated on the left; does not appear separately on the right.
-    # - toc.integrate
-    # - content.action.view
+
   palette:
     # Light mode / dark mode
     # We deliberately don't automatically use `media` to check a user's preferences. We default to light mode as
@@ -98,47 +28,118 @@ theme:
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github  # GitHub logo in top right
+    logo: material/telescope
+    favicon: material/telescope
+
+site_name: dLux
+docs_dir: docs/
+site_description: Documentation for dLux.
+site_author: Louis Desdoigts
+site_url: https://louisdesdoigts.github.io/dlux/
+repo_url: https://github.com/LouisDesdoigts/dlux
+repo_name: louisdesdoigts/dlux
+edit_uri: "" 
+
+strict: true # Prevent builds with warnings
+
+plugins:
+  - mkdocs-jupyter
+  - search
+  - same-dir
+  - autorefs
+  - simple:
+      ignore:
+        - tests
+        - src
+        - build
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            docstring_style: "numpy"
+          rendering:
+            members_order: source
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.extra
+  - toc:
+      toc_depth: 2
 
 # ===== Navigation =====
 nav:
     - Home: README.md
 
     - Tutorials:
-        - Usage:                    docs/usage.md
-        - Phase Retrieval:          docs/notebooks/phase_retrieval_demo.ipynb
-        - Phase Mask Design:        docs/notebooks/designing_a_mask.ipynb
-        - Pixel Level Calibration:  docs/notebooks/flatfield_calibration.ipynb
-        - Fisher Information:       docs/notebooks/fisher_information.ipynb
-        - Parameter Inference:      docs/notebooks/HMC.ipynb
+        - Introductory:
+            - A Basic Overview:         tutorials/introductory/overview.md
+            - Optical Systems:          tutorials/introductory/optical_systems.md
+            - Sources & Spectra:        tutorials/introductory/sources.md
+            # - Detectors:
+            # - Building Telescope:
+            # - Building a coronagraph:
+            # - The Wavefront and PSF classes:
+            # - functional psf modelling with the Utils module:
 
-    - dLux API: 
-        - Overview:        docs/API/overview.md
-        - Wavefronts:      docs/API/wavefronts.md
-        - Optics:          docs/API/optics.md
-        - Optical Layers:  docs/API/optical_layers.md
-        - Propagators:     docs/API/propagators.md
-        - Apertures:       docs/API/apertures.md
-        - Aberrations:     docs/API/aberrations.md
+              
+        - How-To's:
+            - Working with dLux objects: tutorials/howtos/dLux_objects.md
+            - Building Apertures:        tutorials/howtos/custom_apertures.md
+            # - Optimisation with dLux (Optimising many parameters, arbitrary loss functions):
+            # - Estimating Uncertainties (Fisher Information):
+            # - Sampling Posteriors (HMC):
+            # - Building your own classes (optical system, source): 
 
-        - Spectra:         docs/API/spectra.md
-        - Sources:         docs/API/sources.md
+            
+        - Examples:
+            - Phase Retrieval:          tutorials/examples/phase_retrieval_demo.md
+            - Phase Mask Design:        tutorials/examples/designing_a_mask.md
+            - Pixel Level Calibration:  tutorials/examples/flatfield_calibration.md
+            - Fisher Information:       tutorials/examples/fisher_information.md
+            - Parameter Inference:      tutorials/examples/HMC.md
 
-        - Images:          docs/API/images.md
-        - Detector Layers: docs/API/detector_layers.md
-        - Detectors:       docs/API/detectors.md
+    - API:
+    
+        - Core API:
+            # - Overview:         API/core/core.md
+            - Wavefronts:       API/core/wavefronts.md
+            - Optical Systems:  API/core/optical_systems.md
+            - Spectra:          API/core/spectra.md
+            - Sources:          API/core/sources.md
+            - PSFs:             API/core/psfs.md
+            - Detectors:        API/core/detectors.md
+            - Instruments:      API/core/instruments.md
+            - Transformations:  API/core/transformations.md
 
-        - Instruments:    docs/API/instruments.md
-        - Observations:   docs/API/observations.md
+        - Layers API:
+            # - Overview:        API/layers/layers.md
+            - Optical Layers:   API/layers/optical_layers.md
+            - Optics:           API/layers/optics.md
+            - Propagators:      API/layers/propagators.md
+            - Apertures:        API/layers/apertures.md
+            - Aberrations:      API/layers/aberrations.md
+            - Detector Layers:  API/layers/detector_layers.md
+            - Unified Layers:   API/layers/unified_layers.md
 
-    - Utils API:
-        # - Overview:      docs/API/utils/utils.md
-        - Optics:        docs/API/utils/optics.md
-        - Units:         docs/API/utils/units.md
-        - Math:          docs/API/utils/math.md
-        - Coordinates:   docs/API/utils/coordinates.md
-        - Interpolation: docs/API/utils/interpolation.md
-        - Helpers:       docs/API/utils/helpers.md
+        - Utils API:
+            # - Overview:      API/utils/utils.md
+            - Array Operations: API/utils/array_ops.md
+            - Coordinates:      API/utils/coordinates.md
+            - Geometry:         API/utils/geometry.md
+            - Helpers:          API/utils/helpers.md
+            - Interpolation:    API/utils/interpolation.md
+            - Math:             API/utils/math.md
+            - Optics:           API/utils/optics.md
+            - Propagation:      API/utils/propagation.md
+            - Source:           API/utils/source.md
+            - Units:            API/utils/units.md
+            - Zernikes:         API/utils/zernikes.md
+            
 
-    - FAQ & Troubleshooting: docs/faq.md
-#    - Change Log: CHANGELOG.md
+    - FAQ & Troubleshooting: faq.md
+    - Change Log: CHANGELOG.md
     - Contributing: CONTRIBUTING.md
