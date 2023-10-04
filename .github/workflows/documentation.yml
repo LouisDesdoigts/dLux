@@ -38,6 +38,9 @@ jobs:
           pip install mkdocstrings[python]
           pip install mkdocs-material
 
+      - name: build umls
+        run: docs/generate_umls.py
+
       - name: generate and deploy documentation
         run: mkdocs gh-deploy -d https://louisdesdoigts.github.io/dLux
 

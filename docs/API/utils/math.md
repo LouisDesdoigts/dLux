@@ -1,17 +1,15 @@
 # Math Utility Functions
 
-This module contains functions used to
+This module contains some basic maths functions used under the hood.
 
-## Factorial
-
-Differentiably calculates the factorial of a number. Jax-friendly!
-
-??? info "Factorial API"
+???+ info "factorial"
     ::: dLux.utils.math.factorial
 
-## Triangular Number
-
-Calculates the nth triangular number.
-
-??? info "Triangular Number API"
+???+ info "triangular_number"
     ::: dLux.utils.math.triangular_number
+
+???+ info "eval_basis"
+    ::: dLux.utils.math.eval_basis
+
+???+ info "nandiv"
+    ::: dLux.utils.math.nandiv
