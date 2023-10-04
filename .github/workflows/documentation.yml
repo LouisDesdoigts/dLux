@@ -37,6 +37,7 @@ jobs:
           pip install mkdocstrings
           pip install mkdocstrings[python]
           pip install mkdocs-material
+          pip install --upgrade notebook==6.4.12
 
       - name: generate and deploy documentation
         run: mkdocs gh-deploy -d https://louisdesdoigts.github.io/dLux
