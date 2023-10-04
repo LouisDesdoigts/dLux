@@ -1,0 +1,2038 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for dLux.">
+      
+      
+        <meta name="author" content="Louis Desdoigts">
+      
+      
+        <link rel="canonical" href="https://louisdesdoigts.github.io/dlux/tutorials/introductory/sources/">
+      
+      
+        <link rel="prev" href="../optical_systems/">
+      
+      
+        <link rel="next" href="../../howtos/dLux_objects/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.3">
+    
+    
+      
+        <title>Sources & Spectra - dLux</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.79e020e9.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.a5377069.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="amber">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sources-spectra" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="dLux" class="md-header__button md-logo" aria-label="dLux" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.9 8.9-1.7 1-4-6.9 1.7-1 4 6.9m-12.1-1 3 5.2 6.1-3.5-3-5.2-6.1 3.5m1.6 4.8-2-3.5-4.3 2.5 2 3.5 4.3-2.5m-9.3 1.9 1 1.7 2.6-1.5-1-1.7-2.6 1.5m10-.6-.3-.4-4.3 2.5.3.4c.2.3.5.6.8.8L7 22h2l1.4-4.3h.1L12 22h2l-1.9-5.6c.5-.7.5-1.6 0-2.4Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            dLux
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Sources & Spectra
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/LouisDesdoigts/dlux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    louisdesdoigts/dlux
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="dLux" class="md-nav__button md-logo" aria-label="dLux" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21.9 8.9-1.7 1-4-6.9 1.7-1 4 6.9m-12.1-1 3 5.2 6.1-3.5-3-5.2-6.1 3.5m1.6 4.8-2-3.5-4.3 2.5 2 3.5 4.3-2.5m-9.3 1.9 1 1.7 2.6-1.5-1-1.7-2.6 1.5m10-.6-.3-.4-4.3 2.5.3.4c.2.3.5.6.8.8L7 22h2l1.4-4.3h.1L12 22h2l-1.9-5.6c.5-.7.5-1.6 0-2.4Z"/></svg>
+
+    </a>
+    dLux
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/LouisDesdoigts/dlux" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    louisdesdoigts/dlux
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Introductory
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Introductory
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    A Basic Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../optical_systems/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Optical Systems
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Sources & Spectra
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Sources & Spectra
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pointsource" class="md-nav__link">
+    PointSource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolvedsource" class="md-nav__link">
+    ResolvedSource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#binarysource" class="md-nav__link">
+    BinarySource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pointresolvedsource" class="md-nav__link">
+    PointResolvedSource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pointsources" class="md-nav__link">
+    PointSources
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scene" class="md-nav__link">
+    Scene
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    How-To's
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            How-To's
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../howtos/dLux_objects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Working with dLux objects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../howtos/custom_apertures/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Building Apertures
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/phase_retrieval_demo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Phase Retrieval
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/designing_a_mask/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Phase Mask Design
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/flatfield_calibration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pixel Level Calibration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/fisher_information/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fisher Information
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/HMC/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameter Inference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Core API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/core/wavefronts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Wavefronts
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/core/optical_systems/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Optical Systems
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/core/spectra/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spectra
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/core/sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/core/psfs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PSFs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/core/detectors/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Detectors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/core/instruments/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Instruments
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/core/transformations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Transformations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Layers API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Layers API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/layers/optical_layers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Optical Layers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/layers/optics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Optics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/layers/propagators/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Propagators
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/layers/apertures/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Apertures
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/layers/aberrations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Aberrations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/layers/detector_layers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Detector Layers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/layers/unified_layers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unified Layers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Utils API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Utils API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/array_ops/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Array Operations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/coordinates/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Coordinates
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/geometry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Geometry
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/helpers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Helpers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/interpolation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Interpolation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/math/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Math
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/optics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Optics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/propagation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Propagation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Source
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/units/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Units
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../API/utils/zernikes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zernikes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../faq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ & Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CHANGELOG/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Change Log
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pointsource" class="md-nav__link">
+    PointSource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolvedsource" class="md-nav__link">
+    ResolvedSource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#binarysource" class="md-nav__link">
+    BinarySource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pointresolvedsource" class="md-nav__link">
+    PointResolvedSource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pointsources" class="md-nav__link">
+    PointSources
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scene" class="md-nav__link">
+    Scene
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="sources-spectra">Sources &amp; Spectra</h1>
+<p>This tutorials is designed to give an overview of both the <code>Source</code> and <code>Spectrum</code> classes within dLux.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Basic imports</span>
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">jax.random</span> <span class="k">as</span> <span class="nn">jr</span>
+
+<span class="c1"># dLux imports</span>
+<span class="kn">import</span> <span class="nn">dLux</span> <span class="k">as</span> <span class="nn">dl</span>
+<span class="kn">import</span> <span class="nn">dLux.utils</span> <span class="k">as</span> <span class="nn">dlu</span>
+
+<span class="c1"># Visualisation imports</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;image.cmap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;inferno&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;serif&quot;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;image.origin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;lower&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.dpi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">72</span>
+</code></pre></div>
+<p>First lets whip up an optical system that we can use to propagate the sources through.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Define our wavefront properties</span>
+<span class="n">wf_npix</span> <span class="o">=</span> <span class="mi">512</span>  <span class="c1"># Number of pixels in the wavefront</span>
+<span class="n">diameter</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># Diameter of the wavefront, meters</span>
+
+<span class="c1"># Construct a simple circular aperture</span>
+<span class="n">coords</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">pixel_coords</span><span class="p">(</span><span class="n">wf_npix</span><span class="p">,</span> <span class="n">diameter</span><span class="p">)</span>
+<span class="n">aperture</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">diameter</span><span class="p">)</span>
+
+<span class="c1"># Define our detector properties</span>
+<span class="n">psf_npix</span> <span class="o">=</span> <span class="mi">64</span>  <span class="c1"># Number of pixels in the PSF</span>
+<span class="n">psf_pixel_scale</span> <span class="o">=</span> <span class="mf">50e-3</span>  <span class="c1"># 50 mili-arcseconds</span>
+<span class="n">oversample</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Oversampling factor for the PSF</span>
+
+<span class="c1"># Define the optical layers</span>
+<span class="n">layers</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;aperture&#39;</span><span class="p">,</span> <span class="n">dl</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Optic</span><span class="p">(</span><span class="n">aperture</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="kc">True</span><span class="p">))]</span>
+
+<span class="c1"># Construct the optics object</span>
+<span class="n">optics</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">AngularOpticalSystem</span><span class="p">(</span>
+    <span class="n">wf_npix</span><span class="p">,</span> <span class="n">diameter</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">psf_npix</span><span class="p">,</span> <span class="n">psf_pixel_scale</span><span class="p">,</span> <span class="n">oversample</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="overview">Overview</h2>
+<p>The <code>Source</code> and <code>Spectrum</code> classes in dLux work in tandem, with all <code>Source</code> objects containing a <code>Spectrum</code> object. There are only two <code>Spectrum</code> classes implemented in dLux:</p>
+<ol>
+<li><code>Spectrum</code> is a simple array-based spectrum, contating <code>wavelengths</code> and <code>weights</code>.</li>
+<li><code>PolySpectrum</code> is a simple polynomial spectrum, containing <code>wavelengths</code> and <code>coefficients</code>.</li>
+</ol>
+<p>In general users will not need to intract with the <code>Spectrum</code> objects directly, as they are automatically instatiated when creating a <code>Source</code> object. Lets take a look at the various different <code>Source</code> classes implemented in dLux.</p>
+<ol>
+<li><code>PointSource</code></li>
+<li><code>ResolvedSource</code></li>
+<li><code>BinarySource</code></li>
+<li><code>PointResolvedSource</code></li>
+<li><code>PointSources</code></li>
+<li><code>Scene</code></li>
+</ol>
+<p>They all have a similar interface, having both a <code>.normalise</code> and <code>.model</code> method. The <code>.normalise</code> method takes no inputs and normalises the source and spectrum, which is important during optimisation since the updates during that process can not guarantee that the source remains normalised. The model method has the following signature <code>.model(optical_system, return_wf=False, return_psf=False)</code>, mirroring the <code>OpticalSystem.model</code> method. The <code>return_wf</code> and <code>return_psf</code> flags are used to determine what object is returned. If both are <code>False</code>, the returned psf is an array, if <code>return_wf</code> is <code>True</code> the returned psf is a <code>Wavefront</code> object, and if <code>return_psf</code> is <code>True</code> the returned psf is a <code>PSF</code> object.</p>
+<p>Ands that about all there is to the <code>Source</code> objects! So lets jump in and have a look at these classes.</p>
+<h3 id="initialising-the-spectrum">Initialising the Spectrum</h3>
+<p><code>Spectrum</code> objects can be initialised from the <code>Source</code> objects in two ways, either by passing in a <code>wavelengths</code> and (optional) <code>weights</code> array, or by passing in a <code>Spectrum</code> object directly. If a <code>Spectrum</code> object is passed in, the <code>wavelengths</code> and <code>weights</code> arrays are ignored. If only a <code>wavelengths</code> array is passed in, the <code>weights</code> array is initialised to be an array of ones. If both a <code>wavelengths</code> and <code>weights</code> array are passed in, the <code>weights</code> array is normalised to sum to one.</p>
+<h2 id="pointsource">PointSource</h2>
+<p>The <code>PointSource</code> class is very straightforwards with three attributes:</p>
+<ol>
+<li><code>position</code> - the position of the source in the sky, in radians.</li>
+<li><code>flux</code> - the flux of the source, in photons.</li>
+<li><code>spectrum</code> - the spectrum of the source.</li>
+</ol>
+<p>Lets create one and model it through an optical system. We will also return the <code>PSF</code> object so we can examine both the oversampled and downsampled psfs.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Define the source properties</span>
+<span class="n">flux</span> <span class="o">=</span> <span class="mf">1e4</span>
+<span class="n">position</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">arcsec2rad</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Construct the source object and examine it</span>
+<span class="n">point</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">flux</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>PointSource(
+  spectrum=Spectrum(wavelengths=f32[10], weights=f32[10]),
+  position=f32[2],
+  flux=10000.0
+)
+</code></pre>
+<div class="highlight"><pre><span></span><code><span class="c1"># Model the source and examine the PSF</span>
+<span class="n">psf_oversample</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
+<span class="n">PSF</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">optics</span><span class="p">,</span> <span class="n">return_psf</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="n">oversample</span><span class="p">)</span>
+
+<span class="c1"># Plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Oversampled PSF&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psf_oversample</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Sqrt Photons&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;&#39;True&#39; PSF&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">PSF</span><span class="o">.</span><span class="n">data</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Sqrt Photons&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p><img alt="png" src="../sources_files/sources_7_0.png" /></p>
+<h2 id="resolvedsource">ResolvedSource</h2>
+<p>The resolved source operates very similarly to the <code>PointSource</code> class, only adding the <code>distribution</code> attribute.</p>
+<ol>
+<li><code>position</code> - the position of the source in the sky, in radians.</li>
+<li><code>flux</code> - the flux of the source, in photons.</li>
+<li><code>spectrum</code> - the spectrum of the source.</li>
+<li><code>distribution</code> - the distribution of the source.</li>
+</ol>
+<p>Lets create one and model it through an optical system.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Define the source properties</span>
+<span class="n">flux</span> <span class="o">=</span> <span class="mf">1e4</span>
+<span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">distribution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="c1"># Construct the source object and examine it</span>
+<span class="n">resolved</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">ResolvedSource</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">distribution</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span>
+
+<span class="c1"># Model the source</span>
+<span class="n">psf</span> <span class="o">=</span> <span class="n">resolved</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>ResolvedSource(
+  spectrum=Spectrum(wavelengths=f32[10], weights=f32[10]),
+  position=f32[2],
+  flux=10000.0,
+  distribution=f32[10,10]
+)
+</code></pre>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Resolved Source&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psf</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Sqrt Photons&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p><img alt="png" src="../sources_files/sources_10_0.png" /></p>
+<h2 id="binarysource">BinarySource</h2>
+<p>The <code>BinarySource</code> class parametrises two point sources with 6 parameters:</p>
+<ol>
+<li><code>position</code> - the mean position of the source in the sky, in radians.</li>
+<li><code>separation</code> - the separation of the two sources, in radians.</li>
+<li><code>position_angle</code> - the position angle of the two sources, in radians.</li>
+<li><code>mean_flux</code> - the mean flux of the sources, in photons.</li>
+<li><code>contrast</code> - the contrast of the two sources, in photons.</li>
+<li><code>spectrum</code> - the spectrum of the sources.</li>
+</ol>
+<p>We can also pass in an array of <code>weights</code> in order to give them <em>different</em> spectra. Lets create one and model it through an optical system.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Define the source properties</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)])</span>
+
+<span class="c1"># Construct the source object and examine it</span>
+<span class="n">binary</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">BinarySource</span><span class="p">(</span>
+    <span class="n">wavelengths</span><span class="p">,</span>
+    <span class="n">mean_flux</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span>
+    <span class="n">contrast</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span>
+    <span class="n">separation</span><span class="o">=</span><span class="n">dlu</span><span class="o">.</span><span class="n">arcsec2rad</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span>
+
+<span class="c1"># Model the source</span>
+<span class="n">psf</span> <span class="o">=</span> <span class="n">binary</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>BinarySource(
+  spectrum=Spectrum(wavelengths=f32[10], weights=f32[2,10]),
+  position=f32[2],
+  mean_flux=10000.0,
+  separation=4.84813681109536e-06,
+  position_angle=1.5707963267948966,
+  contrast=5.0
+)
+</code></pre>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Binary Source PSF&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psf</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Sqrt Photons&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p><img alt="png" src="../sources_files/sources_13_0.png" /></p>
+<h2 id="pointresolvedsource">PointResolvedSource</h2>
+<p>The PointResolved source is a combination of the <code>PointSource</code> and <code>ResolvedSource</code> classes, allowing for a point source <em>and</em> a resolved component to be modelled simultaneously. It has the following attributes:</p>
+<ol>
+<li><code>position</code> - the position of the source in the sky, in radians.</li>
+<li><code>flux</code> - the mean flux of the point and resolved source, in photons.</li>
+<li><code>contrast</code> - the contrast of the two sources, in photons.</li>
+<li><code>spectrum</code> - the spectrum of the source.</li>
+<li><code>distribution</code> - the distribution of the resolved source.</li>
+</ol>
+<p>Lets create one and model it through an optical system.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Define the source properties</span>
+<span class="n">wavelengths</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">distribution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+
+<span class="c1"># Construct the source object and examine it</span>
+<span class="n">point_resolved</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointResolvedSource</span><span class="p">(</span>
+    <span class="n">wavelengths</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">contrast</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">point_resolved</span><span class="p">)</span>
+
+<span class="c1"># Model the source</span>
+<span class="n">psf</span> <span class="o">=</span> <span class="n">point_resolved</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>PointResolvedSource(
+  spectrum=Spectrum(wavelengths=f32[10], weights=f32[2,10]),
+  position=f32[2],
+  flux=1000000.0,
+  distribution=f32[1,100],
+  contrast=5.0
+)
+</code></pre>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Point Resolved Source PSF&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psf</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Sqrt Photons&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p><img alt="png" src="../sources_files/sources_16_0.png" /></p>
+<h2 id="pointsources">PointSources</h2>
+<p>The <code>PointSources</code> class is very similar to the <code>PointSource</code> class, simple expanding the first axes of all the <code>PointSource</code> attributes in order to model multiple point sources simultaneously. It has the following attributes:</p>
+<ol>
+<li><code>position</code> - the positions of the sources in the sky, in radians.</li>
+<li><code>flux</code> - the fluxes of the sources, in photons.</li>
+<li><code>spectrum</code> - the spectrum of the sources.</li>
+</ol>
+<p>Lets create one and model it through an optical system.</p>
+<div class="highlight"><pre><span></span><code><span class="n">wavelengths</span> <span class="o">=</span> <span class="mf">1e-6</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">dr</span> <span class="o">=</span> <span class="n">dlu</span><span class="o">.</span><span class="n">arcsec2rad</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">jr</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">jr</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">minval</span><span class="o">=-</span><span class="n">dr</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="n">dr</span><span class="p">)</span>
+<span class="n">fluxes</span> <span class="o">=</span> <span class="n">jr</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">jr</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">20</span><span class="p">,),</span> <span class="n">minval</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="mf">1e4</span><span class="p">)</span>
+
+<span class="c1"># Construct the source object and examine it</span>
+<span class="n">points</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">PointSources</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">fluxes</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+<span class="c1"># Model the source</span>
+<span class="n">psf</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>PointSources(
+  spectrum=Spectrum(wavelengths=f32[10], weights=f32[10]),
+  position=f32[20,2],
+  flux=f32[20]
+)
+</code></pre>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Point Sources PSF&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psf</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Photons&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p><img alt="png" src="../sources_files/sources_19_0.png" /></p>
+<h2 id="scene">Scene</h2>
+<p>The <code>Scene</code> class is a simple container class for <code>Source</code> objects, allowing for multiple sources to be modelled simultaneously. It behaves similarly to optical systems in dLux, taking in a list of <code>Source</code> objects that are stored in a dictionary. Lets model a series of the sources we just created through an optical system.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Define the sources</span>
+<span class="n">sources</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;resolved&quot;</span><span class="p">,</span> <span class="n">point_resolved</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;points&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">)]</span>
+
+<span class="c1"># Construct the scene object and examine it</span>
+<span class="n">scene</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">Scene</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">scene</span><span class="p">)</span>
+
+<span class="c1"># Model the scene</span>
+<span class="n">psf</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">optics</span><span class="p">)</span>
+</code></pre></div>
+<pre><code>Scene(
+  sources={
+    'resolved':
+    PointResolvedSource(
+      spectrum=Spectrum(wavelengths=f32[10], weights=f32[2,10]),
+      position=f32[2],
+      flux=1000000.0,
+      distribution=f32[1,100],
+      contrast=5.0
+    ),
+    'points':
+    PointSources(
+      spectrum=Spectrum(wavelengths=f32[10], weights=f32[10]),
+      position=f32[20,2],
+      flux=f32[20]
+    )
+  }
+)
+</code></pre>
+<div class="highlight"><pre><span></span><code><span class="c1"># Plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Scene PSF&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">psf</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Photons&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p><img alt="png" src="../sources_files/sources_22_0.png" /></p>
+<div class="highlight"><pre><span></span><code>
+</code></pre></div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.sections", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.6eac0284.min.js"></script>
+      
+    
+  </body>
+</html>
