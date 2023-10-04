@@ -1,32 +1,31 @@
-# Coordinates Utility Functions
+# Coordinates
 
 This module contains a series of functions which are used to calculate coordinate arrays, apply transformations to coordinate arrays, and convert between Cartesian and polar coordinates.
 
-## Polar to Cartesian
-
-Converts a polar coordinate array to Cartesian coordinates.
-
-??? info "Polar to Cartesian API"
-    ::: dLux.utils.coordinates.polar_to_cart
-
-## Cartesian to Polar
-
-Converts a Cartesian coordinate array to polar coordinates.
-
-??? info "Cartesian to Polar API"
-    ::: dLux.utils.coordinates.cart_to_polar
-
-## Pixel Coords
-
-Calculates the coordinates of the pixel centers for the given input,
-    assuming an equal size and pixel scale in all dimensions. Similar to `pixel_coordinates()`, but with a simplified API.
-
-??? info "Pixel Coords API"
+???+ info "pixel_coords"
     ::: dLux.utils.coordinates.pixel_coords
 
-## Pixel Coordinates
+???+ info "nd_coords"
+    ::: dLux.utils.coordinates.nd_coords
 
-Calculates the coordinates of the pixel centers for the given input, without the underlying assumptions of `pixel_coords()`.
+???+ info "cart2polar"
+    ::: dLux.utils.coordinates.cart2polar
 
-??? info "Pixel Coordinates API"
-    ::: dLux.utils.coordinates.pixel_coordinates
+???+ info "polar2cart"
+    ::: dLux.utils.coordinates.polar2cart
+
+---
+
+These remaining functions are primarily used as a back-end, and are not geared to be user-facing. For user-friendly coordinate transformations, use the `dLux.CoordTransform` class.
+
+???+ info "translate_coords"
+    ::: dLux.utils.coordinates.translate_coords
+
+???+ info "compress_coords"
+    ::: dLux.utils.coordinates.compress_coords
+
+???+ info "shear_coords"
+    ::: dLux.utils.coordinates.shear_coords
+
+???+ info "rotate_coords"
+    ::: dLux.utils.coordinates.rotate_coords

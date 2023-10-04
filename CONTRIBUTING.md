@@ -1,6 +1,6 @@
 # Contributing Guide
 
-dLux is an open-source framework and as such is very welcoming to contributions via pull requests! If you would like to contribute but are unfamiliar with any of this process, as I imagine many coming from a science background will be, please feel free to reach out to me at my [email](louis.desdoigts@sydney.edu.au) or on [twitter](https://twitter.com/gradientrider) and I will be happy to help you through the process!
+dLux is an open-source framework and as such is very welcoming to contributions via pull requests! If you would like to contribute but are unfamiliar with any of this process, as I imagine many coming from a science background will be, please feel free to reach out to me at my [email](mailto:louis.desdoigts@sydney.edu.au) or on [twitter](https://twitter.com/gradientrider) and I will be happy to help you through the process!
 
 ---
 

@@ -1,31 +1,9 @@
 # Interpolation Utility Functions
 
-This module contains some basic interpolation functions that can be used on arrays and wavefronts.
+This module contains basic paraxial interpolation functions.
 
-## Scale Array
-
-Scales an array to some number of output pixels.
-
-??? info "Scale Array API"
-    ::: dLux.utils.interpolation.scale_array
-
-## Downsample
-
-Downsamples an array, taking either the mean or sum.
-
-??? info "Downsample API"
-    ::: dLux.utils.interpolation.downsample
-
-## Scale
-
-Scales an array by some sampling ratio.
-
-??? info "Scale API"
+???+ info "scale"
     ::: dLux.utils.interpolation.scale
 
-## Rotate
-
-Rotates an array by some angle in radians.
-
-??? info "Rotate API"
+???+ info "rotate"
     ::: dLux.utils.interpolation.rotate
