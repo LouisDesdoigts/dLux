@@ -31,7 +31,7 @@ For an overview of these capabilities and different optimisation methods in [Zod
 
 Documentation: [https://louisdesdoigts.github.io/dLux/](https://louisdesdoigts.github.io/dLux/)
 
-Requires: Python 3.8+, Jax 0.4.3+, Zodiax 0.4+
+Requires: Python 3.10+, Jax 0.4.13+, Zodiax 0.4+
 
 Installation: ```pip install dLux```
 
