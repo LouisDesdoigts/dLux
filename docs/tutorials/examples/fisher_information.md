@@ -49,7 +49,7 @@ Using models from the `dLuxToliman` package, we need to construct the components
 
 
 ```python
-from dLuxToliman import AlphaCen, TolimanOptics, ApplyBasisCLIMB
+from dLuxToliman import AlphaCen, TolimanOpticalSystem, ApplyBasisCLIMB
 
 # Construct source
 source = AlphaCen()
@@ -61,7 +61,7 @@ mean_wl = source.wavelengths.mean()
 mask_layer = ApplyBasisCLIMB(climb_basis, 1e-9*mean_wl, coefficients)
 
 # Construct instrument
-optics = TolimanOptics(psf_npixels=100, mask=mask_layer, radial_orders=[2, 3])
+optics = TolimanOpticalSystem(psf_npixels=100, mask=mask_layer, radial_orders=[2, 3])
 model = dl.Telescope(optics, source)
 ```
 
