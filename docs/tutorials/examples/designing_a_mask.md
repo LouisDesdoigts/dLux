@@ -144,13 +144,13 @@ These models reside in the external [`dLuxToliman`](https://github.com/maxecharl
 
 
 ```python
-from dLuxToliman import TolimanOptics, ApplyBasisCLIMB
+from dLuxToliman import TolimanOpticalSystem, ApplyBasisCLIMB
 
 # Define our mask layer, here we use ApplyBasisCLIMB
 wavels = 1e-9 * np.linspace(595, 695, 3)
 coeffs = 100*jr.normal(jr.PRNGKey(0), [len(basis)])
 CLIMB = ApplyBasisCLIMB(basis, np.mean(wavels), coeffs)
-optics = TolimanOptics(psf_npixels=64, mask=CLIMB)
+optics = TolimanOpticalSystem(psf_npixels=64, mask=CLIMB)
 ```
 
 We also add a small amount of Gaussian jitter to assist in engineering the PSF shape, then define a simple point source. We then combine all of these together into an `Instrument` object.
