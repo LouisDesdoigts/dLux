@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.8">
     
     
       
@@ -30,10 +30,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.79e020e9.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.4b4a2bd9.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.a5377069.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.356b1318.min.css">
       
       
 
@@ -1590,7 +1590,7 @@
 - the optimisable mask
 - the source
 - the optics</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">dLuxToliman</span> <span class="kn">import</span> <span class="n">AlphaCen</span><span class="p">,</span> <span class="n">TolimanOptics</span><span class="p">,</span> <span class="n">ApplyBasisCLIMB</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">dLuxToliman</span> <span class="kn">import</span> <span class="n">AlphaCen</span><span class="p">,</span> <span class="n">TolimanOpticalSystem</span><span class="p">,</span> <span class="n">ApplyBasisCLIMB</span>
 
 <span class="c1"># Construct source</span>
 <span class="n">source</span> <span class="o">=</span> <span class="n">AlphaCen</span><span class="p">()</span>
@@ -1602,7 +1602,7 @@
 <span class="n">mask_layer</span> <span class="o">=</span> <span class="n">ApplyBasisCLIMB</span><span class="p">(</span><span class="n">climb_basis</span><span class="p">,</span> <span class="mf">1e-9</span><span class="o">*</span><span class="n">mean_wl</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">)</span>
 
 <span class="c1"># Construct instrument</span>
-<span class="n">optics</span> <span class="o">=</span> <span class="n">TolimanOptics</span><span class="p">(</span><span class="n">psf_npixels</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask_layer</span><span class="p">,</span> <span class="n">radial_orders</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">optics</span> <span class="o">=</span> <span class="n">TolimanOpticalSystem</span><span class="p">(</span><span class="n">psf_npixels</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask_layer</span><span class="p">,</span> <span class="n">radial_orders</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">Telescope</span><span class="p">(</span><span class="n">optics</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
 </code></pre></div>
 <p>Visualising the mask and PSF:</p>
@@ -1775,10 +1775,10 @@ Wall time: 6.03 s
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.sections", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.sections", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.6eac0284.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.81fa17fe.min.js"></script>
       
     
   </body>

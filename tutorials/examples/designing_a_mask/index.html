@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.8">
     
     
       
@@ -30,10 +30,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.79e020e9.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.4b4a2bd9.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.a5377069.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.356b1318.min.css">
       
       
 
@@ -1719,13 +1719,13 @@
 <h2 id="optimising-the-pupil">Optimising the Pupil</h2>
 <p>First we want to construct a ∂Lux layer that we can use to design a binary mask; for this, we will use <code>ApplyBasisCLIMB</code> which soft-thresholds the edges (see <a href="https://ui.adsabs.harvard.edu/abs/2021JOSAB..38.2465W/abstract">Wong et al., 2021</a>, sec. 3.2.2). In brief, this creates an optical path difference (OPD) map as a weighted sum of modes; we set it to π phase where it is positive, we set it to zero phase where it is negative, and we soft-edge it on the edges to propagate gradients.</p>
 <p>These models reside in the external <a href="https://github.com/maxecharles/dLuxToliman"><code>dLuxToliman</code></a> package, which you can install with <code>pip install dLuxToliman</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">dLuxToliman</span> <span class="kn">import</span> <span class="n">TolimanOptics</span><span class="p">,</span> <span class="n">ApplyBasisCLIMB</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">dLuxToliman</span> <span class="kn">import</span> <span class="n">TolimanOpticalSystem</span><span class="p">,</span> <span class="n">ApplyBasisCLIMB</span>
 
 <span class="c1"># Define our mask layer, here we use ApplyBasisCLIMB</span>
 <span class="n">wavels</span> <span class="o">=</span> <span class="mf">1e-9</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">595</span><span class="p">,</span> <span class="mi">695</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="n">coeffs</span> <span class="o">=</span> <span class="mi">100</span><span class="o">*</span><span class="n">jr</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">jr</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">basis</span><span class="p">)])</span>
 <span class="n">CLIMB</span> <span class="o">=</span> <span class="n">ApplyBasisCLIMB</span><span class="p">(</span><span class="n">basis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">wavels</span><span class="p">),</span> <span class="n">coeffs</span><span class="p">)</span>
-<span class="n">optics</span> <span class="o">=</span> <span class="n">TolimanOptics</span><span class="p">(</span><span class="n">psf_npixels</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">CLIMB</span><span class="p">)</span>
+<span class="n">optics</span> <span class="o">=</span> <span class="n">TolimanOpticalSystem</span><span class="p">(</span><span class="n">psf_npixels</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">CLIMB</span><span class="p">)</span>
 </code></pre></div>
 <p>We also add a small amount of Gaussian jitter to assist in engineering the PSF shape, then define a simple point source. We then combine all of these together into an <code>Instrument</code> object.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Add some detector jitter</span>
@@ -1921,10 +1921,10 @@ Wall time: 2.84 s
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.sections", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.a264c092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.sections", "navigation.path", "navigation.indexes", "navigation.top", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.6eac0284.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.81fa17fe.min.js"></script>
       
     
   </body>
