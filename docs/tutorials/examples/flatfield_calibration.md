@@ -49,11 +49,11 @@ Let's put all this together and see how it looks.
 
 
 ```python
-from dLuxToliman import TolimanOptics
+from dLuxToliman import TolimanOpticalSystem
 
 # Construct optics
 coeffs = 2e-8 * jr.normal(jr.PRNGKey(0), (7,))
-optics = TolimanOptics(radial_orders=[2, 3], coefficients=coeffs, psf_npixels=128)
+optics = TolimanOpticalSystem(radial_orders=[2, 3], coefficients=coeffs, psf_npixels=128)
 
 # Create Detector
 det_npix = optics.psf_npixels * optics.oversample
