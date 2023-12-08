@@ -40,11 +40,11 @@ oversample = 5
 coords = dlu.pixel_coords(npix * oversample, diam)
 
 # Generate outer aperture
-primary = dlu.circle(coords, diam)
+primary = dlu.circle(coords, diam/2)
 
 # Generate secondary mirror occultation
 m2_diam = 0.305 # 30.5 cm
-secondary = dlu.circle(coords, m2_diam, invert=True)
+secondary = dlu.circle(coords, m2_diam/2, invert=True)
 
 # Generate spiders
 spider_width = 0.038 # 38 mm
