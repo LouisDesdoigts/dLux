@@ -38,7 +38,7 @@ psf_pixel_scale = 50e-3  # 50 mili-arcseconds
 oversample = 3  # Oversampling factor for the PSF
 
 # Define the optical layers
-# Note here we can pass in a tuple of (key, layer) paris to be able to
+# Note here we can pass in a tuple of (key, layer) pairs to be able to
 # access the layer from the optics object with the key!
 layers = [
     (
