@@ -247,8 +247,10 @@ Excellent! Now some keen readers may have noticed that using the `.set` method, 
 
 So that is a quick overview of how to work with dLux objects. We have seen how to access the data via paths, and how to modify the data using the `Zodiax` methods. We have also seen how to nest paths, and how to nest paths within paths. Hopefully this has given you a good overview of how to work with dLux objects, and you can now go and work with the objects with ease!
 
-TODO: Add jit to this tutorial?
+[comment]: <> (TODO: Add jit to this tutorial?)
 
-TODO: Add object vectorsation?
+[comment]: <> (TODO: Add object vectorsation?)
+
+[comment]: <> (TODO: Learn how to spell "vectorsation"?)
 
 
