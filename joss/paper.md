@@ -18,7 +18,7 @@ authors:
     affiliation: 2
     orcid: 0000-0001-8125-6494
 affiliations:
- - name: School of Physics, University of Sydney, Cammperdown, NSW 2006, Australia
+ - name: School of Physics, University of Sydney, Camperdown, NSW 2006, Australia
    index: 1
  - name: School of Mathematics and Physics, University of Queensland, St Lucia, QLD 4072, Australia
    index: 2
