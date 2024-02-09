@@ -11,7 +11,7 @@ authors:
     orcid: 0000-0002-1015-9029
     affiliation: 1 # (Multiple affiliations must be quoted)
     corresponding: true
-  - name: Benjamin J. S. PopeS
+  - name: Benjamin J. S. Pope
     affiliation: "2,3"
     orcid: 0000-0003-2595-9114
   - name: Jordan Dennis 
