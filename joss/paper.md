@@ -17,6 +17,9 @@ authors:
   - name: Jordan Dennis 
     affiliation: 2
     orcid: 0000-0001-8125-6494
+  - name: Adam K. Taras
+    orcid: 0000-0002-4558-2222
+    affiliation: 1 # (Multiple affiliations must be quoted)
 affiliations:
  - name: School of Physics, University of Sydney, Camperdown, NSW 2006, Australia
    index: 1
@@ -46,12 +49,12 @@ bibliography: paper.bib
 <!-- describe what has to happen in physical optics etc -->
 
 <!-- alternative packages for astronomy: poppy, prysm, xaosim, hcipy, whatever liaudat has -->
-Non-differentiable open-source physical optics packages used in astronomy include `poppy` [@poppy], `prysm` [@prysm], and in `WaveOpticsPropagation.jl`.
+Non-differentiable open-source physical optics packages used in astronomy include `poppy` [@poppy], `prysm` [@prysm], and in `WaveOpticsPropagation.jl`. By 
 
 Differentiable alternatives to `dLux` used in astronomy so far include `WaveDiff` [@Liaudat2023] and recent versions of `hcipy` [@hcipy]...
 
 <!-- alternative packages outside of astronomy -->
-Similar approaches using differentiable optical models have been applied in the `DeepOptics` project [@Sitzmann2018] for general cameras and `WaveBlocks` [@Page2020] in microscopy... etc
+Similar approaches using differentiable optical models have been applied in the `DeepOptics` project [@Sitzmann2018] or `dO` [@Wang2022] for general cameras and `WaveBlocks` [@Page2020] in microscopy... etc. `dLux` similarly leverages the strengths of differentiable simulation, however a focus on generic physical optics modules enables applications spanning domains and encompasses projects from the design to data processing stages.
 
 <!-- dLux is open source: briefly explain its use -->
 We introduce a new open-source physical optics package, `dLux` (named for taking *partial derivatives of light*), written in Python and using `jax`. It inherits an object oriented framework from `equinox`... etc
