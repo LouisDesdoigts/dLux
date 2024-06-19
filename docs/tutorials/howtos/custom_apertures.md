@@ -23,9 +23,9 @@ plt.rcParams['figure.dpi'] = 72
 
 ## Overview
 
-Designed to be inference engine, dLux provides a large amount of flexibilty for aperture creation. There are two main components, the coordinates and the shapes. Each aperture shape is calcaulted on a set of coordinates, which can can be transformed arbitrarily _before_ the shape is calculated. dLux implements four affine transformations, translation, rotation, compression, and shearing, however, users can implement their own transformations as well.
+Designed to be an inference engine, dLux provides a large amount of flexibilty for aperture creation. There are two main components, the coordinates and the shapes. Each aperture shape is calculated on a set of coordinates, which can can be transformed arbitrarily _before_ the shape is calculated. dLux implements four affine transformations, translation, rotation, compression, and shearing, however, users can implement their own transformations as well.
 
-Lets start by looking at the tools available for creating _static_ apertures, ie ones that are calcaulted as an array of transmission values once and don't change througout optimisation. 
+Let's start by looking at the tools available for creating _static_ apertures, ie ones that are calculated as an array of transmission values once and don't change throughout optimisation. 
 
 ## HST-like Aperture
 
