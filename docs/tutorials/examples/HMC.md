@@ -186,7 +186,6 @@ Let's examine the summary. Note: here we want to make sure that all the `r_hat` 
 
 ```python
 sampler.print_summary()
-values_out = sampler.get_samples()
 ```
 
     
@@ -205,11 +204,12 @@ values_out = sampler.get_samples()
 ```python
 import chainconsumer as cc
 
-chain = cc.ChainConsumer()
-chain.add_chain(values_out)
-chain.configure(serif=True, shade=True, bar_shade=True, shade_alpha=0.2, spacing=1., max_ticks=3)
+chain = cc.Chain.from_numpyro(sampler, "Parameter Inference", color="teal", shade_alpha=0.2)
+consumer = cc.ChainConsumer().add_chain(chain)
 
-fig = chain.plotter.plot()
+consumer.set_plot_config(PlotConfig(serif=True, spacing=1., max_ticks=3))
+
+fig = consumer.plotter.plot()
 fig.set_size_inches((15,15));
 ```
 
