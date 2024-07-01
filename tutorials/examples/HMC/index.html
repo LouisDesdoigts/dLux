@@ -1752,7 +1752,6 @@ Wall time: 53.5 s
 </code></pre>
 <p>Let's examine the summary. Note: here we want to make sure that all the <code>r_hat</code> values are $\sim1$.</p>
 <div class="highlight"><pre><span></span><code><span class="n">sampler</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
-<span class="n">values_out</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_samples</span><span class="p">()</span>
 </code></pre></div>
 <pre><code>                mean       std    median      5.0%     95.0%     n_eff     r_hat
   contrast      2.59      0.25      2.58      2.19      3.01   4132.96      1.00
@@ -1766,11 +1765,12 @@ Number of divergences: 0
 </code></pre>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">chainconsumer</span> <span class="k">as</span> <span class="nn">cc</span>
 
-<span class="n">chain</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">ChainConsumer</span><span class="p">()</span>
-<span class="n">chain</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="n">values_out</span><span class="p">)</span>
-<span class="n">chain</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">serif</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shade</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bar_shade</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shade_alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">max_ticks</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">chain</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">Chain</span><span class="o">.</span><span class="n">from_numpyro</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="s2">&quot;Parameter Inference&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="n">shade_alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">consumer</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">ChainConsumer</span><span class="p">()</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
 
-<span class="n">fig</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">consumer</span><span class="o">.</span><span class="n">set_plot_config</span><span class="p">(</span><span class="n">PlotConfig</span><span class="p">(</span><span class="n">serif</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">max_ticks</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">((</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">));</span>
 </code></pre></div>
 <p><img alt="png" src="../HMC_files/HMC_13_0.png" /></p>
