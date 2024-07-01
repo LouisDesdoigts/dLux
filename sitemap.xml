@@ -2,237 +2,237 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/faq/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/generate_mds/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/generate_umls/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/installation/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/populate_docs/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/core/detectors/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/core/instruments/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/core/optical_systems/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/core/overview/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/core/psfs/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/core/sources/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/core/spectra/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/core/transformations/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/core/wavefronts/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/layers/aberrations/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/layers/apertures/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/layers/detector_layers/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/layers/optical_layers/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/layers/optics/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/layers/propagators/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/layers/unified_layers/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/array_ops/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/coordinates/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/geometry/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/helpers/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/interpolation/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/math/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/optics/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/propagation/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/source/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/units/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/API/utils/zernikes/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/tutorials/examples/HMC/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/tutorials/examples/designing_a_mask/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/tutorials/examples/fisher_information/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/tutorials/examples/flatfield_calibration/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/tutorials/examples/phase_retrieval_demo/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/tutorials/howtos/custom_apertures/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/tutorials/howtos/dLux_objects/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/tutorials/introductory/optical_systems/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/tutorials/introductory/overview/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/tutorials/introductory/sources/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/CONTRIBUTING/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/LICENSE/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/CHANGELOG/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://louisdesdoigts.github.io/dlux/CODE_OF_CONDUCT/</loc>
-         <lastmod>2024-06-26</lastmod>
+         <lastmod>2024-07-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
