@@ -222,13 +222,9 @@ def nd_coords(
         offsets = (offsets,) * len(npixels)
 
     def pixel_fn(n, offset, scale):
-        # TODO: calculate the start and end points first and then use linspace
-        # so that ops are done on floats not arrays
-        # scale = diam / n
-        pix = np.arange(n) - (n - 1) / 2.0
-        pix *= scale
-        pix -= offset
-        return pix
+        start = -(n - 1) / 2 * scale - offset
+        end = (n - 1) / 2 * scale - offset
+        return np.linspace(start, end, n)
 
     # Generate the linear edges of each axes
     # TODO: tree_flatten()[0] to avoid squeeze?
