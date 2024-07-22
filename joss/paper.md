@@ -42,7 +42,7 @@ One of the foundational problems in optical astronomy is that of imaging scenes 
 While there are many data-driven approaches to nonparametrically inferring and subtracting this PSF [@Cantalloube2021], the motivation for our work here is to use principled deterministic physics to model optical systems; to perform high-dimensional inferences from data, jointly about telescopes and the scenes they observe; to train neural networks to model electronics together with optics; and to produce principled, high-dimensional designs for telescope hardware. These problems necessitate a physical optics model which is fast and differentiable.
 
 <!-- what is dLux -->
-In this paper we introduce `dLux`[^dlux], an open-source Python package for differentiable physical optics simulation. Leveraging `jax` [@jax] for automatic differentiation and vectorization, it deploys natively on CPU, GPU, and parallelized HPC environments. `dLux` can perform Fourier and Fresnel optical simulations using matrix and FFT based propagation [@Soumm, as well as simulate linear and nonlinear detector effects. 
+In this paper we introduce `dLux`[^dlux], an open-source Python package for differentiable physical optics simulation. Leveraging `jax` [@jax] for automatic differentiation and vectorization, it deploys natively on CPU, GPU, and parallelized HPC environments. `dLux` can perform Fourier and Fresnel optical simulations using matrix and FFT based propagation [@Soummer2007], as well as simulate linear and nonlinear detector effects. 
 
 <!-- more here -->
 
