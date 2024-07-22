@@ -9,7 +9,7 @@ tags:
 authors:
   - name: Louis Desdoigts
     orcid: 0000-0002-1015-9029
-    affiliation: 1 # (Multiple affiliations must be quoted)
+    affiliation: 1 
     corresponding: true
   - name: Benjamin J. S. Pope
     affiliation: "2,3"
@@ -19,7 +19,10 @@ authors:
     orcid: 0000-0001-8125-6494
   - name: Adam K. Taras
     orcid: 0000-0002-4558-2222
-    affiliation: 1 # (Multiple affiliations must be quoted)
+    affiliation: 1 
+  - name: Max Charles
+    orcid:
+    affiliation: 1
 affiliations:
  - name: School of Physics, University of Sydney, Camperdown, NSW 2006, Australia
    index: 1
@@ -27,13 +30,14 @@ affiliations:
    index: 2
  - name: Centre for Astrophysics, University of Southern Queensland, West Street, Toowoomba, QLD 4350, Australia
    index: 3
-date: 9 Feb 2024
+date: 22 Jul 2024
 bibliography: paper.bib
 ---
 
 # Summary
 
 <!-- why physical optics in astronomy  -->
+One of the foundational problems in optical astronomy is that of imaging scenes at resolutions close to the diffraction limit of a telescope. This is important both in ground-based astronomy, where the turbulent atmosphere blurs the 
 
 <!-- what is dLux -->
 `dLux`[^dlux] is an first open-source Python package for physical optics simulation. Using `jax` [@jax] it is differentiable and deploys natively on CPU, GPU, and parallelized HPC environments. `dLux` can perform Fourier optical simulations using matrix and FFT based propagation, as well as simulate linear and nonlinear detector effects. 
