@@ -37,10 +37,12 @@ bibliography: paper.bib
 # Summary
 
 <!-- why physical optics in astronomy  -->
-One of the foundational problems in optical astronomy is that of imaging scenes at resolutions close to the diffraction limit of a telescope. One of the most stringent cases for high-dynamic-range, high-resolution imaging is exoplanet direct imaging [@Follette2023], whether with adaptive optics systems on large telescopes on Earth [@Guyon2018], or with space-based imagers such as the James Webb Space Telescope coronagraphs [@Boccaletti2022,@Girard2022] and interferometer [@Sivaramakrishnan2023]. In each case, a central issue is in accurately modelling the point spread function (PSF) of the telescope: the diffraction pattern by which light from a point source is spread out over the detector, which is affected by wavelength-scale irregularities at each optical surface the light encounters, and which can drown out the signals of faint planets and circumstellar material. While there are many data-driven approaches to nonparametrically inferring and subtracting this PSF [@Cantalloube2021], the motivation for our work here is to use principled deterministic physics to model optical systems; to perform high-dimensional inferences from data, jointly about telescopes and the scenes they observe; to train neural networks to model electronics together with optics; and to produce principled, high-dimensional designs for telescope hardware. These problems necessitate a physical optics model which is fast and differentiable.
+One of the foundational problems in optical astronomy is that of imaging scenes at resolutions close to the diffraction limit of a telescope. One of the most stringent cases for high-dynamic-range, high-resolution imaging is exoplanet direct imaging [@Follette2023], whether with adaptive optics systems on large telescopes on Earth [@Guyon2018], or with space-based imagers such as the James Webb Space Telescope coronagraphs [@Boccaletti2022 ; @Girard2022] and interferometer [@Sivaramakrishnan2023]. In each case, a central issue is in accurately modelling the point spread function (PSF) of the telescope: the diffraction pattern by which light from a point source is spread out over the detector, which is affected by wavelength-scale irregularities at each optical surface the light encounters, and which can drown out the signals of faint planets and circumstellar material. 
+
+While there are many data-driven approaches to nonparametrically inferring and subtracting this PSF [@Cantalloube2021], the motivation for our work here is to use principled deterministic physics to model optical systems; to perform high-dimensional inferences from data, jointly about telescopes and the scenes they observe; to train neural networks to model electronics together with optics; and to produce principled, high-dimensional designs for telescope hardware. These problems necessitate a physical optics model which is fast and differentiable.
 
 <!-- what is dLux -->
-In this paper we introduce `dLux`[^dlux], an open-source Python package for differentiable physical optics simulation. Leveraging `jax` [@jax] for automatic differentiation and vectorization, it deploys natively on CPU, GPU, and parallelized HPC environments. `dLux` can perform Fourier optical simulations using matrix and FFT based propagation, as well as simulate linear and nonlinear detector effects. 
+In this paper we introduce `dLux`[^dlux], an open-source Python package for differentiable physical optics simulation. Leveraging `jax` [@jax] for automatic differentiation and vectorization, it deploys natively on CPU, GPU, and parallelized HPC environments. `dLux` can perform Fourier and Fresnel optical simulations using matrix and FFT based propagation [@Soumm, as well as simulate linear and nonlinear detector effects. 
 
 <!-- more here -->
 
@@ -53,15 +55,15 @@ In this paper we introduce `dLux`[^dlux], an open-source Python package for diff
 <!-- describe what has to happen in physical optics etc -->
 
 <!-- alternative packages for astronomy: poppy, prysm, xaosim, hcipy, whatever liaudat has -->
-Non-differentiable open-source physical optics packages used in astronomy include `poppy` [@poppy], `prysm` [@prysm], and in `WaveOpticsPropagation.jl`. By 
+Non-differentiable open-source physical optics packages used in astronomy include `poppy` [@poppy], `prysm` [@prysm]. By 
 
-Differentiable alternatives to `dLux` used in astronomy so far include `WaveDiff` [@Liaudat2023] and recent versions of `hcipy` [@hcipy]...
+Differentiable alternatives to `dLux` used in astronomy so far include `WaveDiff` [@Liaudat2023] and recent versions of `hcipy` [@hcipy].
 
 <!-- alternative packages outside of astronomy -->
-Similar approaches using differentiable optical models have been applied in the `DeepOptics` project [@Sitzmann2018] or `dO` [@Wang2022] for general cameras and `WaveBlocks` [@Page2020] in microscopy... etc. `dLux` similarly leverages the strengths of differentiable simulation, however a focus on generic physical optics modules enables applications spanning domains and encompasses projects from the design to data processing stages.
+Similar approaches using differentiable optical models have been applied in the `DeepOptics` project [@Sitzmann2018]; `WaveBlocks` [@Page2020] in microscopy; `dO` [@Wang2022] for general cameras; and in `WaveOpticsPropagation.jl` [@Wechsler24]. `dLux` similarly leverages the strengths of differentiable simulation, however a focus on generic physical optics modules enables applications spanning domains and encompasses projects from the design to data processing stages.
 
 <!-- dLux is open source: briefly explain its use -->
-We introduce a new open-source physical optics package, `dLux` (named for taking *partial derivatives of light*), written in Python and using `jax`. It inherits an object oriented framework from `equinox`... etc
+We introduce a new open-source physical optics package, `dLux` (named for taking *partial derivatives of light*), written in Python and using `jax`. It inherits an object oriented framework from `equinox` [@kidger2021equinox]
 
 - class or feature 1
 - class or feature 2, etc
