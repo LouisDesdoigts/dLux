@@ -37,10 +37,10 @@ bibliography: paper.bib
 # Summary
 
 <!-- why physical optics in astronomy  -->
-One of the foundational problems in optical astronomy is that of imaging scenes at resolutions close to the diffraction limit of a telescope. This is important both in ground-based astronomy, where the turbulent atmosphere blurs the 
+One of the foundational problems in optical astronomy is that of imaging scenes at resolutions close to the diffraction limit of a telescope. One of the most stringent cases for high-dynamic-range, high-resolution imaging is exoplanet direct imaging [@Follette2023], whether with adaptive optics systems on large telescopes on Earth [@Guyon2018], or with space-based imagers such as the James Webb Space Telescope coronagraphs [@Boccaletti2022,@Girard2022] and interferometer [@Sivaramakrishnan2023]. In each case, a central issue is in accurately modelling the point spread function (PSF) of the telescope: the diffraction pattern by which light from a point source is spread out over the detector, which is affected by wavelength-scale irregularities at each optical surface the light encounters, and which can drown out the signals of faint planets and circumstellar material. While there are many data-driven approaches to nonparametrically inferring and subtracting this PSF [@Cantalloube2021], the motivation for our work here is to use principled deterministic physics to model optical systems; to perform high-dimensional inferences from data, jointly about telescopes and the scenes they observe; to train neural networks to model electronics together with optics; and to produce principled, high-dimensional designs for telescope hardware. These problems necessitate a physical optics model which is fast and differentiable.
 
 <!-- what is dLux -->
-`dLux`[^dlux] is an first open-source Python package for physical optics simulation. Using `jax` [@jax] it is differentiable and deploys natively on CPU, GPU, and parallelized HPC environments. `dLux` can perform Fourier optical simulations using matrix and FFT based propagation, as well as simulate linear and nonlinear detector effects. 
+In this paper we introduce `dLux`[^dlux], an open-source Python package for differentiable physical optics simulation. Leveraging `jax` [@jax] for automatic differentiation and vectorization, it deploys natively on CPU, GPU, and parallelized HPC environments. `dLux` can perform Fourier optical simulations using matrix and FFT based propagation, as well as simulate linear and nonlinear detector effects. 
 
 <!-- more here -->
 
