@@ -50,7 +50,7 @@ psf_pixel_scale = 50e-3  # 50 mili-arcseconds
 oversample = 3  # Oversampling factor for the PSF
 
 # Define the optical layers
-# Note here we can pass in a tuple of (key, layer) paris to be able to 
+# Note here we can pass in a tuple of (key, layer) pairs to be able to 
 # access the layer from the optics object with the key!
 layers = [
     (
@@ -68,7 +68,7 @@ optics = dl.AngularOpticalSystem(
 wavels = 1e-6 * np.linspace(1, 1.2, 10)
 psf = optics.propagate(wavels)
 
-# Get out aperture transmission for plotting
+# Get our aperture transmission for plotting
 # Note we can use the 'aperture' key we supplied in the layers to access 
 # that layer directly from the optics object!
 transmission = optics.aperture.transmission
@@ -148,7 +148,7 @@ optics = dl.AngularOpticalSystem(
 )
 psf = optics.propagate(wavels)
 
-# Get out aperture aberrations for plotting
+# Get our aperture aberrations for plotting
 aberrations = optics.aberrations.eval_basis()
 
 # Print the new object
@@ -245,7 +245,7 @@ plt.show()
 
 ## Taking Gradients
 
-One of primary benefits of dLux is it is _differentiable_, meaning we can use autodiff to take gradients of any parameter in out model with respect to an arbitrary loss function.
+One of primary benefits of dLux is it is _differentiable_, meaning we can use autodiff to take gradients of any parameter in our model with respect to an arbitrary loss function.
 
 To do this we will use `Zodiax`, which allows us to take gradients with respect to _specific_ parameters in our model, with a path-based interface. 
 
@@ -256,7 +256,7 @@ flux = 1e4
 data = jr.poisson(jr.PRNGKey(1), flux * optics.propagate(wavels))
 
 
-# Define out loss function, in this case a simple poisson log-likelihood
+# Define our loss function, in this case a simple poisson log-likelihood
 @zdx.filter_value_and_grad("aberrations.coefficients")
 def loss_fn(model, data):
     psf = flux * model.propagate(wavels)
@@ -297,7 +297,7 @@ print(f"Gradients object: {grads}")
 
 ## Compiling and Optimisation
 
-Working within the `jax` framework allows us to compile our code to XLA, which can significantly speed up the execution of our code. Lets do this and see how fast out model is able to evaluate! `Zodiax` provides a simple interface that allows us to compile our _whole object_ to XLA using `zdx.filter_jit`, which is very convenient.
+Working within the `jax` framework allows us to compile our code to XLA, which can significantly speed up the execution of our code. Lets do this and see how fast our model is able to evaluate! `Zodiax` provides a simple interface that allows us to compile our _whole object_ to XLA using `zdx.filter_jit`, which is very convenient.
 
 
 ```python
