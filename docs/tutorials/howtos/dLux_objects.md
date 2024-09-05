@@ -1,6 +1,6 @@
 # Working with dLux Objects
 
-This tutorial is designed to give users a quick overview of how to work with dLux objects. Build using `Equinox` and `Zodiax`, dLux objects intuitive and simple to work with, so lets have a look at how to get started.
+This tutorial is designed to give users a quick overview of how to work with dLux objects. Build using `Equinox` and `Zodiax`, dLux objects intuitive and simple to work with, so let's have a look at how to get started.
 
 
 ```python
@@ -34,7 +34,7 @@ coefficients = 50 * jr.normal(jr.PRNGKey(0), indices.shape)
 
 # Define our detector properties
 psf_npix = 64  # Number of pixels in the PSF
-psf_pixel_scale = 50e-3  # 50 mili-arcseconds
+psf_pixel_scale = 50e-3  # 50 milli-arcseconds
 oversample = 3  # Oversampling factor for the PSF
 
 # Define the optical layers
@@ -88,7 +88,7 @@ print(optics)
 
 ## Paths
 
-So now that we have our optical system set up and we can see the layout, lets have a look at how to work with them. Being built in `Zodiax`, dLux gains access to a 'path-based' interface, greatly simplifying how we work with these objects. 
+So now that we have our optical system set up and we can see the layout, let's have a look at how to work with them. Being built in `Zodiax`, dLux gains access to a 'path-based' interface, greatly simplifying how we work with these objects. 
 
 A path in `Zodiax` works very similarly to a path in a file system. It is a way of navigating through the object, and accessing the data we want via strings, joined with a dot ('.'). Here are some example paths for our optical system:
 
@@ -102,7 +102,7 @@ dLux also makes extensive use of the `__getattr__` methods, which allows for the
 - `'Tilt.angles'`
 - `'aperture.transmission'`
 
-Now to access these values at these paths, we can either use the `.get(path)` method, or just access the via the regular attribute accessors. Lets have a look at this in practice:
+Now to access these values at these paths, we can either use the `.get(path)` method, or just access the via the regular attribute accessors. Let's have a look at this in practice:
 
 
 ```python
@@ -142,7 +142,7 @@ print("Transmission", optics.get('aperture.transmission'))
      [0. 0. 0. ... 0. 0. 0.]]
 
 
-So, if we can access the attributes with regular accessors, what is the point of the `Zodiax` `.get` method? Well the `.get` method lets us access _multiple_ attributes at once by passing in a _list_ of paths. Lets have a look at this in practice:
+So, if we can access the attributes with regular accessors, what is the point of the `Zodiax` `.get` method? Well the `.get` method lets us access _multiple_ attributes at once by passing in a _list_ of paths. Let's have a look at this in practice:
 
 
 ```python
@@ -164,7 +164,7 @@ These paths can actually be simplified _further_, since dLux also raises attribu
 - `'transmission'`
 - `'angles'`
 
-Lets look at this in practice.
+Let's look at this in practice.
 
 **NOTE**
 
@@ -198,7 +198,7 @@ some of the zodiax methods:
 - `.min(paths, values)`
 - `.max(paths, values)`
 
-Lets use the `.add` method to see how we can modify our optical system.
+Let's use the `.add` method to see how we can modify our optical system.
 
 
 ```python
@@ -212,7 +212,7 @@ print(new_optics.get(paths))
 
 ## Nesting
 
-Zodiax goes further here, and allows to 'nest' paths, such that we can operate on _mulitple_ values in the same operation. Lets look at some examples of this in practice:
+Zodiax goes further here, and allows to 'nest' paths, such that we can operate on _mulitple_ values in the same operation. Let's look at some examples of this in practice:
 
 
 ```python
@@ -225,7 +225,7 @@ print(new_optics.get(paths))
     [0.0, Array([0., 0.], dtype=float32)]
 
 
-We can also nest _within_ our path itself, lets see how:
+We can also nest _within_ our path itself, let's see how:
 
 
 ```python
