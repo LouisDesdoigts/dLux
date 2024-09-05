@@ -269,7 +269,7 @@ loss, grads = loss_fn(model, data)
 # Note that Zodiax will return the gradients in the same structure as 
 # the model, ie, an optics object! This means we can use all the same 
 # methods to examine values as we would the normal optics object, so 
-# lets have a look.
+# let's have a look.
 print(f"Loss: {loss}\n")
 print(f"Coefficient gradients: {grads.aberrations.coefficients}\n")
 print(f"Gradients object: {grads}")
@@ -297,14 +297,14 @@ print(f"Gradients object: {grads}")
 
 ## Compiling and Optimisation
 
-Working within the `jax` framework allows us to compile our code to XLA, which can significantly speed up the execution of our code. Lets do this and see how fast our model is able to evaluate! `Zodiax` provides a simple interface that allows us to compile our _whole object_ to XLA using `zdx.filter_jit`, which is very convenient.
+Working within the `jax` framework allows us to compile our code to XLA, which can significantly speed up the execution of our code. Let's do this and see how fast our model is able to evaluate! `Zodiax` provides a simple interface that allows us to compile our _whole object_ to XLA using `zdx.filter_jit`, which is very convenient.
 
 
 ```python
 # First we start by jit-compiling our loss function
 jit_loss = zdx.filter_jit(loss_fn)
 
-# Now lets have a look at the performance of the loss function
+# Now let's have a look at the performance of the loss function
 # Note we need to use the block_until_ready() method to ensure 
 # the computation is timed correctly, this is because jax uses 
 # asynchronous computation by default.

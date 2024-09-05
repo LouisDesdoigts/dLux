@@ -22,7 +22,7 @@ plt.rcParams["image.origin"] = 'lower'
 plt.rcParams['figure.dpi'] = 72
 ```
 
-First lets whip up an optical system that we can use to propagate the sources through.
+First let's whip up an optical system that we can use to propagate the sources through.
 
 
 ```python
@@ -55,7 +55,7 @@ The `Source` and `Spectrum` classes in dLux work in tandem, with all `Source` ob
 1. `Spectrum` is a simple array-based spectrum, contating `wavelengths` and `weights`.
 2. `PolySpectrum` is a simple polynomial spectrum, containing `wavelengths` and `coefficients`.
 
-In general users will not need to intract with the `Spectrum` objects directly, as they are automatically instatiated when creating a `Source` object. Lets take a look at the various different `Source` classes implemented in dLux.
+In general users will not need to intract with the `Spectrum` objects directly, as they are automatically instatiated when creating a `Source` object. Let's take a look at the various different `Source` classes implemented in dLux.
 
 1. `PointSource`
 4. `ResolvedSource`
@@ -66,7 +66,7 @@ In general users will not need to intract with the `Spectrum` objects directly, 
 
 They all have a similar interface, having both a `.normalise` and `.model` method. The `.normalise` method takes no inputs and normalises the source and spectrum, which is important during optimisation since the updates during that process can not guarantee that the source remains normalised. The model method has the following signature `.model(optical_system, return_wf=False, return_psf=False)`, mirroring the `OpticalSystem.model` method. The `return_wf` and `return_psf` flags are used to determine what object is returned. If both are `False`, the returned psf is an array, if `return_wf` is `True` the returned psf is a `Wavefront` object, and if `return_psf` is `True` the returned psf is a `PSF` object.
 
-Ands that about all there is to the `Source` objects! So lets jump in and have a look at these classes.
+Ands that about all there is to the `Source` objects! So let's jump in and have a look at these classes.
 
 ### Initialising the Spectrum
 
@@ -80,7 +80,7 @@ The `PointSource` class is very straightforwards with three attributes:
 2. `flux` - the flux of the source, in photons.
 3. `spectrum` - the spectrum of the source.
 
-Lets create one and model it through an optical system. We will also return the `PSF` object so we can examine both the oversampled and downsampled psfs.
+Let's create one and model it through an optical system. We will also return the `PSF` object so we can examine both the oversampled and downsampled psfs.
 
 
 ```python
@@ -136,7 +136,7 @@ The resolved source operates very similarly to the `PointSource` class, only add
 3. `spectrum` - the spectrum of the source.
 4. `distribution` - the distribution of the source.
 
-Lets create one and model it through an optical system.
+Let's create one and model it through an optical system.
 
 
 ```python
@@ -189,7 +189,7 @@ The `BinarySource` class parametrises two point sources with 6 parameters:
 5. `contrast` - the contrast of the two sources, in photons.
 6. `spectrum` - the spectrum of the sources.
 
-We can also pass in an array of `weights` in order to give them _different_ spectra. Lets create one and model it through an optical system.
+We can also pass in an array of `weights` in order to give them _different_ spectra. Let's create one and model it through an optical system.
 
 
 ```python
@@ -247,7 +247,7 @@ The PointResolved source is a combination of the `PointSource` and `ResolvedSour
 3. `spectrum` - the spectrum of the source.
 4. `distribution` - the distribution of the resolved source.
 
-Lets create one and model it through an optical system.
+Let's create one and model it through an optical system.
 
 
 ```python
@@ -298,7 +298,7 @@ The `PointSources` class is very similar to the `PointSource` class, simple expa
 2. `flux` - the fluxes of the sources, in photons.
 3. `spectrum` - the spectrum of the sources.
 
-Lets create one and model it through an optical system.
+Let's create one and model it through an optical system.
 
 
 ```python
@@ -340,7 +340,7 @@ plt.show()
 
 ## Scene
 
-The `Scene` class is a simple container class for `Source` objects, allowing for multiple sources to be modelled simultaneously. It behaves similarly to optical systems in dLux, taking in a list of `Source` objects that are stored in a dictionary. Lets model a series of the sources we just created through an optical system.
+The `Scene` class is a simple container class for `Source` objects, allowing for multiple sources to be modelled simultaneously. It behaves similarly to optical systems in dLux, taking in a list of `Source` objects that are stored in a dictionary. Let's model a series of the sources we just created through an optical system.
 
 
 ```python

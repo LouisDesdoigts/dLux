@@ -47,7 +47,7 @@ These attributes define the size of the PSF, the pixel scale of the PSF, and the
 
 Beyond this, the `CartesianOpticalSystem` has an extra attribute `focal_length`, with units of meters.
 
-Now lets create a minimal `AnguarOpticalSystem` to demonstrate how to use these classes.
+Now let's create a minimal `AnguarOpticalSystem` to demonstrate how to use these classes.
 
 
 ```python
@@ -99,7 +99,7 @@ All three of these object are quite similar, and share the same three primary me
 2. `.propagate`
 3. `.model`
 
-Lets look at them one-by-one.
+Let's look at them one-by-one.
 
 ## `propagate_mono`
 
@@ -109,7 +109,7 @@ Lets look at them one-by-one.
 - `offset` is the offset of the source from the center of optical system, in radians
 - `return_wf` is a boolean flag that determines whether the wavefront object should be returned, as opposed to the psf array.
 
-Note that the `propagate_mono` method should generally not be used, as its functionality is superceeded by the `propagate` method, but lets look at how it works anyway.
+Note that the `propagate_mono` method should generally not be used, as its functionality is superceeded by the `propagate` method, but let's look at how it works anyway.
 
 
 ```python
@@ -213,7 +213,7 @@ plt.show()
 - `return_wf` is a boolean flag that determines whether the `Wavefront` object should be returned, as opposed to the psf array.
 - `return_psf` is a boolean flag that determines whether the `PSF` object should be returned, as opposed to the psf array.
 
-Lets see how to ues it.
+Let's see how to use it.
 
 
 ```python
@@ -253,7 +253,7 @@ plt.show()
     
 
 
-Now lets see how the amplitudes and phases look.
+Now let's see how the amplitudes and phases look.
 
 
 ```python
@@ -312,7 +312,7 @@ plt.show()
     
 
 
-We can also return the `PSF` object too, allowing us to keep track of the pixel scale and perform operations like downsampling. Lets have a look at that now
+We can also return the `PSF` object too, allowing us to keep track of the pixel scale and perform operations like downsampling. Let's have a look at that now
 
 
 ```python
@@ -322,7 +322,7 @@ PSF = optics.propagate(wavelengths, offset, weights, return_psf=True)
 # Downsample the PSF to the 'true' pixel scale
 true_PSF = PSF.downsample(oversample)
 
-# Lets examine it, and plot it
+# Let's examine it, and plot it
 print(true_PSF)
 
 # Plot
@@ -353,7 +353,7 @@ plt.show()
 - `return_wf` is a boolean flag that determines whether the `Wavefront` object should be returned, as opposed to the psf array.
 - `return_psf` is a boolean flag that determines whether the `PSF` object should be returned, as opposed to the psf array.
 
-Lets see how to ues it, although we will not look at the `return_wf` and `return_psf` flags as they behave identically to the above example.
+Let's see how to use it, although we will not look at the `return_wf` and `return_psf` flags as they behave identically to the above example.
 
 
 ```python
