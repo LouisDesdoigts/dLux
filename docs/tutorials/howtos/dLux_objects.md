@@ -60,7 +60,7 @@ optics = dl.AngularOpticalSystem(
 )
 
 
-# Let examine the optics object! The dLux framework has in-built
+# Let's examine the optics object! The dLux framework has in-built
 # pretty-printing, so we can just print the object to see what it contains.
 print(optics)
 ```
@@ -241,7 +241,7 @@ print(new_optics.get(paths))
     [1, 1, 2]
 
 
-Excellent! Now some keen readers may have noticed that using the `.set` method, the `transmission` values has changes from an array to a float! This is becuase there is no _robust_ way to do runtime type and shape checking, plus sometimes we may want to change the type anyway. Do be cognisant when setting values that you are setting then to valid types for the object.
+Excellent! Now some keen readers may have noticed that by using the `.set` method, the `transmission` values have changed from an array to a float! This is becuase there is no _robust_ way to do runtime type and shape checking, plus sometimes we may want to change the type anyway. Do be cognisant when setting values that you are setting then to valid types for the object.
 
 **Summary**
 
