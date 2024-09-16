@@ -31,7 +31,7 @@ plt.rcParams["image.origin"] = 'lower'
 plt.rcParams['figure.dpi'] = 72
 ```
 
-We want to construct a basic optical system with a $2.4\, \text{m}$ aperture, along with some Zernike aberrations and a bar mask.
+We want to construct a basic optical system with a $2.4 \text{ m}$ aperture, along with some Zernike aberrations and a bar mask.
 
 We also create a simple `PointSource` object that we want to model.
 
@@ -115,7 +115,7 @@ Excellent! Now we want to try and recover these aberrations. To do this, we crea
 # Define path to the zernikes
 param = 'aperture.coefficients'
 coeffs_init = 1e-7*jr.normal(jr.PRNGKey(2), (len(coeffs),))
-model = optics.multiply(param, 0)
+model = optics.multiply(param, coeffs_init)
 ```
 
 Now we need to define our loss function, and specify that we want to optimise the Zernike coefficients. To do this, we pass the string path to the Zernike coefficients into the `zdx.filter_value_and_grad()` function. Note that we also use the `zdx.filter_jit()` function in order to compile this function into XLA so that future evaluations will be much faster!
