@@ -156,7 +156,7 @@ plt.figure(figsize=(25, 4))
 for i in range(len(psfs)):
     plt.subplot(1, 5, i+1)
     plt.title(f"Residual: {i+1}")
-    plt.imshow((psfs[i] - data[i])*1e-3)
+    plt.imshow((psfs[i] - data[i])*1e-3,cmap='coolwarm')
     plt.xlabel("x (arcsec)")
     plt.ylabel("y (arcsec)")
     plt.colorbar(label='Photons $x10^3$')
