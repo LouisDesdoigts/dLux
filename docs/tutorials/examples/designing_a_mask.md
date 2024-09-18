@@ -99,6 +99,7 @@ Orthonormalise with PCA -- you could also use Gram-Schmidt if you prefer.
 try:
     basis = np.load('files/basis.npy')
 except FileNotFoundError:
+    import os
     from sklearn.decomposition import PCA
     pca = PCA().fit(full_basis)
 
@@ -107,6 +108,7 @@ except FileNotFoundError:
     basis = np.concatenate([np.mean(pca.mean_)*np.array(np.ones((1,npix,npix))), components])
 
     # save for use later
+    os.makedirs('files', exist_ok=True)
     np.save('files/basis', basis)
 ```
 
