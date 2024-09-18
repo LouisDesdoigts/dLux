@@ -183,7 +183,7 @@ rmax = 8*sampling_rate # 8 lam/D
 ```python
 aperture = tel.aperture.transmission
 mask = tel.pupil.get_binary_phase()
-outer = plt.Circle((64, 64), rmax, fill=False, color='w')
+outer = plt.Circle((128, 128), rmax, fill=False, color='w')
 
 plt.figure(figsize=(10, 4))
 plt.subplot(1, 2, 1)
