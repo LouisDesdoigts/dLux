@@ -17,7 +17,7 @@ This notebook follows on from [Phase Mask Design](designing_a_mask.md) and will 
 ```python
 # Core jax
 import jax
-from jax.config import config
+from jax import config
 
 import jax.numpy as np
 import jax.random as jr
