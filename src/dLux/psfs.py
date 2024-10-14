@@ -79,7 +79,7 @@ class PSF(Base):
         """
         return self.set("data", dlu.downsample(self.data, n, mean=False))
 
-    def convolve(self: PSF, other: Array) -> PSF:
+    def convolve(self: PSF, other: Array, **kwargs) -> PSF:
         """
         Convolves the psf with some input array.
 
@@ -93,7 +93,9 @@ class PSF(Base):
         psf : PSF
             The convolved psf.
         """
-        return self.set("data", convolve(self.data, other, mode="same"))
+        return self.set(
+            "data", convolve(self.data, other, mode="same", **kwargs)
+        )
 
     def rotate(self: PSF, angle: float, order: int = 1) -> PSF:
         """
