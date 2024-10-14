@@ -79,7 +79,7 @@ class PSF(Base):
         """
         return self.set("data", dlu.downsample(self.data, n, mean=False))
 
-    def convolve(self: PSF, other: Array, method="auto") -> PSF:
+    def convolve(self: PSF, other: Array, method: str = "auto") -> PSF:
         """
         Convolves the psf with some input array.
 
@@ -88,7 +88,7 @@ class PSF(Base):
         other : Array
             The psf to convolve with.
         method : str = "auto"
-            The method to use for the convolution. Can be "auto", "direct", 
+            The method to use for the convolution. Can be "auto", "direct",
             or "fft". Is "auto" by default, which calls "direct".
 
         Returns
