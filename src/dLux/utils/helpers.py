@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import Any, Callable
 import jax.numpy as np
-from jax.tree_util import tree_flatten, tree_map
+import jax.tree as jtu
 from jax import Array
 
 __all__ = ["map2array", "list2dictionary", "insert_layer", "remove_layer"]
@@ -27,9 +27,9 @@ def map2array(fn: Callable, tree: Any, leaf_fn: Callable = None) -> Array:
         The flattened array of the pytree.
     """
     if leaf_fn is not None:
-        return np.array(tree_flatten(tree_map(fn, tree, is_leaf=leaf_fn))[0])
+        return np.array(jtu.flatten(jtu.map(fn, tree, is_leaf=leaf_fn))[0])
     else:
-        return np.array(tree_flatten(tree_map(fn, tree))[0])
+        return np.array(jtu.flatten(jtu.map(fn, tree))[0])
 
 
 def list2dictionary(
