@@ -2,8 +2,9 @@ from __future__ import annotations
 from typing import Any
 from abc import abstractmethod
 import jax.numpy as np
+import jax.tree as jtu
 from jax.scipy.signal import convolve
-from jax import vmap, Array, tree_map
+from jax import vmap, Array, tree
 from zodiax import filter_vmap, Base
 import dLux.utils as dlu
 from dLux import spectra
@@ -692,7 +693,7 @@ class PointResolvedSource(ResolvedSource):
             conv_wf = wf.set("amplitude", vmap(conv_fn)(wf.psf) ** 0.5)
 
             # Stack leaves manually, this is a bit of a hack to get around
-            # string leaf errors from tree_map, and to avoid
+            # string leaf errors from jtu.map, and to avoid
             # flattening/unflattening with partition and combine
             stack_leaves = lambda x, y: np.stack([x, y], axis=0)
             amplitudes = stack_leaves(wf.amplitude, conv_wf.amplitude)
@@ -757,7 +758,7 @@ class Scene(BaseSource):
         """
         is_source = lambda leaf: isinstance(leaf, BaseSource)
         norm_fn = lambda source: source.normalise()
-        sources = tree_map(norm_fn, self.sources, is_leaf=is_source)
+        sources = jtu.map(norm_fn, self.sources, is_leaf=is_source)
         return self.set("sources", sources)
 
     def __getattr__(self: Source, key: str) -> Any:
@@ -810,7 +811,7 @@ class Scene(BaseSource):
 
         # Define leaf_fn and map across sources
         leaf_fn = lambda leaf: isinstance(leaf, BaseSource)
-        output = tree_map(
+        output = jtu.map(
             lambda s: s.model(optics, return_wf, return_psf),
             self.sources,
             is_leaf=leaf_fn,
