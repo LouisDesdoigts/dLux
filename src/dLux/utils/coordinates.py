@@ -1,6 +1,6 @@
 import jax.numpy as np
+import jax.tree as jtu
 from jax import Array
-from jax.tree_util import tree_map
 from typing import Union
 
 __all__ = [
@@ -227,8 +227,8 @@ def nd_coords(
         return np.linspace(start, end, n)
 
     # Generate the linear edges of each axes
-    # TODO: tree_flatten()[0] to avoid squeeze?
-    lin_pixels = tree_map(pixel_fn, npixels, offsets, pixel_scales)
+    # TODO: tree.flatten()[0] to avoid squeeze?
+    lin_pixels = jtu.map(pixel_fn, npixels, offsets, pixel_scales)
 
     # output (x, y) for 2d, else in order
     positions = np.array(np.meshgrid(*lin_pixels, indexing=indexing))
