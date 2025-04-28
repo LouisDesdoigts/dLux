@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import Any
 from equinox import filter
 from jax import Array, numpy as np
-from jax.tree_util import tree_flatten, tree_map
+import jax.tree as jtu
 import dLux.utils as dlu
 
 from ..wavefronts import Wavefront
@@ -967,11 +967,11 @@ class CompositeAperture(BaseDynamicAperture):
 
         # Get aberrated apertures
         # TODO: use partition
-        filter_map = tree_map(
+        filter_map = jtu.map(
             is_aberrated, self.apertures, is_leaf=is_aberrated
         )
         aberrated = filter(self.apertures, filter_map)
-        return tree_flatten(aberrated, is_leaf=is_aberrated)[0]
+        return jtu.flatten(aberrated, is_leaf=is_aberrated)[0]
 
     @property
     def coefficients(self: ApertureLayer) -> list[Array]:
@@ -1002,8 +1002,8 @@ class CompositeAperture(BaseDynamicAperture):
         aberrated_apertures = self._aberrated_apertures()
         basis_fn = lambda ap: ap.calc_basis(coords)
         leaf_fn = lambda ap: isinstance(ap, AberratedAperture)
-        basii = tree_map(basis_fn, aberrated_apertures, is_leaf=leaf_fn)
-        return tree_flatten(basii)[0]
+        basii = jtu.map(basis_fn, aberrated_apertures, is_leaf=leaf_fn)
+        return jtu.flatten(basii)[0]
 
     def eval_basis(self: ApertureLayer, coords: Array) -> Array:
         """
@@ -1022,7 +1022,7 @@ class CompositeAperture(BaseDynamicAperture):
         basii = self.calc_basis(coords)
         coeffs = self.coefficients
         eval_fn = lambda basis, coeff: dlu.eval_basis(basis, coeff)
-        return np.array(tree_map(eval_fn, basii, coeffs))
+        return np.array(jtu.map(eval_fn, basii, coeffs))
 
     def transmissions(
         self: ApertureLayer, coords: Array, pixel_scale: float
@@ -1044,8 +1044,8 @@ class CompositeAperture(BaseDynamicAperture):
         """
         eval_fn = lambda ap: ap.transmission(coords, pixel_scale)
         leaf_fn = lambda ap: isinstance(ap, ApertureLayer)
-        transmissions = tree_map(eval_fn, self.apertures, is_leaf=leaf_fn)
-        return np.squeeze(np.array(tree_flatten(transmissions)[0]))
+        transmissions = jtu.map(eval_fn, self.apertures, is_leaf=leaf_fn)
+        return np.squeeze(np.array(jtu.flatten(transmissions)[0]))
 
     def apply(self: ApertureLayer, wavefront: Wavefront) -> Wavefront:
         """

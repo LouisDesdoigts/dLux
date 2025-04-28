@@ -77,7 +77,9 @@ class PSF(Base):
         psf : PSF
             The downsampled psf.
         """
-        return self.set("data", dlu.downsample(self.data, n, mean=False))
+        data = dlu.downsample(self.data, n, mean=False)
+        pixel_scale = self.pixel_scale * n
+        return self.set(["data", "pixel_scale"], [data, pixel_scale])
 
     def convolve(self: PSF, other: Array, method: str = "auto") -> PSF:
         """
