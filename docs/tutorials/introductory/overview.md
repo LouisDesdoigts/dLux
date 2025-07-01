@@ -5,7 +5,7 @@ This tutorial is designed to give users a basic introduction to the core parts o
 
 ## A Simple Optical System
 
-Lets start by constructing a very simple Airy-like optical system, and propagating multiple wavelengths through it.
+Let's start by constructing a very simple Airy-like optical system, and propagating multiple wavelengths through it.
 
 
 ```python
@@ -117,7 +117,7 @@ plt.show()
 
 ## Adding Aberrations
 
-It is very common for an optical system to have aberrations that have a significant impact on the psf, so lets see how we can model this!
+It is very common for an optical system to have aberrations that have a significant impact on the psf, so let's see how we can model this!
 
 
 ```python
@@ -324,9 +324,9 @@ print(f"Improvement: {time_regular.average/time_jit.average:.3}x faster")
     Improvement: 1.41x faster
 
 
-Excellent, now that we have our compile loss function, lets optimise our model!
+Excellent, now that we have our compile loss function, let's optimise our model!
 
-To do this we use `optax`, the gradient processing library developed by Googles DeepMind team. This library provides a number of optimisation algorithms, and we will use the `adam` optimiser here. `Zodiax` also provides a simple way to map our optimisation algorithms to our model, using `zdx.get_optimiser` function.
+To do this we use `optax`, the gradient processing library developed by Google's DeepMind team. This library provides a number of optimisation algorithms, and we will use the `adam` optimiser here. `Zodiax` also provides a simple way to map our optimisation algorithms to our model, using `zdx.get_optimiser` function.
 
 
 ```python

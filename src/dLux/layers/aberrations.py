@@ -2,7 +2,7 @@ from __future__ import annotations
 from zodiax import Base
 import jax.numpy as np
 from jax import Array
-import jax.tree_util as jtu
+import jax.tree as jtu
 import dLux.utils as dlu
 
 __all__ = ["Zernike", "ZernikeBasis"]
@@ -165,6 +165,4 @@ class ZernikeBasis(Base):
         """
         leaf_fn = lambda leaf: isinstance(leaf, Zernike)
         calculate_fn = lambda z: z.calculate(coordinates, nsides)
-        return np.array(
-            jtu.tree_map(calculate_fn, self.basis, is_leaf=leaf_fn)
-        )
+        return np.array(jtu.map(calculate_fn, self.basis, is_leaf=leaf_fn))
