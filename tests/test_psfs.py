@@ -20,7 +20,9 @@ class TestPSF:
 
     def test_methods(self, psf):
         assert psf.downsample(2).npixels == 8
+        assert psf.downsample(2).pixel_scale == 1 / 8
         assert isinstance(psf.convolve(np.ones((2, 2))), PSF)
+        assert isinstance(psf.convolve(np.ones((2, 2)), method="fft"), PSF)
         assert isinstance(psf.rotate(np.pi), PSF)
         assert isinstance(psf.resize(8), PSF)
         assert isinstance(psf.flip(0), PSF)

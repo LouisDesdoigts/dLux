@@ -23,9 +23,9 @@ plt.rcParams['figure.dpi'] = 72
 
 ## Overview
 
-Designed to be inference engine, dLux provides a large amount of flexibilty for aperture creation. There are two main components, the coordinates and the shapes. Each aperture shape is calcaulted on a set of coordinates, which can can be transformed arbitrarily _before_ the shape is calculated. dLux implements four affine transformations, translation, rotation, compression, and shearing, however, users can implement their own transformations as well.
+Designed to be an inference engine, dLux provides a large amount of flexibilty for aperture creation. There are two main components, the coordinates and the shapes. Each aperture shape is calculated on a set of coordinates, which can can be transformed arbitrarily _before_ the shape is calculated. dLux implements four affine transformations, translation, rotation, compression, and shearing, however, users can implement their own transformations as well.
 
-Lets start by looking at the tools available for creating _static_ apertures, ie ones that are calcaulted as an array of transmission values once and don't change througout optimisation. 
+Let's start by looking at the tools available for creating _static_ apertures, ie ones that are calculated as an array of transmission values once and don't change throughout optimisation. 
 
 ## HST-like Aperture
 
@@ -71,11 +71,11 @@ plt.show()
     
 
 
-Nice and simple, now we have a nice anti-aliased static HST-like aperture that we can use in our optical model! But that was a relatively simple case, what if we want to create a more complex aperture, like a segmented aperture? Lets see how we can create our own JWST-like aperture.
+Nice and simple, now we have a nice anti-aliased static HST-like aperture that we can use in our optical model! But that was a relatively simple case, what if we want to create a more complex aperture, like a segmented aperture? Let's see how we can create our own JWST-like aperture.
 
 ## JWST-like Aperture
 
-So what if we want to do something more compelx like a JWST-like aperture? The code cell below are just some simple function used to calculate the centers of each segment, eventually an optimised version of this will be included in dLux. Untill then, dont worry too much about the details. 
+So what if we want to do something more complex like a JWST-like aperture? The code cell below is just some simple functions used to calculate the centers of each segment, eventually an optimised version of this will be included in dLux. Untill then, don't worry too much about the details. 
 
 
 ```python
@@ -172,7 +172,7 @@ plt.show()
 
 ## Abstractly Transformed Apertures
 
-Since dLux apertures are calculated anaytically on a set of coordinates, we can perform various transformations to the coordinates in order to generate abstractly shaped apertures. Lets see how we can do this.
+Since dLux apertures are calculated anaytically on a set of coordinates, we can perform various transformations to the coordinates in order to generate abstractly shaped apertures. Let's see how we can do this.
 
 For an example, we will look at how we can apply a _shear_ and _rotation_ to the JWST AMI mask.
 
@@ -226,7 +226,7 @@ plt.show()
 
 ## Dynamic Apertures
 
-As an inference engine, dLux is designed to be able to handle dynamic apertures, ie apertures that change througout the optimisation process. This is useful for calibrating miss-alignments in the optical system. The fundamentals are more or less the same as the static apertures, so lets see how we could recover a miss-aligned JWST AMI mask.
+As an inference engine, dLux is designed to be able to handle dynamic apertures, ie apertures that change througout the optimisation process. This is useful for calibrating mis-alignments in the optical system. The fundamentals are more or less the same as the static apertures, so let's see how we could recover a mis-aligned JWST AMI mask.
 
 
 ```python
@@ -279,7 +279,7 @@ plt.show()
     
 
 
-Excellent, as we can see we are able to re-create the miss-aligned JWST AMI mask. Now we can double check that everything is working correctly calculating the gradients of this dynamic aperture (with a slightly different value for shear) wrt the static one we calculated earlier.
+Excellent, as we can see we are able to re-create the mis-aligned JWST AMI mask. Now we can double check that everything is working correctly by calculating the gradients of this dynamic aperture (with a slightly different value for shear) wrt the static one we calculated earlier.
 
 
 ```python
