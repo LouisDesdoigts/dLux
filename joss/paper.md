@@ -26,11 +26,11 @@ authors:
 affiliations:
  - name: School of Physics, University of Sydney, Camperdown, NSW 2006, Australia
    index: 1
- - name: School of Mathematics and Physics, University of Queensland, St Lucia, QLD 4072, Australia
+ - name: School of Mathematical and Physical Sciences, 12 Wally's Walk, Macquarie University, Macquarie Park, NSW 2113, Australia
    index: 2
- - name: Centre for Astrophysics, University of Southern Queensland, West Street, Toowoomba, QLD 4350, Australia
+ - name: School of Mathematics and Physics, University of Queensland, St Lucia, QLD 4072, Australia
    index: 3
-date: 22 Jul 2024
+date: 1 Jul 2025
 bibliography: paper.bib
 ---
 
