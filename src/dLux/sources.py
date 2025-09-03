@@ -4,7 +4,7 @@ from abc import abstractmethod
 import jax.numpy as np
 import jax.tree as jtu
 from jax.scipy.signal import convolve
-from jax import vmap, Array, tree
+from jax import vmap, Array
 from zodiax import filter_vmap, Base
 import dLux.utils as dlu
 from dLux import spectra
