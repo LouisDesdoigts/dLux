@@ -30,14 +30,14 @@ affiliations:
    index: 2
  - name: School of Mathematics and Physics, University of Queensland, St Lucia, QLD 4072, Australia
    index: 3
-date: 1 Jul 2025
+date: 14 Oct 2025
 bibliography: paper.bib
 ---
 
 # Summary
 
 <!-- what is dLux -->
-In this paper we introduce `dLux`[^dlux], an open-source Python package for differentiable physical optics simulation. Leveraging `jax` [@jax] for automatic differentiation and vectorization, it deploys natively on CPU, GPU, and parallelized HPC environments. `dLux` can perform Fourier and Fresnel optical simulations using matrix and FFT based propagation [@Soummer2007], as well as simulate linear and nonlinear detector effects. In published work so far, `dLux` has been used to demonstrate inference of pixel sensitivities jointly with optical aberrations in imaging data [@Desdoigts2023] and to demonstrate principled optimal experimental design of a telescope by direct optimization of the Fisher Information Matrix [@Desdoigts2024]. 
+In this paper we introduce `dLux`[^dlux], an open-source Python package for differentiable physical optics simulation. Leveraging `jax` [@jax] for automatic differentiation and vectorization, it deploys natively on CPU, GPU, and parallelized HPC environments. `dLux` can perform Fourier and Fresnel optical simulations using matrix and FFT based propagation [@Soummer2007], as well as simulate linear and nonlinear detector effects. In published work so far, `dLux` has been used to demonstrate inference of pixel sensitivities jointly with optical aberrations in imaging data [@Desdoigts2023] and to demonstrate principled optimal experimental design of a telescope by direct optimization of the Fisher Information Matrix [@Desdoigts2024]; and to perform and end-to-end calibration of the James Webb Aperture Masking Interferometer [@Desdoigts2025amigo,@Charles2025]. 
 
 <!-- something about zodiax? -->
 
@@ -58,16 +58,19 @@ We introduce a new open-source physical optics package, `dLux` (named for taking
 Similar approaches using differentiable optical models have been applied in the `DeepOptics` project [@Sitzmann2018]; `WaveBlocks` [@Page2020] in microscopy; `dO` [@Wang2022] for general cameras; and in `WaveOpticsPropagation.jl` [@Wechsler24]. `dLux` similarly leverages the strengths of differentiable simulation, however a focus on generic physical optics modules enables applications spanning domains and encompasses projects from the design to data processing stages.
 
 
-
 # Documentation & Case Studies
 <!-- briefly summarize tutorials  -->
 
-In the accompanying [documentation](https://louisdesdoigts.github.io/dLux), we have produced several notebooks illustrating use cases...
+In the accompanying [documentation](https://louisdesdoigts.github.io/dLux), we have produced several notebooks illustrating use cases, incuding
 
-- [example 1](https://louisdesdoigts.github.io/dLux/notebooks/whatever/);
+- [phase retrieval in simulated data](https://louisdesdoigts.github.io/dLux/notebooks/whatever/);
+- [Fisher-optimal design of a diffractive pupil](...)
 
 Figures produced for... are shown in \autoref{fig1}. 
 <!-- also ref joss_figure.py to make figure, or do similar with notebook, so that it is reproducible -->
+
+<!-- Suggestion for figure: multipanel figure with the amigo pupil, PSF, and deconvolution of Io. -->
+
 
 ![Figure Caption. \label{fig1}](joss_figure.png)
 
