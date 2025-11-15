@@ -1,7 +1,7 @@
 from __future__ import annotations
 import jax.numpy as np
 from typing import Any
-from jax import vmap, Array
+from jax import Array
 from zodiax import Base
 import dLux.utils as dlu
 import dLux
@@ -9,6 +9,15 @@ import dLux
 # Optical layers require Wavefront to init, so we alias it here to avoid MRO issues
 OpticalLayer = lambda: dLux.layers.optical_layers.OpticalLayer
 
+
+"""
+High level notes:
+
+ - Should we allow Nones to the magic methods?
+ - Should we allow .apply, rahter than enforcing call?
+    - The question here is whether we need other inputs to the call (ie normalise 
+    or other meta-parameters)
+"""
 
 __all__ = ["Wavefront"]
 
@@ -124,6 +133,30 @@ class Wavefront(Base):
         return self.phasor.imag
 
     @property
+    def amplitude(self: Wavefront) -> Array:
+        """
+        Returns the amplitude component of the `Wavefront`.
+
+        Returns
+        -------
+        wavefront : Array
+            The amplitude component of the `Wavefront` phasor.
+        """
+        return np.abs(self.phasor)
+
+    @property
+    def phase(self: Wavefront) -> Array:
+        """
+        Returns the phase component of the `Wavefront`.
+
+        Returns
+        -------
+        wavefront : Array
+            The phase component of the `Wavefront` phasor.
+        """
+        return np.angle(self.phasor)
+
+    @property
     def psf(self: Wavefront) -> Array:
         """
         Calculates the Point Spread Function (PSF), i.e. the squared modulus
@@ -204,13 +237,17 @@ class Wavefront(Base):
     #######
 
     def __add__(self: Wavefront, other: Any) -> Wavefront:
-        """Allows complex phasors or Wavefronts to be added together."""
-        # TODO: Allow NoneType?
+        """
+        Allows complex phasors or Wavefronts to be added together.
 
-        if isinstance(Array, type(other)):
+        Nones are ignored.
+        `"""
+        if isinstance(other, (Array, float, int, complex)):
             return self.set("phasor", self.phasor + other)
         elif isinstance(other, Wavefront):
             return self.set("phasor", self.phasor + other.phasor)
+        elif other is None:
+            return self
         else:
             raise TypeError(
                 "Can only add an array or Wavefront to "
@@ -218,11 +255,17 @@ class Wavefront(Base):
             )
 
     def __sub__(self: Wavefront, other: Any) -> Wavefront:
-        """Allows complex phasors or Wavefronts to be subtracted."""
-        if isinstance(Array, type(other)):
+        """
+        Allows complex phasors or Wavefronts to be subtracted.
+
+        Nones are ignored.
+        """
+        if isinstance(other, (Array, float, int, complex)):
             return self.set("phasor", self.phasor - other)
         elif isinstance(other, Wavefront):
             return self.set("phasor", self.phasor - other.phasor)
+        elif other is None:
+            return self
         else:
             raise TypeError(
                 "Can only subtract an array or Wavefront from "
@@ -230,11 +273,19 @@ class Wavefront(Base):
             )
 
     def __mul__(self: Wavefront, other: Any) -> Wavefront:
-        """Allows complex phasors or Wavefronts to be multiplied."""
-        if isinstance(Array, type(other)):
+        """
+        Allows complex phasors or Wavefronts to be multiplied.
+
+        Nones are ignored.
+        """
+        if isinstance(other, (Array, float, int, complex)):
             return self.set("phasor", self.phasor * other)
         elif isinstance(other, Wavefront):
             return self.set("phasor", self.phasor * other.phasor)
+        elif isinstance(other, OpticalLayer()):
+            return other.apply(self)
+        elif other is None:
+            return self
         else:
             raise TypeError(
                 "Can only multiply Wavefront by array or "
@@ -242,11 +293,17 @@ class Wavefront(Base):
             )
 
     def __truediv__(self: Wavefront, other: Any) -> Wavefront:
-        """Allows complex phasors or Wavefronts to be divided."""
-        if isinstance(Array, type(other)):
+        """
+        Allows complex phasors or Wavefronts to be divided.
+
+        Nones are ignored.
+        """
+        if isinstance(other, (Array, float, int, complex)):
             return self.set("phasor", self.phasor / other)
         elif isinstance(other, Wavefront):
             return self.set("phasor", self.phasor / other.phasor)
+        elif other is None:
+            return self
         else:
             raise TypeError(
                 "Can only divide Wavefront by array or "
@@ -284,6 +341,8 @@ class Wavefront(Base):
         wavefront : Wavefront
             New wavefront whose phasor is self.phasor * exp(1j * phase).
         """
+        if phase is None:
+            return self
         return self.set("phasor", self.phasor * np.exp(1j * phase))
 
     def add_opd(self: Wavefront, opd: Array) -> Wavefront:
@@ -301,6 +360,8 @@ class Wavefront(Base):
         wavefront : Wavefront
             New wavefront with phasor multiplied by exp(1j * k * opd).
         """
+        if opd is None:
+            return self
         return self.add_phase(self.wavenumber * np.asarray(opd))
 
     def tilt(self: Wavefront, angles: Array) -> Wavefront:
@@ -361,110 +422,6 @@ class Wavefront(Base):
         """
         return self.set("phasor", np.flip(self.phasor, axis))
 
-    #########################################
-    # GRRRRR PRETTY SURE THESE ARE USELSESS #
-    #########################################
-
-    def scale_to(
-        self: Wavefront,
-        npixels: int,
-        pixel_scale: Array,
-        complex: bool = False,
-    ) -> Wavefront:
-        """
-        Interpolated the wavefront to a given npixels and pixel_scale. Can be done on
-        the real and imaginary components by passing in complex=True.
-
-        Parameters
-        ----------
-        npixels : int
-            The number of pixels  to interpolate to.
-        pixel_scale: Array
-            The pixel scale to interpolate to.
-        complex : bool = False
-            Whether to rotate the real and imaginary representation of the wavefront as
-            opposed to the amplitude and phase representation.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new interpolated wavefront.
-        """
-        # Get field in either (amplitude, phase) or (real, imaginary)
-        field = self._to_field(complex=complex)
-
-        # Scale the field
-        scale_fn = vmap(dlu.scale, (0, None, None))
-        field = scale_fn(field, npixels, pixel_scale / self.pixel_scale)
-
-        # Cast back to (amplitude, phase) if needed
-        if complex:
-            field = self._to_amplitude_phase(field)
-
-        # Return new wavefront
-        return self.set(
-            ["amplitude", "phase", "pixel_scale"],
-            [field[0], field[1], pixel_scale],
-        )
-
-    def rotate(
-        self: Wavefront, angle: Array, order: int = 1, complex: bool = False
-    ) -> Wavefront:
-        """
-        Rotates the wavefront by a given angle via interpolation. Can be done on the
-        real and imaginary components by passing in complex=True.
-
-        Parameters
-        ----------
-        angle : Array, radians
-            The angle by which to rotate the wavefront in a clockwise
-            direction.
-        order : int = 1
-            The interpolation order to use.
-        complex : bool = False
-            Whether to rotate the real and imaginary representation of the wavefront as
-            opposed to the amplitude and phase representation.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The new wavefront rotated by angle in the clockwise direction.
-        """
-        # Get field in either (amplitude, phase) or (real, imaginary)
-        field = self._to_field(complex=complex)
-
-        # Rotate the field
-        rotator = vmap(dlu.rotate, (0, None, None))
-        field = rotator(field, angle, order)
-
-        # Cast back to (amplitude, phase) if needed
-        if complex:
-            field = self._to_amplitude_phase(field)
-
-        # Return new wavefront
-        return self.set(["amplitude", "phase"], [field[0], field[1]])
-
-    def resize(self: Wavefront, npixels: int) -> Wavefront:
-        """
-        Resizes the wavefront via a zero-padding or cropping operation.
-
-        Parameters
-        ----------
-        npixels : int
-            The size to resize the wavefront to.
-
-        Returns
-        -------
-        wavefront : Wavefront
-            The resized wavefront.
-        """
-        field = self._to_field()
-        amplitude, phase = vmap(dlu.resize, (0, None))(field, npixels)
-        return self.set(["amplitude", "phase"], [amplitude, phase])
-
-    #########################
-    # Propagation Functions #
-    #########################
     def _prep_prop(self: Wavefront, focal_length) -> tuple:
         """
         Determine propagation direction and output metadata.

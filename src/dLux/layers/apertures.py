@@ -884,7 +884,7 @@ class AberratedAperture(BasisLayer, ApertureLayer):
         if self.as_phase:
             wavefront = wavefront.add_phase(aberrations)
         else:
-            wavefront += aberrations
+            wavefront = wavefront.add_opd(aberrations)
         return wavefront
 
 
