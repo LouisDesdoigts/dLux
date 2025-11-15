@@ -183,9 +183,12 @@ class OpticalSystem(BaseOpticalSystem):
 
         # Calculate - note we multiply by sqrt(weight) to account for the
         # fact that the PSF is the square of the amplitude
+        # prop_fn = lambda wavelength, weight: self.propagate_mono(
+        #     wavelength, offset, return_wf=True
+        # ).multiply("amplitude", weight**0.5)
         prop_fn = lambda wavelength, weight: self.propagate_mono(
             wavelength, offset, return_wf=True
-        ).multiply("amplitude", weight**0.5)
+        ).normalise(value=weight)
         wf = filter_vmap(prop_fn)(wavelengths, weights)
 
         # Return PSF, Wavefront, or array psf

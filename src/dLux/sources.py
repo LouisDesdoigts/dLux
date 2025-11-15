@@ -4,7 +4,7 @@ from abc import abstractmethod
 import jax.numpy as np
 import jax.tree as jtu
 from jax.scipy.signal import convolve
-from jax import vmap, Array, tree
+from jax import vmap, Array
 from zodiax import filter_vmap, Base
 import dLux.utils as dlu
 from dLux import spectra
@@ -424,7 +424,12 @@ class ResolvedSource(PointSource):
         # Returning wf is a special case
         if return_wf:
             conv_fn = lambda psf: convolve(psf, self.distribution, mode="same")
-            return wf.set("amplitude", vmap(conv_fn)(wf.psf) ** 0.5)
+            # Replace previous amplitude leaf update with phasor rescale
+            # return wf.set_amplitude(vmap(conv_fn)(wf.psf) ** 0.5)
+            # NOTE: This operation is actually incorrect since we can only add
+            # incoherent light via a convolution so we can only operate on psfs.
+            amp = vmap(conv_fn)(wf.psf) ** 0.5
+            return wf.set("phasor", amp * np.exp(1j * wf.phase))
 
         # Return psf object
         conv_psf = convolve(wf.psf.sum(0), self.distribution, mode="same")
@@ -690,7 +695,12 @@ class PointResolvedSource(ResolvedSource):
         if return_wf:
             # Perform convolution
             conv_fn = lambda psf: convolve(psf, self.distribution, mode="same")
-            conv_wf = wf.set("amplitude", vmap(conv_fn)(wf.psf) ** 0.5)
+            # Replace previous amplitude leaf update with phasor rescale
+            # TODO: This operation is actually incorrect since we can only add
+            # incoherent light via a convolution so we can only operate on psfs.
+            # conv_wf = wf.set_amplitude(vmap(conv_fn)(wf.psf) ** 0.5)
+            amp = vmap(conv_fn)(wf.psf) ** 0.5
+            conv_wf = wf.set("phasor", amp * np.exp(1j * wf.phase))
 
             # Stack leaves manually, this is a bit of a hack to get around
             # string leaf errors from jtu.map, and to avoid
@@ -701,12 +711,18 @@ class PointResolvedSource(ResolvedSource):
             pixel_scales = stack_leaves(wf.pixel_scale, conv_wf.pixel_scale)
             wavelengths = stack_leaves(wf.wavelength, conv_wf.wavelength)
 
-            # Combine into single wf and finally apply weights
+            # # Combine into single wf and finally apply weights
+            # combined_wf = wf.set(
+            #     ["wavelength", "amplitude", "phase", "pixel_scale"],
+            #     [wavelengths, amplitudes, phases, pixel_scales],
+            # )
+            phasors = amplitudes * np.exp(1j * phases)
             combined_wf = wf.set(
-                ["wavelength", "amplitude", "phase", "pixel_scale"],
-                [wavelengths, amplitudes, phases, pixel_scales],
+                ["wavelength", "phasor", "pixel_scale"],
+                [wavelengths, phasors, pixel_scales],
             )
-            return combined_wf.multiply("amplitude", weights[:, :, None, None])
+            # return combined_wf.multiply("amplitude", weights[:, :, None, None])
+            return combined_wf.multiply("phasor", weights[:, :, None, None])
 
         # Create singe array psf object
         point_psf = (np.expand_dims(weights[0], (1, 2)) * wf.psf).sum(0)
