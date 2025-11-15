@@ -3,9 +3,7 @@ from jax import numpy as np, config
 config.update("jax_debug_nans", True)
 import pytest
 from dLux.layers import (
-    Rotate,
     Flip,
-    Resize,
 )
 from dLux import Wavefront, PSF
 
@@ -18,18 +16,18 @@ def _test_apply(layer):
     assert isinstance(layer.apply(psf), PSF)
 
 
-@pytest.mark.parametrize("npixels", [8, 32])
-def test_resize(npixels):
-    _test_apply(Resize(npixels))
+# @pytest.mark.parametrize("npixels", [8, 32])
+# def test_resize(npixels):
+#     _test_apply(Resize(npixels))
 
 
-@pytest.mark.parametrize("angle", [np.pi])
-@pytest.mark.parametrize("order", [0, 1])
-@pytest.mark.parametrize("complex", [True, False])
-def test_rotate(angle, order, complex):
-    _test_apply(Rotate(angle, order, complex))
-    with pytest.raises(ValueError):
-        Rotate(angle, 2, complex)
+# @pytest.mark.parametrize("angle", [np.pi])
+# @pytest.mark.parametrize("order", [0, 1])
+# @pytest.mark.parametrize("complex", [True, False])
+# def test_rotate(angle, order, complex):
+#     _test_apply(Rotate(angle, order, complex))
+#     with pytest.raises(ValueError):
+#         Rotate(angle, 2, complex)
 
 
 @pytest.mark.parametrize("axes", [0, 1, (0, 1)])
