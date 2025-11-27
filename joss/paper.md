@@ -12,7 +12,7 @@ authors:
     affiliation: 1 
     corresponding: true
   - name: Benjamin J. S. Pope
-    affiliation: "2,3"
+    affiliation: 2
     orcid: 0000-0003-2595-9114
   - name: Jordan Dennis 
     affiliation: 2
@@ -30,7 +30,7 @@ affiliations:
    index: 2
  - name: School of Mathematics and Physics, University of Queensland, St Lucia, QLD 4072, Australia
    index: 3
-date: 14 Oct 2025
+date: 27 Nov 2025
 bibliography: paper.bib
 ---
 
@@ -61,22 +61,23 @@ Similar approaches using differentiable optical models have been applied in the 
 # Documentation & Case Studies
 <!-- briefly summarize tutorials  -->
 
-In the accompanying [documentation](https://louisdesdoigts.github.io/dLux), we have produced several notebooks illustrating use cases, incuding
+In the accompanying [documentation](https://louisdesdoigts.github.io/dLux), we have produced several pages illustrating use cases for `dLux`, incuding
 
 - [phase retrieval in simulated data](https://louisdesdoigts.github.io/dLux/notebooks/whatever/);
-- [Fisher-optimal design of a diffractive pupil](...)
+- [binarization for design of a diffractive pupil](https://louisdesdoigts.github.io/dLux/tutorials/examples/designing_a_mask/)
+- [Fisher-optimal design of a binary-valued diffractive pupil](https://louisdesdoigts.github.io/dLux/tutorials/examples/designing_a_mask/)
+- [calibration of pixel sensitivities](https://louisdesdoigts.github.io/dLux/tutorials/examples/flatfield_calibration/)
+- [inference of a binary star system with HMC in `numpyro`](https://louisdesdoigts.github.io/dLux/tutorials/examples/HMC/)
 
-Figures produced for... are shown in \autoref{fig1}. 
-<!-- also ref joss_figure.py to make figure, or do similar with notebook, so that it is reproducible -->
+The core objects of `dLux` are implemented in `zodiax`, a lightweight wrapper for `equinox`. We have also [documented example uses](https://louisdesdoigts.github.io/zodiax/docs/usage/) of `zodiax` so that users can understand the deeper functionality available here.
 
-<!-- Suggestion for figure: multipanel figure with the amigo pupil, PSF, and deconvolution of Io. -->
-
-
-![Figure Caption. \label{fig1}](joss_figure.png)
+Both the `dLux` and `zodiax` docs incorporate full API references and installation instructions.
 
 # Acknowledgements
 
-<!-- whoever we acknowledge  -->
+We acknowledge and pay respect to the traditional owners of the land on which the University of Sydney, Macquarie University, and University of Queensland are situated, upon whose unceded, sovereign, ancestral lands we work. We pay respects to their Ancestors and descendants, who continue cultural and spiritual connections to Country.
+
+BP and PT have been supported by the Australian Research Council grant DP230101439 and BP by DE210101639; and LD and MC have been supported by the Australian Government Research Training Program (RTP) award. We are grateful to the Australian public for enabling this science. BP would like to thank the Big~Questions~Institute for their philanthropic support. Development of \dlux has been supported by the Breakthrough Foundation through their Toliman project as a part of the Breakthrough Watch initiative.
 
 # References
 <!-- you are only supposed to put refs in the .bib if they are actually used -->
