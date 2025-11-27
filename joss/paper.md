@@ -77,7 +77,7 @@ Both the `dLux` and `zodiax` docs incorporate full API references and installati
 
 We acknowledge and pay respect to the traditional owners of the land on which the University of Sydney, Macquarie University, and University of Queensland are situated, upon whose unceded, sovereign, ancestral lands we work. We pay respects to their Ancestors and descendants, who continue cultural and spiritual connections to Country.
 
-BP and PT have been supported by the Australian Research Council grant DP230101439 and BP by DE210101639; and LD and MC have been supported by the Australian Government Research Training Program (RTP) award. We are grateful to the Australian public for enabling this science. BP would like to thank the Big~Questions~Institute for their philanthropic support. Development of \dlux has been supported by the Breakthrough Foundation through their Toliman project as a part of the Breakthrough Watch initiative.
+BP and PT have been supported by the Australian Research Council grant DP230101439 and BP by DE210101639; and LD and MC have been supported by the Australian Government Research Training Program (RTP) award. We are grateful to the Australian public for enabling this science. BP would like to thank the Big Questions Institute for their philanthropic support. Development of `dLux` has been supported by the Breakthrough Foundation through their Toliman project as a part of the Breakthrough Watch initiative.
 
 # References
 <!-- you are only supposed to put refs in the .bib if they are actually used -->
