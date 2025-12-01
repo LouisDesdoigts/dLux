@@ -9,31 +9,33 @@ tags:
 authors:
   - name: Louis Desdoigts
     orcid: 0000-0002-1015-9029
-    affiliation: 1 
+    affiliation: "1,2" 
     corresponding: true
   - name: Benjamin J. S. Pope
-    affiliation: 2
+    affiliation: 3
     orcid: 0000-0003-2595-9114
   - name: Jordan Dennis 
-    affiliation: 2
+    affiliation: 4
     orcid: 0000-0001-8125-6494
   - name: Adam K. Taras
     orcid: 0000-0002-4558-2222
-    affiliation: 1 
+    affiliation: 2 
   - name: Max Charles
     orcid: 0009-0003-5950-4828
-    affiliation: 1
+    affiliation: 2
   - name: Peter Tuthill
     orcid: 0000-0001-7026-6291
-    affiliation: 1
+    affiliation: 2
 affiliations:
+ - name: Leiden Observatory, Leiden University, PO Box 9513, 2300 RA Leiden, The Netherlands
+   index: 1 
  - name: School of Physics, University of Sydney, Camperdown, NSW 2006, Australia
-   index: 1
- - name: School of Mathematical and Physical Sciences, 12 Wally's Walk, Macquarie University, Macquarie Park, NSW 2113, Australia
    index: 2
- - name: School of Mathematics and Physics, University of Queensland, St Lucia, QLD 4072, Australia
+ - name: School of Mathematical and Physical Sciences, 12 Wally's Walk, Macquarie University, Macquarie Park, NSW 2113, Australia
    index: 3
-date: 27 Nov 2025
+ - name: School of Mathematics and Physics, University of Queensland, St Lucia, QLD 4072, Australia
+   index: 4
+date: 1 Dec 2025
 bibliography: paper.bib
 ---
 
