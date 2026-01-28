@@ -49,7 +49,7 @@ from .helpers import (
     remove_layer as remove_layer,
 )
 from .interpolation import (
-    generate_coordinates as generate_coordinates,
+    interp as interp,
     scale as scale,
     rotate as rotate,
 )
