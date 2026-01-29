@@ -41,6 +41,8 @@ from .coordinates import (
     compress_coords as compress_coords,
     shear_coords as shear_coords,
     rotate_coords as rotate_coords,
+    gen_powers as gen_powers,
+    distort_coords as distort_coords,
 )
 from .helpers import (
     map2array as map2array,
