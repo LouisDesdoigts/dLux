@@ -24,12 +24,10 @@ def test_resize(npixels):
 
 
 @pytest.mark.parametrize("angle", [np.pi])
-@pytest.mark.parametrize("order", [0, 1])
+@pytest.mark.parametrize("method", ["nearest", "linear", "cubic"])
 @pytest.mark.parametrize("complex", [True, False])
-def test_rotate(angle, order, complex):
-    _test_apply(Rotate(angle, order, complex))
-    with pytest.raises(ValueError):
-        Rotate(angle, 2, complex)
+def test_rotate(angle, method, complex):
+    _test_apply(Rotate(angle, method, complex))
 
 
 @pytest.mark.parametrize("axes", [0, 1, (0, 1)])
