@@ -10,7 +10,7 @@ authors = [
 ]
 keywords = ["python", "optics", "machine-learning", "jax", "autodiff", "differentiable", "diffraction", "simulation", "telescope", "dLux"]
 urls = {repository = "https://github.com/LouisDesdoigts/dLux"}
-dependencies = ["jax", "jaxlib", "zodiax>=0.4.1"]
+dependencies = ["jax", "jaxlib", "zodiax>=0.4.1", "interpax"]
 classifiers=[
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",

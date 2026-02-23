@@ -41,7 +41,11 @@ from .spectra import (
 )
 from .wavefronts import Wavefront as Wavefront
 from .psfs import PSF as PSF
-from .transformations import CoordTransform as CoordTransform
+
+from .transformations import (
+    CoordTransform as CoordTransform,
+    DistortedCoords as DistortedCoords,
+)
 
 from .instruments import (
     Instrument as Instrument,
